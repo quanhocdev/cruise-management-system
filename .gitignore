@@ -1,0 +1,49 @@
+# ==========================================
+# 1. Environment & Secrets (BẢO MẬT)
+# ==========================================
+.env
+*.env.local
+# (Giữ lại .env.example để push lên GitHub)
+!.env.example
+
+# ==========================================
+# 2. Cấu hình IDE / Editor & Hệ điều hành
+# ==========================================
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+
+# ==========================================
+# 3. Docker / Build Log Rác
+# ==========================================
+*.log
+docker-data/
+
+# ==========================================
+# 4. Backend (Java Spring Boot)
+# ==========================================
+backend/target/
+backend/build/
+backend/.classpath
+backend/.project
+backend/.settings/
+
+# ==========================================
+# 5. Frontend Web (ReactJS / Vite)
+# ==========================================
+frontend-web/node_modules/
+frontend-web/dist/
+frontend-web/.env.local
+
+# ==========================================
+# 6. Mobile / POS App (Android / Jetpack Compose)
+# ==========================================
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/captures/
+android/.externalNativeBuild/
+android/.cxx/
