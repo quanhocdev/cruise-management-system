@@ -1,0 +1,12 @@
+// src/constants/roles.js
+export const UserRole = {
+  ADMIN: "ADMIN",
+  SCHEDULER: "SCHEDULER",
+  SHORE: "SHORE",
+  ONBOARD: "ONBOARD",
+  CONVENIENCE: "CONVENIENCE",
+  FINANCE: "FINANCE",
+  OPERATION: "OPERATION",
+  PASSENGER: "PASSENGER",
+  GUEST: "GUEST",
+};
