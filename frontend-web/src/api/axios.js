@@ -1,34 +1,37 @@
-// src/api/axios.js
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:8080", // URL Spring Boot Backend
-  withCredentials: true, // BẮT BUỘC: Cho phép gửi & nhận Cookie
+  baseURL: "http://localhost:8080/api", // Base URL trỏ thẳng vào /api
+  withCredentials: true, // BẮT BUỘC: Để gửi & nhận HttpOnly Cookie
 });
 
-// Interceptor: Xử lý tự động khi Access Token hết hạn (401) -> Gọi API Refresh
+// Interceptor: Tự động refresh token khi nhận lỗi 401
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // Nếu bị 401 và chưa thử refresh
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Chỉ thử refresh nếu gặp 401, chưa thử retry, và KHÔNG PHẢI request login/refresh
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url.includes("/auth/login") &&
+      !originalRequest.url.includes("/auth/refresh")
+    ) {
       originalRequest._retry = true;
       try {
-        // Gọi Endpoint Refresh Token (Spring Boot sẽ đọc Cookie refreshToken và set lại Cookie accessToken mới)
-        await axios.post(
-          "http://localhost:8080/api/auth/refresh",
-          {},
-          { withCredentials: true },
-        );
-        return api(originalRequest); // Thực hiện lại request ban đầu
+        // Gọi API refresh token (Cookie refreshToken sẽ tự động gửi kèm)
+        await api.post("/auth/refresh");
+
+        // Thực hiện lại request ban đầu bị 401
+        return api(originalRequest);
       } catch (refreshError) {
-        // Refresh token cũng hết hạn -> Chuyển về trang đăng nhập
+        // Refresh token cũng hết hạn -> Chuyển về trang login
         window.location.href = "/login";
         return Promise.reject(refreshError);
       }
     }
+
     return Promise.reject(error);
   },
 );

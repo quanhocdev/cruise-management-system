@@ -8,13 +8,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+
 import org.springframework.web.bind.annotation.*;
 
-import com.project.cruise.dto.request.LoginRequest;
-import com.project.cruise.dto.request.RegisterRequestDTO;
-import com.project.cruise.dto.response.JwtResponse;
-import com.project.cruise.dto.response.RegisterResponseDTO;
+import com.project.cruise.dto.auth.JwtResponse;
+import com.project.cruise.dto.auth.LoginRequestDTO;
+import com.project.cruise.dto.auth.RegisterRequestDTO;
+import com.project.cruise.dto.auth.RegisterResponseDTO;
 import com.project.cruise.model.Users;
 import com.project.cruise.service.AuthService;
 import com.project.cruise.service.JwtService;
@@ -24,7 +24,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/auth")
 @CrossOrigin(origins = "*")
 public class AuthController {
 
@@ -52,22 +52,19 @@ public class AuthController {
     }
 
     /**
-     * API ĐĂNG NHẬP (Trả về Token qua Cookie cho Web & JSON Body cho Android)
+     * API ĐĂNG NHẬP (Cookie cho Web & JSON Body cho Android)
      */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequestDTO request) {
         try {
-            // 1. Xác thực thông tin người dùng
             Users user = authService.login(request);
 
-            // 2. Tạo cặp Access Token & Refresh Token
             String accessToken = jwtService.generateAccessToken(user);
             String refreshToken = jwtService.generateRefreshToken(user);
 
-            // 3. Set Cookie cho Web Client (React/Next.js)
             ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
                     .httpOnly(true)
-                    .secure(false) // Đổi thành true khi chạy HTTPS thực tế
+                    .secure(false) // Bật true khi deploy HTTPS
                     .path("/")
                     .maxAge(jwtService.getAccessCookieMaxAgeInSeconds())
                     .sameSite("Lax")
@@ -81,7 +78,6 @@ public class AuthController {
                     .sameSite("Strict")
                     .build();
 
-            // 4. Trả JSON Body cho Android App hoặc React State
             JwtResponse responseBody = new JwtResponse(
                     accessToken,
                     refreshToken,
@@ -151,7 +147,6 @@ public class AuthController {
                     .body(responseBody);
 
         } catch (RuntimeException e) {
-            // Nếu Refresh thất bại -> Xóa Cookie trên Browser để yêu cầu login lại
             ResponseCookie cleanAccessCookie = ResponseCookie.from("accessToken", "").path("/").maxAge(0).build();
             ResponseCookie cleanRefreshCookie = ResponseCookie.from("refreshToken", "").path("/").maxAge(0).build();
 
@@ -170,26 +165,45 @@ public class AuthController {
      */
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated() || !(authentication instanceof JwtAuthenticationToken jwtAuth)) {
-            return ResponseEntity.ok(Map.of(
-                    "isLoggedIn", false,
-                    "message", "Chưa đăng nhập hoặc token đã hết hạn"
-            ));
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Chưa đăng nhập");
         }
 
-        String username = jwtAuth.getName();
-        String role = jwtAuth.getAuthorities().stream()
+        String username = authentication.getName();
+        String role = authentication.getAuthorities().stream()
                 .map(auth -> auth.getAuthority())
                 .filter(authority -> authority.startsWith("ROLE_"))
                 .map(authority -> authority.replace("ROLE_", ""))
                 .findFirst()
-                .orElse("USER");
+                .orElse("GUEST");
 
-        Map<String, Object> userInfo = new HashMap<>();
-        userInfo.put("isLoggedIn", true);
+        Map<String, String> userInfo = new HashMap<>();
         userInfo.put("username", username);
         userInfo.put("role", role);
 
         return ResponseEntity.ok(userInfo);
+    }
+
+    /**
+     * API ĐĂNG XUẤT (Xóa sạch Cookie trên Browser)
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout() {
+        ResponseCookie cleanAccessCookie = ResponseCookie.from("accessToken", "")
+                .httpOnly(true)
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        ResponseCookie cleanRefreshCookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cleanAccessCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, cleanRefreshCookie.toString())
+                .body(Map.of("message", "Đăng xuất thành công"));
     }
 }
