@@ -16,10 +16,10 @@ public class TokenProvider {
 
     private final JwtEncoder jwtEncoder;
 
-    @Value("${jwt.access-expiration:86400000}")
+    @Value("${jwt.access-expiration}")
     private long accessExpirationMs;
 
-    @Value("${jwt.refresh-expiration:604800000}")
+    @Value("${jwt.refresh-expiration}")
     private long refreshExpirationMs;
 
     public TokenProvider(JwtEncoder jwtEncoder) {
