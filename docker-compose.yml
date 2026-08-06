@@ -38,7 +38,7 @@ services:
   # 3. Spring Boot Backend (Development)
   backend:
     build:
-      context: ./backend
+      context: ./backend/auth-service
       dockerfile: Dockerfile.dev
     container_name: cruise_backend
     restart: always
@@ -65,9 +65,9 @@ services:
     container_name: cruise_frontend
     restart: always
     ports:
-      - "5173:5173" # Lưu ý: Port truy cập Vite là 5173
+      - "5173:5173" # Port truy cập Vite là 5173
     volumes:
-      - ./frontend-web:/app # Đã sửa từ ./frontend thành ./frontend-web
+      - ./frontend-web:/app
     environment:
       - VITE_API_BASE_URL=http://localhost:8080
     depends_on:
