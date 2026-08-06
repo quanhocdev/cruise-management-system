@@ -1,7 +1,6 @@
 package com.project.cruise.service.auth;
 
 import com.project.cruise.model.RefreshToken;
-import com.project.cruise.model.enums.UserRole;
 import com.project.cruise.repository.RefreshTokenRepository;
 import com.project.cruise.security.TokenProvider;
 import org.springframework.security.oauth2.jwt.Jwt;

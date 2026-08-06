@@ -1,122 +1,131 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+// src/App.jsx
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Navbar from "./components/Navbar";
+import LoginPage from "./pages/LoginPage";
 
-function App() {
-  const [count, setCount] = useState(0)
-
+export default function App() {
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <AuthProvider>
+      <BrowserRouter>
+        <Navbar />
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/login" element={<LoginPage />} />
 
-      <div className="ticks"></div>
+          {/* 1. Module ADMIN */}
+          <Route
+            path="/admin/*"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <div>
+                  <h1>Trang Quản Trị Hệ Thống (ADMIN)</h1>
+                </div>
+              </ProtectedRoute>
+            }
+          />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+          {/* 2. Module SCHEDULER (Lập lịch chuyến đi) */}
+          <Route
+            path="/scheduler/*"
+            element={
+              <ProtectedRoute allowedRoles={["SCHEDULER", "ADMIN"]}>
+                <div>
+                  <h1>Trang Quản Lý Lịch Trình (SCHEDULER)</h1>
+                </div>
+              </ProtectedRoute>
+            }
+          />
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+          {/* 3. Module SHORE (Dịch vụ bờ) */}
+          <Route
+            path="/shore/*"
+            element={
+              <ProtectedRoute allowedRoles={["SHORE", "ADMIN"]}>
+                <div>
+                  <h1>Trang Quản Lý Dịch Vụ Bờ (SHORE)</h1>
+                </div>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 4. Module ONBOARD (Dịch vụ trên tàu) */}
+          <Route
+            path="/onboard/*"
+            element={
+              <ProtectedRoute allowedRoles={["ONBOARD", "ADMIN"]}>
+                <div>
+                  <h1>Trang Quản Lý Dịch Vụ Trên Tàu (ONBOARD)</h1>
+                </div>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 5. Module CONVENIENCE (Tiện ích / Cửa hàng) */}
+          <Route
+            path="/convenience/*"
+            element={
+              <ProtectedRoute allowedRoles={["CONVENIENCE", "ADMIN"]}>
+                <div>
+                  <h1>Trang Quản Lý Tiện Ích (CONVENIENCE)</h1>
+                </div>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 6. Module FINANCE (Tài chính / Doanh thu) */}
+          <Route
+            path="/finance/*"
+            element={
+              <ProtectedRoute allowedRoles={["FINANCE", "ADMIN"]}>
+                <div>
+                  <h1>Trang Báo Cáo Tài Chính (FINANCE)</h1>
+                </div>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 7. Module OPERATION (Vận hành kỹ thuật) */}
+          <Route
+            path="/operation/*"
+            element={
+              <ProtectedRoute allowedRoles={["OPERATION", "ADMIN"]}>
+                <div>
+                  <h1>Trang Vận Hành & Kỹ Thuật (OPERATION)</h1>
+                </div>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 8. Module PASSENGER (Hành khách) */}
+          <Route
+            path="/passenger/*"
+            element={
+              <ProtectedRoute allowedRoles={["PASSENGER", "ADMIN"]}>
+                <div>
+                  <h1>Trang Dành Cho Hành Khách (PASSENGER)</h1>
+                </div>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 9. Module GUEST (Khách vãng lai / Đặt chỗ) */}
+          <Route
+            path="/guest/*"
+            element={
+              <ProtectedRoute allowedRoles={["GUEST", "PASSENGER", "ADMIN"]}>
+                <div>
+                  <h1>Trang Khám Phá & Đặt Tour (GUEST)</h1>
+                </div>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Redirect mặc định */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  );
 }
-
-export default App
