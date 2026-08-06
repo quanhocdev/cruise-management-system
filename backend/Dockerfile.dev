@@ -1,0 +1,10 @@
+FROM maven:3.9.6-eclipse-temurin-17
+
+WORKDIR /app
+
+# Cache dependencies
+COPY pom.xml .
+RUN mvn -B dependency:go-offline
+
+# Chạy Spring Boot ở chế độ dev
+CMD ["mvn", "spring-boot:run"]
