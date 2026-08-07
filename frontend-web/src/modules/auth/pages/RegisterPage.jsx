@@ -37,13 +37,14 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      await api.post("/auth/register", form);
+      const res = await api.post("/auth/register", form);
 
-      setSuccess("Đăng ký thành công! Chuyển sang đăng nhập...");
-
-      setTimeout(() => {
-        navigate("/login");
-      }, 1500);
+      navigate("/verify-email", {
+        state: {
+          userId: res.data.id,
+          email: res.data.email,
+        },
+      });
     } catch (err) {
       setError(err.response?.data?.message || "Đăng ký thất bại!");
     } finally {

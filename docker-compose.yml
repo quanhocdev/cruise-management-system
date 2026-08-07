@@ -84,7 +84,7 @@ services:
     container_name: auth-service
     restart: always
     ports:
-      - "8081:8081"
+      - "8081:8080"
     volumes:
       - ./backend/auth-service:/app
     env_file:

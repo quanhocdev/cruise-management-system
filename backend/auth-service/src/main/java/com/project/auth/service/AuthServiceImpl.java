@@ -20,18 +20,21 @@ private final UserRepository userRepository;
 private final PasswordEncoder passwordEncoder;
 private final JwtService jwtService;
 private final RedisService redisService;
+private final MailService mailService;
 
 
 public AuthServiceImpl(
         UserRepository userRepository,
         PasswordEncoder passwordEncoder,
         JwtService jwtService,
-        RedisService redisService
+        RedisService redisService,
+        MailService mailService
 ) {
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
     this.jwtService = jwtService;
     this.redisService = redisService;
+    this.mailService = mailService;
 }
     /**
      * Khách ghé thăm (GUEST) tự đăng ký tài khoản -> Chuyển thành Hành khách (PASSENGER)
@@ -64,8 +67,10 @@ redisService.saveOtp(
         otp
 );
 
-System.out.println("OTP: " + otp);
-
+mailService.sendOtp(
+        savedUser.getEmail(),
+        otp
+);
 return new RegisterResponseDTO(
         savedUser.getId(),
         savedUser.getUsername(),

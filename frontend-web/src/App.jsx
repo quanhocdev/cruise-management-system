@@ -9,6 +9,7 @@ import Navbar from "./components/Navbar";
 import HomePage from "./modules/guest/pages/HomePage";
 import RegisterPage from "./modules/auth/pages/RegisterPage";
 import LoginPage from "./modules/auth/pages/LoginPage";
+import VerifyOtpPage from "./modules/auth/pages/VerifyOtpPage";
 
 export default function App() {
   return (
@@ -24,6 +25,8 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
 
           <Route path="/register" element={<RegisterPage />} />
+
+          <Route path="/verify-email" element={<VerifyOtpPage />} />
 
           {/* Admin */}
           <Route
