@@ -1,5 +1,4 @@
 // src/App.jsx
-
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import { AuthProvider } from "./context/AuthContext";
@@ -10,6 +9,9 @@ import HomePage from "./modules/guest/pages/HomePage";
 import RegisterPage from "./modules/auth/pages/RegisterPage";
 import LoginPage from "./modules/auth/pages/LoginPage";
 import VerifyOtpPage from "./modules/auth/pages/VerifyOtpPage";
+
+// 1. Import trang Dashboard của Passenger (chỉnh đường dẫn file cho đúng dự án của bạn)
+import PassengerDashboard from "./modules/passenger/pages/Dashboard";
 
 export default function App() {
   return (
@@ -23,9 +25,7 @@ export default function App() {
 
           {/* Auth */}
           <Route path="/login" element={<LoginPage />} />
-
           <Route path="/register" element={<RegisterPage />} />
-
           <Route path="/verify-email" element={<VerifyOtpPage />} />
 
           {/* Admin */}
@@ -43,7 +43,16 @@ export default function App() {
             path="/passenger/*"
             element={
               <ProtectedRoute allowedRoles={["PASSENGER", "ADMIN"]}>
-                <h1>Trang Passenger</h1>
+                <Routes>
+                  {/* Khớp với URL /passenger/my-cruise */}
+                  <Route path="dashboard" element={<PassengerDashboard />} />
+
+                  {/* Nếu chỉ vào /passenger thì tự động chuyển hướng qua /passenger/my-cruise */}
+                  <Route
+                    path=""
+                    element={<Navigate to="my-cruise" replace />}
+                  />
+                </Routes>
               </ProtectedRoute>
             }
           />

@@ -17,21 +17,22 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await api.get("/auth/me");
 
-      // Nếu Backend xác nhận đã đăng nhập thành công
-      if (res.data && res.data.authenticated) {
-        setUser({ username: res.data.username, role: res.data.role });
+      // 🟢 SỬA LẠI: Kiểm tra res.data.username hoặc res.data.id thay vì res.data.authenticated
+      if (res.data && (res.data.username || res.data.id)) {
+        setUser({
+          username: res.data.username,
+          role: res.data.role,
+        });
       } else {
-        // Chưa đăng nhập (200 OK nhưng authenticated = false)
         setUser(null);
       }
     } catch (err) {
-      // Trường hợp mất mạng hoặc server sập hoàn toàn
+      console.error("Phiên đăng nhập hết hạn hoặc chưa đăng nhập", err);
       setUser(null);
     } finally {
       setLoading(false);
     }
   };
-
   const login = async (username, password) => {
     const res = await api.post("/auth/login", { username, password });
     // Backend vừa set Cookie tự động, vừa trả về JwtResponse { username, role, ... }
