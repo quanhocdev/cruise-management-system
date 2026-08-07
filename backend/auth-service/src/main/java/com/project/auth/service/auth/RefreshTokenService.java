@@ -2,14 +2,17 @@ package com.project.auth.service.auth;
 
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.project.auth.model.RefreshToken;
+import com.project.auth.model.enums.UserRole;
 import com.project.auth.repository.RefreshTokenRepository;
 import com.project.auth.security.TokenProvider;
 
 import java.time.Instant;
+import java.util.Optional;
 
 @Service
 public class RefreshTokenService {
@@ -28,26 +31,28 @@ public class RefreshTokenService {
         this.jwtDecoder = jwtDecoder;
     }
 
+    @Transactional
     public String refreshAccessToken(String refreshTokenValue) {
-        // 1. Decode refresh token
-        Jwt jwt = jwtDecoder.decode(refreshTokenValue);
+        Jwt jwt;
+        try {
+            jwt = jwtDecoder.decode(refreshTokenValue);
+        } catch (JwtException e) {
+            throw new RuntimeException("Refresh token không hợp lệ hoặc đã hết hạn", e);
+        }
 
-        // 2. Lấy jti
         String jti = jwt.getId();
         if (jti == null) {
             throw new RuntimeException("Refresh token không chứa jti hợp lệ");
         }
 
-        // 3. Tìm refresh token trong DB
         RefreshToken refreshToken = refreshTokenRepository.findByJti(jti)
                 .orElseThrow(() -> new RuntimeException("Refresh token không tồn tại hoặc đã bị hủy"));
 
-        // 4. Kiểm tra thời gian hết hạn
         if (refreshToken.getExpiresAt().isBefore(Instant.now())) {
-            throw new RuntimeException("Refresh token đã hết hạn");
+            refreshTokenRepository.delete(refreshToken);
+            throw new RuntimeException("Refresh token đã hết hạn, vui lòng đăng nhập lại");
         }
 
-        // 5. Sinh access token mới dựa trên User ID và Role từ DB
         return tokenProvider.generateAccessToken(
                 refreshToken.getUserId(),
                 refreshToken.getRole()
@@ -57,5 +62,25 @@ public class RefreshTokenService {
     @Transactional
     public void deleteOldRefreshToken(String userId) {
         refreshTokenRepository.deleteByUserId(userId);
+    }
+
+    @Transactional
+    public void saveRefreshToken(String userId, String jti, UserRole role, Instant expiresAt) {
+        // 🟢 SỬA LỖI HIBERNATE CONFLICT:
+        // Tìm token cũ của User nếu đã có trong DB
+        Optional<RefreshToken> existingTokenOpt = refreshTokenRepository.findByUserId(userId);
+
+        if (existingTokenOpt.isPresent()) {
+            // Cập nhật thông tin trên chính Entity cũ thay vì xóa/chèn mới làm rác Hibernate Cache
+            RefreshToken existingToken = existingTokenOpt.get();
+            existingToken.setJti(jti);
+            existingToken.setRole(role);
+            existingToken.setExpiresAt(expiresAt);
+            refreshTokenRepository.save(existingToken);
+        } else {
+            // Nếu chưa có thì tạo mới
+            RefreshToken newToken = new RefreshToken(jti, userId, role, expiresAt);
+            refreshTokenRepository.save(newToken);
+        }
     }
 }

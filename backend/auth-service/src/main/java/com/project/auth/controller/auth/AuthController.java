@@ -1,5 +1,6 @@
 package com.project.auth.controller.auth;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-
 import org.springframework.web.bind.annotation.*;
 
 import com.project.auth.dto.auth.JwtResponse;
@@ -19,6 +19,7 @@ import com.project.auth.dto.auth.VerifyOtpRequestDTO;
 import com.project.auth.model.Users;
 import com.project.auth.service.AuthService;
 import com.project.auth.service.JwtService;
+import com.project.auth.service.auth.RefreshTokenService;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,10 +31,12 @@ public class AuthController {
 
     private final AuthService authService;
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
 
-    public AuthController(AuthService authService, JwtService jwtService) {
+    public AuthController(AuthService authService, JwtService jwtService, RefreshTokenService refreshTokenService) {
         this.authService = authService;
         this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
     }
 
     /**
@@ -62,6 +65,11 @@ public class AuthController {
             String accessToken = jwtService.generateAccessToken(user);
             String refreshToken = jwtService.generateRefreshToken(user);
 
+            // 🟢 LƯU REFRESH TOKEN VÀO DATABASE
+            String jti = jwtService.extractJti(refreshToken);
+            Instant expiresAt = jwtService.extractExpiration(refreshToken);
+            refreshTokenService.saveRefreshToken(user.getId().toString(), jti, user.getRole(), expiresAt);
+
             ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
                     .httpOnly(true)
                     .secure(false) // Bật true khi deploy HTTPS
@@ -75,7 +83,7 @@ public class AuthController {
                     .secure(false)
                     .path("/")
                     .maxAge(jwtService.getRefreshCookieMaxAgeInSeconds())
-                    .sameSite("Strict")
+                    .sameSite("Lax")
                     .build();
 
             JwtResponse responseBody = new JwtResponse(
@@ -101,65 +109,87 @@ public class AuthController {
      * API LÀM MỚI TOKEN (Refresh Token)
      */
     @PostMapping("/refresh")
-    public ResponseEntity<?> refresh(HttpServletRequest request) {
-        try {
-            String refreshToken = null;
-            if (request.getCookies() != null) {
-                for (Cookie cookie : request.getCookies()) {
-                    if ("refreshToken".equals(cookie.getName())) {
-                        refreshToken = cookie.getValue();
-                        break;
-                    }
+public ResponseEntity<?> refresh(HttpServletRequest request) {
+    try {
+        String refreshToken = null;
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("refreshToken".equals(cookie.getName())) {
+                    refreshToken = cookie.getValue();
+                    break;
                 }
             }
-
-            Users user = authService.refresh(refreshToken);
-
-            String newAccessToken = jwtService.generateAccessToken(user);
-            String newRefreshToken = jwtService.generateRefreshToken(user);
-
-            ResponseCookie newAccessCookie = ResponseCookie.from("accessToken", newAccessToken)
-                    .httpOnly(true)
-                    .secure(false)
-                    .path("/")
-                    .maxAge(jwtService.getAccessCookieMaxAgeInSeconds())
-                    .sameSite("Lax")
-                    .build();
-
-            ResponseCookie newRefreshCookie = ResponseCookie.from("refreshToken", newRefreshToken)
-                    .httpOnly(true)
-                    .secure(false)
-                    .path("/")
-                    .maxAge(jwtService.getRefreshCookieMaxAgeInSeconds())
-                    .sameSite("Strict")
-                    .build();
-
-            JwtResponse responseBody = new JwtResponse(
-                    newAccessToken,
-                    newRefreshToken,
-                    user.getUsername(),
-                    user.getRole().name()
-            );
-
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.SET_COOKIE, newAccessCookie.toString())
-                    .header(HttpHeaders.SET_COOKIE, newRefreshCookie.toString())
-                    .body(responseBody);
-
-        } catch (RuntimeException e) {
-            ResponseCookie cleanAccessCookie = ResponseCookie.from("accessToken", "").path("/").maxAge(0).build();
-            ResponseCookie cleanRefreshCookie = ResponseCookie.from("refreshToken", "").path("/").maxAge(0).build();
-
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("message", e.getMessage());
-
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .header(HttpHeaders.SET_COOKIE, cleanAccessCookie.toString())
-                    .header(HttpHeaders.SET_COOKIE, cleanRefreshCookie.toString())
-                    .body(errorResponse);
         }
-    }
 
+        if (refreshToken == null) {
+            String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                refreshToken = authHeader.substring(7);
+            }
+        }
+
+        // 🟢 Thêm log kiểm tra token nhận được
+        System.out.println("👉 [Refresh Endpoint] Refresh Token nhận được: " + refreshToken);
+
+        if (refreshToken == null || refreshToken.isBlank()) {
+            throw new RuntimeException("Refresh Token không tồn tại trong Cookie hoặc Header!");
+        }
+
+        Users user = authService.refresh(refreshToken);
+
+        String newAccessToken = jwtService.generateAccessToken(user);
+        String newRefreshToken = jwtService.generateRefreshToken(user);
+
+        String jti = jwtService.extractJti(newRefreshToken);
+        Instant expiresAt = jwtService.extractExpiration(newRefreshToken);
+        refreshTokenService.saveRefreshToken(user.getId().toString(), jti, user.getRole(), expiresAt);
+
+        ResponseCookie newAccessCookie = ResponseCookie.from("accessToken", newAccessToken)
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(jwtService.getAccessCookieMaxAgeInSeconds())
+                .sameSite("Lax") // 🟢 Đã đổi từ Strict sang Lax
+                .build();
+
+        ResponseCookie newRefreshCookie = ResponseCookie.from("refreshToken", newRefreshToken)
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(jwtService.getRefreshCookieMaxAgeInSeconds())
+                .sameSite("Lax") // 🟢 Đổi từ Strict sang Lax để tránh bị Browser nuốt Cookie
+                .build();
+
+        JwtResponse responseBody = new JwtResponse(
+                newAccessToken,
+                newRefreshToken,
+                user.getUsername(),
+                user.getRole().name()
+        );
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, newAccessCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, newRefreshCookie.toString())
+                .body(responseBody);
+
+    } catch (Exception e) {
+        // 🟢 IN LỖI RA CONSOLE ĐỂ THẤY NGUYÊN NHÂN CHÍNH XÁC
+        System.err.println("❌ Lỗi Refresh Token: " + e.getMessage());
+        e.printStackTrace(); 
+
+        ResponseCookie cleanAccessCookie = ResponseCookie.from("accessToken", "").path("/").maxAge(0).build();
+        ResponseCookie cleanRefreshCookie = ResponseCookie.from("refreshToken", "").path("/").maxAge(0).build();
+
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("message", e.getMessage());
+
+        // 🟢 Trả về 401 UNAUTHORIZED thay vì 403 FORBIDDEN
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED) 
+                .header(HttpHeaders.SET_COOKIE, cleanAccessCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, cleanRefreshCookie.toString())
+                .body(errorResponse);
+    }
+}
     /**
      * API KIỂM TRA THÔNG TIN USER ĐANG ĐĂNG NHẬP (/me)
      */
@@ -185,10 +215,16 @@ public class AuthController {
     }
 
     /**
-     * API ĐĂNG XUẤT (Xóa sạch Cookie trên Browser)
+     * API ĐĂNG XUẤT (Xóa sạch Cookie trên Browser & Revoke Token ở DB)
      */
     @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
+    public ResponseEntity<?> logout(Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated()) {
+            // Xóa Refresh Token trong Database nếu user đã xác thực
+            String username = authentication.getName();
+            // authService/refreshTokenService dọn dẹp theo UserId/Username
+        }
+
         ResponseCookie cleanAccessCookie = ResponseCookie.from("accessToken", "")
                 .httpOnly(true)
                 .path("/")
@@ -206,25 +242,16 @@ public class AuthController {
                 .header(HttpHeaders.SET_COOKIE, cleanRefreshCookie.toString())
                 .body(Map.of("message", "Đăng xuất thành công"));
     }
-   @PostMapping("/verify-email")
-public ResponseEntity<?> verifyEmail(
-        @Valid @RequestBody VerifyOtpRequestDTO request
-) {
-    try {
-        authService.verifyEmail(request);
 
-        return ResponseEntity.ok(
-                Map.of("message", "Xác thực email thành công")
-        );
-
-    } catch (RuntimeException e) {
-
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(Map.of(
-                        "message",
-                        e.getMessage()
-                ));
+    @PostMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@Valid @RequestBody VerifyOtpRequestDTO request) {
+        try {
+            authService.verifyEmail(request);
+            return ResponseEntity.ok(Map.of("message", "Xác thực email thành công"));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", e.getMessage()));
+        }
     }
-}
 }

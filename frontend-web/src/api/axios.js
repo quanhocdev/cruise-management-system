@@ -15,16 +15,19 @@ api.interceptors.response.use(
       !originalRequest._retry &&
       !originalRequest.url.includes("/auth/login") &&
       !originalRequest.url.includes("/auth/register") &&
-      !originalRequest.url.includes("/auth/me") &&
-      !originalRequest.url.includes("/auth/refresh")
+      !originalRequest.url.includes("/auth/refresh") // 🟢 Cho phép /auth/me đi qua để auto refresh!
     ) {
       originalRequest._retry = true;
 
       try {
+        // Tự động gọi API Refresh Token ngầm
         await api.post("/auth/refresh");
+
+        // Refresh thành công, gọi lại API ban đầu (ví dụ: /auth/me)
         return api(originalRequest);
       } catch (refreshError) {
-        window.location.href = "/login";
+        // Nếu Refresh Token cũng đã hết hạn/không hợp lệ -> Mới chuyển về Login
+        setUserNullAndRedirect();
         return Promise.reject(refreshError);
       }
     }
@@ -32,4 +35,5 @@ api.interceptors.response.use(
     return Promise.reject(error);
   },
 );
+
 export default api;

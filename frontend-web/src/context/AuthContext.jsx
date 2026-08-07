@@ -1,14 +1,12 @@
-// src/context/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
 import api from "../api/axios";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // Lưu thông tin { username, role }
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Khôi phục phiên đăng nhập khi F5 lại trang
   useEffect(() => {
     checkAuthStatus();
   }, []);
@@ -17,7 +15,6 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await api.get("/auth/me");
 
-      // 🟢 SỬA LẠI: Kiểm tra res.data.username hoặc res.data.id thay vì res.data.authenticated
       if (res.data && (res.data.username || res.data.id)) {
         setUser({
           username: res.data.username,
@@ -27,17 +24,20 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
       }
     } catch (err) {
-      console.error("Phiên đăng nhập hết hạn hoặc chưa đăng nhập", err);
+      // Khi xuống tới đây nghĩa là CẢ Access Token LẪN Refresh Token đều đã hết hạn
+      console.log(
+        "Phiên đăng nhập hết hạn, chưa đăng nhập hoặc Refresh thất bại",
+      );
       setUser(null);
     } finally {
       setLoading(false);
     }
   };
+
   const login = async (username, password) => {
     const res = await api.post("/auth/login", { username, password });
-    // Backend vừa set Cookie tự động, vừa trả về JwtResponse { username, role, ... }
     setUser({ username: res.data.username, role: res.data.role });
-    return res.data.role; // Trả về role để chuyển hướng route
+    return res.data.role;
   };
 
   const register = async (userData) => {
@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await api.post("/auth/logout"); // Backend xóa Cookie accessToken & refreshToken
+      await api.post("/auth/logout");
     } catch (err) {
       console.error("Lỗi khi đăng xuất:", err);
     } finally {

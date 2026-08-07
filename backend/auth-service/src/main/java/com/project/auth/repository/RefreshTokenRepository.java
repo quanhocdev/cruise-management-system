@@ -14,6 +14,9 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
     // Tìm token theo ID định danh (jti)
     Optional<RefreshToken> findByJti(String jti);
 
+    // Tìm token theo userId để phục vụ cập nhật (UPSERT)
+    Optional<RefreshToken> findByUserId(String userId);
+
     // Xóa token khi user Logout
     void deleteByJti(String jti);
 
