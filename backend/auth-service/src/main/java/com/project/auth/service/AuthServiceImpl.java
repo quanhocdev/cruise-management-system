@@ -10,6 +10,7 @@ import com.project.auth.dto.auth.VerifyOtpRequestDTO;
 import com.project.auth.model.Users;
 import com.project.auth.model.enums.UserRole;
 import com.project.auth.model.enums.UserStatus;
+import com.project.auth.model.enums.UserProvider;
 import com.project.auth.repository.UserRepository;
 import com.project.auth.service.redis.RedisService;
 
@@ -20,59 +21,79 @@ private final UserRepository userRepository;
 private final PasswordEncoder passwordEncoder;
 private final JwtService jwtService;
 private final RedisService redisService;
+private final MailService mailService;
 
 
 public AuthServiceImpl(
         UserRepository userRepository,
         PasswordEncoder passwordEncoder,
         JwtService jwtService,
-        RedisService redisService
+        RedisService redisService,
+        MailService mailService
 ) {
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
     this.jwtService = jwtService;
     this.redisService = redisService;
+    this.mailService = mailService;
 }
     /**
      * Khách ghé thăm (GUEST) tự đăng ký tài khoản -> Chuyển thành Hành khách (PASSENGER)
      */
-    public RegisterResponseDTO register(RegisterRequestDTO request) {
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username đã tồn tại");
-        }
+   public RegisterResponseDTO register(RegisterRequestDTO request) {
+    if (userRepository.existsByUsername(request.getUsername())) {
+        throw new RuntimeException("Username đã tồn tại");
+    }
 
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email đã tồn tại");
-        }
+    if (userRepository.existsByEmail(request.getEmail())) {
+        throw new RuntimeException("Email đã tồn tại");
+    }
 
-        Users user = new Users();
-        user.setUsername(request.getUsername());
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+    Users user = new Users();
+    user.setUsername(request.getUsername());
+    user.setEmail(request.getEmail());
+    user.setPassword(passwordEncoder.encode(request.getPassword()));
+    
+    user.setRole(UserRole.PASSENGER);
+    user.setStatus(UserStatus.ACTIVE);
+    user.setProvider(UserProvider.LOCAL);
+    user.setEnabled(false);
+
+    Users savedUser = userRepository.save(user);
+
+    String otp = generateOtp();
+
+    // 1. Lưu OTP vào Redis
+    try {
+        redisService.saveOtp(savedUser.getId(), otp);
+    } catch (Exception e) {
+        System.err.println("❌ LỖI REDIS: " + e.getMessage());
+        throw new RuntimeException("Lỗi lưu OTP vào hệ thống. Vui lòng thử lại!");
+    }
+
+    // 2. Gửi Mail OTP
+    try {
+        mailService.sendOtp(savedUser.getEmail(), otp);
+    } catch (Exception e) {
+        System.err.println("❌ LỖI GỬI MAIL OTP: " + e.getMessage());
+        // In log chi tiết ra console Docker để debug
+        e.printStackTrace(); 
         
-        // Luôn cố định vai trò là PASSENGER cho tài khoản tự đăng ký
-        user.setRole(UserRole.PASSENGER);
-        user.setStatus(UserStatus.ACTIVE);
-        user.setEnabled(false);
+        return new RegisterResponseDTO(
+            savedUser.getId(),
+            savedUser.getUsername(),
+            savedUser.getEmail(),
+            "Đăng ký thành công nhưng không thể gửi email OTP. Vui lòng bấm gửi lại OTP!"
+        );
+    }
 
-        Users savedUser = userRepository.save(user);
-
-String otp = generateOtp();
-
-redisService.saveOtp(
-        savedUser.getId(),
-        otp
-);
-
-System.out.println("OTP: " + otp);
-
-return new RegisterResponseDTO(
+    return new RegisterResponseDTO(
         savedUser.getId(),
         savedUser.getUsername(),
         savedUser.getEmail(),
         "Đã gửi mã OTP xác thực email"
-);
-    }
+    );
+}
 
     /**
      * Đăng nhập dùng chung cho tất cả các Role (PASSENGER, ADMIN, SCHEDULER, SHORE, ONBOARD,...)

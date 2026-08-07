@@ -84,7 +84,7 @@ services:
     container_name: auth-service
     restart: always
     ports:
-      - "8081:8081"
+      - "8081:8080"
     volumes:
       - ./backend/auth-service:/app
     env_file:
@@ -96,6 +96,8 @@ services:
 
       - SPRING_DATA_REDIS_HOST=${REDIS_HOST}
       - SPRING_DATA_REDIS_PORT=${REDIS_PORT}
+
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
 
     depends_on:
       postgres:

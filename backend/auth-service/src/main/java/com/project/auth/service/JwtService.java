@@ -2,10 +2,12 @@ package com.project.auth.service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
@@ -20,13 +22,12 @@ public class JwtService {
     private final JwtEncoder jwtEncoder;
     private final JwtDecoder jwtDecoder;
 
-    @Value("${jwt.access-expiration:300000}") // Default 5 phút
+    @Value("${jwt.access-expiration}") 
     private long accessTokenExpiration;
 
-    @Value("${jwt.refresh-expiration:604800000}") // Default 7 ngày
+    @Value("${jwt.refresh-expiration}") 
     private long refreshTokenExpiration;
 
-    // Constructor injection thủ công
     public JwtService(JwtEncoder jwtEncoder, JwtDecoder jwtDecoder) {
         this.jwtEncoder = jwtEncoder;
         this.jwtDecoder = jwtDecoder;
@@ -52,6 +53,7 @@ public class JwtService {
         Instant now = Instant.now();
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
+                .id(UUID.randomUUID().toString()) // 🟢 BẮT BUỘC: Tạo jti ngẫu nhiên cho Refresh Token
                 .subject(user.getUsername())
                 .issuedAt(now)
                 .expiresAt(now.plus(refreshTokenExpiration, ChronoUnit.MILLIS))
@@ -65,11 +67,23 @@ public class JwtService {
         return jwtDecoder.decode(token).getSubject();
     }
 
+    // 🟢 HÀM BỔ SUNG: Trích xuất jti (JWT ID) từ Token
+    public String extractJti(String token) {
+        Jwt jwt = jwtDecoder.decode(token);
+        return jwt.getId();
+    }
+
+    // 🟢 HÀM BỔ SUNG: Trích xuất ngày hết hạn dạng Instant từ Token
+    public Instant extractExpiration(String token) {
+        Jwt jwt = jwtDecoder.decode(token);
+        return jwt.getExpiresAt();
+    }
+
     public boolean isRefreshToken(String token) {
         try {
-            var jwt = jwtDecoder.decode(token);
+            Jwt jwt = jwtDecoder.decode(token);
             String tokenType = jwt.getClaimAsString("tokenType");
-            return "REFRESH".equals(tokenType) && jwt.getExpiresAt().isAfter(Instant.now());
+            return "REFRESH".equals(tokenType) && jwt.getExpiresAt() != null && jwt.getExpiresAt().isAfter(Instant.now());
         } catch (Exception e) {
             return false;
         }
