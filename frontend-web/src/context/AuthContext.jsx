@@ -15,11 +15,17 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuthStatus = async () => {
     try {
-      // Backend /auth/me trả về 200 OK với { username, role } nếu token hợp lệ,
-      // hoặc 401 Unauthorized nếu chưa đăng nhập/hết hạn.
       const res = await api.get("/auth/me");
-      setUser(res.data);
-    } catch {
+
+      // Nếu Backend xác nhận đã đăng nhập thành công
+      if (res.data && res.data.authenticated) {
+        setUser({ username: res.data.username, role: res.data.role });
+      } else {
+        // Chưa đăng nhập (200 OK nhưng authenticated = false)
+        setUser(null);
+      }
+    } catch (err) {
+      // Trường hợp mất mạng hoặc server sập hoàn toàn
       setUser(null);
     } finally {
       setLoading(false);

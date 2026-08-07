@@ -98,11 +98,11 @@ public AuthenticationManager authenticationManager(AuthenticationConfiguration a
     "/api/auth/register",
     "/api/auth/login",
     "/api/auth/verify-email",
-    "/api/auth/refresh"
+    "/api/auth/refresh",
+    "/api/auth/me"
 ).permitAll()
 
 .requestMatchers(
-    "/api/auth/me",
     "/api/auth/logout"
 )
 .authenticated()
