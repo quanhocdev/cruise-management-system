@@ -17,9 +17,48 @@ import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthen
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import java.util.List;
 
 @Configuration
 public class SecurityConfig {
+
+    @Bean
+public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration configuration = new CorsConfiguration();
+
+    configuration.setAllowedOrigins(
+        List.of("http://localhost:5173")
+    );
+
+    configuration.setAllowedMethods(
+        List.of(
+            "GET",
+            "POST",
+            "PUT",
+            "DELETE",
+            "OPTIONS"
+        )
+    );
+
+    configuration.setAllowedHeaders(
+        List.of("*")
+    );
+
+    configuration.setAllowCredentials(true);
+
+    UrlBasedCorsConfigurationSource source =
+            new UrlBasedCorsConfigurationSource();
+
+    source.registerCorsConfiguration(
+        "/**",
+        configuration
+    );
+
+    return source;
+}
 
     @Bean
 public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
@@ -44,6 +83,7 @@ public AuthenticationManager authenticationManager(AuthenticationConfiguration a
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
 
             // 1. STATELESS HOÀN TOÀN (TẮT SESSION PHÍA SERVER)
@@ -55,11 +95,17 @@ public AuthenticationManager authenticationManager(AuthenticationConfiguration a
             .authorizeHttpRequests(auth -> auth
                 // Public APIs & Static Page Routes
                 .requestMatchers(
-                        "/",
-                        "/login",
-                        "/register",
-                        "/api/auth/**"
-                ).permitAll()
+    "/api/auth/register",
+    "/api/auth/login",
+    "/api/auth/verify-email",
+    "/api/auth/refresh"
+).permitAll()
+
+.requestMatchers(
+    "/api/auth/me",
+    "/api/auth/logout"
+)
+.authenticated()
 
                 // Web Pages phân quyền theo Role
                 .requestMatchers("/admin/**").hasRole("ADMIN")
@@ -98,14 +144,9 @@ public AuthenticationManager authenticationManager(AuthenticationConfiguration a
                 .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
 
                 // Xử lý khi chưa đăng nhập
-                .authenticationEntryPoint((request, response, authException) -> {
-                    String uri = request.getRequestURI();
-                    if (uri.equals("/") || uri.equals("/login") || uri.startsWith("/api/auth/")) {
-                        request.getRequestDispatcher(uri).forward(request, response);
-                    } else {
-                        new BearerTokenAuthenticationEntryPoint().commence(request, response, authException);
-                    }
-                })
+                .authenticationEntryPoint(
+                    new BearerTokenAuthenticationEntryPoint()
+                )
             )
 
             .exceptionHandling(ex -> ex.accessDeniedHandler(new BearerTokenAccessDeniedHandler()))
