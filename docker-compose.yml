@@ -25,6 +25,21 @@ services:
       retries: 5
 
   # ==========================
+  # Redis
+  # ==========================
+  redis:
+    image: redis:8-alpine
+    container_name: cruise_redis
+    restart: always
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==========================
   # pgAdmin
   # ==========================
   pgadmin:
@@ -78,8 +93,14 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${AUTH_DB_NAME:-auth_db}
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-postgres}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+
+      - SPRING_DATA_REDIS_HOST=${REDIS_HOST}
+      - SPRING_DATA_REDIS_PORT=${REDIS_PORT}
+
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
   # ==========================

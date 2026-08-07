@@ -15,6 +15,7 @@ import com.project.auth.dto.auth.JwtResponse;
 import com.project.auth.dto.auth.LoginRequestDTO;
 import com.project.auth.dto.auth.RegisterRequestDTO;
 import com.project.auth.dto.auth.RegisterResponseDTO;
+import com.project.auth.dto.auth.VerifyOtpRequestDTO;
 import com.project.auth.model.Users;
 import com.project.auth.service.AuthService;
 import com.project.auth.service.JwtService;
@@ -206,4 +207,25 @@ public class AuthController {
                 .header(HttpHeaders.SET_COOKIE, cleanRefreshCookie.toString())
                 .body(Map.of("message", "Đăng xuất thành công"));
     }
+   @PostMapping("/verify-email")
+public ResponseEntity<?> verifyEmail(
+        @Valid @RequestBody VerifyOtpRequestDTO request
+) {
+    try {
+        authService.verifyEmail(request);
+
+        return ResponseEntity.ok(
+                Map.of("message", "Xác thực email thành công")
+        );
+
+    } catch (RuntimeException e) {
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(Map.of(
+                        "message",
+                        e.getMessage()
+                ));
+    }
+}
 }

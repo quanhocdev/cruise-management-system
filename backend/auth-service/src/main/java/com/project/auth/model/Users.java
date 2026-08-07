@@ -44,6 +44,9 @@ public class Users {
     @Column(name = "provider", nullable = false)
     private UserProvider provider;
 
+    @Column(name = "enabled", nullable = false)
+    private Boolean enabled = false;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private UserStatus status;
@@ -59,13 +62,14 @@ public class Users {
     public Users() {
     }
 
-    public Users(String username, String password, String email, String firebaseUid, UserRole role, UserProvider provider, UserStatus status) {
+    public Users(String username, String password, String email, String firebaseUid, UserRole role, UserProvider provider, Boolean enabled, UserStatus status) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.firebaseUid = firebaseUid;
         this.role = role;
         this.provider = provider;
+        this.enabled = enabled;
         this.status = status;
     }
 
@@ -110,6 +114,13 @@ public class Users {
     }
     public void setProvider(UserProvider provider) {
         this.provider = provider;
+    }
+    public Boolean getEnabled() {
+    return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+    this.enabled = enabled;
     }
     public UserStatus getStatus() {
         return status;
