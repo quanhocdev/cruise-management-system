@@ -58,21 +58,30 @@ services:
   # ==========================
   # API Gateway
   # ==========================
-  # gateway-service:
-  #   build:
-  #     context: ./backend/gateway-service
-  #     dockerfile: Dockerfile.dev
-  #   container_name: gateway-service
-  #   restart: always
-  #   ports:
-  #     - "8080:8080"
-  #   volumes:
-  #     - ./backend/gateway-service:/app
-  #   env_file:
-  #     - .env
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
+  gateway-service:
+    build:
+      context: ./backend/gateway-service
+      dockerfile: Dockerfile.dev
+    container_name: gateway-service
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend/gateway-service:/app
+    env_file:
+      - .env
+    environment:
+      - AUTH_SERVICE_URL=http://auth-service:8081
+      - BOOKING_SERVICE_URL=http://booking-service:8082
+      - ACTIVITY_SERVICE_URL=http://activity-service:8083
+      - CONVENIENCE_SERVICE_URL=http://convenience-service:8084
+      - PAYMENT_SERVICE_URL=http://payment-service:8085
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8086
+      - FEEDBACK_SERVICE_URL=http://feedback-service:8087
+      - TOUR_SERVICE_URL=http://tour-service:8088
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
+    depends_on:
+      - auth-service
 
   # ==========================
   # Auth Service
@@ -280,9 +289,9 @@ services:
     volumes:
       - ./frontend-web:/app
     environment:
-      VITE_API_BASE_URL: http://localhost:8081
+      VITE_API_BASE_URL: http://localhost:8080
     depends_on:
-      - auth-service
+      - gateway-service
 
 volumes:
   postgres_cruise_data:
