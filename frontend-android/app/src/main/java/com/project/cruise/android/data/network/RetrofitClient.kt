@@ -1,5 +1,7 @@
 package com.project.cruise.android.data.network
 
+import com.project.cruise.android.data.auth.TokenManager
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -15,6 +17,36 @@ object RetrofitClient {
             )
             .build()
 
-    val apiService: ApiService =
+    val refreshApiService: ApiService =
         retrofit.create(ApiService::class.java)
+
+    fun createApiService(
+        tokenManager: TokenManager
+    ): ApiService {
+
+        val authenticator =
+            TokenAuthenticator(
+                tokenManager = tokenManager,
+                refreshApi = refreshApiService
+            )
+
+        val client =
+            OkHttpClient.Builder()
+                .addInterceptor(
+                    AuthInterceptor(tokenManager)
+                )
+                .authenticator(authenticator)
+                .build()
+
+        return Retrofit.Builder()
+            .baseUrl(
+                "${AppConfig.HTTP_BASE_URL}/"
+            )
+            .client(client)
+            .addConverterFactory(
+                GsonConverterFactory.create()
+            )
+            .build()
+            .create(ApiService::class.java)
+    }
 }
