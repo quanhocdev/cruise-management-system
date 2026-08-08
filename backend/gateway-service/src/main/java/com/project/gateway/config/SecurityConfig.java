@@ -1,6 +1,9 @@
 package com.project.gateway.config;
 
 import com.project.gateway.security.CookieOrHeaderBearerTokenResolver;
+
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -13,41 +16,63 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
-
 @Configuration
 public class SecurityConfig {
 
+    // =====================================================
+    // CORS
+    // =====================================================
+
     @Bean
-public CorsConfigurationSource corsConfigurationSource() {
-    CorsConfiguration configuration = new CorsConfiguration();
+    public CorsConfigurationSource corsConfigurationSource() {
 
-    configuration.setAllowedOrigins(
-            List.of("http://localhost:5173")
-    );
+        CorsConfiguration configuration = new CorsConfiguration();
 
-    configuration.setAllowedMethods(
-            List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")
-    );
+        configuration.setAllowedOrigins(
+                List.of("http://localhost:5173")
+        );
 
-    configuration.setAllowedHeaders(
-            List.of("*")
-    );
+        configuration.setAllowedMethods(
+                List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")
+        );
 
-    configuration.setAllowCredentials(true);
+        configuration.setAllowedHeaders(
+                List.of("*")
+        );
 
-    configuration.setExposedHeaders(
-            List.of("Authorization", "Set-Cookie")
-    );
+        configuration.setAllowCredentials(true);
 
-    UrlBasedCorsConfigurationSource source =
-            new UrlBasedCorsConfigurationSource();
+        configuration.setExposedHeaders(
+                List.of("Authorization", "Set-Cookie")
+        );
 
-    source.registerCorsConfiguration("/**", configuration);
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
 
-    return source;
-}
+        source.registerCorsConfiguration("/**", configuration);
 
+        return source;
+    }
+
+    // =====================================================
+    // JWT AUTHORITY CONVERTER
+    // =====================================================
+
+    /**
+     * Convert claim "scope" trong JWT thành:
+     *
+     * SCOPE_xxx
+     * ROLE_xxx
+     *
+     * Ví dụ:
+     *
+     * "scope": "ADMIN"
+     *
+     * =>
+     *
+     * SCOPE_ADMIN
+     * ROLE_ADMIN
+     */
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
 
@@ -86,9 +111,10 @@ public CorsConfigurationSource corsConfigurationSource() {
         return converter;
     }
 
-    /**
-     * Spring Security Filter Chain của Gateway.
-     */
+    // =====================================================
+    // SECURITY FILTER CHAIN
+    // =====================================================
+
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
@@ -98,70 +124,78 @@ public CorsConfigurationSource corsConfigurationSource() {
 
         http
 
-            // =====================================================
-            // CORS
-            // =====================================================
-            // CORS được cấu hình trong application.yml
-            // của Gateway.
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // =================================================
+                // CORS
+                // =================================================
 
-            // =====================================================
-            // CSRF
-            // =====================================================
-            // API Stateless + JWT.
-            .csrf(csrf -> csrf.disable())
+                .cors(cors ->
+                        cors.configurationSource(
+                                corsConfigurationSource()
+                        )
+                )
 
-            // =====================================================
-            // SESSION
-            // =====================================================
-            .sessionManagement(session ->
-                    session.sessionCreationPolicy(
-                            SessionCreationPolicy.STATELESS
-                    )
-            )
+                // =================================================
+                // CSRF
+                // =================================================
 
-            // =====================================================
-            // AUTHORIZATION
-            // =====================================================
-            .authorizeHttpRequests(auth -> auth
+                .csrf(csrf -> csrf.disable())
 
-                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                // =================================================
+                // SESSION
+                // =================================================
 
-                    // -------------------------------------------------
-                    // Public Auth APIs
-                    // -------------------------------------------------
-                    .requestMatchers(
-                            "/api/auth/register",
-                            "/api/auth/login",
-                            "/api/auth/refresh",
-                            "/api/auth/verify-email"
-                    ).permitAll()
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(
+                                SessionCreationPolicy.STATELESS
+                        )
+                )
 
-                    // -------------------------------------------------
-                    // Tất cả API còn lại yêu cầu JWT
-                    // -------------------------------------------------
-                    .anyRequest().authenticated()
-            )
+                // =================================================
+                // AUTHORIZATION
+                // =================================================
 
-            // =====================================================
-            // OAUTH2 RESOURCE SERVER
-            // =====================================================
-            .oauth2ResourceServer(oauth2 -> oauth2
+                .authorizeHttpRequests(auth -> auth
 
-                    // Web:
-                    //     Cookie accessToken
-                    //
-                    // Android:
-                    //     Authorization: Bearer <token>
-                    .bearerTokenResolver(bearerTokenResolver)
+                        // Preflight request
+                        .requestMatchers(
+                                HttpMethod.OPTIONS,
+                                "/**"
+                        ).permitAll()
 
-                    // JWT verification
-                    .jwt(jwt ->
-                            jwt.jwtAuthenticationConverter(
-                                    jwtAuthenticationConverter
-                            )
-                    )
-            );
+                        // Public Auth APIs
+                        .requestMatchers(
+                                "/api/auth/register",
+                                "/api/auth/login",
+                                "/api/auth/refresh",
+                                "/api/auth/verify-email"
+                        ).permitAll()
+
+                        // Các API còn lại yêu cầu JWT
+                        .anyRequest().authenticated()
+                )
+
+                // =================================================
+                // OAUTH2 RESOURCE SERVER
+                // =================================================
+
+                .oauth2ResourceServer(oauth2 -> oauth2
+
+                        // Web:
+                        // Cookie: accessToken
+                        //
+                        // Android:
+                        // Authorization: Bearer <token>
+                        .bearerTokenResolver(
+                                bearerTokenResolver
+                        )
+
+                        // JWT verification
+                        .jwt(jwt ->
+                                jwt.jwtAuthenticationConverter(
+                                        jwtAuthenticationConverter
+                                )
+                        )
+                );
 
         return http.build();
     }

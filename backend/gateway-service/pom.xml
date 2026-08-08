@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="
+            http://maven.apache.org/POM/4.0.0
+            https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -13,9 +15,10 @@
     </parent>
 
     <groupId>com.project</groupId>
-    <artifactId>gateway</artifactId>
+    <artifactId>gateway-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>gateway</name>
+
+    <name>gateway-service</name>
     <description>API Gateway for Cruise Management System</description>
 
     <properties>
@@ -23,6 +26,7 @@
         <spring-cloud.version>2025.1.2</spring-cloud.version>
     </properties>
 
+    <!-- Spring Cloud BOM -->
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -37,39 +41,64 @@
 
     <dependencies>
 
-        <!-- API Gateway - Web MVC -->
+        <!-- ========================================== -->
+        <!-- API Gateway - Web MVC                      -->
+        <!-- ========================================== -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-gateway-server-webmvc</artifactId>
         </dependency>
 
-        <!-- Spring Security -->
+        <!-- ========================================== -->
+        <!-- Spring Security                            -->
+        <!-- ========================================== -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
-        <!-- OAuth2 Resource Server - JWT -->
+        <!-- ========================================== -->
+        <!-- OAuth2 Resource Server / JWT               -->
+        <!-- ========================================== -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
         </dependency>
 
-        <!-- Validation -->
+        <!-- ========================================== -->
+        <!-- Validation                                 -->
+        <!-- ========================================== -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
-        <!-- DevTools -->
+        <!-- ========================================== -->
+        <!-- Actuator                                   -->
+        <!-- ========================================== -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- ========================================== -->
+        <!-- DevTools                                   -->
+        <!-- ========================================== -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <scope>runtime</scope>
-            <optional>true</optional>
         </dependency>
 
-        <!-- Test -->
+        <!-- ========================================== -->
+        <!-- Test                                       -->
+        <!-- ========================================== -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security-test</artifactId>
@@ -78,6 +107,9 @@
 
     </dependencies>
 
+    <!-- ============================================== -->
+    <!-- Build                                          -->
+    <!-- ============================================== -->
     <build>
         <plugins>
             <plugin>
