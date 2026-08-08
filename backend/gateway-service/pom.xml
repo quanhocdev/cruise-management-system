@@ -42,11 +42,11 @@
     <dependencies>
 
         <!-- ========================================== -->
-        <!-- API Gateway - Web MVC                      -->
+        <!-- API Gateway - WebFlux                      -->
         <!-- ========================================== -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-gateway-server-webmvc</artifactId>
+            <artifactId>spring-cloud-starter-gateway-server-webflux</artifactId>
         </dependency>
 
         <!-- ========================================== -->
@@ -95,7 +95,7 @@
         <!-- ========================================== -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webmvc-test</artifactId>
+            <artifactId>spring-boot-starter-webflux-test</artifactId>
             <scope>test</scope>
         </dependency>
 

@@ -11,16 +11,32 @@ import org.springframework.web.server.ServerWebExchange;
 
 import reactor.core.publisher.Mono;
 
-public class JsonAuthenticationEntryPoint implements ServerAuthenticationEntryPoint {
+public class JsonAuthenticationEntryPoint
+        implements ServerAuthenticationEntryPoint {
 
-    private static final byte[] BODY = "{\"status\":401,\"message\":\"Authentication required\"}"
-            .getBytes(StandardCharsets.UTF_8);
+    private static final byte[] BODY =
+            "{\"status\":401,\"message\":\"Authentication required\"}"
+                    .getBytes(StandardCharsets.UTF_8);
 
     @Override
-    public Mono<Void> commence(ServerWebExchange exchange, AuthenticationException exception) {
-        exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-        exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
-        DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(BODY);
-        return exchange.getResponse().writeWith(Mono.just(buffer));
+    public Mono<Void> commence(
+            ServerWebExchange exchange,
+            AuthenticationException exception) {
+
+        exchange.getResponse().setStatusCode(
+                HttpStatus.UNAUTHORIZED
+        );
+
+        exchange.getResponse()
+                .getHeaders()
+                .setContentType(MediaType.APPLICATION_JSON);
+
+        DataBuffer buffer =
+                exchange.getResponse()
+                        .bufferFactory()
+                        .wrap(BODY);
+
+        return exchange.getResponse()
+                .writeWith(Mono.just(buffer));
     }
 }

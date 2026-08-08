@@ -1,39 +1,65 @@
 package com.project.gateway.config;
 
-import com.project.gateway.security.CookieOrHeaderBearerTokenResolver;
-
 import java.util.List;
-
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
-import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.oauth2.server.resource.web.server.authentication.ServerBearerTokenAuthenticationConverter;
+import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.server.ServerAuthenticationEntryPoint;
+import org.springframework.security.web.server.authorization.ServerAccessDeniedHandler;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.reactive.CorsConfigurationSource;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+
+import com.project.gateway.security.CookieOrHeaderBearerTokenConverter;
+import com.project.gateway.security.JsonAccessDeniedHandler;
+import com.project.gateway.security.JsonAuthenticationEntryPoint;
 
 @Configuration
 public class SecurityConfig {
+
+    // =====================================================
+    // PUBLIC ENDPOINTS
+    // =====================================================
+
+    private static final String[] PUBLIC_ENDPOINTS = {
+            "/api/auth/register",
+            "/api/auth/login",
+            "/api/auth/refresh",
+            "/api/auth/verify-email",
+            "/api/auth/logout",
+            "/actuator/health",
+            "/actuator/info"
+    };
 
     // =====================================================
     // CORS
     // =====================================================
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource corsConfigurationSource(
+            @Value("${cors.allowed-origins:http://localhost:5173}")
+            String allowedOrigins) {
 
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(
-                List.of("http://localhost:5173")
+                List.of(allowedOrigins.split(","))
         );
 
         configuration.setAllowedMethods(
-                List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                List.of(
+                        "GET",
+                        "POST",
+                        "PUT",
+                        "DELETE",
+                        "PATCH",
+                        "OPTIONS"
+                )
         );
 
         configuration.setAllowedHeaders(
@@ -49,154 +75,134 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
 
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration(
+                "/**",
+                configuration
+        );
 
         return source;
     }
 
     // =====================================================
-    // JWT AUTHORITY CONVERTER
-    // =====================================================
-
-    /**
-     * Convert claim "scope" trong JWT thành:
-     *
-     * SCOPE_xxx
-     * ROLE_xxx
-     *
-     * Ví dụ:
-     *
-     * "scope": "ADMIN"
-     *
-     * =>
-     *
-     * SCOPE_ADMIN
-     * ROLE_ADMIN
-     */
-    @Bean
-    public JwtAuthenticationConverter jwtAuthenticationConverter() {
-
-        JwtGrantedAuthoritiesConverter scopeConverter =
-                new JwtGrantedAuthoritiesConverter();
-
-        scopeConverter.setAuthoritiesClaimName("scope");
-        scopeConverter.setAuthorityPrefix("SCOPE_");
-
-        JwtGrantedAuthoritiesConverter roleConverter =
-                new JwtGrantedAuthoritiesConverter();
-
-        roleConverter.setAuthoritiesClaimName("scope");
-        roleConverter.setAuthorityPrefix("ROLE_");
-
-        JwtAuthenticationConverter converter =
-                new JwtAuthenticationConverter();
-
-        converter.setJwtGrantedAuthoritiesConverter(jwt -> {
-
-            var authorities = scopeConverter.convert(jwt);
-
-            if (authorities == null) {
-                authorities = new java.util.ArrayList<>();
-            }
-
-            var roleAuthorities = roleConverter.convert(jwt);
-
-            if (roleAuthorities != null) {
-                authorities.addAll(roleAuthorities);
-            }
-
-            return authorities;
-        });
-
-        return converter;
-    }
-
-    // =====================================================
-    // SECURITY FILTER CHAIN
+    // SECURITY
     // =====================================================
 
     @Bean
-    public SecurityFilterChain securityFilterChain(
-            HttpSecurity http,
-            CookieOrHeaderBearerTokenResolver bearerTokenResolver,
-            JwtAuthenticationConverter jwtAuthenticationConverter
-    ) throws Exception {
+    public SecurityWebFilterChain securityWebFilterChain(
+            ServerHttpSecurity http,
+            CookieOrHeaderBearerTokenConverter bearerTokenConverter,
+            ServerAuthenticationEntryPoint authenticationEntryPoint,
+            ServerAccessDeniedHandler accessDeniedHandler
+    ) {
 
-        http
+        return http
 
                 // =================================================
                 // CORS
                 // =================================================
 
-                .cors(cors ->
-                        cors.configurationSource(
-                                corsConfigurationSource()
-                        )
-                )
+                .cors(Customizer.withDefaults())
 
                 // =================================================
                 // CSRF
                 // =================================================
 
-                .csrf(csrf -> csrf.disable())
-
-                // =================================================
-                // SESSION
-                // =================================================
-
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(
-                                SessionCreationPolicy.STATELESS
-                        )
-                )
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
 
                 // =================================================
                 // AUTHORIZATION
                 // =================================================
 
-                .authorizeHttpRequests(auth -> auth
+                .authorizeExchange(exchange -> exchange
 
-                        // Preflight request
-                        .requestMatchers(
-                                HttpMethod.OPTIONS,
-                                "/**"
+                        // CORS preflight
+                        .pathMatchers(
+                                HttpMethod.OPTIONS
                         ).permitAll()
 
                         // Public Auth APIs
-                        .requestMatchers(
-                                "/api/auth/register",
-                                "/api/auth/login",
-                                "/api/auth/refresh",
-                                "/api/auth/verify-email"
+                        .pathMatchers(
+                                PUBLIC_ENDPOINTS
                         ).permitAll()
 
                         // Các API còn lại yêu cầu JWT
-                        .anyRequest().authenticated()
+                        .anyExchange().authenticated()
                 )
 
                 // =================================================
                 // OAUTH2 RESOURCE SERVER
                 // =================================================
 
-                .oauth2ResourceServer(oauth2 -> oauth2
+                .oauth2ResourceServer(resourceServer -> resourceServer
 
                         // Web:
                         // Cookie: accessToken
                         //
                         // Android:
                         // Authorization: Bearer <token>
-                        .bearerTokenResolver(
-                                bearerTokenResolver
+                        .bearerTokenConverter(
+                                bearerTokenConverter
+                        )
+
+                        .authenticationEntryPoint(
+                                authenticationEntryPoint
+                        )
+
+                        .accessDeniedHandler(
+                                accessDeniedHandler
                         )
 
                         // JWT verification
-                        .jwt(jwt ->
-                                jwt.jwtAuthenticationConverter(
-                                        jwtAuthenticationConverter
-                                )
-                        )
-                );
+                        .jwt(Customizer.withDefaults())
+                )
 
-        return http.build();
+                // =================================================
+                // EXCEPTION HANDLING
+                // =================================================
+
+                .exceptionHandling(exception -> exception
+
+                        .authenticationEntryPoint(
+                                authenticationEntryPoint
+                        )
+
+                        .accessDeniedHandler(
+                                accessDeniedHandler
+                        )
+                )
+
+                .build();
+    }
+
+    // =====================================================
+    // BEARER TOKEN CONVERTER
+    // =====================================================
+
+    @Bean
+    public CookieOrHeaderBearerTokenConverter bearerTokenConverter() {
+
+    return new CookieOrHeaderBearerTokenConverter(
+            new ServerBearerTokenAuthenticationConverter()
+    );
+    }
+
+    // =====================================================
+    // AUTHENTICATION ENTRY POINT
+    // =====================================================
+
+    @Bean
+    public ServerAuthenticationEntryPoint authenticationEntryPoint() {
+
+        return new JsonAuthenticationEntryPoint();
+    }
+
+    // =====================================================
+    // ACCESS DENIED HANDLER
+    // =====================================================
+
+    @Bean
+    public ServerAccessDeniedHandler accessDeniedHandler() {
+
+        return new JsonAccessDeniedHandler();
     }
 }

@@ -112,6 +112,7 @@ public class AuthController {
 public ResponseEntity<?> refresh(HttpServletRequest request) {
     try {
         String refreshToken = null;
+
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if ("refreshToken".equals(cookie.getName())) {
@@ -123,71 +124,70 @@ public ResponseEntity<?> refresh(HttpServletRequest request) {
 
         if (refreshToken == null) {
             String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 refreshToken = authHeader.substring(7);
             }
         }
 
-        // 🟢 Thêm log kiểm tra token nhận được
-        System.out.println("👉 [Refresh Endpoint] Refresh Token nhận được: " + refreshToken);
-
         if (refreshToken == null || refreshToken.isBlank()) {
-            throw new RuntimeException("Refresh Token không tồn tại trong Cookie hoặc Header!");
+            throw new RuntimeException("Refresh Token không tồn tại");
         }
 
+        // Kiểm tra refresh token cũ
         Users user = authService.refresh(refreshToken);
 
+        // Chỉ tạo ACCESS TOKEN mới
         String newAccessToken = jwtService.generateAccessToken(user);
-        String newRefreshToken = jwtService.generateRefreshToken(user);
 
-        String jti = jwtService.extractJti(newRefreshToken);
-        Instant expiresAt = jwtService.extractExpiration(newRefreshToken);
-        refreshTokenService.saveRefreshToken(user.getId().toString(), jti, user.getRole(), expiresAt);
-
-        ResponseCookie newAccessCookie = ResponseCookie.from("accessToken", newAccessToken)
+        ResponseCookie newAccessCookie = ResponseCookie
+                .from("accessToken", newAccessToken)
                 .httpOnly(true)
                 .secure(false)
                 .path("/")
                 .maxAge(jwtService.getAccessCookieMaxAgeInSeconds())
-                .sameSite("Lax") // 🟢 Đã đổi từ Strict sang Lax
+                .sameSite("Lax")
                 .build();
-
-        ResponseCookie newRefreshCookie = ResponseCookie.from("refreshToken", newRefreshToken)
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .maxAge(jwtService.getRefreshCookieMaxAgeInSeconds())
-                .sameSite("Lax") // 🟢 Đổi từ Strict sang Lax để tránh bị Browser nuốt Cookie
-                .build();
-
-        JwtResponse responseBody = new JwtResponse(
-                newAccessToken,
-                newRefreshToken,
-                user.getUsername(),
-                user.getRole().name()
-        );
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, newAccessCookie.toString())
-                .header(HttpHeaders.SET_COOKIE, newRefreshCookie.toString())
-                .body(responseBody);
+                .header(
+                        HttpHeaders.SET_COOKIE,
+                        newAccessCookie.toString()
+                )
+                .body(Map.of(
+                        "message", "Access token refreshed"
+                ));
 
     } catch (Exception e) {
-        // 🟢 IN LỖI RA CONSOLE ĐỂ THẤY NGUYÊN NHÂN CHÍNH XÁC
-        System.err.println("❌ Lỗi Refresh Token: " + e.getMessage());
-        e.printStackTrace(); 
 
-        ResponseCookie cleanAccessCookie = ResponseCookie.from("accessToken", "").path("/").maxAge(0).build();
-        ResponseCookie cleanRefreshCookie = ResponseCookie.from("refreshToken", "").path("/").maxAge(0).build();
+        ResponseCookie cleanAccessCookie =
+                ResponseCookie.from("accessToken", "")
+                        .httpOnly(true)
+                        .path("/")
+                        .maxAge(0)
+                        .build();
 
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("message", e.getMessage());
+        ResponseCookie cleanRefreshCookie =
+                ResponseCookie.from("refreshToken", "")
+                        .httpOnly(true)
+                        .path("/")
+                        .maxAge(0)
+                        .build();
 
-        // 🟢 Trả về 401 UNAUTHORIZED thay vì 403 FORBIDDEN
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED) 
-                .header(HttpHeaders.SET_COOKIE, cleanAccessCookie.toString())
-                .header(HttpHeaders.SET_COOKIE, cleanRefreshCookie.toString())
-                .body(errorResponse);
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .header(
+                        HttpHeaders.SET_COOKIE,
+                        cleanAccessCookie.toString()
+                )
+                .header(
+                        HttpHeaders.SET_COOKIE,
+                        cleanRefreshCookie.toString()
+                )
+                .body(Map.of(
+                        "message",
+                        e.getMessage()
+                ));
     }
 }
     /**
