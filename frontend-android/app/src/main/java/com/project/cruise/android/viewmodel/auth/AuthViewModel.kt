@@ -9,9 +9,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-// =========================================================
+// =====================================================
 // LOGIN STATE
-// =========================================================
+// =====================================================
 
 sealed class LoginState {
 
@@ -29,9 +29,9 @@ sealed class LoginState {
 }
 
 
-// =========================================================
+// =====================================================
 // REGISTER STATE
-// =========================================================
+// =====================================================
 
 sealed class RegisterState {
 
@@ -49,9 +49,9 @@ sealed class RegisterState {
 }
 
 
-// =========================================================
+// =====================================================
 // VERIFY OTP STATE
-// =========================================================
+// =====================================================
 
 sealed class VerifyOtpState {
 
@@ -69,9 +69,9 @@ sealed class VerifyOtpState {
 }
 
 
-// =========================================================
+// =====================================================
 // AUTH VIEW MODEL
-// =========================================================
+// =====================================================
 
 class AuthViewModel(
     private val repository: AuthRepository
@@ -86,6 +86,7 @@ class AuthViewModel(
 
     val loginState: StateFlow<LoginState> =
         _loginState
+
 
     fun login(
         username: String,
@@ -128,6 +129,7 @@ class AuthViewModel(
         }
     }
 
+
     fun resetLoginState() {
 
         _loginState.value =
@@ -145,42 +147,26 @@ class AuthViewModel(
     val registerState: StateFlow<RegisterState> =
         _registerState
 
+
     fun register(
         username: String,
         password: String,
-        email: String,
+        email: String
     ) {
 
-        if (username.isBlank()) {
+        if (
+            username.isBlank() ||
+            password.isBlank() ||
+            email.isBlank()
+        ) {
 
             _registerState.value =
                 RegisterState.Error(
-                    "Tài khoản không được để trống"
+                    "Vui lòng nhập đầy đủ thông tin"
                 )
 
             return
         }
-
-        if (password.isBlank()) {
-
-            _registerState.value =
-                RegisterState.Error(
-                    "Mật khẩu không được để trống"
-                )
-
-            return
-        }
-
-        if (email.isBlank()) {
-
-            _registerState.value =
-                RegisterState.Error(
-                    "Email không được để trống"
-                )
-
-            return
-        }
-
 
         viewModelScope.launch {
 
@@ -209,6 +195,7 @@ class AuthViewModel(
         }
     }
 
+
     fun resetRegisterState() {
 
         _registerState.value =
@@ -228,26 +215,17 @@ class AuthViewModel(
     val verifyOtpState: StateFlow<VerifyOtpState> =
         _verifyOtpState
 
+
     fun verifyEmail(
         userId: Long,
         otp: String
     ) {
 
-        if (otp.isBlank()) {
-
-            _verifyOtpState.value =
-                VerifyOtpState.Error(
-                    "Vui lòng nhập mã OTP"
-                )
-
-            return
-        }
-
         if (otp.length != 6) {
 
             _verifyOtpState.value =
                 VerifyOtpState.Error(
-                    "Mã OTP phải gồm 6 chữ số"
+                    "OTP phải có 6 số"
                 )
 
             return
@@ -266,13 +244,10 @@ class AuthViewModel(
                         otp = otp
                     )
 
-                val message =
-                    response["message"]
-                        ?: "Xác thực email thành công"
-
                 _verifyOtpState.value =
                     VerifyOtpState.Success(
-                        message
+                        response["message"]
+                            ?: "Xác thực email thành công"
                     )
 
             } catch (e: Exception) {
@@ -285,6 +260,7 @@ class AuthViewModel(
             }
         }
     }
+
 
     fun resetVerifyOtpState() {
 

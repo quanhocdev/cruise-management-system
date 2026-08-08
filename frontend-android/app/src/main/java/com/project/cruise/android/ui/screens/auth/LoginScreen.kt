@@ -6,22 +6,39 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun LoginScreen(
     onBackClick: () -> Unit,
-    onLoginSuccess: () -> Unit
+
+    onLogin: (
+        username: String,
+        password: String
+    ) -> Unit,
+
+    isLoading: Boolean = false,
+
+    errorMessage: String? = null
 ) {
 
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    var username by remember {
+        mutableStateOf("")
+    }
+
+    var password by remember {
+        mutableStateOf("")
+    }
 
     Column(
         modifier = Modifier
@@ -30,15 +47,28 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center
     ) {
 
+        // ==========================
+        // BACK
+        // ==========================
+
         TextButton(
-            onClick = onBackClick
+            onClick = onBackClick,
+            enabled = !isLoading
         ) {
             Text("← Quay lại")
         }
 
+        // ==========================
+        // TITLE
+        // ==========================
+
         Text(
             text = "Đăng nhập"
         )
+
+        // ==========================
+        // USERNAME
+        // ==========================
 
         OutlinedTextField(
             value = username,
@@ -48,10 +78,16 @@ fun LoginScreen(
             label = {
                 Text("Tài khoản")
             },
+            enabled = !isLoading,
+            singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 24.dp)
         )
+
+        // ==========================
+        // PASSWORD
+        // ==========================
 
         OutlinedTextField(
             value = password,
@@ -61,21 +97,51 @@ fun LoginScreen(
             label = {
                 Text("Mật khẩu")
             },
+            enabled = !isLoading,
+            singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 12.dp)
         )
 
+        // ==========================
+        // ERROR
+        // ==========================
+
+        if (errorMessage != null) {
+
+            Text(
+                text = errorMessage,
+                modifier = Modifier
+                    .padding(top = 12.dp)
+            )
+        }
+
+        // ==========================
+        // LOGIN
+        // ==========================
+
         Button(
             onClick = {
-                // Tạm thời chuyển màn hình để test Navigation
-                onLoginSuccess()
+                onLogin(
+                    username,
+                    password
+                )
             },
+            enabled = !isLoading,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 24.dp)
         ) {
-            Text("Đăng nhập")
+
+            if (isLoading) {
+
+                CircularProgressIndicator()
+
+            } else {
+
+                Text("Đăng nhập")
+            }
         }
     }
 }

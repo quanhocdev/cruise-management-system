@@ -25,7 +25,7 @@ fun RegisterScreen(
     onRegister: (
         username: String,
         password: String,
-        email: String,
+        email: String
     ) -> Unit,
 
     isLoading: Boolean = false,
@@ -42,10 +42,6 @@ fun RegisterScreen(
     }
 
     var email by remember {
-        mutableStateOf("")
-    }
-
-    var fullName by remember {
         mutableStateOf("")
     }
 
@@ -132,7 +128,6 @@ fun RegisterScreen(
                 .padding(top = 12.dp)
         )
 
-
         // ==========================
         // ERROR
         // ==========================
@@ -155,7 +150,7 @@ fun RegisterScreen(
                 onRegister(
                     username,
                     password,
-                    email,
+                    email
                 )
             },
             enabled = !isLoading,
