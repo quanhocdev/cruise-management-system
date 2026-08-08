@@ -82,4 +82,7 @@ class AuthRepository(
 
         return apiService.getCurrentUser()
     }
+    fun logout() {
+        tokenManager.clearTokens()
+    }
 }
