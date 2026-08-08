@@ -8,7 +8,7 @@ object RetrofitClient {
     private val retrofit =
         Retrofit.Builder()
             .baseUrl(
-                "${AppConfig.HTTP_BASE_URL}/api/"
+                "${AppConfig.HTTP_BASE_URL}/"
             )
             .addConverterFactory(
                 GsonConverterFactory.create()

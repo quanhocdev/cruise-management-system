@@ -10,17 +10,17 @@ import retrofit2.http.POST
 
 interface ApiService {
 
-    @POST("auth/login")
+    @POST("api/auth/login")
     suspend fun login(
         @Body request: LoginRequest
     ): JwtResponse
 
-    @POST("auth/register")
+    @POST("api/auth/register")
     suspend fun register(
         @Body request: RegisterRequest
     ): RegisterResponse
 
-    @POST("auth/verify-email")
+    @POST("api/auth/verify-email")
     suspend fun verifyEmail(
         @Body request: VerifyOtpRequest
     ): Map<String, String>
