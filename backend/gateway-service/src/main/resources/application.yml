@@ -1,0 +1,64 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gateway-service
+
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          # ==========================================
+          # ROUTES
+          # ==========================================
+          routes:
+            # ==========================================
+            # AUTH SERVICE
+            # ==========================================
+            - id: auth-service
+              uri: http://auth-service:8081
+              predicates:
+                - Path=/api/auth/**
+
+          # ==========================================
+          # GLOBAL CORS
+          # ==========================================
+          globalcors:
+            add-to-simple-url-handler-mapping: true
+
+            cors-configurations:
+              "[/**]":
+                allowedOrigins:
+                  - "http://localhost:5173"
+
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                  - OPTIONS
+
+                allowedHeaders:
+                  - "*"
+
+                allowCredentials: true
+
+                exposedHeaders:
+                  - Authorization
+                  - Set-Cookie
+
+# ==========================================
+# JWT
+# ==========================================
+jwt:
+  secret: ${JWT_SECRET}
+
+# ==========================================
+# LOGGING
+# ==========================================
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    org.springframework.web: INFO
+    org.springframework.security: INFO

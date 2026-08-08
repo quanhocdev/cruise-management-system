@@ -11,11 +11,29 @@ export const AuthProvider = ({ children }) => {
     checkAuthStatus();
   }, []);
 
+  // =========================================================
+  // KIỂM TRA PHIÊN ĐĂNG NHẬP
+  // =========================================================
   const checkAuthStatus = async () => {
     try {
+      /*
+       * GET /api/auth/me
+       *
+       * Browser tự động gửi accessToken Cookie
+       * nhờ withCredentials: true.
+       *
+       * Nếu chưa đăng nhập:
+       *     /auth/me → 401
+       *     Axios KHÔNG gọi /auth/refresh
+       *     → user = null
+       *
+       * Nếu đã đăng nhập:
+       *     /auth/me → 200
+       *     → lấy thông tin user.
+       */
       const res = await api.get("/auth/me");
 
-      if (res.data && (res.data.username || res.data.id)) {
+      if (res.data && res.data.username) {
         setUser({
           username: res.data.username,
           role: res.data.role,
@@ -24,26 +42,53 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
       }
     } catch (err) {
-      // Khi xuống tới đây nghĩa là CẢ Access Token LẪN Refresh Token đều đã hết hạn
-      console.log(
-        "Phiên đăng nhập hết hạn, chưa đăng nhập hoặc Refresh thất bại",
-      );
+      /*
+       * 401 ở /auth/me là bình thường khi chưa đăng nhập.
+       *
+       * Không cần gọi refresh ở đây.
+       */
       setUser(null);
     } finally {
       setLoading(false);
     }
   };
 
+  // =========================================================
+  // LOGIN
+  // =========================================================
   const login = async (username, password) => {
-    const res = await api.post("/auth/login", { username, password });
-    setUser({ username: res.data.username, role: res.data.role });
+    const res = await api.post("/auth/login", {
+      username,
+      password,
+    });
+
+    /*
+     * Auth Service:
+     *
+     * 1. Tạo accessToken
+     * 2. Tạo refreshToken
+     * 3. Set HttpOnly Cookie
+     *
+     * Browser tự lưu Cookie.
+     */
+    setUser({
+      username: res.data.username,
+      role: res.data.role,
+    });
+
     return res.data.role;
   };
 
+  // =========================================================
+  // REGISTER
+  // =========================================================
   const register = async (userData) => {
     return await api.post("/auth/register", userData);
   };
 
+  // =========================================================
+  // LOGOUT
+  // =========================================================
   const logout = async () => {
     try {
       await api.post("/auth/logout");
@@ -56,8 +101,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
-      {!loading && children}
+    <AuthContext.Provider
+      value={{
+        user,
+        login,
+        register,
+        logout,
+        loading,
+      }}
+    >
+      {children}
     </AuthContext.Provider>
   );
 };
