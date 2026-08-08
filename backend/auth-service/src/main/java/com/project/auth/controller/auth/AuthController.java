@@ -150,13 +150,14 @@ public ResponseEntity<?> refresh(HttpServletRequest request) {
                 .build();
 
         return ResponseEntity.ok()
-                .header(
-                        HttpHeaders.SET_COOKIE,
-                        newAccessCookie.toString()
-                )
-                .body(Map.of(
-                        "message", "Access token refreshed"
-                ));
+        .header(
+                HttpHeaders.SET_COOKIE,
+                newAccessCookie.toString()
+        )
+        .body(Map.of(
+                "accessToken", newAccessToken,
+                "message", "Access token refreshed"
+        ));
 
     } catch (Exception e) {
 

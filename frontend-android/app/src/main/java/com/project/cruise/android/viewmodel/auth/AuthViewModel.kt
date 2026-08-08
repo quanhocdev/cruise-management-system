@@ -68,6 +68,20 @@ sealed class VerifyOtpState {
     ) : VerifyOtpState()
 }
 
+// xem cá nhân
+sealed class MeState {
+    object Idle : MeState()
+    object Loading : MeState()
+
+    data class Success(
+        val username: String,
+        val role: String
+    ) : MeState()
+
+    data class Error(
+        val message: String
+    ) : MeState()
+}
 
 // =====================================================
 // AUTH VIEW MODEL
@@ -266,5 +280,41 @@ class AuthViewModel(
 
         _verifyOtpState.value =
             VerifyOtpState.Idle
+    }
+    private val _meState =
+        MutableStateFlow<MeState>(MeState.Idle)
+
+    val meState: StateFlow<MeState> =
+        _meState
+
+    fun getCurrentUser() {
+
+        viewModelScope.launch {
+
+            _meState.value = MeState.Loading
+
+            try {
+
+                val response =
+                    repository.getCurrentUser()
+
+                _meState.value =
+                    MeState.Success(
+                        username = response.username,
+                        role = response.role
+                    )
+
+            } catch (e: Exception) {
+
+                _meState.value =
+                    MeState.Error(
+                        e.message ?: "Không thể lấy thông tin người dùng"
+                    )
+            }
+        }
+    }
+
+    fun resetMeState() {
+        _meState.value = MeState.Idle
     }
 }
