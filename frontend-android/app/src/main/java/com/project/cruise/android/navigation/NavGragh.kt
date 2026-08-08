@@ -288,9 +288,15 @@ fun NavGraph() {
         composable(
             Routes.PASSENGER_DASHBOARD
         ) {
-
             Dashboard(
-                viewModel = viewModel
+                viewModel = viewModel,
+                onLogout = {
+                    // 🟢 Điều hướng về màn hình Login và xóa sạch lịch sử Navigation (Backstack)
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(0) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
             )
         }
     }

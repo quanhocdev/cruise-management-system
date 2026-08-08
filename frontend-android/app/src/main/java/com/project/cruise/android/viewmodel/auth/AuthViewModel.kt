@@ -317,4 +317,23 @@ class AuthViewModel(
     fun resetMeState() {
         _meState.value = MeState.Idle
     }
+    // =====================================================
+    // LOGOUT
+    // =====================================================
+
+    fun logout(onLogoutSuccess: () -> Unit) {
+        viewModelScope.launch {
+            // 1. Xóa token lưu trong SharedPreferences / DataStore
+            repository.logout()
+
+            // 2. Reset toàn bộ các StateAuth về Idle
+            resetLoginState()
+            resetRegisterState()
+            resetVerifyOtpState()
+            resetMeState()
+
+            // 3. Thực thi callback chuyển màn hình
+            onLogoutSuccess()
+        }
+    }
 }
