@@ -32,7 +32,6 @@ public class SecurityConfig {
             )
 
             .authorizeHttpRequests(authorize -> authorize
-
                 .requestMatchers(HttpMethod.OPTIONS, "/**")
                 .permitAll()
 
@@ -42,34 +41,35 @@ public class SecurityConfig {
                 )
                 .permitAll()
 
-                .requestMatchers(
-                    HttpMethod.POST,
-                    "/api/v1/ports"
-                )
+                // Port management
+                .requestMatchers(HttpMethod.POST, "/api/v1/ports")
                 .hasAnyRole("ADMIN", "SCHEDULER")
 
-                .requestMatchers(
-                    HttpMethod.PUT,
-                    "/api/v1/ports/**"
-                )
+                .requestMatchers(HttpMethod.PUT, "/api/v1/ports/**")
                 .hasAnyRole("ADMIN", "SCHEDULER")
 
-                .requestMatchers(
-                    HttpMethod.PATCH,
-                    "/api/v1/ports/**"
-                )
+                .requestMatchers(HttpMethod.PATCH, "/api/v1/ports/**")
                 .hasAnyRole("ADMIN", "SCHEDULER")
 
-                .requestMatchers(
-                    HttpMethod.GET,
-                    "/api/v1/ports/**"
-                )
+                .requestMatchers(HttpMethod.GET, "/api/v1/ports/**")
+                .authenticated()
+
+                // Cruise management
+                .requestMatchers(HttpMethod.POST, "/api/v1/cruises")
+                .hasRole("ADMIN")
+
+                .requestMatchers(HttpMethod.PUT, "/api/v1/cruises/**")
+                .hasRole("ADMIN")
+
+                .requestMatchers(HttpMethod.PATCH, "/api/v1/cruises/**")
+                .hasRole("ADMIN")
+
+                .requestMatchers(HttpMethod.GET, "/api/v1/cruises/**")
                 .authenticated()
 
                 .anyRequest()
                 .authenticated()
             )
-
             .oauth2ResourceServer(resourceServer -> resourceServer
                 .bearerTokenResolver(bearerTokenResolver)
                 .jwt(jwt -> jwt
