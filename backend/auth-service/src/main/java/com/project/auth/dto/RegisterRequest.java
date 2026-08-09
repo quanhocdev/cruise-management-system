@@ -1,10 +1,10 @@
-package com.project.auth.dto.auth;
+package com.project.auth.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public class RegisterRequestDTO {
+public class RegisterRequest {
 
     @NotBlank(message = "Tài khoản không được để trống")
     @Size(min = 8, max = 20, message = "Tài khoản phải từ 8 đến 20 ký tự")
@@ -19,10 +19,10 @@ public class RegisterRequestDTO {
 
     private String fullName;
 
-    public RegisterRequestDTO() {
+    public RegisterRequest() {
     }
 
-    public RegisterRequestDTO(String username, String password, String email, String fullName) {
+    public RegisterRequest(String username, String password, String email, String fullName) {
         this.username = username;
         this.password = password;
         this.email = email;

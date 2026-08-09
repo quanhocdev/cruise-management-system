@@ -1,13 +1,13 @@
-package com.project.auth.controller.auth;
+package com.project.auth.controller;
 
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.project.auth.dto.auth.RegisterRequestDTO;
-import com.project.auth.dto.auth.RegisterResponseDTO;
-import com.project.auth.dto.auth.VerifyOtpRequestDTO;
+import com.project.auth.dto.RegisterRequest;
+import com.project.auth.dto.RegisterResponse;
+import com.project.auth.dto.VerifyOtpRequest;
 import com.project.auth.service.AuthService;
 
 import jakarta.validation.Valid;
@@ -26,8 +26,8 @@ public class RegisterController {
      * API ĐĂNG KÝ TÀI KHOẢN
      */
     @PostMapping("/register")
-    public ResponseEntity<RegisterResponseDTO> register(@Valid @RequestBody RegisterRequestDTO request) {
-        RegisterResponseDTO response = authService.register(request);
+    public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
+        RegisterResponse response = authService.register(request);
         return ResponseEntity.ok(response);
     }
 
@@ -35,7 +35,7 @@ public class RegisterController {
      * API XÁC THỰC EMAIL
      */
     @PostMapping("/verify-email")
-    public ResponseEntity<Map<String, String>> verifyEmail(@Valid @RequestBody VerifyOtpRequestDTO request) {
+    public ResponseEntity<Map<String, String>> verifyEmail(@Valid @RequestBody VerifyOtpRequest request) {
         authService.verifyEmail(request);
         return ResponseEntity.ok(Map.of("message", "Xác thực email thành công"));
     }

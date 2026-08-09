@@ -2,9 +2,9 @@ package com.project.auth.mapper;
 
 import org.springframework.stereotype.Component;
 
-import com.project.auth.dto.auth.RegisterRequestDTO;
-import com.project.auth.dto.auth.RegisterResponseDTO;
-import com.project.auth.dto.auth.JwtResponse;
+import com.project.auth.dto.RegisterRequest;
+import com.project.auth.dto.RegisterResponse;
+import com.project.auth.dto.JwtResponse;
 import com.project.auth.model.Users;
 import com.project.auth.model.enums.UserProvider;
 import com.project.auth.model.enums.UserRole;
@@ -16,7 +16,7 @@ public class AuthMapper {
     /**
      * Map từ RegisterRequestDTO sang Users entity (đã encode password)
      */
-    public Users toUserEntity(RegisterRequestDTO request, String encodedPassword) {
+    public Users toUserEntity(RegisterRequest request, String encodedPassword) {
         Users user = new Users();
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
@@ -31,8 +31,8 @@ public class AuthMapper {
     /**
      * Map từ Users entity và thông báo sang RegisterResponseDTO
      */
-    public RegisterResponseDTO toRegisterResponseDTO(Users user, String message) {
-        return new RegisterResponseDTO(
+    public RegisterResponse toRegisterResponseDTO(Users user, String message) {
+        return new RegisterResponse(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),

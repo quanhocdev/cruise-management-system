@@ -5,11 +5,11 @@ import java.util.Random;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import com.project.auth.dto.auth.LoginRequestDTO;
-import com.project.auth.dto.auth.RegisterRequestDTO;
-import com.project.auth.dto.auth.RegisterResponseDTO;
-import com.project.auth.dto.auth.VerifyOtpRequestDTO;
+import com.project.auth.service.mail.MailService;
+import com.project.auth.dto.LoginRequest;
+import com.project.auth.dto.RegisterRequest;
+import com.project.auth.dto.RegisterResponse;
+import com.project.auth.dto.VerifyOtpRequest;
 import com.project.auth.exception.AppException;
 import com.project.auth.mapper.AuthMapper;
 import com.project.auth.model.Users;
@@ -48,7 +48,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public RegisterResponseDTO register(RegisterRequestDTO request) {
+    public RegisterResponse register(RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new AppException("Username đã tồn tại", HttpStatus.BAD_REQUEST);
         }
@@ -84,7 +84,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public Users login(LoginRequestDTO request) {
+    public Users login(LoginRequest request) {
         Users user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new AppException("Tài khoản hoặc mật khẩu không chính xác", HttpStatus.UNAUTHORIZED));
 
@@ -130,7 +130,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void verifyEmail(VerifyOtpRequestDTO request) {
+    public void verifyEmail(VerifyOtpRequest request) {
         String storedOtp = redisService.getOtp(request.getUserId());
 
         if (storedOtp == null) {

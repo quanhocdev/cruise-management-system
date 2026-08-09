@@ -1,8 +1,8 @@
-package com.project.auth.dto.auth;
+package com.project.auth.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
-public class LoginRequestDTO {
+public class LoginRequest{
 
     @NotBlank(message = "Tài khoản không được để trống")
     private String username;
@@ -10,10 +10,10 @@ public class LoginRequestDTO {
     @NotBlank(message = "Mật khẩu không được để trống")
     private String password;
 
-    public LoginRequestDTO() {
+    public LoginRequest() {
     }
 
-    public LoginRequestDTO(String username, String password) {
+    public LoginRequest(String username, String password) {
         this.username = username;
         this.password = password;
     }

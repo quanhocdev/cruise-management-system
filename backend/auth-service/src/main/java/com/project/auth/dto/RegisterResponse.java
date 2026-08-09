@@ -1,20 +1,20 @@
-package com.project.auth.dto.auth;
+package com.project.auth.dto;
 
-public class RegisterResponseDTO {
+public class RegisterResponse {
 
     private Long id;
     private String username;
     private String email;
     private String message;
 
-    public RegisterResponseDTO() {
+    public RegisterResponse() {
     }
 
-    public RegisterResponseDTO(String message) {
+    public RegisterResponse(String message) {
         this.message = message;
     }
 
-    public RegisterResponseDTO(Long id, String username, String email, String message) {
+    public RegisterResponse(Long id, String username, String email, String message) {
         this.id = id;
         this.username = username;
         this.email = email;
