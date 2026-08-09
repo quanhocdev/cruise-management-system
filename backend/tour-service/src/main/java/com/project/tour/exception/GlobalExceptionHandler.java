@@ -80,6 +80,23 @@ public class GlobalExceptionHandler {
             .body(response);
     }
 
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<ApiErrorResponse> handleDuplicateResource(
+        DuplicateResourceException exception,
+        HttpServletRequest request
+    ) {
+        ApiErrorResponse response = buildResponse(
+            HttpStatus.CONFLICT,
+            exception.getMessage(),
+            request.getRequestURI(),
+            null
+        );
+
+        return ResponseEntity
+            .status(HttpStatus.CONFLICT)
+            .body(response);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleUnexpectedException(
         Exception exception,
