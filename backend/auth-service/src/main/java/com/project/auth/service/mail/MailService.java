@@ -1,4 +1,4 @@
-package com.project.auth.service;
+package com.project.auth.service.mail;
 
 public interface MailService {
 

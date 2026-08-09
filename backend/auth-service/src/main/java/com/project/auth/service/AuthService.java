@@ -1,20 +1,18 @@
 package com.project.auth.service;
 
-import com.project.auth.dto.auth.LoginRequestDTO;
-import com.project.auth.dto.auth.RegisterRequestDTO;
-import com.project.auth.dto.auth.RegisterResponseDTO;
-import com.project.auth.dto.auth.VerifyOtpRequestDTO;
+import com.project.auth.dto.LoginRequest;
+import com.project.auth.dto.RegisterRequest;
+import com.project.auth.dto.RegisterResponse;
+import com.project.auth.dto.VerifyOtpRequest;
 import com.project.auth.model.Users;
-import com.project.auth.dto.auth.VerifyOtpRequestDTO;
 
 public interface AuthService {
 
-    RegisterResponseDTO register(RegisterRequestDTO request);
+    RegisterResponse register(RegisterRequest request);
 
-    Users login(LoginRequestDTO request);
+    Users login(LoginRequest request);
 
     Users refresh(String refreshToken);
 
-    void verifyEmail(VerifyOtpRequestDTO request);
-
+    void verifyEmail(VerifyOtpRequest request);
 }

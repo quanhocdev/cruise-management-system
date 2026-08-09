@@ -1,4 +1,4 @@
-package com.project.auth.service;
+package com.project.auth.service.mail;
 
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -6,12 +6,12 @@ import org.springframework.stereotype.Service;
 
 
 @Service
-public class MailServiceImpl implements MailService {
+public class MailServiceImpls implements MailService {
 
     private final JavaMailSender mailSender;
 
 
-    public MailServiceImpl(JavaMailSender mailSender) {
+    public MailServiceImpls(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
 

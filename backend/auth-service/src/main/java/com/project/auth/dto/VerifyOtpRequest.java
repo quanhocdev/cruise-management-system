@@ -1,6 +1,6 @@
-package com.project.auth.dto.auth;
+package com.project.auth.dto;
 
-public class VerifyOtpRequestDTO {
+public class VerifyOtpRequest {
 
     private Long userId;
     private String otp;

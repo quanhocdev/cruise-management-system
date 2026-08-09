@@ -35,25 +35,21 @@ public class JwtConfig {
         return new ImmutableSecret<>(getSecretKey());
     }
 
+    // Ký mã hóa JWT HS256
     @Bean
     public JwtEncoder jwtEncoder(JWKSource<SecurityContext> jwkSource) {
         return new NimbusJwtEncoder(jwkSource);
     }
 
-    // @Bean
-    // public JwtDecoder jwtDecoder() {
-    //     return NimbusJwtDecoder.withSecretKey(getSecretKey())
-    //             .macAlgorithm(MacAlgorithm.HS256)
-    //             .build();
-                
-    // }
+
+    // Giải mã JWT và xác thực thời gian hết hạn
     @Bean
     public JwtDecoder jwtDecoder() {
         NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withSecretKey(getSecretKey())
                 .macAlgorithm(MacAlgorithm.HS256)
                 .build();
 
-        // BỎ 60 GIÂY BÙ TRỄ (Cài Clock Skew = 0)
+        // Cài Clock Skew = 0
         JwtTimestampValidator timestampValidator = new JwtTimestampValidator(Duration.ZERO);
         jwtDecoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(timestampValidator));
 

@@ -68,13 +68,13 @@ public String generateRefreshToken(Users user) {
         return jwtDecoder.decode(token).getSubject();
     }
 
-    // 🟢 HÀM BỔ SUNG: Trích xuất jti (JWT ID) từ Token
+    // Trích xuất jti (JWT ID) từ Token
     public String extractJti(String token) {
         Jwt jwt = jwtDecoder.decode(token);
         return jwt.getId();
     }
 
-    // 🟢 HÀM BỔ SUNG: Trích xuất ngày hết hạn dạng Instant từ Token
+    // Trích xuất ngày hết hạn dạng Instant từ Token
     public Instant extractExpiration(String token) {
         Jwt jwt = jwtDecoder.decode(token);
         return jwt.getExpiresAt();

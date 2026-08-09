@@ -1,4 +1,4 @@
-package com.project.auth.dto.auth;
+package com.project.auth.dto;
 
 public class JwtResponse {
 
