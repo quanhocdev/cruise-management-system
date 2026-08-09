@@ -10,7 +10,9 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import java.time.Duration;
 
+import com.project.auth.service.redis.TokenRedisService;
 import com.project.auth.dto.auth.JwtResponse;
 import com.project.auth.dto.auth.LoginRequestDTO;
 import com.project.auth.dto.auth.RegisterRequestDTO;
@@ -19,8 +21,6 @@ import com.project.auth.dto.auth.VerifyOtpRequestDTO;
 import com.project.auth.model.Users;
 import com.project.auth.service.AuthService;
 import com.project.auth.service.JwtService;
-import com.project.auth.service.auth.RefreshTokenService;
-
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -30,14 +30,18 @@ import jakarta.validation.Valid;
 public class AuthController {
 
     private final AuthService authService;
-    private final JwtService jwtService;
-    private final RefreshTokenService refreshTokenService;
+private final JwtService jwtService;
+private final TokenRedisService tokenRedisService;
 
-    public AuthController(AuthService authService, JwtService jwtService, RefreshTokenService refreshTokenService) {
-        this.authService = authService;
-        this.jwtService = jwtService;
-        this.refreshTokenService = refreshTokenService;
-    }
+public AuthController(
+        AuthService authService,
+        JwtService jwtService,
+        TokenRedisService tokenRedisService
+) {
+    this.authService = authService;
+    this.jwtService = jwtService;
+    this.tokenRedisService = tokenRedisService;
+}
 
     /**
      * API ĐĂNG KÝ TÀI KHOẢN
@@ -65,11 +69,35 @@ public class AuthController {
             String accessToken = jwtService.generateAccessToken(user);
             String refreshToken = jwtService.generateRefreshToken(user);
 
-            // 🟢 LƯU REFRESH TOKEN VÀO DATABASE
-            String jti = jwtService.extractJti(refreshToken);
-            Instant expiresAt = jwtService.extractExpiration(refreshToken);
-            refreshTokenService.saveRefreshToken(user.getId().toString(), jti, user.getRole(), expiresAt);
+// Lưu ACCESS TOKEN vào Redis whitelist
+String accessJti = jwtService.extractJti(accessToken);
+Instant accessExpiresAt = jwtService.extractExpiration(accessToken);
 
+Duration accessTtl = Duration.between(
+        Instant.now(),
+        accessExpiresAt
+);
+
+tokenRedisService.saveAccessToken(
+        accessJti,
+        user.getId(),
+        accessTtl
+);
+
+// Lưu REFRESH TOKEN vào Redis whitelist
+String refreshJti = jwtService.extractJti(refreshToken);
+Instant refreshExpiresAt = jwtService.extractExpiration(refreshToken);
+
+Duration refreshTtl = Duration.between(
+        Instant.now(),
+        refreshExpiresAt
+);
+
+tokenRedisService.saveRefreshToken(
+        refreshJti,
+        user.getId(),
+        refreshTtl
+);
             ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
                     .httpOnly(true)
                     .secure(false) // Bật true khi deploy HTTPS
@@ -139,6 +167,22 @@ public ResponseEntity<?> refresh(HttpServletRequest request) {
 
         // Chỉ tạo ACCESS TOKEN mới
         String newAccessToken = jwtService.generateAccessToken(user);
+
+        // Lưu ACCESS JTI mới vào Redis whitelist
+String newAccessJti = jwtService.extractJti(newAccessToken);
+Instant newAccessExpiresAt =
+        jwtService.extractExpiration(newAccessToken);
+
+Duration newAccessTtl = Duration.between(
+        Instant.now(),
+        newAccessExpiresAt
+);
+
+tokenRedisService.saveAccessToken(
+        newAccessJti,
+        user.getId(),
+        newAccessTtl
+);
 
         ResponseCookie newAccessCookie = ResponseCookie
                 .from("accessToken", newAccessToken)
@@ -219,12 +263,70 @@ public ResponseEntity<?> refresh(HttpServletRequest request) {
      * API ĐĂNG XUẤT (Xóa sạch Cookie trên Browser & Revoke Token ở DB)
      */
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(Authentication authentication) {
-        if (authentication != null && authentication.isAuthenticated()) {
-            // Xóa Refresh Token trong Database nếu user đã xác thực
-            String username = authentication.getName();
-            // authService/refreshTokenService dọn dẹp theo UserId/Username
+public ResponseEntity<?> logout(
+        Authentication authentication,
+        HttpServletRequest request
+) {
+        String accessToken = null;
+String refreshToken = null;
+
+// Lấy token từ Cookie
+if (request.getCookies() != null) {
+    for (Cookie cookie : request.getCookies()) {
+
+        if ("accessToken".equals(cookie.getName())) {
+            accessToken = cookie.getValue();
         }
+
+        if ("refreshToken".equals(cookie.getName())) {
+            refreshToken = cookie.getValue();
+        }
+    }
+}
+
+// Nếu không có access token trong cookie,
+// thử lấy từ Authorization header
+if (accessToken == null || accessToken.isBlank()) {
+
+    String authHeader =
+            request.getHeader(HttpHeaders.AUTHORIZATION);
+
+    if (authHeader != null &&
+            authHeader.startsWith("Bearer ")) {
+
+        accessToken = authHeader.substring(7);
+    }
+}
+
+// Xóa Access Token khỏi Redis whitelist
+if (accessToken != null && !accessToken.isBlank()) {
+
+    try {
+        String accessJti = jwtService.extractJti(accessToken);
+
+        if (accessJti != null) {
+            tokenRedisService.deleteAccessToken(accessJti);
+        }
+
+    } catch (Exception ignored) {
+        // Token không hợp lệ thì vẫn tiếp tục xóa cookie
+    }
+}
+
+// Xóa Refresh Token khỏi Redis whitelist
+if (refreshToken != null && !refreshToken.isBlank()) {
+
+    try {
+        String refreshJti = jwtService.extractJti(refreshToken);
+
+        if (refreshJti != null) {
+            tokenRedisService.deleteRefreshToken(refreshJti);
+        }
+
+    } catch (Exception ignored) {
+        // Token không hợp lệ thì vẫn tiếp tục logout
+    }
+}
 
         ResponseCookie cleanAccessCookie = ResponseCookie.from("accessToken", "")
                 .httpOnly(true)
