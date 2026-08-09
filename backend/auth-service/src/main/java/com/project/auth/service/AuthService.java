@@ -5,7 +5,6 @@ import com.project.auth.dto.auth.RegisterRequestDTO;
 import com.project.auth.dto.auth.RegisterResponseDTO;
 import com.project.auth.dto.auth.VerifyOtpRequestDTO;
 import com.project.auth.model.Users;
-import com.project.auth.dto.auth.VerifyOtpRequestDTO;
 
 public interface AuthService {
 
@@ -16,5 +15,4 @@ public interface AuthService {
     Users refresh(String refreshToken);
 
     void verifyEmail(VerifyOtpRequestDTO request);
-
 }
