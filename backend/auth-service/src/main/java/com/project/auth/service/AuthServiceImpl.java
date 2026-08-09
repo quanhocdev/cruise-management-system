@@ -13,6 +13,7 @@ import com.project.auth.model.enums.UserStatus;
 import com.project.auth.model.enums.UserProvider;
 import com.project.auth.repository.UserRepository;
 import com.project.auth.service.redis.RedisService;
+import com.project.auth.service.redis.TokenRedisService;
 
 @Service
 public class AuthServiceImpl implements AuthService{
@@ -22,6 +23,7 @@ private final PasswordEncoder passwordEncoder;
 private final JwtService jwtService;
 private final RedisService redisService;
 private final MailService mailService;
+private final TokenRedisService tokenRedisService;
 
 
 public AuthServiceImpl(
@@ -29,13 +31,15 @@ public AuthServiceImpl(
         PasswordEncoder passwordEncoder,
         JwtService jwtService,
         RedisService redisService,
-        MailService mailService
+        MailService mailService,
+        TokenRedisService tokenRedisService
 ) {
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
     this.jwtService = jwtService;
     this.redisService = redisService;
     this.mailService = mailService;
+    this.tokenRedisService = tokenRedisService;
 }
     /**
      * Khách ghé thăm (GUEST) tự đăng ký tài khoản -> Chuyển thành Hành khách (PASSENGER)
@@ -139,21 +143,46 @@ public AuthServiceImpl(
 }
 
     public Users refresh(String refreshToken) {
-        if (refreshToken == null || !jwtService.isRefreshToken(refreshToken)) {
-            throw new RuntimeException("Refresh Token không hợp lệ hoặc đã hết hạn");
-        }
 
-        String username = jwtService.extractUsername(refreshToken);
-
-        Users user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
-
-        if (user.getStatus() != UserStatus.ACTIVE) {
-            throw new RuntimeException("Tài khoản đã bị khóa");
-        }
-
-        return user;
+    // 1. Kiểm tra JWT Refresh Token
+    if (refreshToken == null || !jwtService.isRefreshToken(refreshToken)) {
+        throw new RuntimeException(
+                "Refresh Token không hợp lệ hoặc đã hết hạn"
+        );
     }
+
+    // 2. Lấy JTI của Refresh Token
+    String refreshJti = jwtService.extractJti(refreshToken);
+
+    if (refreshJti == null || refreshJti.isBlank()) {
+        throw new RuntimeException(
+                "Refresh Token không chứa JTI"
+        );
+    }
+
+    // 3. Kiểm tra JTI có nằm trong Redis whitelist không
+    if (!tokenRedisService.existsRefreshToken(refreshJti)) {
+        throw new RuntimeException(
+                "Refresh Token đã bị thu hồi hoặc không tồn tại"
+        );
+    }
+
+    // 4. Lấy username từ JWT
+    String username = jwtService.extractUsername(refreshToken);
+
+    // 5. Tìm User trong Database
+    Users user = userRepository.findByUsername(username)
+            .orElseThrow(() ->
+                    new RuntimeException("Người dùng không tồn tại")
+            );
+
+    // 6. Kiểm tra trạng thái User
+    if (user.getStatus() != UserStatus.ACTIVE) {
+        throw new RuntimeException("Tài khoản đã bị khóa");
+    }
+
+    return user;
+}
     @Override
 public void verifyEmail(VerifyOtpRequestDTO request) {
 

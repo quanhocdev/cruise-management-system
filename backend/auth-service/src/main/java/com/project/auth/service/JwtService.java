@@ -34,34 +34,35 @@ public class JwtService {
     }
 
     public String generateAccessToken(Users user) {
-        Instant now = Instant.now();
+    Instant now = Instant.now();
 
-        JwtClaimsSet claims = JwtClaimsSet.builder()
-                .subject(user.getUsername())
-                .issuedAt(now)
-                .expiresAt(now.plus(accessTokenExpiration, ChronoUnit.MILLIS))
-                .claim("scope", user.getRole().name())
-                .claim("userId", user.getId())
-                .claim("email", user.getEmail())
-                .claim("tokenType", "ACCESS")
-                .build();
+    JwtClaimsSet claims = JwtClaimsSet.builder()
+            .id(UUID.randomUUID().toString()) // JTI cho Access Token
+            .subject(user.getUsername())
+            .issuedAt(now)
+            .expiresAt(now.plus(accessTokenExpiration, ChronoUnit.MILLIS))
+            .claim("scope", user.getRole().name())
+            .claim("userId", user.getId())
+            .claim("email", user.getEmail())
+            .claim("tokenType", "ACCESS")
+            .build();
 
-        return encodeToken(claims);
-    }
+    return encodeToken(claims);
+}
 
-    public String generateRefreshToken(Users user) {
-        Instant now = Instant.now();
+public String generateRefreshToken(Users user) {
+    Instant now = Instant.now();
 
-        JwtClaimsSet claims = JwtClaimsSet.builder()
-                .id(UUID.randomUUID().toString()) // 🟢 BẮT BUỘC: Tạo jti ngẫu nhiên cho Refresh Token
-                .subject(user.getUsername())
-                .issuedAt(now)
-                .expiresAt(now.plus(refreshTokenExpiration, ChronoUnit.MILLIS))
-                .claim("tokenType", "REFRESH")
-                .build();
+    JwtClaimsSet claims = JwtClaimsSet.builder()
+            .id(UUID.randomUUID().toString()) // JTI cho Refresh Token
+            .subject(user.getUsername())
+            .issuedAt(now)
+            .expiresAt(now.plus(refreshTokenExpiration, ChronoUnit.MILLIS))
+            .claim("tokenType", "REFRESH")
+            .build();
 
-        return encodeToken(claims);
-    }
+    return encodeToken(claims);
+}
 
     public String extractUsername(String token) {
         return jwtDecoder.decode(token).getSubject();
