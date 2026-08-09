@@ -5,14 +5,9 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-import java.lang.annotation.Native;
 import java.math.BigDecimal;
 
 public record CreatePortRequest(
-    
-    @NotBlank(message = "Port code is required")
-    @Size(max = 20, message = "Port code must not exceed 20 characters")
-    String code,
 
     @NotBlank(message = "Port name is required")
     @Size(max = 150, message = "Port name must not exceed 150 characters")
@@ -37,7 +32,7 @@ public record CreatePortRequest(
         value = "90.0",
         message = "Latitude must be less or equal to 90"
     )
-    BigDecimal Latitude,
+    BigDecimal latitude,
 
     @DecimalMin(
         value = "-180.0",
@@ -47,8 +42,8 @@ public record CreatePortRequest(
         value = "180.0",
         message = "Longitude must be less or equal to 180"
     )
-    BigDecimal Longitude,
+    BigDecimal longitude,
 
     String description
-)   {
+) {
 }

@@ -1,4 +1,4 @@
-package com.project.tour.port;
+package com.project.tour.dto.port;
 
 import com.project.tour.entity.enums.PortStatus;
 
@@ -8,7 +8,6 @@ import java.util.UUID;
 
 public record PortResponse(
     UUID id,
-    String code,
     String name,
     String city,
     String country,
@@ -19,5 +18,5 @@ public record PortResponse(
     PortStatus status,
     LocalDateTime createdAt,
     LocalDateTime updatedAt
-)   {
+) {
 }

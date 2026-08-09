@@ -7,26 +7,12 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import javax.annotation.processing.Generated;
-
 @Entity
-@Table(
-    name = "ports",
-    uniqueConstraint = {
-        @UniqueConstraint(
-            name = "uk_ports_code",
-            columnNames = "code"
-        )
-    }
-)
-
+@Table(name = "ports")
 public class Port {
     @Id
-    @GeneratedValue(strategy = GeneratedType.UUID)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @Column(nullable = false, length = 20)
-    private String code;
 
     @Column(nullable = false, length = 150)
     private String name;
@@ -40,10 +26,10 @@ public class Port {
     @Column(length = 255)
     private String address;
 
-    @Column(precicion = 10, scale = 7)
+    @Column(precision = 10, scale = 7)
     private BigDecimal latitude;
 
-    @Column(precicion = 10, scale = 7)
+    @Column(precision = 10, scale = 7)
     private BigDecimal longitude;
 
     @Column(columnDefinition = "TEXT")
@@ -53,7 +39,7 @@ public class Port {
     @Column(nullable = false, length = 20)
     private PortStatus status = PortStatus.ACTIVE;
 
-    @Column(nullable = false, updataple = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(nullable = false)
@@ -66,7 +52,7 @@ public class Port {
         createdAt = now;
         updatedAt = now;
 
-        if (status = null)  {
+        if (status == null)  {
             status = PortStatus.ACTIVE;
         }
     }
@@ -76,20 +62,12 @@ public class Port {
         updatedAt = LocalDateTime.now();
     }
 
-    public UUID getID() {
+    public UUID getId() {
         return id;
     }
 
-    public void setID(UUID id)  {
+    public void setId(UUID id)  {
         this.id = id;
-    }
-
-    public String getCode()    {
-        return code;
-    }
-
-    public void setCode(String code)    {
-        this.code = code;
     }
 
     public String getName() {
@@ -152,7 +130,7 @@ public class Port {
         return status;
     }
 
-    public void setStatus() {
+    public void setStatus(PortStatus status) {
         this.status = status;
     }
 

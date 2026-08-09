@@ -1,4 +1,4 @@
-package com.project.tour_service;
+package com.project.tour;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
