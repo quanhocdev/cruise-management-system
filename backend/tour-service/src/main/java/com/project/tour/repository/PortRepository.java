@@ -1,7 +1,7 @@
 package com.project.tour.repository;
 
-import com.project.tour.entity.Port;
-import com.project.tour.entity.enums.PortStatus;
+import com.project.tour.model.Port;
+import com.project.tour.model.enums.PortStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

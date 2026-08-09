@@ -1,6 +1,6 @@
 package com.project.tour.dto.port;
 
-import com.project.tour.entity.enums.PortStatus;
+import com.project.tour.model.enums.PortStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

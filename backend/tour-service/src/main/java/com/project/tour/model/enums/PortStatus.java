@@ -1,4 +1,4 @@
-package com.project.tour.entity.enums;
+package com.project.tour.model.enums;
 
 public enum PortStatus {
     ACTIVE,

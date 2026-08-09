@@ -2,8 +2,8 @@ package com.project.tour.service;
 
 import com.project.tour.dto.port.CreatePortRequest;
 import com.project.tour.dto.port.PortResponse;
-import com.project.tour.entity.Port;
-import com.project.tour.entity.enums.PortStatus;
+import com.project.tour.model.Port;
+import com.project.tour.model.enums.PortStatus;
 import com.project.tour.exception.ResourceNotFoundException;
 import com.project.tour.repository.PortRepository;
 import org.junit.jupiter.api.BeforeEach;
