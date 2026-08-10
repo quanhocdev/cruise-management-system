@@ -7,6 +7,7 @@ import com.project.tour.exception.DuplicateResourceException;
 import com.project.tour.exception.ResourceNotFoundException;
 import com.project.tour.model.RoomType;
 import com.project.tour.repository.RoomTypeRepository;
+import com.project.tour.repository.RoomRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,11 +30,14 @@ class RoomTypeServiceTests {
     @Mock
     private RoomTypeRepository repository;
 
+    @Mock
+    private RoomRepository roomRepository;
+
     private RoomTypeService service;
 
     @BeforeEach
     void setUp() {
-        service = new RoomTypeService(repository);
+        service = new RoomTypeService(repository, roomRepository);
     }
 
     @Test

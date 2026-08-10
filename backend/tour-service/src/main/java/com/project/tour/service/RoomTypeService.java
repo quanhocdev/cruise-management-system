@@ -7,6 +7,7 @@ import com.project.tour.exception.DuplicateResourceException;
 import com.project.tour.exception.ResourceNotFoundException;
 import com.project.tour.model.RoomType;
 import com.project.tour.repository.RoomTypeRepository;
+import com.project.tour.repository.RoomRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,9 +19,14 @@ import java.util.UUID;
 public class RoomTypeService {
 
     private final RoomTypeRepository roomTypeRepository;
+    private final RoomRepository roomRepository;
 
-    public RoomTypeService(RoomTypeRepository roomTypeRepository) {
+    public RoomTypeService(
+        RoomTypeRepository roomTypeRepository,
+        RoomRepository roomRepository
+    ) {
         this.roomTypeRepository = roomTypeRepository;
+        this.roomRepository = roomRepository;
     }
 
     public RoomTypeResponse createRoomType(CreateRoomTypeRequest request) {
@@ -73,6 +79,13 @@ public class RoomTypeService {
 
     public void deleteRoomType(UUID id) {
         RoomType roomType = findRoomTypeById(id);
+
+        if (roomRepository.existsByRoomType_Id(id)) {
+            throw new IllegalArgumentException(
+                "Room type cannot be deleted because it is used by rooms"
+            );
+        }
+
         roomTypeRepository.delete(roomType);
     }
 
