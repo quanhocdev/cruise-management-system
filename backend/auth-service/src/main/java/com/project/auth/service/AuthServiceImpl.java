@@ -90,8 +90,22 @@ public class AuthServiceImpl implements AuthService {
             throw new AppException("Tài khoản hoặc mật khẩu không chính xác", HttpStatus.UNAUTHORIZED);
         }
 
-        if (user.getStatus() != UserStatus.ACTIVE) {
-            throw new AppException("Tài khoản đã bị khóa", HttpStatus.FORBIDDEN);
+        if (user.getStatus() == UserStatus.BLOCKED) {
+            throw new AppException(
+                    "Tài khoản đã bị khóa",
+                    HttpStatus.FORBIDDEN);
+        }
+
+        if (user.getStatus() == UserStatus.INVITED) {
+            throw new AppException(
+                    "Tài khoản chưa được kích hoạt",
+                    HttpStatus.FORBIDDEN);
+        }
+
+        if (user.getStatus() == UserStatus.INACTIVE) {
+            throw new AppException(
+                    "Tài khoản đang không hoạt động",
+                    HttpStatus.FORBIDDEN);
         }
 
         if (!user.getEnabled()) {

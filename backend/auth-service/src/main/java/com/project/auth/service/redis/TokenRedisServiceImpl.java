@@ -18,30 +18,26 @@ public class TokenRedisServiceImpl implements TokenRedisService {
     public void saveAccessToken(
             String jti,
             Long userId,
-            Duration ttl
-    ) {
+            Duration ttl) {
         String key = "auth:access:" + jti;
 
         redisTemplate.opsForValue().set(
                 key,
                 String.valueOf(userId),
-                ttl
-        );
+                ttl);
     }
 
     @Override
     public void saveRefreshToken(
             String jti,
             Long userId,
-            Duration ttl
-    ) {
+            Duration ttl) {
         String key = "auth:refresh:" + jti;
 
         redisTemplate.opsForValue().set(
                 key,
                 String.valueOf(userId),
-                ttl
-        );
+                ttl);
     }
 
     @Override
@@ -49,8 +45,7 @@ public class TokenRedisServiceImpl implements TokenRedisService {
         String key = "auth:access:" + jti;
 
         return Boolean.TRUE.equals(
-                redisTemplate.hasKey(key)
-        );
+                redisTemplate.hasKey(key));
     }
 
     @Override
@@ -58,8 +53,7 @@ public class TokenRedisServiceImpl implements TokenRedisService {
         String key = "auth:refresh:" + jti;
 
         return Boolean.TRUE.equals(
-                redisTemplate.hasKey(key)
-        );
+                redisTemplate.hasKey(key));
     }
 
     @Override
@@ -72,6 +66,39 @@ public class TokenRedisServiceImpl implements TokenRedisService {
     @Override
     public void deleteRefreshToken(String jti) {
         String key = "auth:refresh:" + jti;
+
+        redisTemplate.delete(key);
+    }
+
+    @Override
+    public void saveActivationToken(
+            String token,
+            Long userId,
+            Duration ttl) {
+        String key = "auth:activation:" + token;
+
+        redisTemplate.opsForValue().set(
+                key,
+                String.valueOf(userId),
+                ttl);
+    }
+
+    @Override
+    public Long getActivationUserId(String token) {
+        String key = "auth:activation:" + token;
+
+        String value = redisTemplate.opsForValue().get(key);
+
+        if (value == null) {
+            return null;
+        }
+
+        return Long.valueOf(value);
+    }
+
+    @Override
+    public void deleteActivationToken(String token) {
+        String key = "auth:activation:" + token;
 
         redisTemplate.delete(key);
     }
