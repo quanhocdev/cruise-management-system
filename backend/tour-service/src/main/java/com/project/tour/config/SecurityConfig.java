@@ -137,6 +137,19 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/decks/*/areas/**")
                 .authenticated()
 
+                // Policy and policy rule management
+                .requestMatchers(HttpMethod.POST, "/api/v1/policies/**")
+                .hasRole("ADMIN")
+
+                .requestMatchers(HttpMethod.PUT, "/api/v1/policies/**")
+                .hasRole("ADMIN")
+
+                .requestMatchers(HttpMethod.PATCH, "/api/v1/policies/**")
+                .hasRole("ADMIN")
+
+                .requestMatchers(HttpMethod.GET, "/api/v1/policies/**")
+                .authenticated()
+
                 .anyRequest()
                 .authenticated()
             )
