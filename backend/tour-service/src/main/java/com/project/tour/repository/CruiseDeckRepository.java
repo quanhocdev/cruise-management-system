@@ -16,6 +16,12 @@ public interface CruiseDeckRepository
         Integer deckNumber
     );
 
+    boolean existsByCruise_IdAndDeckNumberAndIdNot(
+        UUID cruiseId,
+        Integer deckNumber,
+        UUID excludedDeckId
+    );
+
     Optional<CruiseDeck> findByIdAndCruise_Id(
         UUID id,
         UUID cruiseId

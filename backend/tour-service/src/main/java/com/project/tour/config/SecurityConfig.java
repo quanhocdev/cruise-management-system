@@ -58,6 +58,31 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v1/cruises")
                 .hasRole("ADMIN")
 
+                // Cruise deck management
+                .requestMatchers(
+                    HttpMethod.POST,
+                    "/api/v1/cruises/*/decks"
+                )
+                .hasRole("ADMIN")
+
+                .requestMatchers(
+                    HttpMethod.PUT,
+                    "/api/v1/cruises/*/decks/**"
+                )
+                .hasRole("ADMIN")
+
+                .requestMatchers(
+                    HttpMethod.PATCH,
+                    "/api/v1/cruises/*/decks/**"
+                )
+                .hasRole("ADMIN")
+
+                .requestMatchers(
+                    HttpMethod.GET,
+                    "/api/v1/cruises/*/decks/**"
+                )
+                .authenticated()
+
                 .requestMatchers(HttpMethod.PUT, "/api/v1/cruises/**")
                 .hasRole("ADMIN")
 
