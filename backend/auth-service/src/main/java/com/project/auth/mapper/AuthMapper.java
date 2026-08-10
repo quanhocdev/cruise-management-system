@@ -36,8 +36,7 @@ public class AuthMapper {
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
-                message
-        );
+                message);
     }
 
     /**
@@ -48,7 +47,6 @@ public class AuthMapper {
                 accessToken,
                 refreshToken,
                 user.getUsername(),
-                user.getRole().name()
-        );
+                user.getRole().name());
     }
 }
