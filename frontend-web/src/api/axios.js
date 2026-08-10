@@ -20,7 +20,8 @@ api.interceptors.response.use(
       !originalRequest._retry &&
       !originalRequest.url.includes("/auth/login") &&
       !originalRequest.url.includes("/auth/register") &&
-      !originalRequest.url.includes("/auth/refresh")
+      !originalRequest.url.includes("/auth/refresh") &&
+      !originalRequest.url.includes("/auth/activate/")
     ) {
       originalRequest._retry = true;
 
@@ -33,7 +34,7 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         // Refresh token hết hạn / không hợp lệ
-        setUserNullAndRedirect();
+        window.location.href = "/login";
 
         return Promise.reject(refreshError);
       }

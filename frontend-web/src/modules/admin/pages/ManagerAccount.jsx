@@ -1,13 +1,16 @@
-// src/modules/admin/pages/ManagerAccount.jsx
-
 import { useState } from "react";
+import api from "../../../api/axios";
 
 export default function ManagerAccount() {
   const [form, setForm] = useState({
     username: "",
     email: "",
-    password: "",
+    role: "",
   });
+
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -18,26 +21,54 @@ export default function ManagerAccount() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log("Create staff account:", form);
+    setMessage("");
+    setError("");
+    setLoading(true);
 
-    // TODO:
-    // Gọi API tạo tài khoản nhân viên
+    try {
+      const res = await api.post("/admin/staff", {
+        username: form.username,
+        email: form.email,
+        role: form.role,
+      });
+
+      setMessage(
+        res.data?.message ||
+          "Tạo tài khoản nhân viên thành công. Email kích hoạt đã được gửi.",
+      );
+
+      setForm({
+        username: "",
+        email: "",
+        role: "",
+      });
+    } catch (err) {
+      const message =
+        err.response?.data?.message || "Không thể tạo tài khoản nhân viên.";
+
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div style={styles.page}>
       <div style={styles.container}>
         <div style={styles.header}>
-          <div>
-            <h1 style={styles.title}>Quản lý tài khoản</h1>
-            <p style={styles.subtitle}>Tạo tài khoản cho nhân viên</p>
-          </div>
+          <h1 style={styles.title}>Quản lý tài khoản</h1>
+
+          <p style={styles.subtitle}>Tạo tài khoản cho nhân viên</p>
         </div>
 
         <div style={styles.card}>
+          {message && <div style={styles.success}>{message}</div>}
+
+          {error && <div style={styles.error}>{error}</div>}
+
           <form onSubmit={handleSubmit}>
             {/* Username */}
             <div style={styles.formGroup}>
@@ -50,6 +81,8 @@ export default function ManagerAccount() {
                 onChange={handleChange}
                 placeholder="Nhập tên tài khoản"
                 required
+                minLength={3}
+                maxLength={50}
                 style={styles.input}
               />
             </div>
@@ -69,24 +102,48 @@ export default function ManagerAccount() {
               />
             </div>
 
-            {/* Password */}
+            {/* Role */}
             <div style={styles.formGroup}>
-              <label style={styles.label}>Mật khẩu</label>
+              <label style={styles.label}>Vai trò</label>
 
-              <input
-                type="password"
-                name="password"
-                value={form.password}
+              <select
+                name="role"
+                value={form.role}
                 onChange={handleChange}
-                placeholder="Nhập mật khẩu"
                 required
-                minLength={6}
                 style={styles.input}
-              />
+              >
+                <option value="">-- Chọn vai trò --</option>
+
+                <option value="SCHEDULER">Scheduler</option>
+
+                <option value="SHORE">Shore</option>
+
+                <option value="ONBOARD">Onboard</option>
+
+                <option value="CONVENIENCE">Convenience</option>
+
+                <option value="FINANCE">Finance</option>
+
+                <option value="OPERATION">Operation</option>
+              </select>
             </div>
 
-            <button type="submit" style={styles.button}>
-              Tạo tài khoản
+            <div style={styles.note}>
+              Nhân viên sẽ nhận email kích hoạt và tự thiết lập mật khẩu. Admin
+              không cần tạo mật khẩu cho nhân viên.
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                ...styles.button,
+                opacity: loading ? 0.6 : 1,
+                cursor: loading ? "not-allowed" : "pointer",
+              }}
+            >
+              {loading ? "Đang tạo..." : "Tạo tài khoản"}
             </button>
           </form>
         </div>
@@ -152,6 +209,35 @@ const styles = {
     borderRadius: "8px",
     fontSize: "15px",
     outline: "none",
+    backgroundColor: "#ffffff",
+  },
+
+  note: {
+    marginBottom: "20px",
+    padding: "12px 14px",
+    backgroundColor: "#eff6ff",
+    borderRadius: "8px",
+    color: "#1d4ed8",
+    fontSize: "14px",
+    lineHeight: "1.5",
+  },
+
+  success: {
+    marginBottom: "20px",
+    padding: "12px 14px",
+    backgroundColor: "#ecfdf5",
+    borderRadius: "8px",
+    color: "#047857",
+    fontSize: "14px",
+  },
+
+  error: {
+    marginBottom: "20px",
+    padding: "12px 14px",
+    backgroundColor: "#fef2f2",
+    borderRadius: "8px",
+    color: "#dc2626",
+    fontSize: "14px",
   },
 
   button: {
@@ -164,6 +250,5 @@ const styles = {
     color: "#ffffff",
     fontSize: "15px",
     fontWeight: "600",
-    cursor: "pointer",
   },
 };

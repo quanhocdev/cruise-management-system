@@ -10,8 +10,11 @@ import HomePage from "./modules/guest/pages/HomePage";
 import RegisterPage from "./modules/auth/pages/RegisterPage";
 import LoginPage from "./modules/auth/pages/LoginPage";
 import VerifyOtpPage from "./modules/auth/pages/VerifyOtpPage";
+import ActivatePage from "./modules/auth/pages/ActivatePage";
 
 import AdminDashboard from "./modules/admin/pages/Dashboard";
+import ManagerAccount from "./modules/admin/pages/ManagerAccount";
+
 import PassengerDashboard from "./modules/passenger/pages/Dashboard";
 import SchedulerDashboard from "./modules/scheduler/pages/Dashboard";
 import OperationDashboard from "./modules/operation/pages/Dashboard";
@@ -22,91 +25,177 @@ import FinanceDashboard from "./modules/finance/pages/Dashboard";
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
+    <BrowserRouter>
+      <AuthProvider>
         <Routes>
-          {/* GUEST */}
+          {/* =====================================================
+              ACTIVATION
+              Staff chưa đăng nhập vẫn được truy cập
+             ===================================================== */}
+          <Route path="/activate" element={<ActivatePage />} />
+
+          {/* =====================================================
+              GUEST
+             ===================================================== */}
           <Route path="/" element={<HomePage />} />
-          {/* AUTH */}
+
+          {/* =====================================================
+              AUTH
+             ===================================================== */}
           <Route path="/login" element={<LoginPage />} />
+
           <Route path="/register" element={<RegisterPage />} />
+
           <Route path="/verify-email" element={<VerifyOtpPage />} />
-          {/* ADMIN */}
+
+          {/* =====================================================
+              ADMIN
+             ===================================================== */}
           <Route
             path="/admin/*"
             element={
               <ProtectedRoute allowedRoles={["ADMIN"]}>
-                <AdminDashboard />
+                <Routes>
+                  <Route path="dashboard" element={<AdminDashboard />} />
+
+                  <Route path="accounts" element={<ManagerAccount />} />
+
+                  <Route
+                    path=""
+                    element={<Navigate to="dashboard" replace />}
+                  />
+                </Routes>
               </ProtectedRoute>
             }
           />
-          {/* PASSENGER */}
+
+          {/* =====================================================
+              PASSENGER
+             ===================================================== */}
           <Route
             path="/passenger/*"
             element={
               <ProtectedRoute allowedRoles={["PASSENGER"]}>
-                <PassengerDashboard />
+                <Routes>
+                  <Route path="dashboard" element={<PassengerDashboard />} />
+
+                  <Route
+                    path=""
+                    element={<Navigate to="dashboard" replace />}
+                  />
+                </Routes>
               </ProtectedRoute>
             }
           />
-          {/* SCHEDULER */}
+
+          {/* =====================================================
+              SCHEDULER
+             ===================================================== */}
           <Route
             path="/scheduler/*"
             element={
-              <ProtectedRoute allowedRoles={["SCHEDULE"]}>
-                <SchedulerDashboard />
+              <ProtectedRoute allowedRoles={["SCHEDULER"]}>
+                <Routes>
+                  <Route path="schedules" element={<SchedulerDashboard />} />
+
+                  <Route
+                    path=""
+                    element={<Navigate to="schedules" replace />}
+                  />
+                </Routes>
               </ProtectedRoute>
             }
           />
-          {/* OPERATION */}
+
+          {/* =====================================================
+              OPERATION
+             ===================================================== */}
           <Route
             path="/operation/*"
             element={
               <ProtectedRoute allowedRoles={["OPERATION"]}>
-                <OperationDashboard />
+                <Routes>
+                  <Route path="status" element={<OperationDashboard />} />
+
+                  <Route path="" element={<Navigate to="status" replace />} />
+                </Routes>
               </ProtectedRoute>
             }
           />
-          {/* ONBOARD */}
+
+          {/* =====================================================
+              ONBOARD
+             ===================================================== */}
           <Route
             path="/onboard/*"
             element={
               <ProtectedRoute allowedRoles={["ONBOARD"]}>
-                <OnboardDashboard />
+                <Routes>
+                  <Route path="cabins" element={<OnboardDashboard />} />
+
+                  <Route path="" element={<Navigate to="cabins" replace />} />
+                </Routes>
               </ProtectedRoute>
             }
           />
-          {/* SHORE */}
+
+          {/* =====================================================
+              SHORE
+             ===================================================== */}
           <Route
             path="/shore/*"
             element={
               <ProtectedRoute allowedRoles={["SHORE"]}>
-                <ShoreDashboard />
+                <Routes>
+                  <Route path="excursions" element={<ShoreDashboard />} />
+
+                  <Route
+                    path=""
+                    element={<Navigate to="excursions" replace />}
+                  />
+                </Routes>
               </ProtectedRoute>
             }
           />
-          {/* CONVENIENCE */}
+
+          {/* =====================================================
+              CONVENIENCE
+             ===================================================== */}
           <Route
             path="/convenience/*"
             element={
               <ProtectedRoute allowedRoles={["CONVENIENCE"]}>
-                <ConvenienceDashboard />
+                <Routes>
+                  <Route path="services" element={<ConvenienceDashboard />} />
+
+                  <Route path="" element={<Navigate to="services" replace />} />
+                </Routes>
               </ProtectedRoute>
             }
           />
-          {/* FINANCE */}
+
+          {/* =====================================================
+              FINANCE
+             ===================================================== */}
           <Route
             path="/finance/*"
             element={
               <ProtectedRoute allowedRoles={["FINANCE"]}>
-                <FinanceDashboard />
+                <Routes>
+                  <Route path="reports" element={<FinanceDashboard />} />
+
+                  <Route path="" element={<Navigate to="reports" replace />} />
+                </Routes>
               </ProtectedRoute>
             }
           />
-          {/* 404 Not Found */}
+
+          {/* =====================================================
+              404
+             ===================================================== */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
