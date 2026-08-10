@@ -1,6 +1,6 @@
-package com.project.tour.entity;
+package com.project.tour.model;
 
-import com.project.tour.entity.enums.PortStatus;
+import com.project.tour.model.enums.PortStatus;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;

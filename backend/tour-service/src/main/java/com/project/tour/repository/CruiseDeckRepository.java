@@ -1,0 +1,33 @@
+package com.project.tour.repository;
+
+import com.project.tour.model.CruiseDeck;
+import com.project.tour.model.enums.CruiseDeckStatus;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+public interface CruiseDeckRepository
+    extends JpaRepository<CruiseDeck, UUID> {
+
+    boolean existsByCruise_IdAndDeckNumber(
+        UUID cruiseId,
+        Integer deckNumber
+    );
+
+    Optional<CruiseDeck> findByIdAndCruise_Id(
+        UUID id,
+        UUID cruiseId
+    );
+
+    List<CruiseDeck> findAllByCruise_IdOrderByDeckNumberAsc(
+        UUID cruiseId
+    );
+
+    List<CruiseDeck>
+        findAllByCruise_IdAndStatusOrderByDeckNumberAsc(
+            UUID cruiseId,
+            CruiseDeckStatus status
+        );
+}

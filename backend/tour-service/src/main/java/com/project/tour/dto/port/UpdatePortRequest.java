@@ -1,6 +1,6 @@
 package com.project.tour.dto.port;
 
-import com.project.tour.entity.enums.PortStatus;
+import com.project.tour.model.enums.PortStatus;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
