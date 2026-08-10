@@ -92,6 +92,25 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/cruises/**")
                 .authenticated()
 
+                // Room type management
+                .requestMatchers(HttpMethod.POST, "/api/v1/room-types")
+                .hasRole("ADMIN")
+
+                .requestMatchers(
+                    HttpMethod.PUT,
+                    "/api/v1/room-types/**"
+                )
+                .hasRole("ADMIN")
+
+                .requestMatchers(
+                    HttpMethod.DELETE,
+                    "/api/v1/room-types/**"
+                )
+                .hasRole("ADMIN")
+
+                .requestMatchers(HttpMethod.GET, "/api/v1/room-types/**")
+                .authenticated()
+
                 .anyRequest()
                 .authenticated()
             )
