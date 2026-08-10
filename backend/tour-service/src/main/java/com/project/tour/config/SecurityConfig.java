@@ -111,6 +111,19 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/room-types/**")
                 .authenticated()
 
+                // Room management
+                .requestMatchers(HttpMethod.POST, "/api/v1/decks/*/rooms")
+                .hasRole("ADMIN")
+
+                .requestMatchers(HttpMethod.PUT, "/api/v1/decks/*/rooms/**")
+                .hasRole("ADMIN")
+
+                .requestMatchers(HttpMethod.PATCH, "/api/v1/decks/*/rooms/**")
+                .hasRole("ADMIN")
+
+                .requestMatchers(HttpMethod.GET, "/api/v1/decks/*/rooms/**")
+                .authenticated()
+
                 .anyRequest()
                 .authenticated()
             )
