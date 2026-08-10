@@ -16,7 +16,7 @@ spring:
             - id: auth-service
               uri: http://auth-service:8081
               predicates:
-                - Path=/api/auth/**
+                - Path=/api/auth/**,/api/admin/**
 
           # ==========================================
           # GLOBAL CORS

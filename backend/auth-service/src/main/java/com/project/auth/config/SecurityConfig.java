@@ -19,206 +19,191 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class SecurityConfig {
 
-    @Bean
-    public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration authConfig
-    ) throws Exception {
-        return authConfig.getAuthenticationManager();
-    }
+        @Bean
+        public AuthenticationManager authenticationManager(
+                        AuthenticationConfiguration authConfig) throws Exception {
+                return authConfig.getAuthenticationManager();
+        }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().requestMatchers(
-                "/css/**",
-                "/js/**",
-                "/images/**",
-                "/favicon.ico"
-        );
-    }
+        @Bean
+        public WebSecurityCustomizer webSecurityCustomizer() {
+                return (web) -> web.ignoring().requestMatchers(
+                                "/css/**",
+                                "/js/**",
+                                "/images/**",
+                                "/favicon.ico");
+        }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(
-            HttpSecurity http
-    ) throws Exception {
+        @Bean
+        public SecurityFilterChain securityFilterChain(
+                        HttpSecurity http) throws Exception {
 
-        http
-            // =====================================================
-            // CORS
-            // =====================================================
-            // Không xử lý CORS tại Auth Service.
-            // CORS được Gateway xử lý.
-            .csrf(csrf -> csrf.disable())
+                http
+                                // =====================================================
+                                // CORS
+                                // =====================================================
+                                // Không xử lý CORS tại Auth Service.
+                                // CORS được Gateway xử lý.
+                                .csrf(csrf -> csrf.disable())
 
-            // =====================================================
-            // STATELESS
-            // =====================================================
-            .sessionManagement(session ->
-                    session.sessionCreationPolicy(
-                            SessionCreationPolicy.STATELESS
-                    )
-            )
+                                // =====================================================
+                                // STATELESS
+                                // =====================================================
+                                .sessionManagement(session -> session.sessionCreationPolicy(
+                                                SessionCreationPolicy.STATELESS))
 
-            // =====================================================
-            // AUTHORIZATION
-            // =====================================================
-            .authorizeHttpRequests(auth -> auth
+                                // =====================================================
+                                // AUTHORIZATION
+                                // =====================================================
+                                .authorizeHttpRequests(auth -> auth
 
-                    // -------------------------------------------------
-                    // Public Auth APIs
-                    // -------------------------------------------------
-                    .requestMatchers(
-                            "/api/auth/register",
-                            "/api/auth/login",
-                            "/api/auth/verify-email",
-                            "/api/auth/refresh"
-                    ).permitAll()
+                                                // -------------------------------------------------
+                                                // Public Auth APIs
+                                                // -------------------------------------------------
+                                                .requestMatchers(
+                                                                "/api/auth/register",
+                                                                "/api/auth/login",
+                                                                "/api/auth/verify-email",
+                                                                "/api/auth/refresh",
 
-                    // -------------------------------------------------
-                    // Authenticated APIs
-                    // -------------------------------------------------
-                    .requestMatchers(
-                            "/api/auth/logout",
-                            "/api/auth/me"
-                    ).authenticated()
+                                                                // Staff activation
+                                                                "/api/auth/activate/verify",
+                                                                "/api/auth/activate/set-password")
+                                                .permitAll()
 
-                    // -------------------------------------------------
-                    // Web Pages
-                    // -------------------------------------------------
-                    .requestMatchers("/admin/**")
-                    .hasRole("ADMIN")
+                                                // -------------------------------------------------
+                                                // Authenticated APIs
+                                                // -------------------------------------------------
+                                                .requestMatchers(
+                                                                "/api/auth/logout",
+                                                                "/api/auth/me")
+                                                .authenticated()
 
-                    .requestMatchers("/shore/**")
-                    .hasRole("SHORE")
+                                                // -------------------------------------------------
+                                                // Web Pages
+                                                // -------------------------------------------------
+                                                .requestMatchers("/admin/**")
+                                                .hasRole("ADMIN")
 
-                    .requestMatchers("/onboard/**")
-                    .hasRole("ONBOARD")
+                                                .requestMatchers("/shore/**")
+                                                .hasRole("SHORE")
 
-                    .requestMatchers("/operation/**")
-                    .hasRole("OPERATION")
+                                                .requestMatchers("/onboard/**")
+                                                .hasRole("ONBOARD")
 
-                    .requestMatchers("/finance/**")
-                    .hasRole("FINANCE")
+                                                .requestMatchers("/operation/**")
+                                                .hasRole("OPERATION")
 
-                    .requestMatchers("/passenger/**")
-                    .hasRole("PASSENGER")
+                                                .requestMatchers("/finance/**")
+                                                .hasRole("FINANCE")
 
-                    // -------------------------------------------------
-                    // REST APIs
-                    // -------------------------------------------------
-                    .requestMatchers("/api/admin/**")
-                    .hasAuthority("SCOPE_ADMIN")
+                                                .requestMatchers("/passenger/**")
+                                                .hasRole("PASSENGER")
 
-                    .requestMatchers("/api/shore/**")
-                    .hasAuthority("SCOPE_SHORE")
+                                                // -------------------------------------------------
+                                                // REST APIs
+                                                // -------------------------------------------------
+                                                .requestMatchers("/api/admin/**")
+                                                .hasAuthority("SCOPE_ADMIN")
 
-                    .requestMatchers("/api/onboard/**")
-                    .hasAuthority("SCOPE_ONBOARD")
+                                                .requestMatchers("/api/shore/**")
+                                                .hasAuthority("SCOPE_SHORE")
 
-                    .requestMatchers("/api/operation/**")
-                    .hasAuthority("SCOPE_OPERATION")
+                                                .requestMatchers("/api/onboard/**")
+                                                .hasAuthority("SCOPE_ONBOARD")
 
-                    .requestMatchers("/api/finance/**")
-                    .hasAuthority("SCOPE_FINANCE")
+                                                .requestMatchers("/api/operation/**")
+                                                .hasAuthority("SCOPE_OPERATION")
 
-                    .requestMatchers("/api/passenger/**")
-                    .hasAuthority("SCOPE_PASSENGER")
+                                                .requestMatchers("/api/finance/**")
+                                                .hasAuthority("SCOPE_FINANCE")
 
-                    .anyRequest().authenticated()
-            )
+                                                .requestMatchers("/api/passenger/**")
+                                                .hasAuthority("SCOPE_PASSENGER")
 
-            // =====================================================
-            // OAUTH2 RESOURCE SERVER
-            // =====================================================
-            .oauth2ResourceServer(oauth2 -> oauth2
+                                                .anyRequest().authenticated())
 
-                    /*
-                     * Auth Service vẫn có thể nhận:
-                     *
-                     * Web:
-                     *     Cookie accessToken
-                     *
-                     * Android:
-                     *     Authorization: Bearer <token>
-                     */
-                    .bearerTokenResolver(request -> {
+                                // =====================================================
+                                // OAUTH2 RESOURCE SERVER
+                                // =====================================================
+                                .oauth2ResourceServer(oauth2 -> oauth2
 
-                        // Web - Cookie
-                        if (request.getCookies() != null) {
+                                                /*
+                                                 * Auth Service vẫn có thể nhận:
+                                                 *
+                                                 * Web:
+                                                 * Cookie accessToken
+                                                 *
+                                                 * Android:
+                                                 * Authorization: Bearer <token>
+                                                 */
+                                                .bearerTokenResolver(request -> {
 
-                            for (var cookie : request.getCookies()) {
+                                                        // Web - Cookie
+                                                        if (request.getCookies() != null) {
 
-                                if ("accessToken".equals(cookie.getName())) {
-                                    return cookie.getValue();
+                                                                for (var cookie : request.getCookies()) {
+
+                                                                        if ("accessToken".equals(cookie.getName())) {
+                                                                                return cookie.getValue();
+                                                                        }
+                                                                }
+                                                        }
+
+                                                        // Android - Authorization Header
+                                                        return new DefaultBearerTokenResolver()
+                                                                        .resolve(request);
+                                                })
+
+                                                .jwt(jwt -> jwt.jwtAuthenticationConverter(
+                                                                jwtAuthenticationConverter()))
+
+                                                .authenticationEntryPoint(
+                                                                new BearerTokenAuthenticationEntryPoint()))
+
+                                .exceptionHandling(ex -> ex.accessDeniedHandler(
+                                                new BearerTokenAccessDeniedHandler()));
+
+                return http.build();
+        }
+
+        @Bean
+        public JwtAuthenticationConverter jwtAuthenticationConverter() {
+
+                JwtGrantedAuthoritiesConverter scopeConverter = new JwtGrantedAuthoritiesConverter();
+
+                scopeConverter.setAuthoritiesClaimName("scope");
+                scopeConverter.setAuthorityPrefix("SCOPE_");
+
+                JwtGrantedAuthoritiesConverter roleConverter = new JwtGrantedAuthoritiesConverter();
+
+                roleConverter.setAuthoritiesClaimName("scope");
+                roleConverter.setAuthorityPrefix("ROLE_");
+
+                JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+
+                converter.setJwtGrantedAuthoritiesConverter(jwt -> {
+
+                        var authorities = scopeConverter.convert(jwt);
+
+                        if (authorities != null) {
+
+                                var roleAuthorities = roleConverter.convert(jwt);
+
+                                if (roleAuthorities != null) {
+                                        authorities.addAll(roleAuthorities);
                                 }
-                            }
+
                         }
 
-                        // Android - Authorization Header
-                        return new DefaultBearerTokenResolver()
-                                .resolve(request);
-                    })
+                        return authorities;
+                });
 
-                    .jwt(jwt ->
-                            jwt.jwtAuthenticationConverter(
-                                    jwtAuthenticationConverter()
-                            )
-                    )
-
-                    .authenticationEntryPoint(
-                            new BearerTokenAuthenticationEntryPoint()
-                    )
-            )
-
-            .exceptionHandling(ex ->
-                    ex.accessDeniedHandler(
-                            new BearerTokenAccessDeniedHandler()
-                    )
-            );
-
-        return http.build();
-    }
-
-    @Bean
-    public JwtAuthenticationConverter jwtAuthenticationConverter() {
-
-        JwtGrantedAuthoritiesConverter scopeConverter =
-                new JwtGrantedAuthoritiesConverter();
-
-        scopeConverter.setAuthoritiesClaimName("scope");
-        scopeConverter.setAuthorityPrefix("SCOPE_");
-
-        JwtGrantedAuthoritiesConverter roleConverter =
-                new JwtGrantedAuthoritiesConverter();
-
-        roleConverter.setAuthoritiesClaimName("scope");
-        roleConverter.setAuthorityPrefix("ROLE_");
-
-        JwtAuthenticationConverter converter =
-                new JwtAuthenticationConverter();
-
-        converter.setJwtGrantedAuthoritiesConverter(jwt -> {
-
-            var authorities = scopeConverter.convert(jwt);
-
-            if (authorities != null) {
-
-                var roleAuthorities =
-                        roleConverter.convert(jwt);
-
-                if (roleAuthorities != null) {
-                    authorities.addAll(roleAuthorities);
-                }
-
-            }
-
-            return authorities;
-        });
-
-        return converter;
-    }
+                return converter;
+        }
 }

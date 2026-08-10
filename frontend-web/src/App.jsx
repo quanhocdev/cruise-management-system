@@ -96,11 +96,11 @@ export default function App() {
             element={
               <ProtectedRoute allowedRoles={["SCHEDULER"]}>
                 <Routes>
-                  <Route path="schedules" element={<SchedulerDashboard />} />
+                  <Route path="dashboard" element={<SchedulerDashboard />} />
 
                   <Route
                     path=""
-                    element={<Navigate to="schedules" replace />}
+                    element={<Navigate to="dashboard" replace />}
                   />
                 </Routes>
               </ProtectedRoute>
@@ -115,9 +115,12 @@ export default function App() {
             element={
               <ProtectedRoute allowedRoles={["OPERATION"]}>
                 <Routes>
-                  <Route path="status" element={<OperationDashboard />} />
+                  <Route path="dashboard" element={<OperationDashboard />} />
 
-                  <Route path="" element={<Navigate to="status" replace />} />
+                  <Route
+                    path=""
+                    element={<Navigate to="dashboard" replace />}
+                  />
                 </Routes>
               </ProtectedRoute>
             }
@@ -131,9 +134,12 @@ export default function App() {
             element={
               <ProtectedRoute allowedRoles={["ONBOARD"]}>
                 <Routes>
-                  <Route path="cabins" element={<OnboardDashboard />} />
+                  <Route path="dashboard" element={<OnboardDashboard />} />
 
-                  <Route path="" element={<Navigate to="cabins" replace />} />
+                  <Route
+                    path=""
+                    element={<Navigate to="dashboard" replace />}
+                  />
                 </Routes>
               </ProtectedRoute>
             }
@@ -147,11 +153,11 @@ export default function App() {
             element={
               <ProtectedRoute allowedRoles={["SHORE"]}>
                 <Routes>
-                  <Route path="excursions" element={<ShoreDashboard />} />
+                  <Route path="dashboard" element={<ShoreDashboard />} />
 
                   <Route
                     path=""
-                    element={<Navigate to="excursions" replace />}
+                    element={<Navigate to="dashboard" replace />}
                   />
                 </Routes>
               </ProtectedRoute>
@@ -166,9 +172,12 @@ export default function App() {
             element={
               <ProtectedRoute allowedRoles={["CONVENIENCE"]}>
                 <Routes>
-                  <Route path="services" element={<ConvenienceDashboard />} />
+                  <Route path="dashboard" element={<ConvenienceDashboard />} />
 
-                  <Route path="" element={<Navigate to="services" replace />} />
+                  <Route
+                    path=""
+                    element={<Navigate to="dashboard" replace />}
+                  />
                 </Routes>
               </ProtectedRoute>
             }
@@ -182,9 +191,12 @@ export default function App() {
             element={
               <ProtectedRoute allowedRoles={["FINANCE"]}>
                 <Routes>
-                  <Route path="reports" element={<FinanceDashboard />} />
+                  <Route path="dashboard" element={<FinanceDashboard />} />
 
-                  <Route path="" element={<Navigate to="reports" replace />} />
+                  <Route
+                    path=""
+                    element={<Navigate to="dashboard" replace />}
+                  />
                 </Routes>
               </ProtectedRoute>
             }
