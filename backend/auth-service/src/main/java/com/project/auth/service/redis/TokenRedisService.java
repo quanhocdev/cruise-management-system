@@ -15,4 +15,11 @@ public interface TokenRedisService {
     void deleteAccessToken(String jti);
 
     void deleteRefreshToken(String jti);
+
+    void saveActivationToken(String token, Long userId, Duration ttl);
+
+    Long getActivationUserId(String token);
+
+    void deleteActivationToken(String token);
+
 }

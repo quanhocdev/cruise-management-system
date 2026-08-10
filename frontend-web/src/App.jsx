@@ -1,66 +1,201 @@
 // src/App.jsx
+
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Navbar from "./components/Navbar";
 
 import HomePage from "./modules/guest/pages/HomePage";
+
 import RegisterPage from "./modules/auth/pages/RegisterPage";
 import LoginPage from "./modules/auth/pages/LoginPage";
 import VerifyOtpPage from "./modules/auth/pages/VerifyOtpPage";
+import ActivatePage from "./modules/auth/pages/ActivatePage";
 
-// 1. Import trang Dashboard của Passenger (chỉnh đường dẫn file cho đúng dự án của bạn)
+import AdminDashboard from "./modules/admin/pages/Dashboard";
+import ManagerAccount from "./modules/admin/pages/ManagerAccount";
+
 import PassengerDashboard from "./modules/passenger/pages/Dashboard";
+import SchedulerDashboard from "./modules/scheduler/pages/Dashboard";
+import OperationDashboard from "./modules/operation/pages/Dashboard";
+import OnboardDashboard from "./modules/onboard/pages/Dashboard";
+import ShoreDashboard from "./modules/shore/pages/Dashboard";
+import ConvenienceDashboard from "./modules/convenience/pages/Dashboard";
+import FinanceDashboard from "./modules/finance/pages/Dashboard";
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Navbar />
-
+    <BrowserRouter>
+      <AuthProvider>
         <Routes>
-          {/* Guest Public */}
+          {/* =====================================================
+              ACTIVATION
+              Staff chưa đăng nhập vẫn được truy cập
+             ===================================================== */}
+          <Route path="/activate" element={<ActivatePage />} />
+
+          {/* =====================================================
+              GUEST
+             ===================================================== */}
           <Route path="/" element={<HomePage />} />
 
-          {/* Auth */}
+          {/* =====================================================
+              AUTH
+             ===================================================== */}
           <Route path="/login" element={<LoginPage />} />
+
           <Route path="/register" element={<RegisterPage />} />
+
           <Route path="/verify-email" element={<VerifyOtpPage />} />
 
-          {/* Admin */}
+          {/* =====================================================
+              ADMIN
+             ===================================================== */}
           <Route
             path="/admin/*"
             element={
               <ProtectedRoute allowedRoles={["ADMIN"]}>
-                <h1>Trang Admin</h1>
-              </ProtectedRoute>
-            }
-          />
-
-          {/* Passenger */}
-          <Route
-            path="/passenger/*"
-            element={
-              <ProtectedRoute allowedRoles={["PASSENGER", "ADMIN"]}>
                 <Routes>
-                  {/* Khớp với URL /passenger/my-cruise */}
-                  <Route path="dashboard" element={<PassengerDashboard />} />
+                  <Route path="dashboard" element={<AdminDashboard />} />
 
-                  {/* Nếu chỉ vào /passenger thì tự động chuyển hướng qua /passenger/my-cruise */}
+                  <Route path="accounts" element={<ManagerAccount />} />
+
                   <Route
                     path=""
-                    element={<Navigate to="my-cruise" replace />}
+                    element={<Navigate to="dashboard" replace />}
                   />
                 </Routes>
               </ProtectedRoute>
             }
           />
 
-          {/* Không tìm thấy */}
+          {/* =====================================================
+              PASSENGER
+             ===================================================== */}
+          <Route
+            path="/passenger/*"
+            element={
+              <ProtectedRoute allowedRoles={["PASSENGER"]}>
+                <Routes>
+                  <Route path="dashboard" element={<PassengerDashboard />} />
+
+                  <Route
+                    path=""
+                    element={<Navigate to="dashboard" replace />}
+                  />
+                </Routes>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* =====================================================
+              SCHEDULER
+             ===================================================== */}
+          <Route
+            path="/scheduler/*"
+            element={
+              <ProtectedRoute allowedRoles={["SCHEDULER"]}>
+                <Routes>
+                  <Route path="schedules" element={<SchedulerDashboard />} />
+
+                  <Route
+                    path=""
+                    element={<Navigate to="schedules" replace />}
+                  />
+                </Routes>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* =====================================================
+              OPERATION
+             ===================================================== */}
+          <Route
+            path="/operation/*"
+            element={
+              <ProtectedRoute allowedRoles={["OPERATION"]}>
+                <Routes>
+                  <Route path="status" element={<OperationDashboard />} />
+
+                  <Route path="" element={<Navigate to="status" replace />} />
+                </Routes>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* =====================================================
+              ONBOARD
+             ===================================================== */}
+          <Route
+            path="/onboard/*"
+            element={
+              <ProtectedRoute allowedRoles={["ONBOARD"]}>
+                <Routes>
+                  <Route path="cabins" element={<OnboardDashboard />} />
+
+                  <Route path="" element={<Navigate to="cabins" replace />} />
+                </Routes>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* =====================================================
+              SHORE
+             ===================================================== */}
+          <Route
+            path="/shore/*"
+            element={
+              <ProtectedRoute allowedRoles={["SHORE"]}>
+                <Routes>
+                  <Route path="excursions" element={<ShoreDashboard />} />
+
+                  <Route
+                    path=""
+                    element={<Navigate to="excursions" replace />}
+                  />
+                </Routes>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* =====================================================
+              CONVENIENCE
+             ===================================================== */}
+          <Route
+            path="/convenience/*"
+            element={
+              <ProtectedRoute allowedRoles={["CONVENIENCE"]}>
+                <Routes>
+                  <Route path="services" element={<ConvenienceDashboard />} />
+
+                  <Route path="" element={<Navigate to="services" replace />} />
+                </Routes>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* =====================================================
+              FINANCE
+             ===================================================== */}
+          <Route
+            path="/finance/*"
+            element={
+              <ProtectedRoute allowedRoles={["FINANCE"]}>
+                <Routes>
+                  <Route path="reports" element={<FinanceDashboard />} />
+
+                  <Route path="" element={<Navigate to="reports" replace />} />
+                </Routes>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* =====================================================
+              404
+             ===================================================== */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }

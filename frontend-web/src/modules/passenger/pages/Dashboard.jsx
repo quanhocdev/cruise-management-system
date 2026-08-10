@@ -1,4 +1,4 @@
-// passenger/Dashboard.jsx
+// passenger/pages/Dashboard.jsx
 import React from "react";
 
 const PassengerDashboard = () => {

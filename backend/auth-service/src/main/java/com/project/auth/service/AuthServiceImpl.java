@@ -36,8 +36,7 @@ public class AuthServiceImpl implements AuthService {
             RedisService redisService,
             MailService mailService,
             TokenRedisService tokenRedisService,
-            AuthMapper authMapper
-    ) {
+            AuthMapper authMapper) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
@@ -73,27 +72,40 @@ public class AuthServiceImpl implements AuthService {
         } catch (Exception e) {
             return authMapper.toRegisterResponseDTO(
                     savedUser,
-                    "Đăng ký thành công nhưng không thể gửi email OTP. Vui lòng bấm gửi lại OTP!"
-            );
+                    "Đăng ký thành công nhưng không thể gửi email OTP. Vui lòng bấm gửi lại OTP!");
         }
 
         return authMapper.toRegisterResponseDTO(
                 savedUser,
-                "Đã gửi mã OTP xác thực email"
-        );
+                "Đã gửi mã OTP xác thực email");
     }
 
     @Override
     public Users login(LoginRequest request) {
         Users user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new AppException("Tài khoản hoặc mật khẩu không chính xác", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(
+                        () -> new AppException("Tài khoản hoặc mật khẩu không chính xác", HttpStatus.UNAUTHORIZED));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new AppException("Tài khoản hoặc mật khẩu không chính xác", HttpStatus.UNAUTHORIZED);
         }
 
-        if (user.getStatus() != UserStatus.ACTIVE) {
-            throw new AppException("Tài khoản đã bị khóa", HttpStatus.FORBIDDEN);
+        if (user.getStatus() == UserStatus.BLOCKED) {
+            throw new AppException(
+                    "Tài khoản đã bị khóa",
+                    HttpStatus.FORBIDDEN);
+        }
+
+        if (user.getStatus() == UserStatus.INVITED) {
+            throw new AppException(
+                    "Tài khoản chưa được kích hoạt",
+                    HttpStatus.FORBIDDEN);
+        }
+
+        if (user.getStatus() == UserStatus.INACTIVE) {
+            throw new AppException(
+                    "Tài khoản đang không hoạt động",
+                    HttpStatus.FORBIDDEN);
         }
 
         if (!user.getEnabled()) {
