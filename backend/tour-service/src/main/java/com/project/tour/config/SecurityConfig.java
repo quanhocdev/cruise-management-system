@@ -124,6 +124,19 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/decks/*/rooms/**")
                 .authenticated()
 
+                // Cruise area management
+                .requestMatchers(HttpMethod.POST, "/api/v1/decks/*/areas")
+                .hasRole("ADMIN")
+
+                .requestMatchers(HttpMethod.PUT, "/api/v1/decks/*/areas/**")
+                .hasRole("ADMIN")
+
+                .requestMatchers(HttpMethod.PATCH, "/api/v1/decks/*/areas/**")
+                .hasRole("ADMIN")
+
+                .requestMatchers(HttpMethod.GET, "/api/v1/decks/*/areas/**")
+                .authenticated()
+
                 .anyRequest()
                 .authenticated()
             )
