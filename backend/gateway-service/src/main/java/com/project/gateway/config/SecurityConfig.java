@@ -22,187 +22,174 @@ import com.project.gateway.security.JsonAuthenticationEntryPoint;
 @Configuration
 public class SecurityConfig {
 
-    // =====================================================
-    // PUBLIC ENDPOINTS
-    // =====================================================
+        // =====================================================
+        // PUBLIC ENDPOINTS
+        // =====================================================
 
-    private static final String[] PUBLIC_ENDPOINTS = {
-            "/api/auth/register",
-            "/api/auth/login",
-            "/api/auth/refresh",
-            "/api/auth/verify-email",
-            "/api/auth/logout",
-            "/actuator/health",
-            "/actuator/info"
-    };
+        private static final String[] PUBLIC_ENDPOINTS = {
+                        "/api/auth/register",
+                        "/api/auth/login",
+                        "/api/auth/refresh",
+                        "/api/auth/verify-email",
+                        "/api/auth/logout",
 
-    // =====================================================
-    // CORS
-    // =====================================================
+                        // Staff activation
+                        "/api/auth/activate/verify",
+                        "/api/auth/activate/set-password",
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource(
-            @Value("${cors.allowed-origins:http://localhost:5173}")
-            String allowedOrigins) {
+                        "/actuator/health",
+                        "/actuator/info"
+        };
 
-        CorsConfiguration configuration = new CorsConfiguration();
+        // =====================================================
+        // CORS
+        // =====================================================
 
-        configuration.setAllowedOrigins(
-                List.of(allowedOrigins.split(","))
-        );
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource(
+                        @Value("${cors.allowed-origins:http://localhost:5173}") String allowedOrigins) {
 
-        configuration.setAllowedMethods(
-                List.of(
-                        "GET",
-                        "POST",
-                        "PUT",
-                        "DELETE",
-                        "PATCH",
-                        "OPTIONS"
-                )
-        );
+                CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedHeaders(
-                List.of("*")
-        );
+                configuration.setAllowedOrigins(
+                                List.of(allowedOrigins.split(",")));
 
-        configuration.setAllowCredentials(true);
+                configuration.setAllowedMethods(
+                                List.of(
+                                                "GET",
+                                                "POST",
+                                                "PUT",
+                                                "DELETE",
+                                                "PATCH",
+                                                "OPTIONS"));
 
-        configuration.setExposedHeaders(
-                List.of("Authorization", "Set-Cookie")
-        );
+                configuration.setAllowedHeaders(
+                                List.of("*"));
 
-        UrlBasedCorsConfigurationSource source =
-                new UrlBasedCorsConfigurationSource();
+                configuration.setAllowCredentials(true);
 
-        source.registerCorsConfiguration(
-                "/**",
-                configuration
-        );
+                configuration.setExposedHeaders(
+                                List.of("Authorization", "Set-Cookie"));
 
-        return source;
-    }
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
-    // =====================================================
-    // SECURITY
-    // =====================================================
+                source.registerCorsConfiguration(
+                                "/**",
+                                configuration);
 
-    @Bean
-    public SecurityWebFilterChain securityWebFilterChain(
-            ServerHttpSecurity http,
-            CookieOrHeaderBearerTokenConverter bearerTokenConverter,
-            ServerAuthenticationEntryPoint authenticationEntryPoint,
-            ServerAccessDeniedHandler accessDeniedHandler
-    ) {
+                return source;
+        }
 
-        return http
+        // =====================================================
+        // SECURITY
+        // =====================================================
 
-                // =================================================
-                // CORS
-                // =================================================
+        @Bean
+        public SecurityWebFilterChain securityWebFilterChain(
+                        ServerHttpSecurity http,
+                        CookieOrHeaderBearerTokenConverter bearerTokenConverter,
+                        ServerAuthenticationEntryPoint authenticationEntryPoint,
+                        ServerAccessDeniedHandler accessDeniedHandler) {
 
-                .cors(Customizer.withDefaults())
+                return http
 
-                // =================================================
-                // CSRF
-                // =================================================
+                                // =================================================
+                                // CORS
+                                // =================================================
 
-                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                                .cors(Customizer.withDefaults())
 
-                // =================================================
-                // AUTHORIZATION
-                // =================================================
+                                // =================================================
+                                // CSRF
+                                // =================================================
 
-                .authorizeExchange(exchange -> exchange
+                                .csrf(ServerHttpSecurity.CsrfSpec::disable)
 
-                        // CORS preflight
-                        .pathMatchers(
-                                HttpMethod.OPTIONS
-                        ).permitAll()
+                                // =================================================
+                                // AUTHORIZATION
+                                // =================================================
 
-                        // Public Auth APIs
-                        .pathMatchers(
-                                PUBLIC_ENDPOINTS
-                        ).permitAll()
+                                .authorizeExchange(exchange -> exchange
 
-                        // Các API còn lại yêu cầu JWT
-                        .anyExchange().authenticated()
-                )
+                                                // CORS preflight
+                                                .pathMatchers(
+                                                                HttpMethod.OPTIONS)
+                                                .permitAll()
 
-                // =================================================
-                // OAUTH2 RESOURCE SERVER
-                // =================================================
+                                                // Public Auth APIs
+                                                .pathMatchers(
+                                                                PUBLIC_ENDPOINTS)
+                                                .permitAll()
 
-                .oauth2ResourceServer(resourceServer -> resourceServer
+                                                // Các API còn lại yêu cầu JWT
+                                                .anyExchange().authenticated())
 
-                        // Web:
-                        // Cookie: accessToken
-                        //
-                        // Android:
-                        // Authorization: Bearer <token>
-                        .bearerTokenConverter(
-                                bearerTokenConverter
-                        )
+                                // =================================================
+                                // OAUTH2 RESOURCE SERVER
+                                // =================================================
 
-                        .authenticationEntryPoint(
-                                authenticationEntryPoint
-                        )
+                                .oauth2ResourceServer(resourceServer -> resourceServer
 
-                        .accessDeniedHandler(
-                                accessDeniedHandler
-                        )
+                                                // Web:
+                                                // Cookie: accessToken
+                                                //
+                                                // Android:
+                                                // Authorization: Bearer <token>
+                                                .bearerTokenConverter(
+                                                                bearerTokenConverter)
 
-                        // JWT verification
-                        .jwt(Customizer.withDefaults())
-                )
+                                                .authenticationEntryPoint(
+                                                                authenticationEntryPoint)
 
-                // =================================================
-                // EXCEPTION HANDLING
-                // =================================================
+                                                .accessDeniedHandler(
+                                                                accessDeniedHandler)
 
-                .exceptionHandling(exception -> exception
+                                                // JWT verification
+                                                .jwt(Customizer.withDefaults()))
 
-                        .authenticationEntryPoint(
-                                authenticationEntryPoint
-                        )
+                                // =================================================
+                                // EXCEPTION HANDLING
+                                // =================================================
 
-                        .accessDeniedHandler(
-                                accessDeniedHandler
-                        )
-                )
+                                .exceptionHandling(exception -> exception
 
-                .build();
-    }
+                                                .authenticationEntryPoint(
+                                                                authenticationEntryPoint)
 
-    // =====================================================
-    // BEARER TOKEN CONVERTER
-    // =====================================================
+                                                .accessDeniedHandler(
+                                                                accessDeniedHandler))
 
-    @Bean
-    public CookieOrHeaderBearerTokenConverter bearerTokenConverter() {
+                                .build();
+        }
 
-    return new CookieOrHeaderBearerTokenConverter(
-            new ServerBearerTokenAuthenticationConverter()
-    );
-    }
+        // =====================================================
+        // BEARER TOKEN CONVERTER
+        // =====================================================
 
-    // =====================================================
-    // AUTHENTICATION ENTRY POINT
-    // =====================================================
+        @Bean
+        public CookieOrHeaderBearerTokenConverter bearerTokenConverter() {
 
-    @Bean
-    public ServerAuthenticationEntryPoint authenticationEntryPoint() {
+                return new CookieOrHeaderBearerTokenConverter(
+                                new ServerBearerTokenAuthenticationConverter());
+        }
 
-        return new JsonAuthenticationEntryPoint();
-    }
+        // =====================================================
+        // AUTHENTICATION ENTRY POINT
+        // =====================================================
 
-    // =====================================================
-    // ACCESS DENIED HANDLER
-    // =====================================================
+        @Bean
+        public ServerAuthenticationEntryPoint authenticationEntryPoint() {
 
-    @Bean
-    public ServerAccessDeniedHandler accessDeniedHandler() {
+                return new JsonAuthenticationEntryPoint();
+        }
 
-        return new JsonAccessDeniedHandler();
-    }
+        // =====================================================
+        // ACCESS DENIED HANDLER
+        // =====================================================
+
+        @Bean
+        public ServerAccessDeniedHandler accessDeniedHandler() {
+
+                return new JsonAccessDeniedHandler();
+        }
 }
