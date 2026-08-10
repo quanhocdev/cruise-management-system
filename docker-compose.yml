@@ -88,14 +88,15 @@ services:
   # ==========================
   auth-service:
     build:
-      context: ./backend/auth-service
-      dockerfile: Dockerfile.dev
+      context: ./backend
+      dockerfile: auth-service/Dockerfile.dev
     container_name: auth-service
     restart: always
     ports:
       - "8081:8081"
     volumes:
-      - ./backend/auth-service:/app
+      - ./backend/auth-service/src:/app/auth-service/src
+      - ./backend/common/src:/app/common/src
     env_file:
       - .env
     environment:

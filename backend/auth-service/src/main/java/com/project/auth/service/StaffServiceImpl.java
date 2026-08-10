@@ -1,6 +1,5 @@
 package com.project.auth.service;
 
-import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.UUID;
 
@@ -23,194 +22,194 @@ import com.project.auth.service.redis.TokenRedisService;
 @Service
 public class StaffServiceImpl implements StaffService {
 
-    private static final Duration ACTIVATION_TOKEN_TTL = Duration.ofMinutes(10);
+        private static final Duration ACTIVATION_TOKEN_TTL = Duration.ofMinutes(10);
 
-    private final UserRepository userRepository;
-    private final TokenRedisService tokenRedisService;
-    private final MailService mailService;
-    private final PasswordEncoder passwordEncoder;
+        private final UserRepository userRepository;
+        private final TokenRedisService tokenRedisService;
+        private final MailService mailService;
+        private final PasswordEncoder passwordEncoder;
 
-    public StaffServiceImpl(
-            UserRepository userRepository,
-            TokenRedisService tokenRedisService,
-            MailService mailService,
-            PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.tokenRedisService = tokenRedisService;
-        this.mailService = mailService;
-        this.passwordEncoder = passwordEncoder;
-    }
-
-    @Override
-    public CreateStaffResponse createStaff(
-            CreateStaffRequest request) {
-
-        // Kiểm tra username
-        if (userRepository.existsByUsername(request.username())) {
-            throw new AppException(
-                    "Username đã tồn tại",
-                    HttpStatus.BAD_REQUEST);
+        public StaffServiceImpl(
+                        UserRepository userRepository,
+                        TokenRedisService tokenRedisService,
+                        MailService mailService,
+                        PasswordEncoder passwordEncoder) {
+                this.userRepository = userRepository;
+                this.tokenRedisService = tokenRedisService;
+                this.mailService = mailService;
+                this.passwordEncoder = passwordEncoder;
         }
 
-        // Kiểm tra email
-        if (userRepository.existsByEmail(request.email())) {
-            throw new AppException(
-                    "Email đã tồn tại",
-                    HttpStatus.BAD_REQUEST);
+        @Override
+        public CreateStaffResponse createStaff(
+                        CreateStaffRequest request) {
+
+                // Kiểm tra username
+                if (userRepository.existsByUsername(request.username())) {
+                        throw new AppException(
+                                        "Username đã tồn tại",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                // Kiểm tra email
+                if (userRepository.existsByEmail(request.email())) {
+                        throw new AppException(
+                                        "Email đã tồn tại",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                // Không cho Admin tạo Passenger/GUEST bằng API này
+                if (request.role().name().equals("PASSENGER")
+                                || request.role().name().equals("GUEST")) {
+
+                        throw new AppException(
+                                        "Role không hợp lệ cho tài khoản nhân viên",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                /*
+                 * Staff chưa có password.
+                 * Password sẽ được tạo khi staff kích hoạt tài khoản.
+                 */
+                Users user = new Users();
+
+                user.setUsername(request.username());
+                user.setPassword(null);
+                user.setEmail(request.email());
+                user.setFirebaseUid(null);
+                user.setRole(request.role());
+                user.setProvider(UserProvider.LOCAL);
+                user.setEnabled(false);
+                user.setStatus(UserStatus.INVITED);
+
+                Users savedUser = userRepository.save(user);
+
+                /*
+                 * Tạo activation token
+                 */
+                String activationToken = generateActivationToken();
+
+                tokenRedisService.saveActivationToken(
+                                activationToken,
+                                savedUser.getId(),
+                                ACTIVATION_TOKEN_TTL);
+
+                /*
+                 * Link frontend
+                 */
+                String activationLink = "http://localhost:5173/activate?token="
+                                + activationToken;
+
+                /*
+                 * Gửi email
+                 */
+                try {
+
+                        mailService.sendStaffInvitation(
+                                        savedUser.getEmail(),
+                                        savedUser.getUsername(),
+                                        activationLink);
+
+                } catch (Exception e) {
+
+                        // Nếu gửi email thất bại thì xóa user + token
+                        tokenRedisService.deleteActivationToken(
+                                        activationToken);
+
+                        userRepository.delete(savedUser);
+
+                        throw new AppException(
+                                        "Không thể gửi email kích hoạt tài khoản",
+                                        HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+
+                return new CreateStaffResponse(
+                                savedUser.getId(),
+                                savedUser.getUsername(),
+                                savedUser.getEmail(),
+                                savedUser.getRole().name(),
+                                savedUser.getStatus().name(),
+                                "Tạo tài khoản nhân viên thành công. Email kích hoạt đã được gửi.");
         }
 
-        // Không cho Admin tạo Passenger/GUEST bằng API này
-        if (request.role().name().equals("PASSENGER")
-                || request.role().name().equals("GUEST")) {
+        private String generateActivationToken() {
 
-            throw new AppException(
-                    "Role không hợp lệ cho tài khoản nhân viên",
-                    HttpStatus.BAD_REQUEST);
+                return UUID.randomUUID()
+                                .toString()
+                                .replace("-", "")
+                                + UUID.randomUUID()
+                                                .toString()
+                                                .replace("-", "");
         }
 
-        /*
-         * Staff chưa có password.
-         * Password sẽ được tạo khi staff kích hoạt tài khoản.
-         */
-        Users user = new Users();
+        @Override
+        public String verifyActivationToken(
+                        ActivateTokenRequest request) {
 
-        user.setUsername(request.username());
-        user.setPassword(null);
-        user.setEmail(request.email());
-        user.setFirebaseUid(null);
-        user.setRole(request.role());
-        user.setProvider(UserProvider.LOCAL);
-        user.setEnabled(false);
-        user.setStatus(UserStatus.INVITED);
+                Long userId = tokenRedisService.getActivationUserId(
+                                request.token());
 
-        Users savedUser = userRepository.save(user);
+                if (userId == null) {
+                        throw new AppException(
+                                        "Liên kết kích hoạt không hợp lệ hoặc đã hết hạn",
+                                        HttpStatus.BAD_REQUEST);
+                }
 
-        /*
-         * Tạo activation token
-         */
-        String activationToken = generateActivationToken();
+                Users user = userRepository.findById(userId)
+                                .orElseThrow(() -> new AppException(
+                                                "Không tìm thấy tài khoản",
+                                                HttpStatus.NOT_FOUND));
 
-        tokenRedisService.saveActivationToken(
-                activationToken,
-                savedUser.getId(),
-                ACTIVATION_TOKEN_TTL);
+                if (user.getStatus() != UserStatus.INVITED) {
+                        throw new AppException(
+                                        "Tài khoản này đã được kích hoạt hoặc không thể kích hoạt",
+                                        HttpStatus.BAD_REQUEST);
+                }
 
-        /*
-         * Link frontend
-         */
-        String activationLink = "http://localhost:5173/activate?token="
-                + activationToken;
-
-        /*
-         * Gửi email
-         */
-        try {
-
-            mailService.sendStaffInvitation(
-                    savedUser.getEmail(),
-                    savedUser.getUsername(),
-                    activationLink);
-
-        } catch (Exception e) {
-
-            // Nếu gửi email thất bại thì xóa user + token
-            tokenRedisService.deleteActivationToken(
-                    activationToken);
-
-            userRepository.delete(savedUser);
-
-            throw new AppException(
-                    "Không thể gửi email kích hoạt tài khoản",
-                    HttpStatus.INTERNAL_SERVER_ERROR);
+                return user.getUsername();
         }
 
-        return new CreateStaffResponse(
-                savedUser.getId(),
-                savedUser.getUsername(),
-                savedUser.getEmail(),
-                savedUser.getRole().name(),
-                savedUser.getStatus().name(),
-                "Tạo tài khoản nhân viên thành công. Email kích hoạt đã được gửi.");
-    }
+        @Override
+        public void setPassword(SetPasswordRequest request) {
 
-    private String generateActivationToken() {
+                if (!request.password().equals(request.confirmPassword())) {
+                        throw new AppException(
+                                        "Mật khẩu xác nhận không khớp",
+                                        HttpStatus.BAD_REQUEST);
+                }
 
-        return UUID.randomUUID()
-                .toString()
-                .replace("-", "")
-                + UUID.randomUUID()
-                        .toString()
-                        .replace("-", "");
-    }
+                Long userId = tokenRedisService.getActivationUserId(
+                                request.token());
 
-    @Override
-    public String verifyActivationToken(
-            ActivateTokenRequest request) {
+                if (userId == null) {
+                        throw new AppException(
+                                        "Liên kết kích hoạt không hợp lệ hoặc đã hết hạn",
+                                        HttpStatus.BAD_REQUEST);
+                }
 
-        Long userId = tokenRedisService.getActivationUserId(
-                request.token());
+                Users user = userRepository.findById(userId)
+                                .orElseThrow(() -> new AppException(
+                                                "Không tìm thấy tài khoản",
+                                                HttpStatus.NOT_FOUND));
 
-        if (userId == null) {
-            throw new AppException(
-                    "Liên kết kích hoạt không hợp lệ hoặc đã hết hạn",
-                    HttpStatus.BAD_REQUEST);
+                if (user.getStatus() != UserStatus.INVITED) {
+                        throw new AppException(
+                                        "Tài khoản này đã được kích hoạt hoặc không thể kích hoạt",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                // Hash password
+                user.setPassword(
+                                passwordEncoder.encode(request.password()));
+
+                // Kích hoạt tài khoản
+                user.setStatus(UserStatus.ACTIVE);
+                user.setEnabled(true);
+
+                userRepository.save(user);
+
+                // Token chỉ được sử dụng một lần
+                tokenRedisService.deleteActivationToken(
+                                request.token());
         }
-
-        Users user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(
-                        "Không tìm thấy tài khoản",
-                        HttpStatus.NOT_FOUND));
-
-        if (user.getStatus() != UserStatus.INVITED) {
-            throw new AppException(
-                    "Tài khoản này đã được kích hoạt hoặc không thể kích hoạt",
-                    HttpStatus.BAD_REQUEST);
-        }
-
-        return user.getUsername();
-    }
-
-    @Override
-    public void setPassword(SetPasswordRequest request) {
-
-        if (!request.password().equals(request.confirmPassword())) {
-            throw new AppException(
-                    "Mật khẩu xác nhận không khớp",
-                    HttpStatus.BAD_REQUEST);
-        }
-
-        Long userId = tokenRedisService.getActivationUserId(
-                request.token());
-
-        if (userId == null) {
-            throw new AppException(
-                    "Liên kết kích hoạt không hợp lệ hoặc đã hết hạn",
-                    HttpStatus.BAD_REQUEST);
-        }
-
-        Users user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(
-                        "Không tìm thấy tài khoản",
-                        HttpStatus.NOT_FOUND));
-
-        if (user.getStatus() != UserStatus.INVITED) {
-            throw new AppException(
-                    "Tài khoản này đã được kích hoạt hoặc không thể kích hoạt",
-                    HttpStatus.BAD_REQUEST);
-        }
-
-        // Hash password
-        user.setPassword(
-                passwordEncoder.encode(request.password()));
-
-        // Kích hoạt tài khoản
-        user.setStatus(UserStatus.ACTIVE);
-        user.setEnabled(true);
-
-        userRepository.save(user);
-
-        // Token chỉ được sử dụng một lần
-        tokenRedisService.deleteActivationToken(
-                request.token());
-    }
 }
