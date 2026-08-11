@@ -27,28 +27,30 @@ public class PasswordGenerator {
         scanner.close();
     }
 }
-
 // INSERT INTO users (
 // username,
 // password,
 // email,
 // firebase_uid,
-// role,
+// role_id,
 // provider,
 // enabled,
 // status,
 // created_at,
 // updated_at
-// )
-// VALUES (
+// ) VALUES (
 // 'admin',
-// '$2a$10$H3c7kDnIv7e4AHvm3EbS4.mmqdqQiirP7Zls/UreFEZZ1RU.GFffe',
+// '$2a$10$pyRtq3XMOzkPVy4XBbBduwzEZI3etnqRZFwn4qaPZySkCwGkbZa',
 // 'admin@cruisesystem.com',
 // NULL,
-// 'ADMIN',
+// 1,
 // 'LOCAL',
 // TRUE,
 // 'ACTIVE',
 // CURRENT_TIMESTAMP,
 // CURRENT_TIMESTAMP
-// );
+// )
+// ON CONFLICT (username) DO UPDATE SET
+// password = EXCLUDED.password,
+// enabled = TRUE,
+// status = 'ACTIVE';

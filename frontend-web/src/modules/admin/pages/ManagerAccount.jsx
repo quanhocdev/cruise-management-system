@@ -5,7 +5,7 @@ export default function ManagerAccount() {
   const [form, setForm] = useState({
     username: "",
     email: "",
-    role: "",
+    roleId: "", // Đổi tên state từ role thành roleId
   });
 
   const [loading, setLoading] = useState(false);
@@ -32,7 +32,7 @@ export default function ManagerAccount() {
       const res = await api.post("/admin/staff", {
         username: form.username,
         email: form.email,
-        role: form.role,
+        roleId: Number(form.roleId), // Gửi đúng key 'roleId' dạng Number
       });
 
       setMessage(
@@ -43,7 +43,7 @@ export default function ManagerAccount() {
       setForm({
         username: "",
         email: "",
-        role: "",
+        roleId: "",
       });
     } catch (err) {
       const message =
@@ -60,20 +60,17 @@ export default function ManagerAccount() {
       <div style={styles.container}>
         <div style={styles.header}>
           <h1 style={styles.title}>Quản lý tài khoản</h1>
-
           <p style={styles.subtitle}>Tạo tài khoản cho nhân viên</p>
         </div>
 
         <div style={styles.card}>
           {message && <div style={styles.success}>{message}</div>}
-
           {error && <div style={styles.error}>{error}</div>}
 
           <form onSubmit={handleSubmit}>
             {/* Username */}
             <div style={styles.formGroup}>
               <label style={styles.label}>Tài khoản</label>
-
               <input
                 type="text"
                 name="username"
@@ -90,7 +87,6 @@ export default function ManagerAccount() {
             {/* Email */}
             <div style={styles.formGroup}>
               <label style={styles.label}>Email</label>
-
               <input
                 type="email"
                 name="email"
@@ -102,30 +98,24 @@ export default function ManagerAccount() {
               />
             </div>
 
-            {/* Role */}
+            {/* Role ID */}
             <div style={styles.formGroup}>
               <label style={styles.label}>Vai trò</label>
-
               <select
-                name="role"
-                value={form.role}
+                name="roleId"
+                value={form.roleId}
                 onChange={handleChange}
                 required
                 style={styles.input}
               >
                 <option value="">-- Chọn vai trò --</option>
-
-                <option value="SCHEDULER">Scheduler</option>
-
-                <option value="SHORE">Shore</option>
-
-                <option value="ONBOARD">Onboard</option>
-
-                <option value="CONVENIENCE">Convenience</option>
-
-                <option value="FINANCE">Finance</option>
-
-                <option value="OPERATION">Operation</option>
+                {/* Lưu ý: Thay đổi các value=ID này cho khớp với bảng roles trong DB của bạn */}
+                <option value="2">Scheduler</option>
+                <option value="3">Shore</option>
+                <option value="4">Onboard</option>
+                <option value="5">Convenience</option>
+                <option value="6">Finance</option>
+                <option value="7">Operation</option>
               </select>
             </div>
 
@@ -158,41 +148,34 @@ const styles = {
     backgroundColor: "#f5f6f8",
     padding: "40px",
   },
-
   container: {
     maxWidth: "700px",
     margin: "0 auto",
   },
-
   header: {
     marginBottom: "24px",
   },
-
   title: {
     margin: 0,
     fontSize: "28px",
     fontWeight: "600",
     color: "#1f2937",
   },
-
   subtitle: {
     marginTop: "8px",
     marginBottom: 0,
     color: "#6b7280",
     fontSize: "15px",
   },
-
   card: {
     backgroundColor: "#ffffff",
     borderRadius: "12px",
     padding: "30px",
     boxShadow: "0 2px 10px rgba(0, 0, 0, 0.06)",
   },
-
   formGroup: {
     marginBottom: "20px",
   },
-
   label: {
     display: "block",
     marginBottom: "8px",
@@ -200,7 +183,6 @@ const styles = {
     fontWeight: "500",
     color: "#374151",
   },
-
   input: {
     width: "100%",
     boxSizing: "border-box",
@@ -211,7 +193,6 @@ const styles = {
     outline: "none",
     backgroundColor: "#ffffff",
   },
-
   note: {
     marginBottom: "20px",
     padding: "12px 14px",
@@ -221,7 +202,6 @@ const styles = {
     fontSize: "14px",
     lineHeight: "1.5",
   },
-
   success: {
     marginBottom: "20px",
     padding: "12px 14px",
@@ -230,7 +210,6 @@ const styles = {
     color: "#047857",
     fontSize: "14px",
   },
-
   error: {
     marginBottom: "20px",
     padding: "12px 14px",
@@ -239,7 +218,6 @@ const styles = {
     color: "#dc2626",
     fontSize: "14px",
   },
-
   button: {
     width: "100%",
     marginTop: "8px",
