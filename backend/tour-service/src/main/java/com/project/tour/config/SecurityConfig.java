@@ -163,6 +163,22 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/packages/**")
                 .authenticated()
 
+                // Schedule, itinerary day and port call management
+                .requestMatchers(HttpMethod.POST, "/api/v1/schedules/**")
+                .hasAnyRole("ADMIN", "SCHEDULER")
+
+                .requestMatchers(HttpMethod.PUT, "/api/v1/schedules/**")
+                .hasAnyRole("ADMIN", "SCHEDULER")
+
+                .requestMatchers(HttpMethod.PATCH, "/api/v1/schedules/**")
+                .hasAnyRole("ADMIN", "SCHEDULER")
+
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/schedules/**")
+                .hasAnyRole("ADMIN", "SCHEDULER")
+
+                .requestMatchers(HttpMethod.GET, "/api/v1/schedules/**")
+                .authenticated()
+
                 .anyRequest()
                 .authenticated()
             )
