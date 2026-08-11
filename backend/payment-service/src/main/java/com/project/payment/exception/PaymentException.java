@@ -1,5 +1,8 @@
 package com.project.payment.exception;
 
-public class PaymentException {
+public class PaymentException extends RuntimeException {
 
+    public PaymentException(String message) {
+        super(message);
+    }
 }
