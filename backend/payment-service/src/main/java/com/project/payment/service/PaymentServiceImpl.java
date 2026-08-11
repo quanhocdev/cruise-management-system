@@ -30,11 +30,12 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override @Transactional
-    public PaymentResponse createPayment(CreatePaymentRequest request, String clientIp) {
+    public PaymentResponse createPayment(CreatePaymentRequest request, Long payerId, String clientIp) {
         if (request.getMethod() != PaymentMethod.VNPAY)
             throw new PaymentException("Payment method is not available yet: " + request.getMethod());
         Instant now = Instant.now();
         Payment payment = mapper.toEntity(request);
+        payment.setPayerId(payerId);
         payment.setStatus(PaymentStatus.PENDING); payment.setCreatedAt(now); payment.setUpdatedAt(now);
         payment.setExpiresAt(now.plus(timeoutMinutes, ChronoUnit.MINUTES));
         Payment saved = repository.save(payment);
@@ -44,7 +45,12 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override @Transactional(readOnly = true)
-    public PaymentResponse getPayment(Long id) { return mapper.toResponse(find(id)); }
+    public PaymentResponse getPayment(Long id, Long requesterId, boolean privileged) {
+        Payment payment = find(id);
+        if (!privileged && !payment.getPayerId().equals(requesterId))
+            throw new PaymentException("You cannot access this payment");
+        return mapper.toResponse(payment);
+    }
 
     @Override @Transactional(readOnly = true)
     public List<PaymentResponse> getPayments(Long referenceId, PaymentReferenceType referenceType) {

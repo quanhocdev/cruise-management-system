@@ -13,6 +13,8 @@ public class PaymentResponse {
 
     private Long referenceId;
 
+    private Long payerId;
+
     private PaymentReferenceType referenceType;
 
     private BigDecimal amount;
@@ -51,6 +53,9 @@ public class PaymentResponse {
     public void setReferenceId(Long referenceId) {
         this.referenceId = referenceId;
     }
+
+    public Long getPayerId() { return payerId; }
+    public void setPayerId(Long payerId) { this.payerId = payerId; }
 
     public PaymentReferenceType getReferenceType() {
         return referenceType;

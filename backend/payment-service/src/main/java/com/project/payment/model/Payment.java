@@ -31,6 +31,9 @@ public class Payment {
     @Column(name = "reference_id", nullable = false)
     private Long referenceId;
 
+    @Column(name = "payer_id", nullable = false)
+    private Long payerId;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "reference_type", nullable = false, length = 20)
     private PaymentReferenceType referenceType;
@@ -91,6 +94,9 @@ public class Payment {
     public void setReferenceId(Long referenceId) {
         this.referenceId = referenceId;
     }
+
+    public Long getPayerId() { return payerId; }
+    public void setPayerId(Long payerId) { this.payerId = payerId; }
 
     public PaymentReferenceType getReferenceType() {
         return referenceType;

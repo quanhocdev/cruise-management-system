@@ -9,9 +9,9 @@ import java.util.Map;
 
 public interface PaymentService {
 
-    PaymentResponse createPayment(CreatePaymentRequest request, String clientIp);
+    PaymentResponse createPayment(CreatePaymentRequest request, Long payerId, String clientIp);
 
-    PaymentResponse getPayment(Long id);
+    PaymentResponse getPayment(Long id, Long requesterId, boolean privileged);
 
     List<PaymentResponse> getPayments(Long referenceId, PaymentReferenceType referenceType);
 

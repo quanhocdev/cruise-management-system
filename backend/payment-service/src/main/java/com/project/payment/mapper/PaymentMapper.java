@@ -32,6 +32,7 @@ public class PaymentMapper {
 
         response.setId(payment.getId());
         response.setReferenceId(payment.getReferenceId());
+        response.setPayerId(payment.getPayerId());
         response.setReferenceType(payment.getReferenceType());
         response.setAmount(payment.getAmount());
         response.setMethod(payment.getMethod());
