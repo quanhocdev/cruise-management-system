@@ -33,6 +33,10 @@ public class SecurityConfig {
                         "/api/auth/verify-email",
                         "/api/auth/logout",
 
+                        // VNPay redirects the browser and calls IPN without JWT
+                        "/api/v1/payments/vnpay/return",
+                        "/api/v1/payments/vnpay/ipn",
+
                         // Staff activation
                         "/api/auth/activate/verify",
                         "/api/auth/activate/set-password",
