@@ -11,12 +11,18 @@ import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.security.MessageDigest;
 import java.util.Map;
 import java.util.TreeMap;
 
 @Component
 public class VnPayPaymentProvider implements PaymentProvider {
+
+    private static final ZoneId VN_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
+    private static final DateTimeFormatter VNP_DATE_FORMAT =
+            DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
     private final VnPayConfig vnPayConfig;
 
@@ -32,14 +38,17 @@ public class VnPayPaymentProvider implements PaymentProvider {
 
     @Override
     public String createPaymentUrl(
-            Payment payment) {
+            Payment payment,
+            String clientIp) {
+
+        vnPayConfig.requireCredentials();
 
         String txnRef = String.valueOf(payment.getId());
 
-        String createDate = LocalDateTime.now()
-                .format(
-                        DateTimeFormatter.ofPattern(
-                                "yyyyMMddHHmmss"));
+        String createDate = LocalDateTime.ofInstant(payment.getCreatedAt(), VN_ZONE)
+                .format(VNP_DATE_FORMAT);
+        String expireDate = LocalDateTime.ofInstant(payment.getExpiresAt(), VN_ZONE)
+                .format(VNP_DATE_FORMAT);
 
         long amount = payment.getAmount()
                 .multiply(
@@ -90,11 +99,15 @@ public class VnPayPaymentProvider implements PaymentProvider {
 
         params.put(
                 "vnp_IpAddr",
-                "127.0.0.1");
+                normalizeIp(clientIp));
 
         params.put(
                 "vnp_CreateDate",
                 createDate);
+
+        params.put(
+                "vnp_ExpireDate",
+                expireDate);
 
         String query = buildQuery(params);
 
@@ -113,13 +126,21 @@ public class VnPayPaymentProvider implements PaymentProvider {
     public boolean verifyCallback(
             Map<String, String> params) {
 
+        vnPayConfig.requireCredentials();
+
         String receivedHash = params.get("vnp_SecureHash");
 
         if (receivedHash == null) {
             return false;
         }
 
-        Map<String, String> data = new TreeMap<>(params);
+        Map<String, String> data = new TreeMap<>();
+
+        params.forEach((key, value) -> {
+            if (key.startsWith("vnp_") && value != null && !value.isBlank()) {
+                data.put(key, value);
+            }
+        });
 
         data.remove("vnp_SecureHash");
         data.remove("vnp_SecureHashType");
@@ -130,8 +151,9 @@ public class VnPayPaymentProvider implements PaymentProvider {
                 vnPayConfig.getHashSecret(),
                 query);
 
-        return calculatedHash.equalsIgnoreCase(
-                receivedHash);
+        return MessageDigest.isEqual(
+                calculatedHash.toLowerCase().getBytes(StandardCharsets.US_ASCII),
+                receivedHash.toLowerCase().getBytes(StandardCharsets.US_ASCII));
     }
 
     @Override
@@ -146,6 +168,10 @@ public class VnPayPaymentProvider implements PaymentProvider {
         StringBuilder query = new StringBuilder();
 
         for (Map.Entry<String, String> entry : params.entrySet()) {
+
+            if (entry.getValue() == null || entry.getValue().isBlank()) {
+                continue;
+            }
 
             if (query.length() > 0) {
                 query.append("&");
@@ -165,6 +191,12 @@ public class VnPayPaymentProvider implements PaymentProvider {
         }
 
         return query.toString();
+    }
+
+    private String normalizeIp(String clientIp) {
+        if (clientIp == null || clientIp.isBlank()) return "127.0.0.1";
+        String value = clientIp.split(",")[0].trim();
+        return value.length() <= 45 ? value : "127.0.0.1";
     }
 
     private String hmacSHA512(

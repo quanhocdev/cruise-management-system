@@ -9,7 +9,7 @@ public interface PaymentProvider {
 
     PaymentMethod getPaymentMethod();
 
-    String createPaymentUrl(Payment payment);
+    String createPaymentUrl(Payment payment, String clientIp);
 
     boolean verifyCallback(Map<String, String> params);
 
