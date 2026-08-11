@@ -34,8 +34,7 @@ public class AuthController {
     public AuthController(
             AuthService authService,
             JwtService jwtService,
-            TokenRedisService tokenRedisService
-    ) {
+            TokenRedisService tokenRedisService) {
         this.authService = authService;
         this.jwtService = jwtService;
         this.tokenRedisService = tokenRedisService;
@@ -47,8 +46,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(
             @Valid @RequestBody LoginRequest request,
-            HttpServletResponse response
-    ) {
+            HttpServletResponse response) {
         Users user = authService.login(request);
 
         String accessToken = jwtService.generateAccessToken(user);
@@ -67,15 +65,16 @@ public class AuthController {
         tokenRedisService.saveRefreshToken(refreshJti, user.getId(), refreshTtl);
 
         // Set Cookie thông qua CookieUtil
-        CookieUtil.addCookie(response, CookieUtil.ACCESS_TOKEN_COOKIE_NAME, accessToken, jwtService.getAccessCookieMaxAgeInSeconds());
-        CookieUtil.addCookie(response, CookieUtil.REFRESH_TOKEN_COOKIE_NAME, refreshToken, jwtService.getRefreshCookieMaxAgeInSeconds());
+        CookieUtil.addCookie(response, CookieUtil.ACCESS_TOKEN_COOKIE_NAME, accessToken,
+                jwtService.getAccessCookieMaxAgeInSeconds());
+        CookieUtil.addCookie(response, CookieUtil.REFRESH_TOKEN_COOKIE_NAME, refreshToken,
+                jwtService.getRefreshCookieMaxAgeInSeconds());
 
         JwtResponse responseBody = new JwtResponse(
                 accessToken,
                 refreshToken,
                 user.getUsername(),
-                user.getRole().name()
-        );
+                user.getRole().getName());
 
         return ResponseEntity.ok(responseBody);
     }
@@ -86,8 +85,7 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<Map<String, String>> refresh(
             HttpServletRequest request,
-            HttpServletResponse response
-    ) {
+            HttpServletResponse response) {
         String refreshToken = CookieUtil.getCookieValue(request, CookieUtil.REFRESH_TOKEN_COOKIE_NAME);
 
         if (refreshToken == null) {
@@ -115,12 +113,12 @@ public class AuthController {
         tokenRedisService.saveAccessToken(newAccessJti, user.getId(), newAccessTtl);
 
         // Set Access Token Cookie mới
-        CookieUtil.addCookie(response, CookieUtil.ACCESS_TOKEN_COOKIE_NAME, newAccessToken, jwtService.getAccessCookieMaxAgeInSeconds());
+        CookieUtil.addCookie(response, CookieUtil.ACCESS_TOKEN_COOKIE_NAME, newAccessToken,
+                jwtService.getAccessCookieMaxAgeInSeconds());
 
         return ResponseEntity.ok(Map.of(
                 "accessToken", newAccessToken,
-                "message", "Access token refreshed"
-        ));
+                "message", "Access token refreshed"));
     }
 
     /**
@@ -142,8 +140,7 @@ public class AuthController {
 
         return ResponseEntity.ok(Map.of(
                 "username", username,
-                "role", role
-        ));
+                "role", role));
     }
 
     /**
@@ -152,8 +149,7 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<Map<String, String>> logout(
             HttpServletRequest request,
-            HttpServletResponse response
-    ) {
+            HttpServletResponse response) {
         String accessToken = CookieUtil.getCookieValue(request, CookieUtil.ACCESS_TOKEN_COOKIE_NAME);
         String refreshToken = CookieUtil.getCookieValue(request, CookieUtil.REFRESH_TOKEN_COOKIE_NAME);
 
@@ -171,7 +167,8 @@ public class AuthController {
                 if (accessJti != null) {
                     tokenRedisService.deleteAccessToken(accessJti);
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
         if (refreshToken != null && !refreshToken.isBlank()) {
@@ -180,7 +177,8 @@ public class AuthController {
                 if (refreshJti != null) {
                     tokenRedisService.deleteRefreshToken(refreshJti);
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
         // Clear toàn bộ Auth Cookie

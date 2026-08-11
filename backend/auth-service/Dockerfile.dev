@@ -2,9 +2,27 @@ FROM maven:3.9.6-eclipse-temurin-17
 
 WORKDIR /app
 
-# Cache dependencies
-COPY pom.xml .
-RUN mvn -B dependency:go-offline
+# ==========================
+# Common
+# ==========================
 
-# Chạy Spring Boot ở chế độ dev
+COPY common/pom.xml ./common/pom.xml
+COPY common/src ./common/src
+
+# Build common và cài vào Maven local repository
+RUN mvn -f common/pom.xml clean install -DskipTests
+
+# ==========================
+# Auth Service
+# ==========================
+
+COPY auth-service/pom.xml ./auth-service/pom.xml
+COPY auth-service/src ./auth-service/src
+
+WORKDIR /app/auth-service
+
+# Tải dependency của auth-service
+RUN mvn dependency:go-offline -B
+
+# Chạy auth-service
 CMD ["mvn", "spring-boot:run"]

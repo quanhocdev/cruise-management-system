@@ -12,54 +12,54 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // =========================================================
-// KIỂM TRA PHIÊN ĐĂNG NHẬP
-// =========================================================
-const checkAuthStatus = async () => {
+  // KIỂM TRA PHIÊN ĐĂNG NHẬP
+  // =========================================================
+  const checkAuthStatus = async () => {
     try {
-        /*
-         * GET /api/auth/me
-         *
-         * Browser tự động gửi Cookie nhờ withCredentials: true.
-         *
-         * Trường hợp 1: Chưa đăng nhập
-         *     /auth/me → 401
-         *     /auth/refresh → 401
-         *     → catch → user = null
-         *
-         * Trường hợp 2: Access token còn hạn
-         *     /auth/me → 200
-         *     → lấy thông tin user
-         *
-         * Trường hợp 3: Access token hết hạn
-         *     /auth/me → 401
-         *     → Axios interceptor tự gọi /auth/refresh
-         *     → tạo access token mới
-         *     → gọi lại /auth/me
-         *     → 200 → lấy thông tin user
-         */
-    const res = await api.get("/auth/me");
+      /*
+       * GET /api/auth/me
+       *
+       * Browser tự động gửi Cookie nhờ withCredentials: true.
+       *
+       * Trường hợp 1: Chưa đăng nhập
+       *     /auth/me → 401
+       *     /auth/refresh → 401
+       *     → catch → user = null
+       *
+       * Trường hợp 2: Access token còn hạn
+       *     /auth/me → 200
+       *     → lấy thông tin user
+       *
+       * Trường hợp 3: Access token hết hạn
+       *     /auth/me → 401
+       *     → Axios interceptor tự gọi /auth/refresh
+       *     → tạo access token mới
+       *     → gọi lại /auth/me
+       *     → 200 → lấy thông tin user
+       */
+      const res = await api.get("/auth/me");
 
-    if (res.data && res.data.username) {
+      if (res.data && res.data.username) {
         setUser({
-            username: res.data.username,
-            role: res.data.role,
+          username: res.data.username,
+          role: res.data.role,
         });
-    } else {
+      } else {
         setUser(null);
+      }
+    } catch (err) {
+      /*
+       * Không xác thực được phiên đăng nhập.
+       *
+       * Có thể do:
+       * - Chưa đăng nhập
+       * - Refresh token hết hạn
+       * - Refresh token không hợp lệ
+       */
+      setUser(null);
+    } finally {
+      setLoading(false);
     }
-} catch (err) {
-    /*
-     * Không xác thực được phiên đăng nhập.
-     *
-     * Có thể do:
-     * - Chưa đăng nhập
-     * - Refresh token hết hạn
-     * - Refresh token không hợp lệ
-     */
-    setUser(null);
-} finally {
-    setLoading(false);
-}
   };
 
   // =========================================================

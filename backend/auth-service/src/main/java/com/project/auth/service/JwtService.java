@@ -22,10 +22,10 @@ public class JwtService {
     private final JwtEncoder jwtEncoder;
     private final JwtDecoder jwtDecoder;
 
-    @Value("${jwt.access-expiration}") 
+    @Value("${jwt.access-expiration}")
     private long accessTokenExpiration;
 
-    @Value("${jwt.refresh-expiration}") 
+    @Value("${jwt.refresh-expiration}")
     private long refreshTokenExpiration;
 
     public JwtService(JwtEncoder jwtEncoder, JwtDecoder jwtDecoder) {
@@ -34,35 +34,35 @@ public class JwtService {
     }
 
     public String generateAccessToken(Users user) {
-    Instant now = Instant.now();
+        Instant now = Instant.now();
 
-    JwtClaimsSet claims = JwtClaimsSet.builder()
-            .id(UUID.randomUUID().toString()) // JTI cho Access Token
-            .subject(user.getUsername())
-            .issuedAt(now)
-            .expiresAt(now.plus(accessTokenExpiration, ChronoUnit.MILLIS))
-            .claim("scope", user.getRole().name())
-            .claim("userId", user.getId())
-            .claim("email", user.getEmail())
-            .claim("tokenType", "ACCESS")
-            .build();
+        JwtClaimsSet claims = JwtClaimsSet.builder()
+                .id(UUID.randomUUID().toString()) // JTI cho Access Token
+                .subject(user.getUsername())
+                .issuedAt(now)
+                .expiresAt(now.plus(accessTokenExpiration, ChronoUnit.MILLIS))
+                .claim("scope", user.getRole().getName())
+                .claim("userId", user.getId())
+                .claim("email", user.getEmail())
+                .claim("tokenType", "ACCESS")
+                .build();
 
-    return encodeToken(claims);
-}
+        return encodeToken(claims);
+    }
 
-public String generateRefreshToken(Users user) {
-    Instant now = Instant.now();
+    public String generateRefreshToken(Users user) {
+        Instant now = Instant.now();
 
-    JwtClaimsSet claims = JwtClaimsSet.builder()
-            .id(UUID.randomUUID().toString()) // JTI cho Refresh Token
-            .subject(user.getUsername())
-            .issuedAt(now)
-            .expiresAt(now.plus(refreshTokenExpiration, ChronoUnit.MILLIS))
-            .claim("tokenType", "REFRESH")
-            .build();
+        JwtClaimsSet claims = JwtClaimsSet.builder()
+                .id(UUID.randomUUID().toString()) // JTI cho Refresh Token
+                .subject(user.getUsername())
+                .issuedAt(now)
+                .expiresAt(now.plus(refreshTokenExpiration, ChronoUnit.MILLIS))
+                .claim("tokenType", "REFRESH")
+                .build();
 
-    return encodeToken(claims);
-}
+        return encodeToken(claims);
+    }
 
     public String extractUsername(String token) {
         return jwtDecoder.decode(token).getSubject();
@@ -84,7 +84,8 @@ public String generateRefreshToken(Users user) {
         try {
             Jwt jwt = jwtDecoder.decode(token);
             String tokenType = jwt.getClaimAsString("tokenType");
-            return "REFRESH".equals(tokenType) && jwt.getExpiresAt() != null && jwt.getExpiresAt().isAfter(Instant.now());
+            return "REFRESH".equals(tokenType) && jwt.getExpiresAt() != null
+                    && jwt.getExpiresAt().isAfter(Instant.now());
         } catch (Exception e) {
             return false;
         }
@@ -102,8 +103,7 @@ public String generateRefreshToken(Users user) {
         return jwtEncoder.encode(
                 JwtEncoderParameters.from(
                         JwsHeader.with(MacAlgorithm.HS256).build(),
-                        claims
-                )
-        ).getTokenValue();
+                        claims))
+                .getTokenValue();
     }
 }

@@ -10,54 +10,35 @@ spring:
       server:
         webflux:
           routes:
-            # ==========================================
-            # AUTH SERVICE
-            # ==========================================
             - id: auth-service
-              uri: http://auth-service:8081
+              uri: ${AUTH_SERVICE_URL:http://auth-service:8081}
               predicates:
                 - Path=/api/auth/**,/api/admin/**
 
-          # ==========================================
-          # GLOBAL CORS
-          # ==========================================
-          globalcors:
-            add-to-simple-url-handler-mapping: true
-
-            cors-configurations:
-              "[/**]":
-                allowedOrigins:
-                  - "http://localhost:5173"
-
-                allowedMethods:
-                  - GET
-                  - POST
-                  - PUT
-                  - DELETE
-                  - OPTIONS
-
-                allowedHeaders:
-                  - "*"
-
-                allowCredentials: true
-
-                exposedHeaders:
-                  - Authorization
-                  - Set-Cookie
-
-# ==========================================
-# JWT
-# ==========================================
+      globalcors:
+        add-to-simple-url-handler-mapping: true
+        cors-configurations:
+          "[/**]":
+            allowedOrigins:
+              - "http://localhost:5173"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+            exposedHeaders:
+              - Authorization
+              - Set-Cookie
 
 jwt:
   secret: ${JWT_SECRET}
 
-# ==========================================
-# LOGGING
-# ==========================================
-
 logging:
   level:
-    org.springframework.cloud.gateway: INFO
+    org.springframework.cloud.gateway: DEBUG
     org.springframework.web: INFO
     org.springframework.security: INFO
