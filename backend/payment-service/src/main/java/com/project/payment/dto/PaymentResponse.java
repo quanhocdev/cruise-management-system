@@ -23,11 +23,15 @@ public class PaymentResponse {
 
     private String transactionCode;
 
+    private String responseCode;
+
     private String paymentUrl;
 
     private Instant createdAt;
 
     private Instant paidAt;
+
+    private Instant expiresAt;
 
     public PaymentResponse() {
     }
@@ -88,6 +92,9 @@ public class PaymentResponse {
         this.transactionCode = transactionCode;
     }
 
+    public String getResponseCode() { return responseCode; }
+    public void setResponseCode(String responseCode) { this.responseCode = responseCode; }
+
     public String getPaymentUrl() {
         return paymentUrl;
     }
@@ -111,4 +118,7 @@ public class PaymentResponse {
     public void setPaidAt(Instant paidAt) {
         this.paidAt = paidAt;
     }
+
+    public Instant getExpiresAt() { return expiresAt; }
+    public void setExpiresAt(Instant expiresAt) { this.expiresAt = expiresAt; }
 }

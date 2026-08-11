@@ -37,9 +37,11 @@ public class PaymentMapper {
         response.setMethod(payment.getMethod());
         response.setStatus(payment.getStatus());
         response.setTransactionCode(payment.getTransactionCode());
+        response.setResponseCode(payment.getResponseCode());
         response.setPaymentUrl(payment.getPaymentUrl());
         response.setCreatedAt(payment.getCreatedAt());
         response.setPaidAt(payment.getPaidAt());
+        response.setExpiresAt(payment.getExpiresAt());
 
         return response;
     }

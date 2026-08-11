@@ -4,12 +4,14 @@ import com.project.payment.model.Payment;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
+import java.util.List;
+import com.project.payment.model.enums.PaymentReferenceType;
 
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     Optional<Payment> findByTransactionCode(String transactionCode);
 
-    Optional<Payment> findByReferenceIdAndReferenceType(
+    List<Payment> findAllByReferenceIdAndReferenceTypeOrderByCreatedAtDesc(
             Long referenceId,
-            com.project.payment.model.enums.PaymentReferenceType referenceType);
+            PaymentReferenceType referenceType);
 }
