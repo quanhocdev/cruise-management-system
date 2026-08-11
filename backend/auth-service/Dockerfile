@@ -1,4 +1,6 @@
+# auth-service/Dockerfile.dev
 FROM maven:3.9.6-eclipse-temurin-17 AS build
+
 WORKDIR /app
 
 # Step 1: Copy file pom.xml của common và build trước dependency (Tạo layer cache cho common)

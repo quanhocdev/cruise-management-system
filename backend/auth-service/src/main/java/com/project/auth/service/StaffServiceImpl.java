@@ -12,9 +12,11 @@ import com.project.auth.dto.CreateStaffRequest;
 import com.project.auth.dto.CreateStaffResponse;
 import com.project.auth.dto.SetPasswordRequest;
 import com.project.auth.exception.AppException;
+import com.project.auth.model.Role;
 import com.project.auth.model.Users;
 import com.project.auth.model.enums.UserProvider;
 import com.project.auth.model.enums.UserStatus;
+import com.project.auth.repository.RoleRepository;
 import com.project.auth.repository.UserRepository;
 import com.project.auth.service.mail.MailService;
 import com.project.auth.service.redis.TokenRedisService;
@@ -25,16 +27,19 @@ public class StaffServiceImpl implements StaffService {
         private static final Duration ACTIVATION_TOKEN_TTL = Duration.ofMinutes(10);
 
         private final UserRepository userRepository;
+        private final RoleRepository roleRepository;
         private final TokenRedisService tokenRedisService;
         private final MailService mailService;
         private final PasswordEncoder passwordEncoder;
 
         public StaffServiceImpl(
                         UserRepository userRepository,
+                        RoleRepository roleRepository,
                         TokenRedisService tokenRedisService,
                         MailService mailService,
                         PasswordEncoder passwordEncoder) {
                 this.userRepository = userRepository;
+                this.roleRepository = roleRepository;
                 this.tokenRedisService = tokenRedisService;
                 this.mailService = mailService;
                 this.passwordEncoder = passwordEncoder;
@@ -58,9 +63,19 @@ public class StaffServiceImpl implements StaffService {
                                         HttpStatus.BAD_REQUEST);
                 }
 
-                // Không cho Admin tạo Passenger/GUEST bằng API này
-                if (request.role().name().equals("PASSENGER")
-                                || request.role().name().equals("GUEST")) {
+                /*
+                 * Lấy Role từ database
+                 */
+                Role role = roleRepository.findById(request.roleId())
+                                .orElseThrow(() -> new AppException(
+                                                "Role không tồn tại",
+                                                HttpStatus.BAD_REQUEST));
+
+                /*
+                 * Không cho Admin tạo Passenger/GUEST bằng API này
+                 */
+                if (role.getName().equals("PASSENGER")
+                                || role.getName().equals("GUEST")) {
 
                         throw new AppException(
                                         "Role không hợp lệ cho tài khoản nhân viên",
@@ -77,7 +92,7 @@ public class StaffServiceImpl implements StaffService {
                 user.setPassword(null);
                 user.setEmail(request.email());
                 user.setFirebaseUid(null);
-                user.setRole(request.role());
+                user.setRole(role);
                 user.setProvider(UserProvider.LOCAL);
                 user.setEnabled(false);
                 user.setStatus(UserStatus.INVITED);
@@ -127,7 +142,7 @@ public class StaffServiceImpl implements StaffService {
                                 savedUser.getId(),
                                 savedUser.getUsername(),
                                 savedUser.getEmail(),
-                                savedUser.getRole().name(),
+                                savedUser.getRole().getName(),
                                 savedUser.getStatus().name(),
                                 "Tạo tài khoản nhân viên thành công. Email kích hoạt đã được gửi.");
         }
@@ -170,7 +185,8 @@ public class StaffServiceImpl implements StaffService {
         }
 
         @Override
-        public void setPassword(SetPasswordRequest request) {
+        public void setPassword(
+                        SetPasswordRequest request) {
 
                 if (!request.password().equals(request.confirmPassword())) {
                         throw new AppException(
