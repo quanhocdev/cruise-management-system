@@ -58,6 +58,31 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v1/cruises")
                 .hasRole("ADMIN")
 
+                // Cruise deck management
+                .requestMatchers(
+                    HttpMethod.POST,
+                    "/api/v1/cruises/*/decks"
+                )
+                .hasRole("ADMIN")
+
+                .requestMatchers(
+                    HttpMethod.PUT,
+                    "/api/v1/cruises/*/decks/**"
+                )
+                .hasRole("ADMIN")
+
+                .requestMatchers(
+                    HttpMethod.PATCH,
+                    "/api/v1/cruises/*/decks/**"
+                )
+                .hasRole("ADMIN")
+
+                .requestMatchers(
+                    HttpMethod.GET,
+                    "/api/v1/cruises/*/decks/**"
+                )
+                .authenticated()
+
                 .requestMatchers(HttpMethod.PUT, "/api/v1/cruises/**")
                 .hasRole("ADMIN")
 
@@ -65,6 +90,93 @@ public class SecurityConfig {
                 .hasRole("ADMIN")
 
                 .requestMatchers(HttpMethod.GET, "/api/v1/cruises/**")
+                .authenticated()
+
+                // Room type management
+                .requestMatchers(HttpMethod.POST, "/api/v1/room-types")
+                .hasRole("ADMIN")
+
+                .requestMatchers(
+                    HttpMethod.PUT,
+                    "/api/v1/room-types/**"
+                )
+                .hasRole("ADMIN")
+
+                .requestMatchers(
+                    HttpMethod.DELETE,
+                    "/api/v1/room-types/**"
+                )
+                .hasRole("ADMIN")
+
+                .requestMatchers(HttpMethod.GET, "/api/v1/room-types/**")
+                .authenticated()
+
+                // Room management
+                .requestMatchers(HttpMethod.POST, "/api/v1/decks/*/rooms")
+                .hasRole("ADMIN")
+
+                .requestMatchers(HttpMethod.PUT, "/api/v1/decks/*/rooms/**")
+                .hasRole("ADMIN")
+
+                .requestMatchers(HttpMethod.PATCH, "/api/v1/decks/*/rooms/**")
+                .hasRole("ADMIN")
+
+                .requestMatchers(HttpMethod.GET, "/api/v1/decks/*/rooms/**")
+                .authenticated()
+
+                // Cruise area management
+                .requestMatchers(HttpMethod.POST, "/api/v1/decks/*/areas")
+                .hasRole("ADMIN")
+
+                .requestMatchers(HttpMethod.PUT, "/api/v1/decks/*/areas/**")
+                .hasRole("ADMIN")
+
+                .requestMatchers(HttpMethod.PATCH, "/api/v1/decks/*/areas/**")
+                .hasRole("ADMIN")
+
+                .requestMatchers(HttpMethod.GET, "/api/v1/decks/*/areas/**")
+                .authenticated()
+
+                // Policy and policy rule management
+                .requestMatchers(HttpMethod.POST, "/api/v1/policies/**")
+                .hasRole("ADMIN")
+
+                .requestMatchers(HttpMethod.PUT, "/api/v1/policies/**")
+                .hasRole("ADMIN")
+
+                .requestMatchers(HttpMethod.PATCH, "/api/v1/policies/**")
+                .hasRole("ADMIN")
+
+                .requestMatchers(HttpMethod.GET, "/api/v1/policies/**")
+                .authenticated()
+
+                // Tour package management
+                .requestMatchers(HttpMethod.POST, "/api/v1/packages")
+                .hasAnyRole("ADMIN", "SCHEDULER")
+
+                .requestMatchers(HttpMethod.PUT, "/api/v1/packages/**")
+                .hasAnyRole("ADMIN", "SCHEDULER")
+
+                .requestMatchers(HttpMethod.PATCH, "/api/v1/packages/**")
+                .hasAnyRole("ADMIN", "SCHEDULER")
+
+                .requestMatchers(HttpMethod.GET, "/api/v1/packages/**")
+                .authenticated()
+
+                // Schedule, itinerary day and port call management
+                .requestMatchers(HttpMethod.POST, "/api/v1/schedules/**")
+                .hasAnyRole("ADMIN", "SCHEDULER")
+
+                .requestMatchers(HttpMethod.PUT, "/api/v1/schedules/**")
+                .hasAnyRole("ADMIN", "SCHEDULER")
+
+                .requestMatchers(HttpMethod.PATCH, "/api/v1/schedules/**")
+                .hasAnyRole("ADMIN", "SCHEDULER")
+
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/schedules/**")
+                .hasAnyRole("ADMIN", "SCHEDULER")
+
+                .requestMatchers(HttpMethod.GET, "/api/v1/schedules/**")
                 .authenticated()
 
                 .anyRequest()
