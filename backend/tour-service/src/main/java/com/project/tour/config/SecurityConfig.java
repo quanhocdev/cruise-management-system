@@ -150,6 +150,19 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/policies/**")
                 .authenticated()
 
+                // Tour package management
+                .requestMatchers(HttpMethod.POST, "/api/v1/packages")
+                .hasAnyRole("ADMIN", "SCHEDULER")
+
+                .requestMatchers(HttpMethod.PUT, "/api/v1/packages/**")
+                .hasAnyRole("ADMIN", "SCHEDULER")
+
+                .requestMatchers(HttpMethod.PATCH, "/api/v1/packages/**")
+                .hasAnyRole("ADMIN", "SCHEDULER")
+
+                .requestMatchers(HttpMethod.GET, "/api/v1/packages/**")
+                .authenticated()
+
                 .anyRequest()
                 .authenticated()
             )
