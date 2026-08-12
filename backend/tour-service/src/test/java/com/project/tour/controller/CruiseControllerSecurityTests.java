@@ -3,6 +3,7 @@ package com.project.tour.controller;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import com.project.tour.config.JwtConfig;
 import com.project.tour.config.SecurityConfig;
+import com.project.tour.controller.cruise.CruiseController;
 import com.project.tour.exception.DuplicateResourceException;
 import com.project.tour.service.CruiseService;
 import org.junit.jupiter.api.Test;
@@ -31,14 +32,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(CruiseController.class)
-@Import({SecurityConfig.class, JwtConfig.class})
+@Import({ SecurityConfig.class, JwtConfig.class })
 @TestPropertySource(properties = {
-    "jwt.secret=cruise-management-system-local-secret-key-2026"
+        "jwt.secret=cruise-management-system-local-secret-key-2026"
 })
 class CruiseControllerSecurityTests {
 
-    private static final String SECRET =
-        "cruise-management-system-local-secret-key-2026";
+    private static final String SECRET = "cruise-management-system-local-secret-key-2026";
 
     @Autowired
     private MockMvc mockMvc;
@@ -49,63 +49,60 @@ class CruiseControllerSecurityTests {
     @Test
     void requestWithoutTokenReturnsUnauthorized() throws Exception {
         mockMvc.perform(get("/api/v1/cruises"))
-            .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     void passengerCannotCreateCruise() throws Exception {
         performCreate("PASSENGER")
-            .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden());
     }
 
     @Test
     void schedulerCannotCreateCruise() throws Exception {
         performCreate("SCHEDULER")
-            .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden());
     }
 
     @Test
     void adminCanCreateCruise() throws Exception {
         performCreate("ADMIN")
-            .andExpect(status().isCreated());
+                .andExpect(status().isCreated());
     }
 
     @Test
     void authenticatedPassengerCanReadCruises() throws Exception {
         mockMvc.perform(get("/api/v1/cruises")
                 .header("Authorization", "Bearer " + accessToken("PASSENGER")))
-            .andExpect(status().isOk());
+                .andExpect(status().isOk());
     }
 
     @Test
     void refreshTokenIsRejected() throws Exception {
         mockMvc.perform(get("/api/v1/cruises")
                 .header("Authorization", "Bearer " + token(null, "REFRESH")))
-            .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     void duplicateCruiseCodeReturnsConflict() throws Exception {
         when(cruiseService.createCruise(any()))
-            .thenThrow(new DuplicateResourceException(
-                "Cruise code already exists: OCEAN-STAR-01"
-            ));
+                .thenThrow(new DuplicateResourceException(
+                        "Cruise code already exists: OCEAN-STAR-01"));
 
         performCreate("ADMIN")
-            .andExpect(status().isConflict())
-            .andExpect(jsonPath("$.status").value(409))
-            .andExpect(jsonPath("$.message").value(
-                "Cruise code already exists: OCEAN-STAR-01"
-            ));
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.message").value(
+                        "Cruise code already exists: OCEAN-STAR-01"));
     }
 
     private org.springframework.test.web.servlet.ResultActions performCreate(
-        String role
-    ) throws Exception {
+            String role) throws Exception {
         return mockMvc.perform(post("/api/v1/cruises")
-            .header("Authorization", "Bearer " + accessToken(role))
-            .contentType("application/json")
-            .content(validCruiseJson()));
+                .header("Authorization", "Bearer " + accessToken(role))
+                .contentType("application/json")
+                .content(validCruiseJson()));
     }
 
     private String accessToken(String role) {
@@ -116,42 +113,39 @@ class CruiseControllerSecurityTests {
         Instant now = Instant.now();
 
         JwtClaimsSet.Builder claims = JwtClaimsSet.builder()
-            .subject("test-user-id")
-            .issuedAt(now)
-            .expiresAt(now.plusSeconds(300))
-            .claim("tokenType", tokenType);
+                .subject("test-user-id")
+                .issuedAt(now)
+                .expiresAt(now.plusSeconds(300))
+                .claim("tokenType", tokenType);
 
         if (role != null) {
             claims.claim("scope", role);
         }
 
         SecretKey key = new SecretKeySpec(
-            SECRET.getBytes(StandardCharsets.UTF_8),
-            MacAlgorithm.HS256.getName()
-        );
+                SECRET.getBytes(StandardCharsets.UTF_8),
+                MacAlgorithm.HS256.getName());
 
         NimbusJwtEncoder encoder = new NimbusJwtEncoder(
-            new ImmutableSecret<>(key)
-        );
+                new ImmutableSecret<>(key));
 
         JwsHeader header = JwsHeader
-            .with(MacAlgorithm.HS256)
-            .build();
+                .with(MacAlgorithm.HS256)
+                .build();
 
         return encoder.encode(
-            JwtEncoderParameters.from(header, claims.build())
-        ).getTokenValue();
+                JwtEncoderParameters.from(header, claims.build())).getTokenValue();
     }
 
     private String validCruiseJson() {
         return """
-            {
-              "name": "Ocean Star",
-              "code": "OCEAN-STAR-01",
-              "description": "Multi-day cruise",
-              "totalDecks": 12,
-              "maxPassengers": 2500
-            }
-            """;
+                {
+                  "name": "Ocean Star",
+                  "code": "OCEAN-STAR-01",
+                  "description": "Multi-day cruise",
+                  "totalDecks": 12,
+                  "maxPassengers": 2500
+                }
+                """;
     }
 }

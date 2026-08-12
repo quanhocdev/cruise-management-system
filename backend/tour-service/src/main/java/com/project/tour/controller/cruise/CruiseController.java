@@ -1,4 +1,4 @@
-package com.project.tour.controller;
+package com.project.tour.controller.cruise;
 
 import com.project.tour.dto.cruise.CreateCruiseRequest;
 import com.project.tour.dto.cruise.CruiseResponse;
@@ -24,41 +24,33 @@ public class CruiseController {
 
     @PostMapping
     public ResponseEntity<CruiseResponse> createCruise(
-        @Valid @RequestBody CreateCruiseRequest request
-    ) {
-        CruiseResponse response =
-            cruiseService.createCruise(request);
+            @Valid @RequestBody CreateCruiseRequest request) {
+        CruiseResponse response = cruiseService.createCruise(request);
 
         return ResponseEntity
-            .status(HttpStatus.CREATED)
-            .body(response);
+                .status(HttpStatus.CREATED)
+                .body(response);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<CruiseResponse> getCruiseById(
-        @PathVariable UUID id
-    ) {
-        CruiseResponse response =
-            cruiseService.getCruiseById(id);
+            @PathVariable UUID id) {
+        CruiseResponse response = cruiseService.getCruiseById(id);
 
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/code/{code}")
     public ResponseEntity<CruiseResponse> getCruiseByCode(
-        @PathVariable String code
-    ) {
-        CruiseResponse response =
-            cruiseService.getCruiseByCode(code);
+            @PathVariable String code) {
+        CruiseResponse response = cruiseService.getCruiseByCode(code);
 
         return ResponseEntity.ok(response);
     }
 
     @GetMapping
     public ResponseEntity<List<CruiseResponse>> getCruises(
-        @RequestParam(defaultValue = "false")
-        boolean activeOnly
-    ) {
+            @RequestParam(defaultValue = "false") boolean activeOnly) {
         List<CruiseResponse> response;
 
         if (activeOnly) {
@@ -72,21 +64,17 @@ public class CruiseController {
 
     @PutMapping("/{id}")
     public ResponseEntity<CruiseResponse> updateCruise(
-        @PathVariable UUID id,
-        @Valid @RequestBody UpdateCruiseRequest request
-    ) {
-        CruiseResponse response =
-            cruiseService.updateCruise(id, request);
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateCruiseRequest request) {
+        CruiseResponse response = cruiseService.updateCruise(id, request);
 
         return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{id}/deactivate")
     public ResponseEntity<CruiseResponse> deactivateCruise(
-        @PathVariable UUID id
-    ) {
-        CruiseResponse response =
-            cruiseService.deactivateCruise(id);
+            @PathVariable UUID id) {
+        CruiseResponse response = cruiseService.deactivateCruise(id);
 
         return ResponseEntity.ok(response);
     }

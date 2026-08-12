@@ -2,6 +2,7 @@ package com.project.tour.controller;
 
 import com.project.tour.config.JwtConfig;
 import com.project.tour.config.SecurityConfig;
+import com.project.tour.controller.cruise.CruiseAreaController;
 import com.project.tour.service.CruiseAreaService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,14 +21,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(CruiseAreaController.class)
-@Import({SecurityConfig.class, JwtConfig.class})
+@Import({ SecurityConfig.class, JwtConfig.class })
 @TestPropertySource(properties = "jwt.secret=cruise-management-system-local-secret-key-2026")
 class CruiseAreaControllerSecurityTests {
 
     private static final String URL = "/api/v1/decks/" + UUID.randomUUID() + "/areas";
 
-    @Autowired MockMvc mockMvc;
-    @MockitoBean CruiseAreaService areaService;
+    @Autowired
+    MockMvc mockMvc;
+    @MockitoBean
+    CruiseAreaService areaService;
 
     @Test
     void noTokenReturnsUnauthorized() throws Exception {
@@ -40,7 +43,7 @@ class CruiseAreaControllerSecurityTests {
                 .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_PASSENGER")))
                 .contentType("application/json")
                 .content(validBody()))
-            .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -49,14 +52,14 @@ class CruiseAreaControllerSecurityTests {
                 .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
                 .contentType("application/json")
                 .content(validBody()))
-            .andExpect(status().isCreated());
+                .andExpect(status().isCreated());
     }
 
     @Test
     void passengerCanReadAreas() throws Exception {
         mockMvc.perform(get(URL)
                 .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_PASSENGER"))))
-            .andExpect(status().isOk());
+                .andExpect(status().isOk());
     }
 
     private String validBody() {

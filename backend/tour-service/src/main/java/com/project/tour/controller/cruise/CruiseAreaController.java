@@ -1,4 +1,4 @@
-package com.project.tour.controller;
+package com.project.tour.controller.cruise;
 
 import com.project.tour.dto.cruisearea.CreateCruiseAreaRequest;
 import com.project.tour.dto.cruisearea.CruiseAreaResponse;
@@ -24,43 +24,38 @@ public class CruiseAreaController {
 
     @PostMapping
     public ResponseEntity<CruiseAreaResponse> createArea(
-        @PathVariable UUID deckId,
-        @Valid @RequestBody CreateCruiseAreaRequest request
-    ) {
+            @PathVariable UUID deckId,
+            @Valid @RequestBody CreateCruiseAreaRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(areaService.createArea(deckId, request));
+                .body(areaService.createArea(deckId, request));
     }
 
     @GetMapping
     public ResponseEntity<List<CruiseAreaResponse>> getAreas(
-        @PathVariable UUID deckId,
-        @RequestParam(defaultValue = "false") boolean activeOnly
-    ) {
+            @PathVariable UUID deckId,
+            @RequestParam(defaultValue = "false") boolean activeOnly) {
         return ResponseEntity.ok(areaService.getAreas(deckId, activeOnly));
     }
 
     @GetMapping("/{areaId}")
     public ResponseEntity<CruiseAreaResponse> getArea(
-        @PathVariable UUID deckId,
-        @PathVariable UUID areaId
-    ) {
+            @PathVariable UUID deckId,
+            @PathVariable UUID areaId) {
         return ResponseEntity.ok(areaService.getArea(deckId, areaId));
     }
 
     @PutMapping("/{areaId}")
     public ResponseEntity<CruiseAreaResponse> updateArea(
-        @PathVariable UUID deckId,
-        @PathVariable UUID areaId,
-        @Valid @RequestBody UpdateCruiseAreaRequest request
-    ) {
+            @PathVariable UUID deckId,
+            @PathVariable UUID areaId,
+            @Valid @RequestBody UpdateCruiseAreaRequest request) {
         return ResponseEntity.ok(areaService.updateArea(deckId, areaId, request));
     }
 
     @PatchMapping("/{areaId}/deactivate")
     public ResponseEntity<CruiseAreaResponse> deactivateArea(
-        @PathVariable UUID deckId,
-        @PathVariable UUID areaId
-    ) {
+            @PathVariable UUID deckId,
+            @PathVariable UUID areaId) {
         return ResponseEntity.ok(areaService.deactivateArea(deckId, areaId));
     }
 }
