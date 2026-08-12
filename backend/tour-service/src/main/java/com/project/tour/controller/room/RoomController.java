@@ -6,6 +6,7 @@ import com.project.tour.dto.room.UpdateRoomRequest;
 import com.project.tour.service.room.RoomService;
 
 import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/decks/{deckId}/rooms")
+@RequestMapping("/api/admin/areas/{areaId}/rooms")
 public class RoomController {
 
     private final RoomService roomService;
@@ -25,39 +26,59 @@ public class RoomController {
 
     @PostMapping
     public ResponseEntity<RoomResponse> createRoom(
-            @PathVariable UUID deckId,
+            @PathVariable UUID areaId,
             @Valid @RequestBody CreateRoomRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(roomService.createRoom(deckId, request));
+
+        RoomResponse response = roomService.createRoom(areaId, request);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
     }
 
     @GetMapping
     public ResponseEntity<List<RoomResponse>> getRooms(
-            @PathVariable UUID deckId,
+            @PathVariable UUID areaId,
             @RequestParam(defaultValue = "false") boolean activeOnly) {
-        return ResponseEntity.ok(roomService.getRooms(deckId, activeOnly));
+
+        List<RoomResponse> response = activeOnly
+                ? roomService.getActiveRoomsByArea(areaId)
+                : roomService.getRoomsByArea(areaId);
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{roomId}")
     public ResponseEntity<RoomResponse> getRoomById(
-            @PathVariable UUID deckId,
+            @PathVariable UUID areaId,
             @PathVariable UUID roomId) {
-        return ResponseEntity.ok(roomService.getRoomById(deckId, roomId));
+
+        return ResponseEntity.ok(
+                roomService.getRoomById(
+                        areaId,
+                        roomId));
     }
 
-    @PutMapping("/{roomId}")
+    @PatchMapping("/{roomId}")
     public ResponseEntity<RoomResponse> updateRoom(
-            @PathVariable UUID deckId,
+            @PathVariable UUID areaId,
             @PathVariable UUID roomId,
             @Valid @RequestBody UpdateRoomRequest request) {
+
         return ResponseEntity.ok(
-                roomService.updateRoom(deckId, roomId, request));
+                roomService.updateRoom(
+                        areaId,
+                        roomId,
+                        request));
     }
 
-    @PatchMapping("/{roomId}/deactivate")
-    public ResponseEntity<RoomResponse> deactivateRoom(
-            @PathVariable UUID deckId,
+    @DeleteMapping("/{roomId}")
+    public ResponseEntity<Void> deleteRoom(
+            @PathVariable UUID areaId,
             @PathVariable UUID roomId) {
-        return ResponseEntity.ok(roomService.deactivateRoom(deckId, roomId));
+
+        roomService.deleteRoom(areaId, roomId);
+
+        return ResponseEntity.noContent().build();
     }
 }

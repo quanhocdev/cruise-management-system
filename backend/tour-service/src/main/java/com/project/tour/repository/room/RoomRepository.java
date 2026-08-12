@@ -10,20 +10,25 @@ import java.util.UUID;
 
 public interface RoomRepository extends JpaRepository<Room, UUID> {
 
-    boolean existsByCruiseDeck_IdAndCodeIgnoreCase(UUID deckId, String code);
+        boolean existsByCruiseArea_IdAndCodeIgnoreCase(
+                        UUID areaId,
+                        String code);
 
-    boolean existsByCruiseDeck_IdAndCodeIgnoreCaseAndIdNot(
-            UUID deckId,
-            String code,
-            UUID excludedRoomId);
+        boolean existsByCruiseArea_IdAndCodeIgnoreCaseAndIdNot(
+                        UUID areaId,
+                        String code,
+                        UUID excludedRoomId);
 
-    Optional<Room> findByIdAndCruiseDeck_Id(UUID id, UUID deckId);
+        Optional<Room> findByIdAndCruiseArea_Id(
+                        UUID id,
+                        UUID areaId);
 
-    List<Room> findAllByCruiseDeck_IdOrderByCodeAsc(UUID deckId);
+        List<Room> findAllByCruiseArea_IdOrderByCodeAsc(
+                        UUID areaId);
 
-    List<Room> findAllByCruiseDeck_IdAndStatusOrderByCodeAsc(
-            UUID deckId,
-            RoomStatus status);
+        List<Room> findAllByCruiseArea_IdAndStatusOrderByCodeAsc(
+                        UUID areaId,
+                        RoomStatus status);
 
-    boolean existsByRoomType_Id(UUID roomTypeId);
+        boolean existsByRoomType_Id(UUID roomTypeId);
 }

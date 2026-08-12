@@ -7,7 +7,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "rooms", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_rooms_deck_code", columnNames = { "cruise_deck_id", "code" })
+        @UniqueConstraint(name = "uk_rooms_area_code", columnNames = { "cruise_area_id", "code" })
 })
 public class Room {
 
@@ -16,8 +16,8 @@ public class Room {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "cruise_deck_id", nullable = false)
-    private CruiseDeck cruiseDeck;
+    @JoinColumn(name = "cruise_area_id", nullable = false)
+    private CruiseArea cruiseArea;
 
     @Column(nullable = false, length = 50)
     private String code;
@@ -45,12 +45,12 @@ public class Room {
         this.id = id;
     }
 
-    public CruiseDeck getCruiseDeck() {
-        return cruiseDeck;
+    public CruiseArea getCruiseArea() {
+        return cruiseArea;
     }
 
-    public void setCruiseDeck(CruiseDeck cruiseDeck) {
-        this.cruiseDeck = cruiseDeck;
+    public void setCruiseArea(CruiseArea cruiseArea) {
+        this.cruiseArea = cruiseArea;
     }
 
     public String getCode() {
