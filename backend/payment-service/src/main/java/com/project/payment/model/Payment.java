@@ -9,7 +9,13 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 @Entity
-@Table(name = "payment")
+@Table(
+    name = "payments",
+    indexes = {
+        @Index(name = "idx_payments_reference", columnList = "reference_type,reference_id"),
+        @Index(name = "idx_payments_transaction_code", columnList = "transaction_code")
+    }
+)
 public class Payment {
 
     @Id
@@ -24,6 +30,9 @@ public class Payment {
      */
     @Column(name = "reference_id", nullable = false)
     private Long referenceId;
+
+    @Column(name = "payer_id", nullable = false)
+    private Long payerId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "reference_type", nullable = false, length = 20)
@@ -46,6 +55,9 @@ public class Payment {
     @Column(name = "transaction_code", length = 100)
     private String transactionCode;
 
+    @Column(name = "response_code", length = 10)
+    private String responseCode;
+
     /**
      * URL thanh toán do payment provider trả về.
      */
@@ -57,6 +69,12 @@ public class Payment {
 
     @Column(name = "paid_at")
     private Instant paidAt;
+
+    @Column(name = "expires_at")
+    private Instant expiresAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
 
     public Payment() {
     }
@@ -76,6 +94,9 @@ public class Payment {
     public void setReferenceId(Long referenceId) {
         this.referenceId = referenceId;
     }
+
+    public Long getPayerId() { return payerId; }
+    public void setPayerId(Long payerId) { this.payerId = payerId; }
 
     public PaymentReferenceType getReferenceType() {
         return referenceType;
@@ -117,6 +138,9 @@ public class Payment {
         this.transactionCode = transactionCode;
     }
 
+    public String getResponseCode() { return responseCode; }
+    public void setResponseCode(String responseCode) { this.responseCode = responseCode; }
+
     public String getPaymentUrl() {
         return paymentUrl;
     }
@@ -140,4 +164,9 @@ public class Payment {
     public void setPaidAt(Instant paidAt) {
         this.paidAt = paidAt;
     }
+
+    public Instant getExpiresAt() { return expiresAt; }
+    public void setExpiresAt(Instant expiresAt) { this.expiresAt = expiresAt; }
+    public Instant getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
 }

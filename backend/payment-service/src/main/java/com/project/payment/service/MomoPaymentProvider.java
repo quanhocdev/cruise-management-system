@@ -16,7 +16,8 @@ public class MomoPaymentProvider implements PaymentProvider {
 
     @Override
     public String createPaymentUrl(
-            Payment payment) {
+            Payment payment,
+            String clientIp) {
 
         throw new UnsupportedOperationException(
                 "MoMo payment provider is not implemented yet");

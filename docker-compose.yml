@@ -144,6 +144,32 @@ services:
         condition: service_healthy
 
   # ==========================
+  # Payment Service
+  # ==========================
+
+  payment-service:
+    build:
+      context: ./backend/payment-service
+      dockerfile: Dockerfile.dev
+
+    container_name: payment-service
+    restart: always
+    ports:
+      - "8085:8085"
+    volumes:
+      - ./backend/payment-service:/app
+      - /app/target
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-cruise_db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ==========================
   # React
   # ==========================
 

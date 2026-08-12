@@ -1,185 +1,122 @@
 package com.project.payment.service;
 
-import com.project.payment.dto.CreatePaymentRequest;
-import com.project.payment.dto.PaymentResponse;
+import com.project.payment.dto.*;
+import com.project.payment.exception.PaymentException;
 import com.project.payment.mapper.PaymentMapper;
 import com.project.payment.model.Payment;
-import com.project.payment.model.enums.PaymentMethod;
-import com.project.payment.model.enums.PaymentStatus;
+import com.project.payment.model.enums.*;
 import com.project.payment.repository.PaymentRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
+    private final PaymentRepository repository;
+    private final PaymentMapper mapper;
+    private final Map<PaymentMethod, PaymentProvider> providers;
+    private final long timeoutMinutes;
 
-    private final PaymentRepository paymentRepository;
-    private final PaymentMapper paymentMapper;
-
-    private final Map<PaymentMethod, PaymentProvider> paymentProviders;
-
-    public PaymentServiceImpl(
-            PaymentRepository paymentRepository,
-            PaymentMapper paymentMapper,
-            List<PaymentProvider> providers) {
-        this.paymentRepository = paymentRepository;
-        this.paymentMapper = paymentMapper;
-
-        this.paymentProviders = new EnumMap<>(PaymentMethod.class);
-
-        for (PaymentProvider provider : providers) {
-            this.paymentProviders.put(
-                    provider.getPaymentMethod(),
-                    provider);
-        }
+    public PaymentServiceImpl(PaymentRepository repository, PaymentMapper mapper,
+                              List<PaymentProvider> paymentProviders,
+                              @Value("${vnpay.payment-timeout-minutes:15}") long timeoutMinutes) {
+        this.repository = repository; this.mapper = mapper; this.timeoutMinutes = timeoutMinutes;
+        providers = new EnumMap<>(PaymentMethod.class);
+        paymentProviders.forEach(provider -> providers.put(provider.getPaymentMethod(), provider));
     }
 
-    @Override
-    @Transactional
-    public PaymentResponse createPayment(
-            CreatePaymentRequest request) {
-
-        Payment payment = paymentMapper.toEntity(request);
-
-        payment.setStatus(
-                PaymentStatus.PENDING);
-
-        payment.setCreatedAt(
-                Instant.now());
-
-        /*
-         * Lưu Payment trước để có ID.
-         *
-         * ID này sẽ được sử dụng làm vnp_TxnRef
-         * khi tạo URL thanh toán VNPay.
-         */
-        Payment savedPayment = paymentRepository.save(payment);
-
-        PaymentProvider provider = getProvider(request.getMethod());
-
-        String paymentUrl = provider.createPaymentUrl(
-                savedPayment);
-
-        savedPayment.setPaymentUrl(
-                paymentUrl);
-
-        savedPayment = paymentRepository.save(
-                savedPayment);
-
-        return paymentMapper.toResponse(
-                savedPayment);
+    @Override @Transactional
+    public PaymentResponse createPayment(CreatePaymentRequest request, Long payerId, String clientIp) {
+        if (request.getMethod() != PaymentMethod.VNPAY)
+            throw new PaymentException("Payment method is not available yet: " + request.getMethod());
+        Instant now = Instant.now();
+        Payment payment = mapper.toEntity(request);
+        payment.setPayerId(payerId);
+        payment.setStatus(PaymentStatus.PENDING); payment.setCreatedAt(now); payment.setUpdatedAt(now);
+        payment.setExpiresAt(now.plus(timeoutMinutes, ChronoUnit.MINUTES));
+        Payment saved = repository.save(payment);
+        saved.setPaymentUrl(provider().createPaymentUrl(saved, clientIp));
+        saved.setUpdatedAt(Instant.now());
+        return mapper.toResponse(repository.save(saved));
     }
 
-    @Override
-    @Transactional
-    public PaymentResponse handleVnPayCallback(
-            Map<String, String> params) {
+    @Override @Transactional(readOnly = true)
+    public PaymentResponse getPayment(Long id, Long requesterId, boolean privileged) {
+        Payment payment = find(id);
+        if (!privileged && !payment.getPayerId().equals(requesterId))
+            throw new PaymentException("You cannot access this payment");
+        return mapper.toResponse(payment);
+    }
 
-        PaymentProvider provider = getProvider(
-                PaymentMethod.VNPAY);
+    @Override @Transactional(readOnly = true)
+    public List<PaymentResponse> getPayments(Long referenceId, PaymentReferenceType referenceType) {
+        return repository.findAllByReferenceIdAndReferenceTypeOrderByCreatedAtDesc(referenceId, referenceType)
+            .stream().map(mapper::toResponse).toList();
+    }
 
-        /*
-         * Kiểm tra chữ ký do VNPay gửi về.
-         */
-        if (!provider.verifyCallback(params)) {
-            throw new IllegalArgumentException(
-                    "Invalid VNPay callback signature");
+    @Override @Transactional
+    public PaymentResponse handleVnPayReturn(Map<String, String> params) {
+        if (!provider().verifyCallback(params)) throw new PaymentException("Invalid VNPay signature");
+        Payment payment = findFromCallback(params);
+        validateAmount(payment, params);
+        return mapper.toResponse(applyResult(payment, params));
+    }
+
+    @Override @Transactional
+    public VnPayIpnResponse handleVnPayIpn(Map<String, String> params) {
+        if (!provider().verifyCallback(params)) return new VnPayIpnResponse("97", "Invalid checksum");
+        Payment payment;
+        try { payment = findFromCallback(params); }
+        catch (PaymentException ex) { return new VnPayIpnResponse("01", "Order not found"); }
+        try { validateAmount(payment, params); }
+        catch (PaymentException ex) { return new VnPayIpnResponse("04", "Invalid amount"); }
+        if (payment.getStatus() == PaymentStatus.SUCCESS)
+            return new VnPayIpnResponse("02", "Order already confirmed");
+        applyResult(payment, params);
+        return new VnPayIpnResponse("00", "Confirm success");
+    }
+
+    private Payment applyResult(Payment payment, Map<String, String> params) {
+        boolean success = "00".equals(params.get("vnp_ResponseCode"))
+            && "00".equals(params.getOrDefault("vnp_TransactionStatus", "00"));
+        if (payment.getStatus() != PaymentStatus.SUCCESS) {
+            payment.setStatus(success ? PaymentStatus.SUCCESS : PaymentStatus.FAILED);
+            if (success) payment.setPaidAt(Instant.now());
+            payment.setTransactionCode(provider().getTransactionCode(params));
+            payment.setResponseCode(params.get("vnp_ResponseCode"));
+            payment.setUpdatedAt(Instant.now());
+            return repository.save(payment);
         }
+        return payment;
+    }
 
-        /*
-         * vnp_TxnRef là ID Payment của hệ thống mình.
-         *
-         * Ví dụ:
-         *
-         * Payment ID = 15
-         *
-         * => vnp_TxnRef = 15
-         */
+    private Payment findFromCallback(Map<String, String> params) {
         String txnRef = params.get("vnp_TxnRef");
-
-        if (txnRef == null) {
-            throw new IllegalArgumentException(
-                    "Missing VNPay transaction reference");
-        }
-
-        Long paymentId;
-
-        try {
-            paymentId = Long.parseLong(txnRef);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(
-                    "Invalid VNPay transaction reference");
-        }
-
-        /*
-         * Tìm Payment bằng ID.
-         */
-        Payment payment = paymentRepository
-                .findById(paymentId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Payment not found: "
-                                + paymentId));
-
-        /*
-         * Mã giao dịch thực tế do VNPay trả về.
-         *
-         * vnp_TransactionNo khác với vnp_TxnRef.
-         */
-        String transactionCode = params.get("vnp_TransactionNo");
-
-        /*
-         * VNPay response code:
-         *
-         * 00 = thanh toán thành công
-         * khác 00 = thanh toán thất bại
-         */
-        String responseCode = params.get("vnp_ResponseCode");
-
-        if ("00".equals(responseCode)) {
-
-            payment.setStatus(
-                    PaymentStatus.SUCCESS);
-
-            payment.setPaidAt(
-                    Instant.now());
-
-        } else {
-
-            payment.setStatus(
-                    PaymentStatus.FAILED);
-        }
-
-        /*
-         * Lưu transaction code thực tế
-         * VNPay trả về.
-         */
-        payment.setTransactionCode(
-                transactionCode);
-
-        Payment savedPayment = paymentRepository.save(
-                payment);
-
-        return paymentMapper.toResponse(
-                savedPayment);
+        if (txnRef == null) throw new PaymentException("Missing VNPay transaction reference");
+        try { return find(Long.parseLong(txnRef)); }
+        catch (NumberFormatException ex) { throw new PaymentException("Invalid VNPay transaction reference"); }
     }
 
-    private PaymentProvider getProvider(
-            PaymentMethod method) {
+    private void validateAmount(Payment payment, Map<String, String> params) {
+        String rawAmount = params.get("vnp_Amount");
+        if (rawAmount == null) throw new PaymentException("Missing VNPay amount");
+        try {
+            BigDecimal callbackAmount = new BigDecimal(rawAmount).movePointLeft(2);
+            if (callbackAmount.compareTo(payment.getAmount()) != 0)
+                throw new PaymentException("VNPay amount does not match payment amount");
+        } catch (NumberFormatException ex) { throw new PaymentException("Invalid VNPay amount"); }
+    }
 
-        PaymentProvider provider = paymentProviders.get(
-                method);
-
-        if (provider == null) {
-            throw new IllegalArgumentException(
-                    "Unsupported payment method: "
-                            + method);
-        }
-
+    private Payment find(Long id) {
+        return repository.findById(id).orElseThrow(() -> new PaymentException("Payment not found: " + id));
+    }
+    private PaymentProvider provider() {
+        PaymentProvider provider = providers.get(PaymentMethod.VNPAY);
+        if (provider == null) throw new PaymentException("VNPay provider is unavailable");
         return provider;
     }
 }
