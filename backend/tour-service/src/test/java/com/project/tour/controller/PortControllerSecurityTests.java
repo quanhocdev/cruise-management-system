@@ -3,7 +3,9 @@ package com.project.tour.controller;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import com.project.tour.config.JwtConfig;
 import com.project.tour.config.SecurityConfig;
-import com.project.tour.service.PortService;
+import com.project.tour.controller.port.PortController;
+import com.project.tour.service.port.PortService;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -27,109 +29,105 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(PortController.class)
-@Import({SecurityConfig.class, JwtConfig.class})
+@Import({ SecurityConfig.class, JwtConfig.class })
 @TestPropertySource(properties = {
-    "jwt.secret=cruise-management-system-local-secret-key-2026"
+                "jwt.secret=cruise-management-system-local-secret-key-2026"
 })
 class PortControllerSecurityTests {
 
-    private static final String SECRET =
-        "cruise-management-system-local-secret-key-2026";
+        private static final String SECRET = "cruise-management-system-local-secret-key-2026";
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @MockitoBean
-    private PortService portService;
+        @MockitoBean
+        private PortService portService;
 
-    @Test
-    void requestWithoutTokenReturnsUnauthorized() throws Exception {
-        mockMvc.perform(get("/api/v1/ports"))
-            .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    void passengerCannotCreatePort() throws Exception {
-        mockMvc.perform(post("/api/v1/ports")
-                .header("Authorization", "Bearer " + accessToken("PASSENGER"))
-                .contentType("application/json")
-                .content(validPortJson()))
-            .andExpect(status().isForbidden());
-    }
-
-    @Test
-    void schedulerCanCreatePort() throws Exception {
-        mockMvc.perform(post("/api/v1/ports")
-                .header("Authorization", "Bearer " + accessToken("SCHEDULER"))
-                .contentType("application/json")
-                .content(validPortJson()))
-            .andExpect(status().isCreated());
-    }
-
-    @Test
-    void authenticatedPassengerCanReadPorts() throws Exception {
-        mockMvc.perform(get("/api/v1/ports")
-                .header("Authorization", "Bearer " + accessToken("PASSENGER")))
-            .andExpect(status().isOk());
-    }
-
-    @Test
-    void refreshTokenIsRejected() throws Exception {
-        mockMvc.perform(get("/api/v1/ports")
-                .header("Authorization", "Bearer " + refreshToken()))
-            .andExpect(status().isUnauthorized());
-    }
-
-    private String accessToken(String role) {
-        return token(role, "ACCESS");
-    }
-
-    private String refreshToken() {
-        return token(null, "REFRESH");
-    }
-
-    private String token(String role, String tokenType) {
-        Instant now = Instant.now();
-
-        JwtClaimsSet.Builder claims = JwtClaimsSet.builder()
-            .subject("test-user-id")
-            .issuedAt(now)
-            .expiresAt(now.plusSeconds(300))
-            .claim("tokenType", tokenType);
-
-        if (role != null) {
-            claims.claim("scope", role);
+        @Test
+        void requestWithoutTokenReturnsUnauthorized() throws Exception {
+                mockMvc.perform(get("/api/v1/ports"))
+                                .andExpect(status().isUnauthorized());
         }
 
-        SecretKey key = new SecretKeySpec(
-            SECRET.getBytes(StandardCharsets.UTF_8),
-            MacAlgorithm.HS256.getName()
-        );
+        @Test
+        void passengerCannotCreatePort() throws Exception {
+                mockMvc.perform(post("/api/v1/ports")
+                                .header("Authorization", "Bearer " + accessToken("PASSENGER"))
+                                .contentType("application/json")
+                                .content(validPortJson()))
+                                .andExpect(status().isForbidden());
+        }
 
-        NimbusJwtEncoder encoder = new NimbusJwtEncoder(
-            new ImmutableSecret<>(key)
-        );
+        @Test
+        void schedulerCanCreatePort() throws Exception {
+                mockMvc.perform(post("/api/v1/ports")
+                                .header("Authorization", "Bearer " + accessToken("SCHEDULER"))
+                                .contentType("application/json")
+                                .content(validPortJson()))
+                                .andExpect(status().isCreated());
+        }
 
-        JwsHeader header = JwsHeader
-            .with(MacAlgorithm.HS256)
-            .build();
+        @Test
+        void authenticatedPassengerCanReadPorts() throws Exception {
+                mockMvc.perform(get("/api/v1/ports")
+                                .header("Authorization", "Bearer " + accessToken("PASSENGER")))
+                                .andExpect(status().isOk());
+        }
 
-        return encoder.encode(
-            JwtEncoderParameters.from(header, claims.build())
-        ).getTokenValue();
-    }
+        @Test
+        void refreshTokenIsRejected() throws Exception {
+                mockMvc.perform(get("/api/v1/ports")
+                                .header("Authorization", "Bearer " + refreshToken()))
+                                .andExpect(status().isUnauthorized());
+        }
 
-    private String validPortJson() {
-        return """
-            {
-              "name": "Saigon Port",
-              "city": "Ho Chi Minh City",
-              "country": "Vietnam",
-              "address": "District 4",
-              "latitude": 10.7598,
-              "longitude": 106.7072,
-              "description": "Passenger port"
-            }
-            """;
-    }
+        private String accessToken(String role) {
+                return token(role, "ACCESS");
+        }
+
+        private String refreshToken() {
+                return token(null, "REFRESH");
+        }
+
+        private String token(String role, String tokenType) {
+                Instant now = Instant.now();
+
+                JwtClaimsSet.Builder claims = JwtClaimsSet.builder()
+                                .subject("test-user-id")
+                                .issuedAt(now)
+                                .expiresAt(now.plusSeconds(300))
+                                .claim("tokenType", tokenType);
+
+                if (role != null) {
+                        claims.claim("scope", role);
+                }
+
+                SecretKey key = new SecretKeySpec(
+                                SECRET.getBytes(StandardCharsets.UTF_8),
+                                MacAlgorithm.HS256.getName());
+
+                NimbusJwtEncoder encoder = new NimbusJwtEncoder(
+                                new ImmutableSecret<>(key));
+
+                JwsHeader header = JwsHeader
+                                .with(MacAlgorithm.HS256)
+                                .build();
+
+                return encoder.encode(
+                                JwtEncoderParameters.from(header, claims.build())).getTokenValue();
+        }
+
+        private String validPortJson() {
+                return """
+                                {
+                                  "name": "Saigon Port",
+                                  "city": "Ho Chi Minh City",
+                                  "country": "Vietnam",
+                                  "address": "District 4",
+                                  "latitude": 10.7598,
+                                  "longitude": 106.7072,
+                                  "description": "Passenger port"
+                                }
+                                """;
+        }
 }

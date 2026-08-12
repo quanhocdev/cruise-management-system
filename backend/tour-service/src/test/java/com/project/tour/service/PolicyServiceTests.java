@@ -7,6 +7,8 @@ import com.project.tour.model.Policy;
 import com.project.tour.model.enums.PolicyStatus;
 import com.project.tour.model.enums.PolicyType;
 import com.project.tour.repository.PolicyRepository;
+import com.project.tour.service.policy.PolicyService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,16 +22,20 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class PolicyServiceTests {
-    @Mock PolicyRepository repository;
+    @Mock
+    PolicyRepository repository;
     PolicyService service;
-    @BeforeEach void setUp() { service = new PolicyService(repository); }
+
+    @BeforeEach
+    void setUp() {
+        service = new PolicyService(repository);
+    }
 
     @Test
     void createPolicyTrimsTextAndActivatesPolicy() {
         when(repository.save(any(Policy.class))).thenAnswer(invocation -> invocation.getArgument(0));
         PolicyResponse response = service.create(new CreatePolicyRequest(
-            PolicyType.CANCEL, " Cancellation ", " Refund conditions "
-        ));
+                PolicyType.CANCEL, " Cancellation ", " Refund conditions "));
         assertEquals("Cancellation", response.title());
         assertEquals("Refund conditions", response.content());
         assertEquals(PolicyStatus.ACTIVE, response.status());
@@ -38,10 +44,11 @@ class PolicyServiceTests {
     @Test
     void findByIdAndTypeRejectsWrongPolicyType() {
         UUID id = UUID.randomUUID();
-        Policy policy = new Policy(); policy.setType(PolicyType.REGISTER);
+        Policy policy = new Policy();
+        policy.setType(PolicyType.REGISTER);
         when(repository.findById(id)).thenReturn(Optional.of(policy));
         assertThrows(IllegalArgumentException.class,
-            () -> service.findByIdAndType(id, PolicyType.CANCEL));
+                () -> service.findByIdAndType(id, PolicyType.CANCEL));
     }
 
     @Test

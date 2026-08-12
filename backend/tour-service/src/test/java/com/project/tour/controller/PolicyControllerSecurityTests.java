@@ -2,7 +2,9 @@ package com.project.tour.controller;
 
 import com.project.tour.config.JwtConfig;
 import com.project.tour.config.SecurityConfig;
-import com.project.tour.service.PolicyService;
+import com.project.tour.controller.policy.PolicyController;
+import com.project.tour.service.policy.PolicyService;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -17,31 +19,41 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(PolicyController.class)
-@Import({SecurityConfig.class, JwtConfig.class})
+@Import({ SecurityConfig.class, JwtConfig.class })
 @TestPropertySource(properties = "jwt.secret=cruise-management-system-local-secret-key-2026")
 class PolicyControllerSecurityTests {
-    @Autowired MockMvc mockMvc;
-    @MockitoBean PolicyService policyService;
+    @Autowired
+    MockMvc mockMvc;
+    @MockitoBean
+    PolicyService policyService;
 
-    @Test void noTokenReturnsUnauthorized() throws Exception {
+    @Test
+    void noTokenReturnsUnauthorized() throws Exception {
         mockMvc.perform(get("/api/v1/policies")).andExpect(status().isUnauthorized());
     }
-    @Test void passengerCanReadPolicies() throws Exception {
+
+    @Test
+    void passengerCanReadPolicies() throws Exception {
         mockMvc.perform(get("/api/v1/policies").with(jwt().authorities(
-            new SimpleGrantedAuthority("ROLE_PASSENGER")))).andExpect(status().isOk());
+                new SimpleGrantedAuthority("ROLE_PASSENGER")))).andExpect(status().isOk());
     }
-    @Test void passengerCannotCreatePolicy() throws Exception {
+
+    @Test
+    void passengerCannotCreatePolicy() throws Exception {
         mockMvc.perform(post("/api/v1/policies").with(jwt().authorities(
                 new SimpleGrantedAuthority("ROLE_PASSENGER")))
-            .contentType("application/json").content(validBody()))
-            .andExpect(status().isForbidden());
+                .contentType("application/json").content(validBody()))
+                .andExpect(status().isForbidden());
     }
-    @Test void adminCanCreatePolicy() throws Exception {
+
+    @Test
+    void adminCanCreatePolicy() throws Exception {
         mockMvc.perform(post("/api/v1/policies").with(jwt().authorities(
                 new SimpleGrantedAuthority("ROLE_ADMIN")))
-            .contentType("application/json").content(validBody()))
-            .andExpect(status().isCreated());
+                .contentType("application/json").content(validBody()))
+                .andExpect(status().isCreated());
     }
+
     private String validBody() {
         return "{\"type\":\"CANCEL\",\"title\":\"Cancellation\",\"content\":\"Refund terms\"}";
     }

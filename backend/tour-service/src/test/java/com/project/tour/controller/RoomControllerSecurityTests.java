@@ -2,7 +2,9 @@ package com.project.tour.controller;
 
 import com.project.tour.config.JwtConfig;
 import com.project.tour.config.SecurityConfig;
-import com.project.tour.service.RoomService;
+import com.project.tour.controller.room.RoomController;
+import com.project.tour.service.room.RoomService;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -20,14 +22,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(RoomController.class)
-@Import({SecurityConfig.class, JwtConfig.class})
+@Import({ SecurityConfig.class, JwtConfig.class })
 @TestPropertySource(properties = "jwt.secret=cruise-management-system-local-secret-key-2026")
 class RoomControllerSecurityTests {
 
     private static final String URL = "/api/v1/decks/" + UUID.randomUUID() + "/rooms";
 
-    @Autowired MockMvc mockMvc;
-    @MockitoBean RoomService roomService;
+    @Autowired
+    MockMvc mockMvc;
+    @MockitoBean
+    RoomService roomService;
 
     @Test
     void noTokenReturnsUnauthorized() throws Exception {
@@ -40,7 +44,7 @@ class RoomControllerSecurityTests {
                 .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_PASSENGER")))
                 .contentType("application/json")
                 .content(validBody()))
-            .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -49,18 +53,18 @@ class RoomControllerSecurityTests {
                 .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
                 .contentType("application/json")
                 .content(validBody()))
-            .andExpect(status().isCreated());
+                .andExpect(status().isCreated());
     }
 
     @Test
     void passengerCanReadRooms() throws Exception {
         mockMvc.perform(get(URL)
                 .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_PASSENGER"))))
-            .andExpect(status().isOk());
+                .andExpect(status().isOk());
     }
 
     private String validBody() {
         return "{\"code\":\"A-101\",\"roomTypeId\":\""
-            + UUID.randomUUID() + "\"}";
+                + UUID.randomUUID() + "\"}";
     }
 }
