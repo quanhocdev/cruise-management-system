@@ -1,12 +1,59 @@
 package com.project.tour.dto.cruise.area;
 
 import com.project.tour.model.enums.CruiseAreaStatus;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-public record UpdateCruiseAreaRequest(
-                @NotBlank(message = "Cruise area name is required") @Size(max = 150, message = "Cruise area name must not exceed 150 characters") String name,
-                @Size(max = 5000, message = "Description must not exceed 5000 characters") String description,
-                @NotNull(message = "Cruise area status is required") CruiseAreaStatus status) {
+import org.springframework.web.multipart.MultipartFile;
+
+public class UpdateCruiseAreaRequest {
+
+    @NotBlank(message = "Area name is required")
+    @Size(max = 150, message = "Area name must not exceed 150 characters")
+    private String name;
+
+    @Size(max = 2000, message = "Description must not exceed 2000 characters")
+    private String description;
+
+    @NotNull(message = "Area status is required")
+    private CruiseAreaStatus status;
+
+    private MultipartFile image;
+
+    public UpdateCruiseAreaRequest() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public CruiseAreaStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(CruiseAreaStatus status) {
+        this.status = status;
+    }
+
+    public MultipartFile getImage() {
+        return image;
+    }
+
+    public void setImage(MultipartFile image) {
+        this.image = image;
+    }
 }

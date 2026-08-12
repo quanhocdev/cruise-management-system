@@ -23,9 +23,11 @@ public class CruiseController {
         this.cruiseService = cruiseService;
     }
 
+    // CREATE
     @PostMapping
     public ResponseEntity<CruiseResponse> createCruise(
             @Valid @RequestBody CreateCruiseRequest request) {
+
         CruiseResponse response = cruiseService.createCruise(request);
 
         return ResponseEntity
@@ -33,50 +35,53 @@ public class CruiseController {
                 .body(response);
     }
 
+    // GET BY ID
     @GetMapping("/{id}")
     public ResponseEntity<CruiseResponse> getCruiseById(
             @PathVariable UUID id) {
-        CruiseResponse response = cruiseService.getCruiseById(id);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(
+                cruiseService.getCruiseById(id));
     }
 
+    // GET BY CODE
     @GetMapping("/code/{code}")
     public ResponseEntity<CruiseResponse> getCruiseByCode(
             @PathVariable String code) {
-        CruiseResponse response = cruiseService.getCruiseByCode(code);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(
+                cruiseService.getCruiseByCode(code));
     }
 
+    // GET ALL
     @GetMapping
     public ResponseEntity<List<CruiseResponse>> getCruises(
             @RequestParam(defaultValue = "false") boolean activeOnly) {
-        List<CruiseResponse> response;
 
-        if (activeOnly) {
-            response = cruiseService.getActiveCruises();
-        } else {
-            response = cruiseService.getAllCruises();
-        }
+        List<CruiseResponse> response = activeOnly
+                ? cruiseService.getActiveCruises()
+                : cruiseService.getAllCruises();
 
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{id}")
+    // UPDATE
+    @PatchMapping("/{id}")
     public ResponseEntity<CruiseResponse> updateCruise(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateCruiseRequest request) {
-        CruiseResponse response = cruiseService.updateCruise(id, request);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(
+                cruiseService.updateCruise(id, request));
     }
 
-    @PatchMapping("/{id}/deactivate")
-    public ResponseEntity<CruiseResponse> deactivateCruise(
+    // DELETE - XÓA THẬT KHỎI DATABASE
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCruise(
             @PathVariable UUID id) {
-        CruiseResponse response = cruiseService.deactivateCruise(id);
 
-        return ResponseEntity.ok(response);
+        cruiseService.deleteCruise(id);
+
+        return ResponseEntity.noContent().build();
     }
 }
