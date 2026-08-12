@@ -27,10 +27,14 @@ public class PolicyService {
         this.policyRepository = policyRepository;
     }
 
+    // =====================================================
     // CREATE
+    // =====================================================
+
     public PolicyResponse create(CreatePolicyRequest request) {
 
         if (policyRepository.existsByType(request.getType())) {
+
             throw new AppException(
                     "Policy with type " + request.getType() + " already exists",
                     HttpStatus.CONFLICT);
@@ -43,7 +47,10 @@ public class PolicyService {
         return PolicyMapper.toResponse(savedPolicy);
     }
 
+    // =====================================================
     // GET BY ID
+    // =====================================================
+
     @Transactional(readOnly = true)
     public PolicyResponse getById(UUID id) {
 
@@ -52,7 +59,10 @@ public class PolicyService {
         return PolicyMapper.toResponse(policy);
     }
 
+    // =====================================================
     // GET ALL
+    // =====================================================
+
     @Transactional(readOnly = true)
     public List<PolicyResponse> getAll(
             PolicyType type,
@@ -88,21 +98,29 @@ public class PolicyService {
                 .toList();
     }
 
+    // =====================================================
     // UPDATE
+    // =====================================================
+
     public PolicyResponse update(
             UUID id,
             UpdatePolicyRequest request) {
 
         Policy policy = findById(id);
 
-        PolicyMapper.updateEntity(policy, request);
+        PolicyMapper.updateEntity(
+                policy,
+                request);
 
         Policy updatedPolicy = policyRepository.save(policy);
 
         return PolicyMapper.toResponse(updatedPolicy);
     }
 
+    // =====================================================
     // SOFT DELETE
+    // =====================================================
+
     public void deactivate(UUID id) {
 
         Policy policy = findById(id);
@@ -112,11 +130,36 @@ public class PolicyService {
         policyRepository.save(policy);
     }
 
+    // =====================================================
+    // FIND BY ID
+    // =====================================================
+
     private Policy findById(UUID id) {
 
-        return policyRepository.findById(id)
+        return policyRepository
+                .findById(id)
                 .orElseThrow(() -> new AppException(
                         "Policy not found with id: " + id,
                         HttpStatus.NOT_FOUND));
+    }
+
+    // =====================================================
+    // FIND BY ID + TYPE
+    // =====================================================
+
+    public Policy findByIdAndType(
+            UUID id,
+            PolicyType type) {
+
+        Policy policy = findById(id);
+
+        if (policy.getType() != type) {
+
+            throw new AppException(
+                    "Policy must have type " + type,
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        return policy;
     }
 }

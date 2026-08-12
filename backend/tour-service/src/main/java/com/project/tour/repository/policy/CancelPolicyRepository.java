@@ -9,4 +9,24 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface CancelPolicyRepository extends JpaRepository<CancelPolicy, UUID> {
+
+    Optional<CancelPolicy> findByIdAndPolicy_Id(
+            UUID id,
+            UUID policyId);
+
+    List<CancelPolicy> findAllByPolicy_IdOrderByDaysBeforeDesc(
+            UUID policyId);
+
+    List<CancelPolicy> findAllByPolicy_IdAndStatusOrderByDaysBeforeDesc(
+            UUID policyId,
+            PolicyStatus status);
+
+    boolean existsByPolicy_IdAndDaysBefore(
+            UUID policyId,
+            Integer daysBefore);
+
+    boolean existsByPolicy_IdAndDaysBeforeAndIdNot(
+            UUID policyId,
+            Integer daysBefore,
+            UUID id);
 }
