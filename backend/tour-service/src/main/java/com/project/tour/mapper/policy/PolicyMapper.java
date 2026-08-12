@@ -4,33 +4,35 @@ import com.project.tour.dto.policy.CreatePolicyRequest;
 import com.project.tour.dto.policy.PolicyResponse;
 import com.project.tour.dto.policy.UpdatePolicyRequest;
 import com.project.tour.model.Policy;
-import org.springframework.stereotype.Component;
+import com.project.tour.model.enums.PolicyStatus;
 
-@Component
 public class PolicyMapper {
 
-    public Policy toEntity(CreatePolicyRequest request) {
+    private PolicyMapper() {
+    }
+
+    public static Policy toEntity(CreatePolicyRequest request) {
 
         Policy policy = new Policy();
 
         policy.setType(request.getType());
-        policy.setTitle(request.getTitle());
-        policy.setContent(request.getContent());
+        policy.setTitle(request.getTitle().trim());
+        policy.setContent(request.getContent().trim());
+        policy.setStatus(PolicyStatus.ACTIVE);
 
         return policy;
     }
 
-    public void updateEntity(
+    public static void updateEntity(
             Policy policy,
             UpdatePolicyRequest request) {
 
-        policy.setType(request.getType());
-        policy.setTitle(request.getTitle());
-        policy.setContent(request.getContent());
+        policy.setTitle(request.getTitle().trim());
+        policy.setContent(request.getContent().trim());
         policy.setStatus(request.getStatus());
     }
 
-    public PolicyResponse toResponse(Policy policy) {
+    public static PolicyResponse toResponse(Policy policy) {
 
         PolicyResponse response = new PolicyResponse();
 
