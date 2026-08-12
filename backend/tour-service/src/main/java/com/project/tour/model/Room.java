@@ -6,15 +6,9 @@ import jakarta.persistence.*;
 import java.util.UUID;
 
 @Entity
-@Table(
-    name = "rooms",
-    uniqueConstraints = {
-        @UniqueConstraint(
-            name = "uk_rooms_deck_code",
-            columnNames = {"cruise_deck_id", "code"}
-        )
-    }
-)
+@Table(name = "rooms", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_rooms_deck_code", columnNames = { "cruise_deck_id", "code" })
+})
 public class Room {
 
     @Id
@@ -43,14 +37,43 @@ public class Room {
         }
     }
 
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
-    public CruiseDeck getCruiseDeck() { return cruiseDeck; }
-    public void setCruiseDeck(CruiseDeck cruiseDeck) { this.cruiseDeck = cruiseDeck; }
-    public String getCode() { return code; }
-    public void setCode(String code) { this.code = code; }
-    public RoomType getRoomType() { return roomType; }
-    public void setRoomType(RoomType roomType) { this.roomType = roomType; }
-    public RoomStatus getStatus() { return status; }
-    public void setStatus(RoomStatus status) { this.status = status; }
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public CruiseDeck getCruiseDeck() {
+        return cruiseDeck;
+    }
+
+    public void setCruiseDeck(CruiseDeck cruiseDeck) {
+        this.cruiseDeck = cruiseDeck;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public RoomType getRoomType() {
+        return roomType;
+    }
+
+    public void setRoomType(RoomType roomType) {
+        this.roomType = roomType;
+    }
+
+    public RoomStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(RoomStatus status) {
+        this.status = status;
+    }
 }
