@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/ports")
+@RequestMapping("/admin/ports")
 public class PortController {
 
     private final PortService portService;
@@ -22,57 +22,56 @@ public class PortController {
         this.portService = portService;
     }
 
+    // CREATE
     @PostMapping
     public ResponseEntity<PortResponse> createPort(
-        @Valid @RequestBody CreatePortRequest request
-    ) {
+            @Valid @RequestBody CreatePortRequest request) {
+
         PortResponse response = portService.createPort(request);
 
         return ResponseEntity
-            .status(HttpStatus.CREATED)
-            .body(response);
+                .status(HttpStatus.CREATED)
+                .body(response);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<PortResponse> getPortById(
-        @PathVariable UUID id
-    ) {
-        PortResponse response = portService.getPortById(id);
-
-        return ResponseEntity.ok(response);
-    }
-
+    // GET ALL
     @GetMapping
     public ResponseEntity<List<PortResponse>> getPorts(
-        @RequestParam(defaultValue = "false") boolean activeOnly
-    ) {
-        List<PortResponse> response;
+            @RequestParam(defaultValue = "false") boolean activeOnly) {
 
-        if (activeOnly) {
-            response = portService.getActivePorts();
-        } else {
-            response = portService.getAllPorts();
-        }
+        List<PortResponse> response = activeOnly
+                ? portService.getActivePorts()
+                : portService.getAllPorts();
 
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{id}")
+    // GET BY ID
+    @GetMapping("/{id}")
+    public ResponseEntity<PortResponse> getPortById(
+            @PathVariable UUID id) {
+
+        return ResponseEntity.ok(
+                portService.getPortById(id));
+    }
+
+    // UPDATE
+    @PatchMapping("/{id}")
     public ResponseEntity<PortResponse> updatePort(
-        @PathVariable UUID id,
-        @Valid @RequestBody UpdatePortRequest request
-    ) {
-        PortResponse response = portService.updatePort(id, request);
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdatePortRequest request) {
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(
+                portService.updatePort(id, request));
     }
 
-    @PatchMapping("/{id}/deactivate")
-    public ResponseEntity<PortResponse> deactivatePort(
-        @PathVariable UUID id
-    ) {
-        PortResponse response = portService.deactivatePort(id);
+    // DELETE / SOFT DELETE
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePort(
+            @PathVariable UUID id) {
 
-        return ResponseEntity.ok(response);
+        portService.deactivatePort(id);
+
+        return ResponseEntity.noContent().build();
     }
 }

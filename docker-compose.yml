@@ -101,6 +101,8 @@ services:
 
     depends_on:
       - auth-service
+      - payment-service
+      - tour-service
 
   # ==========================
   # Auth Service
@@ -141,6 +143,40 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+
+  # ==========================
+  # Tour Service
+  # ==========================
+
+  tour-service:
+    build:
+      context: ./backend
+      dockerfile: tour-service/Dockerfile.dev
+
+    container_name: tour-service
+    restart: always
+
+    ports:
+      - "8088:8088"
+
+    working_dir: /app/tour-service
+
+    volumes:
+      - ./backend/tour-service/src:/app/tour-service/src
+      - ./backend/common/src:/app/common/src
+      - /app/tour-service/target
+
+    env_file:
+      - .env
+
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-cruise_db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+
+    depends_on:
+      postgres:
         condition: service_healthy
 
   # ==========================

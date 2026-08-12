@@ -12,8 +12,10 @@ import LoginPage from "./modules/auth/pages/LoginPage";
 import VerifyOtpPage from "./modules/auth/pages/VerifyOtpPage";
 import ActivatePage from "./modules/auth/pages/ActivatePage";
 
+// admin
 import AdminDashboard from "./modules/admin/pages/Dashboard";
 import ManagerAccount from "./modules/admin/pages/ManagerAccount";
+import ManagerPort from "./modules/admin/pages/ManagerPort";
 
 import PassengerDashboard from "./modules/passenger/pages/Dashboard";
 import SchedulerDashboard from "./modules/scheduler/pages/Dashboard";
@@ -59,7 +61,7 @@ export default function App() {
                   <Route path="dashboard" element={<AdminDashboard />} />
 
                   <Route path="accounts" element={<ManagerAccount />} />
-
+                  <Route path="ports" element={<ManagerPort />} />
                   <Route
                     path=""
                     element={<Navigate to="dashboard" replace />}

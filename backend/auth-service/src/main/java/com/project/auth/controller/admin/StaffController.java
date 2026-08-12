@@ -10,7 +10,7 @@ import com.project.auth.service.StaffService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/admin/staff")
+@RequestMapping("/admin/staff")
 public class StaffController {
 
     private final StaffService staffService;
