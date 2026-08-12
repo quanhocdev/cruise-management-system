@@ -1,7 +1,7 @@
 package com.project.tour.service;
 
-import com.project.tour.dto.policy.CreateBookingPolicyRequest;
-import com.project.tour.dto.policy.CreateCancelPolicyRequest;
+import com.project.tour.dto.policy.booking.CreateBookingPolicyRequest;
+import com.project.tour.dto.policy.cancel.CreateCancelPolicyRequest;
 import com.project.tour.exception.DuplicateResourceException;
 import com.project.tour.model.Policy;
 import com.project.tour.model.enums.PolicyType;

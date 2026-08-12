@@ -1,8 +1,8 @@
 package com.project.tour.service.policy;
 
-import com.project.tour.dto.policy.BookingPolicyResponse;
-import com.project.tour.dto.policy.CreateBookingPolicyRequest;
-import com.project.tour.dto.policy.UpdateBookingPolicyRequest;
+import com.project.tour.dto.policy.booking.BookingPolicyResponse;
+import com.project.tour.dto.policy.booking.CreateBookingPolicyRequest;
+import com.project.tour.dto.policy.booking.UpdateBookingPolicyRequest;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.policy.BookingPolicyMapper;
 import com.project.tour.model.BookingPolicy;

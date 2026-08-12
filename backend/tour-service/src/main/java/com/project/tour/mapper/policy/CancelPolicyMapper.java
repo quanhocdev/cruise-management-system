@@ -1,8 +1,8 @@
 package com.project.tour.mapper.policy;
 
-import com.project.tour.dto.policy.CancelPolicyResponse;
-import com.project.tour.dto.policy.CreateCancelPolicyRequest;
-import com.project.tour.dto.policy.UpdateCancelPolicyRequest;
+import com.project.tour.dto.policy.cancel.CancelPolicyResponse;
+import com.project.tour.dto.policy.cancel.CreateCancelPolicyRequest;
+import com.project.tour.dto.policy.cancel.UpdateCancelPolicyRequest;
 import com.project.tour.model.CancelPolicy;
 import com.project.tour.model.Policy;
 

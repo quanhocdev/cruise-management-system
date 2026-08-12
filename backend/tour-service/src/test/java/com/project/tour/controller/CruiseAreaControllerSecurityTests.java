@@ -3,7 +3,8 @@ package com.project.tour.controller;
 import com.project.tour.config.JwtConfig;
 import com.project.tour.config.SecurityConfig;
 import com.project.tour.controller.cruise.CruiseAreaController;
-import com.project.tour.service.CruiseAreaService;
+import com.project.tour.service.cruise.CruiseAreaService;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;

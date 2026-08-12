@@ -7,7 +7,9 @@ import com.project.tour.exception.DuplicateResourceException;
 import com.project.tour.exception.ResourceNotFoundException;
 import com.project.tour.model.RoomType;
 import com.project.tour.repository.RoomTypeRepository;
-import com.project.tour.repository.RoomRepository;
+import com.project.tour.repository.room.RoomRepository;
+import com.project.tour.service.room.RoomTypeService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,76 +29,71 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class RoomTypeServiceTests {
 
-    @Mock
-    private RoomTypeRepository repository;
+        @Mock
+        private RoomTypeRepository repository;
 
-    @Mock
-    private RoomRepository roomRepository;
+        @Mock
+        private RoomRepository roomRepository;
 
-    private RoomTypeService service;
+        private RoomTypeService service;
 
-    @BeforeEach
-    void setUp() {
-        service = new RoomTypeService(repository, roomRepository);
-    }
+        @BeforeEach
+        void setUp() {
+                service = new RoomTypeService(repository, roomRepository);
+        }
 
-    @Test
-    void createRoomTypeTrimsValues() {
-        when(repository.existsByNameIgnoreCase("Deluxe Room"))
-            .thenReturn(false);
-        when(repository.save(any(RoomType.class)))
-            .thenAnswer(invocation -> invocation.getArgument(0));
+        @Test
+        void createRoomTypeTrimsValues() {
+                when(repository.existsByNameIgnoreCase("Deluxe Room"))
+                                .thenReturn(false);
+                when(repository.save(any(RoomType.class)))
+                                .thenAnswer(invocation -> invocation.getArgument(0));
 
-        RoomTypeResponse response = service.createRoomType(
-            new CreateRoomTypeRequest(" Deluxe Room ", " Ocean view ")
-        );
+                RoomTypeResponse response = service.createRoomType(
+                                new CreateRoomTypeRequest(" Deluxe Room ", " Ocean view "));
 
-        assertEquals("Deluxe Room", response.name());
-        assertEquals("Ocean view", response.description());
-    }
+                assertEquals("Deluxe Room", response.name());
+                assertEquals("Ocean view", response.description());
+        }
 
-    @Test
-    void createRoomTypeRejectsDuplicateName() {
-        when(repository.existsByNameIgnoreCase("Suite"))
-            .thenReturn(true);
+        @Test
+        void createRoomTypeRejectsDuplicateName() {
+                when(repository.existsByNameIgnoreCase("Suite"))
+                                .thenReturn(true);
 
-        assertThrows(
-            DuplicateResourceException.class,
-            () -> service.createRoomType(
-                new CreateRoomTypeRequest("Suite", null)
-            )
-        );
-        verify(repository, never()).save(any(RoomType.class));
-    }
+                assertThrows(
+                                DuplicateResourceException.class,
+                                () -> service.createRoomType(
+                                                new CreateRoomTypeRequest("Suite", null)));
+                verify(repository, never()).save(any(RoomType.class));
+        }
 
-    @Test
-    void updateRoomTypeExcludesCurrentRecordFromDuplicateCheck() {
-        UUID id = UUID.randomUUID();
-        RoomType roomType = new RoomType();
-        roomType.setId(id);
-        roomType.setName("Suite");
+        @Test
+        void updateRoomTypeExcludesCurrentRecordFromDuplicateCheck() {
+                UUID id = UUID.randomUUID();
+                RoomType roomType = new RoomType();
+                roomType.setId(id);
+                roomType.setName("Suite");
 
-        when(repository.findById(id)).thenReturn(Optional.of(roomType));
-        when(repository.existsByNameIgnoreCaseAndIdNot("Suite", id))
-            .thenReturn(false);
-        when(repository.save(roomType)).thenReturn(roomType);
+                when(repository.findById(id)).thenReturn(Optional.of(roomType));
+                when(repository.existsByNameIgnoreCaseAndIdNot("Suite", id))
+                                .thenReturn(false);
+                when(repository.save(roomType)).thenReturn(roomType);
 
-        RoomTypeResponse response = service.updateRoomType(
-            id,
-            new UpdateRoomTypeRequest("Suite", "Updated")
-        );
+                RoomTypeResponse response = service.updateRoomType(
+                                id,
+                                new UpdateRoomTypeRequest("Suite", "Updated"));
 
-        assertEquals("Updated", response.description());
-    }
+                assertEquals("Updated", response.description());
+        }
 
-    @Test
-    void getRoomTypeRejectsMissingId() {
-        UUID id = UUID.randomUUID();
-        when(repository.findById(id)).thenReturn(Optional.empty());
+        @Test
+        void getRoomTypeRejectsMissingId() {
+                UUID id = UUID.randomUUID();
+                when(repository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(
-            ResourceNotFoundException.class,
-            () -> service.getRoomTypeById(id)
-        );
-    }
+                assertThrows(
+                                ResourceNotFoundException.class,
+                                () -> service.getRoomTypeById(id));
+        }
 }

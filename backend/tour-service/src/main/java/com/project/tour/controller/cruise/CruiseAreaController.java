@@ -1,9 +1,10 @@
 package com.project.tour.controller.cruise;
 
-import com.project.tour.dto.cruisearea.CreateCruiseAreaRequest;
-import com.project.tour.dto.cruisearea.CruiseAreaResponse;
-import com.project.tour.dto.cruisearea.UpdateCruiseAreaRequest;
-import com.project.tour.service.CruiseAreaService;
+import com.project.tour.dto.cruise.area.CreateCruiseAreaRequest;
+import com.project.tour.dto.cruise.area.CruiseAreaResponse;
+import com.project.tour.dto.cruise.area.UpdateCruiseAreaRequest;
+import com.project.tour.service.cruise.CruiseAreaService;
+
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
