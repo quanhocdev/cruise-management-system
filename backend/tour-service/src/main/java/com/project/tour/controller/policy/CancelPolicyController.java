@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/admin/policies/{policyId}/cancel-rules")
+@RequestMapping("/api/admin/policies/{policyId}/cancel-rules")
 public class CancelPolicyController {
 
     private final CancelPolicyService service;

@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/cruises")
+@RequestMapping("/api/admin/cruises")
 public class CruiseController {
 
     private final CruiseService cruiseService;

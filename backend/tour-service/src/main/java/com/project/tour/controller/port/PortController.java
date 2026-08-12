@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/admin/ports")
+@RequestMapping("/api/admin/ports")
 public class PortController {
 
     private final PortService portService;

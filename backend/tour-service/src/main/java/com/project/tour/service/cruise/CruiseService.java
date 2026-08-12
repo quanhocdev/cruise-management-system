@@ -8,6 +8,7 @@ import com.project.tour.dto.cruise.UpdateCruiseRequest;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.cruise.CruiseMapper;
 import com.project.tour.model.Cruise;
+import com.project.tour.model.enums.CruiseStatus;
 import com.project.tour.repository.cruise.CruiseRepository;
 
 import org.springframework.http.HttpStatus;
@@ -37,31 +38,50 @@ public class CruiseService {
      * CREATE
      * =====================================================
      */
-    public CruiseResponse create(CreateCruiseRequest request) {
+    public CruiseResponse createCruise(
+            CreateCruiseRequest request) {
 
-        if (cruiseRepository.existsByCodeIgnoreCase(request.getCode())) {
+        /*
+         * Kiểm tra code đã tồn tại
+         */
+        if (cruiseRepository.existsByCodeIgnoreCase(
+                request.getCode())) {
+
             throw new AppException(
                     "Cruise code already exists",
                     HttpStatus.CONFLICT);
         }
 
+        /*
+         * Request -> Entity
+         */
         Cruise cruise = CruiseMapper.toEntity(request);
 
         /*
-         * Upload image
+         * Upload image nếu có
          */
-        if (request.getImage() != null && !request.getImage().isEmpty()) {
+        if (request.getImage() != null
+                && !request.getImage().isEmpty()) {
 
             UploadResult uploadResult = fileStorageService.saveMultipart(
                     request.getImage(),
                     "cruises");
 
-            cruise.setImageUrl(uploadResult.getUrl());
-            cruise.setImagePublicId(uploadResult.getPublicId());
+            cruise.setImageUrl(
+                    uploadResult.getUrl());
+
+            cruise.setImagePublicId(
+                    uploadResult.getPublicId());
         }
 
+        /*
+         * Save database
+         */
         Cruise savedCruise = cruiseRepository.save(cruise);
 
+        /*
+         * Entity -> Response
+         */
         return CruiseMapper.toResponse(savedCruise);
     }
 
@@ -71,9 +91,28 @@ public class CruiseService {
      * =====================================================
      */
     @Transactional(readOnly = true)
-    public CruiseResponse getById(UUID id) {
+    public CruiseResponse getCruiseById(
+            UUID id) {
 
         Cruise cruise = findById(id);
+
+        return CruiseMapper.toResponse(cruise);
+    }
+
+    /*
+     * =====================================================
+     * GET BY CODE
+     * =====================================================
+     */
+    @Transactional(readOnly = true)
+    public CruiseResponse getCruiseByCode(
+            String code) {
+
+        Cruise cruise = cruiseRepository
+                .findByCodeIgnoreCase(code)
+                .orElseThrow(() -> new AppException(
+                        "Cruise not found",
+                        HttpStatus.NOT_FOUND));
 
         return CruiseMapper.toResponse(cruise);
     }
@@ -84,9 +123,25 @@ public class CruiseService {
      * =====================================================
      */
     @Transactional(readOnly = true)
-    public List<CruiseResponse> getAll() {
+    public List<CruiseResponse> getAllCruises() {
 
         return cruiseRepository.findAll()
+                .stream()
+                .map(CruiseMapper::toResponse)
+                .toList();
+    }
+
+    /*
+     * =====================================================
+     * GET ACTIVE
+     * =====================================================
+     */
+    @Transactional(readOnly = true)
+    public List<CruiseResponse> getActiveCruises() {
+
+        return cruiseRepository
+                .findAllByStatusOrderByNameAsc(
+                        CruiseStatus.ACTIVE)
                 .stream()
                 .map(CruiseMapper::toResponse)
                 .toList();
@@ -97,15 +152,19 @@ public class CruiseService {
      * UPDATE
      * =====================================================
      */
-    public CruiseResponse update(
+    public CruiseResponse updateCruise(
             UUID id,
             UpdateCruiseRequest request) {
 
         Cruise cruise = findById(id);
 
-        if (cruiseRepository.existsByCodeIgnoreCaseAndIdNot(
-                request.getCode(),
-                id)) {
+        /*
+         * Kiểm tra code trùng với Cruise khác
+         */
+        if (cruiseRepository
+                .existsByCodeIgnoreCaseAndIdNot(
+                        request.getCode(),
+                        id)) {
 
             throw new AppException(
                     "Cruise code already exists",
@@ -113,74 +172,93 @@ public class CruiseService {
         }
 
         /*
-         * Update thông tin cơ bản
+         * Lưu publicId ảnh cũ
          */
-        CruiseMapper.updateEntity(cruise, request);
+        String oldPublicId = cruise.getImagePublicId();
 
         /*
-         * Nếu có ảnh mới:
-         *
-         * 1. Xóa ảnh cũ
-         * 2. Upload ảnh mới
-         * 3. Lưu URL + publicId mới
+         * Update thông tin cơ bản
+         */
+        CruiseMapper.updateEntity(
+                cruise,
+                request);
+
+        /*
+         * Nếu request có ảnh mới
          */
         if (request.getImage() != null
                 && !request.getImage().isEmpty()) {
 
-            String oldPublicId = cruise.getImagePublicId();
-
+            /*
+             * Upload ảnh mới trước
+             */
             UploadResult uploadResult = fileStorageService.saveMultipart(
                     request.getImage(),
                     "cruises");
 
-            cruise.setImageUrl(uploadResult.getUrl());
-            cruise.setImagePublicId(uploadResult.getPublicId());
+            cruise.setImageUrl(
+                    uploadResult.getUrl());
+
+            cruise.setImagePublicId(
+                    uploadResult.getPublicId());
 
             /*
-             * Xóa ảnh cũ sau khi upload ảnh mới thành công.
+             * Sau khi upload thành công
+             * mới xóa ảnh cũ
              */
             if (oldPublicId != null
                     && !oldPublicId.isBlank()) {
 
-                fileStorageService.delete(oldPublicId);
+                fileStorageService.delete(
+                        oldPublicId);
             }
         }
 
+        /*
+         * Save database
+         */
         Cruise updatedCruise = cruiseRepository.save(cruise);
 
-        return CruiseMapper.toResponse(updatedCruise);
+        return CruiseMapper.toResponse(
+                updatedCruise);
     }
 
     /*
      * =====================================================
-     * DELETE
+     * DEACTIVATE
+     * =====================================================
+     *
+     * Soft delete:
+     *
+     * ACTIVE -> INACTIVE
+     *
+     * Không xóa record khỏi database.
+     *
      * =====================================================
      */
-    public void delete(UUID id) {
+    public CruiseResponse deactivateCruise(
+            UUID id) {
 
         Cruise cruise = findById(id);
 
-        /*
-         * Xóa ảnh trên Cloudinary
-         */
-        if (cruise.getImagePublicId() != null
-                && !cruise.getImagePublicId().isBlank()) {
+        cruise.setStatus(
+                CruiseStatus.INACTIVE);
 
-            fileStorageService.delete(
-                    cruise.getImagePublicId());
-        }
+        Cruise updatedCruise = cruiseRepository.save(cruise);
 
-        cruiseRepository.delete(cruise);
+        return CruiseMapper.toResponse(
+                updatedCruise);
     }
 
     /*
      * =====================================================
-     * FIND ENTITY
+     * FIND ENTITY BY ID
      * =====================================================
      */
     private Cruise findById(UUID id) {
 
-        return cruiseRepository.findById(id)
+        return cruiseRepository
+                .findById(id)
                 .orElseThrow(() -> new AppException(
                         "Cruise not found",
                         HttpStatus.NOT_FOUND));

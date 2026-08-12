@@ -15,58 +15,58 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/admin/policies/{policyId}/booking-rules")
+@RequestMapping("/api/admin/policies/{policyId}/booking-rules")
 public class BookingPolicyController {
 
-    private final BookingPolicyService service;
+        private final BookingPolicyService service;
 
-    public BookingPolicyController(
-            BookingPolicyService service) {
+        public BookingPolicyController(
+                        BookingPolicyService service) {
 
-        this.service = service;
-    }
+                this.service = service;
+        }
 
-    @PostMapping
-    public ResponseEntity<BookingPolicyResponse> create(
-            @PathVariable UUID policyId,
-            @Valid @RequestBody CreateBookingPolicyRequest request) {
+        @PostMapping
+        public ResponseEntity<BookingPolicyResponse> create(
+                        @PathVariable UUID policyId,
+                        @Valid @RequestBody CreateBookingPolicyRequest request) {
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(service.create(policyId, request));
-    }
+                return ResponseEntity
+                                .status(HttpStatus.CREATED)
+                                .body(service.create(policyId, request));
+        }
 
-    @GetMapping
-    public ResponseEntity<List<BookingPolicyResponse>> getAll(
-            @PathVariable UUID policyId,
-            @RequestParam(defaultValue = "false") boolean activeOnly) {
+        @GetMapping
+        public ResponseEntity<List<BookingPolicyResponse>> getAll(
+                        @PathVariable UUID policyId,
+                        @RequestParam(defaultValue = "false") boolean activeOnly) {
 
-        return ResponseEntity.ok(
-                service.getAll(policyId, activeOnly));
-    }
+                return ResponseEntity.ok(
+                                service.getAll(policyId, activeOnly));
+        }
 
-    @PutMapping("/{ruleId}")
-    public ResponseEntity<BookingPolicyResponse> update(
-            @PathVariable UUID policyId,
-            @PathVariable UUID ruleId,
-            @Valid @RequestBody UpdateBookingPolicyRequest request) {
+        @PutMapping("/{ruleId}")
+        public ResponseEntity<BookingPolicyResponse> update(
+                        @PathVariable UUID policyId,
+                        @PathVariable UUID ruleId,
+                        @Valid @RequestBody UpdateBookingPolicyRequest request) {
 
-        return ResponseEntity.ok(
-                service.update(
-                        policyId,
-                        ruleId,
-                        request));
-    }
+                return ResponseEntity.ok(
+                                service.update(
+                                                policyId,
+                                                ruleId,
+                                                request));
+        }
 
-    @PatchMapping("/{ruleId}/deactivate")
-    public ResponseEntity<Void> deactivate(
-            @PathVariable UUID policyId,
-            @PathVariable UUID ruleId) {
+        @PatchMapping("/{ruleId}/deactivate")
+        public ResponseEntity<Void> deactivate(
+                        @PathVariable UUID policyId,
+                        @PathVariable UUID ruleId) {
 
-        service.deactivate(
-                policyId,
-                ruleId);
+                service.deactivate(
+                                policyId,
+                                ruleId);
 
-        return ResponseEntity.noContent().build();
-    }
+                return ResponseEntity.noContent().build();
+        }
 }

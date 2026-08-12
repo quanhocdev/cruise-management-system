@@ -13,7 +13,7 @@ spring:
             - id: auth-service
               uri: ${AUTH_SERVICE_URL:http://auth-service:8081}
               predicates:
-                - Path=/api/auth/**,/admin/**
+                - Path=/api/auth/**,/api/admin/**
 
             - id: payment-service
               uri: ${PAYMENT_SERVICE_URL:http://payment-service:8085}

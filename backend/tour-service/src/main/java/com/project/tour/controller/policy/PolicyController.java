@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/admin/policies")
+@RequestMapping("/api/admin/policies")
 public class PolicyController {
 
     private final PolicyService policyService;
