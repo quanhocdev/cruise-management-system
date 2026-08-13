@@ -18,6 +18,11 @@ import AdminDashboard from "./modules/admin/pages/Dashboard";
 import ManagerAccount from "./modules/admin/pages/ManagerAccount";
 import ManagerPort from "./modules/admin/pages/ManagerPort";
 
+import ManagerCruise from "./modules/admin/pages/ManagerCruise";
+import CruiseDeck from "./modules/admin/pages/CruiseDeck";
+import CruiseArea from "./modules/admin/pages/CruiseArea";
+import CruiseRoom from "./modules/admin/pages/CruiseRoom";
+
 import PassengerDashboard from "./modules/passenger/pages/Dashboard";
 import SchedulerDashboard from "./modules/scheduler/pages/Dashboard";
 import OperationDashboard from "./modules/operation/pages/Dashboard";
@@ -59,12 +64,35 @@ export default function App() {
               // <ProtectedRoute allowedRoles={["ADMIN"]}>
               <AdminLayout>
                 <Routes>
+                  {/* DASHBOARD */}
                   <Route path="dashboard" element={<AdminDashboard />} />
 
+                  {/* ACCOUNT */}
                   <Route path="accounts" element={<ManagerAccount />} />
 
+                  {/* PORT */}
                   <Route path="ports" element={<ManagerPort />} />
 
+                  {/* =================================================
+                      CRUISE
+                     ================================================= */}
+
+                  {/* Quản lý du thuyền */}
+                  <Route path="cruises" element={<ManagerCruise />} />
+
+                  {/* Quản lý tầng của du thuyền */}
+                  <Route
+                    path="cruises/:cruiseId/decks"
+                    element={<CruiseDeck />}
+                  />
+
+                  {/* Quản lý khu vực của tầng */}
+                  <Route path="decks/:deckId/areas" element={<CruiseArea />} />
+
+                  {/* Quản lý phòng của tầng */}
+                  <Route path="decks/:deckId/rooms" element={<CruiseRoom />} />
+
+                  {/* DEFAULT */}
                   <Route
                     path=""
                     element={<Navigate to="dashboard" replace />}

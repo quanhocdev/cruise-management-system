@@ -18,68 +18,68 @@ import java.util.UUID;
 @RequestMapping("/api/admin/cruises/{cruiseId}/decks")
 public class CruiseDeckController {
 
-    private final CruiseDeckService cruiseDeckService;
+        private final CruiseDeckService cruiseDeckService;
 
-    public CruiseDeckController(
-            CruiseDeckService cruiseDeckService) {
+        public CruiseDeckController(
+                        CruiseDeckService cruiseDeckService) {
 
-        this.cruiseDeckService = cruiseDeckService;
-    }
+                this.cruiseDeckService = cruiseDeckService;
+        }
 
-    @PostMapping
-    public ResponseEntity<CruiseDeckResponse> createDeck(
-            @PathVariable UUID cruiseId,
-            @Valid @RequestBody CreateCruiseDeckRequest request) {
+        @PostMapping
+        public ResponseEntity<CruiseDeckResponse> createDeck(
+                        @PathVariable UUID cruiseId,
+                        @Valid @RequestBody CreateCruiseDeckRequest request) {
 
-        request.setCruiseId(cruiseId);
+                CruiseDeckResponse response = cruiseDeckService.createDeck(
+                                cruiseId,
+                                request);
 
-        CruiseDeckResponse response = cruiseDeckService.createDeck(request);
+                return ResponseEntity
+                                .status(HttpStatus.CREATED)
+                                .body(response);
+        }
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(response);
-    }
+        @GetMapping
+        public ResponseEntity<List<CruiseDeckResponse>> getDecks(
+                        @PathVariable UUID cruiseId,
+                        @RequestParam(defaultValue = "false") boolean activeOnly) {
 
-    @GetMapping
-    public ResponseEntity<List<CruiseDeckResponse>> getDecks(
-            @PathVariable UUID cruiseId,
-            @RequestParam(defaultValue = "false") boolean activeOnly) {
+                List<CruiseDeckResponse> response = activeOnly
+                                ? cruiseDeckService.getActiveDecksByCruise(cruiseId)
+                                : cruiseDeckService.getDecksByCruise(cruiseId);
 
-        List<CruiseDeckResponse> response = activeOnly
-                ? cruiseDeckService.getActiveDecksByCruise(cruiseId)
-                : cruiseDeckService.getDecksByCruise(cruiseId);
+                return ResponseEntity.ok(response);
+        }
 
-        return ResponseEntity.ok(response);
-    }
+        @GetMapping("/{deckId}")
+        public ResponseEntity<CruiseDeckResponse> getDeckById(
+                        @PathVariable UUID cruiseId,
+                        @PathVariable UUID deckId) {
 
-    @GetMapping("/{deckId}")
-    public ResponseEntity<CruiseDeckResponse> getDeckById(
-            @PathVariable UUID cruiseId,
-            @PathVariable UUID deckId) {
+                return ResponseEntity.ok(
+                                cruiseDeckService.getDeckById(deckId));
+        }
 
-        return ResponseEntity.ok(
-                cruiseDeckService.getDeckById(deckId));
-    }
+        @PatchMapping("/{deckId}")
+        public ResponseEntity<CruiseDeckResponse> updateDeck(
+                        @PathVariable UUID cruiseId,
+                        @PathVariable UUID deckId,
+                        @Valid @RequestBody UpdateCruiseDeckRequest request) {
 
-    @PatchMapping("/{deckId}")
-    public ResponseEntity<CruiseDeckResponse> updateDeck(
-            @PathVariable UUID cruiseId,
-            @PathVariable UUID deckId,
-            @Valid @RequestBody UpdateCruiseDeckRequest request) {
+                return ResponseEntity.ok(
+                                cruiseDeckService.updateDeck(
+                                                deckId,
+                                                request));
+        }
 
-        return ResponseEntity.ok(
-                cruiseDeckService.updateDeck(
-                        deckId,
-                        request));
-    }
+        @DeleteMapping("/{deckId}")
+        public ResponseEntity<Void> deleteDeck(
+                        @PathVariable UUID cruiseId,
+                        @PathVariable UUID deckId) {
 
-    @DeleteMapping("/{deckId}")
-    public ResponseEntity<Void> deleteDeck(
-            @PathVariable UUID cruiseId,
-            @PathVariable UUID deckId) {
+                cruiseDeckService.deleteDeck(deckId);
 
-        cruiseDeckService.deleteDeck(deckId);
-
-        return ResponseEntity.noContent().build();
-    }
+                return ResponseEntity.noContent().build();
+        }
 }

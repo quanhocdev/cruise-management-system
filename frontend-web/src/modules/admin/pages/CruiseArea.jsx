@@ -1,52 +1,48 @@
-// src/modules/admin/pages/ManagerCruise.jsx
 import { useState } from "react";
 import { Alert, Button } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
-import useCruises from "../hooks/useCruises";
-import CruiseTable from "../components/cruise/CruiseTable";
-import CruiseFormModal from "../components/cruise/CruiseFormModal";
+import useCruiseAreas from "../hooks/useCruiseAreas";
+import CruiseAreaTable from "../components/cruise/CruiseAreaTable";
+import CruiseAreaFormModal from "../components/cruise/CruiseAreaFormModal";
 
-import "../styles/cruise/ManagerCruise.css";
+import "../styles/cruise/CruiseArea.css";
 
-export default function ManagerCruise() {
+export default function CruiseArea() {
+  const { deckId } = useParams();
   const navigate = useNavigate();
 
   const {
-    cruises,
+    areas,
     loading,
     error,
     success,
     setError,
     setSuccess,
-    createCruise,
-    updateCruise,
-    deleteCruise,
-  } = useCruises();
+    createArea,
+    updateArea,
+    deleteArea,
+  } = useCruiseAreas(deckId);
 
   const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [editingCruise, setEditingCruise] = useState(null);
+  const [editingArea, setEditingArea] = useState(null);
 
   const [form, setForm] = useState({
     name: "",
-    code: "",
     description: "",
-    maxPassengers: "",
-    image: null,
     status: "ACTIVE",
+    image: null,
   });
 
   const handleOpenCreate = () => {
-    setEditingCruise(null);
+    setEditingArea(null);
 
     setForm({
       name: "",
-      code: "",
       description: "",
-      maxPassengers: "",
-      image: null,
       status: "ACTIVE",
+      image: null,
     });
 
     setError("");
@@ -54,16 +50,14 @@ export default function ManagerCruise() {
     setShowModal(true);
   };
 
-  const handleOpenEdit = (cruise) => {
-    setEditingCruise(cruise);
+  const handleOpenEdit = (area) => {
+    setEditingArea(area);
 
     setForm({
-      name: cruise.name || "",
-      code: cruise.code || "",
-      description: cruise.description || "",
-      maxPassengers: cruise.maxPassengers ?? "",
+      name: area.name || "",
+      description: area.description || "",
+      status: area.status || "ACTIVE",
       image: null,
-      status: cruise.status || "ACTIVE",
     });
 
     setError("");
@@ -95,33 +89,21 @@ export default function ManagerCruise() {
     setSuccess("");
 
     if (!form.name.trim()) {
-      setError("Vui lòng nhập tên du thuyền.");
-      return;
-    }
-
-    if (!form.code.trim()) {
-      setError("Vui lòng nhập mã du thuyền.");
-      return;
-    }
-
-    if (!form.maxPassengers || Number(form.maxPassengers) <= 0) {
-      setError("Số hành khách tối đa phải lớn hơn 0.");
+      setError("Vui lòng nhập tên khu vực.");
       return;
     }
 
     const formData = new FormData();
 
     formData.append("name", form.name.trim());
-    formData.append("code", form.code.trim());
     formData.append("description", form.description.trim());
-    formData.append("maxPassengers", Number(form.maxPassengers));
+
+    if (editingArea) {
+      formData.append("status", form.status);
+    }
 
     if (form.image) {
       formData.append("image", form.image);
-    }
-
-    if (editingCruise) {
-      formData.append("status", form.status);
     }
 
     setSaving(true);
@@ -129,10 +111,10 @@ export default function ManagerCruise() {
     try {
       let result;
 
-      if (!editingCruise) {
-        result = await createCruise(formData);
+      if (!editingArea) {
+        result = await createArea(formData);
       } else {
-        result = await updateCruise(editingCruise.id, formData);
+        result = await updateArea(editingArea.id, formData);
       }
 
       if (result) {
@@ -143,35 +125,39 @@ export default function ManagerCruise() {
     }
   };
 
-  const handleDelete = async (cruise) => {
+  const handleDelete = async (area) => {
     const confirmed = window.confirm(
-      `Bạn có chắc muốn xóa du thuyền "${cruise.name}" không?`,
+      `Bạn có chắc muốn xóa khu vực "${area.name}" không?`,
     );
 
     if (!confirmed) {
       return;
     }
 
-    await deleteCruise(cruise.id);
-  };
-
-  const handleManageDecks = (cruise) => {
-    navigate(`/admin/cruises/${cruise.id}/decks`);
+    await deleteArea(area.id);
   };
 
   return (
-    <div className="manager-cruise-page container-fluid py-4">
-      <div className="manager-cruise-header mb-4">
+    <div className="cruise-area-page container-fluid py-4">
+      <div className="cruise-area-header mb-4">
         <div>
-          <h2 className="manager-cruise-title">Quản lý du thuyền</h2>
+          <Button
+            variant="link"
+            className="px-0 mb-2"
+            onClick={() => navigate(-1)}
+          >
+            ← Quay lại tầng
+          </Button>
 
-          <p className="manager-cruise-description">
-            Quản lý thông tin các du thuyền trong hệ thống.
+          <h2 className="cruise-area-title">Quản lý khu vực</h2>
+
+          <p className="cruise-area-description">
+            Quản lý các khu vực trên tầng của du thuyền.
           </p>
         </div>
 
         <Button variant="primary" onClick={handleOpenCreate}>
-          + Thêm du thuyền
+          + Thêm khu vực
         </Button>
       </div>
 
@@ -187,18 +173,17 @@ export default function ManagerCruise() {
         </Alert>
       )}
 
-      <CruiseTable
-        cruises={cruises}
+      <CruiseAreaTable
+        areas={areas}
         loading={loading}
         onEdit={handleOpenEdit}
         onDelete={handleDelete}
-        onManageDecks={handleManageDecks}
       />
 
-      <CruiseFormModal
+      <CruiseAreaFormModal
         show={showModal}
         saving={saving}
-        editingCruise={editingCruise}
+        editingArea={editingArea}
         form={form}
         error={error}
         onClose={handleCloseModal}

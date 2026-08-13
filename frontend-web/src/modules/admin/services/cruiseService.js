@@ -1,0 +1,177 @@
+import api from "../../../api/axios";
+
+const cruiseService = {
+  // =====================================================
+  // CRUISE
+  // =====================================================
+
+  getAllCruises: async (activeOnly = false) => {
+    const response = await api.get("/admin/cruises", {
+      params: { activeOnly },
+    });
+
+    return response.data;
+  },
+
+  getCruiseById: async (cruiseId) => {
+    const response = await api.get(`/admin/cruises/${cruiseId}`);
+
+    return response.data;
+  },
+
+  createCruise: async (formData) => {
+    const response = await api.post("/admin/cruises", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return response.data;
+  },
+
+  updateCruise: async (cruiseId, formData) => {
+    const response = await api.patch(`/admin/cruises/${cruiseId}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return response.data;
+  },
+
+  deleteCruise: async (cruiseId) => {
+    await api.delete(`/admin/cruises/${cruiseId}`);
+  },
+
+  // =====================================================
+  // DECK
+  // =====================================================
+
+  getDecks: async (cruiseId, activeOnly = false) => {
+    const response = await api.get(`/admin/cruises/${cruiseId}/decks`, {
+      params: { activeOnly },
+    });
+
+    return response.data;
+  },
+
+  getDeckById: async (cruiseId, deckId) => {
+    const response = await api.get(
+      `/admin/cruises/${cruiseId}/decks/${deckId}`,
+    );
+
+    return response.data;
+  },
+
+  createDeck: async (cruiseId, data) => {
+    const response = await api.post(`/admin/cruises/${cruiseId}/decks`, data);
+
+    return response.data;
+  },
+
+  updateDeck: async (cruiseId, deckId, data) => {
+    const response = await api.patch(
+      `/admin/cruises/${cruiseId}/decks/${deckId}`,
+      data,
+    );
+
+    return response.data;
+  },
+
+  deleteDeck: async (cruiseId, deckId) => {
+    await api.delete(`/admin/cruises/${cruiseId}/decks/${deckId}`);
+  },
+
+  // =====================================================
+  // AREA
+  // =====================================================
+
+  getAreas: async (deckId, activeOnly = false) => {
+    const response = await api.get(`/admin/decks/${deckId}/areas`, {
+      params: { activeOnly },
+    });
+
+    return response.data;
+  },
+
+  getAreaById: async (deckId, areaId) => {
+    const response = await api.get(`/admin/decks/${deckId}/areas/${areaId}`);
+
+    return response.data;
+  },
+
+  createArea: async (deckId, formData) => {
+    const response = await api.post(`/admin/decks/${deckId}/areas`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return response.data;
+  },
+
+  updateArea: async (deckId, areaId, formData) => {
+    const response = await api.patch(
+      `/admin/decks/${deckId}/areas/${areaId}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      },
+    );
+
+    return response.data;
+  },
+
+  deactivateArea: async (deckId, areaId) => {
+    const response = await api.patch(
+      `/admin/decks/${deckId}/areas/${areaId}/deactivate`,
+    );
+
+    return response.data;
+  },
+
+  deleteArea: async (deckId, areaId) => {
+    await api.delete(`/admin/decks/${deckId}/areas/${areaId}`);
+  },
+
+  // =====================================================
+  // ROOM
+  // =====================================================
+
+  getRooms: async (deckId, activeOnly = false) => {
+    const response = await api.get(`/admin/decks/${deckId}/rooms`, {
+      params: { activeOnly },
+    });
+
+    return response.data;
+  },
+
+  getRoomById: async (deckId, roomId) => {
+    const response = await api.get(`/admin/decks/${deckId}/rooms/${roomId}`);
+
+    return response.data;
+  },
+
+  createRoom: async (deckId, data) => {
+    const response = await api.post(`/admin/decks/${deckId}/rooms`, data);
+
+    return response.data;
+  },
+
+  updateRoom: async (deckId, roomId, data) => {
+    const response = await api.patch(
+      `/admin/decks/${deckId}/rooms/${roomId}`,
+      data,
+    );
+
+    return response.data;
+  },
+
+  deleteRoom: async (deckId, roomId) => {
+    await api.delete(`/admin/decks/${deckId}/rooms/${roomId}`);
+  },
+};
+
+export default cruiseService;

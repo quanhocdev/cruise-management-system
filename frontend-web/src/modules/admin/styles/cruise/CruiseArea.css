@@ -1,0 +1,55 @@
+.cruise-area-page {
+  min-height: 100%;
+}
+
+.cruise-area-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.cruise-area-header > div:first-child {
+  min-width: 0;
+}
+
+.cruise-area-header .btn-link {
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.cruise-area-header .btn-link:hover {
+  text-decoration: underline;
+}
+
+.cruise-area-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #212529;
+}
+
+.cruise-area-description {
+  margin: 8px 0 0;
+  color: #6c757d;
+  font-size: 0.95rem;
+}
+
+.cruise-area-page .alert {
+  border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+  .cruise-area-header {
+    flex-direction: column;
+  }
+
+  .cruise-area-header .btn-primary {
+    width: 100%;
+  }
+
+  .cruise-area-title {
+    font-size: 1.5rem;
+  }
+}
