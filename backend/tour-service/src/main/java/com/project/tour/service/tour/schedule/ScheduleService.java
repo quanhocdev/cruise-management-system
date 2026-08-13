@@ -1,4 +1,4 @@
-package com.project.tour.service.schedule;
+package com.project.tour.service.tour.schedule;
 
 import com.project.tour.dto.schedule.*;
 import com.project.tour.model.*;
