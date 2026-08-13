@@ -4,60 +4,19 @@ import com.project.tour.model.enums.RoomStatus;
 
 import java.util.UUID;
 
-public class RoomResponse {
+public record RoomResponse(
 
-    private UUID id;
-    private UUID cruiseAreaId;
-    private String code;
-    private UUID roomTypeId;
-    private String roomTypeName;
-    private RoomStatus status;
+        UUID id,
 
-    public UUID getId() {
-        return id;
-    }
+        UUID cruiseDeckId,
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
+        String code,
 
-    public UUID getCruiseAreaId() {
-        return cruiseAreaId;
-    }
+        UUID roomTypeId,
 
-    public void setCruiseAreaId(UUID cruiseAreaId) {
-        this.cruiseAreaId = cruiseAreaId;
-    }
+        String roomTypeName,
 
-    public String getCode() {
-        return code;
-    }
+        RoomStatus status
 
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public UUID getRoomTypeId() {
-        return roomTypeId;
-    }
-
-    public void setRoomTypeId(UUID roomTypeId) {
-        this.roomTypeId = roomTypeId;
-    }
-
-    public String getRoomTypeName() {
-        return roomTypeName;
-    }
-
-    public void setRoomTypeName(String roomTypeName) {
-        this.roomTypeName = roomTypeName;
-    }
-
-    public RoomStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(RoomStatus status) {
-        this.status = status;
-    }
+) {
 }

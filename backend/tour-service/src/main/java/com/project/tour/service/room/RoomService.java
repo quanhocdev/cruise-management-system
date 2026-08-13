@@ -5,11 +5,11 @@ import com.project.tour.dto.room.RoomResponse;
 import com.project.tour.dto.room.UpdateRoomRequest;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.room.RoomMapper;
-import com.project.tour.model.CruiseArea;
+import com.project.tour.model.CruiseDeck;
 import com.project.tour.model.Room;
 import com.project.tour.model.RoomType;
 import com.project.tour.model.enums.RoomStatus;
-import com.project.tour.repository.cruise.CruiseAreaRepository;
+import com.project.tour.repository.cruise.CruiseDeckRepository;
 import com.project.tour.repository.room.RoomRepository;
 import com.project.tour.repository.room.RoomTypeRepository;
 
@@ -24,155 +24,198 @@ import java.util.UUID;
 @Transactional
 public class RoomService {
 
-    private final RoomRepository roomRepository;
-    private final CruiseAreaRepository cruiseAreaRepository;
-    private final RoomTypeRepository roomTypeRepository;
+        private final RoomRepository roomRepository;
+        private final CruiseDeckRepository cruiseDeckRepository;
+        private final RoomTypeRepository roomTypeRepository;
 
-    public RoomService(
-            RoomRepository roomRepository,
-            CruiseAreaRepository cruiseAreaRepository,
-            RoomTypeRepository roomTypeRepository) {
+        public RoomService(
+                        RoomRepository roomRepository,
+                        CruiseDeckRepository cruiseDeckRepository,
+                        RoomTypeRepository roomTypeRepository) {
 
-        this.roomRepository = roomRepository;
-        this.cruiseAreaRepository = cruiseAreaRepository;
-        this.roomTypeRepository = roomTypeRepository;
-    }
-
-    public RoomResponse createRoom(
-            UUID areaId,
-            CreateRoomRequest request) {
-
-        CruiseArea area = findArea(areaId);
-
-        if (roomRepository.existsByCruiseArea_IdAndCodeIgnoreCase(
-                areaId,
-                request.getCode())) {
-
-            throw new AppException(
-                    "Room code already exists in this area",
-                    HttpStatus.CONFLICT);
+                this.roomRepository = roomRepository;
+                this.cruiseDeckRepository = cruiseDeckRepository;
+                this.roomTypeRepository = roomTypeRepository;
         }
 
-        RoomType roomType = findRoomType(
-                request.getRoomTypeId());
+        // =====================================================
+        // CREATE ROOM
+        // =====================================================
 
-        Room room = RoomMapper.toEntity(
-                request,
-                roomType);
+        public RoomResponse createRoom(
+                        UUID deckId,
+                        CreateRoomRequest request) {
 
-        room.setCruiseArea(area);
+                CruiseDeck deck = findDeck(deckId);
 
-        Room savedRoom = roomRepository.save(room);
+                if (roomRepository.existsByCruiseDeck_IdAndCodeIgnoreCase(
+                                deckId,
+                                request.code())) {
 
-        return RoomMapper.toResponse(savedRoom);
-    }
+                        throw new AppException(
+                                        "Room code already exists in this deck",
+                                        HttpStatus.CONFLICT);
+                }
 
-    @Transactional(readOnly = true)
-    public RoomResponse getRoomById(
-            UUID areaId,
-            UUID roomId) {
+                RoomType roomType = findRoomType(
+                                request.roomTypeId());
 
-        Room room = findById(areaId, roomId);
+                Room room = RoomMapper.toEntity(
+                                request,
+                                deck,
+                                roomType);
 
-        return RoomMapper.toResponse(room);
-    }
+                Room savedRoom = roomRepository.save(room);
 
-    @Transactional(readOnly = true)
-    public List<RoomResponse> getRoomsByArea(
-            UUID areaId) {
-
-        findArea(areaId);
-
-        return roomRepository
-                .findAllByCruiseArea_IdOrderByCodeAsc(areaId)
-                .stream()
-                .map(RoomMapper::toResponse)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public List<RoomResponse> getActiveRoomsByArea(
-            UUID areaId) {
-
-        findArea(areaId);
-
-        return roomRepository
-                .findAllByCruiseArea_IdAndStatusOrderByCodeAsc(
-                        areaId,
-                        RoomStatus.ACTIVE)
-                .stream()
-                .map(RoomMapper::toResponse)
-                .toList();
-    }
-
-    public RoomResponse updateRoom(
-            UUID areaId,
-            UUID roomId,
-            UpdateRoomRequest request) {
-
-        Room room = findById(areaId, roomId);
-
-        if (roomRepository
-                .existsByCruiseArea_IdAndCodeIgnoreCaseAndIdNot(
-                        areaId,
-                        request.getCode(),
-                        roomId)) {
-
-            throw new AppException(
-                    "Room code already exists in this area",
-                    HttpStatus.CONFLICT);
+                return RoomMapper.toResponse(savedRoom);
         }
 
-        RoomType roomType = findRoomType(
-                request.getRoomTypeId());
+        // =====================================================
+        // GET ROOM BY ID
+        // =====================================================
 
-        RoomMapper.updateEntity(
-                room,
-                request,
-                roomType);
+        @Transactional(readOnly = true)
+        public RoomResponse getRoomById(
+                        UUID deckId,
+                        UUID roomId) {
 
-        Room updatedRoom = roomRepository.save(room);
+                Room room = findById(
+                                deckId,
+                                roomId);
 
-        return RoomMapper.toResponse(updatedRoom);
-    }
+                return RoomMapper.toResponse(room);
+        }
 
-    public void deleteRoom(
-            UUID areaId,
-            UUID roomId) {
+        // =====================================================
+        // GET ALL ROOMS BY DECK
+        // =====================================================
 
-        Room room = findById(areaId, roomId);
+        @Transactional(readOnly = true)
+        public List<RoomResponse> getRoomsByDeck(
+                        UUID deckId) {
 
-        roomRepository.delete(room);
-    }
+                findDeck(deckId);
 
-    private CruiseArea findArea(UUID areaId) {
+                return roomRepository
+                                .findAllByCruiseDeck_IdOrderByCodeAsc(deckId)
+                                .stream()
+                                .map(RoomMapper::toResponse)
+                                .toList();
+        }
 
-        return cruiseAreaRepository
-                .findById(areaId)
-                .orElseThrow(() -> new AppException(
-                        "Cruise area not found",
-                        HttpStatus.NOT_FOUND));
-    }
+        // =====================================================
+        // GET ACTIVE ROOMS BY DECK
+        // =====================================================
 
-    private RoomType findRoomType(UUID roomTypeId) {
+        @Transactional(readOnly = true)
+        public List<RoomResponse> getActiveRoomsByDeck(
+                        UUID deckId) {
 
-        return roomTypeRepository
-                .findById(roomTypeId)
-                .orElseThrow(() -> new AppException(
-                        "Room type not found",
-                        HttpStatus.NOT_FOUND));
-    }
+                findDeck(deckId);
 
-    private Room findById(
-            UUID areaId,
-            UUID roomId) {
+                return roomRepository
+                                .findAllByCruiseDeck_IdAndStatusOrderByCodeAsc(
+                                                deckId,
+                                                RoomStatus.ACTIVE)
+                                .stream()
+                                .map(RoomMapper::toResponse)
+                                .toList();
+        }
 
-        return roomRepository
-                .findByIdAndCruiseArea_Id(
-                        roomId,
-                        areaId)
-                .orElseThrow(() -> new AppException(
-                        "Room not found",
-                        HttpStatus.NOT_FOUND));
-    }
+        // =====================================================
+        // UPDATE ROOM
+        // =====================================================
+
+        public RoomResponse updateRoom(
+                        UUID deckId,
+                        UUID roomId,
+                        UpdateRoomRequest request) {
+
+                Room room = findById(
+                                deckId,
+                                roomId);
+
+                if (roomRepository
+                                .existsByCruiseDeck_IdAndCodeIgnoreCaseAndIdNot(
+                                                deckId,
+                                                request.code(),
+                                                roomId)) {
+
+                        throw new AppException(
+                                        "Room code already exists in this deck",
+                                        HttpStatus.CONFLICT);
+                }
+
+                RoomType roomType = findRoomType(
+                                request.roomTypeId());
+
+                RoomMapper.updateEntity(
+                                room,
+                                request,
+                                roomType);
+
+                Room updatedRoom = roomRepository.save(room);
+
+                return RoomMapper.toResponse(updatedRoom);
+        }
+
+        // =====================================================
+        // DELETE ROOM
+        // =====================================================
+
+        public void deleteRoom(
+                        UUID deckId,
+                        UUID roomId) {
+
+                Room room = findById(
+                                deckId,
+                                roomId);
+
+                roomRepository.delete(room);
+        }
+
+        // =====================================================
+        // FIND DECK
+        // =====================================================
+
+        private CruiseDeck findDeck(
+                        UUID deckId) {
+
+                return cruiseDeckRepository
+                                .findById(deckId)
+                                .orElseThrow(() -> new AppException(
+                                                "Cruise deck not found",
+                                                HttpStatus.NOT_FOUND));
+        }
+
+        // =====================================================
+        // FIND ROOM TYPE
+        // =====================================================
+
+        private RoomType findRoomType(
+                        UUID roomTypeId) {
+
+                return roomTypeRepository
+                                .findById(roomTypeId)
+                                .orElseThrow(() -> new AppException(
+                                                "Room type not found",
+                                                HttpStatus.NOT_FOUND));
+        }
+
+        // =====================================================
+        // FIND ROOM
+        // =====================================================
+
+        private Room findById(
+                        UUID deckId,
+                        UUID roomId) {
+
+                return roomRepository
+                                .findByIdAndCruiseDeck_Id(
+                                                roomId,
+                                                deckId)
+                                .orElseThrow(() -> new AppException(
+                                                "Room not found",
+                                                HttpStatus.NOT_FOUND));
+        }
 }

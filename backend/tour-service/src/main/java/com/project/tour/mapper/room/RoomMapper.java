@@ -3,18 +3,24 @@ package com.project.tour.mapper.room;
 import com.project.tour.dto.room.CreateRoomRequest;
 import com.project.tour.dto.room.RoomResponse;
 import com.project.tour.dto.room.UpdateRoomRequest;
+import com.project.tour.model.CruiseDeck;
 import com.project.tour.model.Room;
 import com.project.tour.model.RoomType;
 
 public class RoomMapper {
 
+    private RoomMapper() {
+    }
+
     public static Room toEntity(
             CreateRoomRequest request,
+            CruiseDeck cruiseDeck,
             RoomType roomType) {
 
         Room room = new Room();
 
-        room.setCode(request.getCode());
+        room.setCruiseDeck(cruiseDeck);
+        room.setCode(request.code());
         room.setRoomType(roomType);
 
         return room;
@@ -25,25 +31,19 @@ public class RoomMapper {
             UpdateRoomRequest request,
             RoomType roomType) {
 
-        room.setCode(request.getCode());
+        room.setCode(request.code());
         room.setRoomType(roomType);
-        room.setStatus(request.getStatus());
+        room.setStatus(request.status());
     }
 
     public static RoomResponse toResponse(Room room) {
 
-        RoomResponse response = new RoomResponse();
-
-        response.setId(room.getId());
-        response.setCruiseAreaId(
-                room.getCruiseArea().getId());
-        response.setCode(room.getCode());
-        response.setRoomTypeId(
-                room.getRoomType().getId());
-        response.setRoomTypeName(
-                room.getRoomType().getName());
-        response.setStatus(room.getStatus());
-
-        return response;
+        return new RoomResponse(
+                room.getId(),
+                room.getCruiseDeck().getId(),
+                room.getCode(),
+                room.getRoomType().getId(),
+                room.getRoomType().getName(),
+                room.getStatus());
     }
 }
