@@ -7,7 +7,7 @@ import com.project.tour.exception.AppException;
 import com.project.tour.mapper.cruise.CruiseAreaMapper;
 import com.project.tour.model.CruiseArea;
 import com.project.tour.model.CruiseDeck;
-import com.project.tour.model.enums.CruiseAreaStatus;
+import com.project.tour.model.enums.cruise.CruiseAreaStatus;
 import com.project.tour.repository.cruise.CruiseAreaRepository;
 import com.project.tour.repository.cruise.CruiseDeckRepository;
 
@@ -22,141 +22,141 @@ import java.util.UUID;
 @Transactional
 public class CruiseAreaService {
 
-    private final CruiseAreaRepository cruiseAreaRepository;
-    private final CruiseDeckRepository cruiseDeckRepository;
+        private final CruiseAreaRepository cruiseAreaRepository;
+        private final CruiseDeckRepository cruiseDeckRepository;
 
-    public CruiseAreaService(
-            CruiseAreaRepository cruiseAreaRepository,
-            CruiseDeckRepository cruiseDeckRepository) {
+        public CruiseAreaService(
+                        CruiseAreaRepository cruiseAreaRepository,
+                        CruiseDeckRepository cruiseDeckRepository) {
 
-        this.cruiseAreaRepository = cruiseAreaRepository;
-        this.cruiseDeckRepository = cruiseDeckRepository;
-    }
-
-    public CruiseAreaResponse create(
-            UUID deckId,
-            CreateCruiseAreaRequest request) {
-
-        CruiseDeck deck = findDeck(deckId);
-
-        if (cruiseAreaRepository.existsByCruiseDeck_IdAndNameIgnoreCase(
-                deckId,
-                request.getName())) {
-
-            throw new AppException(
-                    "Area name already exists in this deck",
-                    HttpStatus.CONFLICT);
+                this.cruiseAreaRepository = cruiseAreaRepository;
+                this.cruiseDeckRepository = cruiseDeckRepository;
         }
 
-        CruiseArea area = CruiseAreaMapper.toEntity(request);
-        area.setCruiseDeck(deck);
+        public CruiseAreaResponse create(
+                        UUID deckId,
+                        CreateCruiseAreaRequest request) {
 
-        CruiseArea saved = cruiseAreaRepository.save(area);
+                CruiseDeck deck = findDeck(deckId);
 
-        return CruiseAreaMapper.toResponse(saved);
-    }
+                if (cruiseAreaRepository.existsByCruiseDeck_IdAndNameIgnoreCase(
+                                deckId,
+                                request.getName())) {
 
-    @Transactional(readOnly = true)
-    public CruiseAreaResponse getById(
-            UUID deckId,
-            UUID areaId) {
+                        throw new AppException(
+                                        "Area name already exists in this deck",
+                                        HttpStatus.CONFLICT);
+                }
 
-        CruiseArea area = findById(deckId, areaId);
+                CruiseArea area = CruiseAreaMapper.toEntity(request);
+                area.setCruiseDeck(deck);
 
-        return CruiseAreaMapper.toResponse(area);
-    }
+                CruiseArea saved = cruiseAreaRepository.save(area);
 
-    @Transactional(readOnly = true)
-    public List<CruiseAreaResponse> getAll(
-            UUID deckId) {
-
-        findDeck(deckId);
-
-        return cruiseAreaRepository
-                .findAllByCruiseDeck_IdOrderByNameAsc(deckId)
-                .stream()
-                .map(CruiseAreaMapper::toResponse)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public List<CruiseAreaResponse> getActive(
-            UUID deckId) {
-
-        findDeck(deckId);
-
-        return cruiseAreaRepository
-                .findAllByCruiseDeck_IdAndStatusOrderByNameAsc(
-                        deckId,
-                        CruiseAreaStatus.ACTIVE)
-                .stream()
-                .map(CruiseAreaMapper::toResponse)
-                .toList();
-    }
-
-    public CruiseAreaResponse update(
-            UUID deckId,
-            UUID areaId,
-            UpdateCruiseAreaRequest request) {
-
-        CruiseArea area = findById(deckId, areaId);
-
-        if (cruiseAreaRepository
-                .existsByCruiseDeck_IdAndNameIgnoreCaseAndIdNot(
-                        deckId,
-                        request.getName(),
-                        areaId)) {
-
-            throw new AppException(
-                    "Area name already exists in this deck",
-                    HttpStatus.CONFLICT);
+                return CruiseAreaMapper.toResponse(saved);
         }
 
-        CruiseAreaMapper.updateEntity(area, request);
+        @Transactional(readOnly = true)
+        public CruiseAreaResponse getById(
+                        UUID deckId,
+                        UUID areaId) {
 
-        CruiseArea updated = cruiseAreaRepository.save(area);
+                CruiseArea area = findById(deckId, areaId);
 
-        return CruiseAreaMapper.toResponse(updated);
-    }
+                return CruiseAreaMapper.toResponse(area);
+        }
 
-    public CruiseAreaResponse deactivate(
-            UUID deckId,
-            UUID areaId) {
+        @Transactional(readOnly = true)
+        public List<CruiseAreaResponse> getAll(
+                        UUID deckId) {
 
-        CruiseArea area = findById(deckId, areaId);
+                findDeck(deckId);
 
-        area.setStatus(CruiseAreaStatus.INACTIVE);
+                return cruiseAreaRepository
+                                .findAllByCruiseDeck_IdOrderByNameAsc(deckId)
+                                .stream()
+                                .map(CruiseAreaMapper::toResponse)
+                                .toList();
+        }
 
-        CruiseArea updated = cruiseAreaRepository.save(area);
+        @Transactional(readOnly = true)
+        public List<CruiseAreaResponse> getActive(
+                        UUID deckId) {
 
-        return CruiseAreaMapper.toResponse(updated);
-    }
+                findDeck(deckId);
 
-    public void delete(
-            UUID deckId,
-            UUID areaId) {
+                return cruiseAreaRepository
+                                .findAllByCruiseDeck_IdAndStatusOrderByNameAsc(
+                                                deckId,
+                                                CruiseAreaStatus.ACTIVE)
+                                .stream()
+                                .map(CruiseAreaMapper::toResponse)
+                                .toList();
+        }
 
-        CruiseArea area = findById(deckId, areaId);
+        public CruiseAreaResponse update(
+                        UUID deckId,
+                        UUID areaId,
+                        UpdateCruiseAreaRequest request) {
 
-        cruiseAreaRepository.delete(area);
-    }
+                CruiseArea area = findById(deckId, areaId);
 
-    private CruiseDeck findDeck(UUID deckId) {
+                if (cruiseAreaRepository
+                                .existsByCruiseDeck_IdAndNameIgnoreCaseAndIdNot(
+                                                deckId,
+                                                request.getName(),
+                                                areaId)) {
 
-        return cruiseDeckRepository.findById(deckId)
-                .orElseThrow(() -> new AppException(
-                        "Cruise deck not found",
-                        HttpStatus.NOT_FOUND));
-    }
+                        throw new AppException(
+                                        "Area name already exists in this deck",
+                                        HttpStatus.CONFLICT);
+                }
 
-    private CruiseArea findById(
-            UUID deckId,
-            UUID areaId) {
+                CruiseAreaMapper.updateEntity(area, request);
 
-        return cruiseAreaRepository
-                .findByIdAndCruiseDeck_Id(areaId, deckId)
-                .orElseThrow(() -> new AppException(
-                        "Cruise area not found",
-                        HttpStatus.NOT_FOUND));
-    }
+                CruiseArea updated = cruiseAreaRepository.save(area);
+
+                return CruiseAreaMapper.toResponse(updated);
+        }
+
+        public CruiseAreaResponse deactivate(
+                        UUID deckId,
+                        UUID areaId) {
+
+                CruiseArea area = findById(deckId, areaId);
+
+                area.setStatus(CruiseAreaStatus.INACTIVE);
+
+                CruiseArea updated = cruiseAreaRepository.save(area);
+
+                return CruiseAreaMapper.toResponse(updated);
+        }
+
+        public void delete(
+                        UUID deckId,
+                        UUID areaId) {
+
+                CruiseArea area = findById(deckId, areaId);
+
+                cruiseAreaRepository.delete(area);
+        }
+
+        private CruiseDeck findDeck(UUID deckId) {
+
+                return cruiseDeckRepository.findById(deckId)
+                                .orElseThrow(() -> new AppException(
+                                                "Cruise deck not found",
+                                                HttpStatus.NOT_FOUND));
+        }
+
+        private CruiseArea findById(
+                        UUID deckId,
+                        UUID areaId) {
+
+                return cruiseAreaRepository
+                                .findByIdAndCruiseDeck_Id(areaId, deckId)
+                                .orElseThrow(() -> new AppException(
+                                                "Cruise area not found",
+                                                HttpStatus.NOT_FOUND));
+        }
 }

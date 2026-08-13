@@ -1,8 +1,8 @@
 package com.project.tour.dto.cruise.deck;
 
-import com.project.tour.model.enums.CruiseDeckStatus;
-
 import java.util.UUID;
+
+import com.project.tour.model.enums.cruise.CruiseDeckStatus;
 
 public class CruiseDeckResponse {
 

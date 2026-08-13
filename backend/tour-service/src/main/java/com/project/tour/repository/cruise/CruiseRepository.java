@@ -1,7 +1,7 @@
 package com.project.tour.repository.cruise;
 
 import com.project.tour.model.Cruise;
-import com.project.tour.model.enums.CruiseStatus;
+import com.project.tour.model.enums.cruise.CruiseStatus;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

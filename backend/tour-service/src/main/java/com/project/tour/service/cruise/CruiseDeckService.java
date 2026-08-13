@@ -21,130 +21,130 @@ import java.util.UUID;
 @Transactional
 public class CruiseDeckService {
 
-    private final CruiseDeckRepository cruiseDeckRepository;
-    private final CruiseRepository cruiseRepository;
+        private final CruiseDeckRepository cruiseDeckRepository;
+        private final CruiseRepository cruiseRepository;
 
-    public CruiseDeckService(
-            CruiseDeckRepository cruiseDeckRepository,
-            CruiseRepository cruiseRepository) {
+        public CruiseDeckService(
+                        CruiseDeckRepository cruiseDeckRepository,
+                        CruiseRepository cruiseRepository) {
 
-        this.cruiseDeckRepository = cruiseDeckRepository;
-        this.cruiseRepository = cruiseRepository;
-    }
-
-    public CruiseDeckResponse createDeck(
-            CreateCruiseDeckRequest request) {
-
-        Cruise cruise = cruiseRepository.findById(
-                request.getCruiseId()).orElseThrow(
-                        () -> new AppException(
-                                "Cruise not found",
-                                HttpStatus.NOT_FOUND));
-
-        if (cruiseDeckRepository.existsByCruise_IdAndDeckNumber(
-                request.getCruiseId(),
-                request.getDeckNumber())) {
-
-            throw new AppException(
-                    "Deck number already exists in this cruise",
-                    HttpStatus.CONFLICT);
+                this.cruiseDeckRepository = cruiseDeckRepository;
+                this.cruiseRepository = cruiseRepository;
         }
 
-        CruiseDeck deck = CruiseDeckMapper.toEntity(
-                request,
-                cruise);
+        public CruiseDeckResponse createDeck(
+                        CreateCruiseDeckRequest request) {
 
-        CruiseDeck savedDeck = cruiseDeckRepository.save(deck);
+                Cruise cruise = cruiseRepository.findById(
+                                request.getCruiseId()).orElseThrow(
+                                                () -> new AppException(
+                                                                "Cruise not found",
+                                                                HttpStatus.NOT_FOUND));
 
-        return CruiseDeckMapper.toResponse(savedDeck);
-    }
+                if (cruiseDeckRepository.existsByCruise_IdAndDeckNumber(
+                                request.getCruiseId(),
+                                request.getDeckNumber())) {
 
-    @Transactional(readOnly = true)
-    public CruiseDeckResponse getDeckById(UUID id) {
+                        throw new AppException(
+                                        "Deck number already exists in this cruise",
+                                        HttpStatus.CONFLICT);
+                }
 
-        CruiseDeck deck = findById(id);
+                CruiseDeck deck = CruiseDeckMapper.toEntity(
+                                request,
+                                cruise);
 
-        return CruiseDeckMapper.toResponse(deck);
-    }
+                CruiseDeck savedDeck = cruiseDeckRepository.save(deck);
 
-    @Transactional(readOnly = true)
-    public List<CruiseDeckResponse> getDecksByCruise(
-            UUID cruiseId) {
-
-        if (!cruiseRepository.existsById(cruiseId)) {
-
-            throw new AppException(
-                    "Cruise not found",
-                    HttpStatus.NOT_FOUND);
+                return CruiseDeckMapper.toResponse(savedDeck);
         }
 
-        return cruiseDeckRepository
-                .findAllByCruise_IdOrderByDeckNumberAsc(cruiseId)
-                .stream()
-                .map(CruiseDeckMapper::toResponse)
-                .toList();
-    }
+        @Transactional(readOnly = true)
+        public CruiseDeckResponse getDeckById(UUID id) {
 
-    @Transactional(readOnly = true)
-    public List<CruiseDeckResponse> getActiveDecksByCruise(
-            UUID cruiseId) {
+                CruiseDeck deck = findById(id);
 
-        if (!cruiseRepository.existsById(cruiseId)) {
-
-            throw new AppException(
-                    "Cruise not found",
-                    HttpStatus.NOT_FOUND);
+                return CruiseDeckMapper.toResponse(deck);
         }
 
-        return cruiseDeckRepository
-                .findAllByCruise_IdAndStatusOrderByDeckNumberAsc(
-                        cruiseId,
-                        com.project.tour.model.enums.CruiseDeckStatus.ACTIVE)
-                .stream()
-                .map(CruiseDeckMapper::toResponse)
-                .toList();
-    }
+        @Transactional(readOnly = true)
+        public List<CruiseDeckResponse> getDecksByCruise(
+                        UUID cruiseId) {
 
-    public CruiseDeckResponse updateDeck(
-            UUID id,
-            UpdateCruiseDeckRequest request) {
+                if (!cruiseRepository.existsById(cruiseId)) {
 
-        CruiseDeck deck = findById(id);
+                        throw new AppException(
+                                        "Cruise not found",
+                                        HttpStatus.NOT_FOUND);
+                }
 
-        UUID cruiseId = deck.getCruise().getId();
-
-        if (cruiseDeckRepository
-                .existsByCruise_IdAndDeckNumberAndIdNot(
-                        cruiseId,
-                        request.getDeckNumber(),
-                        id)) {
-
-            throw new AppException(
-                    "Deck number already exists in this cruise",
-                    HttpStatus.CONFLICT);
+                return cruiseDeckRepository
+                                .findAllByCruise_IdOrderByDeckNumberAsc(cruiseId)
+                                .stream()
+                                .map(CruiseDeckMapper::toResponse)
+                                .toList();
         }
 
-        CruiseDeckMapper.updateEntity(
-                deck,
-                request);
+        @Transactional(readOnly = true)
+        public List<CruiseDeckResponse> getActiveDecksByCruise(
+                        UUID cruiseId) {
 
-        CruiseDeck updatedDeck = cruiseDeckRepository.save(deck);
+                if (!cruiseRepository.existsById(cruiseId)) {
 
-        return CruiseDeckMapper.toResponse(updatedDeck);
-    }
+                        throw new AppException(
+                                        "Cruise not found",
+                                        HttpStatus.NOT_FOUND);
+                }
 
-    public void deleteDeck(UUID id) {
+                return cruiseDeckRepository
+                                .findAllByCruise_IdAndStatusOrderByDeckNumberAsc(
+                                                cruiseId,
+                                                com.project.tour.model.enums.cruise.CruiseDeckStatus.ACTIVE)
+                                .stream()
+                                .map(CruiseDeckMapper::toResponse)
+                                .toList();
+        }
 
-        CruiseDeck deck = findById(id);
+        public CruiseDeckResponse updateDeck(
+                        UUID id,
+                        UpdateCruiseDeckRequest request) {
 
-        cruiseDeckRepository.delete(deck);
-    }
+                CruiseDeck deck = findById(id);
 
-    private CruiseDeck findById(UUID id) {
+                UUID cruiseId = deck.getCruise().getId();
 
-        return cruiseDeckRepository.findById(id)
-                .orElseThrow(() -> new AppException(
-                        "Cruise deck not found",
-                        HttpStatus.NOT_FOUND));
-    }
+                if (cruiseDeckRepository
+                                .existsByCruise_IdAndDeckNumberAndIdNot(
+                                                cruiseId,
+                                                request.getDeckNumber(),
+                                                id)) {
+
+                        throw new AppException(
+                                        "Deck number already exists in this cruise",
+                                        HttpStatus.CONFLICT);
+                }
+
+                CruiseDeckMapper.updateEntity(
+                                deck,
+                                request);
+
+                CruiseDeck updatedDeck = cruiseDeckRepository.save(deck);
+
+                return CruiseDeckMapper.toResponse(updatedDeck);
+        }
+
+        public void deleteDeck(UUID id) {
+
+                CruiseDeck deck = findById(id);
+
+                cruiseDeckRepository.delete(deck);
+        }
+
+        private CruiseDeck findById(UUID id) {
+
+                return cruiseDeckRepository.findById(id)
+                                .orElseThrow(() -> new AppException(
+                                                "Cruise deck not found",
+                                                HttpStatus.NOT_FOUND));
+        }
 }

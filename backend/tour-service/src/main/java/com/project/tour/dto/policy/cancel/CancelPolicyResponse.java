@@ -1,9 +1,9 @@
 package com.project.tour.dto.policy.cancel;
 
-import com.project.tour.model.enums.PolicyStatus;
-
 import java.math.BigDecimal;
 import java.util.UUID;
+
+import com.project.tour.model.enums.policy.PolicyStatus;
 
 public class CancelPolicyResponse {
 

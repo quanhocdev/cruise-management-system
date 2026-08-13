@@ -1,10 +1,11 @@
 package com.project.tour.model;
 
-import com.project.tour.model.enums.CruiseStatus;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+
+import com.project.tour.model.enums.cruise.CruiseStatus;
 
 @Entity
 @Table(name = "cruises", uniqueConstraints = {

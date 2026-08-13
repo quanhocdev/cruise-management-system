@@ -1,4 +1,4 @@
-package com.project.tour.model.enums;
+package com.project.tour.model.enums.policy;
 
 public enum PolicyStatus {
     ACTIVE,

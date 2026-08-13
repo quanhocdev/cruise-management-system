@@ -1,6 +1,6 @@
 package com.project.tour.dto.cruise.deck;
 
-import com.project.tour.model.enums.CruiseDeckStatus;
+import com.project.tour.model.enums.cruise.CruiseDeckStatus;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;

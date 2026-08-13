@@ -1,49 +1,34 @@
 package com.project.tour.model;
 
-import com.project.tour.model.enums.CruiseDeckStatus;
 import jakarta.persistence.*;
 
 import java.util.UUID;
 
+import com.project.tour.model.enums.cruise.CruiseDeckStatus;
+
 @Entity
-@Table(
-    name = "cruise_decks",
-    uniqueConstraints = {
-        @UniqueConstraint(
-            name = "uk_cruise_decks_cruise_number",
-            columnNames = {
+@Table(name = "cruise_decks", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_cruise_decks_cruise_number", columnNames = {
                 "cruise_id",
                 "deck_number"
-            }
-        )
-    }
-)
+        })
+})
 public class CruiseDeck {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne(
-        fetch = FetchType.LAZY,
-        optional = false
-    )
-    @JoinColumn(
-        name = "cruise_id",
-        nullable = false
-    )
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "cruise_id", nullable = false)
     private Cruise cruise;
 
-    @Column(
-        name = "deck_number",
-        nullable = false
-    )
+    @Column(name = "deck_number", nullable = false)
     private Integer deckNumber;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private CruiseDeckStatus status =
-        CruiseDeckStatus.ACTIVE;
+    private CruiseDeckStatus status = CruiseDeckStatus.ACTIVE;
 
     @PrePersist
     protected void onCreate() {

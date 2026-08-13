@@ -1,12 +1,12 @@
 package com.project.tour.dto.cruise.area;
 
-import com.project.tour.model.enums.CruiseAreaStatus;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import org.springframework.web.multipart.MultipartFile;
+
+import com.project.tour.model.enums.cruise.CruiseAreaStatus;
 
 public class UpdateCruiseAreaRequest {
 

@@ -1,8 +1,8 @@
 package com.project.tour.dto.cruise.area;
 
-import com.project.tour.model.enums.CruiseAreaStatus;
-
 import java.util.UUID;
+
+import com.project.tour.model.enums.cruise.CruiseAreaStatus;
 
 public class CruiseAreaResponse {
 
