@@ -1,54 +1,88 @@
-package com.project.tour.controller.schedule;
+// package com.project.tour.controller.tour;
 
-import com.project.tour.dto.schedule.*;
-import com.project.tour.model.enums.ScheduleStatus;
-import com.project.tour.service.schedule.ScheduleService;
+// import com.project.tour.dto.tour.schedule.CreateScheduleRequest;
+// import com.project.tour.dto.tour.schedule.ScheduleResponse;
+// import com.project.tour.dto.tour.schedule.UpdateScheduleRequest;
+// import com.project.tour.service.service.schedule.ScheduleService;
 
-import jakarta.validation.Valid;
-import org.springframework.http.*;
-import org.springframework.web.bind.annotation.*;
-import java.util.List;
-import java.util.UUID;
+// import jakarta.validation.Valid;
 
-@RestController
-@RequestMapping("/api/v1/schedules")
-public class ScheduleController {
-    private final ScheduleService service;
+// import org.springframework.http.HttpStatus;
+// import org.springframework.http.ResponseEntity;
+// import org.springframework.web.bind.annotation.*;
 
-    public ScheduleController(ScheduleService service) {
-        this.service = service;
-    }
+// import java.util.List;
+// import java.util.UUID;
 
-    @PostMapping
-    public ResponseEntity<ScheduleResponse> create(@Valid @RequestBody CreateScheduleRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(request));
-    }
+// @RestController
+// @RequestMapping("/api/scheduler/tours/{tourId}/schedules")
+// public class ScheduleController {
 
-    @GetMapping
-    public ResponseEntity<List<ScheduleResponse>> getAll(
-            @RequestParam(required = false) ScheduleStatus status,
-            @RequestParam(defaultValue = "false") boolean upcomingOnly) {
-        return ResponseEntity.ok(service.getAll(status, upcomingOnly));
-    }
+// private final ScheduleService scheduleService;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ScheduleResponse> get(@PathVariable UUID id) {
-        return ResponseEntity.ok(service.get(id));
-    }
+// public ScheduleController(
+// ScheduleService scheduleService) {
 
-    @GetMapping("/code/{code}")
-    public ResponseEntity<ScheduleResponse> getByCode(@PathVariable String code) {
-        return ResponseEntity.ok(service.getByCode(code));
-    }
+// this.scheduleService = scheduleService;
+// }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ScheduleResponse> update(@PathVariable UUID id,
-            @Valid @RequestBody UpdateScheduleRequest request) {
-        return ResponseEntity.ok(service.update(id, request));
-    }
+// @PostMapping
+// public ResponseEntity<ScheduleResponse> create(
+// @PathVariable UUID tourId,
+// @Valid @RequestBody CreateScheduleRequest request) {
 
-    @PatchMapping("/{id}/cancel")
-    public ResponseEntity<ScheduleResponse> cancel(@PathVariable UUID id) {
-        return ResponseEntity.ok(service.cancel(id));
-    }
-}
+// return ResponseEntity
+// .status(HttpStatus.CREATED)
+// .body(scheduleService.create(
+// tourId,
+// request));
+// }
+
+// @GetMapping
+// public ResponseEntity<List<ScheduleResponse>> getAll(
+// @PathVariable UUID tourId,
+// @RequestParam(defaultValue = "false") boolean activeOnly) {
+
+// List<ScheduleResponse> response = activeOnly
+// ? scheduleService.getActive(tourId)
+// : scheduleService.getAll(tourId);
+
+// return ResponseEntity.ok(response);
+// }
+
+// @GetMapping("/{scheduleId}")
+// public ResponseEntity<ScheduleResponse> getById(
+// @PathVariable UUID tourId,
+// @PathVariable UUID scheduleId) {
+
+// return ResponseEntity.ok(
+// scheduleService.getById(
+// tourId,
+// scheduleId));
+// }
+
+// @PatchMapping("/{scheduleId}")
+// public ResponseEntity<ScheduleResponse> update(
+// @PathVariable UUID tourId,
+// @PathVariable UUID scheduleId,
+// @Valid @RequestBody UpdateScheduleRequest request) {
+
+// return ResponseEntity.ok(
+// scheduleService.update(
+// tourId,
+// scheduleId,
+// request));
+// }
+
+// @DeleteMapping("/{scheduleId}")
+// public ResponseEntity<Void> delete(
+// @PathVariable UUID tourId,
+// @PathVariable UUID scheduleId) {
+
+// scheduleService.delete(
+// tourId,
+// scheduleId);
+
+// return ResponseEntity.noContent().build();
+// }
+// }

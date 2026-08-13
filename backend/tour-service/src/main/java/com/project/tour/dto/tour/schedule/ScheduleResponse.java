@@ -1,47 +1,19 @@
-package com.project.tour.model;
+package com.project.tour.dto.tour.schedule;
 
 import com.project.tour.model.enums.ScheduleStatus;
-import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.util.UUID;
 
-@Entity
-@Table(name = "schedules", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_schedules_tour_day", columnNames = { "tour_id", "day_number" })
-})
-public class Schedule {
+public class ScheduleResponse {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "tour_id", nullable = false)
-    private Tour tour;
-
-    @Column(nullable = false, length = 150)
+    private UUID tourId;
     private String name;
-
-    @Column(columnDefinition = "TEXT")
     private String description;
-
-    @Column(name = "day_number", nullable = false)
     private Integer dayNumber;
-
-    @Column(name = "real_day", nullable = false)
     private LocalDate realDay;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private ScheduleStatus status = ScheduleStatus.ACTIVE;
-
-    @PrePersist
-    protected void onCreate() {
-        if (status == null) {
-            status = ScheduleStatus.ACTIVE;
-        }
-    }
+    private ScheduleStatus status;
 
     public UUID getId() {
         return id;
@@ -51,12 +23,12 @@ public class Schedule {
         this.id = id;
     }
 
-    public Tour getTour() {
-        return tour;
+    public UUID getTourId() {
+        return tourId;
     }
 
-    public void setTour(Tour tour) {
-        this.tour = tour;
+    public void setTourId(UUID tourId) {
+        this.tourId = tourId;
     }
 
     public String getName() {
