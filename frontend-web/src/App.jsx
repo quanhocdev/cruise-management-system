@@ -13,6 +13,7 @@ import VerifyOtpPage from "./modules/auth/pages/VerifyOtpPage";
 import ActivatePage from "./modules/auth/pages/ActivatePage";
 
 // admin
+import AdminLayout from "./modules/admin/layout/AdminLayout";
 import AdminDashboard from "./modules/admin/pages/Dashboard";
 import ManagerAccount from "./modules/admin/pages/ManagerAccount";
 import ManagerPort from "./modules/admin/pages/ManagerPort";
@@ -32,7 +33,6 @@ export default function App() {
         <Routes>
           {/* =====================================================
               ACTIVATION
-              Staff chưa đăng nhập vẫn được truy cập
              ===================================================== */}
           <Route path="/activate" element={<ActivatePage />} />
 
@@ -56,18 +56,22 @@ export default function App() {
           <Route
             path="/admin/*"
             element={
-              <ProtectedRoute allowedRoles={["ADMIN"]}>
+              // <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <AdminLayout>
                 <Routes>
                   <Route path="dashboard" element={<AdminDashboard />} />
 
                   <Route path="accounts" element={<ManagerAccount />} />
+
                   <Route path="ports" element={<ManagerPort />} />
+
                   <Route
                     path=""
                     element={<Navigate to="dashboard" replace />}
                   />
                 </Routes>
-              </ProtectedRoute>
+              </AdminLayout>
+              // </ProtectedRoute>
             }
           />
 
