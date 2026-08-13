@@ -24,6 +24,7 @@ import CruiseArea from "./modules/admin/pages/CruiseArea";
 import CruiseRoom from "./modules/admin/pages/CruiseRoom";
 
 import ManagerProduct from "./modules/admin/pages/ManagerProduct";
+import ManagerService from "./modules/admin/pages/ManagerService";
 
 import PassengerDashboard from "./modules/passenger/pages/Dashboard";
 import SchedulerDashboard from "./modules/scheduler/pages/Dashboard";
@@ -95,6 +96,7 @@ export default function App() {
                   <Route path="decks/:deckId/rooms" element={<CruiseRoom />} />
 
                   <Route path="products" element={<ManagerProduct />} />
+                  <Route path="services" element={<ManagerService />} />
                   {/* DEFAULT */}
                   <Route
                     path=""
