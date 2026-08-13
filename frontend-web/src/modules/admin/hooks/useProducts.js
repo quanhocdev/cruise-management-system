@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import api from "../../../api/axios";
 
-export default function useProducts(areaId) {
+export default function useProducts() {
   const [products, setProducts] = useState([]);
 
   const [loading, setLoading] = useState(false);
@@ -11,21 +11,11 @@ export default function useProducts(areaId) {
   const [success, setSuccess] = useState("");
 
   const loadProducts = useCallback(async () => {
-    /*
-     * Chưa có areaId
-     */
-    if (!areaId) {
-      setProducts([]);
-      setLoading(false);
-      setError("Chưa xác định được khu vực để tải sản phẩm.");
-      return;
-    }
-
     setLoading(true);
     setError("");
 
     try {
-      const response = await api.get(`/admin/areas/${areaId}/products`);
+      const response = await api.get("/admin/products");
 
       const data = response.data;
 
@@ -49,34 +39,23 @@ export default function useProducts(areaId) {
         );
       }
 
-      // Quan trọng: vẫn giữ UI hoạt động
       setProducts([]);
     } finally {
       setLoading(false);
     }
-  }, [areaId]);
+  }, []);
 
   useEffect(() => {
     loadProducts();
   }, [loadProducts]);
 
-  /*
-   * =====================================================
-   * CREATE
-   * =====================================================
-   */
   const createProduct = async (formData) => {
-    if (!areaId) {
-      setError("Chưa xác định được khu vực.");
-      return false;
-    }
-
     setSaving(true);
     setError("");
     setSuccess("");
 
     try {
-      await api.post(`/admin/areas/${areaId}/products`, formData);
+      await api.post("/admin/products", formData);
 
       setSuccess("Tạo sản phẩm thành công.");
 
@@ -98,23 +77,13 @@ export default function useProducts(areaId) {
     }
   };
 
-  /*
-   * =====================================================
-   * UPDATE
-   * =====================================================
-   */
   const updateProduct = async (productId, formData) => {
-    if (!areaId) {
-      setError("Chưa xác định được khu vực.");
-      return false;
-    }
-
     setSaving(true);
     setError("");
     setSuccess("");
 
     try {
-      await api.patch(`/admin/areas/${areaId}/products/${productId}`, formData);
+      await api.patch(`/admin/products/${productId}`, formData);
 
       setSuccess("Cập nhật sản phẩm thành công.");
 
@@ -138,22 +107,12 @@ export default function useProducts(areaId) {
     }
   };
 
-  /*
-   * =====================================================
-   * DELETE
-   * =====================================================
-   */
   const deleteProduct = async (productId) => {
-    if (!areaId) {
-      setError("Chưa xác định được khu vực.");
-      return false;
-    }
-
     setError("");
     setSuccess("");
 
     try {
-      await api.delete(`/admin/areas/${areaId}/products/${productId}`);
+      await api.delete(`/admin/products/${productId}`);
 
       setSuccess("Xóa sản phẩm thành công.");
 

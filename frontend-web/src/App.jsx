@@ -94,10 +94,7 @@ export default function App() {
                   {/* Quản lý phòng của tầng */}
                   <Route path="decks/:deckId/rooms" element={<CruiseRoom />} />
 
-                  <Route
-                    path="areas/:areaId/products"
-                    element={<ManagerProduct />}
-                  />
+                  <Route path="products" element={<ManagerProduct />} />
                   {/* DEFAULT */}
                   <Route
                     path=""

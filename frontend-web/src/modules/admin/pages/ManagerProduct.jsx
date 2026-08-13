@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Alert, Button } from "react-bootstrap";
-import { useNavigate, useParams } from "react-router-dom";
 
 import useProducts from "../hooks/useProducts";
 
@@ -10,9 +9,6 @@ import ProductFormModal from "../components/product/ProductFormModal";
 import "../styles/ManagerProduct.css";
 
 export default function ManagerProduct() {
-  const { areaId } = useParams();
-  const navigate = useNavigate();
-
   const {
     products,
     loading,
@@ -27,16 +23,11 @@ export default function ManagerProduct() {
     createProduct,
     updateProduct,
     deleteProduct,
-  } = useProducts(areaId);
+  } = useProducts();
 
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
 
-  /*
-   * =====================================================
-   * OPEN CREATE
-   * =====================================================
-   */
   const handleOpenCreate = () => {
     setEditingProduct(null);
 
@@ -46,11 +37,6 @@ export default function ManagerProduct() {
     setShowModal(true);
   };
 
-  /*
-   * =====================================================
-   * OPEN EDIT
-   * =====================================================
-   */
   const handleOpenEdit = (product) => {
     setEditingProduct(product);
 
@@ -60,11 +46,6 @@ export default function ManagerProduct() {
     setShowModal(true);
   };
 
-  /*
-   * =====================================================
-   * CLOSE MODAL
-   * =====================================================
-   */
   const handleCloseModal = () => {
     if (saving) {
       return;
@@ -75,11 +56,6 @@ export default function ManagerProduct() {
     setError("");
   };
 
-  /*
-   * =====================================================
-   * CREATE / UPDATE
-   * =====================================================
-   */
   const handleSubmit = async (formData) => {
     let result;
 
@@ -95,15 +71,10 @@ export default function ManagerProduct() {
     }
   };
 
-  /*
-   * =====================================================
-   * DELETE
-   * =====================================================
-   */
   const handleDelete = async (product) => {
     const confirmed = window.confirm(
       `Bạn có chắc muốn xóa sản phẩm "${product.name}" không?\n\n` +
-        "Sản phẩm sẽ bị xóa khỏi cơ sở dữ liệu và không thể khôi phục.",
+        "Sản phẩm sẽ bị xóa khỏi hệ thống và không thể khôi phục.",
     );
 
     if (!confirmed) {
@@ -113,43 +84,15 @@ export default function ManagerProduct() {
     await deleteProduct(product.id);
   };
 
-  /*
-   * =====================================================
-   * BACK
-   * =====================================================
-   */
-  const handleBack = () => {
-    navigate(-1);
-  };
-
-  /*
-   * =====================================================
-   * RENDER
-   * =====================================================
-   */
   return (
     <div className="manager-product-page container-fluid py-4">
-      {/* =================================================
-          HEADER
-         ================================================= */}
       <div className="manager-product-header">
-        <div className="manager-product-header-left">
-          <Button
-            variant="outline-secondary"
-            size="sm"
-            className="manager-product-back-button"
-            onClick={handleBack}
-          >
-            ← Quay lại
-          </Button>
+        <div>
+          <h2 className="manager-product-title">Quản lý sản phẩm</h2>
 
-          <div>
-            <h2 className="manager-product-title">Quản lý sản phẩm</h2>
-
-            <p className="manager-product-description">
-              Quản lý các sản phẩm được cung cấp tại khu vực này.
-            </p>
-          </div>
+          <p className="manager-product-description">
+            Quản lý danh mục sản phẩm dùng chung trong hệ thống.
+          </p>
         </div>
 
         <Button variant="primary" onClick={handleOpenCreate}>
@@ -157,43 +100,25 @@ export default function ManagerProduct() {
         </Button>
       </div>
 
-      {/* =================================================
-          SUCCESS
-         ================================================= */}
       {success && (
         <Alert variant="success" dismissible onClose={() => setSuccess("")}>
           {success}
         </Alert>
       )}
 
-      {/* =================================================
-          ERROR
-         ================================================= */}
       {error && !showModal && (
         <Alert variant="danger" dismissible onClose={() => setError("")}>
           {error}
         </Alert>
       )}
 
-      {/* =================================================
-          AREA ID
-         ================================================= */}
-      {!areaId && <Alert variant="danger">Không xác định được khu vực.</Alert>}
-
-      {/* =================================================
-          PRODUCT TABLE
-         ================================================= */}
       <ProductTable
         products={products}
         loading={loading}
-        error={error}
         onEdit={handleOpenEdit}
         onDelete={handleDelete}
       />
 
-      {/* =================================================
-          FORM MODAL
-         ================================================= */}
       <ProductFormModal
         show={showModal}
         saving={saving}

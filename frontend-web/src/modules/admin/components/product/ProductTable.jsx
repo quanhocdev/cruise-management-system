@@ -17,7 +17,7 @@ export default function ProductTable({ products, loading, onEdit, onDelete }) {
 
         <h5>Chưa có sản phẩm</h5>
 
-        <p>Khu vực này hiện chưa có sản phẩm nào.</p>
+        <p>Hệ thống hiện chưa có sản phẩm nào.</p>
       </div>
     );
   }
@@ -27,7 +27,7 @@ export default function ProductTable({ products, loading, onEdit, onDelete }) {
       return "-";
     }
 
-    return Number(price).toLocaleString("vi-VN") + " ₫";
+    return `${Number(price).toLocaleString("vi-VN")} ₫`;
   };
 
   const getStatusLabel = (status) => {
@@ -67,7 +67,6 @@ export default function ProductTable({ products, loading, onEdit, onDelete }) {
         <tbody>
           {products.map((product) => (
             <tr key={product.id}>
-              {/* IMAGE */}
               <td>
                 {product.imageUrl ? (
                   <img
@@ -80,39 +79,32 @@ export default function ProductTable({ products, loading, onEdit, onDelete }) {
                 )}
               </td>
 
-              {/* NAME */}
               <td>
                 <div className="product-table-product-name">{product.name}</div>
-
-                {product.areaName && (
-                  <small className="text-muted">{product.areaName}</small>
-                )}
               </td>
 
-              {/* DESCRIPTION */}
               <td>
                 <div className="product-table-description">
                   {product.description || "-"}
                 </div>
               </td>
 
-              {/* PRICE */}
               <td>
                 <strong>{formatPrice(product.price)}</strong>
               </td>
 
-              {/* QUANTITY */}
               <td>
                 <span
                   className={
-                    product.quantity === 0 ? "product-quantity-empty" : ""
+                    Number(product.quantity) === 0
+                      ? "product-quantity-empty"
+                      : ""
                   }
                 >
                   {product.quantity ?? 0}
                 </span>
               </td>
 
-              {/* STATUS */}
               <td>
                 <span
                   className={`product-status-badge ${
@@ -125,7 +117,6 @@ export default function ProductTable({ products, loading, onEdit, onDelete }) {
                 </span>
               </td>
 
-              {/* ACTION */}
               <td>
                 <div className="product-table-actions">
                   <Button

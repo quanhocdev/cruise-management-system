@@ -20,11 +20,6 @@ export default function ProductFormModal({
 
   const [previewUrl, setPreviewUrl] = useState("");
 
-  /*
-   * =====================================================
-   * RESET / LOAD FORM
-   * =====================================================
-   */
   useEffect(() => {
     if (!show) {
       return;
@@ -55,11 +50,6 @@ export default function ProductFormModal({
     }
   }, [show, editingProduct]);
 
-  /*
-   * =====================================================
-   * INPUT CHANGE
-   * =====================================================
-   */
   const handleChange = (event) => {
     const { name, value } = event.target;
 
@@ -69,11 +59,6 @@ export default function ProductFormModal({
     }));
   };
 
-  /*
-   * =====================================================
-   * IMAGE CHANGE
-   * =====================================================
-   */
   const handleImageChange = (event) => {
     const file = event.target.files?.[0] || null;
 
@@ -83,25 +68,15 @@ export default function ProductFormModal({
     }));
 
     if (file) {
-      const url = URL.createObjectURL(file);
-
-      setPreviewUrl(url);
+      setPreviewUrl(URL.createObjectURL(file));
     } else {
       setPreviewUrl(editingProduct?.imageUrl || "");
     }
   };
 
-  /*
-   * =====================================================
-   * SUBMIT
-   * =====================================================
-   */
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    /*
-     * Frontend validation
-     */
     if (!form.name.trim()) {
       return;
     }
@@ -117,23 +92,14 @@ export default function ProductFormModal({
     const formData = new FormData();
 
     formData.append("name", form.name.trim());
-
     formData.append("description", form.description.trim());
-
     formData.append("price", form.price);
-
     formData.append("quantity", form.quantity);
 
-    /*
-     * Status chỉ cần khi UPDATE
-     */
     if (editingProduct) {
       formData.append("status", form.status);
     }
 
-    /*
-     * Image chỉ append khi user chọn file
-     */
     if (form.image) {
       formData.append("image", form.image);
     }
@@ -153,9 +119,6 @@ export default function ProductFormModal({
         <Modal.Body>
           {error && <Alert variant="danger">{error}</Alert>}
 
-          {/* =================================================
-              NAME
-             ================================================= */}
           <Form.Group className="mb-3">
             <Form.Label>
               Tên sản phẩm <span className="text-danger">*</span>
@@ -173,9 +136,6 @@ export default function ProductFormModal({
             />
           </Form.Group>
 
-          {/* =================================================
-              DESCRIPTION
-             ================================================= */}
           <Form.Group className="mb-3">
             <Form.Label>Mô tả</Form.Label>
 
@@ -193,9 +153,6 @@ export default function ProductFormModal({
             <Form.Text muted>{form.description.length}/5000</Form.Text>
           </Form.Group>
 
-          {/* =================================================
-              PRICE + QUANTITY
-             ================================================= */}
           <div className="row">
             <div className="col-md-6">
               <Form.Group className="mb-3">
@@ -238,9 +195,6 @@ export default function ProductFormModal({
             </div>
           </div>
 
-          {/* =================================================
-              STATUS
-             ================================================= */}
           {editingProduct && (
             <Form.Group className="mb-3">
               <Form.Label>Trạng thái</Form.Label>
@@ -258,9 +212,6 @@ export default function ProductFormModal({
             </Form.Group>
           )}
 
-          {/* =================================================
-              IMAGE
-             ================================================= */}
           <Form.Group className="mb-3">
             <Form.Label>Hình ảnh</Form.Label>
 
@@ -274,9 +225,6 @@ export default function ProductFormModal({
             <Form.Text muted>Chọn hình ảnh sản phẩm.</Form.Text>
           </Form.Group>
 
-          {/* =================================================
-              IMAGE PREVIEW
-             ================================================= */}
           {previewUrl && (
             <div className="product-form-image-preview">
               <Form.Label>Xem trước</Form.Label>
