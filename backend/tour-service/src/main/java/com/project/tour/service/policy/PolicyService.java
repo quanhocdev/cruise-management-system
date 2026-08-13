@@ -6,8 +6,8 @@ import com.project.tour.dto.policy.UpdatePolicyRequest;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.policy.PolicyMapper;
 import com.project.tour.model.Policy;
-import com.project.tour.model.enums.PolicyStatus;
-import com.project.tour.model.enums.PolicyType;
+import com.project.tour.model.enums.policy.PolicyType;
+import com.project.tour.model.enums.policy.PolicyStatus;
 import com.project.tour.repository.policy.PolicyRepository;
 
 import org.springframework.http.HttpStatus;

@@ -3,8 +3,8 @@ package com.project.tour.controller.policy;
 import com.project.tour.dto.policy.CreatePolicyRequest;
 import com.project.tour.dto.policy.PolicyResponse;
 import com.project.tour.dto.policy.UpdatePolicyRequest;
-import com.project.tour.model.enums.PolicyStatus;
-import com.project.tour.model.enums.PolicyType;
+import com.project.tour.model.enums.policy.PolicyType;
+import com.project.tour.model.enums.policy.PolicyStatus;
 import com.project.tour.service.policy.PolicyService;
 
 import jakarta.validation.Valid;

@@ -4,7 +4,7 @@ import com.project.tour.dto.policy.CreatePolicyRequest;
 import com.project.tour.dto.policy.PolicyResponse;
 import com.project.tour.dto.policy.UpdatePolicyRequest;
 import com.project.tour.model.Policy;
-import com.project.tour.model.enums.PolicyStatus;
+import com.project.tour.model.enums.policy.PolicyStatus;
 
 public class PolicyMapper {
 

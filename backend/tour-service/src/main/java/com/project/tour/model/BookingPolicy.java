@@ -1,10 +1,11 @@
 package com.project.tour.model;
 
-import com.project.tour.model.enums.PolicyStatus;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.util.UUID;
+
+import com.project.tour.model.enums.policy.PolicyStatus;
 
 @Entity
 @Table(name = "booking_policies", uniqueConstraints = @UniqueConstraint(name = "uk_booking_policy_days", columnNames = {

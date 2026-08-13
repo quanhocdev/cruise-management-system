@@ -1,7 +1,8 @@
 package com.project.tour.model;
 
-import com.project.tour.model.enums.PolicyStatus;
-import com.project.tour.model.enums.PolicyType;
+import com.project.tour.model.enums.policy.PolicyType;
+import com.project.tour.model.enums.policy.PolicyStatus;
+
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;

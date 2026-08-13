@@ -7,8 +7,8 @@ import com.project.tour.exception.AppException;
 import com.project.tour.mapper.policy.BookingPolicyMapper;
 import com.project.tour.model.BookingPolicy;
 import com.project.tour.model.Policy;
-import com.project.tour.model.enums.PolicyStatus;
-import com.project.tour.model.enums.PolicyType;
+import com.project.tour.model.enums.policy.PolicyType;
+import com.project.tour.model.enums.policy.PolicyStatus;
 import com.project.tour.repository.policy.BookingPolicyRepository;
 
 import org.springframework.http.HttpStatus;
@@ -22,132 +22,132 @@ import java.util.UUID;
 @Transactional
 public class BookingPolicyService {
 
-    private final BookingPolicyRepository repository;
-    private final PolicyService policyService;
+        private final BookingPolicyRepository repository;
+        private final PolicyService policyService;
 
-    public BookingPolicyService(
-            BookingPolicyRepository repository,
-            PolicyService policyService) {
+        public BookingPolicyService(
+                        BookingPolicyRepository repository,
+                        PolicyService policyService) {
 
-        this.repository = repository;
-        this.policyService = policyService;
-    }
-
-    // CREATE
-    public BookingPolicyResponse create(
-            UUID policyId,
-            CreateBookingPolicyRequest request) {
-
-        Policy policy = policyService.findByIdAndType(
-                policyId,
-                PolicyType.BOOKING);
-
-        if (repository.existsByPolicy_IdAndDaysBeforeDeparture(
-                policyId,
-                request.getDaysBeforeDeparture())) {
-
-            throw new AppException(
-                    "Booking rule already exists for this day threshold",
-                    HttpStatus.CONFLICT);
+                this.repository = repository;
+                this.policyService = policyService;
         }
 
-        BookingPolicy entity = BookingPolicyMapper.toEntity(
-                request,
-                policy);
+        // CREATE
+        public BookingPolicyResponse create(
+                        UUID policyId,
+                        CreateBookingPolicyRequest request) {
 
-        entity.setStatus(PolicyStatus.ACTIVE);
+                Policy policy = policyService.findByIdAndType(
+                                policyId,
+                                PolicyType.BOOKING);
 
-        BookingPolicy saved = repository.save(entity);
+                if (repository.existsByPolicy_IdAndDaysBeforeDeparture(
+                                policyId,
+                                request.getDaysBeforeDeparture())) {
 
-        return BookingPolicyMapper.toResponse(saved);
-    }
+                        throw new AppException(
+                                        "Booking rule already exists for this day threshold",
+                                        HttpStatus.CONFLICT);
+                }
 
-    // GET ALL
-    @Transactional(readOnly = true)
-    public List<BookingPolicyResponse> getAll(
-            UUID policyId,
-            boolean activeOnly) {
+                BookingPolicy entity = BookingPolicyMapper.toEntity(
+                                request,
+                                policy);
 
-        policyService.findByIdAndType(
-                policyId,
-                PolicyType.BOOKING);
+                entity.setStatus(PolicyStatus.ACTIVE);
 
-        List<BookingPolicy> policies;
+                BookingPolicy saved = repository.save(entity);
 
-        if (activeOnly) {
-
-            policies = repository
-                    .findAllByPolicy_IdAndStatusOrderByDaysBeforeDepartureDesc(
-                            policyId,
-                            PolicyStatus.ACTIVE);
-
-        } else {
-
-            policies = repository
-                    .findAllByPolicy_IdOrderByDaysBeforeDepartureDesc(
-                            policyId);
+                return BookingPolicyMapper.toResponse(saved);
         }
 
-        return policies.stream()
-                .map(BookingPolicyMapper::toResponse)
-                .toList();
-    }
+        // GET ALL
+        @Transactional(readOnly = true)
+        public List<BookingPolicyResponse> getAll(
+                        UUID policyId,
+                        boolean activeOnly) {
 
-    // UPDATE
-    public BookingPolicyResponse update(
-            UUID policyId,
-            UUID ruleId,
-            UpdateBookingPolicyRequest request) {
+                policyService.findByIdAndType(
+                                policyId,
+                                PolicyType.BOOKING);
 
-        BookingPolicy entity = findByIdAndPolicyId(
-                policyId,
-                ruleId);
+                List<BookingPolicy> policies;
 
-        if (repository.existsByPolicy_IdAndDaysBeforeDepartureAndIdNot(
-                policyId,
-                request.getDaysBeforeDeparture(),
-                ruleId)) {
+                if (activeOnly) {
 
-            throw new AppException(
-                    "Booking rule already exists for this day threshold",
-                    HttpStatus.CONFLICT);
+                        policies = repository
+                                        .findAllByPolicy_IdAndStatusOrderByDaysBeforeDepartureDesc(
+                                                        policyId,
+                                                        PolicyStatus.ACTIVE);
+
+                } else {
+
+                        policies = repository
+                                        .findAllByPolicy_IdOrderByDaysBeforeDepartureDesc(
+                                                        policyId);
+                }
+
+                return policies.stream()
+                                .map(BookingPolicyMapper::toResponse)
+                                .toList();
         }
 
-        BookingPolicyMapper.updateEntity(
-                entity,
-                request);
+        // UPDATE
+        public BookingPolicyResponse update(
+                        UUID policyId,
+                        UUID ruleId,
+                        UpdateBookingPolicyRequest request) {
 
-        BookingPolicy updated = repository.save(entity);
+                BookingPolicy entity = findByIdAndPolicyId(
+                                policyId,
+                                ruleId);
 
-        return BookingPolicyMapper.toResponse(updated);
-    }
+                if (repository.existsByPolicy_IdAndDaysBeforeDepartureAndIdNot(
+                                policyId,
+                                request.getDaysBeforeDeparture(),
+                                ruleId)) {
 
-    // DEACTIVATE
-    public void deactivate(
-            UUID policyId,
-            UUID ruleId) {
+                        throw new AppException(
+                                        "Booking rule already exists for this day threshold",
+                                        HttpStatus.CONFLICT);
+                }
 
-        BookingPolicy entity = findByIdAndPolicyId(
-                policyId,
-                ruleId);
+                BookingPolicyMapper.updateEntity(
+                                entity,
+                                request);
 
-        entity.setStatus(
-                PolicyStatus.INACTIVE);
+                BookingPolicy updated = repository.save(entity);
 
-        repository.save(entity);
-    }
+                return BookingPolicyMapper.toResponse(updated);
+        }
 
-    // FIND RULE
-    private BookingPolicy findByIdAndPolicyId(
-            UUID policyId,
-            UUID ruleId) {
+        // DEACTIVATE
+        public void deactivate(
+                        UUID policyId,
+                        UUID ruleId) {
 
-        return repository
-                .findByIdAndPolicy_Id(
-                        ruleId,
-                        policyId)
-                .orElseThrow(() -> new AppException(
-                        "Booking rule not found with id: " + ruleId,
-                        HttpStatus.NOT_FOUND));
-    }
+                BookingPolicy entity = findByIdAndPolicyId(
+                                policyId,
+                                ruleId);
+
+                entity.setStatus(
+                                PolicyStatus.INACTIVE);
+
+                repository.save(entity);
+        }
+
+        // FIND RULE
+        private BookingPolicy findByIdAndPolicyId(
+                        UUID policyId,
+                        UUID ruleId) {
+
+                return repository
+                                .findByIdAndPolicy_Id(
+                                                ruleId,
+                                                policyId)
+                                .orElseThrow(() -> new AppException(
+                                                "Booking rule not found with id: " + ruleId,
+                                                HttpStatus.NOT_FOUND));
+        }
 }

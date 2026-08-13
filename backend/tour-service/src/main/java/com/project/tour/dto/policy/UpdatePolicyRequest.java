@@ -1,6 +1,7 @@
 package com.project.tour.dto.policy;
 
-import com.project.tour.model.enums.PolicyStatus;
+import com.project.tour.model.enums.policy.PolicyStatus;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
