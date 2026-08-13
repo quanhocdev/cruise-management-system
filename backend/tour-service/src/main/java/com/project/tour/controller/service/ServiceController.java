@@ -15,73 +15,91 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/admin/areas/{areaId}/services")
+@RequestMapping("/api/admin/services")
 public class ServiceController {
 
-    private final ServiceService serviceService;
+        private final ServiceService serviceService;
 
-    public ServiceController(
-            ServiceService serviceService) {
+        public ServiceController(
+                        ServiceService serviceService) {
 
-        this.serviceService = serviceService;
-    }
+                this.serviceService = serviceService;
+        }
 
-    @PostMapping
-    public ResponseEntity<ServiceResponse> createService(
-            @PathVariable UUID areaId,
-            @Valid @RequestBody CreateServiceRequest request) {
+        /*
+         * =====================================================
+         * CREATE
+         * =====================================================
+         */
+        @PostMapping
+        public ResponseEntity<ServiceResponse> createService(
+                        @Valid @ModelAttribute CreateServiceRequest request) {
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(serviceService.createService(
-                        areaId,
-                        request));
-    }
+                return ResponseEntity
+                                .status(HttpStatus.CREATED)
+                                .body(
+                                                serviceService.createService(
+                                                                request));
+        }
 
-    @GetMapping
-    public ResponseEntity<List<ServiceResponse>> getServices(
-            @PathVariable UUID areaId,
-            @RequestParam(defaultValue = "false") boolean activeOnly) {
+        /*
+         * =====================================================
+         * GET ALL
+         * =====================================================
+         */
+        @GetMapping
+        public ResponseEntity<List<ServiceResponse>> getServices(
+                        @RequestParam(defaultValue = "false") boolean activeOnly) {
 
-        return ResponseEntity.ok(
-                serviceService.getServices(
-                        areaId,
-                        activeOnly));
-    }
+                return ResponseEntity.ok(
+                                serviceService.getServices(
+                                                activeOnly));
+        }
 
-    @GetMapping("/{serviceId}")
-    public ResponseEntity<ServiceResponse> getServiceById(
-            @PathVariable UUID areaId,
-            @PathVariable UUID serviceId) {
+        /*
+         * =====================================================
+         * GET BY ID
+         * =====================================================
+         */
+        @GetMapping("/{serviceId}")
+        public ResponseEntity<ServiceResponse> getServiceById(
+                        @PathVariable UUID serviceId) {
 
-        return ResponseEntity.ok(
-                serviceService.getServiceById(
-                        areaId,
-                        serviceId));
-    }
+                return ResponseEntity.ok(
+                                serviceService.getServiceById(
+                                                serviceId));
+        }
 
-    @PatchMapping("/{serviceId}")
-    public ResponseEntity<ServiceResponse> updateService(
-            @PathVariable UUID areaId,
-            @PathVariable UUID serviceId,
-            @Valid @RequestBody UpdateServiceRequest request) {
+        /*
+         * =====================================================
+         * UPDATE
+         * =====================================================
+         */
+        @PatchMapping("/{serviceId}")
+        public ResponseEntity<ServiceResponse> updateService(
+                        @PathVariable UUID serviceId,
+                        @Valid @ModelAttribute UpdateServiceRequest request) {
 
-        return ResponseEntity.ok(
-                serviceService.updateService(
-                        areaId,
-                        serviceId,
-                        request));
-    }
+                return ResponseEntity.ok(
+                                serviceService.updateService(
+                                                serviceId,
+                                                request));
+        }
 
-    @DeleteMapping("/{serviceId}")
-    public ResponseEntity<Void> deleteService(
-            @PathVariable UUID areaId,
-            @PathVariable UUID serviceId) {
+        /*
+         * =====================================================
+         * DELETE
+         * =====================================================
+         */
+        @DeleteMapping("/{serviceId}")
+        public ResponseEntity<Void> deleteService(
+                        @PathVariable UUID serviceId) {
 
-        serviceService.deleteService(
-                areaId,
-                serviceId);
+                serviceService.deleteService(
+                                serviceId);
 
-        return ResponseEntity.noContent().build();
-    }
+                return ResponseEntity
+                                .noContent()
+                                .build();
+        }
 }

@@ -9,17 +9,13 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "services", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_services_area_name", columnNames = { "cruise_area_id", "name" })
+        @UniqueConstraint(name = "uk_services_name", columnNames = "name")
 })
 public class Service {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "cruise_area_id", nullable = false)
-    private CruiseArea cruiseArea;
 
     @Column(nullable = false, length = 150)
     private String name;
@@ -75,14 +71,6 @@ public class Service {
 
     public void setId(UUID id) {
         this.id = id;
-    }
-
-    public CruiseArea getCruiseArea() {
-        return cruiseArea;
-    }
-
-    public void setCruiseArea(CruiseArea cruiseArea) {
-        this.cruiseArea = cruiseArea;
     }
 
     public String getName() {

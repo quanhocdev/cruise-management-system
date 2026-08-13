@@ -9,8 +9,6 @@ import java.util.UUID;
 public class ServiceResponse {
 
     private UUID id;
-    private UUID areaId;
-    private String areaName;
     private String name;
     private String description;
     private BigDecimal price;
@@ -28,22 +26,6 @@ public class ServiceResponse {
 
     public void setId(UUID id) {
         this.id = id;
-    }
-
-    public UUID getAreaId() {
-        return areaId;
-    }
-
-    public void setAreaId(UUID areaId) {
-        this.areaId = areaId;
-    }
-
-    public String getAreaName() {
-        return areaName;
-    }
-
-    public void setAreaName(String areaName) {
-        this.areaName = areaName;
     }
 
     public String getName() {
