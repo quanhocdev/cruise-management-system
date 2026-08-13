@@ -15,82 +15,95 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/admin/areas/{areaId}/products")
+@RequestMapping("/api/admin/products")
 public class ProductController {
 
-    private final ProductService productService;
+        private final ProductService productService;
 
-    public ProductController(
-            ProductService productService) {
+        public ProductController(
+                        ProductService productService) {
 
-        this.productService = productService;
-    }
-
-    @PostMapping
-    public ResponseEntity<ProductResponse> createProduct(
-            @PathVariable UUID areaId,
-            @Valid @ModelAttribute CreateProductRequest request) {
-
-        ProductResponse response = productService.createProduct(
-                areaId,
-                request);
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(response);
-    }
-
-    @GetMapping
-    public ResponseEntity<List<ProductResponse>> getProducts(
-            @PathVariable UUID areaId,
-            @RequestParam(defaultValue = "false") boolean activeOnly) {
-
-        List<ProductResponse> response;
-
-        if (activeOnly) {
-            response = productService.getActiveProductsByArea(
-                    areaId);
-        } else {
-            response = productService.getProductsByArea(
-                    areaId);
+                this.productService = productService;
         }
 
-        return ResponseEntity.ok(response);
-    }
+        /*
+         * =====================================================
+         * CREATE PRODUCT
+         * =====================================================
+         */
+        @PostMapping
+        public ResponseEntity<ProductResponse> createProduct(
+                        @Valid @ModelAttribute CreateProductRequest request) {
 
-    @GetMapping("/{productId}")
-    public ResponseEntity<ProductResponse> getProductById(
-            @PathVariable UUID areaId,
-            @PathVariable UUID productId) {
+                ProductResponse response = productService.createProduct(request);
 
-        return ResponseEntity.ok(
-                productService.getProductById(
-                        areaId,
-                        productId));
-    }
+                return ResponseEntity
+                                .status(HttpStatus.CREATED)
+                                .body(response);
+        }
 
-    @PatchMapping("/{productId}")
-    public ResponseEntity<ProductResponse> updateProduct(
-            @PathVariable UUID areaId,
-            @PathVariable UUID productId,
-            @Valid @ModelAttribute UpdateProductRequest request) {
+        /*
+         * =====================================================
+         * GET ALL PRODUCTS
+         * =====================================================
+         */
+        @GetMapping
+        public ResponseEntity<List<ProductResponse>> getProducts(
+                        @RequestParam(defaultValue = "false") boolean activeOnly) {
 
-        return ResponseEntity.ok(
-                productService.updateProduct(
-                        areaId,
-                        productId,
-                        request));
-    }
+                List<ProductResponse> response;
 
-    @DeleteMapping("/{productId}")
-    public ResponseEntity<Void> deleteProduct(
-            @PathVariable UUID areaId,
-            @PathVariable UUID productId) {
+                if (activeOnly) {
+                        response = productService.getActiveProducts();
+                } else {
+                        response = productService.getProducts();
+                }
 
-        productService.deleteProduct(
-                areaId,
-                productId);
+                return ResponseEntity.ok(response);
+        }
 
-        return ResponseEntity.noContent().build();
-    }
+        /*
+         * =====================================================
+         * GET PRODUCT BY ID
+         * =====================================================
+         */
+        @GetMapping("/{productId}")
+        public ResponseEntity<ProductResponse> getProductById(
+                        @PathVariable UUID productId) {
+
+                return ResponseEntity.ok(
+                                productService.getProductById(productId));
+        }
+
+        /*
+         * =====================================================
+         * UPDATE PRODUCT
+         * =====================================================
+         */
+        @PatchMapping("/{productId}")
+        public ResponseEntity<ProductResponse> updateProduct(
+                        @PathVariable UUID productId,
+                        @Valid @ModelAttribute UpdateProductRequest request) {
+
+                return ResponseEntity.ok(
+                                productService.updateProduct(
+                                                productId,
+                                                request));
+        }
+
+        /*
+         * =====================================================
+         * DELETE PRODUCT
+         * =====================================================
+         */
+        @DeleteMapping("/{productId}")
+        public ResponseEntity<Void> deleteProduct(
+                        @PathVariable UUID productId) {
+
+                productService.deleteProduct(productId);
+
+                return ResponseEntity
+                                .noContent()
+                                .build();
+        }
 }

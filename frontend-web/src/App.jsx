@@ -23,6 +23,8 @@ import CruiseDeck from "./modules/admin/pages/CruiseDeck";
 import CruiseArea from "./modules/admin/pages/CruiseArea";
 import CruiseRoom from "./modules/admin/pages/CruiseRoom";
 
+import ManagerProduct from "./modules/admin/pages/ManagerProduct";
+
 import PassengerDashboard from "./modules/passenger/pages/Dashboard";
 import SchedulerDashboard from "./modules/scheduler/pages/Dashboard";
 import OperationDashboard from "./modules/operation/pages/Dashboard";
@@ -92,6 +94,10 @@ export default function App() {
                   {/* Quản lý phòng của tầng */}
                   <Route path="decks/:deckId/rooms" element={<CruiseRoom />} />
 
+                  <Route
+                    path="areas/:areaId/products"
+                    element={<ManagerProduct />}
+                  />
                   {/* DEFAULT */}
                   <Route
                     path=""

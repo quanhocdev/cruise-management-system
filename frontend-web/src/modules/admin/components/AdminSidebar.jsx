@@ -37,11 +37,6 @@ const menuItems = [
     path: "/admin/ports",
   },
   {
-    label: "Quản lý phòng",
-    icon: BedDouble,
-    path: "/admin/rooms",
-  },
-  {
     label: "Quản lý sản phẩm",
     icon: Package,
     path: "/admin/products",
