@@ -144,6 +144,31 @@ services:
         condition: service_healthy
 
   # ==========================
+  # Booking Service
+  # ==========================
+
+  booking-service:
+    build:
+      context: ./backend/booking-service
+      dockerfile: Dockerfile.dev
+    container_name: booking-service
+    restart: always
+    ports:
+      - "8082:8082"
+    volumes:
+      - ./backend/booking-service:/app
+      - /app/target
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-cruise_db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ==========================
   # Payment Service
   # ==========================
 
@@ -168,6 +193,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      booking-service:
+        condition: service_started
 
   # ==========================
   # React
