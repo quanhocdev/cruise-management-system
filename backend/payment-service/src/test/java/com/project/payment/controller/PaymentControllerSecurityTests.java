@@ -42,6 +42,14 @@ class PaymentControllerSecurityTests {
         mockMvc.perform(get("/api/v1/payments/vnpay/ipn?vnp_TxnRef=10"))
             .andExpect(status().isOk());
     }
+    @Test void createPaymentRejectsFractionalVndAmount() throws Exception {
+        mockMvc.perform(post("/api/v1/payments")
+            .with(jwt().jwt(j -> j.claim("userId", 7L)).authorities(new SimpleGrantedAuthority("ROLE_PASSENGER")))
+            .contentType("application/json")
+            .content("{\"referenceId\":100,\"referenceType\":\"BOOKING\","
+                + "\"amount\":1000.50,\"method\":\"VNPAY\"}"))
+            .andExpect(status().isBadRequest());
+    }
     private String validBody() {
         return "{\"referenceId\":100,\"referenceType\":\"BOOKING\","
             + "\"amount\":1000000,\"method\":\"VNPAY\"}";
