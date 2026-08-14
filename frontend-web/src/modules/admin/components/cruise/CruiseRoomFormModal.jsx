@@ -22,75 +22,138 @@ export default function CruiseRoomFormModal({
       keyboard={!saving}
     >
       <Form onSubmit={onSubmit}>
+        {/* =================================================
+            HEADER
+           ================================================= */}
+
         <Modal.Header closeButton={!saving}>
           <Modal.Title>
             {isEditing ? "Chỉnh sửa phòng" : "Thêm phòng"}
           </Modal.Title>
         </Modal.Header>
 
+        {/* =================================================
+            BODY
+           ================================================= */}
+
         <Modal.Body>
           {error && <Alert variant="danger">{error}</Alert>}
 
-          <Form.Group className="mb-3">
-            <Form.Label>
-              Mã phòng <span className="text-danger">*</span>
-            </Form.Label>
+          {/* =================================================
+              CREATE
+             ================================================= */}
 
-            <Form.Control
-              type="text"
-              name="code"
-              value={form.code}
-              onChange={onChange}
-              placeholder="Ví dụ: 101, A101, DELUXE-01"
-              disabled={saving}
-              maxLength={50}
-              required
-            />
+          {!isEditing && (
+            <>
+              {/* ROOM TYPE */}
 
-            <Form.Text className="text-muted">
-              Chỉ sử dụng chữ cái, số, dấu gạch ngang hoặc gạch dưới.
-            </Form.Text>
-          </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Loại phòng</Form.Label>
 
-          <Form.Group className="mb-3">
-            <Form.Label>
-              Loại phòng <span className="text-danger">*</span>
-            </Form.Label>
+                <Form.Select
+                  name="roomTypeId"
+                  value={form.roomTypeId}
+                  onChange={onChange}
+                  disabled={saving}
+                >
+                  <option value="">-- Chọn loại phòng --</option>
 
-            <Form.Select
-              name="roomTypeId"
-              value={form.roomTypeId}
-              onChange={onChange}
-              disabled={saving}
-              required
-            >
-              <option value="">-- Chọn loại phòng --</option>
+                  {roomTypes?.map((roomType) => (
+                    <option key={roomType.id} value={roomType.id}>
+                      {roomType.name}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
 
-              {roomTypes?.map((roomType) => (
-                <option key={roomType.id} value={roomType.id}>
-                  {roomType.name}
-                </option>
-              ))}
-            </Form.Select>
-          </Form.Group>
+              {/* QUANTITY */}
+
+              <Form.Group className="mb-3">
+                <Form.Label>Số lượng phòng</Form.Label>
+
+                <Form.Control
+                  type="number"
+                  name="quantity"
+                  value={form.quantity}
+                  onChange={onChange}
+                  min={1}
+                  max={1000}
+                  placeholder="Ví dụ: 10"
+                  disabled={saving}
+                />
+
+                <Form.Text className="text-muted">
+                  Hệ thống sẽ tự động đánh số phòng tiếp theo trên tầng.
+                </Form.Text>
+              </Form.Group>
+            </>
+          )}
+
+          {/* =================================================
+              EDIT
+             ================================================= */}
 
           {isEditing && (
-            <Form.Group className="mb-3">
-              <Form.Label>Trạng thái</Form.Label>
+            <>
+              {/* CODE */}
 
-              <Form.Select
-                name="status"
-                value={form.status}
-                onChange={onChange}
-                disabled={saving}
-              >
-                <option value="ACTIVE">Hoạt động</option>
+              <Form.Group className="mb-3">
+                <Form.Label>Mã phòng</Form.Label>
 
-                <option value="INACTIVE">Không hoạt động</option>
-              </Form.Select>
-            </Form.Group>
+                <Form.Control
+                  type="text"
+                  name="code"
+                  value={form.code}
+                  onChange={onChange}
+                  maxLength={50}
+                  disabled={saving}
+                />
+              </Form.Group>
+
+              {/* ROOM TYPE */}
+
+              <Form.Group className="mb-3">
+                <Form.Label>Loại phòng</Form.Label>
+
+                <Form.Select
+                  name="roomTypeId"
+                  value={form.roomTypeId}
+                  onChange={onChange}
+                  disabled={saving}
+                >
+                  <option value="">-- Chọn loại phòng --</option>
+
+                  {roomTypes?.map((roomType) => (
+                    <option key={roomType.id} value={roomType.id}>
+                      {roomType.name}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+
+              {/* STATUS */}
+
+              <Form.Group className="mb-3">
+                <Form.Label>Trạng thái</Form.Label>
+
+                <Form.Select
+                  name="status"
+                  value={form.status}
+                  onChange={onChange}
+                  disabled={saving}
+                >
+                  <option value="ACTIVE">ACTIVE</option>
+
+                  <option value="INACTIVE">INACTIVE</option>
+                </Form.Select>
+              </Form.Group>
+            </>
           )}
         </Modal.Body>
+
+        {/* =================================================
+            FOOTER
+           ================================================= */}
 
         <Modal.Footer>
           <Button variant="secondary" onClick={onClose} disabled={saving}>
@@ -98,11 +161,16 @@ export default function CruiseRoomFormModal({
           </Button>
 
           <Button variant="primary" type="submit" disabled={saving}>
-            {saving && (
-              <Spinner size="sm" animation="border" className="me-2" />
+            {saving ? (
+              <>
+                <Spinner size="sm" animation="border" className="me-2" />
+                Đang lưu...
+              </>
+            ) : isEditing ? (
+              "Lưu thay đổi"
+            ) : (
+              "Tạo phòng"
             )}
-
-            {isEditing ? "Lưu thay đổi" : "Thêm phòng"}
           </Button>
         </Modal.Footer>
       </Form>

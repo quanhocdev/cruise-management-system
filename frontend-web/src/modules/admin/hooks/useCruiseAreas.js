@@ -1,3 +1,4 @@
+// src/modules/admin/hooks/useCruises.js
 import { useCallback, useEffect, useState } from "react";
 import cruiseService from "../services/cruiseService";
 
@@ -6,6 +7,10 @@ export default function useCruiseAreas(deckId) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  // =====================================================
+  // LOAD AREAS
+  // =====================================================
 
   const loadAreas = useCallback(async () => {
     if (!deckId) {
@@ -17,10 +22,15 @@ export default function useCruiseAreas(deckId) {
     setError("");
 
     try {
-      const response = await cruiseService.getAreas(deckId);
+      const data = await cruiseService.getAreas(deckId);
 
-      setAreas(response.data);
+      setAreas(data);
     } catch (err) {
+      console.error("🔥 LOAD AREAS ERROR:", err);
+      console.error("🔥 RESPONSE:", err.response);
+      console.error("🔥 RESPONSE DATA:", err.response?.data);
+      console.error("🔥 STATUS:", err.response?.status);
+
       setError(
         err.response?.data?.message || "Không thể tải danh sách khu vực.",
       );
@@ -33,72 +43,109 @@ export default function useCruiseAreas(deckId) {
     loadAreas();
   }, [loadAreas]);
 
+  // =====================================================
+  // CREATE AREA
+  // =====================================================
+
   const createArea = async (formData) => {
     setError("");
     setSuccess("");
 
     try {
-      const response = await cruiseService.createArea(deckId, formData);
+      const createdArea = await cruiseService.createArea(deckId, formData);
 
       setAreas((previous) =>
-        [...previous, response.data].sort((a, b) =>
+        [...previous, createdArea].sort((a, b) =>
           a.name.localeCompare(b.name, "vi"),
         ),
       );
 
       setSuccess("Tạo khu vực thành công.");
 
-      return response.data;
+      return createdArea;
     } catch (err) {
+      console.error("🔥 CREATE AREA ERROR:", err);
+      console.error("🔥 RESPONSE:", err.response);
+      console.error("🔥 RESPONSE DATA:", err.response?.data);
+      console.error("🔥 STATUS:", err.response?.status);
+
       setError(err.response?.data?.message || "Không thể tạo khu vực.");
 
       return null;
     }
   };
 
+  // =====================================================
+  // UPDATE AREA
+  // =====================================================
+
   const updateArea = async (areaId, formData) => {
     setError("");
     setSuccess("");
 
     try {
-      const response = await cruiseService.updateArea(deckId, areaId, formData);
+      const updatedArea = await cruiseService.updateArea(
+        deckId,
+        areaId,
+        formData,
+      );
 
       setAreas((previous) =>
         previous
-          .map((area) => (area.id === areaId ? response.data : area))
+          .map((area) => (area.id === areaId ? updatedArea : area))
           .sort((a, b) => a.name.localeCompare(b.name, "vi")),
       );
 
       setSuccess("Cập nhật khu vực thành công.");
 
-      return response.data;
+      return updatedArea;
     } catch (err) {
+      console.error("🔥 UPDATE AREA ERROR:", err);
+      console.error("🔥 RESPONSE:", err.response);
+      console.error("🔥 RESPONSE DATA:", err.response?.data);
+      console.error("🔥 STATUS:", err.response?.status);
+
       setError(err.response?.data?.message || "Không thể cập nhật khu vực.");
 
       return null;
     }
   };
 
+  // =====================================================
+  // DEACTIVATE AREA
+  // =====================================================
+
   const deactivateArea = async (areaId) => {
     setError("");
     setSuccess("");
 
     try {
-      const response = await cruiseService.deactivateArea(deckId, areaId);
+      const updatedArea = await cruiseService.deactivateArea(deckId, areaId);
 
       setAreas((previous) =>
-        previous.map((area) => (area.id === areaId ? response.data : area)),
+        previous
+          .map((area) => (area.id === areaId ? updatedArea : area))
+          .sort((a, b) => a.name.localeCompare(b.name, "vi")),
       );
 
       setSuccess("Đã vô hiệu hóa khu vực.");
 
-      return response.data;
+      return updatedArea;
     } catch (err) {
+      console.error("🔥 DEACTIVATE AREA ERROR:", err);
+      console.error("🔥 RESPONSE:", err.response);
+      console.error("🔥 RESPONSE DATA:", err.response?.data);
+      console.error("🔥 STATUS:", err.response?.status);
+
       setError(err.response?.data?.message || "Không thể vô hiệu hóa khu vực.");
 
       return null;
     }
   };
+
+  // =====================================================
+  // DELETE AREA
+  // =====================================================
 
   const deleteArea = async (areaId) => {
     setError("");
@@ -113,11 +160,20 @@ export default function useCruiseAreas(deckId) {
 
       return true;
     } catch (err) {
+      console.error("🔥 DELETE AREA ERROR:", err);
+      console.error("🔥 RESPONSE:", err.response);
+      console.error("🔥 RESPONSE DATA:", err.response?.data);
+      console.error("🔥 STATUS:", err.response?.status);
+
       setError(err.response?.data?.message || "Không thể xóa khu vực.");
 
       return false;
     }
   };
+
+  // =====================================================
+  // RETURN
+  // =====================================================
 
   return {
     areas,

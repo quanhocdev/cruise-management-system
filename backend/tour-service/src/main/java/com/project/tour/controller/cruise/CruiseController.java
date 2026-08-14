@@ -7,6 +7,7 @@ import com.project.tour.service.cruise.CruiseService;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,10 +24,12 @@ public class CruiseController {
         this.cruiseService = cruiseService;
     }
 
-    // CREATE
-    @PostMapping
+    // =========================================================
+    // CREATE - MULTIPART/FORM-DATA
+    // =========================================================
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CruiseResponse> createCruise(
-            @Valid @RequestBody CreateCruiseRequest request) {
+            @Valid @ModelAttribute CreateCruiseRequest request) {
 
         CruiseResponse response = cruiseService.createCruise(request);
 
@@ -35,7 +38,9 @@ public class CruiseController {
                 .body(response);
     }
 
+    // =========================================================
     // GET BY ID
+    // =========================================================
     @GetMapping("/{id}")
     public ResponseEntity<CruiseResponse> getCruiseById(
             @PathVariable UUID id) {
@@ -44,7 +49,9 @@ public class CruiseController {
                 cruiseService.getCruiseById(id));
     }
 
+    // =========================================================
     // GET BY CODE
+    // =========================================================
     @GetMapping("/code/{code}")
     public ResponseEntity<CruiseResponse> getCruiseByCode(
             @PathVariable String code) {
@@ -53,7 +60,9 @@ public class CruiseController {
                 cruiseService.getCruiseByCode(code));
     }
 
+    // =========================================================
     // GET ALL
+    // =========================================================
     @GetMapping
     public ResponseEntity<List<CruiseResponse>> getCruises(
             @RequestParam(defaultValue = "false") boolean activeOnly) {
@@ -65,17 +74,21 @@ public class CruiseController {
         return ResponseEntity.ok(response);
     }
 
-    // UPDATE
-    @PatchMapping("/{id}")
+    // =========================================================
+    // UPDATE - MULTIPART/FORM-DATA
+    // =========================================================
+    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CruiseResponse> updateCruise(
             @PathVariable UUID id,
-            @Valid @RequestBody UpdateCruiseRequest request) {
+            @Valid @ModelAttribute UpdateCruiseRequest request) {
 
         return ResponseEntity.ok(
                 cruiseService.updateCruise(id, request));
     }
 
-    // DELETE - XÓA THẬT KHỎI DATABASE
+    // =========================================================
+    // DELETE
+    // =========================================================
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCruise(
             @PathVariable UUID id) {

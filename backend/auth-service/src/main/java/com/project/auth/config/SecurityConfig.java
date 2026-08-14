@@ -144,7 +144,29 @@ public class SecurityConfig {
                                                  */
                                                 .bearerTokenResolver(request -> {
 
-                                                        // Web - Cookie
+                                                        /*
+                                                         * =====================================================
+                                                         * REFRESH
+                                                         * =====================================================
+                                                         *
+                                                         * Không lấy accessToken cookie ở /api/auth/refresh.
+                                                         *
+                                                         * Vì accessToken có thể đã hết hạn.
+                                                         * Nếu lấy nó, Resource Server sẽ reject request
+                                                         * trước khi AuthController.refresh() được gọi.
+                                                         *
+                                                         * Refresh endpoint sẽ tự lấy refreshToken cookie
+                                                         * trong AuthController.
+                                                         */
+                                                        if ("/api/auth/refresh".equals(request.getRequestURI())) {
+                                                                return null;
+                                                        }
+
+                                                        /*
+                                                         * =====================================================
+                                                         * WEB - ACCESS TOKEN COOKIE
+                                                         * =====================================================
+                                                         */
                                                         if (request.getCookies() != null) {
 
                                                                 for (var cookie : request.getCookies()) {
@@ -155,7 +177,11 @@ public class SecurityConfig {
                                                                 }
                                                         }
 
-                                                        // Android - Authorization Header
+                                                        /*
+                                                         * =====================================================
+                                                         * ANDROID - AUTHORIZATION HEADER
+                                                         * =====================================================
+                                                         */
                                                         return new DefaultBearerTokenResolver()
                                                                         .resolve(request);
                                                 })

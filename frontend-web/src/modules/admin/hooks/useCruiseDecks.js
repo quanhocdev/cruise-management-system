@@ -7,6 +7,10 @@ export default function useCruiseDecks(cruiseId) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  // =====================================================
+  // LOAD
+  // =====================================================
+
   const loadDecks = useCallback(async () => {
     if (!cruiseId) {
       setDecks([]);
@@ -17,10 +21,15 @@ export default function useCruiseDecks(cruiseId) {
     setError("");
 
     try {
-      const response = await cruiseService.getDecks(cruiseId);
+      const data = await cruiseService.getDecks(cruiseId);
 
-      setDecks(response.data);
+      setDecks(data);
     } catch (err) {
+      console.error("🔥 LOAD DECKS ERROR:", err);
+      console.error("🔥 RESPONSE:", err.response);
+      console.error("🔥 RESPONSE DATA:", err.response?.data);
+      console.error("🔥 STATUS:", err.response?.status);
+
       setError(err.response?.data?.message || "Không thể tải danh sách tầng.");
     } finally {
       setLoading(false);
@@ -31,51 +40,88 @@ export default function useCruiseDecks(cruiseId) {
     loadDecks();
   }, [loadDecks]);
 
-  const createDeck = async (data) => {
+  // =====================================================
+  // CREATE MULTIPLE DECKS
+  // =====================================================
+
+  const createDecks = async (totalDecks) => {
     setError("");
     setSuccess("");
 
     try {
-      const response = await cruiseService.createDeck(cruiseId, data);
-
-      setDecks((previous) => [...previous, response.data]);
-
-      setDecks((previous) =>
-        [...previous].sort((a, b) => a.deckNumber - b.deckNumber),
+      const createdDecks = await cruiseService.createDecks(
+        cruiseId,
+        totalDecks,
       );
 
-      setSuccess("Tạo tầng thành công.");
+      /*
+       * Backend trả về List<CruiseDeckResponse>
+       *
+       * Ví dụ:
+       *
+       * [
+       *   { id: "...", deckNumber: 1 },
+       *   { id: "...", deckNumber: 2 },
+       *   { id: "...", deckNumber: 3 }
+       * ]
+       */
 
-      return response.data;
+      setDecks(createdDecks);
+
+      setSuccess(`Tạo ${createdDecks.length} tầng thành công.`);
+
+      return createdDecks;
     } catch (err) {
+      console.error("🔥 CREATE DECKS ERROR:", err);
+      console.error("🔥 RESPONSE:", err.response);
+      console.error("🔥 RESPONSE DATA:", err.response?.data);
+      console.error("🔥 STATUS:", err.response?.status);
+
       setError(err.response?.data?.message || "Không thể tạo tầng.");
 
       return null;
     }
   };
 
+  // =====================================================
+  // UPDATE DECK
+  // =====================================================
+
   const updateDeck = async (deckId, data) => {
     setError("");
     setSuccess("");
 
     try {
-      const response = await cruiseService.updateDeck(cruiseId, deckId, data);
+      const updatedDeck = await cruiseService.updateDeck(
+        cruiseId,
+        deckId,
+        data,
+      );
 
       setDecks((previous) =>
         previous
-          .map((deck) => (deck.id === deckId ? response.data : deck))
+          .map((deck) => (deck.id === deckId ? updatedDeck : deck))
           .sort((a, b) => a.deckNumber - b.deckNumber),
       );
 
       setSuccess("Cập nhật tầng thành công.");
 
-      return response.data;
+      return updatedDeck;
     } catch (err) {
+      console.error("🔥 UPDATE DECK ERROR:", err);
+      console.error("🔥 RESPONSE:", err.response);
+      console.error("🔥 RESPONSE DATA:", err.response?.data);
+      console.error("🔥 STATUS:", err.response?.status);
+
       setError(err.response?.data?.message || "Không thể cập nhật tầng.");
 
       return null;
     }
   };
+
+  // =====================================================
+  // DELETE DECK
+  // =====================================================
 
   const deleteDeck = async (deckId) => {
     setError("");
@@ -90,11 +136,20 @@ export default function useCruiseDecks(cruiseId) {
 
       return true;
     } catch (err) {
+      console.error("🔥 DELETE DECK ERROR:", err);
+      console.error("🔥 RESPONSE:", err.response);
+      console.error("🔥 RESPONSE DATA:", err.response?.data);
+      console.error("🔥 STATUS:", err.response?.status);
+
       setError(err.response?.data?.message || "Không thể xóa tầng.");
 
       return false;
     }
   };
+
+  // =====================================================
+  // RETURN
+  // =====================================================
 
   return {
     decks,
@@ -106,7 +161,7 @@ export default function useCruiseDecks(cruiseId) {
     setSuccess,
 
     loadDecks,
-    createDeck,
+    createDecks,
     updateDeck,
     deleteDeck,
   };

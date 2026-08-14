@@ -2,6 +2,7 @@ package com.project.tour.repository.room;
 
 import com.project.tour.model.Room;
 import com.project.tour.model.enums.RoomStatus;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

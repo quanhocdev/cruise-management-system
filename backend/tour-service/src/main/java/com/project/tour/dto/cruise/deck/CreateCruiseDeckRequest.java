@@ -5,18 +5,18 @@ import jakarta.validation.constraints.Positive;
 
 public class CreateCruiseDeckRequest {
 
-    @NotNull(message = "Deck number is required")
-    @Positive(message = "Deck number must be greater than 0")
-    private Integer deckNumber;
+    @NotNull(message = "Total decks is required")
+    @Positive(message = "Total decks must be greater than 0")
+    private Integer totalDecks;
 
     public CreateCruiseDeckRequest() {
     }
 
-    public Integer getDeckNumber() {
-        return deckNumber;
+    public Integer getTotalDecks() {
+        return totalDecks;
     }
 
-    public void setDeckNumber(Integer deckNumber) {
-        this.deckNumber = deckNumber;
+    public void setTotalDecks(Integer totalDecks) {
+        this.totalDecks = totalDecks;
     }
 }

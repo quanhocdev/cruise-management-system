@@ -1,15 +1,23 @@
 import { useCallback, useEffect, useState } from "react";
-import cruiseService from "../services/cruiseService";
+
+import roomService from "../services/roomService";
+import roomTypeService from "../services/roomTypeService";
 
 export default function useCruiseRooms(deckId) {
   const [rooms, setRooms] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [roomTypes, setRoomTypes] = useState([]);
+
+  const [loading, setLoading] = useState(true);
+
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  // =====================================================
+  // LOAD ROOMS
+  // =====================================================
+
   const loadRooms = useCallback(async () => {
     if (!deckId) {
-      setRooms([]);
       return;
     }
 
@@ -17,86 +25,128 @@ export default function useCruiseRooms(deckId) {
     setError("");
 
     try {
-      const response = await cruiseService.getRooms(deckId);
+      const data = await roomService.getRoomsByDeck(deckId);
 
-      setRooms(response.data);
+      setRooms(Array.isArray(data) ? data : []);
     } catch (err) {
-      setError(err.response?.data?.message || "Không thể tải danh sách phòng.");
+      console.error("🔥 LOAD ROOMS ERROR:", err);
+
+      setError(
+        err?.response?.data?.message || "Không thể tải danh sách phòng.",
+      );
     } finally {
       setLoading(false);
     }
   }, [deckId]);
 
+  // =====================================================
+  // LOAD ROOM TYPES
+  // =====================================================
+
+  const loadRoomTypes = useCallback(async () => {
+    try {
+      const data = await roomTypeService.getAllRoomTypes();
+
+      setRoomTypes(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("🔥 LOAD ROOM TYPES ERROR:", err);
+
+      setError(
+        err?.response?.data?.message || "Không thể tải danh sách loại phòng.",
+      );
+    }
+  }, []);
+
+  // =====================================================
+  // INITIAL LOAD
+  // =====================================================
+
   useEffect(() => {
     loadRooms();
-  }, [loadRooms]);
+    loadRoomTypes();
+  }, [loadRooms, loadRoomTypes]);
 
-  const createRoom = async (data) => {
+  // =====================================================
+  // CREATE ROOMS
+  // =====================================================
+
+  const createRooms = async (data) => {
     setError("");
     setSuccess("");
 
     try {
-      const response = await cruiseService.createRoom(deckId, data);
+      const createdRooms = await roomService.createRooms(deckId, data);
 
-      setRooms((previous) =>
-        [...previous, response.data].sort((a, b) =>
-          a.code.localeCompare(b.code, undefined, {
-            numeric: true,
-          }),
-        ),
-      );
+      setRooms((previous) => [
+        ...previous,
+        ...(Array.isArray(createdRooms) ? createdRooms : []),
+      ]);
 
-      setSuccess("Tạo phòng thành công.");
+      const quantity = createdRooms?.length || data.quantity;
 
-      return response.data;
+      setSuccess(`Đã tạo ${quantity} phòng thành công.`);
+
+      return createdRooms;
     } catch (err) {
-      setError(err.response?.data?.message || "Không thể tạo phòng.");
+      console.error("🔥 CREATE ROOMS ERROR:", err);
+
+      console.error("🔥 RESPONSE:", err?.response);
+      console.error("🔥 RESPONSE DATA:", err?.response?.data);
+      console.error("🔥 STATUS:", err?.response?.status);
+
+      setError(err?.response?.data?.message || "Không thể tạo phòng.");
 
       return null;
     }
   };
+
+  // =====================================================
+  // UPDATE ROOM
+  // =====================================================
 
   const updateRoom = async (roomId, data) => {
     setError("");
     setSuccess("");
 
     try {
-      const response = await cruiseService.updateRoom(deckId, roomId, data);
+      const updatedRoom = await roomService.updateRoom(deckId, roomId, data);
 
       setRooms((previous) =>
-        previous
-          .map((room) => (room.id === roomId ? response.data : room))
-          .sort((a, b) =>
-            a.code.localeCompare(b.code, undefined, {
-              numeric: true,
-            }),
-          ),
+        previous.map((room) => (room.id === roomId ? updatedRoom : room)),
       );
 
-      setSuccess("Cập nhật phòng thành công.");
+      setSuccess("Đã cập nhật phòng thành công.");
 
-      return response.data;
+      return updatedRoom;
     } catch (err) {
-      setError(err.response?.data?.message || "Không thể cập nhật phòng.");
+      console.error("🔥 UPDATE ROOM ERROR:", err);
+
+      setError(err?.response?.data?.message || "Không thể cập nhật phòng.");
 
       return null;
     }
   };
+
+  // =====================================================
+  // DELETE ROOM
+  // =====================================================
 
   const deleteRoom = async (roomId) => {
     setError("");
     setSuccess("");
 
     try {
-      await cruiseService.deleteRoom(deckId, roomId);
+      await roomService.deleteRoom(deckId, roomId);
 
       setRooms((previous) => previous.filter((room) => room.id !== roomId));
 
-      setSuccess("Xóa phòng thành công.");
+      setSuccess("Đã xóa phòng thành công.");
 
       return true;
     } catch (err) {
-      setError(err.response?.data?.message || "Không thể xóa phòng.");
+      console.error("🔥 DELETE ROOM ERROR:", err);
+
+      setError(err?.response?.data?.message || "Không thể xóa phòng.");
 
       return false;
     }
@@ -104,6 +154,7 @@ export default function useCruiseRooms(deckId) {
 
   return {
     rooms,
+    roomTypes,
     loading,
     error,
     success,
@@ -112,7 +163,7 @@ export default function useCruiseRooms(deckId) {
     setSuccess,
 
     loadRooms,
-    createRoom,
+    createRooms,
     updateRoom,
     deleteRoom,
   };

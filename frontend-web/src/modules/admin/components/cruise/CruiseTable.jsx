@@ -1,6 +1,12 @@
 import { Button, Spinner, Table } from "react-bootstrap";
 
-export default function CruiseTable({ cruises, loading, onEdit, onDelete }) {
+export default function CruiseTable({
+  cruises,
+  loading,
+  onEdit,
+  onDelete,
+  onManageDecks,
+}) {
   if (loading) {
     return (
       <div className="text-center py-5">
@@ -33,7 +39,7 @@ export default function CruiseTable({ cruises, loading, onEdit, onDelete }) {
 
             <th>Trạng thái</th>
 
-            <th className="text-center" style={{ width: "220px" }}>
+            <th className="text-center" style={{ width: "320px" }}>
               Thao tác
             </th>
           </tr>
@@ -79,10 +85,18 @@ export default function CruiseTable({ cruises, loading, onEdit, onDelete }) {
               </td>
 
               <td>
-                <div className="d-flex justify-content-center gap-2">
+                <div className="d-flex justify-content-center gap-2 flex-wrap">
                   <Button
                     size="sm"
                     variant="outline-primary"
+                    onClick={() => onManageDecks(cruise)}
+                  >
+                    Quản lý tầng
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    variant="outline-warning"
                     onClick={() => onEdit(cruise)}
                   >
                     Sửa

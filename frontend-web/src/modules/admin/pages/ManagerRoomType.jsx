@@ -1,49 +1,35 @@
+// src/modules/admin/pages/ManagerRoomType.jsx
 import { useState } from "react";
 import { Alert, Button } from "react-bootstrap";
-import { useNavigate, useParams } from "react-router-dom";
 
-import useCruiseRooms from "../hooks/useCruiseRooms";
+import useRoomTypes from "../hooks/useRoomTypes";
+import RoomTypeTable from "../components/room/RoomTypeTable";
+import RoomTypeFormModal from "../components/room/RoomTypeFormModal";
 
-import CruiseRoomTable from "../components/cruise/CruiseRoomTable";
-import CruiseRoomFormModal from "../components/cruise/CruiseRoomFormModal";
-
-import "../styles/cruise/CruiseRoom.css";
-
-export default function CruiseRoom() {
-  const { deckId } = useParams();
-
-  const navigate = useNavigate();
-
+export default function ManagerRoomType() {
   const {
-    rooms,
     roomTypes,
     loading,
     error,
     success,
-
     setError,
     setSuccess,
-
-    createRooms,
-    updateRoom,
-    deleteRoom,
-  } = useCruiseRooms(deckId);
+    createRoomType,
+    updateRoomType,
+    deleteRoomType,
+  } = useRoomTypes();
 
   const [showModal, setShowModal] = useState(false);
-
   const [saving, setSaving] = useState(false);
-
-  const [editingRoom, setEditingRoom] = useState(null);
+  const [editingRoomType, setEditingRoomType] = useState(null);
 
   // =====================================================
   // FORM
   // =====================================================
 
   const [form, setForm] = useState({
-    code: "",
-    roomTypeId: "",
-    quantity: 1,
-    status: "ACTIVE",
+    name: "",
+    description: "",
   });
 
   // =====================================================
@@ -51,18 +37,15 @@ export default function CruiseRoom() {
   // =====================================================
 
   const handleOpenCreate = () => {
-    setEditingRoom(null);
+    setEditingRoomType(null);
 
     setForm({
-      code: "",
-      roomTypeId: "",
-      quantity: 1,
-      status: "ACTIVE",
+      name: "",
+      description: "",
     });
 
     setError("");
     setSuccess("");
-
     setShowModal(true);
   };
 
@@ -70,24 +53,21 @@ export default function CruiseRoom() {
   // OPEN EDIT
   // =====================================================
 
-  const handleOpenEdit = (room) => {
-    setEditingRoom(room);
+  const handleOpenEdit = (roomType) => {
+    setEditingRoomType(roomType);
 
     setForm({
-      code: room.code || "",
-      roomTypeId: room.roomTypeId || "",
-      quantity: 1,
-      status: room.status || "ACTIVE",
+      name: roomType.name || "",
+      description: roomType.description || "",
     });
 
     setError("");
     setSuccess("");
-
     setShowModal(true);
   };
 
   // =====================================================
-  // CLOSE MODAL
+  // CLOSE
   // =====================================================
 
   const handleCloseModal = () => {
@@ -122,65 +102,46 @@ export default function CruiseRoom() {
     setSuccess("");
 
     // ===================================================
-    // CREATE
+    // VALIDATION
     // ===================================================
 
-    if (!editingRoom) {
-      if (!form.roomTypeId) {
-        setError("Vui lòng chọn loại phòng.");
-        return;
-      }
+    const name = form.name.trim();
+    const description = form.description.trim();
 
-      const quantity = Number(form.quantity);
+    if (!name) {
+      setError("Vui lòng nhập tên loại phòng.");
+      return;
+    }
 
-      if (!Number.isInteger(quantity) || quantity <= 0) {
-        setError("Số lượng phòng phải lớn hơn 0.");
-        return;
-      }
+    if (name.length > 100) {
+      setError("Tên loại phòng không được vượt quá 100 ký tự.");
+      return;
+    }
 
-      setSaving(true);
-
-      try {
-        const result = await createRooms({
-          roomTypeId: form.roomTypeId,
-
-          quantity,
-        });
-
-        if (result) {
-          setShowModal(false);
-        }
-      } finally {
-        setSaving(false);
-      }
-
+    if (description.length > 5000) {
+      setError("Mô tả không được vượt quá 5000 ký tự.");
       return;
     }
 
     // ===================================================
-    // UPDATE
+    // REQUEST
     // ===================================================
 
-    if (!form.code.trim()) {
-      setError("Vui lòng nhập mã phòng.");
-      return;
-    }
-
-    if (!form.roomTypeId) {
-      setError("Vui lòng chọn loại phòng.");
-      return;
-    }
+    const data = {
+      name,
+      description,
+    };
 
     setSaving(true);
 
     try {
-      const result = await updateRoom(editingRoom.id, {
-        code: form.code.trim(),
+      let result;
 
-        roomTypeId: form.roomTypeId,
-
-        status: form.status,
-      });
+      if (!editingRoomType) {
+        result = await createRoomType(data);
+      } else {
+        result = await updateRoomType(editingRoomType.id, data);
+      }
 
       if (result) {
         setShowModal(false);
@@ -194,16 +155,16 @@ export default function CruiseRoom() {
   // DELETE
   // =====================================================
 
-  const handleDelete = async (room) => {
+  const handleDelete = async (roomType) => {
     const confirmed = window.confirm(
-      `Bạn có chắc muốn xóa phòng "${room.code}" không?`,
+      `Bạn có chắc muốn xóa loại phòng "${roomType.name}" không?`,
     );
 
     if (!confirmed) {
       return;
     }
 
-    await deleteRoom(room.id);
+    await deleteRoomType(roomType.id);
   };
 
   // =====================================================
@@ -211,44 +172,23 @@ export default function CruiseRoom() {
   // =====================================================
 
   return (
-    <div className="cruise-room-page container-fluid py-4">
+    <div className="container-fluid py-4">
       {/* =================================================
           HEADER
          ================================================= */}
 
-      <div className="cruise-room-header mb-4">
+      <div className="d-flex justify-content-between align-items-start mb-4">
         <div>
-          <Button
-            variant="link"
-            className="px-0 mb-2"
-            onClick={() => navigate(-1)}
-          >
-            ← Quay lại tầng
-          </Button>
+          <h2>Quản lý loại phòng</h2>
 
-          <h2 className="cruise-room-title">Quản lý phòng</h2>
-
-          <p className="cruise-room-description">
-            Quản lý các phòng thuộc tầng của du thuyền.
+          <p className="text-muted mb-0">
+            Quản lý các loại phòng được sử dụng trên các tầng của du thuyền.
           </p>
         </div>
 
-        <div className="d-flex gap-2">
-          {/* ROOM TYPES */}
-
-          <Button
-            variant="outline-primary"
-            onClick={() => navigate("/admin/room-types")}
-          >
-            Quản lý loại phòng
-          </Button>
-
-          {/* CREATE */}
-
-          <Button variant="primary" onClick={handleOpenCreate}>
-            + Thêm phòng
-          </Button>
-        </div>
+        <Button variant="primary" onClick={handleOpenCreate}>
+          + Thêm loại phòng
+        </Button>
       </div>
 
       {/* =================================================
@@ -275,8 +215,8 @@ export default function CruiseRoom() {
           TABLE
          ================================================= */}
 
-      <CruiseRoomTable
-        rooms={rooms}
+      <RoomTypeTable
+        roomTypes={roomTypes}
         loading={loading}
         onEdit={handleOpenEdit}
         onDelete={handleDelete}
@@ -286,12 +226,11 @@ export default function CruiseRoom() {
           MODAL
          ================================================= */}
 
-      <CruiseRoomFormModal
+      <RoomTypeFormModal
         show={showModal}
         saving={saving}
-        editingRoom={editingRoom}
+        editingRoomType={editingRoomType}
         form={form}
-        roomTypes={roomTypes}
         error={error}
         onClose={handleCloseModal}
         onSubmit={handleSubmit}

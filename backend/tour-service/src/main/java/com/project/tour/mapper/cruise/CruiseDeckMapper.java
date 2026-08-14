@@ -1,6 +1,5 @@
 package com.project.tour.mapper.cruise;
 
-import com.project.tour.dto.cruise.deck.CreateCruiseDeckRequest;
 import com.project.tour.dto.cruise.deck.CruiseDeckResponse;
 import com.project.tour.dto.cruise.deck.UpdateCruiseDeckRequest;
 import com.project.tour.model.Cruise;
@@ -13,21 +12,35 @@ public class CruiseDeckMapper {
 
     /*
      * =====================================================
-     * CREATE REQUEST -> ENTITY
+     * CREATE ENTITY
      * =====================================================
+     *
+     * Dùng khi Service tự sinh từng tầng.
+     *
+     * Ví dụ:
+     * totalDecks = 5
+     *
+     * Service sẽ gọi:
+     *
+     * toEntity(cruise, 1)
+     * toEntity(cruise, 2)
+     * toEntity(cruise, 3)
+     * toEntity(cruise, 4)
+     * toEntity(cruise, 5)
+     *
      */
     public static CruiseDeck toEntity(
-            CreateCruiseDeckRequest request,
-            Cruise cruise) {
+            Cruise cruise,
+            Integer deckNumber) {
 
-        if (request == null) {
+        if (cruise == null || deckNumber == null) {
             return null;
         }
 
         CruiseDeck deck = new CruiseDeck();
 
         deck.setCruise(cruise);
-        deck.setDeckNumber(request.getDeckNumber());
+        deck.setDeckNumber(deckNumber);
 
         return deck;
     }

@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,35 +40,49 @@ public class RoomService {
         }
 
         // =====================================================
-        // CREATE ROOM
+        // CREATE ROOMS
         // =====================================================
 
-        public RoomResponse createRoom(
+        public List<RoomResponse> createRooms(
                         UUID deckId,
                         CreateRoomRequest request) {
 
                 CruiseDeck deck = findDeck(deckId);
 
-                if (roomRepository.existsByCruiseDeck_IdAndCodeIgnoreCase(
-                                deckId,
-                                request.code())) {
-
-                        throw new AppException(
-                                        "Room code already exists in this deck",
-                                        HttpStatus.CONFLICT);
-                }
-
                 RoomType roomType = findRoomType(
                                 request.roomTypeId());
 
-                Room room = RoomMapper.toEntity(
-                                request,
-                                deck,
-                                roomType);
+                int startNumber = getNextRoomNumber(deck);
 
-                Room savedRoom = roomRepository.save(room);
+                List<Room> rooms = new ArrayList<>();
 
-                return RoomMapper.toResponse(savedRoom);
+                for (int i = 0; i < request.quantity(); i++) {
+
+                        String code = String.valueOf(
+                                        startNumber + i);
+
+                        if (roomRepository
+                                        .existsByCruiseDeck_IdAndCodeIgnoreCase(
+                                                        deckId,
+                                                        code)) {
+
+                                throw new AppException(
+                                                "Room code already exists: " + code,
+                                                HttpStatus.CONFLICT);
+                        }
+
+                        rooms.add(
+                                        RoomMapper.toEntity(
+                                                        deck,
+                                                        roomType,
+                                                        code));
+                }
+
+                return roomRepository
+                                .saveAll(rooms)
+                                .stream()
+                                .map(RoomMapper::toResponse)
+                                .toList();
         }
 
         // =====================================================
@@ -87,7 +102,7 @@ public class RoomService {
         }
 
         // =====================================================
-        // GET ALL ROOMS BY DECK
+        // GET ALL ROOMS
         // =====================================================
 
         @Transactional(readOnly = true)
@@ -104,7 +119,7 @@ public class RoomService {
         }
 
         // =====================================================
-        // GET ACTIVE ROOMS BY DECK
+        // GET ACTIVE ROOMS
         // =====================================================
 
         @Transactional(readOnly = true)
@@ -154,9 +169,8 @@ public class RoomService {
                                 request,
                                 roomType);
 
-                Room updatedRoom = roomRepository.save(room);
-
-                return RoomMapper.toResponse(updatedRoom);
+                return RoomMapper.toResponse(
+                                roomRepository.save(room));
         }
 
         // =====================================================
@@ -172,6 +186,34 @@ public class RoomService {
                                 roomId);
 
                 roomRepository.delete(room);
+        }
+
+        // =====================================================
+        // GET NEXT ROOM NUMBER
+        // =====================================================
+
+        private int getNextRoomNumber(
+                        CruiseDeck deck) {
+
+                List<Room> rooms = roomRepository
+                                .findAllByCruiseDeck_IdOrderByCodeAsc(
+                                                deck.getId());
+
+                int max = 0;
+
+                for (Room room : rooms) {
+
+                        try {
+
+                                int number = Integer.parseInt(room.getCode());
+
+                                max = Math.max(max, number);
+
+                        } catch (NumberFormatException ignored) {
+                        }
+                }
+
+                return max + 1;
         }
 
         // =====================================================

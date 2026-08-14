@@ -26,12 +26,34 @@ public class CruiseDeckController {
                 this.cruiseDeckService = cruiseDeckService;
         }
 
+        /*
+         * =====================================================
+         * CREATE DECKS
+         * =====================================================
+         *
+         * Request:
+         *
+         * {
+         * "totalDecks": 5
+         * }
+         *
+         * Backend tự tạo:
+         *
+         * Deck 1
+         * Deck 2
+         * Deck 3
+         * Deck 4
+         * Deck 5
+         *
+         * Mỗi deck vẫn là một record riêng,
+         * có UUID riêng và cùng thuộc cruise này.
+         */
         @PostMapping
-        public ResponseEntity<CruiseDeckResponse> createDeck(
+        public ResponseEntity<List<CruiseDeckResponse>> createDecks(
                         @PathVariable UUID cruiseId,
                         @Valid @RequestBody CreateCruiseDeckRequest request) {
 
-                CruiseDeckResponse response = cruiseDeckService.createDeck(
+                List<CruiseDeckResponse> response = cruiseDeckService.createDecks(
                                 cruiseId,
                                 request);
 
@@ -40,27 +62,45 @@ public class CruiseDeckController {
                                 .body(response);
         }
 
+        /*
+         * =====================================================
+         * GET ALL DECKS
+         * =====================================================
+         */
         @GetMapping
         public ResponseEntity<List<CruiseDeckResponse>> getDecks(
                         @PathVariable UUID cruiseId,
                         @RequestParam(defaultValue = "false") boolean activeOnly) {
 
                 List<CruiseDeckResponse> response = activeOnly
-                                ? cruiseDeckService.getActiveDecksByCruise(cruiseId)
-                                : cruiseDeckService.getDecksByCruise(cruiseId);
+                                ? cruiseDeckService.getActiveDecksByCruise(
+                                                cruiseId)
+                                : cruiseDeckService.getDecksByCruise(
+                                                cruiseId);
 
                 return ResponseEntity.ok(response);
         }
 
+        /*
+         * =====================================================
+         * GET DECK BY ID
+         * =====================================================
+         */
         @GetMapping("/{deckId}")
         public ResponseEntity<CruiseDeckResponse> getDeckById(
                         @PathVariable UUID cruiseId,
                         @PathVariable UUID deckId) {
 
                 return ResponseEntity.ok(
-                                cruiseDeckService.getDeckById(deckId));
+                                cruiseDeckService.getDeckById(
+                                                deckId));
         }
 
+        /*
+         * =====================================================
+         * UPDATE DECK
+         * =====================================================
+         */
         @PatchMapping("/{deckId}")
         public ResponseEntity<CruiseDeckResponse> updateDeck(
                         @PathVariable UUID cruiseId,
@@ -73,6 +113,11 @@ public class CruiseDeckController {
                                                 request));
         }
 
+        /*
+         * =====================================================
+         * DELETE DECK
+         * =====================================================
+         */
         @DeleteMapping("/{deckId}")
         public ResponseEntity<Void> deleteDeck(
                         @PathVariable UUID cruiseId,

@@ -7,6 +7,7 @@ import com.project.tour.exception.AppException;
 import com.project.tour.mapper.cruise.CruiseDeckMapper;
 import com.project.tour.model.Cruise;
 import com.project.tour.model.CruiseDeck;
+import com.project.tour.model.enums.cruise.CruiseDeckStatus;
 import com.project.tour.repository.cruise.CruiseDeckRepository;
 import com.project.tour.repository.cruise.CruiseRepository;
 
@@ -14,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,32 +34,134 @@ public class CruiseDeckService {
                 this.cruiseRepository = cruiseRepository;
         }
 
-        public CruiseDeckResponse createDeck(
+        /*
+         * =====================================================
+         * CREATE DECKS
+         * =====================================================
+         *
+         * Admin nhập:
+         *
+         * {
+         * "totalDecks": 5
+         * }
+         *
+         * Backend sẽ đảm bảo cruise có tổng cộng 5 tầng.
+         *
+         * Nếu chưa có tầng:
+         * 1 -> 5
+         *
+         * Nếu đã có 3 tầng:
+         * 4 -> 5
+         *
+         * Nếu đã có 5 tầng:
+         * không tạo thêm.
+         */
+        public List<CruiseDeckResponse> createDecks(
                         UUID cruiseId,
                         CreateCruiseDeckRequest request) {
+
+                /*
+                 * =================================================
+                 * 1. KIỂM TRA CRUISE
+                 * =================================================
+                 */
 
                 Cruise cruise = cruiseRepository.findById(cruiseId)
                                 .orElseThrow(() -> new AppException(
                                                 "Cruise not found",
                                                 HttpStatus.NOT_FOUND));
 
-                if (cruiseDeckRepository.existsByCruise_IdAndDeckNumber(
-                                cruiseId,
-                                request.getDeckNumber())) {
+                int totalDecks = request.getTotalDecks();
+
+                /*
+                 * =================================================
+                 * 2. TÌM SỐ TẦNG HIỆN TẠI
+                 * =================================================
+                 */
+
+                Integer maxDeckNumber = cruiseDeckRepository.findMaxDeckNumberByCruiseId(
+                                cruiseId);
+
+                int currentMaxDeck = maxDeckNumber == null
+                                ? 0
+                                : maxDeckNumber;
+
+                /*
+                 * =================================================
+                 * 3. KHÔNG CHO GIẢM SỐ TẦNG
+                 * =================================================
+                 */
+
+                if (totalDecks < currentMaxDeck) {
 
                         throw new AppException(
-                                        "Deck number already exists in this cruise",
-                                        HttpStatus.CONFLICT);
+                                        "Cruise currently has "
+                                                        + currentMaxDeck
+                                                        + " decks. "
+                                                        + "You cannot reduce the total number of decks.",
+                                        HttpStatus.BAD_REQUEST);
                 }
 
-                CruiseDeck deck = CruiseDeckMapper.toEntity(
-                                request,
-                                cruise);
+                /*
+                 * =================================================
+                 * 4. NẾU ĐÃ ĐỦ TẦNG
+                 * =================================================
+                 */
 
-                CruiseDeck savedDeck = cruiseDeckRepository.save(deck);
+                if (totalDecks == currentMaxDeck) {
 
-                return CruiseDeckMapper.toResponse(savedDeck);
+                        return cruiseDeckRepository
+                                        .findAllByCruise_IdOrderByDeckNumberAsc(cruiseId)
+                                        .stream()
+                                        .map(CruiseDeckMapper::toResponse)
+                                        .toList();
+                }
+
+                /*
+                 * =================================================
+                 * 5. TẠO CÁC TẦNG CÒN THIẾU
+                 * =================================================
+                 */
+
+                List<CruiseDeck> decksToCreate = new ArrayList<>();
+
+                for (int deckNumber = currentMaxDeck + 1; deckNumber <= totalDecks; deckNumber++) {
+
+                        CruiseDeck deck = CruiseDeckMapper.toEntity(
+                                        cruise,
+                                        deckNumber);
+
+                        deck.setStatus(CruiseDeckStatus.ACTIVE);
+
+                        decksToCreate.add(deck);
+                }
+
+                /*
+                 * =================================================
+                 * 6. LƯU TẤT CẢ
+                 * =================================================
+                 */
+
+                List<CruiseDeck> savedDecks = cruiseDeckRepository.saveAll(
+                                decksToCreate);
+
+                /*
+                 * =================================================
+                 * 7. TRẢ VỀ RESPONSE
+                 * =================================================
+                 */
+
+                return savedDecks
+                                .stream()
+                                .map(CruiseDeckMapper::toResponse)
+                                .toList();
         }
+
+        /*
+         * =====================================================
+         * GET BY ID
+         * =====================================================
+         */
 
         @Transactional(readOnly = true)
         public CruiseDeckResponse getDeckById(UUID id) {
@@ -66,6 +170,12 @@ public class CruiseDeckService {
 
                 return CruiseDeckMapper.toResponse(deck);
         }
+
+        /*
+         * =====================================================
+         * GET ALL DECKS
+         * =====================================================
+         */
 
         @Transactional(readOnly = true)
         public List<CruiseDeckResponse> getDecksByCruise(
@@ -85,6 +195,12 @@ public class CruiseDeckService {
                                 .toList();
         }
 
+        /*
+         * =====================================================
+         * GET ACTIVE DECKS
+         * =====================================================
+         */
+
         @Transactional(readOnly = true)
         public List<CruiseDeckResponse> getActiveDecksByCruise(
                         UUID cruiseId) {
@@ -99,11 +215,17 @@ public class CruiseDeckService {
                 return cruiseDeckRepository
                                 .findAllByCruise_IdAndStatusOrderByDeckNumberAsc(
                                                 cruiseId,
-                                                com.project.tour.model.enums.cruise.CruiseDeckStatus.ACTIVE)
+                                                CruiseDeckStatus.ACTIVE)
                                 .stream()
                                 .map(CruiseDeckMapper::toResponse)
                                 .toList();
         }
+
+        /*
+         * =====================================================
+         * UPDATE DECK
+         * =====================================================
+         */
 
         public CruiseDeckResponse updateDeck(
                         UUID id,
@@ -112,6 +234,11 @@ public class CruiseDeckService {
                 CruiseDeck deck = findById(id);
 
                 UUID cruiseId = deck.getCruise().getId();
+
+                /*
+                 * Không cho đổi sang số tầng
+                 * đã tồn tại trong cùng cruise.
+                 */
 
                 if (cruiseDeckRepository
                                 .existsByCruise_IdAndDeckNumberAndIdNot(
@@ -130,8 +257,15 @@ public class CruiseDeckService {
 
                 CruiseDeck updatedDeck = cruiseDeckRepository.save(deck);
 
-                return CruiseDeckMapper.toResponse(updatedDeck);
+                return CruiseDeckMapper.toResponse(
+                                updatedDeck);
         }
+
+        /*
+         * =====================================================
+         * DELETE DECK
+         * =====================================================
+         */
 
         public void deleteDeck(UUID id) {
 
@@ -139,6 +273,12 @@ public class CruiseDeckService {
 
                 cruiseDeckRepository.delete(deck);
         }
+
+        /*
+         * =====================================================
+         * FIND BY ID
+         * =====================================================
+         */
 
         private CruiseDeck findById(UUID id) {
 

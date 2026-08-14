@@ -19,7 +19,7 @@ export default function CruiseDeck() {
     success,
     setError,
     setSuccess,
-    createDeck,
+    createDecks,
     updateDeck,
     deleteDeck,
   } = useCruiseDecks(cruiseId);
@@ -28,16 +28,24 @@ export default function CruiseDeck() {
   const [saving, setSaving] = useState(false);
   const [editingDeck, setEditingDeck] = useState(null);
 
+  // =====================================================
+  // FORM
+  // =====================================================
+
   const [form, setForm] = useState({
-    deckNumber: "",
+    totalDecks: "",
     status: "ACTIVE",
   });
+
+  // =====================================================
+  // CREATE
+  // =====================================================
 
   const handleOpenCreate = () => {
     setEditingDeck(null);
 
     setForm({
-      deckNumber: "",
+      totalDecks: "",
       status: "ACTIVE",
     });
 
@@ -46,11 +54,15 @@ export default function CruiseDeck() {
     setShowModal(true);
   };
 
+  // =====================================================
+  // EDIT
+  // =====================================================
+
   const handleOpenEdit = (deck) => {
     setEditingDeck(deck);
 
     setForm({
-      deckNumber: deck.deckNumber ?? "",
+      totalDecks: String(deck.deckNumber ?? ""),
       status: deck.status || "ACTIVE",
     });
 
@@ -59,6 +71,10 @@ export default function CruiseDeck() {
     setShowModal(true);
   };
 
+  // =====================================================
+  // CLOSE
+  // =====================================================
+
   const handleCloseModal = () => {
     if (saving) {
       return;
@@ -66,6 +82,10 @@ export default function CruiseDeck() {
 
     setShowModal(false);
   };
+
+  // =====================================================
+  // CHANGE
+  // =====================================================
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -76,32 +96,65 @@ export default function CruiseDeck() {
     }));
   };
 
+  // =====================================================
+  // SUBMIT
+  // =====================================================
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     setError("");
     setSuccess("");
 
-    if (!form.deckNumber || Number(form.deckNumber) <= 0) {
-      setError("Số tầng phải lớn hơn 0.");
+    // ===================================================
+    // CREATE MULTIPLE DECKS
+    // ===================================================
+
+    if (!editingDeck) {
+      const totalDecks = Number(form.totalDecks);
+
+      if (
+        !form.totalDecks ||
+        !Number.isInteger(totalDecks) ||
+        totalDecks <= 0
+      ) {
+        setError("Tổng số tầng phải là số nguyên lớn hơn 0.");
+        return;
+      }
+
+      setSaving(true);
+
+      try {
+        const result = await createDecks(totalDecks);
+
+        if (result) {
+          setShowModal(false);
+        }
+      } finally {
+        setSaving(false);
+      }
+
+      return;
+    }
+
+    // ===================================================
+    // UPDATE ONE DECK
+    // ===================================================
+
+    const deckNumber = Number(form.totalDecks);
+
+    if (!form.totalDecks || !Number.isInteger(deckNumber) || deckNumber <= 0) {
+      setError("Số tầng phải là số nguyên lớn hơn 0.");
       return;
     }
 
     setSaving(true);
 
     try {
-      let result;
-
-      if (!editingDeck) {
-        result = await createDeck({
-          deckNumber: Number(form.deckNumber),
-        });
-      } else {
-        result = await updateDeck(editingDeck.id, {
-          deckNumber: Number(form.deckNumber),
-          status: form.status,
-        });
-      }
+      const result = await updateDeck(editingDeck.id, {
+        deckNumber,
+        status: form.status,
+      });
 
       if (result) {
         setShowModal(false);
@@ -110,6 +163,10 @@ export default function CruiseDeck() {
       setSaving(false);
     }
   };
+
+  // =====================================================
+  // DELETE
+  // =====================================================
 
   const handleDelete = async (deck) => {
     const confirmed = window.confirm(
@@ -123,13 +180,12 @@ export default function CruiseDeck() {
     await deleteDeck(deck.id);
   };
 
-  const handleAreas = (deck) => {
-    navigate(`/admin/decks/${deck.id}/areas`);
+  const handleView = (deck) => {
+    navigate(`/admin/decks/${deck.id}`);
   };
-
-  const handleRooms = (deck) => {
-    navigate(`/admin/decks/${deck.id}/rooms`);
-  };
+  // =====================================================
+  // RENDER
+  // =====================================================
 
   return (
     <div className="cruise-deck-page container-fluid py-4">
@@ -155,11 +211,15 @@ export default function CruiseDeck() {
         </Button>
       </div>
 
+      {/* SUCCESS */}
+
       {success && (
         <Alert variant="success" dismissible onClose={() => setSuccess("")}>
           {success}
         </Alert>
       )}
+
+      {/* ERROR */}
 
       {error && !showModal && (
         <Alert variant="danger" dismissible onClose={() => setError("")}>
@@ -167,14 +227,17 @@ export default function CruiseDeck() {
         </Alert>
       )}
 
+      {/* TABLE */}
+
       <CruiseDeckTable
         decks={decks}
         loading={loading}
         onEdit={handleOpenEdit}
         onDelete={handleDelete}
-        onAreas={handleAreas}
-        onRooms={handleRooms}
+        onView={handleView}
       />
+
+      {/* MODAL */}
 
       <CruiseDeckFormModal
         show={showModal}
