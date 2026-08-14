@@ -1,7 +1,7 @@
 import { UserCircle } from "lucide-react";
 
 import NotificationBell from "./NotificationBell";
-import "../styles/AdminHeader.css";
+import "../../styles/admin/AdminHeader.css";
 
 function AdminHeader() {
   return (

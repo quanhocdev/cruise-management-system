@@ -3,7 +3,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import { AuthProvider } from "./context/AuthContext";
-import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 import HomePage from "./modules/guest/pages/HomePage";
 
@@ -13,7 +13,7 @@ import VerifyOtpPage from "./modules/auth/pages/VerifyOtpPage";
 import ActivatePage from "./modules/auth/pages/ActivatePage";
 
 // admin
-import AdminLayout from "./modules/admin/layout/AdminLayout";
+import AdminLayout from "./layouts/AdminLayout";
 import AdminDashboard from "./modules/admin/pages/Dashboard";
 import ManagerAccount from "./modules/admin/pages/ManagerAccount";
 import ManagerPort from "./modules/admin/pages/ManagerPort";

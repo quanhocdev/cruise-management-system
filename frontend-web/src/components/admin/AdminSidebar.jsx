@@ -13,7 +13,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-import "../styles/AdminSidebar.css";
+import "../../styles/admin/AdminSidebar.css";
 
 const menuItems = [
   {

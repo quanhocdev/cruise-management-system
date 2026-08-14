@@ -1,7 +1,7 @@
-import AdminSidebar from "../components/AdminSidebar";
-import AdminHeader from "../components/AdminHeader";
-import AdminFooter from "../components/AdminFooter";
-import "../styles/AdminLayout.css";
+import AdminSidebar from "../components/admin/AdminSidebar";
+import AdminHeader from "../components/admin/AdminHeader";
+import AdminFooter from "../components/admin/AdminFooter";
+import "./AdminLayout.css";
 
 function AdminLayout({ children }) {
   return (

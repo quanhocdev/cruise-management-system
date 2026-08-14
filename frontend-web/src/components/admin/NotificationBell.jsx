@@ -1,6 +1,6 @@
 import { Bell } from "lucide-react";
 
-import "../styles/NotificationBell.css";
+import "../../styles/admin/NotificationBell.css";
 
 function NotificationBell() {
   return (

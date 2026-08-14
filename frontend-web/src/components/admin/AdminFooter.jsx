@@ -1,4 +1,4 @@
-import "../styles/AdminFooter.css";
+import "../../styles/admin/AdminFooter.css";
 
 function AdminFooter() {
   return (
