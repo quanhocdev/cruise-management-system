@@ -144,6 +144,31 @@ services:
         condition: service_healthy
 
   # ==========================
+  # Tour Service
+  # ==========================
+
+  tour-service:
+    build:
+      context: ./backend/tour-service
+      dockerfile: Dockerfile.dev
+    container_name: tour-service
+    restart: always
+    ports:
+      - "8088:8088"
+    volumes:
+      - ./backend/tour-service:/app
+      - /app/target
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-cruise_db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ==========================
   # Booking Service
   # ==========================
 
@@ -167,6 +192,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      tour-service:
+        condition: service_started
 
   # ==========================
   # Payment Service

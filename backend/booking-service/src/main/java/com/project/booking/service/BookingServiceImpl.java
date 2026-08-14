@@ -1,6 +1,7 @@
 package com.project.booking.service;
 
 import com.project.booking.dto.*;
+import com.project.booking.client.*;
 import com.project.booking.exception.BookingException;
 import com.project.booking.model.Booking;
 import com.project.booking.model.Passenger;
@@ -20,14 +21,17 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository repository;
     private final PassengerRepository passengerRepository;
     private final PassengerVoyageRepository passengerVoyageRepository;
+    private final TourClient tourClient;
     public BookingServiceImpl(BookingRepository repository, PassengerRepository passengerRepository,
-                              PassengerVoyageRepository passengerVoyageRepository) {
+                              PassengerVoyageRepository passengerVoyageRepository, TourClient tourClient) {
         this.repository = repository; this.passengerRepository = passengerRepository;
-        this.passengerVoyageRepository = passengerVoyageRepository;
+        this.passengerVoyageRepository = passengerVoyageRepository; this.tourClient = tourClient;
     }
 
     @Override @Transactional
-    public BookingResponse create(CreateBookingRequest request, Long userId) {
+    public synchronized BookingResponse create(CreateBookingRequest request, Long userId) {
+        TourScheduleContext voyage = tourClient.getSchedule(request.voyageId());
+        validateAvailability(request, voyage);
         Instant now = Instant.now();
         Booking booking = new Booking();
         booking.setCreatedByUserId(userId); booking.setVoyageId(request.voyageId());
@@ -118,5 +122,17 @@ public class BookingServiceImpl implements BookingService {
             if (!repository.existsByBookingCode(code)) return code;
         }
         throw new BookingException(HttpStatus.INTERNAL_SERVER_ERROR, "Cannot generate a unique booking code");
+    }
+    private void validateAvailability(CreateBookingRequest request, TourScheduleContext voyage) {
+        if (!request.voyageId().equals(voyage.voyageId()))
+            throw new BookingException(HttpStatus.BAD_REQUEST, "Voyage reference does not match");
+        if (!"OPEN".equals(voyage.status()))
+            throw new BookingException(HttpStatus.CONFLICT, "Voyage is not open for booking");
+        if (!voyage.startDate().isAfter(java.time.LocalDate.now()))
+            throw new BookingException(HttpStatus.CONFLICT, "Voyage registration has closed");
+        long occupied = passengerVoyageRepository.countByVoyageIdAndPassengerStatus(
+            request.voyageId(), PassengerStatus.REGISTERED);
+        if (occupied + request.passengers().size() > voyage.capacity())
+            throw new BookingException(HttpStatus.CONFLICT, "Voyage does not have enough available capacity");
     }
 }
