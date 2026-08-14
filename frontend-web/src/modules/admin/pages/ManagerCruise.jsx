@@ -91,23 +91,12 @@ export default function ManagerCruise() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    console.log("🔥 1. HANDLE SUBMIT");
+
     setError("");
     setSuccess("");
 
-    if (!form.name.trim()) {
-      setError("Vui lòng nhập tên du thuyền.");
-      return;
-    }
-
-    if (!form.code.trim()) {
-      setError("Vui lòng nhập mã du thuyền.");
-      return;
-    }
-
-    if (!form.maxPassengers || Number(form.maxPassengers) <= 0) {
-      setError("Số hành khách tối đa phải lớn hơn 0.");
-      return;
-    }
+    // ...
 
     const formData = new FormData();
 
@@ -124,16 +113,23 @@ export default function ManagerCruise() {
       formData.append("status", form.status);
     }
 
+    console.log("🔥 2. FORM DATA READY");
+    console.log([...formData.entries()]);
+
     setSaving(true);
 
     try {
       let result;
 
       if (!editingCruise) {
+        console.log("🔥 3. CALL createCruise()");
         result = await createCruise(formData);
       } else {
+        console.log("🔥 3. CALL updateCruise()");
         result = await updateCruise(editingCruise.id, formData);
       }
+
+      console.log("🔥 4. RESULT:", result);
 
       if (result) {
         setShowModal(false);

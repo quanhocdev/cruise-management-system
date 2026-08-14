@@ -5,8 +5,20 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// Cờ kiểm tra xem có đang thực hiện refresh token hay không
 let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error) => {
+  failedQueue.forEach(({ resolve, reject }) => {
+    if (error) {
+      reject(error);
+    } else {
+      resolve();
+    }
+  });
+
+  failedQueue = [];
+};
 
 api.interceptors.response.use(
   (response) => response,
@@ -14,59 +26,85 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // =====================================================
-    // 1. XỬ LÝ KHI CHÍNH REQUEST /auth/refresh BỊ LỖI (400, 401,...)
-    // =====================================================
-    if (originalRequest?.url?.includes("/auth/refresh")) {
-      isRefreshing = false;
+    if (!originalRequest) {
+      return Promise.reject(error);
+    }
 
-      // Tránh lặp reload nếu người dùng đang ở sẵn trang /login
-      if (window.location.pathname !== "/login") {
-        window.location.href = "/login";
-      }
+    const url = originalRequest.url || "";
+
+    // =====================================================
+    // REFRESH REQUEST BỊ LỖI
+    // =====================================================
+
+    if (url.includes("/auth/refresh")) {
+      isRefreshing = false;
+      processQueue(error);
 
       return Promise.reject(error);
     }
 
     // =====================================================
-    // 2. XỬ LÝ LỖI 401 DÀNH CHO CÁC REQUEST KHÁC
+    // AUTH ENDPOINTS
     // =====================================================
+
     if (
-      error.response?.status === 401 &&
-      originalRequest &&
-      !originalRequest._retry &&
-      !originalRequest.url.includes("/auth/login") &&
-      !originalRequest.url.includes("/auth/register") &&
-      !originalRequest.url.includes("/auth/activate/")
+      url.includes("/auth/login") ||
+      url.includes("/auth/register") ||
+      url.includes("/auth/activate") ||
+      url.includes("/auth/verify-otp") ||
+      url.includes("/auth/resend-otp")
     ) {
-      // Nếu đang có 1 request refresh chạy dở, không gọi thêm nữa
-      if (isRefreshing) {
-        return Promise.reject(error);
-      }
-
-      originalRequest._retry = true;
-      isRefreshing = true;
-
-      try {
-        // Refresh token nằm trong HttpOnly Cookie
-        await api.post("/auth/refresh");
-
-        isRefreshing = false;
-
-        // Refresh thành công → gọi lại request ban đầu
-        return api(originalRequest);
-      } catch (refreshError) {
-        isRefreshing = false;
-
-        if (window.location.pathname !== "/login") {
-          window.location.href = "/login";
-        }
-
-        return Promise.reject(refreshError);
-      }
+      return Promise.reject(error);
     }
 
-    return Promise.reject(error);
+    // =====================================================
+    // KHÔNG PHẢI 401
+    // =====================================================
+
+    if (error.response?.status !== 401 || originalRequest._retry) {
+      return Promise.reject(error);
+    }
+
+    // =====================================================
+    // ĐANG REFRESH
+    // Cho request này chờ
+    // =====================================================
+
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        failedQueue.push({
+          resolve: () => {
+            resolve(api(originalRequest));
+          },
+          reject,
+        });
+      });
+    }
+
+    // =====================================================
+    // REQUEST ĐẦU TIÊN PHÁT HIỆN ACCESS TOKEN HẾT HẠN
+    // =====================================================
+
+    originalRequest._retry = true;
+    isRefreshing = true;
+
+    try {
+      await api.post("/auth/refresh");
+
+      // Refresh thành công
+      isRefreshing = false;
+
+      processQueue(null);
+
+      // Retry request ban đầu
+      return api(originalRequest);
+    } catch (refreshError) {
+      isRefreshing = false;
+
+      processQueue(refreshError);
+
+      return Promise.reject(refreshError);
+    }
   },
 );
 

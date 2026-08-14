@@ -1,3 +1,5 @@
+// src/modules/admin/services/cruiseService.js
+
 import api from "../../../api/axios";
 
 const cruiseService = {
@@ -9,38 +11,28 @@ const cruiseService = {
     const response = await api.get("/admin/cruises", {
       params: { activeOnly },
     });
-
     return response.data;
   },
 
   getCruiseById: async (cruiseId) => {
     const response = await api.get(`/admin/cruises/${cruiseId}`);
-
     return response.data;
   },
 
   createCruise: async (formData) => {
-    const response = await api.post("/admin/cruises", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-
+    // Axios auto-detects FormData and sets the boundary header correctly
+    const response = await api.post("/admin/cruises", formData);
     return response.data;
   },
 
   updateCruise: async (cruiseId, formData) => {
-    const response = await api.patch(`/admin/cruises/${cruiseId}`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-
+    const response = await api.patch(`/admin/cruises/${cruiseId}`, formData);
     return response.data;
   },
 
   deleteCruise: async (cruiseId) => {
-    await api.delete(`/admin/cruises/${cruiseId}`);
+    const response = await api.delete(`/admin/cruises/${cruiseId}`);
+    return response.data;
   },
 
   // =====================================================
@@ -51,7 +43,6 @@ const cruiseService = {
     const response = await api.get(`/admin/cruises/${cruiseId}/decks`, {
       params: { activeOnly },
     });
-
     return response.data;
   },
 
@@ -59,13 +50,11 @@ const cruiseService = {
     const response = await api.get(
       `/admin/cruises/${cruiseId}/decks/${deckId}`,
     );
-
     return response.data;
   },
 
   createDeck: async (cruiseId, data) => {
     const response = await api.post(`/admin/cruises/${cruiseId}/decks`, data);
-
     return response.data;
   },
 
@@ -74,12 +63,14 @@ const cruiseService = {
       `/admin/cruises/${cruiseId}/decks/${deckId}`,
       data,
     );
-
     return response.data;
   },
 
   deleteDeck: async (cruiseId, deckId) => {
-    await api.delete(`/admin/cruises/${cruiseId}/decks/${deckId}`);
+    const response = await api.delete(
+      `/admin/cruises/${cruiseId}/decks/${deckId}`,
+    );
+    return response.data;
   },
 
   // =====================================================
@@ -90,23 +81,16 @@ const cruiseService = {
     const response = await api.get(`/admin/decks/${deckId}/areas`, {
       params: { activeOnly },
     });
-
     return response.data;
   },
 
   getAreaById: async (deckId, areaId) => {
     const response = await api.get(`/admin/decks/${deckId}/areas/${areaId}`);
-
     return response.data;
   },
 
   createArea: async (deckId, formData) => {
-    const response = await api.post(`/admin/decks/${deckId}/areas`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-
+    const response = await api.post(`/admin/decks/${deckId}/areas`, formData);
     return response.data;
   },
 
@@ -114,13 +98,7 @@ const cruiseService = {
     const response = await api.patch(
       `/admin/decks/${deckId}/areas/${areaId}`,
       formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      },
     );
-
     return response.data;
   },
 
@@ -128,12 +106,12 @@ const cruiseService = {
     const response = await api.patch(
       `/admin/decks/${deckId}/areas/${areaId}/deactivate`,
     );
-
     return response.data;
   },
 
   deleteArea: async (deckId, areaId) => {
-    await api.delete(`/admin/decks/${deckId}/areas/${areaId}`);
+    const response = await api.delete(`/admin/decks/${deckId}/areas/${areaId}`);
+    return response.data;
   },
 
   // =====================================================
@@ -144,19 +122,16 @@ const cruiseService = {
     const response = await api.get(`/admin/decks/${deckId}/rooms`, {
       params: { activeOnly },
     });
-
     return response.data;
   },
 
   getRoomById: async (deckId, roomId) => {
     const response = await api.get(`/admin/decks/${deckId}/rooms/${roomId}`);
-
     return response.data;
   },
 
   createRoom: async (deckId, data) => {
     const response = await api.post(`/admin/decks/${deckId}/rooms`, data);
-
     return response.data;
   },
 
@@ -165,12 +140,12 @@ const cruiseService = {
       `/admin/decks/${deckId}/rooms/${roomId}`,
       data,
     );
-
     return response.data;
   },
 
   deleteRoom: async (deckId, roomId) => {
-    await api.delete(`/admin/decks/${deckId}/rooms/${roomId}`);
+    const response = await api.delete(`/admin/decks/${deckId}/rooms/${roomId}`);
+    return response.data;
   },
 };
 
