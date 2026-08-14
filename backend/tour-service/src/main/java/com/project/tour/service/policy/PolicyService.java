@@ -121,13 +121,11 @@ public class PolicyService {
     // SOFT DELETE
     // =====================================================
 
-    public void deactivate(UUID id) {
+    public void delete(UUID id) {
 
         Policy policy = findById(id);
 
-        policy.setStatus(PolicyStatus.INACTIVE);
-
-        policyRepository.save(policy);
+        policyRepository.delete(policy);
     }
 
     // =====================================================

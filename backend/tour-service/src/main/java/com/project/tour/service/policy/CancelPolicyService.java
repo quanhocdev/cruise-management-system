@@ -141,7 +141,7 @@ public class CancelPolicyService {
         // DEACTIVATE
         // =====================================================
 
-        public void deactivate(
+        public void delete(
                         UUID policyId,
                         UUID ruleId) {
 
@@ -149,9 +149,7 @@ public class CancelPolicyService {
                                 policyId,
                                 ruleId);
 
-                entity.setStatus(PolicyStatus.INACTIVE);
-
-                repository.save(entity);
+                repository.delete(entity);
         }
 
         // =====================================================
