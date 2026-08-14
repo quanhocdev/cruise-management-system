@@ -22,11 +22,13 @@ public interface CancelPolicyRepository extends JpaRepository<CancelPolicy, UUID
                         UUID policyId,
                         PolicyStatus status);
 
-        boolean existsByPolicy_IdAndDaysBefore(
+        // Đã sửa: Thêm 'Equals'
+        boolean existsByPolicy_IdAndDaysBeforeEquals(
                         UUID policyId,
                         Integer daysBefore);
 
-        boolean existsByPolicy_IdAndDaysBeforeAndIdNot(
+        // Đã sửa: Thêm 'Equals'
+        boolean existsByPolicy_IdAndDaysBeforeEqualsAndIdNot(
                         UUID policyId,
                         Integer daysBefore,
                         UUID id);

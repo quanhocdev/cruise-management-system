@@ -46,8 +46,8 @@ public class CancelPolicyService {
                                 policyId,
                                 PolicyType.CANCEL);
 
-                // Không cho phép trùng số ngày
-                if (repository.existsByPolicy_IdAndDaysBefore(
+                // Không cho phép trùng số ngày (Đã sửa method name)
+                if (repository.existsByPolicy_IdAndDaysBeforeEquals(
                                 policyId,
                                 request.getDaysBefore())) {
 
@@ -117,8 +117,8 @@ public class CancelPolicyService {
                                 policyId,
                                 ruleId);
 
-                // Không cho phép 2 rule cùng số ngày
-                if (repository.existsByPolicy_IdAndDaysBeforeAndIdNot(
+                // Không cho phép 2 rule cùng số ngày (Đã sửa method name)
+                if (repository.existsByPolicy_IdAndDaysBeforeEqualsAndIdNot(
                                 policyId,
                                 request.getDaysBefore(),
                                 ruleId)) {
