@@ -8,6 +8,7 @@ import com.project.tour.service.cruise.CruiseAreaService;
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,82 +19,106 @@ import java.util.UUID;
 @RequestMapping("/api/admin/decks/{deckId}/areas")
 public class CruiseAreaController {
 
-    private final CruiseAreaService cruiseAreaService;
+        private final CruiseAreaService cruiseAreaService;
 
-    public CruiseAreaController(
-            CruiseAreaService cruiseAreaService) {
+        public CruiseAreaController(
+                        CruiseAreaService cruiseAreaService) {
 
-        this.cruiseAreaService = cruiseAreaService;
-    }
+                this.cruiseAreaService = cruiseAreaService;
+        }
 
-    @PostMapping
-    public ResponseEntity<CruiseAreaResponse> createArea(
-            @PathVariable UUID deckId,
-            @Valid @RequestBody CreateCruiseAreaRequest request) {
+        // =====================================================
+        // CREATE AREA
+        // =====================================================
 
-        CruiseAreaResponse response = cruiseAreaService.create(deckId, request);
+        @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        public ResponseEntity<CruiseAreaResponse> createArea(
+                        @PathVariable UUID deckId,
+                        @Valid @ModelAttribute CreateCruiseAreaRequest request) {
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(response);
-    }
+                CruiseAreaResponse response = cruiseAreaService.create(deckId, request);
 
-    @GetMapping
-    public ResponseEntity<List<CruiseAreaResponse>> getAreas(
-            @PathVariable UUID deckId,
-            @RequestParam(defaultValue = "false") boolean activeOnly) {
+                return ResponseEntity
+                                .status(HttpStatus.CREATED)
+                                .body(response);
+        }
 
-        List<CruiseAreaResponse> response = activeOnly
-                ? cruiseAreaService.getActive(deckId)
-                : cruiseAreaService.getAll(deckId);
+        // =====================================================
+        // GET ALL AREAS
+        // =====================================================
 
-        return ResponseEntity.ok(response);
-    }
+        @GetMapping
+        public ResponseEntity<List<CruiseAreaResponse>> getAreas(
+                        @PathVariable UUID deckId,
+                        @RequestParam(defaultValue = "false") boolean activeOnly) {
 
-    @GetMapping("/{areaId}")
-    public ResponseEntity<CruiseAreaResponse> getAreaById(
-            @PathVariable UUID deckId,
-            @PathVariable UUID areaId) {
+                List<CruiseAreaResponse> response = activeOnly
+                                ? cruiseAreaService.getActive(deckId)
+                                : cruiseAreaService.getAll(deckId);
 
-        return ResponseEntity.ok(
-                cruiseAreaService.getById(
-                        deckId,
-                        areaId));
-    }
+                return ResponseEntity.ok(response);
+        }
 
-    @PatchMapping("/{areaId}")
-    public ResponseEntity<CruiseAreaResponse> updateArea(
-            @PathVariable UUID deckId,
-            @PathVariable UUID areaId,
-            @Valid @RequestBody UpdateCruiseAreaRequest request) {
+        // =====================================================
+        // GET AREA BY ID
+        // =====================================================
 
-        return ResponseEntity.ok(
-                cruiseAreaService.update(
-                        deckId,
-                        areaId,
-                        request));
-    }
+        @GetMapping("/{areaId}")
+        public ResponseEntity<CruiseAreaResponse> getAreaById(
+                        @PathVariable UUID deckId,
+                        @PathVariable UUID areaId) {
 
-    @PatchMapping("/{areaId}/deactivate")
-    public ResponseEntity<CruiseAreaResponse> deactivateArea(
-            @PathVariable UUID deckId,
-            @PathVariable UUID areaId) {
+                return ResponseEntity.ok(
+                                cruiseAreaService.getById(
+                                                deckId,
+                                                areaId));
+        }
 
-        return ResponseEntity.ok(
-                cruiseAreaService.deactivate(
-                        deckId,
-                        areaId));
-    }
+        // =====================================================
+        // UPDATE AREA
+        // =====================================================
 
-    @DeleteMapping("/{areaId}")
-    public ResponseEntity<Void> deleteArea(
-            @PathVariable UUID deckId,
-            @PathVariable UUID areaId) {
+        @PatchMapping(value = "/{areaId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        public ResponseEntity<CruiseAreaResponse> updateArea(
+                        @PathVariable UUID deckId,
+                        @PathVariable UUID areaId,
+                        @Valid @ModelAttribute UpdateCruiseAreaRequest request) {
 
-        cruiseAreaService.delete(
-                deckId,
-                areaId);
+                return ResponseEntity.ok(
+                                cruiseAreaService.update(
+                                                deckId,
+                                                areaId,
+                                                request));
+        }
 
-        return ResponseEntity.noContent().build();
-    }
+        // =====================================================
+        // DEACTIVATE
+        // =====================================================
+
+        @PatchMapping("/{areaId}/deactivate")
+        public ResponseEntity<CruiseAreaResponse> deactivateArea(
+                        @PathVariable UUID deckId,
+                        @PathVariable UUID areaId) {
+
+                return ResponseEntity.ok(
+                                cruiseAreaService.deactivate(
+                                                deckId,
+                                                areaId));
+        }
+
+        // =====================================================
+        // DELETE
+        // =====================================================
+
+        @DeleteMapping("/{areaId}")
+        public ResponseEntity<Void> deleteArea(
+                        @PathVariable UUID deckId,
+                        @PathVariable UUID areaId) {
+
+                cruiseAreaService.delete(
+                                deckId,
+                                areaId);
+
+                return ResponseEntity.noContent().build();
+        }
 }

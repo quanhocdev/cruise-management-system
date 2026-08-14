@@ -9,7 +9,6 @@ export default function CruiseAreaFormModal({
   onClose,
   onSubmit,
   onChange,
-  onImageChange,
 }) {
   const isEditing = Boolean(editingArea);
 
@@ -41,7 +40,7 @@ export default function CruiseAreaFormModal({
               name="name"
               value={form.name}
               onChange={onChange}
-              placeholder="Ví dụ: Nhà hàng, Hồ bơi, Bar..."
+              placeholder="Ví dụ: Khu vực A, Boong tàu, Ban công, Sân thượng, Sảnh..."
               maxLength={150}
               disabled={saving}
             />
@@ -57,7 +56,7 @@ export default function CruiseAreaFormModal({
               name="description"
               value={form.description}
               onChange={onChange}
-              placeholder="Nhập mô tả khu vực..."
+              placeholder="Nhập mô tả vị trí/khu vực..."
               maxLength={2000}
               disabled={saving}
             />
@@ -69,8 +68,9 @@ export default function CruiseAreaFormModal({
 
             <Form.Control
               type="file"
+              name="image"
               accept="image/*"
-              onChange={onImageChange}
+              onChange={onChange}
               disabled={saving}
             />
 

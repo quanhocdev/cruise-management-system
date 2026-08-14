@@ -152,7 +152,7 @@ export default function CruiseArea() {
           <h2 className="cruise-area-title">Quản lý khu vực</h2>
 
           <p className="cruise-area-description">
-            Quản lý các khu vực trên tầng của du thuyền.
+            Quản lý các không gian và vị trí trên tầng của du thuyền.
           </p>
         </div>
 

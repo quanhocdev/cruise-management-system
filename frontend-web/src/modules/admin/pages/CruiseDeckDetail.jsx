@@ -48,7 +48,7 @@ export default function CruiseDeckDetail() {
                 variant="primary"
                 onClick={() => navigate(`/admin/decks/${deckId}/areas`)}
               >
-                + Tạo khu vực
+                + Quản lý khu vực
               </Button>
             </Card.Body>
           </Card>
@@ -72,7 +72,7 @@ export default function CruiseDeckDetail() {
                 variant="success"
                 onClick={() => navigate(`/admin/decks/${deckId}/rooms`)}
               >
-                + Tạo dãy phòng
+                + Quản lý phòng
               </Button>
             </Card.Body>
           </Card>
