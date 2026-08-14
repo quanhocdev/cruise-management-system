@@ -20,6 +20,7 @@ import ManagerPort from "./modules/admin/pages/ManagerPort";
 
 import ManagerCruise from "./modules/admin/pages/ManagerCruise";
 import CruiseDeck from "./modules/admin/pages/CruiseDeck";
+import CruiseDeckDetail from "./modules/admin/pages/CruiseDeckDetail";
 import CruiseArea from "./modules/admin/pages/CruiseArea";
 import CruiseRoom from "./modules/admin/pages/CruiseRoom";
 
@@ -88,6 +89,10 @@ export default function App() {
                     <Route
                       path="cruises/:cruiseId/decks"
                       element={<CruiseDeck />}
+                    />
+                    <Route
+                      path="decks/:deckId"
+                      element={<CruiseDeckDetail />}
                     />
 
                     {/* Quản lý khu vực của tầng */}

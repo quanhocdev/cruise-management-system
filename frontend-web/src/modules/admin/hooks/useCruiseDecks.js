@@ -1,4 +1,3 @@
-// src/modules/admin/hooks/useCruises.js
 import { useCallback, useEffect, useState } from "react";
 import cruiseService from "../services/cruiseService";
 
@@ -9,7 +8,7 @@ export default function useCruiseDecks(cruiseId) {
   const [success, setSuccess] = useState("");
 
   // =====================================================
-  // LOAD DECKS
+  // LOAD
   // =====================================================
 
   const loadDecks = useCallback(async () => {
@@ -42,25 +41,38 @@ export default function useCruiseDecks(cruiseId) {
   }, [loadDecks]);
 
   // =====================================================
-  // CREATE DECK
+  // CREATE MULTIPLE DECKS
   // =====================================================
 
-  const createDeck = async (data) => {
+  const createDecks = async (totalDecks) => {
     setError("");
     setSuccess("");
 
     try {
-      const createdDeck = await cruiseService.createDeck(cruiseId, data);
-
-      setDecks((previous) =>
-        [...previous, createdDeck].sort((a, b) => a.deckNumber - b.deckNumber),
+      const createdDecks = await cruiseService.createDecks(
+        cruiseId,
+        totalDecks,
       );
 
-      setSuccess("Tạo tầng thành công.");
+      /*
+       * Backend trả về List<CruiseDeckResponse>
+       *
+       * Ví dụ:
+       *
+       * [
+       *   { id: "...", deckNumber: 1 },
+       *   { id: "...", deckNumber: 2 },
+       *   { id: "...", deckNumber: 3 }
+       * ]
+       */
 
-      return createdDeck;
+      setDecks(createdDecks);
+
+      setSuccess(`Tạo ${createdDecks.length} tầng thành công.`);
+
+      return createdDecks;
     } catch (err) {
-      console.error("🔥 CREATE DECK ERROR:", err);
+      console.error("🔥 CREATE DECKS ERROR:", err);
       console.error("🔥 RESPONSE:", err.response);
       console.error("🔥 RESPONSE DATA:", err.response?.data);
       console.error("🔥 STATUS:", err.response?.status);
@@ -149,7 +161,7 @@ export default function useCruiseDecks(cruiseId) {
     setSuccess,
 
     loadDecks,
-    createDeck,
+    createDecks,
     updateDeck,
     deleteDeck,
   };

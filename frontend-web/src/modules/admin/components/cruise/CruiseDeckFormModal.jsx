@@ -23,47 +23,101 @@ export default function CruiseDeckFormModal({
       <Form onSubmit={onSubmit}>
         <Modal.Header closeButton={!saving}>
           <Modal.Title>
-            {isEditing ? "Chỉnh sửa tầng" : "Thêm tầng"}
+            {isEditing ? "Chỉnh sửa tầng" : "Tạo các tầng du thuyền"}
           </Modal.Title>
         </Modal.Header>
 
         <Modal.Body>
           {error && <Alert variant="danger">{error}</Alert>}
 
-          <Form.Group className="mb-3">
-            <Form.Label>Số tầng</Form.Label>
+          {/* =================================================
+              CREATE
+          ================================================= */}
+          {!isEditing && (
+            <>
+              <Form.Group className="mb-3">
+                <Form.Label>Số tầng muốn tạo</Form.Label>
 
-            <Form.Control
-              type="number"
-              name="deckNumber"
-              value={form.deckNumber}
-              onChange={onChange}
-              min="1"
-              placeholder="Ví dụ: 1"
-              disabled={saving}
-            />
+                <Form.Control
+                  type="number"
+                  name="totalDecks"
+                  value={form.totalDecks}
+                  onChange={onChange}
+                  min="1"
+                  max="100"
+                  placeholder="Ví dụ: 5"
+                  disabled={saving}
+                  autoFocus
+                />
 
-            <Form.Text className="text-muted">
-              Số tầng phải là số nguyên dương và không được trùng trong cùng một
-              du thuyền.
-            </Form.Text>
-          </Form.Group>
+                <Form.Text className="text-muted">
+                  Nhập số tầng, hệ thống sẽ tự động tạo từ tầng 1 đến tầng{" "}
+                  {form.totalDecks || "..."}.
+                </Form.Text>
+              </Form.Group>
 
+              {form.totalDecks > 0 && (
+                <Alert variant="info">
+                  Hệ thống sẽ tạo <strong>{form.totalDecks} tầng</strong>:
+                  <div className="mt-2">
+                    {Array.from(
+                      {
+                        length: Number(form.totalDecks),
+                      },
+                      (_, index) => (
+                        <span
+                          key={index}
+                          className="badge bg-primary me-1 mb-1"
+                        >
+                          Tầng {index + 1}
+                        </span>
+                      ),
+                    )}
+                  </div>
+                </Alert>
+              )}
+            </>
+          )}
+
+          {/* =================================================
+              UPDATE
+          ================================================= */}
           {isEditing && (
-            <Form.Group className="mb-3">
-              <Form.Label>Trạng thái</Form.Label>
+            <>
+              <Form.Group className="mb-3">
+                <Form.Label>Số tầng</Form.Label>
 
-              <Form.Select
-                name="status"
-                value={form.status}
-                onChange={onChange}
-                disabled={saving}
-              >
-                <option value="ACTIVE">ACTIVE</option>
+                <Form.Control
+                  type="number"
+                  name="deckNumber"
+                  value={form.deckNumber}
+                  onChange={onChange}
+                  min="1"
+                  placeholder="Ví dụ: 1"
+                  disabled={saving}
+                />
 
-                <option value="INACTIVE">INACTIVE</option>
-              </Form.Select>
-            </Form.Group>
+                <Form.Text className="text-muted">
+                  Số tầng phải là số nguyên dương và không được trùng trong cùng
+                  một du thuyền.
+                </Form.Text>
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Trạng thái</Form.Label>
+
+                <Form.Select
+                  name="status"
+                  value={form.status}
+                  onChange={onChange}
+                  disabled={saving}
+                >
+                  <option value="ACTIVE">ACTIVE</option>
+
+                  <option value="INACTIVE">INACTIVE</option>
+                </Form.Select>
+              </Form.Group>
+            </>
           )}
         </Modal.Body>
 
@@ -81,7 +135,7 @@ export default function CruiseDeckFormModal({
             ) : isEditing ? (
               "Lưu thay đổi"
             ) : (
-              "Thêm tầng"
+              "Tạo tầng"
             )}
           </Button>
         </Modal.Footer>
