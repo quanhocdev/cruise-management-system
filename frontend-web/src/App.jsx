@@ -65,48 +65,55 @@ export default function App() {
           <Route
             path="/admin/*"
             element={
-              // <ProtectedRoute allowedRoles={["ADMIN"]}>
-              <AdminLayout>
-                <Routes>
-                  {/* DASHBOARD */}
-                  <Route path="dashboard" element={<AdminDashboard />} />
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <AdminLayout>
+                  <Routes>
+                    {/* DASHBOARD */}
+                    <Route path="dashboard" element={<AdminDashboard />} />
 
-                  {/* ACCOUNT */}
-                  <Route path="accounts" element={<ManagerAccount />} />
+                    {/* ACCOUNT */}
+                    <Route path="accounts" element={<ManagerAccount />} />
 
-                  {/* PORT */}
-                  <Route path="ports" element={<ManagerPort />} />
+                    {/* PORT */}
+                    <Route path="ports" element={<ManagerPort />} />
 
-                  {/* =================================================
+                    {/* =================================================
                       CRUISE
                      ================================================= */}
 
-                  {/* Quản lý du thuyền */}
-                  <Route path="cruises" element={<ManagerCruise />} />
+                    {/* Quản lý du thuyền */}
+                    <Route path="cruises" element={<ManagerCruise />} />
 
-                  {/* Quản lý tầng của du thuyền */}
-                  <Route
-                    path="cruises/:cruiseId/decks"
-                    element={<CruiseDeck />}
-                  />
+                    {/* Quản lý tầng của du thuyền */}
+                    <Route
+                      path="cruises/:cruiseId/decks"
+                      element={<CruiseDeck />}
+                    />
 
-                  {/* Quản lý khu vực của tầng */}
-                  <Route path="decks/:deckId/areas" element={<CruiseArea />} />
+                    {/* Quản lý khu vực của tầng */}
+                    <Route
+                      path="decks/:deckId/areas"
+                      element={<CruiseArea />}
+                    />
 
-                  {/* Quản lý phòng của tầng */}
-                  <Route path="decks/:deckId/rooms" element={<CruiseRoom />} />
+                    {/* Quản lý phòng của tầng */}
+                    <Route
+                      path="decks/:deckId/rooms"
+                      element={<CruiseRoom />}
+                    />
 
-                  <Route path="products" element={<ManagerProduct />} />
-                  <Route path="services" element={<ManagerService />} />
-                  <Route path="policies" element={<ManagerPolicy />} />
-                  {/* DEFAULT */}
-                  <Route
-                    path=""
-                    element={<Navigate to="dashboard" replace />}
-                  />
-                </Routes>
-              </AdminLayout>
-              // </ProtectedRoute>
+                    <Route path="products" element={<ManagerProduct />} />
+                    <Route path="services" element={<ManagerService />} />
+                    <Route path="policies" element={<ManagerPolicy />} />
+                    {/* DEFAULT */}
+                    <Route
+                      path=""
+                      element={<Navigate to="dashboard" replace />}
+                    />
+                  </Routes>
+                </AdminLayout>
+                //{" "}
+              </ProtectedRoute>
             }
           />
 

@@ -1,29 +1,49 @@
 services:
   # ==========================
-  # PostgreSQL
+  # PostgreSQL cho Auth Service
   # ==========================
-
-  postgres:
+  postgres-auth:
     image: postgres:15-alpine
-    container_name: cruise_postgres
+    container_name: cruise_postgres_auth
     restart: always
-
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-cruise_db}
+      POSTGRES_DB: auth_service_db
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-
     ports:
-      - "${DB_PORT:-5432}:5432"
-
+      - "5432:5432"
     volumes:
-      - postgres_cruise_data:/var/lib/postgresql/data
-
+      - postgres_auth_data:/var/lib/postgresql/data
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "pg_isready -U $${POSTGRES_USER:-postgres} -d $${POSTGRES_DB:-cruise_db}",
+          "pg_isready -U $${POSTGRES_USER:-postgres} -d auth_service_db",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==========================
+  # PostgreSQL cho Tour Service
+  # ==========================
+  postgres-tour:
+    image: postgres:15-alpine
+    container_name: cruise_postgres_tour
+    restart: always
+    environment:
+      POSTGRES_DB: tour_service_db
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5433:5432" # Map cổng 5433 ra máy thật
+    volumes:
+      - postgres_tour_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER:-postgres} -d tour_service_db",
         ]
       interval: 10s
       timeout: 5s
@@ -32,15 +52,12 @@ services:
   # ==========================
   # Redis
   # ==========================
-
   redis:
     image: redis:8-alpine
     container_name: cruise_redis
     restart: always
-
     ports:
       - "${REDIS_PORT:-6379}:6379"
-
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -50,44 +67,36 @@ services:
   # ==========================
   # pgAdmin
   # ==========================
-
   pgadmin:
     image: dpage/pgadmin4
     container_name: cruise_pgadmin
     restart: always
-
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@cruise.com}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
-
     ports:
       - "5050:80"
-
     depends_on:
-      postgres:
+      postgres-auth:
+        condition: service_healthy
+      postgres-tour:
         condition: service_healthy
 
   # ==========================
   # API Gateway
   # ==========================
-
   gateway-service:
     build:
       context: ./backend/gateway-service
       dockerfile: Dockerfile.dev
-
     container_name: gateway-service
     restart: always
-
     ports:
       - "8080:8080"
-
     volumes:
       - ./backend/gateway-service:/app
-
     env_file:
       - .env
-
     environment:
       AUTH_SERVICE_URL: http://auth-service:8081
       BOOKING_SERVICE_URL: http://booking-service:8082
@@ -98,49 +107,37 @@ services:
       FEEDBACK_SERVICE_URL: http://feedback-service:8087
       TOUR_SERVICE_URL: http://tour-service:8088
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
-
     depends_on:
       - auth-service
-      - payment-service
       - tour-service
 
   # ==========================
   # Auth Service
   # ==========================
-
   auth-service:
     build:
       context: ./backend
       dockerfile: auth-service/Dockerfile.dev
-
     container_name: auth-service
     restart: always
-
     ports:
       - "8081:8081"
-
     working_dir: /app/auth-service
-
     volumes:
       - ./backend/auth-service/src:/app/auth-service/src
       - ./backend/common/src:/app/common/src
       - /app/auth-service/target
-
     env_file:
       - .env
-
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${AUTH_DB_NAME:-auth_db}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/${AUTH_DB_NAME:-auth_service_db}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-
       SPRING_DATA_REDIS_HOST: ${REDIS_HOST:-redis}
       SPRING_DATA_REDIS_PORT: ${REDIS_PORT:-6379}
-
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
-
     depends_on:
-      postgres:
+      postgres-auth:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -148,120 +145,51 @@ services:
   # ==========================
   # Tour Service
   # ==========================
-
   tour-service:
     build:
       context: ./backend
       dockerfile: tour-service/Dockerfile.dev
-
     container_name: tour-service
     restart: always
-
     ports:
       - "8088:8088"
-
     working_dir: /app/tour-service
-
     volumes:
       - ./backend/tour-service/src:/app/tour-service/src
       - ./backend/common/src:/app/common/src
       - /app/tour-service/target
-
     env_file:
       - .env
-
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-cruise_db}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-tour:5432/${TOUR_DB_NAME:-tour_service_db}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-
     depends_on:
-      postgres:
+      postgres-tour:
         condition: service_healthy
 
   # ==========================
-  # Booking Service
+  # React Frontend
   # ==========================
-
-  booking-service:
-    build:
-      context: ./backend/booking-service
-      dockerfile: Dockerfile.dev
-
-    container_name: booking-service
-    restart: always
-
-    ports:
-      - "8082:8082"
-
-    volumes:
-      - ./backend/booking-service:/app
-      - /app/target
-
-    env_file:
-      - .env
-
-  # ==========================
-  # Payment Service
-  # ==========================
-
-  payment-service:
-    build:
-      context: ./backend/payment-service
-      dockerfile: Dockerfile.dev
-
-    container_name: payment-service
-    restart: always
-
-    ports:
-      - "8085:8085"
-
-    volumes:
-      - ./backend/payment-service:/app
-      - /app/target
-
-    env_file:
-      - .env
-
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-cruise_db}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-
-    depends_on:
-      postgres:
-        condition: service_healthy
-      booking-service:
-        condition: service_started
-
-  # ==========================
-  # React
-  # ==========================
-
   frontend-web:
     build:
       context: ./frontend-web
       dockerfile: Dockerfile.dev
-
     container_name: cruise_frontend
     restart: always
-
     ports:
       - "5173:5173"
-
     volumes:
       - ./frontend-web:/app
       - /app/node_modules
-
     environment:
       VITE_API_BASE_URL: http://localhost:8080
-
     depends_on:
       - gateway-service
 
 # ==========================
 # Volumes
 # ==========================
-
 volumes:
-  postgres_cruise_data:
+  postgres_auth_data:
+  postgres_tour_data:

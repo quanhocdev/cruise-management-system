@@ -17,62 +17,62 @@ import java.util.UUID;
 @RequestMapping("/api/convenience/areas/{areaId}/products")
 public class ProductAreaController {
 
-    private final ProductAreaService productAreaService;
+        private final ProductAreaService productAreaService;
 
-    public ProductAreaController(
-            ProductAreaService productAreaService) {
+        public ProductAreaController(
+                        ProductAreaService productAreaService) {
 
-        this.productAreaService = productAreaService;
-    }
+                this.productAreaService = productAreaService;
+        }
 
-    /*
-     * =====================================================
-     * GET PRODUCTS ASSIGNED TO AREA
-     * =====================================================
-     */
-    @GetMapping
-    public ResponseEntity<List<ProductAreaResponse>> getProductsByArea(
-            @PathVariable UUID areaId) {
+        /*
+         * =====================================================
+         * GET PRODUCTS ASSIGNED TO AREA
+         * =====================================================
+         */
+        @GetMapping
+        public ResponseEntity<List<ProductAreaResponse>> getProductsByArea(
+                        @PathVariable UUID areaId) {
 
-        return ResponseEntity.ok(
-                productAreaService.getProductsByArea(areaId));
-    }
+                return ResponseEntity.ok(
+                                productAreaService.getProductsByArea(areaId));
+        }
 
-    /*
-     * =====================================================
-     * ASSIGN PRODUCT TO AREA
-     * =====================================================
-     */
-    @PostMapping
-    public ResponseEntity<ProductAreaResponse> assignProduct(
-            @PathVariable UUID areaId,
-            @Valid @RequestBody CreateProductAreaRequest request) {
+        /*
+         * =====================================================
+         * ASSIGN PRODUCT TO AREA
+         * =====================================================
+         */
+        @PostMapping
+        public ResponseEntity<ProductAreaResponse> assignProduct(
+                        @PathVariable UUID areaId,
+                        @Valid @RequestBody CreateProductAreaRequest request) {
 
-        ProductAreaResponse response = productAreaService.assignProduct(
-                areaId,
-                request);
+                ProductAreaResponse response = productAreaService.assignProduct(
+                                areaId,
+                                request);
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(response);
-    }
+                return ResponseEntity
+                                .status(HttpStatus.CREATED)
+                                .body(response);
+        }
 
-    /*
-     * =====================================================
-     * REMOVE PRODUCT FROM AREA
-     * =====================================================
-     */
-    @DeleteMapping("/{productId}")
-    public ResponseEntity<Void> removeProduct(
-            @PathVariable UUID areaId,
-            @PathVariable UUID productId) {
+        /*
+         * =====================================================
+         * REMOVE PRODUCT FROM AREA
+         * =====================================================
+         */
+        @DeleteMapping("/{productId}")
+        public ResponseEntity<Void> removeProduct(
+                        @PathVariable UUID areaId,
+                        @PathVariable UUID productId) {
 
-        productAreaService.removeProduct(
-                areaId,
-                productId);
+                productAreaService.removeProduct(
+                                areaId,
+                                productId);
 
-        return ResponseEntity
-                .noContent()
-                .build();
-    }
+                return ResponseEntity
+                                .noContent()
+                                .build();
+        }
 }
