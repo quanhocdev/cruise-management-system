@@ -1,6 +1,8 @@
 package com.project.payment.service;
 
 import com.project.payment.dto.*;
+import com.project.payment.client.BookingClient;
+import com.project.payment.client.BookingPaymentContext;
 import com.project.payment.exception.PaymentException;
 import com.project.payment.mapper.PaymentMapper;
 import com.project.payment.model.Payment;
@@ -21,14 +23,17 @@ import static org.mockito.Mockito.when;
 class PaymentServiceImplTests {
     @Mock PaymentRepository repository;
     @Mock PaymentProvider provider;
+    @Mock BookingClient bookingClient;
     PaymentServiceImpl service;
 
     @BeforeEach void setUp() {
         when(provider.getPaymentMethod()).thenReturn(PaymentMethod.VNPAY);
-        service = new PaymentServiceImpl(repository, new PaymentMapper(), List.of(provider), 15);
+        service = new PaymentServiceImpl(repository, new PaymentMapper(), List.of(provider), bookingClient, 15);
     }
 
     @Test void createPaymentUsesAuthenticatedPayerAndReturnsSandboxUrl() {
+        when(bookingClient.getPaymentContext(100L)).thenReturn(
+            new BookingPaymentContext(100L, 7L, new BigDecimal("1000000"), "PENDING_PAYMENT"));
         when(repository.save(any(Payment.class))).thenAnswer(invocation -> {
             Payment payment = invocation.getArgument(0); if (payment.getId() == null) payment.setId(10L); return payment;
         });
@@ -38,6 +43,12 @@ class PaymentServiceImplTests {
         assertEquals(PaymentStatus.PENDING, response.getStatus());
         assertEquals("https://sandbox.test/pay", response.getPaymentUrl());
         assertNotNull(response.getExpiresAt());
+    }
+
+    @Test void createPaymentRejectsTamperedBookingAmount() {
+        when(bookingClient.getPaymentContext(100L)).thenReturn(
+            new BookingPaymentContext(100L, 7L, new BigDecimal("2000000"), "PENDING_PAYMENT"));
+        assertThrows(PaymentException.class, () -> service.createPayment(request(), 7L, "127.0.0.1"));
     }
 
     @Test void returnRejectsAmountTampering() {
