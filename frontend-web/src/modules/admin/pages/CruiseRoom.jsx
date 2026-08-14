@@ -153,9 +153,20 @@ export default function CruiseRoom() {
           </p>
         </div>
 
-        <Button variant="primary" onClick={handleOpenCreate}>
-          + Thêm phòng
-        </Button>
+        <div className="d-flex gap-2">
+          {/* QUẢN LÝ LOẠI PHÒNG */}
+          <Button
+            variant="outline-primary"
+            onClick={() => navigate("/admin/room-types")}
+          >
+            Quản lý loại phòng
+          </Button>
+
+          {/* THÊM PHÒNG */}
+          <Button variant="primary" onClick={handleOpenCreate}>
+            + Thêm phòng
+          </Button>
+        </div>
       </div>
 
       {success && (

@@ -23,6 +23,7 @@ import CruiseDeck from "./modules/admin/pages/CruiseDeck";
 import CruiseDeckDetail from "./modules/admin/pages/CruiseDeckDetail";
 import CruiseArea from "./modules/admin/pages/CruiseArea";
 import CruiseRoom from "./modules/admin/pages/CruiseRoom";
+import ManagerRoomType from "./modules/admin/pages/ManagerRoomType";
 
 import ManagerProduct from "./modules/admin/pages/ManagerProduct";
 import ManagerService from "./modules/admin/pages/ManagerService";
@@ -100,7 +101,7 @@ export default function App() {
                       path="decks/:deckId/areas"
                       element={<CruiseArea />}
                     />
-
+                    <Route path="room-types" element={<ManagerRoomType />} />
                     {/* Quản lý phòng của tầng */}
                     <Route
                       path="decks/:deckId/rooms"
