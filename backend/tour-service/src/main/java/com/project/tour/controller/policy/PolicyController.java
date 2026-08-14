@@ -67,10 +67,10 @@ public class PolicyController {
 
     // SOFT DELETE
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deactivate(
+    public ResponseEntity<Void> delete(
             @PathVariable UUID id) {
 
-        policyService.deactivate(id);
+        policyService.delete(id);
 
         return ResponseEntity.noContent().build();
     }

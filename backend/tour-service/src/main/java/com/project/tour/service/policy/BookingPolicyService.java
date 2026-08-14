@@ -122,8 +122,7 @@ public class BookingPolicyService {
                 return BookingPolicyMapper.toResponse(updated);
         }
 
-        // DEACTIVATE
-        public void deactivate(
+        public void delete(
                         UUID policyId,
                         UUID ruleId) {
 
@@ -131,10 +130,7 @@ public class BookingPolicyService {
                                 policyId,
                                 ruleId);
 
-                entity.setStatus(
-                                PolicyStatus.INACTIVE);
-
-                repository.save(entity);
+                repository.delete(entity);
         }
 
         // FIND RULE

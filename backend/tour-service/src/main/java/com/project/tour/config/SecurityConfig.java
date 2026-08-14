@@ -44,6 +44,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/scheduler/**")
                         .hasRole("SCHEDULE")
 
+                        .requestMatchers("/api/convenience/**")
+                        .hasRole("CONVENIENCE")
+
                         .anyRequest()
                         .authenticated())
                 .oauth2ResourceServer(resourceServer -> resourceServer

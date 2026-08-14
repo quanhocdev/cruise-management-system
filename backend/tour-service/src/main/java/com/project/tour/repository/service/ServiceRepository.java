@@ -8,25 +8,21 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface ServiceRepository extends JpaRepository<Service, UUID> {
+public interface ServiceRepository
+                extends JpaRepository<Service, UUID> {
 
-    boolean existsByCruiseArea_IdAndNameIgnoreCase(
-            UUID areaId,
-            String name);
+        boolean existsByNameIgnoreCase(
+                        String name);
 
-    boolean existsByCruiseArea_IdAndNameIgnoreCaseAndIdNot(
-            UUID areaId,
-            String name,
-            UUID excludedServiceId);
+        boolean existsByNameIgnoreCaseAndIdNot(
+                        String name,
+                        UUID excludedServiceId);
 
-    Optional<Service> findByIdAndCruiseArea_Id(
-            UUID id,
-            UUID areaId);
+        Optional<Service> findById(
+                        UUID serviceId);
 
-    List<Service> findAllByCruiseArea_IdOrderByNameAsc(
-            UUID areaId);
+        List<Service> findAllByOrderByNameAsc();
 
-    List<Service> findAllByCruiseArea_IdAndStatusOrderByNameAsc(
-            UUID areaId,
-            ServiceStatus status);
+        List<Service> findAllByStatusOrderByNameAsc(
+                        ServiceStatus status);
 }

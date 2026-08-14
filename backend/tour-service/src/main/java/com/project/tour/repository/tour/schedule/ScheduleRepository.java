@@ -11,23 +11,23 @@ import java.util.UUID;
 
 public interface ScheduleRepository extends JpaRepository<Schedule, UUID> {
 
-    boolean existsByTour_IdAndDayNumber(
-            UUID tourId,
-            Integer dayNumber);
+        boolean existsByTour_IdAndDayNumber(
+                        UUID tourId,
+                        Integer dayNumber);
 
-    boolean existsByTour_IdAndDayNumberAndIdNot(
-            UUID tourId,
-            Integer dayNumber,
-            UUID excludedScheduleId);
+        boolean existsByTour_IdAndDayNumberAndIdNot(
+                        UUID tourId,
+                        Integer dayNumber,
+                        UUID excludedScheduleId);
 
-    Optional<Schedule> findByIdAndTour_Id(
-            UUID id,
-            UUID tourId);
+        Optional<Schedule> findByIdAndTour_Id(
+                        UUID id,
+                        UUID tourId);
 
-    List<Schedule> findAllByTour_IdOrderByDayNumberAsc(
-            UUID tourId);
+        List<Schedule> findAllByTour_IdOrderByDayNumberAsc(
+                        UUID tourId);
 
-    List<Schedule> findAllByTour_IdAndStatusOrderByDayNumberAsc(
-            UUID tourId,
-            ScheduleStatus status);
+        List<Schedule> findAllByTour_IdAndStatusOrderByDayNumberAsc(
+                        UUID tourId,
+                        ScheduleStatus status);
 }

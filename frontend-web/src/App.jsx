@@ -3,7 +3,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import { AuthProvider } from "./context/AuthContext";
-import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 import HomePage from "./modules/guest/pages/HomePage";
 
@@ -13,9 +13,19 @@ import VerifyOtpPage from "./modules/auth/pages/VerifyOtpPage";
 import ActivatePage from "./modules/auth/pages/ActivatePage";
 
 // admin
+import AdminLayout from "./layouts/AdminLayout";
 import AdminDashboard from "./modules/admin/pages/Dashboard";
 import ManagerAccount from "./modules/admin/pages/ManagerAccount";
 import ManagerPort from "./modules/admin/pages/ManagerPort";
+
+import ManagerCruise from "./modules/admin/pages/ManagerCruise";
+import CruiseDeck from "./modules/admin/pages/CruiseDeck";
+import CruiseArea from "./modules/admin/pages/CruiseArea";
+import CruiseRoom from "./modules/admin/pages/CruiseRoom";
+
+import ManagerProduct from "./modules/admin/pages/ManagerProduct";
+import ManagerService from "./modules/admin/pages/ManagerService";
+import ManagerPolicy from "./modules/admin/pages/ManagerPolicy";
 
 import PassengerDashboard from "./modules/passenger/pages/Dashboard";
 import SchedulerDashboard from "./modules/scheduler/pages/Dashboard";
@@ -32,7 +42,6 @@ export default function App() {
         <Routes>
           {/* =====================================================
               ACTIVATION
-              Staff chưa đăng nhập vẫn được truy cập
              ===================================================== */}
           <Route path="/activate" element={<ActivatePage />} />
 
@@ -56,18 +65,48 @@ export default function App() {
           <Route
             path="/admin/*"
             element={
-              <ProtectedRoute allowedRoles={["ADMIN"]}>
+              // <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <AdminLayout>
                 <Routes>
+                  {/* DASHBOARD */}
                   <Route path="dashboard" element={<AdminDashboard />} />
 
+                  {/* ACCOUNT */}
                   <Route path="accounts" element={<ManagerAccount />} />
+
+                  {/* PORT */}
                   <Route path="ports" element={<ManagerPort />} />
+
+                  {/* =================================================
+                      CRUISE
+                     ================================================= */}
+
+                  {/* Quản lý du thuyền */}
+                  <Route path="cruises" element={<ManagerCruise />} />
+
+                  {/* Quản lý tầng của du thuyền */}
+                  <Route
+                    path="cruises/:cruiseId/decks"
+                    element={<CruiseDeck />}
+                  />
+
+                  {/* Quản lý khu vực của tầng */}
+                  <Route path="decks/:deckId/areas" element={<CruiseArea />} />
+
+                  {/* Quản lý phòng của tầng */}
+                  <Route path="decks/:deckId/rooms" element={<CruiseRoom />} />
+
+                  <Route path="products" element={<ManagerProduct />} />
+                  <Route path="services" element={<ManagerService />} />
+                  <Route path="policies" element={<ManagerPolicy />} />
+                  {/* DEFAULT */}
                   <Route
                     path=""
                     element={<Navigate to="dashboard" replace />}
                   />
                 </Routes>
-              </ProtectedRoute>
+              </AdminLayout>
+              // </ProtectedRoute>
             }
           />
 

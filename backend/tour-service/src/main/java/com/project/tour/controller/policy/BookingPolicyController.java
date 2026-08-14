@@ -45,7 +45,7 @@ public class BookingPolicyController {
                                 service.getAll(policyId, activeOnly));
         }
 
-        @PutMapping("/{ruleId}")
+        @PatchMapping("/{ruleId}")
         public ResponseEntity<BookingPolicyResponse> update(
                         @PathVariable UUID policyId,
                         @PathVariable UUID ruleId,
@@ -58,12 +58,12 @@ public class BookingPolicyController {
                                                 request));
         }
 
-        @PatchMapping("/{ruleId}/deactivate")
-        public ResponseEntity<Void> deactivate(
+        @DeleteMapping("/{ruleId}")
+        public ResponseEntity<Void> delete(
                         @PathVariable UUID policyId,
                         @PathVariable UUID ruleId) {
 
-                service.deactivate(
+                service.delete(
                                 policyId,
                                 ruleId);
 

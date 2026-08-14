@@ -7,10 +7,8 @@ import com.project.tour.dto.service.ServiceResponse;
 import com.project.tour.dto.service.UpdateServiceRequest;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.service.ServiceMapper;
-import com.project.tour.model.CruiseArea;
 import com.project.tour.model.Service;
 import com.project.tour.model.enums.ServiceStatus;
-import com.project.tour.repository.cruise.CruiseAreaRepository;
 import com.project.tour.repository.service.ServiceRepository;
 
 import org.springframework.http.HttpStatus;
@@ -23,178 +21,180 @@ import java.util.UUID;
 @Transactional
 public class ServiceService {
 
-    private final ServiceRepository serviceRepository;
-    private final CruiseAreaRepository cruiseAreaRepository;
-    private final FileStorageService fileStorageService;
+        private final ServiceRepository serviceRepository;
+        private final FileStorageService fileStorageService;
 
-    public ServiceService(
-            ServiceRepository serviceRepository,
-            CruiseAreaRepository cruiseAreaRepository,
-            FileStorageService fileStorageService) {
+        public ServiceService(
+                        ServiceRepository serviceRepository,
+                        FileStorageService fileStorageService) {
 
-        this.serviceRepository = serviceRepository;
-        this.cruiseAreaRepository = cruiseAreaRepository;
-        this.fileStorageService = fileStorageService;
-    }
-
-    public ServiceResponse createService(
-            UUID areaId,
-            CreateServiceRequest request) {
-
-        CruiseArea area = findArea(areaId);
-
-        if (serviceRepository
-                .existsByCruiseArea_IdAndNameIgnoreCase(
-                        areaId,
-                        request.getName())) {
-
-            throw new AppException(
-                    "Service name already exists in this area",
-                    HttpStatus.CONFLICT);
+                this.serviceRepository = serviceRepository;
+                this.fileStorageService = fileStorageService;
         }
 
-        Service service = ServiceMapper.toEntity(request);
+        /*
+         * =====================================================
+         * CREATE
+         * =====================================================
+         */
+        public ServiceResponse createService(
+                        CreateServiceRequest request) {
 
-        service.setCruiseArea(area);
+                if (serviceRepository.existsByNameIgnoreCase(
+                                request.getName())) {
 
-        if (request.getImage() != null
-                && !request.getImage().isEmpty()) {
+                        throw new AppException(
+                                        "Service name already exists",
+                                        HttpStatus.CONFLICT);
+                }
 
-            UploadResult uploadResult = fileStorageService.saveMultipart(
-                    request.getImage(),
-                    "services");
+                Service service = ServiceMapper.toEntity(request);
 
-            service.setImageUrl(
-                    uploadResult.getUrl());
+                if (request.getImage() != null
+                                && !request.getImage().isEmpty()) {
 
-            service.setImagePublicId(
-                    uploadResult.getPublicId());
+                        UploadResult uploadResult = fileStorageService.saveMultipart(
+                                        request.getImage(),
+                                        "services");
+
+                        service.setImageUrl(
+                                        uploadResult.getUrl());
+
+                        service.setImagePublicId(
+                                        uploadResult.getPublicId());
+                }
+
+                Service saved = serviceRepository.save(service);
+
+                return ServiceMapper.toResponse(saved);
         }
 
-        Service saved = serviceRepository.save(service);
+        /*
+         * =====================================================
+         * GET BY ID
+         * =====================================================
+         */
+        @Transactional(readOnly = true)
+        public ServiceResponse getServiceById(
+                        UUID serviceId) {
 
-        return ServiceMapper.toResponse(saved);
-    }
-
-    @Transactional(readOnly = true)
-    public ServiceResponse getServiceById(
-            UUID areaId,
-            UUID serviceId) {
-
-        return ServiceMapper.toResponse(
-                findById(areaId, serviceId));
-    }
-
-    @Transactional(readOnly = true)
-    public List<ServiceResponse> getServices(
-            UUID areaId,
-            boolean activeOnly) {
-
-        findArea(areaId);
-
-        List<Service> services;
-
-        if (activeOnly) {
-            services = serviceRepository
-                    .findAllByCruiseArea_IdAndStatusOrderByNameAsc(
-                            areaId,
-                            ServiceStatus.ACTIVE);
-        } else {
-            services = serviceRepository
-                    .findAllByCruiseArea_IdOrderByNameAsc(
-                            areaId);
+                return ServiceMapper.toResponse(
+                                findById(serviceId));
         }
 
-        return services.stream()
-                .map(ServiceMapper::toResponse)
-                .toList();
-    }
+        /*
+         * =====================================================
+         * GET ALL
+         * =====================================================
+         */
+        @Transactional(readOnly = true)
+        public List<ServiceResponse> getServices(
+                        boolean activeOnly) {
 
-    public ServiceResponse updateService(
-            UUID areaId,
-            UUID serviceId,
-            UpdateServiceRequest request) {
+                List<Service> services;
 
-        Service service = findById(areaId, serviceId);
+                if (activeOnly) {
 
-        if (serviceRepository
-                .existsByCruiseArea_IdAndNameIgnoreCaseAndIdNot(
-                        areaId,
-                        request.getName(),
-                        serviceId)) {
+                        services = serviceRepository
+                                        .findAllByStatusOrderByNameAsc(
+                                                        ServiceStatus.ACTIVE);
 
-            throw new AppException(
-                    "Service name already exists in this area",
-                    HttpStatus.CONFLICT);
+                } else {
+
+                        services = serviceRepository
+                                        .findAllByOrderByNameAsc();
+                }
+
+                return services.stream()
+                                .map(ServiceMapper::toResponse)
+                                .toList();
         }
 
-        String oldPublicId = service.getImagePublicId();
+        /*
+         * =====================================================
+         * UPDATE
+         * =====================================================
+         */
+        public ServiceResponse updateService(
+                        UUID serviceId,
+                        UpdateServiceRequest request) {
 
-        ServiceMapper.updateEntity(
-                service,
-                request);
+                Service service = findById(serviceId);
 
-        if (request.getImage() != null
-                && !request.getImage().isEmpty()) {
+                if (serviceRepository
+                                .existsByNameIgnoreCaseAndIdNot(
+                                                request.getName(),
+                                                serviceId)) {
 
-            UploadResult uploadResult = fileStorageService.saveMultipart(
-                    request.getImage(),
-                    "services");
+                        throw new AppException(
+                                        "Service name already exists",
+                                        HttpStatus.CONFLICT);
+                }
 
-            service.setImageUrl(
-                    uploadResult.getUrl());
+                String oldPublicId = service.getImagePublicId();
 
-            service.setImagePublicId(
-                    uploadResult.getPublicId());
+                ServiceMapper.updateEntity(
+                                service,
+                                request);
 
-            if (oldPublicId != null
-                    && !oldPublicId.isBlank()) {
+                if (request.getImage() != null
+                                && !request.getImage().isEmpty()) {
 
-                fileStorageService.delete(
-                        oldPublicId);
-            }
+                        UploadResult uploadResult = fileStorageService.saveMultipart(
+                                        request.getImage(),
+                                        "services");
+
+                        service.setImageUrl(
+                                        uploadResult.getUrl());
+
+                        service.setImagePublicId(
+                                        uploadResult.getPublicId());
+
+                        if (oldPublicId != null
+                                        && !oldPublicId.isBlank()) {
+
+                                fileStorageService.delete(
+                                                oldPublicId);
+                        }
+                }
+
+                Service updated = serviceRepository.save(service);
+
+                return ServiceMapper.toResponse(updated);
         }
 
-        Service updated = serviceRepository.save(service);
+        /*
+         * =====================================================
+         * DELETE
+         * =====================================================
+         */
+        public void deleteService(
+                        UUID serviceId) {
 
-        return ServiceMapper.toResponse(updated);
-    }
+                Service service = findById(serviceId);
 
-    public void deleteService(
-            UUID areaId,
-            UUID serviceId) {
+                if (service.getImagePublicId() != null
+                                && !service.getImagePublicId().isBlank()) {
 
-        Service service = findById(areaId, serviceId);
+                        fileStorageService.delete(
+                                        service.getImagePublicId());
+                }
 
-        if (service.getImagePublicId() != null
-                && !service.getImagePublicId().isBlank()) {
-
-            fileStorageService.delete(
-                    service.getImagePublicId());
+                serviceRepository.delete(service);
         }
 
-        serviceRepository.delete(service);
-    }
+        /*
+         * =====================================================
+         * FIND
+         * =====================================================
+         */
+        private Service findById(
+                        UUID serviceId) {
 
-    private CruiseArea findArea(UUID areaId) {
-
-        return cruiseAreaRepository
-                .findById(areaId)
-                .orElseThrow(() -> new AppException(
-                        "Cruise area not found",
-                        HttpStatus.NOT_FOUND));
-    }
-
-    private Service findById(
-            UUID areaId,
-            UUID serviceId) {
-
-        return serviceRepository
-                .findByIdAndCruiseArea_Id(
-                        serviceId,
-                        areaId)
-                .orElseThrow(() -> new AppException(
-                        "Service not found",
-                        HttpStatus.NOT_FOUND));
-    }
+                return serviceRepository
+                                .findById(serviceId)
+                                .orElseThrow(() -> new AppException(
+                                                "Service not found",
+                                                HttpStatus.NOT_FOUND));
+        }
 }

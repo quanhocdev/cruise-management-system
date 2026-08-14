@@ -7,8 +7,10 @@ import com.project.tour.model.Product;
 
 public class ProductMapper {
 
-    public static Product toEntity(
-            CreateProductRequest request) {
+    private ProductMapper() {
+    }
+
+    public static Product toEntity(CreateProductRequest request) {
 
         Product product = new Product();
 
@@ -31,14 +33,11 @@ public class ProductMapper {
         product.setStatus(request.getStatus());
     }
 
-    public static ProductResponse toResponse(
-            Product product) {
+    public static ProductResponse toResponse(Product product) {
 
         ProductResponse response = new ProductResponse();
 
         response.setId(product.getId());
-        response.setAreaId(product.getCruiseArea().getId());
-        response.setAreaName(product.getCruiseArea().getName());
         response.setName(product.getName());
         response.setDescription(product.getDescription());
         response.setPrice(product.getPrice());

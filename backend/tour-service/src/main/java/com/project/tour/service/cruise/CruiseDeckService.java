@@ -33,16 +33,16 @@ public class CruiseDeckService {
         }
 
         public CruiseDeckResponse createDeck(
+                        UUID cruiseId,
                         CreateCruiseDeckRequest request) {
 
-                Cruise cruise = cruiseRepository.findById(
-                                request.getCruiseId()).orElseThrow(
-                                                () -> new AppException(
-                                                                "Cruise not found",
-                                                                HttpStatus.NOT_FOUND));
+                Cruise cruise = cruiseRepository.findById(cruiseId)
+                                .orElseThrow(() -> new AppException(
+                                                "Cruise not found",
+                                                HttpStatus.NOT_FOUND));
 
                 if (cruiseDeckRepository.existsByCruise_IdAndDeckNumber(
-                                request.getCruiseId(),
+                                cruiseId,
                                 request.getDeckNumber())) {
 
                         throw new AppException(

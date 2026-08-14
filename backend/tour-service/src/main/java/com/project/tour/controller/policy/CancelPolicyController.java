@@ -49,15 +49,20 @@ public class CancelPolicyController {
             @Valid @RequestBody UpdateCancelPolicyRequest request) {
 
         return ResponseEntity.ok(
-                service.update(policyId, ruleId, request));
+                service.update(
+                        policyId,
+                        ruleId,
+                        request));
     }
 
     @DeleteMapping("/{ruleId}")
-    public ResponseEntity<Void> deactivate(
+    public ResponseEntity<Void> delete(
             @PathVariable UUID policyId,
             @PathVariable UUID ruleId) {
 
-        service.deactivate(policyId, ruleId);
+        service.delete(
+                policyId,
+                ruleId);
 
         return ResponseEntity.noContent().build();
     }

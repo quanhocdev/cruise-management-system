@@ -1,0 +1,55 @@
+.cruise-room-page {
+  min-height: 100%;
+}
+
+.cruise-room-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.cruise-room-header > div:first-child {
+  min-width: 0;
+}
+
+.cruise-room-header .btn-link {
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.cruise-room-header .btn-link:hover {
+  text-decoration: underline;
+}
+
+.cruise-room-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #212529;
+}
+
+.cruise-room-description {
+  margin: 8px 0 0;
+  color: #6c757d;
+  font-size: 0.95rem;
+}
+
+.cruise-room-page .alert {
+  border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+  .cruise-room-header {
+    flex-direction: column;
+  }
+
+  .cruise-room-header .btn-primary {
+    width: 100%;
+  }
+
+  .cruise-room-title {
+    font-size: 1.5rem;
+  }
+}

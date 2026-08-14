@@ -7,9 +7,7 @@ import com.project.tour.dto.product.ProductResponse;
 import com.project.tour.dto.product.UpdateProductRequest;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.product.ProductMapper;
-import com.project.tour.model.CruiseArea;
 import com.project.tour.model.Product;
-import com.project.tour.repository.cruise.CruiseAreaRepository;
 import com.project.tour.repository.product.ProductRepository;
 
 import org.springframework.http.HttpStatus;
@@ -23,175 +21,179 @@ import java.util.UUID;
 @Transactional
 public class ProductService {
 
-    private final ProductRepository productRepository;
-    private final CruiseAreaRepository cruiseAreaRepository;
-    private final FileStorageService fileStorageService;
+        private final ProductRepository productRepository;
+        private final FileStorageService fileStorageService;
 
-    public ProductService(
-            ProductRepository productRepository,
-            CruiseAreaRepository cruiseAreaRepository,
-            FileStorageService fileStorageService) {
+        public ProductService(
+                        ProductRepository productRepository,
+                        FileStorageService fileStorageService) {
 
-        this.productRepository = productRepository;
-        this.cruiseAreaRepository = cruiseAreaRepository;
-        this.fileStorageService = fileStorageService;
-    }
-
-    public ProductResponse createProduct(
-            UUID areaId,
-            CreateProductRequest request) {
-
-        CruiseArea area = findArea(areaId);
-
-        if (productRepository.existsByCruiseArea_IdAndNameIgnoreCase(
-                areaId,
-                request.getName())) {
-
-            throw new AppException(
-                    "Product name already exists in this area",
-                    HttpStatus.CONFLICT);
+                this.productRepository = productRepository;
+                this.fileStorageService = fileStorageService;
         }
 
-        Product product = ProductMapper.toEntity(request);
+        /*
+         * =====================================================
+         * CREATE
+         * =====================================================
+         */
+        public ProductResponse createProduct(
+                        CreateProductRequest request) {
 
-        product.setCruiseArea(area);
+                if (productRepository.existsByNameIgnoreCase(
+                                request.getName())) {
 
-        if (request.getImage() != null
-                && !request.getImage().isEmpty()) {
+                        throw new AppException(
+                                        "Product name already exists",
+                                        HttpStatus.CONFLICT);
+                }
 
-            UploadResult uploadResult = fileStorageService.saveMultipart(
-                    request.getImage(),
-                    "products");
+                Product product = ProductMapper.toEntity(request);
 
-            product.setImageUrl(uploadResult.getUrl());
-            product.setImagePublicId(uploadResult.getPublicId());
+                if (request.getImage() != null
+                                && !request.getImage().isEmpty()) {
+
+                        UploadResult uploadResult = fileStorageService.saveMultipart(
+                                        request.getImage(),
+                                        "products");
+
+                        product.setImageUrl(uploadResult.getUrl());
+                        product.setImagePublicId(
+                                        uploadResult.getPublicId());
+                }
+
+                Product savedProduct = productRepository.save(product);
+
+                return ProductMapper.toResponse(savedProduct);
         }
 
-        Product savedProduct = productRepository.save(product);
+        /*
+         * =====================================================
+         * GET BY ID
+         * =====================================================
+         */
+        @Transactional(readOnly = true)
+        public ProductResponse getProductById(
+                        UUID productId) {
 
-        return ProductMapper.toResponse(savedProduct);
-    }
+                Product product = findProduct(productId);
 
-    @Transactional(readOnly = true)
-    public ProductResponse getProductById(
-            UUID areaId,
-            UUID productId) {
-
-        Product product = findProduct(areaId, productId);
-
-        return ProductMapper.toResponse(product);
-    }
-
-    @Transactional(readOnly = true)
-    public List<ProductResponse> getProductsByArea(
-            UUID areaId) {
-
-        findArea(areaId);
-
-        return productRepository
-                .findAllByCruiseArea_IdOrderByNameAsc(areaId)
-                .stream()
-                .map(ProductMapper::toResponse)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public List<ProductResponse> getActiveProductsByArea(
-            UUID areaId) {
-
-        findArea(areaId);
-
-        return productRepository
-                .findAllByCruiseArea_IdAndStatusOrderByNameAsc(
-                        areaId,
-                        com.project.tour.model.enums.ProductStatus.ACTIVE)
-                .stream()
-                .map(ProductMapper::toResponse)
-                .toList();
-    }
-
-    public ProductResponse updateProduct(
-            UUID areaId,
-            UUID productId,
-            UpdateProductRequest request) {
-
-        Product product = findProduct(areaId, productId);
-
-        if (productRepository
-                .existsByCruiseArea_IdAndNameIgnoreCaseAndIdNot(
-                        areaId,
-                        request.getName(),
-                        productId)) {
-
-            throw new AppException(
-                    "Product name already exists in this area",
-                    HttpStatus.CONFLICT);
+                return ProductMapper.toResponse(product);
         }
 
-        String oldPublicId = product.getImagePublicId();
+        /*
+         * =====================================================
+         * GET ALL
+         * =====================================================
+         */
+        @Transactional(readOnly = true)
+        public List<ProductResponse> getProducts() {
 
-        ProductMapper.updateEntity(
-                product,
-                request);
-
-        if (request.getImage() != null
-                && !request.getImage().isEmpty()) {
-
-            UploadResult uploadResult = fileStorageService.saveMultipart(
-                    request.getImage(),
-                    "products");
-
-            product.setImageUrl(uploadResult.getUrl());
-            product.setImagePublicId(
-                    uploadResult.getPublicId());
-
-            if (oldPublicId != null
-                    && !oldPublicId.isBlank()) {
-
-                fileStorageService.delete(oldPublicId);
-            }
+                return productRepository
+                                .findAllByOrderByNameAsc()
+                                .stream()
+                                .map(ProductMapper::toResponse)
+                                .toList();
         }
 
-        Product updatedProduct = productRepository.save(product);
+        /*
+         * =====================================================
+         * GET ACTIVE
+         * =====================================================
+         */
+        @Transactional(readOnly = true)
+        public List<ProductResponse> getActiveProducts() {
 
-        return ProductMapper.toResponse(updatedProduct);
-    }
-
-    public void deleteProduct(
-            UUID areaId,
-            UUID productId) {
-
-        Product product = findProduct(areaId, productId);
-
-        if (product.getImagePublicId() != null
-                && !product.getImagePublicId().isBlank()) {
-
-            fileStorageService.delete(
-                    product.getImagePublicId());
+                return productRepository
+                                .findAllByStatusOrderByNameAsc(
+                                                com.project.tour.model.enums.ProductStatus.ACTIVE)
+                                .stream()
+                                .map(ProductMapper::toResponse)
+                                .toList();
         }
 
-        productRepository.delete(product);
-    }
+        /*
+         * =====================================================
+         * UPDATE
+         * =====================================================
+         */
+        public ProductResponse updateProduct(
+                        UUID productId,
+                        UpdateProductRequest request) {
 
-    private CruiseArea findArea(UUID areaId) {
+                Product product = findProduct(productId);
 
-        return cruiseAreaRepository
-                .findById(areaId)
-                .orElseThrow(() -> new AppException(
-                        "Cruise area not found",
-                        HttpStatus.NOT_FOUND));
-    }
+                if (productRepository
+                                .existsByNameIgnoreCaseAndIdNot(
+                                                request.getName(),
+                                                productId)) {
 
-    private Product findProduct(
-            UUID areaId,
-            UUID productId) {
+                        throw new AppException(
+                                        "Product name already exists",
+                                        HttpStatus.CONFLICT);
+                }
 
-        return productRepository
-                .findByIdAndCruiseArea_Id(
-                        productId,
-                        areaId)
-                .orElseThrow(() -> new AppException(
-                        "Product not found",
-                        HttpStatus.NOT_FOUND));
-    }
+                String oldPublicId = product.getImagePublicId();
+
+                ProductMapper.updateEntity(
+                                product,
+                                request);
+
+                if (request.getImage() != null
+                                && !request.getImage().isEmpty()) {
+
+                        UploadResult uploadResult = fileStorageService.saveMultipart(
+                                        request.getImage(),
+                                        "products");
+
+                        product.setImageUrl(
+                                        uploadResult.getUrl());
+
+                        product.setImagePublicId(
+                                        uploadResult.getPublicId());
+
+                        if (oldPublicId != null
+                                        && !oldPublicId.isBlank()) {
+
+                                fileStorageService.delete(oldPublicId);
+                        }
+                }
+
+                Product updatedProduct = productRepository.save(product);
+
+                return ProductMapper.toResponse(updatedProduct);
+        }
+
+        /*
+         * =====================================================
+         * DELETE
+         * =====================================================
+         */
+        public void deleteProduct(UUID productId) {
+
+                Product product = findProduct(productId);
+
+                if (product.getImagePublicId() != null
+                                && !product.getImagePublicId().isBlank()) {
+
+                        fileStorageService.delete(
+                                        product.getImagePublicId());
+                }
+
+                productRepository.delete(product);
+        }
+
+        /*
+         * =====================================================
+         * FIND
+         * =====================================================
+         */
+        private Product findProduct(UUID productId) {
+
+                return productRepository
+                                .findById(productId)
+                                .orElseThrow(() -> new AppException(
+                                                "Product not found",
+                                                HttpStatus.NOT_FOUND));
+        }
 }

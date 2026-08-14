@@ -1,0 +1,40 @@
+.admin-footer {
+  min-height: 52px;
+  padding: 0 28px;
+  background: #ffffff;
+  border-top: 1px solid #e5e7eb;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #6b7280;
+  font-size: 13px;
+  text-align: center;
+}
+
+/* Tablet */
+@media (max-width: 992px) {
+  .admin-footer {
+    padding: 0 20px;
+    font-size: 13px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .admin-footer {
+    min-height: 48px;
+    padding: 0 16px;
+    font-size: 12px;
+  }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+  .admin-footer {
+    min-height: 44px;
+    padding: 0 12px;
+    font-size: 11px;
+  }
+}

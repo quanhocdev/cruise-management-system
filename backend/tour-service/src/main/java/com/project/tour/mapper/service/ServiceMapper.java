@@ -39,8 +39,6 @@ public class ServiceMapper {
         ServiceResponse response = new ServiceResponse();
 
         response.setId(service.getId());
-        response.setAreaId(service.getCruiseArea().getId());
-        response.setAreaName(service.getCruiseArea().getName());
         response.setName(service.getName());
         response.setDescription(service.getDescription());
         response.setPrice(service.getPrice());

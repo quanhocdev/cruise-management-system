@@ -1,6 +1,7 @@
 package com.project.auth.service;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -9,8 +10,10 @@ import org.springframework.stereotype.Service;
 
 import com.project.auth.dto.ActivateTokenRequest;
 import com.project.auth.dto.CreateStaffRequest;
-import com.project.auth.dto.CreateStaffResponse;
 import com.project.auth.dto.SetPasswordRequest;
+import com.project.auth.dto.StaffResponse;
+import com.project.auth.dto.UpdateStaffRequest;
+import com.project.auth.dto.UpdateStaffStatusRequest;
 import com.project.auth.exception.AppException;
 import com.project.auth.model.Role;
 import com.project.auth.model.Users;
@@ -38,6 +41,7 @@ public class StaffServiceImpl implements StaffService {
                         TokenRedisService tokenRedisService,
                         MailService mailService,
                         PasswordEncoder passwordEncoder) {
+
                 this.userRepository = userRepository;
                 this.roleRepository = roleRepository;
                 this.tokenRedisService = tokenRedisService;
@@ -45,47 +49,33 @@ public class StaffServiceImpl implements StaffService {
                 this.passwordEncoder = passwordEncoder;
         }
 
+        // =====================================================
+        // CREATE STAFF
+        // =====================================================
+
         @Override
-        public CreateStaffResponse createStaff(
+        public StaffResponse createStaff(
                         CreateStaffRequest request) {
 
-                // Kiểm tra username
                 if (userRepository.existsByUsername(request.username())) {
                         throw new AppException(
                                         "Username đã tồn tại",
                                         HttpStatus.BAD_REQUEST);
                 }
 
-                // Kiểm tra email
                 if (userRepository.existsByEmail(request.email())) {
                         throw new AppException(
                                         "Email đã tồn tại",
                                         HttpStatus.BAD_REQUEST);
                 }
 
-                /*
-                 * Lấy Role từ database
-                 */
                 Role role = roleRepository.findById(request.roleId())
                                 .orElseThrow(() -> new AppException(
                                                 "Role không tồn tại",
                                                 HttpStatus.BAD_REQUEST));
 
-                /*
-                 * Không cho Admin tạo Passenger/GUEST bằng API này
-                 */
-                if (role.getName().equals("PASSENGER")
-                                || role.getName().equals("GUEST")) {
+                validateStaffRole(role);
 
-                        throw new AppException(
-                                        "Role không hợp lệ cho tài khoản nhân viên",
-                                        HttpStatus.BAD_REQUEST);
-                }
-
-                /*
-                 * Staff chưa có password.
-                 * Password sẽ được tạo khi staff kích hoạt tài khoản.
-                 */
                 Users user = new Users();
 
                 user.setUsername(request.username());
@@ -99,9 +89,6 @@ public class StaffServiceImpl implements StaffService {
 
                 Users savedUser = userRepository.save(user);
 
-                /*
-                 * Tạo activation token
-                 */
                 String activationToken = generateActivationToken();
 
                 tokenRedisService.saveActivationToken(
@@ -109,15 +96,9 @@ public class StaffServiceImpl implements StaffService {
                                 savedUser.getId(),
                                 ACTIVATION_TOKEN_TTL);
 
-                /*
-                 * Link frontend
-                 */
                 String activationLink = "http://localhost:5173/activate?token="
                                 + activationToken;
 
-                /*
-                 * Gửi email
-                 */
                 try {
 
                         mailService.sendStaffInvitation(
@@ -127,7 +108,6 @@ public class StaffServiceImpl implements StaffService {
 
                 } catch (Exception e) {
 
-                        // Nếu gửi email thất bại thì xóa user + token
                         tokenRedisService.deleteActivationToken(
                                         activationToken);
 
@@ -138,24 +118,140 @@ public class StaffServiceImpl implements StaffService {
                                         HttpStatus.INTERNAL_SERVER_ERROR);
                 }
 
-                return new CreateStaffResponse(
-                                savedUser.getId(),
-                                savedUser.getUsername(),
-                                savedUser.getEmail(),
-                                savedUser.getRole().getName(),
-                                savedUser.getStatus().name(),
-                                "Tạo tài khoản nhân viên thành công. Email kích hoạt đã được gửi.");
+                return toStaffResponse(savedUser);
         }
 
-        private String generateActivationToken() {
+        // =====================================================
+        // GET ALL STAFF
+        // =====================================================
 
-                return UUID.randomUUID()
-                                .toString()
-                                .replace("-", "")
-                                + UUID.randomUUID()
-                                                .toString()
-                                                .replace("-", "");
+        @Override
+        public List<StaffResponse> getAllStaff() {
+
+                return userRepository.findAll()
+                                .stream()
+                                .filter(this::isStaff)
+                                .map(this::toStaffResponse)
+                                .toList();
         }
+
+        // =====================================================
+        // GET STAFF BY ID
+        // =====================================================
+
+        @Override
+        public StaffResponse getStaffById(Long id) {
+
+                Users user = userRepository.findById(id)
+                                .orElseThrow(() -> new AppException(
+                                                "Không tìm thấy tài khoản",
+                                                HttpStatus.NOT_FOUND));
+
+                if (!isStaff(user)) {
+                        throw new AppException(
+                                        "Tài khoản không phải nhân viên",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                return toStaffResponse(user);
+        }
+
+        // =====================================================
+        // UPDATE STAFF
+        // =====================================================
+
+        @Override
+        public StaffResponse updateStaff(
+                        Long id,
+                        UpdateStaffRequest request) {
+
+                Users user = userRepository.findById(id)
+                                .orElseThrow(() -> new AppException(
+                                                "Không tìm thấy tài khoản",
+                                                HttpStatus.NOT_FOUND));
+
+                if (!isStaff(user)) {
+                        throw new AppException(
+                                        "Tài khoản không phải nhân viên",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                if (!user.getUsername().equals(request.username())
+                                && userRepository.existsByUsername(request.username())) {
+
+                        throw new AppException(
+                                        "Username đã tồn tại",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                if (!user.getEmail().equals(request.email())
+                                && userRepository.existsByEmail(request.email())) {
+
+                        throw new AppException(
+                                        "Email đã tồn tại",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                Role role = roleRepository.findById(request.roleId())
+                                .orElseThrow(() -> new AppException(
+                                                "Role không tồn tại",
+                                                HttpStatus.BAD_REQUEST));
+
+                validateStaffRole(role);
+
+                user.setUsername(request.username());
+                user.setEmail(request.email());
+                user.setRole(role);
+
+                Users savedUser = userRepository.save(user);
+
+                return toStaffResponse(savedUser);
+        }
+
+        // =====================================================
+        // UPDATE STAFF STATUS
+        // =====================================================
+
+        @Override
+        public StaffResponse updateStaffStatus(
+                        Long id,
+                        UpdateStaffStatusRequest request) {
+
+                Users user = userRepository.findById(id)
+                                .orElseThrow(() -> new AppException(
+                                                "Không tìm thấy tài khoản",
+                                                HttpStatus.NOT_FOUND));
+
+                if (!isStaff(user)) {
+                        throw new AppException(
+                                        "Tài khoản không phải nhân viên",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                UserStatus newStatus = request.status();
+
+                if (newStatus == UserStatus.INVITED) {
+                        throw new AppException(
+                                        "Không thể chuyển tài khoản về trạng thái INVITED",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                user.setStatus(newStatus);
+
+                if (newStatus == UserStatus.ACTIVE) {
+                        user.setEnabled(true);
+                } else {
+                        user.setEnabled(false);
+                }
+
+                Users savedUser = userRepository.save(user);
+
+                return toStaffResponse(savedUser);
+        }
+
+        // =====================================================
+        // VERIFY ACTIVATION TOKEN
+        // =====================================================
 
         @Override
         public String verifyActivationToken(
@@ -184,11 +280,17 @@ public class StaffServiceImpl implements StaffService {
                 return user.getUsername();
         }
 
+        // =====================================================
+        // SET PASSWORD
+        // =====================================================
+
         @Override
         public void setPassword(
                         SetPasswordRequest request) {
 
-                if (!request.password().equals(request.confirmPassword())) {
+                if (!request.password()
+                                .equals(request.confirmPassword())) {
+
                         throw new AppException(
                                         "Mật khẩu xác nhận không khớp",
                                         HttpStatus.BAD_REQUEST);
@@ -214,18 +316,81 @@ public class StaffServiceImpl implements StaffService {
                                         HttpStatus.BAD_REQUEST);
                 }
 
-                // Hash password
                 user.setPassword(
                                 passwordEncoder.encode(request.password()));
 
-                // Kích hoạt tài khoản
                 user.setStatus(UserStatus.ACTIVE);
                 user.setEnabled(true);
 
                 userRepository.save(user);
 
-                // Token chỉ được sử dụng một lần
                 tokenRedisService.deleteActivationToken(
                                 request.token());
+        }
+
+        // =====================================================
+        // HELPER - CHECK STAFF
+        // =====================================================
+
+        private boolean isStaff(Users user) {
+
+                if (user.getRole() == null) {
+                        return false;
+                }
+
+                String roleName = user.getRole().getName();
+
+                return !roleName.equals("PASSENGER")
+                                && !roleName.equals("GUEST");
+        }
+
+        // =====================================================
+        // HELPER - VALIDATE STAFF ROLE
+        // =====================================================
+
+        private void validateStaffRole(Role role) {
+
+                String roleName = role.getName();
+
+                if (roleName.equals("PASSENGER")
+                                || roleName.equals("GUEST")) {
+
+                        throw new AppException(
+                                        "Role không hợp lệ cho tài khoản nhân viên",
+                                        HttpStatus.BAD_REQUEST);
+                }
+        }
+
+        // =====================================================
+        // MAPPER
+        // =====================================================
+
+        private StaffResponse toStaffResponse(Users user) {
+
+                return new StaffResponse(
+                                user.getId(),
+                                user.getUsername(),
+                                user.getEmail(),
+                                user.getRole().getId(),
+                                user.getRole().getName(),
+                                user.getProvider().name(),
+                                user.getStatus().name(),
+                                user.getEnabled(),
+                                user.getCreatedAt(),
+                                user.getUpdatedAt());
+        }
+
+        // =====================================================
+        // GENERATE ACTIVATION TOKEN
+        // =====================================================
+
+        private String generateActivationToken() {
+
+                return UUID.randomUUID()
+                                .toString()
+                                .replace("-", "")
+                                + UUID.randomUUID()
+                                                .toString()
+                                                .replace("-", "");
         }
 }

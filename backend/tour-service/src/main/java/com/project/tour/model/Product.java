@@ -9,17 +9,13 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "products", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_products_area_name", columnNames = { "cruise_area_id", "name" })
+        @UniqueConstraint(name = "uk_products_name", columnNames = { "name" })
 })
 public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "cruise_area_id", nullable = false)
-    private CruiseArea cruiseArea;
 
     @Column(nullable = false, length = 150)
     private String name;
@@ -52,6 +48,7 @@ public class Product {
     @PrePersist
     protected void onCreate() {
         Instant now = Instant.now();
+
         createdAt = now;
         updatedAt = now;
 
@@ -71,14 +68,6 @@ public class Product {
 
     public void setId(UUID id) {
         this.id = id;
-    }
-
-    public CruiseArea getCruiseArea() {
-        return cruiseArea;
-    }
-
-    public void setCruiseArea(CruiseArea cruiseArea) {
-        this.cruiseArea = cruiseArea;
     }
 
     public String getName() {

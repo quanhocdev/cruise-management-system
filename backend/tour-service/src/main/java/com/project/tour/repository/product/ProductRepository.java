@@ -10,25 +10,18 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface ProductRepository
-        extends JpaRepository<Product, UUID> {
+                extends JpaRepository<Product, UUID> {
 
-    boolean existsByCruiseArea_IdAndNameIgnoreCase(
-            UUID areaId,
-            String name);
+        boolean existsByNameIgnoreCase(String name);
 
-    boolean existsByCruiseArea_IdAndNameIgnoreCaseAndIdNot(
-            UUID areaId,
-            String name,
-            UUID excludedProductId);
+        boolean existsByNameIgnoreCaseAndIdNot(
+                        String name,
+                        UUID excludedProductId);
 
-    Optional<Product> findByIdAndCruiseArea_Id(
-            UUID productId,
-            UUID areaId);
+        Optional<Product> findById(UUID productId);
 
-    List<Product> findAllByCruiseArea_IdOrderByNameAsc(
-            UUID areaId);
+        List<Product> findAllByOrderByNameAsc();
 
-    List<Product> findAllByCruiseArea_IdAndStatusOrderByNameAsc(
-            UUID areaId,
-            ProductStatus status);
+        List<Product> findAllByStatusOrderByNameAsc(
+                        ProductStatus status);
 }
