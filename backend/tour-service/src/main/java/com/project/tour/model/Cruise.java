@@ -1,21 +1,16 @@
 package com.project.tour.model;
 
-import com.project.tour.model.enums.CruiseStatus;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.project.tour.model.enums.cruise.CruiseStatus;
+
 @Entity
-@Table(
-    name = "cruises",
-    uniqueConstraints = {
-        @UniqueConstraint(
-            name = "uk_cruises_code",
-            columnNames = "code"
-        )
-    }
-)
+@Table(name = "cruises", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_cruises_code", columnNames = "code")
+})
 public class Cruise {
 
     @Id
@@ -30,9 +25,6 @@ public class Cruise {
 
     @Column(columnDefinition = "TEXT")
     private String description;
-
-    @Column(nullable = false)
-    private Integer totalDecks;
 
     @Column(nullable = false)
     private Integer maxPassengers;
@@ -100,14 +92,6 @@ public class Cruise {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public Integer getTotalDecks() {
-        return totalDecks;
-    }
-
-    public void setTotalDecks(Integer totalDecks) {
-        this.totalDecks = totalDecks;
     }
 
     public Integer getMaxPassengers() {

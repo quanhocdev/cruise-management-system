@@ -1,0 +1,55 @@
+package com.project.tour.mapper.service;
+
+import com.project.tour.dto.service.CreateServiceRequest;
+import com.project.tour.dto.service.ServiceResponse;
+import com.project.tour.dto.service.UpdateServiceRequest;
+import com.project.tour.model.Service;
+
+public class ServiceMapper {
+
+    public static Service toEntity(
+            CreateServiceRequest request) {
+
+        Service service = new Service();
+
+        service.setName(request.getName());
+        service.setDescription(request.getDescription());
+        service.setPrice(request.getPrice());
+        service.setDurationMinutes(request.getDurationMinutes());
+        service.setMaxPassengers(request.getMaxPassengers());
+
+        return service;
+    }
+
+    public static void updateEntity(
+            Service service,
+            UpdateServiceRequest request) {
+
+        service.setName(request.getName());
+        service.setDescription(request.getDescription());
+        service.setPrice(request.getPrice());
+        service.setDurationMinutes(request.getDurationMinutes());
+        service.setMaxPassengers(request.getMaxPassengers());
+        service.setStatus(request.getStatus());
+    }
+
+    public static ServiceResponse toResponse(
+            Service service) {
+
+        ServiceResponse response = new ServiceResponse();
+
+        response.setId(service.getId());
+        response.setName(service.getName());
+        response.setDescription(service.getDescription());
+        response.setPrice(service.getPrice());
+        response.setDurationMinutes(service.getDurationMinutes());
+        response.setMaxPassengers(service.getMaxPassengers());
+        response.setImageUrl(service.getImageUrl());
+        response.setImagePublicId(service.getImagePublicId());
+        response.setStatus(service.getStatus());
+        response.setCreatedAt(service.getCreatedAt());
+        response.setUpdatedAt(service.getUpdatedAt());
+
+        return response;
+    }
+}

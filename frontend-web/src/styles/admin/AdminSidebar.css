@@ -1,0 +1,245 @@
+.admin-sidebar {
+  width: 260px;
+  height: 100vh;
+
+  background: #0f172a;
+  color: #ffffff;
+
+  display: flex;
+  flex-direction: column;
+
+  transition: width 0.25s ease;
+
+  flex-shrink: 0;
+  z-index: 1000;
+}
+
+.admin-sidebar.collapsed {
+  width: 72px;
+}
+
+/* =========================
+   TOP
+   ========================= */
+
+.admin-sidebar-top {
+  height: 72px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 12px 0 20px;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.admin-sidebar-brand {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  min-width: 0;
+  flex: 1;
+
+  color: #ffffff;
+
+  font-size: 16px;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+.admin-sidebar-brand svg {
+  flex-shrink: 0;
+}
+
+.admin-sidebar-toggle {
+  width: 36px;
+  height: 36px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: transparent;
+  color: #cbd5e1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  flex-shrink: 0;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.admin-sidebar-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.admin-sidebar.collapsed .admin-sidebar-top {
+  padding: 0 18px;
+  justify-content: center;
+}
+
+.admin-sidebar.collapsed .admin-sidebar-brand {
+  display: none;
+}
+
+/* =========================
+   MENU
+   ========================= */
+
+.admin-sidebar-menu {
+  flex: 1;
+
+  padding: 16px 10px;
+
+  overflow-y: auto;
+}
+
+.admin-sidebar-item {
+  height: 46px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 14px;
+
+  padding: 0 12px;
+  margin-bottom: 4px;
+
+  border-radius: 9px;
+
+  color: #cbd5e1;
+
+  text-decoration: none;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  white-space: nowrap;
+  overflow: hidden;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.admin-sidebar-item svg {
+  flex-shrink: 0;
+}
+
+/* Hover */
+
+.admin-sidebar-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+/* Active */
+
+.admin-sidebar-item.active {
+  background: #2563eb;
+  color: #ffffff;
+
+  font-weight: 600;
+}
+
+/* Collapsed */
+
+.admin-sidebar.collapsed .admin-sidebar-item {
+  justify-content: center;
+  padding: 0;
+}
+
+/* =========================
+   SCROLLBAR
+   ========================= */
+
+.admin-sidebar-menu::-webkit-scrollbar {
+  width: 5px;
+}
+
+.admin-sidebar-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-sidebar-menu::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+}
+
+/* =========================
+   TABLET
+   ========================= */
+
+@media (max-width: 992px) {
+  .admin-sidebar {
+    width: 220px;
+  }
+
+  .admin-sidebar.collapsed {
+    width: 68px;
+  }
+
+  .admin-sidebar-item {
+    font-size: 13px;
+    gap: 12px;
+  }
+}
+
+/* =========================
+   MOBILE
+   ========================= */
+
+@media (max-width: 768px) {
+  .admin-sidebar {
+    width: 68px;
+  }
+
+  .admin-sidebar-brand {
+    display: none;
+  }
+
+  .admin-sidebar-top {
+    padding: 0 16px;
+    justify-content: center;
+  }
+
+  .admin-sidebar-item {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .admin-sidebar-item span {
+    display: none;
+  }
+
+  .admin-sidebar-toggle {
+    display: none;
+  }
+}
+
+/* =========================
+   SMALL MOBILE
+   ========================= */
+
+@media (max-width: 480px) {
+  .admin-sidebar {
+    width: 60px;
+  }
+
+  .admin-sidebar-menu {
+    padding: 12px 6px;
+  }
+
+  .admin-sidebar-item {
+    height: 44px;
+  }
+}

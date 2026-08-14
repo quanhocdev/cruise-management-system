@@ -108,19 +108,19 @@ public class SecurityConfig {
                                                 // -------------------------------------------------
                                                 // REST APIs
                                                 // -------------------------------------------------
-                                                .requestMatchers("/api/admin/**")
+                                                .requestMatchers("/admin/**")
                                                 .hasAuthority("SCOPE_ADMIN")
 
-                                                .requestMatchers("/api/shore/**")
+                                                .requestMatchers("/shore/**")
                                                 .hasAuthority("SCOPE_SHORE")
 
-                                                .requestMatchers("/api/onboard/**")
+                                                .requestMatchers("/onboard/**")
                                                 .hasAuthority("SCOPE_ONBOARD")
 
-                                                .requestMatchers("/api/operation/**")
+                                                .requestMatchers("/operation/**")
                                                 .hasAuthority("SCOPE_OPERATION")
 
-                                                .requestMatchers("/api/finance/**")
+                                                .requestMatchers("/finance/**")
                                                 .hasAuthority("SCOPE_FINANCE")
 
                                                 .requestMatchers("/api/passenger/**")

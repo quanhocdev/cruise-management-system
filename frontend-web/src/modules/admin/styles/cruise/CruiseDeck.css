@@ -1,0 +1,55 @@
+.cruise-deck-page {
+  min-height: 100%;
+}
+
+.cruise-deck-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.cruise-deck-header > div:first-child {
+  min-width: 0;
+}
+
+.cruise-deck-header .btn-link {
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.cruise-deck-header .btn-link:hover {
+  text-decoration: underline;
+}
+
+.cruise-deck-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #212529;
+}
+
+.cruise-deck-description {
+  margin: 8px 0 0;
+  color: #6c757d;
+  font-size: 0.95rem;
+}
+
+.cruise-deck-page .alert {
+  border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+  .cruise-deck-header {
+    flex-direction: column;
+  }
+
+  .cruise-deck-header .btn-primary {
+    width: 100%;
+  }
+
+  .cruise-deck-title {
+    font-size: 1.5rem;
+  }
+}

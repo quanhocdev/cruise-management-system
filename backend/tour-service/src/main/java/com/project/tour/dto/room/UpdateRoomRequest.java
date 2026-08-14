@@ -9,18 +9,12 @@ import jakarta.validation.constraints.Size;
 import java.util.UUID;
 
 public record UpdateRoomRequest(
-    @NotBlank(message = "Room code is required")
-    @Size(max = 50, message = "Room code must not exceed 50 characters")
-    @Pattern(
-        regexp = "^[A-Za-z0-9_-]+$",
-        message = "Room code may only contain letters, numbers, hyphens and underscores"
-    )
-    String code,
 
-    @NotNull(message = "Room type id is required")
-    UUID roomTypeId,
+        @NotBlank(message = "Room code is required") @Size(max = 50, message = "Room code must not exceed 50 characters") @Pattern(regexp = "^[A-Za-z0-9_-]+$", message = "Room code may only contain letters, numbers, hyphens and underscores") String code,
 
-    @NotNull(message = "Room status is required")
-    RoomStatus status
+        @NotNull(message = "Room type id is required") UUID roomTypeId,
+
+        @NotNull(message = "Room status is required") RoomStatus status
+
 ) {
 }

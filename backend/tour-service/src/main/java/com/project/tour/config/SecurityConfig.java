@@ -2,6 +2,7 @@ package com.project.tour.config;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -19,186 +20,62 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(
-        org.springframework.security.config.annotation.web.builders.HttpSecurity http,
-        BearerTokenResolver bearerTokenResolver,
-        JwtAuthenticationConverter jwtAuthenticationConverter
-    ) throws Exception {
+            org.springframework.security.config.annotation.web.builders.HttpSecurity http,
+            BearerTokenResolver bearerTokenResolver,
+            JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
 
         return http
-            .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.disable())
 
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-            .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers(HttpMethod.OPTIONS, "/**")
-                .permitAll()
+                .authorizeHttpRequests(authorize -> authorize
 
-                .requestMatchers(
-                    "/actuator/health",
-                    "/actuator/info",
-                    "/internal/**"
-                )
-                .permitAll()
+                        // CORS preflight
+                        .requestMatchers(HttpMethod.OPTIONS, "/**")
+                        .permitAll()
 
-                // Port management
-                .requestMatchers(HttpMethod.POST, "/api/v1/ports")
-                .hasAnyRole("ADMIN", "SCHEDULER")
+                        // Public/internal endpoints
+                        .requestMatchers(
+                                "/actuator/health",
+                                "/actuator/info",
+                                "/internal/**")
+                        .permitAll()
 
-                .requestMatchers(HttpMethod.PUT, "/api/v1/ports/**")
-                .hasAnyRole("ADMIN", "SCHEDULER")
+                        // Admin
+                        .requestMatchers("/api/admin/**")
+                        .hasRole("ADMIN")
 
-                .requestMatchers(HttpMethod.PATCH, "/api/v1/ports/**")
-                .hasAnyRole("ADMIN", "SCHEDULER")
+                        // Scheduler
+                        .requestMatchers("/api/scheduler/**")
+                        .hasRole("SCHEDULE")
 
-                .requestMatchers(HttpMethod.GET, "/api/v1/ports/**")
-                .authenticated()
+                        // Convenience
+                        .requestMatchers("/api/convenience/**")
+                        .hasRole("CONVENIENCE")
 
-                // Cruise management
-                .requestMatchers(HttpMethod.POST, "/api/v1/cruises")
-                .hasRole("ADMIN")
+                        // Everything else
+                        .anyRequest()
+                        .authenticated())
 
-                // Cruise deck management
-                .requestMatchers(
-                    HttpMethod.POST,
-                    "/api/v1/cruises/*/decks"
-                )
-                .hasRole("ADMIN")
+                .oauth2ResourceServer(resourceServer -> resourceServer
+                        .bearerTokenResolver(bearerTokenResolver)
+                        .jwt(jwt -> jwt
+                                .jwtAuthenticationConverter(
+                                        jwtAuthenticationConverter)))
 
-                .requestMatchers(
-                    HttpMethod.PUT,
-                    "/api/v1/cruises/*/decks/**"
-                )
-                .hasRole("ADMIN")
-
-                .requestMatchers(
-                    HttpMethod.PATCH,
-                    "/api/v1/cruises/*/decks/**"
-                )
-                .hasRole("ADMIN")
-
-                .requestMatchers(
-                    HttpMethod.GET,
-                    "/api/v1/cruises/*/decks/**"
-                )
-                .authenticated()
-
-                .requestMatchers(HttpMethod.PUT, "/api/v1/cruises/**")
-                .hasRole("ADMIN")
-
-                .requestMatchers(HttpMethod.PATCH, "/api/v1/cruises/**")
-                .hasRole("ADMIN")
-
-                .requestMatchers(HttpMethod.GET, "/api/v1/cruises/**")
-                .authenticated()
-
-                // Room type management
-                .requestMatchers(HttpMethod.POST, "/api/v1/room-types")
-                .hasRole("ADMIN")
-
-                .requestMatchers(
-                    HttpMethod.PUT,
-                    "/api/v1/room-types/**"
-                )
-                .hasRole("ADMIN")
-
-                .requestMatchers(
-                    HttpMethod.DELETE,
-                    "/api/v1/room-types/**"
-                )
-                .hasRole("ADMIN")
-
-                .requestMatchers(HttpMethod.GET, "/api/v1/room-types/**")
-                .authenticated()
-
-                // Room management
-                .requestMatchers(HttpMethod.POST, "/api/v1/decks/*/rooms")
-                .hasRole("ADMIN")
-
-                .requestMatchers(HttpMethod.PUT, "/api/v1/decks/*/rooms/**")
-                .hasRole("ADMIN")
-
-                .requestMatchers(HttpMethod.PATCH, "/api/v1/decks/*/rooms/**")
-                .hasRole("ADMIN")
-
-                .requestMatchers(HttpMethod.GET, "/api/v1/decks/*/rooms/**")
-                .authenticated()
-
-                // Cruise area management
-                .requestMatchers(HttpMethod.POST, "/api/v1/decks/*/areas")
-                .hasRole("ADMIN")
-
-                .requestMatchers(HttpMethod.PUT, "/api/v1/decks/*/areas/**")
-                .hasRole("ADMIN")
-
-                .requestMatchers(HttpMethod.PATCH, "/api/v1/decks/*/areas/**")
-                .hasRole("ADMIN")
-
-                .requestMatchers(HttpMethod.GET, "/api/v1/decks/*/areas/**")
-                .authenticated()
-
-                // Policy and policy rule management
-                .requestMatchers(HttpMethod.POST, "/api/v1/policies/**")
-                .hasRole("ADMIN")
-
-                .requestMatchers(HttpMethod.PUT, "/api/v1/policies/**")
-                .hasRole("ADMIN")
-
-                .requestMatchers(HttpMethod.PATCH, "/api/v1/policies/**")
-                .hasRole("ADMIN")
-
-                .requestMatchers(HttpMethod.GET, "/api/v1/policies/**")
-                .authenticated()
-
-                // Tour package management
-                .requestMatchers(HttpMethod.POST, "/api/v1/packages")
-                .hasAnyRole("ADMIN", "SCHEDULER")
-
-                .requestMatchers(HttpMethod.PUT, "/api/v1/packages/**")
-                .hasAnyRole("ADMIN", "SCHEDULER")
-
-                .requestMatchers(HttpMethod.PATCH, "/api/v1/packages/**")
-                .hasAnyRole("ADMIN", "SCHEDULER")
-
-                .requestMatchers(HttpMethod.GET, "/api/v1/packages/**")
-                .authenticated()
-
-                // Schedule, itinerary day and port call management
-                .requestMatchers(HttpMethod.POST, "/api/v1/schedules/**")
-                .hasAnyRole("ADMIN", "SCHEDULER")
-
-                .requestMatchers(HttpMethod.PUT, "/api/v1/schedules/**")
-                .hasAnyRole("ADMIN", "SCHEDULER")
-
-                .requestMatchers(HttpMethod.PATCH, "/api/v1/schedules/**")
-                .hasAnyRole("ADMIN", "SCHEDULER")
-
-                .requestMatchers(HttpMethod.DELETE, "/api/v1/schedules/**")
-                .hasAnyRole("ADMIN", "SCHEDULER")
-
-                .requestMatchers(HttpMethod.GET, "/api/v1/schedules/**")
-                .authenticated()
-
-                .anyRequest()
-                .authenticated()
-            )
-            .oauth2ResourceServer(resourceServer -> resourceServer
-                .bearerTokenResolver(bearerTokenResolver)
-                .jwt(jwt -> jwt
-                    .jwtAuthenticationConverter(jwtAuthenticationConverter)
-                )
-            )
-
-            .build();
+                .build();
     }
 
     @Bean
     public BearerTokenResolver bearerTokenResolver() {
+
         DefaultBearerTokenResolver headerResolver =
-            new DefaultBearerTokenResolver();
+                new DefaultBearerTokenResolver();
 
         return request -> {
+
             String cookieToken = findAccessTokenCookie(request);
 
             if (cookieToken != null) {
@@ -211,23 +88,25 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
+
         JwtGrantedAuthoritiesConverter authoritiesConverter =
-            new JwtGrantedAuthoritiesConverter();
+                new JwtGrantedAuthoritiesConverter();
 
         authoritiesConverter.setAuthoritiesClaimName("scope");
         authoritiesConverter.setAuthorityPrefix("ROLE_");
 
         JwtAuthenticationConverter authenticationConverter =
-            new JwtAuthenticationConverter();
+                new JwtAuthenticationConverter();
 
         authenticationConverter.setJwtGrantedAuthoritiesConverter(
-            authoritiesConverter
-        );
+                authoritiesConverter);
 
         return authenticationConverter;
     }
 
-    private String findAccessTokenCookie(HttpServletRequest request) {
+    private String findAccessTokenCookie(
+            HttpServletRequest request) {
+
         Cookie[] cookies = request.getCookies();
 
         if (cookies == null) {
@@ -235,10 +114,11 @@ public class SecurityConfig {
         }
 
         return Arrays.stream(cookies)
-            .filter(cookie -> "accessToken".equals(cookie.getName()))
-            .map(Cookie::getValue)
-            .filter(value -> !value.isBlank())
-            .findFirst()
-            .orElse(null);
+                .filter(cookie ->
+                        "accessToken".equals(cookie.getName()))
+                .map(Cookie::getValue)
+                .filter(value -> !value.isBlank())
+                .findFirst()
+                .orElse(null);
     }
 }

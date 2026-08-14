@@ -1,0 +1,41 @@
+.manager-cruise-page {
+  min-height: 100%;
+}
+
+.manager-cruise-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.manager-cruise-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #212529;
+}
+
+.manager-cruise-description {
+  margin: 8px 0 0;
+  color: #6c757d;
+  font-size: 0.95rem;
+}
+
+.manager-cruise-page .alert {
+  border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+  .manager-cruise-header {
+    flex-direction: column;
+  }
+
+  .manager-cruise-header .btn {
+    width: 100%;
+  }
+
+  .manager-cruise-title {
+    font-size: 1.5rem;
+  }
+}

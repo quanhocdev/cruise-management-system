@@ -101,6 +101,8 @@ services:
 
     depends_on:
       - auth-service
+      - payment-service
+      - tour-service
 
   # ==========================
   # Auth Service
@@ -149,21 +151,30 @@ services:
 
   tour-service:
     build:
-      context: ./backend/tour-service
-      dockerfile: Dockerfile.dev
+      context: ./backend
+      dockerfile: tour-service/Dockerfile.dev
+
     container_name: tour-service
     restart: always
+
     ports:
       - "8088:8088"
+
+    working_dir: /app/tour-service
+
     volumes:
-      - ./backend/tour-service:/app
-      - /app/target
+      - ./backend/tour-service/src:/app/tour-service/src
+      - ./backend/common/src:/app/common/src
+      - /app/tour-service/target
+
     env_file:
       - .env
+
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-cruise_db}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+
     depends_on:
       postgres:
         condition: service_healthy
@@ -176,24 +187,19 @@ services:
     build:
       context: ./backend/booking-service
       dockerfile: Dockerfile.dev
+
     container_name: booking-service
     restart: always
+
     ports:
       - "8082:8082"
+
     volumes:
       - ./backend/booking-service:/app
       - /app/target
+
     env_file:
       - .env
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-cruise_db}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-    depends_on:
-      postgres:
-        condition: service_healthy
-      tour-service:
-        condition: service_started
 
   # ==========================
   # Payment Service
@@ -206,17 +212,22 @@ services:
 
     container_name: payment-service
     restart: always
+
     ports:
       - "8085:8085"
+
     volumes:
       - ./backend/payment-service:/app
       - /app/target
+
     env_file:
       - .env
+
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-cruise_db}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+
     depends_on:
       postgres:
         condition: service_healthy

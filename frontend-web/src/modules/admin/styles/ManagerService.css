@@ -1,0 +1,257 @@
+/* =====================================================
+   PAGE
+   ===================================================== */
+
+.manager-service-page {
+  min-height: calc(100vh - 80px);
+}
+
+/* =====================================================
+   HEADER
+   ===================================================== */
+
+.manager-service-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.manager-service-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #212529;
+}
+
+.manager-service-description {
+  margin: 6px 0 0;
+  color: #6c757d;
+  font-size: 15px;
+}
+
+/* =====================================================
+   TABLE WRAPPER
+   ===================================================== */
+
+.service-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  background: #ffffff;
+  border-radius: 10px;
+}
+
+/* =====================================================
+   TABLE
+   ===================================================== */
+
+.service-table {
+  margin-bottom: 0;
+  min-width: 1100px;
+}
+
+.service-table thead th {
+  white-space: nowrap;
+  vertical-align: middle;
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #343a40;
+}
+
+.service-table tbody td {
+  vertical-align: middle;
+}
+
+/* =====================================================
+   IMAGE
+   ===================================================== */
+
+.service-table-image-column {
+  width: 100px;
+  text-align: center;
+}
+
+.service-table-image {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+.service-table-no-image {
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  background-color: #f8f9fa;
+
+  font-size: 28px;
+}
+
+/* =====================================================
+   SERVICE NAME
+   ===================================================== */
+
+.service-table-service-name {
+  min-width: 160px;
+  font-weight: 600;
+  color: #212529;
+}
+
+/* =====================================================
+   DESCRIPTION
+   ===================================================== */
+
+.service-table-description {
+  max-width: 280px;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+
+  overflow: hidden;
+
+  color: #6c757d;
+  line-height: 1.5;
+}
+
+/* =====================================================
+   STATUS
+   ===================================================== */
+
+.service-status-badge {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 5px 10px;
+  border-radius: 999px;
+
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.service-status-active {
+  color: #198754;
+  background-color: #d1e7dd;
+}
+
+.service-status-inactive {
+  color: #6c757d;
+  background-color: #e9ecef;
+}
+
+/* =====================================================
+   ACTION
+   ===================================================== */
+
+.service-table-action-column {
+  min-width: 140px;
+  text-align: center;
+}
+
+.service-table-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+/* =====================================================
+   LOADING
+   ===================================================== */
+
+.service-table-loading {
+  min-height: 220px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+
+  color: #6c757d;
+}
+
+/* =====================================================
+   EMPTY
+   ===================================================== */
+
+.service-table-empty {
+  min-height: 300px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 40px;
+  text-align: center;
+
+  background-color: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+}
+
+.service-table-empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.service-table-empty h5 {
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.service-table-empty p {
+  margin: 0;
+  color: #6c757d;
+}
+
+/* =====================================================
+   FORM MODAL
+   ===================================================== */
+
+.service-form-current-image {
+  margin-top: 12px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.service-form-image-preview {
+  width: 100px;
+  height: 100px;
+
+  object-fit: cover;
+
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+
+@media (max-width: 768px) {
+  .manager-service-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .manager-service-title {
+    font-size: 24px;
+  }
+
+  .manager-service-header > .btn {
+    width: 100%;
+  }
+}
