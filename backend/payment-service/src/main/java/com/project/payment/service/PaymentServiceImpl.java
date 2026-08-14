@@ -1,6 +1,8 @@
 package com.project.payment.service;
 
 import com.project.payment.dto.*;
+import com.project.payment.client.BookingClient;
+import com.project.payment.client.BookingPaymentContext;
 import com.project.payment.exception.PaymentException;
 import com.project.payment.mapper.PaymentMapper;
 import com.project.payment.model.Payment;
@@ -20,11 +22,14 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentMapper mapper;
     private final Map<PaymentMethod, PaymentProvider> providers;
     private final long timeoutMinutes;
+    private final BookingClient bookingClient;
 
     public PaymentServiceImpl(PaymentRepository repository, PaymentMapper mapper,
                               List<PaymentProvider> paymentProviders,
+                              BookingClient bookingClient,
                               @Value("${vnpay.payment-timeout-minutes:15}") long timeoutMinutes) {
-        this.repository = repository; this.mapper = mapper; this.timeoutMinutes = timeoutMinutes;
+        this.repository = repository; this.mapper = mapper; this.bookingClient = bookingClient;
+        this.timeoutMinutes = timeoutMinutes;
         providers = new EnumMap<>(PaymentMethod.class);
         paymentProviders.forEach(provider -> providers.put(provider.getPaymentMethod(), provider));
     }
@@ -33,8 +38,13 @@ public class PaymentServiceImpl implements PaymentService {
     public PaymentResponse createPayment(CreatePaymentRequest request, Long payerId, String clientIp) {
         if (request.getMethod() != PaymentMethod.VNPAY)
             throw new PaymentException("Payment method is not available yet: " + request.getMethod());
+        if (request.getReferenceType() != PaymentReferenceType.BOOKING)
+            throw new PaymentException("Payment reference type is not available yet: " + request.getReferenceType());
+        BookingPaymentContext booking = bookingClient.getPaymentContext(request.getReferenceId());
+        validateBooking(request, payerId, booking);
         Instant now = Instant.now();
         Payment payment = mapper.toEntity(request);
+        payment.setAmount(booking.totalAmount());
         payment.setPayerId(payerId);
         payment.setStatus(PaymentStatus.PENDING); payment.setCreatedAt(now); payment.setUpdatedAt(now);
         payment.setExpiresAt(now.plus(timeoutMinutes, ChronoUnit.MINUTES));
@@ -76,7 +86,8 @@ public class PaymentServiceImpl implements PaymentService {
         catch (PaymentException ex) { return new VnPayIpnResponse("04", "Invalid amount"); }
         if (payment.getStatus() == PaymentStatus.SUCCESS)
             return new VnPayIpnResponse("02", "Order already confirmed");
-        applyResult(payment, params);
+        try { applyResult(payment, params); }
+        catch (PaymentException ex) { return new VnPayIpnResponse("99", "Booking confirmation failed"); }
         return new VnPayIpnResponse("00", "Confirm success");
     }
 
@@ -89,7 +100,10 @@ public class PaymentServiceImpl implements PaymentService {
             payment.setTransactionCode(provider().getTransactionCode(params));
             payment.setResponseCode(params.get("vnp_ResponseCode"));
             payment.setUpdatedAt(Instant.now());
-            return repository.save(payment);
+            Payment saved = repository.save(payment);
+            if (success && saved.getReferenceType() == PaymentReferenceType.BOOKING)
+                bookingClient.confirmPayment(saved.getReferenceId(), saved.getId());
+            return saved;
         }
         return payment;
     }
@@ -113,6 +127,16 @@ public class PaymentServiceImpl implements PaymentService {
 
     private Payment find(Long id) {
         return repository.findById(id).orElseThrow(() -> new PaymentException("Payment not found: " + id));
+    }
+    private void validateBooking(CreatePaymentRequest request, Long payerId, BookingPaymentContext booking) {
+        if (!request.getReferenceId().equals(booking.bookingId()))
+            throw new PaymentException("Booking reference does not match");
+        if (!payerId.equals(booking.userId()))
+            throw new PaymentException("You cannot pay for this booking");
+        if (!"PENDING_PAYMENT".equals(booking.status()))
+            throw new PaymentException("Booking is not payable");
+        if (request.getAmount().compareTo(booking.totalAmount()) != 0)
+            throw new PaymentException("Payment amount does not match booking total");
     }
     private PaymentProvider provider() {
         PaymentProvider provider = providers.get(PaymentMethod.VNPAY);

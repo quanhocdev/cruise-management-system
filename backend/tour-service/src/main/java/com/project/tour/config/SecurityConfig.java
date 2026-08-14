@@ -2,6 +2,7 @@ package com.project.tour.config;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -30,38 +31,51 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(authorize -> authorize
+
+                        // CORS preflight
                         .requestMatchers(HttpMethod.OPTIONS, "/**")
                         .permitAll()
 
+                        // Public/internal endpoints
                         .requestMatchers(
                                 "/actuator/health",
-                                "/actuator/info")
+                                "/actuator/info",
+                                "/internal/**")
                         .permitAll()
 
+                        // Admin
                         .requestMatchers("/api/admin/**")
                         .hasRole("ADMIN")
 
+                        // Scheduler
                         .requestMatchers("/api/scheduler/**")
                         .hasRole("SCHEDULE")
 
+                        // Convenience
                         .requestMatchers("/api/convenience/**")
                         .hasRole("CONVENIENCE")
 
+                        // Everything else
                         .anyRequest()
                         .authenticated())
+
                 .oauth2ResourceServer(resourceServer -> resourceServer
                         .bearerTokenResolver(bearerTokenResolver)
                         .jwt(jwt -> jwt
-                                .jwtAuthenticationConverter(jwtAuthenticationConverter)))
+                                .jwtAuthenticationConverter(
+                                        jwtAuthenticationConverter)))
 
                 .build();
     }
 
     @Bean
     public BearerTokenResolver bearerTokenResolver() {
-        DefaultBearerTokenResolver headerResolver = new DefaultBearerTokenResolver();
+
+        DefaultBearerTokenResolver headerResolver =
+                new DefaultBearerTokenResolver();
 
         return request -> {
+
             String cookieToken = findAccessTokenCookie(request);
 
             if (cookieToken != null) {
@@ -74,12 +88,15 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
+
+        JwtGrantedAuthoritiesConverter authoritiesConverter =
+                new JwtGrantedAuthoritiesConverter();
 
         authoritiesConverter.setAuthoritiesClaimName("scope");
         authoritiesConverter.setAuthorityPrefix("ROLE_");
 
-        JwtAuthenticationConverter authenticationConverter = new JwtAuthenticationConverter();
+        JwtAuthenticationConverter authenticationConverter =
+                new JwtAuthenticationConverter();
 
         authenticationConverter.setJwtGrantedAuthoritiesConverter(
                 authoritiesConverter);
@@ -87,7 +104,9 @@ public class SecurityConfig {
         return authenticationConverter;
     }
 
-    private String findAccessTokenCookie(HttpServletRequest request) {
+    private String findAccessTokenCookie(
+            HttpServletRequest request) {
+
         Cookie[] cookies = request.getCookies();
 
         if (cookies == null) {
@@ -95,7 +114,8 @@ public class SecurityConfig {
         }
 
         return Arrays.stream(cookies)
-                .filter(cookie -> "accessToken".equals(cookie.getName()))
+                .filter(cookie ->
+                        "accessToken".equals(cookie.getName()))
                 .map(Cookie::getValue)
                 .filter(value -> !value.isBlank())
                 .findFirst()

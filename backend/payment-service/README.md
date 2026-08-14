@@ -60,9 +60,17 @@ Authorization: Bearer <access-token>
 ```
 
 Open the returned `paymentUrl` in a browser and use VNPay sandbox test payment
-details supplied by VNPay. The amount is VND and is entirely simulated.
+details supplied by VNPay. The amount is whole VND (decimal values are
+rejected) and is entirely simulated.
 
-## 5. Run tests
+## 5. Booking integration boundary
+
+The booking service currently has no booking API. Until it is implemented, the
+caller supplies `referenceId` and `amount`. Before production, payment creation
+must resolve the booking server-side and verify its owner, payable status, and
+total amount instead of trusting those request fields.
+
+## 6. Run tests
 
 ```powershell
 cd backend/payment-service

@@ -53,7 +53,7 @@ public class VnPayPaymentProvider implements PaymentProvider {
         long amount = payment.getAmount()
                 .multiply(
                         BigDecimal.valueOf(100))
-                .longValue();
+                .longValueExact();
 
         Map<String, String> params = new TreeMap<>();
 

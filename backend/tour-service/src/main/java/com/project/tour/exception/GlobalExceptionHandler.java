@@ -11,6 +11,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -55,9 +56,11 @@ public class GlobalExceptionHandler {
             MethodArgumentNotValidException exception,
             HttpServletRequest request) {
 
-        Map<String, String> validationErrors = new LinkedHashMap<>();
+        Map<String, String> validationErrors =
+                new LinkedHashMap<>();
 
-        for (FieldError fieldError : exception.getBindingResult().getFieldErrors()) {
+        for (FieldError fieldError :
+                exception.getBindingResult().getFieldErrors()) {
 
             validationErrors.put(
                     fieldError.getField(),
@@ -68,7 +71,8 @@ public class GlobalExceptionHandler {
 
         response.setTimestamp(LocalDateTime.now());
         response.setStatus(HttpStatus.BAD_REQUEST.value());
-        response.setError(HttpStatus.BAD_REQUEST.getReasonPhrase());
+        response.setError(
+                HttpStatus.BAD_REQUEST.getReasonPhrase());
         response.setMessage("Validation failed");
         response.setPath(request.getRequestURI());
         response.setValidationErrors(validationErrors);
@@ -84,15 +88,17 @@ public class GlobalExceptionHandler {
      * =====================================================
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ApiErrorResponse> handleHttpMessageNotReadableException(
-            HttpMessageNotReadableException exception,
-            HttpServletRequest request) {
+    public ResponseEntity<ApiErrorResponse>
+            handleHttpMessageNotReadableException(
+                    HttpMessageNotReadableException exception,
+                    HttpServletRequest request) {
 
         ApiErrorResponse response = new ApiErrorResponse();
 
         response.setTimestamp(LocalDateTime.now());
         response.setStatus(HttpStatus.BAD_REQUEST.value());
-        response.setError(HttpStatus.BAD_REQUEST.getReasonPhrase());
+        response.setError(
+                HttpStatus.BAD_REQUEST.getReasonPhrase());
         response.setMessage("Invalid request body");
         response.setPath(request.getRequestURI());
         response.setValidationErrors(null);
@@ -100,6 +106,29 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .badRequest()
                 .body(response);
+    }
+
+    /*
+     * =====================================================
+     * RESPONSE STATUS EXCEPTION
+     * =====================================================
+     */
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ApiErrorResponse> handleResponseStatus(
+            ResponseStatusException exception,
+            HttpServletRequest request) {
+
+        HttpStatus status =
+                HttpStatus.valueOf(
+                        exception.getStatusCode().value());
+
+        return ResponseEntity
+                .status(status)
+                .body(buildResponse(
+                        status,
+                        exception.getReason(),
+                        request.getRequestURI(),
+                        null));
     }
 
     /*
@@ -128,5 +157,23 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(response);
+    }
+
+    private ApiErrorResponse buildResponse(
+            HttpStatus status,
+            String message,
+            String path,
+            Map<String, String> validationErrors) {
+
+        ApiErrorResponse response = new ApiErrorResponse();
+
+        response.setTimestamp(LocalDateTime.now());
+        response.setStatus(status.value());
+        response.setError(status.getReasonPhrase());
+        response.setMessage(message);
+        response.setPath(path);
+        response.setValidationErrors(validationErrors);
+
+        return response;
     }
 }
