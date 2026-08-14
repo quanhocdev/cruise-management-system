@@ -46,8 +46,9 @@ class BookingControllerSecurityTests {
             .header("X-Internal-Api-Key", "test-internal-key")).andExpect(status().isOk());
     }
     private String body() {
-        return "{\"scheduleId\":\"11111111-1111-1111-1111-111111111111\","
-            + "\"roomId\":\"22222222-2222-2222-2222-222222222222\","
-            + "\"guestCount\":2,\"totalAmount\":1000000}";
+        return "{\"voyageId\":\"11111111-1111-1111-1111-111111111111\","
+            + "\"primaryContactName\":\"Nguyen Van A\",\"primaryContactPhone\":\"0900000000\","
+            + "\"totalAmount\":1000000,\"passengers\":[{\"fullName\":\"Nguyen Van A\","
+            + "\"dateOfBirth\":\"1990-01-01\",\"gender\":\"MALE\"}]}";
     }
 }
