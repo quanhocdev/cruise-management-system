@@ -24,19 +24,26 @@ public class RoomController {
                 this.roomService = roomService;
         }
 
+        // =====================================================
+        // CREATE ROOMS
+        // =====================================================
+
         @PostMapping
-        public ResponseEntity<RoomResponse> createRoom(
+        public ResponseEntity<List<RoomResponse>> createRooms(
                         @PathVariable UUID deckId,
                         @Valid @RequestBody CreateRoomRequest request) {
 
-                RoomResponse response = roomService.createRoom(
-                                deckId,
-                                request);
-
                 return ResponseEntity
                                 .status(HttpStatus.CREATED)
-                                .body(response);
+                                .body(
+                                                roomService.createRooms(
+                                                                deckId,
+                                                                request));
         }
+
+        // =====================================================
+        // GET ROOMS
+        // =====================================================
 
         @GetMapping
         public ResponseEntity<List<RoomResponse>> getRooms(
@@ -50,6 +57,10 @@ public class RoomController {
                 return ResponseEntity.ok(response);
         }
 
+        // =====================================================
+        // GET ROOM BY ID
+        // =====================================================
+
         @GetMapping("/{roomId}")
         public ResponseEntity<RoomResponse> getRoomById(
                         @PathVariable UUID deckId,
@@ -60,6 +71,10 @@ public class RoomController {
                                                 deckId,
                                                 roomId));
         }
+
+        // =====================================================
+        // UPDATE ROOM
+        // =====================================================
 
         @PatchMapping("/{roomId}")
         public ResponseEntity<RoomResponse> updateRoom(
@@ -73,6 +88,10 @@ public class RoomController {
                                                 roomId,
                                                 request));
         }
+
+        // =====================================================
+        // DELETE ROOM
+        // =====================================================
 
         @DeleteMapping("/{roomId}")
         public ResponseEntity<Void> deleteRoom(
