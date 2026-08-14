@@ -8,16 +8,17 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "bookings", indexes = {
-    @Index(name = "idx_bookings_user", columnList = "user_id"),
-    @Index(name = "idx_bookings_schedule", columnList = "schedule_id")
+    @Index(name = "idx_bookings_creator", columnList = "created_by_user_id"),
+    @Index(name = "idx_bookings_voyage", columnList = "voyage_id")
 })
 public class Booking {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "user_id", nullable = false) private Long userId;
-    @Column(name = "schedule_id", nullable = false) private UUID scheduleId;
-    @Column(name = "room_id", nullable = false) private UUID roomId;
-    @Column(name = "guest_count", nullable = false) private Integer guestCount;
+    @Column(name = "created_by_user_id") private Long createdByUserId;
+    @Column(name = "voyage_id", nullable = false) private UUID voyageId;
+    @Column(name = "booking_code", unique = true, length = 30) private String bookingCode;
+    @Column(name = "primary_contact_name", nullable = false, length = 150) private String primaryContactName;
+    @Column(name = "primary_contact_phone", nullable = false, length = 30) private String primaryContactPhone;
     @Column(name = "total_amount", nullable = false, precision = 19, scale = 2) private BigDecimal totalAmount;
     @Enumerated(EnumType.STRING) @Column(nullable = false, length = 30) private BookingStatus status;
     @Column(name = "payment_id") private Long paymentId;
@@ -26,14 +27,16 @@ public class Booking {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
-    public UUID getScheduleId() { return scheduleId; }
-    public void setScheduleId(UUID scheduleId) { this.scheduleId = scheduleId; }
-    public UUID getRoomId() { return roomId; }
-    public void setRoomId(UUID roomId) { this.roomId = roomId; }
-    public Integer getGuestCount() { return guestCount; }
-    public void setGuestCount(Integer guestCount) { this.guestCount = guestCount; }
+    public Long getCreatedByUserId() { return createdByUserId; }
+    public void setCreatedByUserId(Long value) { this.createdByUserId = value; }
+    public UUID getVoyageId() { return voyageId; }
+    public void setVoyageId(UUID value) { this.voyageId = value; }
+    public String getBookingCode() { return bookingCode; }
+    public void setBookingCode(String value) { this.bookingCode = value; }
+    public String getPrimaryContactName() { return primaryContactName; }
+    public void setPrimaryContactName(String value) { this.primaryContactName = value; }
+    public String getPrimaryContactPhone() { return primaryContactPhone; }
+    public void setPrimaryContactPhone(String value) { this.primaryContactPhone = value; }
     public BigDecimal getTotalAmount() { return totalAmount; }
     public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
     public BookingStatus getStatus() { return status; }
