@@ -47,7 +47,7 @@ public class BookingServiceImpl implements BookingService {
             passenger = passengerRepository.save(passenger);
             PassengerVoyage link = new PassengerVoyage(); link.setPassenger(passenger); link.setBooking(saved);
             link.setVoyageId(saved.getVoyageId()); link.setCabinId(item.cabinId());
-            link.setPassengerStatus(PassengerStatus.REGISTERED); link.setEmbarkationStatus(EmbarkationStatus.NOT_CHECKED_IN);
+            link.setPassengerStatus(PassengerStatus.RESERVED); link.setEmbarkationStatus(EmbarkationStatus.NOT_CHECKED_IN);
             passengerVoyageRepository.save(link);
         }
         return toResponse(saved);
@@ -97,6 +97,9 @@ public class BookingServiceImpl implements BookingService {
             throw new BookingException(HttpStatus.CONFLICT, "Booking is not payable");
         booking.setStatus(BookingStatus.CONFIRMED); booking.setPaymentId(paymentId);
         booking.setBookingCode(generateBookingCode(booking.getId())); booking.setUpdatedAt(Instant.now());
+        passengerVoyageRepository.findAllByBooking_IdOrderByIdAsc(id).forEach(link -> {
+            link.setPassengerStatus(PassengerStatus.REGISTERED); passengerVoyageRepository.save(link);
+        });
         return toResponse(repository.save(booking));
     }
 
@@ -130,8 +133,8 @@ public class BookingServiceImpl implements BookingService {
             throw new BookingException(HttpStatus.CONFLICT, "Voyage is not open for booking");
         if (!voyage.startDate().isAfter(java.time.LocalDate.now()))
             throw new BookingException(HttpStatus.CONFLICT, "Voyage registration has closed");
-        long occupied = passengerVoyageRepository.countByVoyageIdAndPassengerStatus(
-            request.voyageId(), PassengerStatus.REGISTERED);
+        long occupied = passengerVoyageRepository.countByVoyageIdAndPassengerStatusIn(
+            request.voyageId(), List.of(PassengerStatus.RESERVED, PassengerStatus.REGISTERED));
         if (occupied + request.passengers().size() > voyage.capacity())
             throw new BookingException(HttpStatus.CONFLICT, "Voyage does not have enough available capacity");
     }

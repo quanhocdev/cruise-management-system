@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.*;
 public interface PassengerVoyageRepository extends JpaRepository<PassengerVoyage, Long> {
     List<PassengerVoyage> findAllByBooking_IdOrderByIdAsc(Long bookingId);
-    long countByVoyageIdAndPassengerStatus(UUID voyageId, PassengerStatus status);
+    long countByVoyageIdAndPassengerStatusIn(UUID voyageId, Collection<PassengerStatus> statuses);
 }
