@@ -25,6 +25,7 @@ docker-data/
 # 4. Backend (Java Spring Boot)
 # ==========================================
 backend/target/
+backend/**/target/
 backend/build/
 backend/.classpath
 backend/.project
