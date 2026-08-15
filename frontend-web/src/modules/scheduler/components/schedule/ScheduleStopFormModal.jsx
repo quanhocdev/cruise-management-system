@@ -60,6 +60,10 @@ function ScheduleStopFormModal({
   const [errors, setErrors] = useState({});
 
   const isEdit = Boolean(stop);
+  console.log("========== SCHEDULE STOP MODAL ==========");
+  console.log("scheduleDate nhận được:", scheduleDate);
+  console.log("stop:", stop);
+  console.log("open:", open);
 
   // =====================================================
   // LOAD FORM

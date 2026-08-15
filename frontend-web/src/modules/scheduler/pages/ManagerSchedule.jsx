@@ -172,7 +172,22 @@ function ManagerSchedule() {
   };
 
   const handleViewStops = (schedule) => {
-    navigate(`/scheduler/tours/${tourId}/schedules/${schedule.id}/stops`);
+    // Ép Number() để tránh lỗi so sánh kiểu String vs Number
+    const day = tourDays.find(
+      (item) => Number(item.dayNumber) === Number(schedule.dayNumber),
+    );
+
+    navigate(`/scheduler/tours/${tourId}/schedules/${schedule.id}/stops`, {
+      state: {
+        schedule: {
+          ...schedule,
+          realDay:
+            day?.realDay || schedule.realDay || schedule.scheduleDate || "",
+        },
+        scheduleDate:
+          day?.realDay || schedule.realDay || schedule.scheduleDate || "",
+      },
+    });
   };
 
   if (tourLoading) {
