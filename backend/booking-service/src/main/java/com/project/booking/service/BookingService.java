@@ -2,6 +2,7 @@ package com.project.booking.service;
 
 import com.project.booking.dto.*;
 import java.util.List;
+import java.time.LocalDate;
 
 public interface BookingService {
     BookingResponse create(CreateBookingRequest request, Long userId);
@@ -14,4 +15,5 @@ public interface BookingService {
     PassengerVoyageResponse checkIn(String bookingCode, Long passengerVoyageId, String nfcTagId);
     PassengerVoyageResponse board(String nfcTagId);
     PassengerVoyageResponse disembark(String nfcTagId);
+    int sendDepartureReminders(LocalDate departureDate);
 }
