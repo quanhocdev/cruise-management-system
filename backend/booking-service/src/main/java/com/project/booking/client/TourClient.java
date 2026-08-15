@@ -17,7 +17,7 @@ public class TourClient {
     }
     public TourScheduleContext getSchedule(UUID voyageId) {
         try {
-            TourScheduleContext result = client.get().uri("/internal/schedules/{id}/booking-context", voyageId)
+            TourScheduleContext result = client.get().uri("/internal/tours/{id}/booking-context", voyageId)
                 .header("X-Internal-Api-Key", apiKey).retrieve().body(TourScheduleContext.class);
             if (result == null) throw new BookingException(HttpStatus.BAD_GATEWAY, "Tour service returned an empty response");
             return result;

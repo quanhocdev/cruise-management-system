@@ -19,6 +19,16 @@ spring:
               predicates:
                 - Path=/api/auth/**,/api/admin/staff/**
 
+            - id: booking-service
+              uri: ${BOOKING_SERVICE_URL:http://booking-service:8082}
+              predicates:
+                - Path=/api/v1/bookings/**,/api/v1/check-in/**
+
+            - id: payment-service
+              uri: ${PAYMENT_SERVICE_URL:http://payment-service:8085}
+              predicates:
+                - Path=/api/v1/payments/**
+
             # ==========================
             # TOUR SERVICE - ADMIN
             # ==========================
