@@ -4,7 +4,11 @@ import com.project.booking.dto.*;
 import com.project.booking.client.*;
 import com.project.booking.exception.BookingException;
 import com.project.booking.model.Booking;
+import com.project.booking.model.Passenger;
+import com.project.booking.model.PassengerVoyage;
 import com.project.booking.model.enums.BookingStatus;
+import com.project.booking.model.enums.EmbarkationStatus;
+import com.project.booking.model.enums.PassengerStatus;
 import com.project.booking.repository.BookingRepository;
 import com.project.booking.repository.PassengerRepository;
 import com.project.booking.repository.PassengerVoyageRepository;
@@ -80,6 +84,29 @@ class BookingServiceImplTests {
         assertThrows(BookingException.class, () -> service.confirmPayment(1L, 10L));
     }
 
+    @Test void checkInAssignsNfcAndRejectsSecondCheckIn() {
+        Booking booking = booking(BookingStatus.CONFIRMED, 10L); booking.setBookingCode("CR00000001");
+        PassengerVoyage link = passengerVoyage(booking, EmbarkationStatus.NOT_CHECKED_IN);
+        when(repository.findByBookingCodeIgnoreCase("CR00000001")).thenReturn(Optional.of(booking));
+        when(passengerVoyageRepository.findById(3L)).thenReturn(Optional.of(link));
+        when(passengerVoyageRepository.existsByNfcTagIdIgnoreCase("TAG-01")).thenReturn(false);
+        when(passengerVoyageRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        PassengerVoyageResponse result = service.checkIn("CR00000001", 3L, "tag-01");
+        assertEquals(EmbarkationStatus.CHECKED_IN, result.embarkationStatus());
+        assertEquals("TAG-01", result.nfcTagId());
+        assertThrows(BookingException.class, () -> service.checkIn("CR00000001", 3L, "tag-02"));
+    }
+
+    @Test void nfcLifecycleRequiresCorrectOrder() {
+        Booking booking = booking(BookingStatus.CONFIRMED, 10L);
+        PassengerVoyage link = passengerVoyage(booking, EmbarkationStatus.CHECKED_IN); link.setNfcTagId("TAG-01");
+        when(passengerVoyageRepository.findByNfcTagIdIgnoreCase("TAG-01")).thenReturn(Optional.of(link));
+        when(passengerVoyageRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        assertEquals(EmbarkationStatus.BOARDED, service.board("tag-01").embarkationStatus());
+        assertEquals(EmbarkationStatus.DISEMBARKED, service.disembark("tag-01").embarkationStatus());
+        assertThrows(BookingException.class, () -> service.board("tag-01"));
+    }
+
     private CreateBookingRequest request() {
         return new CreateBookingRequest(UUID.randomUUID(), "Nguyen Van A", "0900000000",
             new BigDecimal("1000000"), List.of(new CreatePassengerRequest(null, "Nguyen Van A",
@@ -91,5 +118,12 @@ class BookingServiceImplTests {
         b.setTotalAmount(new BigDecimal("1000000"));
         b.setStatus(status); b.setPaymentId(paymentId); b.setCreatedAt(Instant.now()); b.setUpdatedAt(Instant.now());
         return b;
+    }
+    private PassengerVoyage passengerVoyage(Booking booking, EmbarkationStatus status) {
+        Passenger passenger = new Passenger(); passenger.setId(2L); passenger.setFullName("Nguyen Van A");
+        PassengerVoyage link = new PassengerVoyage(); link.setId(3L); link.setPassenger(passenger);
+        link.setBooking(booking); link.setVoyageId(booking.getVoyageId());
+        link.setPassengerStatus(PassengerStatus.REGISTERED); link.setEmbarkationStatus(status);
+        return link;
     }
 }

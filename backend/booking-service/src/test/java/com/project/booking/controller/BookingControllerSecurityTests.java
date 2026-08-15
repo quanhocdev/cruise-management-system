@@ -3,6 +3,7 @@ package com.project.booking.controller;
 import com.project.booking.config.*;
 import com.project.booking.dto.*;
 import com.project.booking.service.BookingService;
+import com.project.booking.service.QrCodeService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -10,6 +11,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.math.BigDecimal;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
@@ -17,7 +19,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest({BookingController.class, InternalBookingController.class})
+@WebMvcTest({BookingController.class, InternalBookingController.class, CheckInController.class})
 @Import({SecurityConfig.class, JwtConfig.class})
 @TestPropertySource(properties = {
     "jwt.secret=cruise-management-system-local-secret-key-2026",
@@ -26,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class BookingControllerSecurityTests {
     @Autowired MockMvc mockMvc;
     @MockitoBean BookingService service;
+    @MockitoBean QrCodeService qrCodeService;
 
     @Test void createRequiresJwt() throws Exception {
         mockMvc.perform(post("/api/v1/bookings").contentType("application/json").content(body()))
@@ -44,6 +47,16 @@ class BookingControllerSecurityTests {
             1L, 7L, new BigDecimal("1000000"), com.project.booking.model.enums.BookingStatus.PENDING_PAYMENT));
         mockMvc.perform(get("/internal/bookings/1/payment-context")
             .header("X-Internal-Api-Key", "test-internal-key")).andExpect(status().isOk());
+    }
+    @Test void passengerCannotUseCheckInEndpoints() throws Exception {
+        mockMvc.perform(get("/api/v1/check-in/bookings/CR00000001")
+            .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_PASSENGER"))))
+            .andExpect(status().isForbidden());
+    }
+    @Test void schedulerCanLookupCheckInBooking() throws Exception {
+        mockMvc.perform(get("/api/v1/check-in/bookings/CR00000001")
+            .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_SCHEDULE"))))
+            .andExpect(status().isOk());
     }
     private String body() {
         return "{\"voyageId\":\"11111111-1111-1111-1111-111111111111\","
