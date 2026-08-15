@@ -192,8 +192,8 @@ services:
 
   booking-service:
     build:
-      context: ./backend
-      dockerfile: booking-service/Dockerfile.dev
+      context: ./backend/booking-service
+      dockerfile: Dockerfile.dev
     container_name: booking-service
     restart: always
     ports:
@@ -216,8 +216,8 @@ services:
 
   payment-service:
     build:
-      context: ./backend
-      dockerfile: payment-service/Dockerfile.dev
+      context: ./backend/payment-service
+      dockerfile: Dockerfile.dev
     container_name: payment-service
     restart: always
     ports:
@@ -240,8 +240,8 @@ services:
 
   notification-service:
     build:
-      context: ./backend
-      dockerfile: notification-service/Dockerfile.dev
+      context: ./backend/notification-service
+      dockerfile: Dockerfile.dev
     container_name: notification-service
     restart: always
     ports:
