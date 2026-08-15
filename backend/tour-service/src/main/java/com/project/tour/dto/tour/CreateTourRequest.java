@@ -1,6 +1,7 @@
 package com.project.tour.dto.tour;
 
-import jakarta.validation.constraints.Min;
+import java.time.LocalDate;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -13,7 +14,9 @@ public record CreateTourRequest(
 
         @Size(max = 5000, message = "Description must not exceed 5000 characters") String description,
 
-        @NotNull(message = "Day start is required") @Min(value = 1, message = "Day start must be at least 1") Integer dayStart,
+        @NotNull(message = "Start date is required") LocalDate startDate,
 
-        @NotNull(message = "Day end is required") @Min(value = 1, message = "Day end must be at least 1") Integer dayEnd) {
+        @NotNull(message = "End date is required") LocalDate endDate
+
+) {
 }

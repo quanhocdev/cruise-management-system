@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,9 +35,9 @@ public class TourService {
         public TourResponse createTour(
                         CreateTourRequest request) {
 
-                validateDays(
-                                request.dayStart(),
-                                request.dayEnd());
+                validateDates(
+                                request.startDate(),
+                                request.endDate());
 
                 validateCodeNotExists(
                                 request.code());
@@ -115,9 +116,9 @@ public class TourService {
                         UUID id,
                         UpdateTourRequest request) {
 
-                validateDays(
-                                request.dayStart(),
-                                request.dayEnd());
+                validateDates(
+                                request.startDate(),
+                                request.endDate());
 
                 Tour tour = findById(id);
 
@@ -169,14 +170,19 @@ public class TourService {
         // VALIDATION
         // =====================================================
 
-        private void validateDays(
-                        Integer dayStart,
-                        Integer dayEnd) {
+        private void validateDates(
+                        LocalDate dayStart,
+                        LocalDate dayEnd) {
 
-                if (dayEnd < dayStart) {
-
+                if (dayStart == null || dayEnd == null) {
                         throw new AppException(
-                                        "Day end must be greater than or equal to day start",
+                                        "Start date and end date are required",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                if (dayEnd.isBefore(dayStart)) {
+                        throw new AppException(
+                                        "End date must be greater than or equal to start date",
                                         HttpStatus.BAD_REQUEST);
                 }
         }

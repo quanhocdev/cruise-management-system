@@ -11,15 +11,21 @@ public final class TourMapper {
     private TourMapper() {
     }
 
-    public static Tour toEntity(CreateTourRequest request) {
+    // =====================================================
+    // CREATE
+    // =====================================================
+
+    public static Tour toEntity(
+            CreateTourRequest request) {
 
         Tour tour = new Tour();
 
         tour.setCode(request.code());
         tour.setName(request.name());
         tour.setDescription(request.description());
-        tour.setDayStart(request.dayStart());
-        tour.setDayEnd(request.dayEnd());
+
+        tour.setStartDate(request.startDate());
+        tour.setEndDate(request.endDate());
 
         /*
          * Scheduler không được chọn Cruise.
@@ -35,6 +41,10 @@ public final class TourMapper {
         return tour;
     }
 
+    // =====================================================
+    // UPDATE
+    // =====================================================
+
     public static void updateEntity(
             Tour tour,
             UpdateTourRequest request) {
@@ -42,8 +52,9 @@ public final class TourMapper {
         tour.setCode(request.code());
         tour.setName(request.name());
         tour.setDescription(request.description());
-        tour.setDayStart(request.dayStart());
-        tour.setDayEnd(request.dayEnd());
+
+        tour.setStartDate(request.startDate());
+        tour.setEndDate(request.endDate());
 
         /*
          * Không cập nhật:
@@ -57,7 +68,12 @@ public final class TourMapper {
          */
     }
 
-    public static TourResponse toResponse(Tour tour) {
+    // =====================================================
+    // RESPONSE
+    // =====================================================
+
+    public static TourResponse toResponse(
+            Tour tour) {
 
         Cruise cruise = tour.getCruise();
 
@@ -66,8 +82,9 @@ public final class TourMapper {
                 tour.getCode(),
                 tour.getName(),
                 tour.getDescription(),
-                tour.getDayStart(),
-                tour.getDayEnd(),
+
+                tour.getStartDate(),
+                tour.getEndDate(),
 
                 cruise != null
                         ? cruise.getId()

@@ -30,7 +30,12 @@ import ManagerService from "./modules/admin/pages/ManagerService";
 import ManagerPolicy from "./modules/admin/pages/ManagerPolicy";
 
 import PassengerDashboard from "./modules/passenger/pages/Dashboard";
+
+import SchedulerLayout from "./layouts/SchedulerLayout";
 import SchedulerDashboard from "./modules/scheduler/pages/Dashboard";
+import ManagerTour from "./modules/scheduler/pages/ManagerTour";
+import TourDetail from "./modules/scheduler/pages/TourDetail";
+
 import OperationDashboard from "./modules/operation/pages/Dashboard";
 import OnboardDashboard from "./modules/onboard/pages/Dashboard";
 import ShoreDashboard from "./modules/shore/pages/Dashboard";
@@ -149,14 +154,27 @@ export default function App() {
             path="/scheduler/*"
             element={
               <ProtectedRoute allowedRoles={["SCHEDULER"]}>
-                <Routes>
-                  <Route path="dashboard" element={<SchedulerDashboard />} />
+                <SchedulerLayout>
+                  <Routes>
+                    {/* DASHBOARD */}
 
-                  <Route
-                    path=""
-                    element={<Navigate to="dashboard" replace />}
-                  />
-                </Routes>
+                    <Route path="dashboard" element={<SchedulerDashboard />} />
+
+                    {/* TOUR */}
+
+                    <Route path="tours" element={<ManagerTour />} />
+
+                    {/* TOUR DETAIL */}
+
+                    <Route path="tours/:tourId" element={<TourDetail />} />
+
+                    {/* DEFAULT */}
+                    <Route
+                      path=""
+                      element={<Navigate to="dashboard" replace />}
+                    />
+                  </Routes>
+                </SchedulerLayout>
               </ProtectedRoute>
             }
           />

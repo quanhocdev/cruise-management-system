@@ -5,6 +5,7 @@ import com.project.tour.model.enums.tour.TourStatusTrip;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -27,28 +28,48 @@ public class Tour {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "day_start", nullable = false)
-    private Integer dayStart;
+    /*
+     * Ngày bắt đầu và ngày kết thúc thực tế của Tour.
+     *
+     * Ví dụ:
+     * startDate = 2026-08-20
+     * endDate = 2026-08-25
+     */
+    @Column(name = "start_date", nullable = false)
+    private LocalDate startDate;
 
-    @Column(name = "day_end", nullable = false)
-    private Integer dayEnd;
+    @Column(name = "end_date", nullable = false)
+    private LocalDate endDate;
 
     /*
      * Cruise chỉ được Operation cấu hình.
      *
      * Khi Scheduler tạo Tour:
+     *
      * cruise = null
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cruise_id")
     private Cruise cruise;
 
+    /*
+     * Trạng thái vận hành của Tour.
+     *
+     * Scheduler tạo:
+     * APPROVAL_PENDING
+     *
+     * Operation duyệt:
+     * APPROVED
+     *
+     * Operation hủy:
+     * CANCELLED
+     */
     @Enumerated(EnumType.STRING)
     @Column(name = "status_trip", nullable = false, length = 30)
     private TourStatusTrip statusTrip = TourStatusTrip.APPROVAL_PENDING;
 
     /*
-     * Chỉ được Operation cấu hình.
+     * Chỉ Operation được cấu hình.
      */
     @Column(name = "booking_start")
     private LocalDateTime bookingStart;
@@ -56,6 +77,9 @@ public class Tour {
     @Column(name = "booking_end")
     private LocalDateTime bookingEnd;
 
+    /*
+     * Trạng thái booking.
+     */
     @Enumerated(EnumType.STRING)
     @Column(name = "status_booking", nullable = false, length = 30)
     private TourBookingStatus statusBooking = TourBookingStatus.NOT_OPEN;
@@ -120,20 +144,20 @@ public class Tour {
         this.description = description;
     }
 
-    public Integer getDayStart() {
-        return dayStart;
+    public LocalDate getStartDate() {
+        return startDate;
     }
 
-    public void setDayStart(Integer dayStart) {
-        this.dayStart = dayStart;
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
     }
 
-    public Integer getDayEnd() {
-        return dayEnd;
+    public LocalDate getEndDate() {
+        return endDate;
     }
 
-    public void setDayEnd(Integer dayEnd) {
-        this.dayEnd = dayEnd;
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
     }
 
     public Cruise getCruise() {

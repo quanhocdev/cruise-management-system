@@ -3,6 +3,7 @@ package com.project.tour.dto.tour;
 import com.project.tour.model.enums.tour.TourBookingStatus;
 import com.project.tour.model.enums.tour.TourStatusTrip;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -16,9 +17,9 @@ public record TourResponse(
 
         String description,
 
-        Integer dayStart,
+        LocalDate startDate,
 
-        Integer dayEnd,
+        LocalDate endDate,
 
         UUID cruiseId,
 
@@ -34,5 +35,7 @@ public record TourResponse(
 
         LocalDateTime createdAt,
 
-        LocalDateTime updatedAt) {
+        LocalDateTime updatedAt
+
+) {
 }
