@@ -1,106 +1,174 @@
+// src/modules/admin/hooks/usePorts.js
+
 import { useCallback, useEffect, useState } from "react";
-import api from "../../../api/axios";
+
+import portService from "../services/portService";
 
 export default function usePorts() {
   const [ports, setPorts] = useState([]);
+
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  // =====================================================
+  // LOAD PORTS
+  // =====================================================
 
   const loadPorts = useCallback(async () => {
     setLoading(true);
     setError("");
 
     try {
-      const response = await api.get("/admin/ports");
+      const data = await portService.getPorts(false);
 
-      const data = response.data;
+      setPorts(Array.isArray(data) ? data : []);
 
-      setPorts(
-        Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [],
-      );
-    } catch (error) {
-      console.error("Load ports error:", error);
+      return Array.isArray(data) ? data : [];
+    } catch (err) {
+      console.error("🔥 LOAD PORTS ERROR:", err);
 
-      setError(
-        error.response?.data?.message || "Không thể tải danh sách cảng.",
-      );
+      const message =
+        err?.response?.data?.message || "Không thể tải danh sách cảng.";
+
+      setError(message);
+
+      return [];
     } finally {
       setLoading(false);
     }
   }, []);
 
+  // =====================================================
+  // INITIAL LOAD
+  // =====================================================
+
   useEffect(() => {
     loadPorts();
   }, [loadPorts]);
 
-  const createPort = async (requestData) => {
+  // =====================================================
+  // CREATE
+  // =====================================================
+
+  const createPort = useCallback(async (data) => {
+    setSaving(true);
     setError("");
     setSuccess("");
 
     try {
-      await api.post("/admin/ports", requestData);
+      const createdPort = await portService.createPort(data);
+
+      setPorts((prev) => {
+        const exists = prev.some((port) => port.id === createdPort.id);
+
+        if (exists) {
+          return prev;
+        }
+
+        return [...prev, createdPort].sort((a, b) =>
+          (a.name || "").localeCompare(b.name || "", "vi"),
+        );
+      });
 
       setSuccess("Tạo cảng thành công.");
 
-      await loadPorts();
+      return createdPort;
+    } catch (err) {
+      console.error("🔥 CREATE PORT ERROR:", err);
 
-      return true;
-    } catch (error) {
-      console.error("Create port error:", error);
+      const message = err?.response?.data?.message || "Không thể tạo cảng.";
 
-      setError(error.response?.data?.message || "Không thể tạo cảng.");
+      setError(message);
 
-      return false;
+      return null;
+    } finally {
+      setSaving(false);
     }
-  };
+  }, []);
 
-  const updatePort = async (id, requestData) => {
+  // =====================================================
+  // UPDATE
+  // =====================================================
+
+  const updatePort = useCallback(async (id, data) => {
+    setSaving(true);
     setError("");
     setSuccess("");
 
     try {
-      await api.patch(`/admin/ports/${id}`, requestData);
+      const updatedPort = await portService.updatePort(id, data);
+
+      setPorts((prev) =>
+        prev
+          .map((port) => (port.id === id ? updatedPort : port))
+          .sort((a, b) => (a.name || "").localeCompare(b.name || "", "vi")),
+      );
 
       setSuccess("Cập nhật cảng thành công.");
 
-      await loadPorts();
+      return updatedPort;
+    } catch (err) {
+      console.error("🔥 UPDATE PORT ERROR:", err);
 
-      return true;
-    } catch (error) {
-      console.error("Update port error:", error);
+      const message =
+        err?.response?.data?.message || "Không thể cập nhật cảng.";
 
-      setError(error.response?.data?.message || "Không thể cập nhật cảng.");
+      setError(message);
 
-      return false;
+      return null;
+    } finally {
+      setSaving(false);
     }
-  };
+  }, []);
 
-  const deactivatePort = async (id) => {
+  // =====================================================
+  // DEACTIVATE
+  // =====================================================
+
+  const deactivatePort = useCallback(async (id) => {
+    setSaving(true);
     setError("");
     setSuccess("");
 
     try {
-      await api.delete(`/admin/ports/${id}`);
+      await portService.deactivatePort(id);
+
+      setPorts((prev) =>
+        prev.map((port) =>
+          port.id === id
+            ? {
+                ...port,
+                status: "INACTIVE",
+              }
+            : port,
+        ),
+      );
 
       setSuccess("Đã vô hiệu hóa cảng.");
 
-      await loadPorts();
-
       return true;
-    } catch (error) {
-      console.error("Deactivate port error:", error);
+    } catch (err) {
+      console.error("🔥 DEACTIVATE PORT ERROR:", err);
 
-      setError(error.response?.data?.message || "Không thể vô hiệu hóa cảng.");
+      const message =
+        err?.response?.data?.message || "Không thể vô hiệu hóa cảng.";
+
+      setError(message);
 
       return false;
+    } finally {
+      setSaving(false);
     }
-  };
+  }, []);
 
   return {
     ports,
+
     loading,
+    saving,
 
     error,
     success,

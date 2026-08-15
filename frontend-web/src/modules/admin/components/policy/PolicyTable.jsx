@@ -3,85 +3,131 @@ import { Button, Spinner, Table } from "react-bootstrap";
 export default function PolicyTable({
   policies,
   loading,
+  filterLoading,
   onEdit,
   onDelete,
   onManageRules,
 }) {
+  // =====================================================
+  // INITIAL LOADING
+  // =====================================================
+
+  if (loading) {
+    return (
+      <div className="policy-table-loading">
+        <Spinner animation="border" />
+
+        <span>Đang tải danh sách chính sách...</span>
+      </div>
+    );
+  }
+
+  // =====================================================
+  // EMPTY
+  // =====================================================
+
+  if (!policies || policies.length === 0) {
+    return (
+      <div className="policy-table-empty">
+        <div className="policy-table-empty-icon">📋</div>
+
+        <h5>Chưa có chính sách</h5>
+
+        <p>Không có chính sách nào phù hợp với bộ lọc hiện tại.</p>
+      </div>
+    );
+  }
+
+  // =====================================================
+  // TYPE LABEL
+  // =====================================================
+
   const getTypeLabel = (type) => {
-    if (type === "BOOKING") {
-      return "Đăng ký";
-    }
+    switch (type) {
+      case "BOOKING":
+        return "Đặt tour";
 
-    if (type === "CANCEL") {
-      return "Hủy / hoàn tiền";
-    }
+      case "CANCEL":
+        return "Hủy tour";
 
-    return type || "-";
+      default:
+        return type || "-";
+    }
   };
+
+  // =====================================================
+  // STATUS LABEL
+  // =====================================================
 
   const getStatusLabel = (status) => {
-    if (status === "ACTIVE") {
-      return "Đang hoạt động";
-    }
+    switch (status) {
+      case "ACTIVE":
+        return "Đang hoạt động";
 
-    if (status === "INACTIVE") {
-      return "Ngừng hoạt động";
-    }
+      case "INACTIVE":
+        return "Ngừng hoạt động";
 
-    return status || "-";
+      default:
+        return status || "-";
+    }
   };
 
-  const formatDate = (value) => {
+  // =====================================================
+  // FORMAT DATE
+  // =====================================================
+
+  const formatDateTime = (value) => {
     if (!value) {
       return "-";
     }
 
-    return new Date(value).toLocaleString("vi-VN");
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return value;
+    }
+
+    return date.toLocaleString("vi-VN");
   };
 
-  if (loading) {
-    return (
-      <div className="policy-table-loading text-center py-5">
-        <Spinner animation="border" />
-        <div className="mt-2">Đang tải chính sách...</div>
-      </div>
-    );
-  }
-
-  if (!policies || policies.length === 0) {
-    return (
-      <div className="policy-table-empty text-center py-5">
-        <div className="mb-2">Chưa có chính sách nào.</div>
-
-        <small className="text-muted">
-          Hãy tạo chính sách đăng ký hoặc hủy / hoàn tiền.
-        </small>
-      </div>
-    );
-  }
+  // =====================================================
+  // RENDER
+  // =====================================================
 
   return (
     <div className="policy-table-wrapper">
-      <Table
-        responsive
-        hover
-        bordered
-        className="policy-table align-middle mb-0"
-      >
+      {/* FILTER LOADING INDICATOR */}
+
+      {filterLoading && (
+        <div className="policy-table-filter-loading">
+          <Spinner animation="border" size="sm" />
+
+          <span>Đang cập nhật danh sách...</span>
+        </div>
+      )}
+
+      <Table responsive hover bordered className="policy-table align-middle">
         <thead>
           <tr>
             <th>Loại</th>
+
             <th>Tiêu đề</th>
+
             <th>Nội dung</th>
+
             <th>Trạng thái</th>
+
             <th>Cập nhật</th>
-            <th className="text-center">Thao tác</th>
+
+            <th className="policy-table-action-column">Thao tác</th>
           </tr>
         </thead>
 
         <tbody>
           {policies.map((policy) => (
             <tr key={policy.id}>
+              {/* TYPE */}
+
               <td>
                 <span
                   className={`policy-type-badge ${
@@ -94,15 +140,21 @@ export default function PolicyTable({
                 </span>
               </td>
 
-              <td>
-                <strong>{policy.title}</strong>
-              </td>
+              {/* TITLE */}
 
               <td>
-                <div className="policy-content-preview">
+                <div className="policy-table-title">{policy.title}</div>
+              </td>
+
+              {/* CONTENT */}
+
+              <td>
+                <div className="policy-table-content">
                   {policy.content || "-"}
                 </div>
               </td>
+
+              {/* STATUS */}
 
               <td>
                 <span
@@ -116,32 +168,37 @@ export default function PolicyTable({
                 </span>
               </td>
 
-              <td>
-                <small>{formatDate(policy.updatedAt)}</small>
-              </td>
+              {/* UPDATED */}
+
+              <td>{formatDateTime(policy.updatedAt)}</td>
+
+              {/* ACTIONS */}
 
               <td>
-                <div className="d-flex justify-content-center gap-2 flex-wrap">
+                <div className="policy-table-actions">
                   <Button
                     size="sm"
                     variant="outline-primary"
                     onClick={() => onEdit(policy)}
+                    disabled={filterLoading}
                   >
                     Sửa
                   </Button>
 
                   <Button
                     size="sm"
-                    variant="outline-secondary"
+                    variant="outline-success"
                     onClick={() => onManageRules(policy)}
+                    disabled={filterLoading}
                   >
-                    Quản lý mức
+                    Quy tắc
                   </Button>
 
                   <Button
                     size="sm"
                     variant="outline-danger"
                     onClick={() => onDelete(policy)}
+                    disabled={filterLoading}
                   >
                     Xóa
                   </Button>

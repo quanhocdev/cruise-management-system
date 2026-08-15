@@ -1,46 +1,910 @@
+/* =====================================================
+   MANAGER PORT PAGE
+   ===================================================== */
+
 .manager-port-page {
-  width: 100%;
+  min-height: 100%;
+  padding: 24px;
+  background: #f6f8fb;
 }
+
+/* =====================================================
+   HEADER
+   ===================================================== */
 
 .manager-port-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 20px;
+  margin-bottom: 20px;
 }
 
 .manager-port-title {
   margin: 0;
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 26px;
+  font-weight: 700;
+  color: #1f2937;
 }
 
 .manager-port-description {
-  margin: 4px 0 0;
+  margin: 6px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.manager-port-header .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+/* =====================================================
+   VIEW TOOLBAR
+   ===================================================== */
+
+.manager-port-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  margin-bottom: 16px;
+  padding: 6px;
+
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.manager-port-view-switch {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.manager-port-view-switch button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  padding: 9px 15px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: transparent;
+  color: #6b7280;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease;
+}
+
+.manager-port-view-switch button:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.manager-port-view-switch button.active {
+  background: #eef4ff;
+  color: #2563eb;
+}
+
+.manager-port-count {
+  padding-right: 10px;
+
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* =====================================================
+   MAP SECTION
+   ===================================================== */
+
+.manager-port-map-section {
+  position: relative;
+}
+
+.manager-port-map-search {
+  position: absolute;
+
+  z-index: 20;
+
+  top: 18px;
+  left: 18px;
+
+  width: min(460px, calc(100% - 36px));
+}
+
+/* =====================================================
+   SEARCH
+   ===================================================== */
+
+.port-search {
+  position: relative;
+  width: 100%;
+}
+
+.port-search-input-wrapper {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  background: #ffffff;
+
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+
+  overflow: hidden;
+}
+
+.port-search-icon {
+  flex-shrink: 0;
+  margin-left: 13px;
   color: #6b7280;
 }
 
-.port-actions-column {
-  width: 180px;
+.port-search-input {
+  border: none !important;
+  box-shadow: none !important;
+
+  padding-left: 10px;
+  padding-right: 42px;
 }
 
-@media (max-width: 992px) {
-  .manager-port-header {
-    align-items: flex-start;
-  }
-
-  .port-actions-column {
-    width: auto;
-  }
+.port-search-spinner {
+  position: absolute;
+  right: 14px;
 }
+
+.port-search-clear {
+  position: absolute;
+  right: 5px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 34px;
+  height: 34px;
+
+  color: #6b7280;
+}
+
+.port-search-error {
+  margin-top: 6px;
+  padding: 8px 12px;
+
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  border-radius: 8px;
+
+  color: #be123c;
+  font-size: 13px;
+}
+
+.port-search-results {
+  margin-top: 6px;
+
+  max-height: 300px;
+  overflow-y: auto;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.14);
+}
+
+.port-search-result {
+  display: block;
+
+  width: 100%;
+
+  padding: 12px 14px;
+
+  text-align: left;
+
+  border: none;
+  border-bottom: 1px solid #f1f5f9;
+
+  background: #ffffff;
+
+  cursor: pointer;
+
+  transition: background-color 0.15s ease;
+}
+
+.port-search-result:last-child {
+  border-bottom: none;
+}
+
+.port-search-result:hover {
+  background: #f8fafc;
+}
+
+.port-search-result-title {
+  color: #111827;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.port-search-result-address {
+  margin-top: 3px;
+
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* =====================================================
+   MAP
+   ===================================================== */
+
+.port-map-container {
+  position: relative;
+
+  height: 650px;
+
+  overflow: hidden;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+
+  background: #e5e7eb;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.port-map {
+  width: 100%;
+  height: 100%;
+}
+
+.port-map-config-error {
+  position: absolute;
+
+  top: 50%;
+  left: 50%;
+
+  transform: translate(-50%, -50%);
+
+  padding: 15px 20px;
+
+  background: #ffffff;
+
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+
+  color: #b91c1c;
+
+  font-weight: 600;
+
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.port-map-hint {
+  position: absolute;
+
+  bottom: 18px;
+  left: 18px;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  max-width: 450px;
+
+  padding: 9px 13px;
+
+  background: rgba(255, 255, 255, 0.94);
+
+  border-radius: 8px;
+
+  color: #4b5563;
+
+  font-size: 12px;
+
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* =====================================================
+   MAP MARKER
+   ===================================================== */
+
+.port-map-marker {
+  cursor: pointer;
+}
+
+.port-map-marker-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 38px;
+  height: 38px;
+
+  background: #2563eb;
+
+  border: 3px solid #ffffff;
+
+  border-radius: 50% 50% 50% 0;
+
+  transform: rotate(-45deg);
+
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+}
+
+.port-map-marker-pin span {
+  transform: rotate(45deg);
+
+  color: #ffffff;
+
+  font-size: 18px;
+}
+
+/* =====================================================
+   TEMPORARY MARKER
+   ===================================================== */
+
+.port-map-temporary-marker {
+  cursor: pointer;
+}
+
+.port-map-temporary-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 38px;
+  height: 38px;
+
+  background: #dc2626;
+
+  border: 3px solid #ffffff;
+
+  border-radius: 50% 50% 50% 0;
+
+  transform: rotate(-45deg);
+
+  color: #ffffff;
+
+  font-size: 24px;
+  font-weight: 700;
+
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* =====================================================
+   POPUP
+   ===================================================== */
+
+.port-map-popup {
+  min-width: 220px;
+  padding: 2px;
+}
+
+.port-map-popup-title {
+  margin-bottom: 5px;
+
+  color: #111827;
+
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.port-map-popup-address {
+  color: #6b7280;
+
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.port-map-popup-coordinate {
+  margin-top: 7px;
+
+  color: #374151;
+
+  font-size: 11px;
+  font-family: monospace;
+}
+
+.port-map-popup-status {
+  display: inline-block;
+
+  margin-top: 8px;
+  padding: 3px 7px;
+
+  border-radius: 999px;
+
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.port-map-popup-status.active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.port-map-popup-status.inactive {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.port-map-popup-edit {
+  display: block;
+
+  width: 100%;
+
+  margin-top: 9px;
+  padding: 6px 8px;
+
+  border: 1px solid #2563eb;
+  border-radius: 6px;
+
+  background: #ffffff;
+  color: #2563eb;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.port-map-popup-edit:hover {
+  background: #eff6ff;
+}
+
+/* =====================================================
+   SELECTED LOCATION PANEL
+   ===================================================== */
+
+.port-location-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  margin-top: 12px;
+  padding: 15px 17px;
+
+  background: #ffffff;
+
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.07);
+}
+
+.port-location-panel-content {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 12px;
+
+  min-width: 0;
+}
+
+.port-location-panel-icon {
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 38px;
+  height: 38px;
+
+  background: #eff6ff;
+
+  border-radius: 9px;
+
+  font-size: 18px;
+}
+
+.port-location-panel-info {
+  min-width: 0;
+}
+
+.port-location-panel-title {
+  color: #111827;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.port-location-panel-place {
+  margin-top: 3px;
+
+  color: #4b5563;
+
+  font-size: 13px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.port-location-panel-coordinates {
+  display: flex;
+
+  gap: 18px;
+
+  margin-top: 6px;
+
+  color: #6b7280;
+
+  font-size: 12px;
+  font-family: monospace;
+}
+
+.port-location-panel .btn {
+  flex-shrink: 0;
+
+  display: inline-flex;
+  align-items: center;
+
+  gap: 7px;
+}
+
+/* =====================================================
+   MAP LOADING
+   ===================================================== */
+
+.manager-port-map-loading {
+  position: absolute;
+
+  right: 18px;
+  bottom: 18px;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 8px 12px;
+
+  background: rgba(255, 255, 255, 0.95);
+
+  border-radius: 8px;
+
+  color: #4b5563;
+
+  font-size: 12px;
+
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* =====================================================
+   TABLE SECTION
+   ===================================================== */
+
+.manager-port-table-section {
+  padding: 20px;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.manager-port-table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  margin-bottom: 18px;
+}
+
+.manager-port-table-header h5 {
+  margin: 0;
+
+  color: #1f2937;
+
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.manager-port-table-header p {
+  margin: 4px 0 0;
+
+  color: #6b7280;
+
+  font-size: 13px;
+}
+
+.manager-port-table-header .btn {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 7px;
+}
+
+/* =====================================================
+   TABLE
+   ===================================================== */
+
+.port-table-wrapper {
+  width: 100%;
+}
+
+.port-table {
+  margin-bottom: 0;
+
+  font-size: 13px;
+}
+
+.port-table thead th {
+  padding: 12px 14px;
+
+  background: #f8fafc;
+
+  color: #475569;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+.port-table tbody td {
+  padding: 13px 14px;
+}
+
+.port-table-name {
+  color: #111827;
+
+  font-weight: 700;
+}
+
+.port-table-country {
+  margin-top: 3px;
+
+  color: #6b7280;
+
+  font-size: 12px;
+}
+
+.port-table-address {
+  max-width: 300px;
+
+  color: #4b5563;
+
+  line-height: 1.5;
+}
+
+.port-table-coordinates {
+  color: #4b5563;
+
+  font-size: 11px;
+  font-family: monospace;
+  line-height: 1.6;
+}
+
+.port-table-action-column {
+  width: 170px;
+}
+
+.port-table-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.port-status-badge {
+  display: inline-flex;
+
+  padding: 5px 9px;
+
+  border-radius: 999px;
+
+  font-size: 11px;
+  font-weight: 600;
+
+  white-space: nowrap;
+}
+
+.port-status-active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.port-status-inactive {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+/* =====================================================
+   TABLE STATES
+   ===================================================== */
+
+.port-table-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  min-height: 260px;
+
+  color: #6b7280;
+
+  font-size: 14px;
+}
+
+.port-table-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 260px;
+
+  text-align: center;
+
+  color: #6b7280;
+}
+
+.port-table-empty-icon {
+  margin-bottom: 12px;
+
+  font-size: 38px;
+}
+
+.port-table-empty h5 {
+  margin-bottom: 5px;
+
+  color: #374151;
+
+  font-weight: 700;
+}
+
+.port-table-empty p {
+  margin: 0;
+
+  font-size: 13px;
+}
+
+/* =====================================================
+   FORM
+   ===================================================== */
+
+.port-selected-location {
+  padding: 11px 13px;
+
+  background: #eff6ff;
+
+  border: 1px solid #bfdbfe;
+
+  border-radius: 8px;
+}
+
+.port-selected-location-label {
+  color: #2563eb;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.port-selected-location-name {
+  margin-top: 3px;
+
+  color: #374151;
+
+  font-size: 13px;
+}
+
+.port-geocoding-note {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 8px;
+
+  padding: 10px 12px;
+
+  background: #f8fafc;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 8px;
+
+  color: #64748b;
+
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
 
 @media (max-width: 768px) {
+  .manager-port-page {
+    padding: 15px;
+  }
+
   .manager-port-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .manager-port-header .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .port-map-container {
+    height: 520px;
+  }
+
+  .manager-port-map-search {
+    width: calc(100% - 30px);
+
+    top: 15px;
+    left: 15px;
+  }
+
+  .port-location-panel {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .port-location-panel .btn {
+    justify-content: center;
+  }
+
+  .port-location-panel-coordinates {
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .manager-port-table-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .manager-port-table-header .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .port-table-actions {
     flex-direction: column;
     align-items: stretch;
   }
+}
+.manager-port-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
 
-  .manager-port-title {
-    font-size: 20px;
-  }
+.port-view-switcher {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.port-view-switcher .btn {
+  min-width: 105px;
 }

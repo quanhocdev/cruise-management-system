@@ -1,92 +1,140 @@
-import { Button, Card, Spinner, Table } from "react-bootstrap";
+// src/modules/admin/components/port/PortTable.jsx
 
-export default function PortTable({ ports, loading, onEdit, onDeactivate }) {
+import { Button, Spinner, Table } from "react-bootstrap";
+
+export default function PortTable({
+  ports = [],
+  loading = false,
+  onEdit,
+  onDelete,
+}) {
+  const formatCoordinate = (value) => {
+    if (value == null) {
+      return "-";
+    }
+
+    return Number(value).toFixed(6);
+  };
+
+  const formatDateTime = (value) => {
+    if (!value) {
+      return "-";
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return value;
+    }
+
+    return date.toLocaleString("vi-VN");
+  };
+
+  if (loading) {
+    return (
+      <div className="port-table-loading">
+        <Spinner animation="border" />
+
+        <span>Đang tải danh sách cảng...</span>
+      </div>
+    );
+  }
+
+  if (!ports.length) {
+    return (
+      <div className="port-table-empty">
+        <div className="port-table-empty-icon">⚓</div>
+
+        <h5>Chưa có cảng</h5>
+
+        <p>Hệ thống chưa có cảng nào được tạo.</p>
+      </div>
+    );
+  }
+
   return (
-    <Card>
-      <Card.Body>
-        {loading ? (
-          <div className="text-center py-5">
-            <Spinner animation="border" />
+    <div className="port-table-wrapper">
+      <Table responsive hover bordered className="port-table align-middle">
+        <thead>
+          <tr>
+            <th>Cảng</th>
 
-            <div className="mt-2">Đang tải danh sách cảng...</div>
-          </div>
-        ) : ports.length === 0 ? (
-          <div className="text-center text-muted py-5">Chưa có cảng nào.</div>
-        ) : (
-          <div className="table-responsive">
-            <Table hover bordered align="middle">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Tên cảng</th>
-                  <th>Địa chỉ</th>
-                  <th>Thành phố</th>
-                  <th>Quốc gia</th>
-                  <th>Tọa độ</th>
-                  <th>Trạng thái</th>
-                  <th className="text-center port-actions-column">Thao tác</th>
-                </tr>
-              </thead>
+            <th>Địa chỉ</th>
 
-              <tbody>
-                {ports.map((port, index) => (
-                  <tr key={port.id}>
-                    <td>{index + 1}</td>
+            <th>Tọa độ</th>
 
-                    <td>
-                      <strong>{port.name}</strong>
-                    </td>
+            <th>Trạng thái</th>
 
-                    <td>{port.address || "—"}</td>
+            <th>Cập nhật</th>
 
-                    <td>{port.city || "—"}</td>
+            <th className="port-table-action-column">Thao tác</th>
+          </tr>
+        </thead>
 
-                    <td>{port.country || "—"}</td>
+        <tbody>
+          {ports.map((port) => (
+            <tr key={port.id}>
+              <td>
+                <div className="port-table-name">{port.name}</div>
 
-                    <td>
-                      <small>
-                        {port.latitude}
-                        <br />
-                        {port.longitude}
-                      </small>
-                    </td>
+                <div className="port-table-country">
+                  {port.city || "-"}, {port.country || "-"}
+                </div>
+              </td>
 
-                    <td>
-                      {port.status === "ACTIVE" ? (
-                        <span className="badge bg-success">ACTIVE</span>
-                      ) : (
-                        <span className="badge bg-secondary">INACTIVE</span>
-                      )}
-                    </td>
+              <td>
+                <div className="port-table-address">{port.address || "-"}</div>
+              </td>
 
-                    <td>
-                      <div className="d-flex gap-2 justify-content-center">
-                        <Button
-                          size="sm"
-                          variant="outline-primary"
-                          onClick={() => onEdit(port)}
-                        >
-                          Sửa
-                        </Button>
+              <td>
+                <div className="port-table-coordinates">
+                  <div>Lat: {formatCoordinate(port.latitude)}</div>
 
-                        {port.status === "ACTIVE" && (
-                          <Button
-                            size="sm"
-                            variant="outline-danger"
-                            onClick={() => onDeactivate(port)}
-                          >
-                            Vô hiệu hóa
-                          </Button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </div>
-        )}
-      </Card.Body>
-    </Card>
+                  <div>Lng: {formatCoordinate(port.longitude)}</div>
+                </div>
+              </td>
+
+              <td>
+                <span
+                  className={`port-status-badge ${
+                    port.status === "ACTIVE"
+                      ? "port-status-active"
+                      : "port-status-inactive"
+                  }`}
+                >
+                  {port.status === "ACTIVE"
+                    ? "Đang hoạt động"
+                    : "Ngừng hoạt động"}
+                </span>
+              </td>
+
+              <td>{formatDateTime(port.updatedAt)}</td>
+
+              <td>
+                <div className="port-table-actions">
+                  <Button
+                    size="sm"
+                    variant="outline-primary"
+                    onClick={() => onEdit?.(port)}
+                  >
+                    Sửa
+                  </Button>
+
+                  {port.status === "ACTIVE" && (
+                    <Button
+                      size="sm"
+                      variant="outline-danger"
+                      onClick={() => onDelete?.(port)}
+                    >
+                      Vô hiệu hóa
+                    </Button>
+                  )}
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </div>
   );
 }
