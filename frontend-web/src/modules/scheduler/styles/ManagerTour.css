@@ -1,0 +1,1231 @@
+.scheduler-tour-page {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.scheduler-tour-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.scheduler-tour-header h1 {
+  margin: 0 0 8px;
+  color: #172554;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.scheduler-tour-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.scheduler-tour-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.scheduler-tour-refresh-button,
+.scheduler-tour-create-button {
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.scheduler-tour-refresh-button {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+}
+
+.scheduler-tour-refresh-button:hover {
+  background: #f1f5f9;
+}
+
+.scheduler-tour-create-button {
+  border: none;
+  background: #0f766e;
+  color: #ffffff;
+}
+
+.scheduler-tour-create-button:hover {
+  background: #115e59;
+}
+
+.scheduler-tour-refresh-button:disabled,
+.scheduler-tour-create-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.scheduler-tour-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.scheduler-tour-summary-card {
+  min-height: 105px;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.scheduler-tour-summary-card span {
+  display: block;
+  margin-bottom: 12px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.scheduler-tour-summary-card strong {
+  color: #0f172a;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.scheduler-tour-summary-card.pending {
+  border-left: 4px solid #f59e0b;
+}
+
+.scheduler-tour-summary-card.approved {
+  border-left: 4px solid #0f766e;
+}
+
+.scheduler-tour-summary-card.completed {
+  border-left: 4px solid #2563eb;
+}
+
+.scheduler-tour-content {
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.scheduler-tour-error {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border: 1px solid #fecaca;
+  border-radius: 9px;
+  background: #fef2f2;
+  color: #991b1b;
+  font-size: 14px;
+}
+
+.scheduler-tour-error span {
+  color: #b91c1c;
+}
+
+.scheduler-spin {
+  animation: scheduler-spin 1s linear infinite;
+}
+
+@keyframes scheduler-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1100px) {
+  .scheduler-tour-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .scheduler-tour-header {
+    flex-direction: column;
+  }
+
+  .scheduler-tour-header-actions {
+    width: 100%;
+  }
+
+  .scheduler-tour-refresh-button,
+  .scheduler-tour-create-button {
+    flex: 1;
+  }
+}
+
+@media (max-width: 520px) {
+  .scheduler-tour-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .scheduler-tour-header h1 {
+    font-size: 24px;
+  }
+
+  .scheduler-tour-header-actions {
+    flex-direction: column;
+  }
+
+  .scheduler-tour-refresh-button,
+  .scheduler-tour-create-button {
+    width: 100%;
+  }
+}
+/* =========================================================
+   TOUR TABLE
+   ========================================================= */
+
+.tour-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.tour-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+}
+
+.tour-table th,
+.tour-table td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.tour-table th {
+  background: #f8fafc;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tour-table td {
+  color: #334155;
+  font-size: 14px;
+}
+
+.tour-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+.tour-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+/* =========================================================
+   TOUR CODE
+   ========================================================= */
+
+.tour-code {
+  color: #0f766e;
+  font-weight: 700;
+}
+
+/* =========================================================
+   TOUR NAME
+   ========================================================= */
+
+.tour-name-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 220px;
+  max-width: 320px;
+}
+
+.tour-name-cell strong {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tour-name-cell span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* =========================================================
+   TOUR STATUS
+   ========================================================= */
+
+.tour-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 5px 10px;
+
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Trip status */
+
+.tour-status.status-warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.tour-status.status-success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.tour-status.status-info {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.tour-status.status-completed {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.tour-status.status-danger {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.tour-status.status-default {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.tour-status.status-muted {
+  background: #f8fafc;
+  color: #64748b;
+}
+
+/* =========================================================
+   TABLE ACTIONS
+   ========================================================= */
+
+.tour-table-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.icon-button {
+  width: 34px;
+  height: 34px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 7px;
+
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.icon-button:hover {
+  transform: translateY(-1px);
+}
+
+.icon-button.view {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.icon-button.view:hover {
+  background: #dbeafe;
+}
+
+.icon-button.schedule {
+  background: #f0fdfa;
+  color: #0f766e;
+}
+
+.icon-button.schedule:hover {
+  background: #ccfbf1;
+}
+
+.icon-button.edit {
+  background: #ecfeff;
+  color: #0891b2;
+}
+
+.icon-button.edit:hover {
+  background: #cffafe;
+}
+
+.icon-button.delete {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.icon-button.delete:hover {
+  background: #fee2e2;
+}
+
+.icon-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* =========================================================
+   TABLE LOADING / EMPTY
+   ========================================================= */
+
+.tour-table-state {
+  min-height: 280px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 40px 20px;
+
+  color: #64748b;
+  text-align: center;
+}
+
+.tour-table-state svg {
+  margin-bottom: 14px;
+  color: #94a3b8;
+}
+
+.tour-table-state h3 {
+  margin: 0 0 6px;
+
+  color: #334155;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.tour-table-state p {
+  margin: 0;
+
+  color: #64748b;
+  font-size: 14px;
+}
+
+.tour-table-spinner {
+  width: 32px;
+  height: 32px;
+
+  margin-bottom: 12px;
+
+  border: 3px solid #e2e8f0;
+  border-top-color: #0f766e;
+  border-radius: 50%;
+
+  animation: tour-table-spin 0.8s linear infinite;
+}
+
+@keyframes tour-table-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .tour-table th,
+  .tour-table td {
+    padding: 12px;
+  }
+
+  .tour-name-cell {
+    min-width: 180px;
+  }
+
+  .tour-table-actions {
+    gap: 4px;
+  }
+
+  .icon-button {
+    width: 32px;
+    height: 32px;
+  }
+}
+/* =========================================================
+   TOUR STATUS
+   ========================================================= */
+
+.scheduler-tour-status {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 5px 10px;
+
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.scheduler-tour-status.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.scheduler-tour-status.approved {
+  background: #ccfbf1;
+  color: #115e59;
+}
+
+.scheduler-tour-status.in-progress {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.scheduler-tour-status.completed {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.scheduler-tour-status.cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* =========================================================
+   EMPTY / LOADING
+   ========================================================= */
+
+.scheduler-tour-table-loading,
+.scheduler-tour-table-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 220px;
+
+  color: #64748b;
+  font-size: 14px;
+}
+
+.scheduler-tour-table-loading {
+  gap: 10px;
+}
+/* =========================================================
+   TOUR MODAL
+   ========================================================= */
+
+.tour-modal-overlay {
+  position: fixed;
+  inset: 0;
+
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.tour-modal {
+  width: 100%;
+  max-width: 720px;
+  max-height: calc(100vh - 48px);
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  border-radius: 16px;
+
+  background: #ffffff;
+
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35);
+}
+
+/* =========================================================
+   MODAL HEADER
+   ========================================================= */
+
+.tour-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding: 22px 24px;
+
+  border-bottom: 1px solid #e2e8f0;
+
+  background: #ffffff;
+}
+
+.tour-modal-header h2 {
+  margin: 0 0 6px;
+
+  color: #172554;
+
+  font-size: 21px;
+  font-weight: 700;
+}
+
+.tour-modal-header p {
+  margin: 0;
+
+  color: #64748b;
+
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.tour-modal-close {
+  width: 36px;
+  height: 36px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border: none;
+  border-radius: 8px;
+
+  background: transparent;
+  color: #64748b;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.tour-modal-close:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.tour-modal-close:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   MODAL BODY
+   ========================================================= */
+
+.tour-modal-body {
+  flex: 1;
+
+  overflow-y: auto;
+
+  padding: 24px;
+}
+
+/* =========================================================
+   FORM GRID
+   ========================================================= */
+
+.tour-form-grid {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 18px;
+}
+
+/* =========================================================
+   FORM GROUP
+   ========================================================= */
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+
+  margin-bottom: 18px;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
+.form-group label {
+  color: #334155;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.form-group label span {
+  color: #dc2626;
+}
+
+/* =========================================================
+   INPUT / TEXTAREA
+   ========================================================= */
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+
+  background: #ffffff;
+  color: #0f172a;
+
+  font-family: inherit;
+  font-size: 14px;
+
+  outline: none;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.form-group input {
+  height: 42px;
+
+  padding: 0 12px;
+}
+
+.form-group textarea {
+  min-height: 120px;
+
+  padding: 11px 12px;
+
+  resize: vertical;
+
+  line-height: 1.5;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: #94a3b8;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: #0f766e;
+
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+}
+
+.form-group input:disabled,
+.form-group textarea:disabled {
+  background: #f8fafc;
+
+  color: #64748b;
+
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   DATE INPUT
+   ========================================================= */
+
+.form-group input[type="date"] {
+  cursor: pointer;
+}
+
+.form-group input[type="date"]:disabled {
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   FORM ERROR
+   ========================================================= */
+
+.form-error {
+  color: #dc2626;
+
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* =========================================================
+   FORM HELPER
+   ========================================================= */
+
+.form-helper {
+  color: #94a3b8;
+
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+/* =========================================================
+   NOTICE
+   ========================================================= */
+
+.tour-form-notice {
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 8px;
+
+  margin-top: 22px;
+
+  padding: 13px 14px;
+
+  border: 1px solid #bae6fd;
+  border-radius: 9px;
+
+  background: #f0f9ff;
+
+  color: #0369a1;
+
+  font-size: 12px;
+
+  line-height: 1.5;
+}
+
+.tour-form-notice strong {
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   MODAL FOOTER
+   ========================================================= */
+
+.tour-modal-footer {
+  display: flex;
+
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 10px;
+
+  padding: 16px 24px;
+
+  border-top: 1px solid #e2e8f0;
+
+  background: #ffffff;
+}
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.secondary-button,
+.primary-button {
+  min-height: 40px;
+
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  padding: 0 16px;
+
+  border-radius: 8px;
+
+  font-family: inherit;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.secondary-button {
+  border: 1px solid #cbd5e1;
+
+  background: #ffffff;
+
+  color: #334155;
+}
+
+.secondary-button:hover {
+  background: #f8fafc;
+
+  border-color: #94a3b8;
+}
+
+.primary-button {
+  border: 1px solid #0f766e;
+
+  background: #0f766e;
+
+  color: #ffffff;
+}
+
+.primary-button:hover {
+  background: #115e59;
+
+  border-color: #115e59;
+}
+
+.secondary-button:disabled,
+.primary-button:disabled {
+  opacity: 0.6;
+
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .tour-modal-overlay {
+    padding: 14px;
+  }
+
+  .tour-modal {
+    max-height: calc(100vh - 28px);
+
+    border-radius: 12px;
+  }
+
+  .tour-form-grid {
+    grid-template-columns: 1fr;
+
+    gap: 0;
+  }
+
+  .tour-modal-header {
+    padding: 18px;
+  }
+
+  .tour-modal-body {
+    padding: 18px;
+  }
+
+  .tour-modal-footer {
+    padding: 14px 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tour-modal-header h2 {
+    font-size: 18px;
+  }
+
+  .tour-modal-footer {
+    flex-direction: column-reverse;
+  }
+
+  .secondary-button,
+  .primary-button {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   MODAL HEADER
+   ========================================================= */
+
+.tour-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 16px;
+
+  padding: 22px 24px;
+
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.tour-modal-header h2 {
+  margin: 0;
+
+  color: #172554;
+
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.tour-modal-header p {
+  margin: 6px 0 0;
+
+  color: #64748b;
+
+  font-size: 14px;
+}
+
+.tour-modal-close {
+  width: 36px;
+  height: 36px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border: none;
+  border-radius: 8px;
+
+  background: transparent;
+  color: #64748b;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.tour-modal-close:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+/* =========================================================
+   MODAL BODY
+   ========================================================= */
+
+.tour-modal-body {
+  padding: 24px;
+
+  overflow-y: auto;
+}
+
+.tour-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 18px;
+
+  margin-bottom: 18px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.form-group label {
+  color: #334155;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.form-group label span {
+  color: #dc2626;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  box-sizing: border-box;
+
+  padding: 10px 12px;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+
+  outline: none;
+
+  background: #ffffff;
+  color: #0f172a;
+
+  font-family: inherit;
+  font-size: 14px;
+
+  transition: 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: #0f766e;
+
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+}
+
+.form-group input:disabled,
+.form-group textarea:disabled {
+  background: #f8fafc;
+  cursor: not-allowed;
+}
+
+.form-group textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.form-error {
+  color: #dc2626;
+  font-size: 12px;
+}
+
+/* =========================================================
+   MODAL NOTICE
+   ========================================================= */
+
+.tour-form-notice {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 8px;
+
+  margin-top: 20px;
+  padding: 12px 14px;
+
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+
+  background: #f0f9ff;
+  color: #075985;
+
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.tour-form-notice strong {
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   MODAL FOOTER
+   ========================================================= */
+
+.tour-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 10px;
+
+  padding: 16px 24px;
+
+  border-top: 1px solid #e2e8f0;
+
+  background: #ffffff;
+}
+
+.secondary-button,
+.primary-button {
+  min-height: 40px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  padding: 0 16px;
+
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.secondary-button {
+  border: 1px solid #cbd5e1;
+
+  background: #ffffff;
+  color: #334155;
+}
+
+.secondary-button:hover {
+  background: #f8fafc;
+}
+
+.primary-button {
+  border: none;
+
+  background: #0f766e;
+  color: #ffffff;
+}
+
+.primary-button:hover {
+  background: #115e59;
+}
+
+.primary-button:disabled,
+.secondary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   RESPONSIVE MODAL
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .tour-modal-overlay {
+    padding: 12px;
+  }
+
+  .tour-modal {
+    max-height: calc(100vh - 24px);
+  }
+
+  .tour-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tour-modal-header,
+  .tour-modal-body {
+    padding: 18px;
+  }
+
+  .tour-modal-footer {
+    padding: 14px 18px;
+  }
+}
+
+@media (max-width: 520px) {
+  .tour-modal-footer {
+    flex-direction: column-reverse;
+  }
+
+  .secondary-button,
+  .primary-button {
+    width: 100%;
+  }
+}

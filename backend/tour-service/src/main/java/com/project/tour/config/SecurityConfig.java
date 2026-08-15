@@ -18,107 +18,103 @@ import java.util.Arrays;
 @Configuration
 public class SecurityConfig {
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(
-            org.springframework.security.config.annotation.web.builders.HttpSecurity http,
-            BearerTokenResolver bearerTokenResolver,
-            JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
+        @Bean
+        public SecurityFilterChain securityFilterChain(
+                        org.springframework.security.config.annotation.web.builders.HttpSecurity http,
+                        BearerTokenResolver bearerTokenResolver,
+                        JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
 
-        return http
-                .csrf(csrf -> csrf.disable())
+                return http
+                                .csrf(csrf -> csrf.disable())
 
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                .authorizeHttpRequests(authorize -> authorize
+                                .authorizeHttpRequests(authorize -> authorize
 
-                        // CORS preflight
-                        .requestMatchers(HttpMethod.OPTIONS, "/**")
-                        .permitAll()
+                                                // CORS preflight
+                                                .requestMatchers(HttpMethod.OPTIONS, "/**")
+                                                .permitAll()
 
-                        // Public/internal endpoints
-                        .requestMatchers(
-                                "/actuator/health",
-                                "/actuator/info",
-                                "/internal/**")
-                        .permitAll()
+                                                // Public/internal endpoints
+                                                .requestMatchers(
+                                                                "/actuator/health",
+                                                                "/actuator/info",
+                                                                "/internal/**")
+                                                .permitAll()
 
-                        // Admin
-                        .requestMatchers("/api/admin/**")
-                        .hasRole("ADMIN")
+                                                // Admin
+                                                .requestMatchers("/api/admin/**")
+                                                .hasRole("ADMIN")
 
-                        // Scheduler
-                        .requestMatchers("/api/scheduler/**")
-                        .hasRole("SCHEDULE")
+                                                // Scheduler
+                                                .requestMatchers("/api/scheduler/**")
+                                                .hasRole("SCHEDULER")
 
-                        // Convenience
-                        .requestMatchers("/api/convenience/**")
-                        .hasRole("CONVENIENCE")
+                                                // Convenience
+                                                .requestMatchers("/api/convenience/**")
+                                                .hasRole("CONVENIENCE")
 
-                        // Everything else
-                        .anyRequest()
-                        .authenticated())
+                                                // Everything else
+                                                .anyRequest()
+                                                .authenticated())
 
-                .oauth2ResourceServer(resourceServer -> resourceServer
-                        .bearerTokenResolver(bearerTokenResolver)
-                        .jwt(jwt -> jwt
-                                .jwtAuthenticationConverter(
-                                        jwtAuthenticationConverter)))
+                                .oauth2ResourceServer(resourceServer -> resourceServer
+                                                .bearerTokenResolver(bearerTokenResolver)
+                                                .jwt(jwt -> jwt
+                                                                .jwtAuthenticationConverter(
+                                                                                jwtAuthenticationConverter)))
 
-                .build();
-    }
-
-    @Bean
-    public BearerTokenResolver bearerTokenResolver() {
-
-        DefaultBearerTokenResolver headerResolver =
-                new DefaultBearerTokenResolver();
-
-        return request -> {
-
-            String cookieToken = findAccessTokenCookie(request);
-
-            if (cookieToken != null) {
-                return cookieToken;
-            }
-
-            return headerResolver.resolve(request);
-        };
-    }
-
-    @Bean
-    public JwtAuthenticationConverter jwtAuthenticationConverter() {
-
-        JwtGrantedAuthoritiesConverter authoritiesConverter =
-                new JwtGrantedAuthoritiesConverter();
-
-        authoritiesConverter.setAuthoritiesClaimName("scope");
-        authoritiesConverter.setAuthorityPrefix("ROLE_");
-
-        JwtAuthenticationConverter authenticationConverter =
-                new JwtAuthenticationConverter();
-
-        authenticationConverter.setJwtGrantedAuthoritiesConverter(
-                authoritiesConverter);
-
-        return authenticationConverter;
-    }
-
-    private String findAccessTokenCookie(
-            HttpServletRequest request) {
-
-        Cookie[] cookies = request.getCookies();
-
-        if (cookies == null) {
-            return null;
+                                .build();
         }
 
-        return Arrays.stream(cookies)
-                .filter(cookie ->
-                        "accessToken".equals(cookie.getName()))
-                .map(Cookie::getValue)
-                .filter(value -> !value.isBlank())
-                .findFirst()
-                .orElse(null);
-    }
+        @Bean
+        public BearerTokenResolver bearerTokenResolver() {
+
+                DefaultBearerTokenResolver headerResolver = new DefaultBearerTokenResolver();
+
+                return request -> {
+
+                        String cookieToken = findAccessTokenCookie(request);
+
+                        if (cookieToken != null) {
+                                return cookieToken;
+                        }
+
+                        return headerResolver.resolve(request);
+                };
+        }
+
+        @Bean
+        public JwtAuthenticationConverter jwtAuthenticationConverter() {
+
+                JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
+
+                authoritiesConverter.setAuthoritiesClaimName("scope");
+                authoritiesConverter.setAuthorityPrefix("ROLE_");
+
+                JwtAuthenticationConverter authenticationConverter = new JwtAuthenticationConverter();
+
+                authenticationConverter.setJwtGrantedAuthoritiesConverter(
+                                authoritiesConverter);
+
+                return authenticationConverter;
+        }
+
+        private String findAccessTokenCookie(
+                        HttpServletRequest request) {
+
+                Cookie[] cookies = request.getCookies();
+
+                if (cookies == null) {
+                        return null;
+                }
+
+                return Arrays.stream(cookies)
+                                .filter(cookie -> "accessToken".equals(cookie.getName()))
+                                .map(Cookie::getValue)
+                                .filter(value -> !value.isBlank())
+                                .findFirst()
+                                .orElse(null);
+        }
 }

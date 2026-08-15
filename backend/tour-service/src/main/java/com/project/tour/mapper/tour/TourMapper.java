@@ -6,66 +6,99 @@ import com.project.tour.dto.tour.UpdateTourRequest;
 import com.project.tour.model.Cruise;
 import com.project.tour.model.Tour;
 
-public class TourMapper {
+public final class TourMapper {
+
+    private TourMapper() {
+    }
+
+    // =====================================================
+    // CREATE
+    // =====================================================
 
     public static Tour toEntity(
-            CreateTourRequest request,
-            Cruise cruise) {
+            CreateTourRequest request) {
 
         Tour tour = new Tour();
 
-        tour.setCode(request.getCode());
-        tour.setName(request.getName());
-        tour.setDescription(request.getDescription());
-        tour.setDayStart(request.getDayStart());
-        tour.setDayEnd(request.getDayEnd());
-        tour.setCruise(cruise);
-        tour.setBookingStart(request.getBookingStart());
-        tour.setBookingEnd(request.getBookingEnd());
+        tour.setCode(request.code());
+        tour.setName(request.name());
+        tour.setDescription(request.description());
+
+        tour.setStartDate(request.startDate());
+        tour.setEndDate(request.endDate());
+
+        /*
+         * Scheduler không được chọn Cruise.
+         *
+         * Các field:
+         * - cruise
+         * - bookingStart
+         * - bookingEnd
+         *
+         * giữ null để Operation cấu hình sau.
+         */
 
         return tour;
     }
 
+    // =====================================================
+    // UPDATE
+    // =====================================================
+
     public static void updateEntity(
             Tour tour,
-            UpdateTourRequest request,
-            Cruise cruise) {
+            UpdateTourRequest request) {
 
-        tour.setCode(request.getCode());
-        tour.setName(request.getName());
-        tour.setDescription(request.getDescription());
-        tour.setDayStart(request.getDayStart());
-        tour.setDayEnd(request.getDayEnd());
-        tour.setCruise(cruise);
-        tour.setStatusTrip(request.getStatusTrip());
-        tour.setBookingStart(request.getBookingStart());
-        tour.setBookingEnd(request.getBookingEnd());
-        tour.setStatusBooking(request.getStatusBooking());
+        tour.setCode(request.code());
+        tour.setName(request.name());
+        tour.setDescription(request.description());
+
+        tour.setStartDate(request.startDate());
+        tour.setEndDate(request.endDate());
+
+        /*
+         * Không cập nhật:
+         * - cruise
+         * - bookingStart
+         * - bookingEnd
+         * - statusTrip
+         * - statusBooking
+         *
+         * Scheduler không có quyền thay đổi các field này.
+         */
     }
 
-    public static TourResponse toResponse(Tour tour) {
+    // =====================================================
+    // RESPONSE
+    // =====================================================
 
-        TourResponse response = new TourResponse();
+    public static TourResponse toResponse(
+            Tour tour) {
 
-        response.setId(tour.getId());
-        response.setCode(tour.getCode());
-        response.setName(tour.getName());
-        response.setDescription(tour.getDescription());
-        response.setDayStart(tour.getDayStart());
-        response.setDayEnd(tour.getDayEnd());
+        Cruise cruise = tour.getCruise();
 
-        if (tour.getCruise() != null) {
-            response.setCruiseId(tour.getCruise().getId());
-            response.setCruiseName(tour.getCruise().getName());
-        }
+        return new TourResponse(
+                tour.getId(),
+                tour.getCode(),
+                tour.getName(),
+                tour.getDescription(),
 
-        response.setStatusTrip(tour.getStatusTrip());
-        response.setBookingStart(tour.getBookingStart());
-        response.setBookingEnd(tour.getBookingEnd());
-        response.setStatusBooking(tour.getStatusBooking());
-        response.setCreatedAt(tour.getCreatedAt());
-        response.setUpdatedAt(tour.getUpdatedAt());
+                tour.getStartDate(),
+                tour.getEndDate(),
 
-        return response;
+                cruise != null
+                        ? cruise.getId()
+                        : null,
+
+                cruise != null
+                        ? cruise.getName()
+                        : null,
+
+                tour.getStatusTrip(),
+                tour.getBookingStart(),
+                tour.getBookingEnd(),
+                tour.getStatusBooking(),
+                tour.getCreatedAt(),
+                tour.getUpdatedAt());
     }
 }

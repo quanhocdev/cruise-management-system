@@ -30,7 +30,13 @@ import ManagerService from "./modules/admin/pages/ManagerService";
 import ManagerPolicy from "./modules/admin/pages/ManagerPolicy";
 
 import PassengerDashboard from "./modules/passenger/pages/Dashboard";
+
+import SchedulerLayout from "./layouts/SchedulerLayout";
 import SchedulerDashboard from "./modules/scheduler/pages/Dashboard";
+import ManagerTour from "./modules/scheduler/pages/ManagerTour";
+import ManagerSchedule from "./modules/scheduler/pages/ManagerSchedule";
+import ManagerScheduleStops from "./modules/scheduler/pages/ManagerScheduleStops";
+
 import OperationDashboard from "./modules/operation/pages/Dashboard";
 import OnboardDashboard from "./modules/onboard/pages/Dashboard";
 import ShoreDashboard from "./modules/shore/pages/Dashboard";
@@ -149,14 +155,29 @@ export default function App() {
             path="/scheduler/*"
             element={
               <ProtectedRoute allowedRoles={["SCHEDULER"]}>
-                <Routes>
-                  <Route path="dashboard" element={<SchedulerDashboard />} />
+                <SchedulerLayout>
+                  <Routes>
+                    {/* DASHBOARD */}
+                    <Route path="dashboard" element={<SchedulerDashboard />} />
+                    {/* TOUR */}
+                    <Route path="tours" element={<ManagerTour />} />
 
-                  <Route
-                    path=""
-                    element={<Navigate to="dashboard" replace />}
-                  />
-                </Routes>
+                    <Route
+                      path="tours/:tourId/schedules"
+                      element={<ManagerSchedule />}
+                    />
+                    <Route
+                      path="tours/:tourId/schedules/:scheduleId/stops"
+                      element={<ManagerScheduleStops />}
+                    />
+                    {/* TOUR DETAIL */}
+                    {/* DEFAULT */}
+                    <Route
+                      path=""
+                      element={<Navigate to="dashboard" replace />}
+                    />
+                  </Routes>
+                </SchedulerLayout>
               </ProtectedRoute>
             }
           />

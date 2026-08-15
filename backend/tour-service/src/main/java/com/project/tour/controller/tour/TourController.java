@@ -26,6 +26,10 @@ public class TourController {
         this.tourService = tourService;
     }
 
+    // =====================================================
+    // CREATE TOUR
+    // =====================================================
+
     @PostMapping
     public ResponseEntity<TourResponse> createTour(
             @Valid @RequestBody CreateTourRequest request) {
@@ -37,6 +41,10 @@ public class TourController {
                 .body(response);
     }
 
+    // =====================================================
+    // GET BY ID
+    // =====================================================
+
     @GetMapping("/{id}")
     public ResponseEntity<TourResponse> getTourById(
             @PathVariable UUID id) {
@@ -44,6 +52,10 @@ public class TourController {
         return ResponseEntity.ok(
                 tourService.getTourById(id));
     }
+
+    // =====================================================
+    // GET BY CODE
+    // =====================================================
 
     @GetMapping("/code/{code}")
     public ResponseEntity<TourResponse> getTourByCode(
@@ -53,6 +65,10 @@ public class TourController {
                 tourService.getTourByCode(code));
     }
 
+    // =====================================================
+    // GET ALL / BY CRUISE
+    // =====================================================
+
     @GetMapping
     public ResponseEntity<List<TourResponse>> getTours(
             @RequestParam(required = false) UUID cruiseId) {
@@ -60,13 +76,20 @@ public class TourController {
         List<TourResponse> response;
 
         if (cruiseId != null) {
+
             response = tourService.getToursByCruise(cruiseId);
+
         } else {
+
             response = tourService.getAllTours();
         }
 
         return ResponseEntity.ok(response);
     }
+
+    // =====================================================
+    // UPDATE
+    // =====================================================
 
     @PatchMapping("/{id}")
     public ResponseEntity<TourResponse> updateTour(
@@ -74,8 +97,14 @@ public class TourController {
             @Valid @RequestBody UpdateTourRequest request) {
 
         return ResponseEntity.ok(
-                tourService.updateTour(id, request));
+                tourService.updateTour(
+                        id,
+                        request));
     }
+
+    // =====================================================
+    // DELETE
+    // =====================================================
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTour(
