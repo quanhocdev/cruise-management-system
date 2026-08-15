@@ -1,0 +1,74 @@
+/*src/layouts/SchedulerLayout.css*/
+/* =========================================================
+   SCHEDULER LAYOUT
+   ========================================================= */
+
+.scheduler-layout {
+  width: 100%;
+  height: 100vh;
+
+  display: flex;
+
+  overflow: hidden;
+
+  background: #f8fafc;
+}
+
+/* =========================================================
+   MAIN
+   ========================================================= */
+
+.scheduler-layout-main {
+  flex: 1;
+
+  min-width: 0;
+
+  height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+}
+
+/* =========================================================
+   CONTENT
+   ========================================================= */
+
+.scheduler-layout-content {
+  flex: 1;
+
+  min-height: 0;
+
+  overflow-y: auto;
+
+  padding: 24px;
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 992px) {
+  .scheduler-layout-content {
+    padding: 20px;
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .scheduler-layout-content {
+    padding: 16px;
+  }
+}
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 480px) {
+  .scheduler-layout-content {
+    padding: 12px;
+  }
+}

@@ -6,132 +6,33 @@ import com.project.tour.model.enums.tour.TourStatusTrip;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public class TourResponse {
+public record TourResponse(
 
-    private UUID id;
-    private String code;
-    private String name;
-    private String description;
-    private Integer dayStart;
-    private Integer dayEnd;
-    private UUID cruiseId;
-    private String cruiseName;
-    private TourStatusTrip statusTrip;
-    private LocalDateTime bookingStart;
-    private LocalDateTime bookingEnd;
-    private TourBookingStatus statusBooking;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+        UUID id,
 
-    public UUID getId() {
-        return id;
-    }
+        String code,
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
+        String name,
 
-    public String getCode() {
-        return code;
-    }
+        String description,
 
-    public void setCode(String code) {
-        this.code = code;
-    }
+        Integer dayStart,
 
-    public String getName() {
-        return name;
-    }
+        Integer dayEnd,
 
-    public void setName(String name) {
-        this.name = name;
-    }
+        UUID cruiseId,
 
-    public String getDescription() {
-        return description;
-    }
+        String cruiseName,
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+        TourStatusTrip statusTrip,
 
-    public Integer getDayStart() {
-        return dayStart;
-    }
+        LocalDateTime bookingStart,
 
-    public void setDayStart(Integer dayStart) {
-        this.dayStart = dayStart;
-    }
+        LocalDateTime bookingEnd,
 
-    public Integer getDayEnd() {
-        return dayEnd;
-    }
+        TourBookingStatus statusBooking,
 
-    public void setDayEnd(Integer dayEnd) {
-        this.dayEnd = dayEnd;
-    }
+        LocalDateTime createdAt,
 
-    public UUID getCruiseId() {
-        return cruiseId;
-    }
-
-    public void setCruiseId(UUID cruiseId) {
-        this.cruiseId = cruiseId;
-    }
-
-    public String getCruiseName() {
-        return cruiseName;
-    }
-
-    public void setCruiseName(String cruiseName) {
-        this.cruiseName = cruiseName;
-    }
-
-    public TourStatusTrip getStatusTrip() {
-        return statusTrip;
-    }
-
-    public void setStatusTrip(TourStatusTrip statusTrip) {
-        this.statusTrip = statusTrip;
-    }
-
-    public LocalDateTime getBookingStart() {
-        return bookingStart;
-    }
-
-    public void setBookingStart(LocalDateTime bookingStart) {
-        this.bookingStart = bookingStart;
-    }
-
-    public LocalDateTime getBookingEnd() {
-        return bookingEnd;
-    }
-
-    public void setBookingEnd(LocalDateTime bookingEnd) {
-        this.bookingEnd = bookingEnd;
-    }
-
-    public TourBookingStatus getStatusBooking() {
-        return statusBooking;
-    }
-
-    public void setStatusBooking(TourBookingStatus statusBooking) {
-        this.statusBooking = statusBooking;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+        LocalDateTime updatedAt) {
 }

@@ -5,7 +5,6 @@ import com.project.tour.model.enums.tour.TourStatusTrip;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -34,14 +33,23 @@ public class Tour {
     @Column(name = "day_end", nullable = false)
     private Integer dayEnd;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "cruise_id", nullable = false)
+    /*
+     * Cruise chỉ được Operation cấu hình.
+     *
+     * Khi Scheduler tạo Tour:
+     * cruise = null
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cruise_id")
     private Cruise cruise;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status_trip", nullable = false, length = 30)
-    private TourStatusTrip statusTrip = TourStatusTrip.UPCOMING;
+    private TourStatusTrip statusTrip = TourStatusTrip.APPROVAL_PENDING;
 
+    /*
+     * Chỉ được Operation cấu hình.
+     */
     @Column(name = "booking_start")
     private LocalDateTime bookingStart;
 
@@ -52,7 +60,7 @@ public class Tour {
     @Column(name = "status_booking", nullable = false, length = 30)
     private TourBookingStatus statusBooking = TourBookingStatus.NOT_OPEN;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
@@ -60,13 +68,14 @@ public class Tour {
 
     @PrePersist
     protected void onCreate() {
+
         LocalDateTime now = LocalDateTime.now();
 
         createdAt = now;
         updatedAt = now;
 
         if (statusTrip == null) {
-            statusTrip = TourStatusTrip.UPCOMING;
+            statusTrip = TourStatusTrip.APPROVAL_PENDING;
         }
 
         if (statusBooking == null) {
