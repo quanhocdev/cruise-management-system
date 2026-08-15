@@ -6,4 +6,6 @@ import java.util.*;
 public interface PassengerVoyageRepository extends JpaRepository<PassengerVoyage, Long> {
     List<PassengerVoyage> findAllByBooking_IdOrderByIdAsc(Long bookingId);
     long countByVoyageIdAndPassengerStatusIn(UUID voyageId, Collection<PassengerStatus> statuses);
+    Optional<PassengerVoyage> findByNfcTagIdIgnoreCase(String nfcTagId);
+    boolean existsByNfcTagIdIgnoreCase(String nfcTagId);
 }

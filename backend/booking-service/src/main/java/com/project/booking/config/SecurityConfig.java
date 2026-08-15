@@ -18,6 +18,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(a -> a
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/actuator/health", "/actuator/info", "/internal/**").permitAll()
+                .requestMatchers("/api/v1/check-in/**").hasAnyRole("ADMIN", "SCHEDULE")
                 .anyRequest().authenticated())
             .oauth2ResourceServer(o -> o.bearerTokenResolver(resolver).jwt(j -> j.jwtAuthenticationConverter(converter)))
             .build();
