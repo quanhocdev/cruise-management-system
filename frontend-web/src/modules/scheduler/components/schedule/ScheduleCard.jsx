@@ -4,22 +4,35 @@ const getStatusLabel = (status) => {
   switch (status) {
     case "ACTIVE":
       return "Đang hoạt động";
+
     case "INACTIVE":
       return "Không hoạt động";
+
     default:
       return status || "-";
   }
+};
+
+const formatDate = (dateString) => {
+  if (!dateString) {
+    return "-";
+  }
+
+  const date = new Date(`${dateString}T00:00:00`);
+
+  return date.toLocaleDateString("vi-VN", {
+    weekday: "long",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
 };
 
 function ScheduleCard({ schedule, onEdit, onDelete, onView }) {
   return (
     <article className="schedule-card">
       <div className="schedule-card-top">
-        <div className="schedule-day">
-          <CalendarDays size={18} />
-
-          <span>Ngày {schedule.dayNumber}</span>
-        </div>
+        <span className="schedule-card-label">Lịch trình trong ngày</span>
 
         <span
           className={`schedule-status ${
@@ -33,13 +46,11 @@ function ScheduleCard({ schedule, onEdit, onDelete, onView }) {
       <div className="schedule-card-body">
         <h3>{schedule.name}</h3>
 
-        {schedule.realDay && (
-          <div className="schedule-date">
-            <CalendarDays size={15} />
+        <div className="schedule-date">
+          <CalendarDays size={15} />
 
-            <span>{schedule.realDay}</span>
-          </div>
-        )}
+          <span>{formatDate(schedule.realDay)}</span>
+        </div>
 
         {schedule.description && (
           <p>
@@ -52,7 +63,7 @@ function ScheduleCard({ schedule, onEdit, onDelete, onView }) {
         <div className="schedule-card-stops">
           <MapPin size={16} />
 
-          <span>Quản lý các điểm dừng tại lịch trình này</span>
+          <span>Quản lý các điểm dừng cập cảng của ngày này</span>
         </div>
       </div>
 

@@ -6,7 +6,6 @@ import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
   Map,
-  CalendarDays,
   ChevronLeft,
   ChevronRight,
   Ship,
@@ -24,11 +23,6 @@ const menuItems = [
     label: "Quản lý Tour",
     icon: Map,
     path: "/scheduler/tours",
-  },
-  {
-    label: "Lịch trình",
-    icon: CalendarDays,
-    path: "/scheduler/schedules",
   },
 ];
 
@@ -51,7 +45,7 @@ function SchedulerSidebar() {
         <button
           type="button"
           className="scheduler-sidebar-toggle"
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={() => setCollapsed((prev) => !prev)}
           title={collapsed ? "Mở rộng" : "Thu gọn"}
         >
           {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}

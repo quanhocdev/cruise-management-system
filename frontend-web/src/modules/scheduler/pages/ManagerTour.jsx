@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import { Plus, RefreshCw } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import useTours from "../hooks/useTours";
 import TourTable from "../components/tour/TourTable";
 import TourFormModal from "../components/tour/TourFormModal";
 
 import "../styles/ManagerTour.css";
-
+import "../styles/ManagerSchedule.css";
 function ManagerTour() {
+  const navigate = useNavigate();
+
   const {
     tours,
     loading,
@@ -23,7 +26,7 @@ function ManagerTour() {
 
   useEffect(() => {
     loadTours();
-  }, []);
+  }, [loadTours]);
 
   const handleCreate = () => {
     console.log("CLICK TAO TOUR");
@@ -35,6 +38,20 @@ function ManagerTour() {
   const handleEdit = (tour) => {
     setSelectedTour(tour);
     setShowModal(true);
+  };
+
+  /*
+   * =====================================================
+   * ĐI ĐẾN QUẢN LÝ LỊCH TRÌNH CỦA TOUR
+   * =====================================================
+   */
+  const handleManageSchedule = (tour) => {
+    if (!tour?.id) {
+      console.error("TOUR ID KHÔNG TỒN TẠI:", tour);
+      return;
+    }
+
+    navigate(`/scheduler/tours/${tour.id}/schedules`);
   };
 
   const handleCloseModal = () => {
@@ -76,6 +93,10 @@ function ManagerTour() {
 
   return (
     <div className="scheduler-tour-page">
+      {/* =====================================================
+          HEADER
+         ===================================================== */}
+
       <div className="scheduler-tour-header">
         <div>
           <h1>Quản lý Tour</h1>
@@ -108,12 +129,20 @@ function ManagerTour() {
         </div>
       </div>
 
+      {/* =====================================================
+          ERROR
+         ===================================================== */}
+
       {error && (
         <div className="scheduler-tour-error">
           <strong>Không thể tải dữ liệu.</strong>
           <span>{error}</span>
         </div>
       )}
+
+      {/* =====================================================
+          SUMMARY
+         ===================================================== */}
 
       <div className="scheduler-tour-summary">
         <div className="scheduler-tour-summary-card">
@@ -123,6 +152,7 @@ function ManagerTour() {
 
         <div className="scheduler-tour-summary-card pending">
           <span>Chờ Operation duyệt</span>
+
           <strong>
             {
               tours.filter((tour) => tour.statusTrip === "APPROVAL_PENDING")
@@ -133,6 +163,7 @@ function ManagerTour() {
 
         <div className="scheduler-tour-summary-card approved">
           <span>Đã được duyệt</span>
+
           <strong>
             {tours.filter((tour) => tour.statusTrip === "APPROVED").length}
           </strong>
@@ -140,11 +171,16 @@ function ManagerTour() {
 
         <div className="scheduler-tour-summary-card completed">
           <span>Hoàn thành</span>
+
           <strong>
             {tours.filter((tour) => tour.statusTrip === "COMPLETED").length}
           </strong>
         </div>
       </div>
+
+      {/* =====================================================
+          TOUR TABLE
+         ===================================================== */}
 
       <div className="scheduler-tour-content">
         <TourTable
@@ -152,8 +188,13 @@ function ManagerTour() {
           loading={loading}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          onManageSchedule={handleManageSchedule}
         />
       </div>
+
+      {/* =====================================================
+          CREATE / EDIT TOUR MODAL
+         ===================================================== */}
 
       <TourFormModal
         open={showModal}

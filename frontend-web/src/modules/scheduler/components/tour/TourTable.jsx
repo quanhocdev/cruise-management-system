@@ -48,7 +48,13 @@ const getBookingStatusLabel = (status) => {
       return status || "-";
   }
 };
+const formatDate = (date) => {
+  if (!date) return "-";
 
+  const [year, month, day] = date.split("-");
+
+  return `${day}/${month}/${year}`;
+};
 const getBookingStatusClass = (status) => {
   switch (status) {
     case "OPEN":
@@ -126,7 +132,7 @@ function TourTable({
 
               <td>
                 <span>
-                  Ngày {tour.dayStart} → {tour.dayEnd}
+                  {formatDate(tour.startDate)} → {formatDate(tour.endDate)}
                 </span>
               </td>
 

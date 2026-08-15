@@ -1,0 +1,803 @@
+/* =========================================================
+   MANAGER SCHEDULE
+   ========================================================= */
+
+.scheduler-schedule-page {
+  min-height: 100%;
+  padding: 28px 32px 40px;
+  background: #f5f7fb;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.scheduler-schedule-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.scheduler-schedule-header-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.scheduler-schedule-header-left > div {
+  min-width: 0;
+}
+
+.scheduler-schedule-header h1 {
+  margin: 0 0 6px;
+  font-size: 28px;
+  line-height: 1.25;
+  font-weight: 700;
+  color: #172033;
+}
+
+.scheduler-schedule-header p {
+  margin: 0;
+  color: #667085;
+  font-size: 14px;
+}
+
+/* =========================================================
+   BACK BUTTON
+   ========================================================= */
+
+.scheduler-back-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  height: 40px;
+  padding: 0 14px;
+
+  border: 1px solid #d9dee8;
+  border-radius: 8px;
+
+  background: #ffffff;
+  color: #344054;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.scheduler-back-button:hover {
+  background: #f8fafc;
+  border-color: #bfc7d4;
+  color: #1d2939;
+}
+
+.scheduler-back-button:active {
+  transform: translateY(1px);
+}
+
+/* =========================================================
+   REFRESH
+   ========================================================= */
+
+.scheduler-tour-refresh-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  min-height: 40px;
+  padding: 0 15px;
+
+  border: 1px solid #d9dee8;
+  border-radius: 8px;
+
+  background: #ffffff;
+  color: #344054;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.scheduler-tour-refresh-button:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #bfc7d4;
+}
+
+.scheduler-tour-refresh-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.scheduler-spin {
+  animation: scheduler-spin 0.9s linear infinite;
+}
+
+@keyframes scheduler-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================================================
+   ERROR
+   ========================================================= */
+
+.scheduler-tour-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+
+  margin-bottom: 22px;
+  padding: 14px 16px;
+
+  border: 1px solid #fecdca;
+  border-radius: 10px;
+
+  background: #fef3f2;
+  color: #b42318;
+
+  font-size: 14px;
+}
+
+.scheduler-tour-error strong {
+  white-space: nowrap;
+}
+
+.scheduler-tour-error span {
+  color: #912018;
+}
+
+/* =========================================================
+   TOUR INFORMATION
+   ========================================================= */
+
+.scheduler-tour-info {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+
+  gap: 1px;
+
+  margin-bottom: 26px;
+
+  overflow: hidden;
+
+  border: 1px solid #e4e7ec;
+  border-radius: 12px;
+
+  background: #e4e7ec;
+
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+.scheduler-tour-info > div {
+  min-width: 0;
+  padding: 17px 18px;
+
+  background: #ffffff;
+}
+
+.scheduler-tour-info span {
+  display: block;
+
+  margin-bottom: 7px;
+
+  color: #667085;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.scheduler-tour-info strong {
+  display: block;
+
+  overflow: hidden;
+
+  color: #172033;
+  font-size: 14px;
+  font-weight: 650;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   DAY LIST SECTION
+   ========================================================= */
+
+.schedule-day-list {
+  margin-top: 8px;
+}
+
+.schedule-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 18px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  color: #172033;
+}
+
+.section-title svg {
+  flex-shrink: 0;
+}
+
+.section-title h2 {
+  margin: 0;
+
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+.schedule-list-header p {
+  margin: 6px 0 0;
+
+  color: #667085;
+  font-size: 14px;
+}
+
+/* =========================================================
+   DAY GRID
+   ========================================================= */
+
+.schedule-day-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+/* =========================================================
+   DAY ITEM
+   ========================================================= */
+
+.schedule-day-item {
+  min-width: 0;
+
+  border: 1px solid #e4e7ec;
+  border-radius: 14px;
+
+  background: #ffffff;
+
+  overflow: hidden;
+
+  box-shadow:
+    0 1px 2px rgba(16, 24, 40, 0.04),
+    0 4px 12px rgba(16, 24, 40, 0.03);
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.schedule-day-item:hover {
+  border-color: #d0d5dd;
+
+  box-shadow:
+    0 2px 4px rgba(16, 24, 40, 0.05),
+    0 8px 20px rgba(16, 24, 40, 0.05);
+}
+
+/* =========================================================
+   DAY HEADER
+   ========================================================= */
+
+.schedule-day-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding: 15px 17px;
+
+  border-bottom: 1px solid #eaecf0;
+
+  background: #f9fafb;
+}
+
+.schedule-day-number {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  color: #172033;
+}
+
+.schedule-day-number svg {
+  flex-shrink: 0;
+}
+
+.schedule-day-number strong {
+  font-size: 15px;
+}
+
+.schedule-day-item-header > span {
+  overflow: hidden;
+
+  color: #667085;
+  font-size: 13px;
+  font-weight: 500;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   HAS / NO SCHEDULE
+   ========================================================= */
+
+.schedule-day-item.has-schedule {
+  border-color: #d9dee8;
+}
+
+.schedule-day-item.no-schedule {
+  border-style: dashed;
+}
+
+/* =========================================================
+   EMPTY DAY
+   ========================================================= */
+
+.schedule-day-empty {
+  min-height: 245px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 28px 20px;
+
+  text-align: center;
+}
+
+.schedule-day-empty svg {
+  margin-bottom: 12px;
+
+  color: #98a2b3;
+}
+
+.schedule-day-empty h3 {
+  margin: 0 0 6px;
+
+  color: #344054;
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.schedule-day-empty p {
+  max-width: 280px;
+
+  margin: 0 0 18px;
+
+  color: #667085;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   PRIMARY BUTTON
+   ========================================================= */
+
+.primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  min-height: 38px;
+  padding: 0 14px;
+
+  border: 1px solid transparent;
+  border-radius: 8px;
+
+  background: #2563eb;
+  color: #ffffff;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.primary-button:hover {
+  background: #1d4ed8;
+
+  box-shadow: 0 2px 5px rgba(37, 99, 235, 0.2);
+}
+
+.primary-button:active {
+  transform: translateY(1px);
+}
+
+/* =========================================================
+   SCHEDULE CARD OVERRIDE
+   ScheduleCard được render bên trong day item
+   ========================================================= */
+
+.schedule-day-item .schedule-card {
+  border: 0;
+  border-radius: 0;
+
+  box-shadow: none;
+}
+
+.schedule-day-item .schedule-card:hover {
+  border: 0;
+  box-shadow: none;
+  transform: none;
+}
+/* =========================================================
+   SCHEDULE CARD
+   ========================================================= */
+
+.schedule-card {
+  width: 100%;
+  box-sizing: border-box;
+  background: #ffffff;
+}
+
+/* =========================================================
+   CARD TOP
+   ========================================================= */
+
+.schedule-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding: 12px 17px;
+
+  border-bottom: 1px solid #eaecf0;
+  background: #ffffff;
+}
+
+.schedule-card-label {
+  color: #667085;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.schedule-status {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 5px 10px;
+
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.schedule-status.active {
+  color: #027a48;
+  background: #ecfdf3;
+}
+
+.schedule-status.inactive {
+  color: #475467;
+  background: #f2f4f7;
+}
+
+/* =========================================================
+   CARD BODY
+   ========================================================= */
+
+.schedule-card-body {
+  padding: 18px 17px;
+}
+
+.schedule-card-body h3 {
+  margin: 0 0 10px;
+
+  color: #172033;
+  font-size: 17px;
+  line-height: 1.4;
+  font-weight: 700;
+}
+
+.schedule-date {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  margin-bottom: 12px;
+
+  color: #667085;
+  font-size: 13px;
+}
+
+.schedule-date svg {
+  flex-shrink: 0;
+  color: #98a2b3;
+}
+
+.schedule-card-body p {
+  margin: 0 0 14px;
+
+  color: #667085;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+/* =========================================================
+   STOP INFO
+   ========================================================= */
+
+.schedule-card-stops {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 10px 12px;
+
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+
+  background: #eff6ff;
+
+  color: #1d4ed8;
+
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.schedule-card-stops svg {
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   CARD ACTIONS
+   ========================================================= */
+
+.schedule-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 12px 17px;
+
+  border-top: 1px solid #eaecf0;
+  background: #fcfcfd;
+}
+
+.schedule-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  min-height: 34px;
+  padding: 0 11px;
+
+  border: 1px solid #d0d5dd;
+  border-radius: 7px;
+
+  background: #ffffff;
+  color: #344054;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.schedule-action:hover {
+  background: #f9fafb;
+  border-color: #98a2b3;
+}
+
+/* Điểm dừng */
+
+.schedule-action.view {
+  color: #175cd3;
+  border-color: #b2ddff;
+  background: #eff8ff;
+}
+
+.schedule-action.view:hover {
+  background: #dff1ff;
+}
+
+/* Sửa */
+
+.schedule-action.edit:hover {
+  background: #f2f4f7;
+}
+
+/* Xóa */
+
+.schedule-action.delete {
+  width: 34px;
+  min-width: 34px;
+
+  padding: 0;
+  margin-left: auto;
+
+  color: #b42318;
+
+  border-color: #fecdca;
+  background: #fff5f4;
+}
+
+.schedule-action.delete:hover {
+  background: #fee4e2;
+  border-color: #fda29b;
+}
+/* =========================================================
+   LOADING
+   ========================================================= */
+
+.schedule-list-state {
+  min-height: 300px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+
+  color: #667085;
+  font-size: 14px;
+}
+
+.tour-table-spinner {
+  width: 28px;
+  height: 28px;
+
+  border: 3px solid #e4e7ec;
+  border-top-color: #2563eb;
+
+  border-radius: 50%;
+
+  animation: scheduler-spinner 0.8s linear infinite;
+}
+
+@keyframes scheduler-spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================================================
+   EMPTY TOUR
+   ========================================================= */
+
+.schedule-list-empty {
+  min-height: 320px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 40px 20px;
+
+  border: 1px dashed #d0d5dd;
+  border-radius: 12px;
+
+  background: #ffffff;
+
+  text-align: center;
+}
+
+.schedule-list-empty svg {
+  margin-bottom: 14px;
+
+  color: #98a2b3;
+}
+
+.schedule-list-empty h3 {
+  margin: 0 0 7px;
+
+  color: #344054;
+  font-size: 17px;
+}
+
+.schedule-list-empty p {
+  max-width: 440px;
+
+  margin: 0;
+
+  color: #667085;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1200px) {
+  .scheduler-tour-info {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .schedule-day-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .scheduler-schedule-page {
+    padding: 20px 16px 30px;
+  }
+
+  .scheduler-schedule-header {
+    flex-direction: column;
+  }
+
+  .scheduler-schedule-header-left {
+    width: 100%;
+  }
+
+  .scheduler-tour-refresh-button {
+    width: 100%;
+  }
+
+  .scheduler-tour-info {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .schedule-day-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .scheduler-schedule-header-left {
+    flex-direction: column;
+  }
+
+  .scheduler-tour-info {
+    grid-template-columns: 1fr;
+  }
+
+  .schedule-day-item-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

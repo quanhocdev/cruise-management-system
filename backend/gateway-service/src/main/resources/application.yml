@@ -35,7 +35,7 @@ spring:
             - id: tour-scheduler-service
               uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
               predicates:
-                - Path=/api/scheduler/tours/**,/api/scheduler/schedules/**
+                - Path=/api/scheduler/**
 
             # ==========================
             # TOUR SERVICE - CONVENIENCE

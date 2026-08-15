@@ -34,7 +34,8 @@ import PassengerDashboard from "./modules/passenger/pages/Dashboard";
 import SchedulerLayout from "./layouts/SchedulerLayout";
 import SchedulerDashboard from "./modules/scheduler/pages/Dashboard";
 import ManagerTour from "./modules/scheduler/pages/ManagerTour";
-import TourDetail from "./modules/scheduler/pages/TourDetail";
+import ManagerSchedule from "./modules/scheduler/pages/ManagerSchedule";
+import ManagerScheduleStops from "./modules/scheduler/pages/ManagerScheduleStops";
 
 import OperationDashboard from "./modules/operation/pages/Dashboard";
 import OnboardDashboard from "./modules/onboard/pages/Dashboard";
@@ -157,17 +158,19 @@ export default function App() {
                 <SchedulerLayout>
                   <Routes>
                     {/* DASHBOARD */}
-
                     <Route path="dashboard" element={<SchedulerDashboard />} />
-
                     {/* TOUR */}
-
                     <Route path="tours" element={<ManagerTour />} />
 
+                    <Route
+                      path="tours/:tourId/schedules"
+                      element={<ManagerSchedule />}
+                    />
+                    <Route
+                      path="tours/:tourId/schedules/:scheduleId/stops"
+                      element={<ManagerScheduleStops />}
+                    />
                     {/* TOUR DETAIL */}
-
-                    <Route path="tours/:tourId" element={<TourDetail />} />
-
                     {/* DEFAULT */}
                     <Route
                       path=""
