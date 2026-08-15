@@ -29,9 +29,10 @@ class BookingServiceImplTests {
     @Mock PassengerRepository passengerRepository;
     @Mock PassengerVoyageRepository passengerVoyageRepository;
     @Mock TourClient tourClient;
+    @Mock NotificationClient notificationClient;
     BookingServiceImpl service;
     @BeforeEach void setUp() {
-        service = new BookingServiceImpl(repository, passengerRepository, passengerVoyageRepository, tourClient);
+        service = new BookingServiceImpl(repository, passengerRepository, passengerVoyageRepository, tourClient, notificationClient);
     }
 
     @Test void createUsesAuthenticatedUserAndPendingStatus() {
@@ -105,6 +106,19 @@ class BookingServiceImplTests {
         assertEquals(EmbarkationStatus.BOARDED, service.board("tag-01").embarkationStatus());
         assertEquals(EmbarkationStatus.DISEMBARKED, service.disembark("tag-01").embarkationStatus());
         assertThrows(BookingException.class, () -> service.board("tag-01"));
+    }
+
+    @Test void departureReminderIsSentOnlyOnceAfterSuccessfulDelivery() {
+        java.time.LocalDate tomorrow = java.time.LocalDate.now().plusDays(1);
+        Booking booking = booking(BookingStatus.CONFIRMED, 10L); booking.setBookingCode("CR00000001");
+        booking.setVoyageStartDate(tomorrow);
+        when(repository.findAllByStatusAndVoyageStartDateAndDepartureReminderSentAtIsNull(BookingStatus.CONFIRMED, tomorrow))
+            .thenReturn(List.of(booking));
+        when(passengerVoyageRepository.findAllByBooking_IdOrderByIdAsc(1L)).thenReturn(List.of());
+        when(notificationClient.send(eq(7L), isNull(), eq("DEPARTURE_REMINDER"), anyString(), anyString(), eq(1L)))
+            .thenReturn(true);
+        assertEquals(1, service.sendDepartureReminders(tomorrow));
+        assertNotNull(booking.getDepartureReminderSentAt()); verify(repository).save(booking);
     }
 
     private CreateBookingRequest request() {
