@@ -1,16 +1,68 @@
-import { Alert, Button, Form, Modal } from "react-bootstrap";
+// src/modules/admin/components/policy/PolicyFormModal.jsx
+
+import { useEffect, useState } from "react";
+import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap";
 
 export default function PolicyFormModal({
   show,
   saving,
   editingPolicy,
-  form,
   error,
   onClose,
   onSubmit,
-  onChange,
 }) {
-  const isEditing = Boolean(editingPolicy);
+  const [type, setType] = useState("BOOKING");
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [status, setStatus] = useState("ACTIVE");
+
+  useEffect(() => {
+    if (!show) {
+      return;
+    }
+
+    if (editingPolicy) {
+      setType(editingPolicy.type || "BOOKING");
+      setTitle(editingPolicy.title || "");
+      setContent(editingPolicy.content || "");
+      setStatus(editingPolicy.status || "ACTIVE");
+    } else {
+      setType("BOOKING");
+      setTitle("");
+      setContent("");
+      setStatus("ACTIVE");
+    }
+  }, [show, editingPolicy]);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    const data = editingPolicy
+      ? {
+          title,
+          content,
+          status,
+        }
+      : {
+          type,
+          title,
+          content,
+        };
+
+    await onSubmit(data);
+  };
+
+  const getTypeLabel = (value) => {
+    if (value === "BOOKING") {
+      return "Chính sách đặt tour";
+    }
+
+    if (value === "CANCEL") {
+      return "Chính sách hủy tour";
+    }
+
+    return value;
+  };
 
   return (
     <Modal
@@ -21,75 +73,80 @@ export default function PolicyFormModal({
       backdrop={saving ? "static" : true}
       keyboard={!saving}
     >
-      <Form onSubmit={onSubmit}>
+      <Form onSubmit={handleSubmit}>
         <Modal.Header closeButton={!saving}>
           <Modal.Title>
-            {isEditing ? "Cập nhật chính sách" : "Tạo chính sách"}
+            {editingPolicy ? "Chỉnh sửa chính sách" : "Tạo chính sách"}
           </Modal.Title>
         </Modal.Header>
 
         <Modal.Body>
           {error && <Alert variant="danger">{error}</Alert>}
 
+          {/* TYPE */}
           <Form.Group className="mb-3">
-            <Form.Label>Loại chính sách</Form.Label>
+            <Form.Label>
+              Loại chính sách <span className="text-danger">*</span>
+            </Form.Label>
 
-            <Form.Select
-              name="type"
-              value={form.type}
-              onChange={onChange}
-              disabled={isEditing || saving}
-            >
-              <option value="">-- Chọn loại chính sách --</option>
+            {editingPolicy ? (
+              <Form.Control value={getTypeLabel(type)} disabled />
+            ) : (
+              <Form.Select
+                value={type}
+                onChange={(event) => setType(event.target.value)}
+                disabled={saving}
+                required
+              >
+                <option value="BOOKING">Chính sách đặt tour</option>
 
-              <option value="BOOKING">Đăng ký / giảm giá</option>
-
-              <option value="CANCEL">Hủy / hoàn tiền</option>
-            </Form.Select>
-
-            {isEditing && (
-              <Form.Text className="text-muted">
-                Không thể thay đổi loại của chính sách sau khi đã tạo.
-              </Form.Text>
+                <option value="CANCEL">Chính sách hủy tour</option>
+              </Form.Select>
             )}
           </Form.Group>
 
+          {/* TITLE */}
           <Form.Group className="mb-3">
-            <Form.Label>Tiêu đề</Form.Label>
+            <Form.Label>
+              Tiêu đề <span className="text-danger">*</span>
+            </Form.Label>
 
             <Form.Control
               type="text"
-              name="title"
-              value={form.title}
-              onChange={onChange}
-              placeholder="Nhập tiêu đề chính sách..."
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              placeholder="Nhập tiêu đề chính sách"
               maxLength={200}
+              required
               disabled={saving}
             />
           </Form.Group>
 
+          {/* CONTENT */}
           <Form.Group className="mb-3">
-            <Form.Label>Nội dung</Form.Label>
+            <Form.Label>
+              Nội dung <span className="text-danger">*</span>
+            </Form.Label>
 
             <Form.Control
               as="textarea"
-              rows={7}
-              name="content"
-              value={form.content}
-              onChange={onChange}
-              placeholder="Nhập nội dung chính sách..."
+              rows={8}
+              value={content}
+              onChange={(event) => setContent(event.target.value)}
+              placeholder="Nhập nội dung chính sách"
+              required
               disabled={saving}
             />
           </Form.Group>
 
-          {isEditing && (
-            <Form.Group>
+          {/* STATUS - EDIT ONLY */}
+          {editingPolicy && (
+            <Form.Group className="mb-3">
               <Form.Label>Trạng thái</Form.Label>
 
               <Form.Select
-                name="status"
-                value={form.status}
-                onChange={onChange}
+                value={status}
+                onChange={(event) => setStatus(event.target.value)}
                 disabled={saving}
               >
                 <option value="ACTIVE">Đang hoạt động</option>
@@ -105,12 +162,17 @@ export default function PolicyFormModal({
             Hủy
           </Button>
 
-          <Button type="submit" variant="primary" disabled={saving}>
-            {saving
-              ? "Đang lưu..."
-              : isEditing
-                ? "Lưu thay đổi"
-                : "Tạo chính sách"}
+          <Button variant="primary" type="submit" disabled={saving}>
+            {saving ? (
+              <>
+                <Spinner animation="border" size="sm" className="me-2" />
+                Đang lưu...
+              </>
+            ) : editingPolicy ? (
+              "Cập nhật"
+            ) : (
+              "Tạo chính sách"
+            )}
           </Button>
         </Modal.Footer>
       </Form>

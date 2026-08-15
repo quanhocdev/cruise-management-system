@@ -1,901 +1,474 @@
-import { useState } from "react";
-import { Alert, Button, Modal, Spinner } from "react-bootstrap";
+// src/modules/admin/pages/ManagerPolicy.jsx
 
-import usePolicy from "../hooks/usePolicy";
+import { useEffect, useState } from "react";
+import { Alert, Button, Form, Spinner } from "react-bootstrap";
+
+import usePolicies from "../hooks/usePolicies";
+import useBookingPolicies from "../hooks/useBookingPolicies";
+import useCancelPolicies from "../hooks/useCancelPolicies";
 
 import PolicyTable from "../components/policy/PolicyTable";
 import PolicyFormModal from "../components/policy/PolicyFormModal";
-import BookingPolicyTable from "../components/policy/BookingPolicyTable";
-import CancelPolicyTable from "../components/policy/CancelPolicyTable";
+import PolicyRuleModal from "../components/policy/PolicyRuleModal";
 
 import "../styles/ManagerPolicy.css";
 
 export default function ManagerPolicy() {
+  // =====================================================
+  // POLICY HOOK
+  // =====================================================
+
   const {
     policies,
+    loading: policyLoading,
+    saving: policySaving,
 
-    bookingRules,
-    cancelRules,
+    error: policyError,
+    success: policySuccess,
 
-    loading,
-    rulesLoading,
-    saving,
-
-    error,
-    success,
-
-    setError,
-    setSuccess,
+    setError: setPolicyError,
+    setSuccess: setPolicySuccess,
 
     createPolicy,
     updatePolicy,
     deletePolicy,
+    loadPolicies,
+  } = usePolicies();
 
-    fetchBookingRules,
-    createBookingRule,
-    updateBookingRule,
-    deleteBookingRule,
+  // =====================================================
+  // FILTER
+  // =====================================================
 
-    fetchCancelRules,
-    createCancelRule,
-    updateCancelRule,
-    deleteCancelRule,
+  const [typeFilter, setTypeFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
 
-    clearMessages,
-  } = usePolicy();
-
-  /*
-   * =====================================================
-   * POLICY MODAL
-   * =====================================================
-   */
+  // =====================================================
+  // POLICY MODAL
+  // =====================================================
 
   const [showPolicyModal, setShowPolicyModal] = useState(false);
-
   const [editingPolicy, setEditingPolicy] = useState(null);
 
-  const [policyForm, setPolicyForm] = useState({
-    type: "",
-    title: "",
-    content: "",
-    status: "ACTIVE",
-  });
-
-  /*
-   * =====================================================
-   * RULE MODAL
-   * =====================================================
-   */
+  // =====================================================
+  // RULE MODAL
+  // =====================================================
 
   const [showRuleModal, setShowRuleModal] = useState(false);
+  const [selectedPolicy, setSelectedPolicy] = useState(null);
 
-  const [editingRule, setEditingRule] = useState(null);
+  // =====================================================
+  // BOOKING RULE HOOK
+  // =====================================================
 
-  const [rulePolicy, setRulePolicy] = useState(null);
+  const {
+    bookingPolicies,
 
-  const [ruleForm, setRuleForm] = useState({
-    daysBefore: "",
-    refundPercent: "",
-    daysBeforeDeparture: "",
-    discountPercent: "",
-    status: "ACTIVE",
-  });
+    loading: bookingLoading,
+    saving: bookingSaving,
+
+    error: bookingError,
+
+    createBookingPolicy,
+    updateBookingPolicy,
+    deleteBookingPolicy,
+  } = useBookingPolicies(
+    selectedPolicy?.type === "BOOKING" ? selectedPolicy.id : null,
+  );
+
+  // =====================================================
+  // CANCEL RULE HOOK
+  // =====================================================
+
+  const {
+    cancelPolicies,
+
+    loading: cancelLoading,
+    saving: cancelSaving,
+
+    error: cancelError,
+
+    createCancelPolicy,
+    updateCancelPolicy,
+    deleteCancelPolicy,
+  } = useCancelPolicies(
+    selectedPolicy?.type === "CANCEL" ? selectedPolicy.id : null,
+  );
+
+  // =====================================================
+  // RULE LOADING / SAVING
+  // =====================================================
+
+  const ruleLoading =
+    selectedPolicy?.type === "BOOKING" ? bookingLoading : cancelLoading;
+
+  const ruleSaving =
+    selectedPolicy?.type === "BOOKING" ? bookingSaving : cancelSaving;
+
+  const ruleError =
+    selectedPolicy?.type === "BOOKING" ? bookingError : cancelError;
+
+  // =====================================================
+  // COMBINED SAVING
+  // =====================================================
+
+  const saving = policySaving || ruleSaving;
+
+  // =====================================================
+  // FILTER
+  // =====================================================
+
+  const handleTypeFilterChange = (event) => {
+    setTypeFilter(event.target.value);
+  };
+
+  const handleStatusFilterChange = (event) => {
+    setStatusFilter(event.target.value);
+  };
 
   /*
-   * =====================================================
-   * OPEN CREATE POLICY
-   * =====================================================
+   * Filter được xử lý bởi BACKEND.
+   *
+   * Khi người dùng đổi filter:
+   * - UI đổi ngay lập tức
+   * - useEffect gọi API
+   * - Không cần await trong event handler
    */
 
-  const handleOpenCreatePolicy = () => {
+  useEffect(() => {
+    loadPolicies({
+      type: typeFilter || undefined,
+      status: statusFilter || undefined,
+    });
+  }, [typeFilter, statusFilter, loadPolicies]);
+
+  // =====================================================
+  // CREATE POLICY
+  // =====================================================
+
+  const handleOpenCreate = () => {
+    setPolicyError("");
+    setPolicySuccess("");
+
     setEditingPolicy(null);
-
-    setPolicyForm({
-      type: "",
-      title: "",
-      content: "",
-      status: "ACTIVE",
-    });
-
-    clearMessages();
-
     setShowPolicyModal(true);
   };
 
-  /*
-   * =====================================================
-   * OPEN EDIT POLICY
-   * =====================================================
-   */
+  // =====================================================
+  // EDIT POLICY
+  // =====================================================
 
-  const handleOpenEditPolicy = (policy) => {
+  const handleOpenEdit = (policy) => {
+    setPolicyError("");
+    setPolicySuccess("");
+
     setEditingPolicy(policy);
-
-    setPolicyForm({
-      type: policy.type || "",
-      title: policy.title || "",
-      content: policy.content || "",
-      status: policy.status || "ACTIVE",
-    });
-
-    clearMessages();
-
     setShowPolicyModal(true);
   };
 
-  /*
-   * =====================================================
-   * CLOSE POLICY MODAL
-   * =====================================================
-   */
+  // =====================================================
+  // CLOSE POLICY MODAL
+  // =====================================================
 
   const handleClosePolicyModal = () => {
-    if (saving) {
+    if (policySaving) {
       return;
     }
 
     setShowPolicyModal(false);
+    setEditingPolicy(null);
+
+    setPolicyError("");
   };
 
-  /*
-   * =====================================================
-   * POLICY INPUT
-   * =====================================================
-   */
+  // =====================================================
+  // CREATE / UPDATE POLICY
+  // =====================================================
 
-  const handlePolicyChange = (event) => {
-    const { name, value } = event.target;
+  const handlePolicySubmit = async (data) => {
+    let result;
 
-    setPolicyForm((previous) => ({
-      ...previous,
-      [name]: value,
-    }));
-  };
-
-  /*
-   * =====================================================
-   * SUBMIT POLICY
-   * =====================================================
-   */
-
-  const handlePolicySubmit = async (event) => {
-    event.preventDefault();
-
-    setError("");
-    setSuccess("");
-
-    if (!policyForm.type) {
-      setError("Vui lòng chọn loại chính sách.");
-      return;
-    }
-
-    if (!policyForm.title.trim()) {
-      setError("Vui lòng nhập tiêu đề chính sách.");
-      return;
-    }
-
-    if (!policyForm.content.trim()) {
-      setError("Vui lòng nhập nội dung chính sách.");
-      return;
-    }
-
-    let result = null;
-
-    if (!editingPolicy) {
-      result = await createPolicy({
-        type: policyForm.type,
-        title: policyForm.title.trim(),
-        content: policyForm.content.trim(),
-      });
+    if (editingPolicy) {
+      result = await updatePolicy(editingPolicy.id, data);
     } else {
-      result = await updatePolicy(editingPolicy.id, {
-        title: policyForm.title.trim(),
-        content: policyForm.content.trim(),
-        status: policyForm.status,
-      });
+      result = await createPolicy(data);
     }
 
     if (result) {
       setShowPolicyModal(false);
+      setEditingPolicy(null);
+
+      /*
+       * Không cần reload nếu usePolicies đã cập nhật state.
+       *
+       * Tuy nhiên sau CREATE/UPDATE có thể filter hiện tại
+       * không còn phù hợp.
+       *
+       * Reload lại theo filter hiện tại để backend quyết định.
+       */
+      await loadPolicies({
+        type: typeFilter || undefined,
+        status: statusFilter || undefined,
+      });
     }
   };
 
-  /*
-   * =====================================================
-   * DELETE POLICY
-   * =====================================================
-   */
+  // =====================================================
+  // DELETE POLICY
+  // =====================================================
 
-  const handleDeletePolicy = async (policy) => {
+  const handleDelete = async (policy) => {
     const confirmed = window.confirm(
-      `Bạn có chắc muốn xóa chính sách "${policy.title}" không?\n\nCác quy tắc ${policy.type === "BOOKING" ? "đăng ký" : "hủy / hoàn tiền"} thuộc chính sách này cũng sẽ không còn được quản lý từ đây.`,
+      `Bạn có chắc muốn xóa chính sách "${policy.title}" không?\n\n` +
+        "Chính sách sẽ được chuyển sang trạng thái ngừng hoạt động.",
     );
 
     if (!confirmed) {
       return;
     }
 
-    await deletePolicy(policy.id);
-  };
+    const result = await deletePolicy(policy.id);
 
-  /*
-   * =====================================================
-   * OPEN RULE MANAGER
-   * =====================================================
-   */
-
-  const handleOpenRuleManager = async (policy) => {
-    setRulePolicy(policy);
-    setEditingRule(null);
-
-    setRuleForm({
-      daysBefore: "",
-      refundPercent: "",
-      daysBeforeDeparture: "",
-      discountPercent: "",
-      status: "ACTIVE",
-    });
-
-    clearMessages();
-
-    if (policy.type === "BOOKING") {
-      await fetchBookingRules(policy.id);
-    }
-
-    if (policy.type === "CANCEL") {
-      await fetchCancelRules(policy.id);
+    if (result) {
+      await loadPolicies({
+        type: typeFilter || undefined,
+        status: statusFilter || undefined,
+      });
     }
   };
 
-  /*
-   * =====================================================
-   * CLOSE RULE MANAGER
-   * =====================================================
-   */
+  // =====================================================
+  // OPEN RULE MODAL
+  // =====================================================
 
-  const handleCloseRuleManager = () => {
-    if (saving) {
-      return;
-    }
+  const handleOpenRules = (policy) => {
+    setPolicyError("");
+    setPolicySuccess("");
 
-    setRulePolicy(null);
-    setEditingRule(null);
-    setShowRuleModal(false);
-  };
-
-  /*
-   * =====================================================
-   * OPEN CREATE RULE
-   * =====================================================
-   */
-
-  const handleOpenCreateRule = () => {
-    setEditingRule(null);
-
-    setRuleForm({
-      daysBefore: "",
-      refundPercent: "",
-      daysBeforeDeparture: "",
-      discountPercent: "",
-      status: "ACTIVE",
-    });
-
-    setError("");
-    setSuccess("");
-
+    setSelectedPolicy(policy);
     setShowRuleModal(true);
   };
 
-  /*
-   * =====================================================
-   * OPEN EDIT RULE
-   * =====================================================
-   */
+  // =====================================================
+  // CLOSE RULE MODAL
+  // =====================================================
 
-  const handleOpenEditRule = (rule) => {
-    setEditingRule(rule);
-
-    if (rulePolicy?.type === "BOOKING") {
-      setRuleForm({
-        daysBefore: "",
-        refundPercent: "",
-        daysBeforeDeparture: rule.daysBeforeDeparture ?? "",
-        discountPercent: rule.discountPercent ?? "",
-        status: rule.status || "ACTIVE",
-      });
-    } else {
-      setRuleForm({
-        daysBefore: rule.daysBefore ?? "",
-        refundPercent: rule.refundPercent ?? "",
-        daysBeforeDeparture: "",
-        discountPercent: "",
-        status: rule.status || "ACTIVE",
-      });
-    }
-
-    setError("");
-    setSuccess("");
-
-    setShowRuleModal(true);
-  };
-
-  /*
-   * =====================================================
-   * CLOSE RULE FORM
-   * =====================================================
-   */
-
-  const handleCloseRuleForm = () => {
-    if (saving) {
+  const handleCloseRuleModal = () => {
+    if (ruleSaving) {
       return;
     }
 
     setShowRuleModal(false);
+    setSelectedPolicy(null);
   };
 
-  /*
-   * =====================================================
-   * RULE INPUT
-   * =====================================================
-   */
+  // =====================================================
+  // CREATE BOOKING RULE
+  // =====================================================
 
-  const handleRuleChange = (event) => {
-    const { name, value } = event.target;
-
-    setRuleForm((previous) => ({
-      ...previous,
-      [name]: value,
-    }));
+  const handleCreateBookingRule = async (policyId, data) => {
+    return await createBookingPolicy(data);
   };
 
-  /*
-   * =====================================================
-   * SUBMIT BOOKING RULE
-   * =====================================================
-   */
+  // =====================================================
+  // UPDATE BOOKING RULE
+  // =====================================================
 
-  const handleSubmitBookingRule = async () => {
-    if (!rulePolicy) {
-      return;
-    }
-
-    if (ruleForm.daysBeforeDeparture === "") {
-      setError("Vui lòng nhập số ngày trước khi khởi hành.");
-      return;
-    }
-
-    if (Number(ruleForm.daysBeforeDeparture) < 0) {
-      setError("Số ngày trước khi khởi hành không được âm.");
-      return;
-    }
-
-    if (ruleForm.discountPercent === "") {
-      setError("Vui lòng nhập phần trăm giảm giá.");
-      return;
-    }
-
-    const discount = Number(ruleForm.discountPercent);
-
-    if (discount < 0 || discount > 100) {
-      setError("Phần trăm giảm giá phải từ 0 đến 100.");
-      return;
-    }
-
-    let result = null;
-
-    if (!editingRule) {
-      result = await createBookingRule(rulePolicy.id, {
-        daysBeforeDeparture: ruleForm.daysBeforeDeparture,
-        discountPercent: ruleForm.discountPercent,
-      });
-    } else {
-      result = await updateBookingRule(rulePolicy.id, editingRule.id, {
-        daysBeforeDeparture: ruleForm.daysBeforeDeparture,
-        discountPercent: ruleForm.discountPercent,
-        status: ruleForm.status,
-      });
-    }
-
-    if (result) {
-      setShowRuleModal(false);
-    }
+  const handleUpdateBookingRule = async (policyId, ruleId, data) => {
+    return await updateBookingPolicy(ruleId, data);
   };
 
-  /*
-   * =====================================================
-   * SUBMIT CANCEL RULE
-   * =====================================================
-   */
+  // =====================================================
+  // DELETE BOOKING RULE
+  // =====================================================
 
-  const handleSubmitCancelRule = async () => {
-    if (!rulePolicy) {
-      return;
-    }
-
-    if (ruleForm.daysBefore === "") {
-      setError("Vui lòng nhập số ngày trước khi khởi hành.");
-      return;
-    }
-
-    if (Number(ruleForm.daysBefore) < 0) {
-      setError("Số ngày trước khi khởi hành không được âm.");
-      return;
-    }
-
-    if (ruleForm.refundPercent === "") {
-      setError("Vui lòng nhập phần trăm hoàn tiền.");
-      return;
-    }
-
-    const refund = Number(ruleForm.refundPercent);
-
-    if (refund < 0 || refund > 100) {
-      setError("Phần trăm hoàn tiền phải từ 0 đến 100.");
-      return;
-    }
-
-    let result = null;
-
-    if (!editingRule) {
-      result = await createCancelRule(rulePolicy.id, {
-        daysBefore: ruleForm.daysBefore,
-        refundPercent: ruleForm.refundPercent,
-      });
-    } else {
-      result = await updateCancelRule(rulePolicy.id, editingRule.id, {
-        daysBefore: ruleForm.daysBefore,
-        refundPercent: ruleForm.refundPercent,
-        status: ruleForm.status,
-      });
-    }
-
-    if (result) {
-      setShowRuleModal(false);
-    }
+  const handleDeleteBookingRule = async (policyId, ruleId) => {
+    return await deleteBookingPolicy(ruleId);
   };
 
-  /*
-   * =====================================================
-   * SUBMIT RULE
-   * =====================================================
-   */
+  // =====================================================
+  // CREATE CANCEL RULE
+  // =====================================================
 
-  const handleRuleSubmit = async (event) => {
-    event.preventDefault();
-
-    setError("");
-    setSuccess("");
-
-    if (!rulePolicy) {
-      return;
-    }
-
-    if (rulePolicy.type === "BOOKING") {
-      await handleSubmitBookingRule();
-      return;
-    }
-
-    if (rulePolicy.type === "CANCEL") {
-      await handleSubmitCancelRule();
-    }
+  const handleCreateCancelRule = async (policyId, data) => {
+    return await createCancelPolicy(data);
   };
 
-  /*
-   * =====================================================
-   * DELETE BOOKING RULE
-   * =====================================================
-   */
+  // =====================================================
+  // UPDATE CANCEL RULE
+  // =====================================================
 
-  const handleDeleteBookingRule = async (rule) => {
-    if (!rulePolicy) {
-      return;
-    }
-
-    const confirmed = window.confirm(
-      `Bạn có chắc muốn xóa mức giảm ${rule.discountPercent}% cho khách đặt trước ${rule.daysBeforeDeparture} ngày không?`,
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    await deleteBookingRule(rulePolicy.id, rule.id);
+  const handleUpdateCancelRule = async (policyId, ruleId, data) => {
+    return await updateCancelPolicy(ruleId, data);
   };
 
-  /*
-   * =====================================================
-   * DELETE CANCEL RULE
-   * =====================================================
-   */
+  // =====================================================
+  // DELETE CANCEL RULE
+  // =====================================================
 
-  const handleDeleteCancelRule = async (rule) => {
-    if (!rulePolicy) {
-      return;
-    }
-
-    const confirmed = window.confirm(
-      `Bạn có chắc muốn xóa mức hoàn ${rule.refundPercent}% cho trường hợp hủy trước ${rule.daysBefore} ngày không?`,
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    await deleteCancelRule(rulePolicy.id, rule.id);
+  const handleDeleteCancelRule = async (policyId, ruleId) => {
+    return await deleteCancelPolicy(ruleId);
   };
 
-  /*
-   * =====================================================
-   * LABEL
-   * =====================================================
-   */
-
-  const getPolicyTypeLabel = (type) => {
-    if (type === "BOOKING") {
-      return "Đăng ký / giảm giá";
-    }
-
-    if (type === "CANCEL") {
-      return "Hủy / hoàn tiền";
-    }
-
-    return type;
-  };
-
-  /*
-   * =====================================================
-   * RENDER
-   * =====================================================
-   */
+  // =====================================================
+  // RENDER
+  // =====================================================
 
   return (
     <div className="manager-policy-page container-fluid py-4">
       {/* =================================================
           HEADER
-          ================================================= */}
+         ================================================= */}
 
-      <div className="manager-policy-header mb-4">
+      <div className="manager-policy-header">
         <div>
           <h2 className="manager-policy-title">Quản lý chính sách</h2>
 
           <p className="manager-policy-description">
-            Quản lý chính sách đăng ký, giảm giá, hủy và hoàn tiền cho hệ thống
-            Cruise.
+            Quản lý chính sách đặt tour, hủy tour và các quy tắc áp dụng.
           </p>
         </div>
 
-        <Button variant="primary" onClick={handleOpenCreatePolicy}>
+        <Button variant="primary" onClick={handleOpenCreate}>
           + Tạo chính sách
         </Button>
       </div>
 
       {/* =================================================
           SUCCESS
-          ================================================= */}
+         ================================================= */}
 
-      {success && (
-        <Alert variant="success" dismissible onClose={() => setSuccess("")}>
-          {success}
+      {policySuccess && (
+        <Alert
+          variant="success"
+          dismissible
+          onClose={() => setPolicySuccess("")}
+        >
+          {policySuccess}
         </Alert>
       )}
 
       {/* =================================================
           ERROR
-          ================================================= */}
+         ================================================= */}
 
-      {error && !showPolicyModal && !showRuleModal && (
-        <Alert variant="danger" dismissible onClose={() => setError("")}>
-          {error}
+      {(policyError || ruleError) && !showPolicyModal && !showRuleModal && (
+        <Alert
+          variant="danger"
+          dismissible
+          onClose={() => {
+            setPolicyError("");
+          }}
+        >
+          {typeof policyError === "string"
+            ? policyError
+            : policyError?.message || ruleError || "Có lỗi xảy ra."}
         </Alert>
       )}
 
       {/* =================================================
-          POLICY CARD
-          ================================================= */}
+          FILTER
+         ================================================= */}
 
-      <div className="manager-policy-card">
-        <div className="manager-policy-card-header">
+      <div className="manager-policy-filter-card">
+        <div className="manager-policy-filter-header">
           <div>
-            <h5 className="mb-1">Danh sách chính sách</h5>
+            <h5>Bộ lọc chính sách</h5>
 
-            <span className="text-muted">
-              Mỗi loại chỉ có một chính sách chính.
-            </span>
-          </div>
-
-          <div className="manager-policy-summary">
-            <span>
-              Tổng: <strong>{policies.length}</strong>
-            </span>
+            <span>Lọc danh sách theo loại và trạng thái</span>
           </div>
         </div>
 
-        <div className="manager-policy-card-body">
-          <PolicyTable
-            policies={policies}
-            loading={loading}
-            onEdit={handleOpenEditPolicy}
-            onDelete={handleDeletePolicy}
-            onManageRules={handleOpenRuleManager}
-          />
+        <div className="manager-policy-filter-body">
+          {/* TYPE */}
+
+          <Form.Group className="manager-policy-filter-item">
+            <Form.Label>Loại chính sách</Form.Label>
+
+            <Form.Select value={typeFilter} onChange={handleTypeFilterChange}>
+              <option value="">Tất cả loại</option>
+
+              <option value="BOOKING">Chính sách đặt tour</option>
+
+              <option value="CANCEL">Chính sách hủy tour</option>
+            </Form.Select>
+          </Form.Group>
+
+          {/* STATUS */}
+
+          <Form.Group className="manager-policy-filter-item">
+            <Form.Label>Trạng thái</Form.Label>
+
+            <Form.Select
+              value={statusFilter}
+              onChange={handleStatusFilterChange}
+            >
+              <option value="">Tất cả trạng thái</option>
+
+              <option value="ACTIVE">Đang hoạt động</option>
+
+              <option value="INACTIVE">Ngừng hoạt động</option>
+            </Form.Select>
+          </Form.Group>
         </div>
       </div>
 
       {/* =================================================
-          POLICY FORM
-          ================================================= */}
+          FILTER LOADING
+         ================================================= */}
 
-      <PolicyFormModal
-        show={showPolicyModal}
-        saving={saving}
-        editingPolicy={editingPolicy}
-        form={policyForm}
-        error={error}
-        onClose={handleClosePolicyModal}
-        onSubmit={handlePolicySubmit}
-        onChange={handlePolicyChange}
+      {policyLoading && (
+        <div className="manager-policy-loading">
+          <Spinner animation="border" size="sm" />
+
+          <span>Đang cập nhật danh sách...</span>
+        </div>
+      )}
+
+      {/* =================================================
+          TABLE
+         ================================================= */}
+
+      <PolicyTable
+        policies={policies}
+        loading={false}
+        onEdit={handleOpenEdit}
+        onDelete={handleDelete}
+        onManageRules={handleOpenRules}
       />
 
       {/* =================================================
-          RULE MANAGER MODAL
-          ================================================= */}
+          POLICY FORM
+         ================================================= */}
 
-      <Modal
-        show={Boolean(rulePolicy)}
-        onHide={handleCloseRuleManager}
-        centered
-        size="xl"
-        backdrop={saving ? "static" : true}
-        keyboard={!saving}
-      >
-        <Modal.Header closeButton={!saving}>
-          <div>
-            <Modal.Title>
-              {rulePolicy
-                ? getPolicyTypeLabel(rulePolicy.type)
-                : "Quản lý chính sách"}
-            </Modal.Title>
-
-            {rulePolicy && (
-              <div className="manager-policy-rule-subtitle">
-                {rulePolicy.title}
-              </div>
-            )}
-          </div>
-        </Modal.Header>
-
-        <Modal.Body>
-          {error && !showRuleModal && (
-            <Alert variant="danger" dismissible onClose={() => setError("")}>
-              {error}
-            </Alert>
-          )}
-
-          {success && !showRuleModal && (
-            <Alert variant="success" dismissible onClose={() => setSuccess("")}>
-              {success}
-            </Alert>
-          )}
-
-          <div className="manager-policy-rule-toolbar">
-            <div>
-              <h6 className="mb-1">
-                {rulePolicy?.type === "BOOKING"
-                  ? "Các mức giảm giá"
-                  : "Các mức hoàn tiền"}
-              </h6>
-
-              <small className="text-muted">
-                Các mức được áp dụng dựa trên số ngày trước ngày khởi hành.
-              </small>
-            </div>
-
-            <Button
-              variant="primary"
-              onClick={handleOpenCreateRule}
-              disabled={rulesLoading || saving}
-            >
-              + Thêm mức
-            </Button>
-          </div>
-
-          <div className="manager-policy-rule-table">
-            {rulePolicy?.type === "BOOKING" && (
-              <BookingPolicyTable
-                rules={bookingRules}
-                loading={rulesLoading}
-                onEdit={handleOpenEditRule}
-                onDelete={handleDeleteBookingRule}
-              />
-            )}
-
-            {rulePolicy?.type === "CANCEL" && (
-              <CancelPolicyTable
-                rules={cancelRules}
-                loading={rulesLoading}
-                onEdit={handleOpenEditRule}
-                onDelete={handleDeleteCancelRule}
-              />
-            )}
-          </div>
-        </Modal.Body>
-
-        <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={handleCloseRuleManager}
-            disabled={saving}
-          >
-            Đóng
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      <PolicyFormModal
+        show={showPolicyModal}
+        saving={policySaving}
+        editingPolicy={editingPolicy}
+        error={policyError}
+        onClose={handleClosePolicyModal}
+        onSubmit={handlePolicySubmit}
+      />
 
       {/* =================================================
-          RULE FORM MODAL
-          ================================================= */}
+          RULE MODAL
+         ================================================= */}
 
-      <Modal
+      <PolicyRuleModal
         show={showRuleModal}
-        onHide={handleCloseRuleForm}
-        centered
-        backdrop={saving ? "static" : true}
-        keyboard={!saving}
-      >
-        <form onSubmit={handleRuleSubmit}>
-          <Modal.Header closeButton={!saving}>
-            <Modal.Title>
-              {editingRule ? "Cập nhật mức chính sách" : "Thêm mức chính sách"}
-            </Modal.Title>
-          </Modal.Header>
-
-          <Modal.Body>
-            {error && <Alert variant="danger">{error}</Alert>}
-
-            {rulePolicy?.type === "BOOKING" && (
-              <>
-                <div className="mb-3">
-                  <label className="form-label" htmlFor="daysBeforeDeparture">
-                    Số ngày trước khởi hành
-                  </label>
-
-                  <input
-                    id="daysBeforeDeparture"
-                    name="daysBeforeDeparture"
-                    type="number"
-                    min="0"
-                    className="form-control"
-                    value={ruleForm.daysBeforeDeparture}
-                    onChange={handleRuleChange}
-                    disabled={saving}
-                    placeholder="Ví dụ: 30"
-                  />
-
-                  <div className="form-text">
-                    Ví dụ: khách đặt trước 30 ngày.
-                  </div>
-                </div>
-
-                <div className="mb-3">
-                  <label className="form-label" htmlFor="discountPercent">
-                    Phần trăm giảm giá
-                  </label>
-
-                  <div className="input-group">
-                    <input
-                      id="discountPercent"
-                      name="discountPercent"
-                      type="number"
-                      min="0"
-                      max="100"
-                      step="0.01"
-                      className="form-control"
-                      value={ruleForm.discountPercent}
-                      onChange={handleRuleChange}
-                      disabled={saving}
-                      placeholder="Ví dụ: 10"
-                    />
-
-                    <span className="input-group-text">%</span>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {rulePolicy?.type === "CANCEL" && (
-              <>
-                <div className="mb-3">
-                  <label className="form-label" htmlFor="daysBefore">
-                    Số ngày trước khởi hành
-                  </label>
-
-                  <input
-                    id="daysBefore"
-                    name="daysBefore"
-                    type="number"
-                    min="0"
-                    className="form-control"
-                    value={ruleForm.daysBefore}
-                    onChange={handleRuleChange}
-                    disabled={saving}
-                    placeholder="Ví dụ: 15"
-                  />
-
-                  <div className="form-text">Ví dụ: hủy trước 15 ngày.</div>
-                </div>
-
-                <div className="mb-3">
-                  <label className="form-label" htmlFor="refundPercent">
-                    Phần trăm hoàn tiền
-                  </label>
-
-                  <div className="input-group">
-                    <input
-                      id="refundPercent"
-                      name="refundPercent"
-                      type="number"
-                      min="0"
-                      max="100"
-                      step="0.01"
-                      className="form-control"
-                      value={ruleForm.refundPercent}
-                      onChange={handleRuleChange}
-                      disabled={saving}
-                      placeholder="Ví dụ: 80"
-                    />
-
-                    <span className="input-group-text">%</span>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {editingRule && (
-              <div className="mb-3">
-                <label className="form-label" htmlFor="ruleStatus">
-                  Trạng thái
-                </label>
-
-                <select
-                  id="ruleStatus"
-                  name="status"
-                  className="form-select"
-                  value={ruleForm.status}
-                  onChange={handleRuleChange}
-                  disabled={saving}
-                >
-                  <option value="ACTIVE">Đang hoạt động</option>
-
-                  <option value="INACTIVE">Ngừng hoạt động</option>
-                </select>
-              </div>
-            )}
-          </Modal.Body>
-
-          <Modal.Footer>
-            <Button
-              variant="secondary"
-              onClick={handleCloseRuleForm}
-              disabled={saving}
-            >
-              Hủy
-            </Button>
-
-            <Button type="submit" variant="primary" disabled={saving}>
-              {saving ? (
-                <>
-                  <Spinner size="sm" animation="border" className="me-2" />
-                  Đang lưu...
-                </>
-              ) : editingRule ? (
-                "Lưu thay đổi"
-              ) : (
-                "Thêm mức"
-              )}
-            </Button>
-          </Modal.Footer>
-        </form>
-      </Modal>
+        policy={selectedPolicy}
+        loading={ruleLoading}
+        saving={ruleSaving}
+        error={ruleError}
+        bookingRules={bookingPolicies}
+        cancelRules={cancelPolicies}
+        onClose={handleCloseRuleModal}
+        onCreateBookingRule={handleCreateBookingRule}
+        onUpdateBookingRule={handleUpdateBookingRule}
+        onDeleteBookingRule={handleDeleteBookingRule}
+        onCreateCancelRule={handleCreateCancelRule}
+        onUpdateCancelRule={handleUpdateCancelRule}
+        onDeleteCancelRule={handleDeleteCancelRule}
+      />
     </div>
   );
 }
