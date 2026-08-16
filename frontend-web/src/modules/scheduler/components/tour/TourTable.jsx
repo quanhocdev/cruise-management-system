@@ -1,11 +1,13 @@
-import { Eye, Pencil, Trash2, CalendarDays } from "lucide-react";
+import { Eye, Pencil, Trash2, CalendarDays, Send } from "lucide-react";
 
 const getTripStatusLabel = (status) => {
   switch (status) {
+    case "DRAFT":
+      return "Đang cấu hình";
     case "APPROVAL_PENDING":
-      return "Chờ Operation duyệt";
+      return "Chờ duyệt";
     case "APPROVED":
-      return "Đã duyệt";
+      return "Đã được duyệt";
     case "IN_PROGRESS":
       return "Đang diễn ra";
     case "COMPLETED":
@@ -19,6 +21,8 @@ const getTripStatusLabel = (status) => {
 
 const getTripStatusClass = (status) => {
   switch (status) {
+    case "DRAFT":
+      return "status-default";
     case "APPROVAL_PENDING":
       return "status-warning";
     case "APPROVED":
@@ -48,13 +52,7 @@ const getBookingStatusLabel = (status) => {
       return status || "-";
   }
 };
-const formatDate = (date) => {
-  if (!date) return "-";
 
-  const [year, month, day] = date.split("-");
-
-  return `${day}/${month}/${year}`;
-};
 const getBookingStatusClass = (status) => {
   switch (status) {
     case "OPEN":
@@ -68,6 +66,14 @@ const getBookingStatusClass = (status) => {
   }
 };
 
+const formatDate = (date) => {
+  if (!date) return "-";
+
+  const [year, month, day] = date.split("-");
+
+  return `${day}/${month}/${year}`;
+};
+
 function TourTable({
   tours = [],
   loading = false,
@@ -75,11 +81,13 @@ function TourTable({
   onEdit,
   onDelete,
   onManageSchedule,
+  onSubmitForApproval,
 }) {
   if (loading) {
     return (
       <div className="tour-table-state">
         <div className="tour-table-spinner" />
+
         <span>Đang tải danh sách tour...</span>
       </div>
     );
@@ -89,7 +97,9 @@ function TourTable({
     return (
       <div className="tour-table-state">
         <CalendarDays size={42} />
+
         <h3>Chưa có tour nào</h3>
+
         <p>Hãy tạo tour đầu tiên để bắt đầu xây dựng lịch trình.</p>
       </div>
     );
@@ -110,93 +120,167 @@ function TourTable({
         </thead>
 
         <tbody>
-          {tours.map((tour) => (
-            <tr key={tour.id}>
-              <td>
-                <span className="tour-code">{tour.code}</span>
-              </td>
+          {tours.map((tour) => {
+            const isDraft = tour.statusTrip === "DRAFT";
+            const canManageSchedule =
+              tour.statusTrip === "DRAFT" ||
+              tour.statusTrip === "APPROVED" ||
+              tour.statusTrip === "IN_PROGRESS";
 
-              <td>
-                <div className="tour-name-cell">
-                  <strong>{tour.name}</strong>
+            return (
+              <tr key={tour.id}>
+                {/* =====================================================
+                    CODE
+                   ===================================================== */}
 
-                  {tour.description && (
-                    <span>
-                      {tour.description.length > 70
-                        ? `${tour.description.substring(0, 70)}...`
-                        : tour.description}
-                    </span>
-                  )}
-                </div>
-              </td>
+                <td>
+                  <span className="tour-code">{tour.code}</span>
+                </td>
 
-              <td>
-                <span>
-                  {formatDate(tour.startDate)} → {formatDate(tour.endDate)}
-                </span>
-              </td>
+                {/* =====================================================
+                    NAME
+                   ===================================================== */}
 
-              <td>
-                <span
-                  className={`tour-status ${getTripStatusClass(
-                    tour.statusTrip,
-                  )}`}
-                >
-                  {getTripStatusLabel(tour.statusTrip)}
-                </span>
-              </td>
+                <td>
+                  <div className="tour-name-cell">
+                    <strong>{tour.name}</strong>
 
-              <td>
-                <span
-                  className={`tour-status ${getBookingStatusClass(
-                    tour.statusBooking,
-                  )}`}
-                >
-                  {getBookingStatusLabel(tour.statusBooking)}
-                </span>
-              </td>
+                    {tour.description && (
+                      <span>
+                        {tour.description.length > 70
+                          ? `${tour.description.substring(0, 70)}...`
+                          : tour.description}
+                      </span>
+                    )}
+                  </div>
+                </td>
 
-              <td>
-                <div className="tour-table-actions">
-                  <button
-                    type="button"
-                    className="icon-button view"
-                    title="Xem chi tiết"
-                    onClick={() => onView?.(tour)}
+                {/* =====================================================
+                    DATE
+                   ===================================================== */}
+
+                <td>
+                  <span>
+                    {formatDate(tour.startDate)} → {formatDate(tour.endDate)}
+                  </span>
+                </td>
+
+                {/* =====================================================
+                    TRIP STATUS
+                   ===================================================== */}
+
+                <td>
+                  <span
+                    className={`tour-status ${getTripStatusClass(
+                      tour.statusTrip,
+                    )}`}
                   >
-                    <Eye size={17} />
-                  </button>
+                    {getTripStatusLabel(tour.statusTrip)}
+                  </span>
+                </td>
 
-                  <button
-                    type="button"
-                    className="icon-button schedule"
-                    title="Quản lý lịch trình"
-                    onClick={() => onManageSchedule?.(tour)}
-                  >
-                    <CalendarDays size={17} />
-                  </button>
+                {/* =====================================================
+                    BOOKING STATUS
+                   ===================================================== */}
 
-                  <button
-                    type="button"
-                    className="icon-button edit"
-                    title="Chỉnh sửa"
-                    onClick={() => onEdit?.(tour)}
+                <td>
+                  <span
+                    className={`tour-status ${getBookingStatusClass(
+                      tour.statusBooking,
+                    )}`}
                   >
-                    <Pencil size={17} />
-                  </button>
+                    {getBookingStatusLabel(tour.statusBooking)}
+                  </span>
+                </td>
 
-                  <button
-                    type="button"
-                    className="icon-button delete"
-                    title="Xóa tour"
-                    onClick={() => onDelete?.(tour)}
-                  >
-                    <Trash2 size={17} />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ))}
+                {/* =====================================================
+                    ACTIONS
+                   ===================================================== */}
+
+                <td>
+                  <div className="tour-table-actions">
+                    {/* =================================================
+                        VIEW
+                        Tất cả status đều được xem
+                       ================================================= */}
+
+                    <button
+                      type="button"
+                      className="icon-button view"
+                      title="Xem chi tiết"
+                      onClick={() => onView?.(tour)}
+                    >
+                      <Eye size={17} />
+                    </button>
+
+                    {/* =================================================
+                        SCHEDULE
+                        DRAFT + APPROVED
+                       ================================================= */}
+
+                    {canManageSchedule && (
+                      <button
+                        type="button"
+                        className="icon-button schedule"
+                        title="Quản lý lịch trình"
+                        onClick={() => onManageSchedule?.(tour)}
+                      >
+                        <CalendarDays size={17} />
+                      </button>
+                    )}
+
+                    {/* =================================================
+                        EDIT
+                        Chỉ DRAFT
+                       ================================================= */}
+
+                    {isDraft && (
+                      <button
+                        type="button"
+                        className="icon-button edit"
+                        title="Chỉnh sửa"
+                        onClick={() => onEdit?.(tour)}
+                      >
+                        <Pencil size={17} />
+                      </button>
+                    )}
+
+                    {/* =================================================
+                        DELETE
+                        Chỉ DRAFT
+                       ================================================= */}
+
+                    {isDraft && (
+                      <button
+                        type="button"
+                        className="icon-button delete"
+                        title="Xóa tour"
+                        onClick={() => onDelete?.(tour)}
+                      >
+                        <Trash2 size={17} />
+                      </button>
+                    )}
+
+                    {/* =================================================
+                        SUBMIT FOR APPROVAL
+                        Chỉ DRAFT
+                       ================================================= */}
+
+                    {isDraft && (
+                      <button
+                        type="button"
+                        className="icon-button submit"
+                        title="Gửi Operation duyệt"
+                        onClick={() => onSubmitForApproval?.(tour)}
+                      >
+                        <Send size={17} />
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

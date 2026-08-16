@@ -1,0 +1,305 @@
+.operation-sidebar {
+  width: 250px;
+  height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+
+  background: #111827;
+  color: #ffffff;
+
+  transition: width 0.25s ease;
+  flex-shrink: 0;
+  z-index: 1000;
+}
+
+.operation-sidebar.collapsed {
+  width: 72px;
+}
+
+/* =========================
+   HEADER / BRAND
+   ========================= */
+
+.operation-sidebar-header {
+  height: 72px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 12px 0 18px;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.operation-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+  flex: 1;
+}
+
+.operation-sidebar-logo {
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 9px;
+
+  background: #2563eb;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.operation-sidebar-brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  white-space: nowrap;
+}
+
+.operation-sidebar-brand-text strong {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.operation-sidebar-brand-text span {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.operation-sidebar-toggle {
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+  border-radius: 7px;
+
+  background: transparent;
+  color: #9ca3af;
+
+  cursor: pointer;
+  flex-shrink: 0;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.operation-sidebar-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.operation-sidebar.collapsed .operation-sidebar-header {
+  padding: 0 17px;
+  justify-content: center;
+}
+
+/* =========================
+   NAVIGATION MENU
+   ========================= */
+
+.operation-sidebar-nav {
+  flex: 1;
+
+  padding: 16px 10px;
+
+  overflow-y: auto;
+}
+
+.operation-sidebar-section-title {
+  padding: 0 12px;
+  margin-bottom: 8px;
+
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.operation-sidebar-link {
+  min-height: 44px;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 0 12px;
+  margin-bottom: 4px;
+
+  border-radius: 8px;
+
+  color: #9ca3af;
+  text-decoration: none;
+
+  font-size: 13px;
+  font-weight: 500;
+
+  white-space: nowrap;
+  overflow: hidden;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.operation-sidebar-link svg {
+  flex-shrink: 0;
+}
+
+.operation-sidebar-link:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+
+.operation-sidebar-link.active {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+/* Collapsed Links */
+.operation-sidebar.collapsed .operation-sidebar-link {
+  justify-content: center;
+  padding: 0;
+}
+
+/* =========================
+   STATUS / FOOTER
+   ========================= */
+
+.operation-sidebar-bottom {
+  padding: 14px 10px;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.operation-sidebar-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 10px 12px;
+
+  border-radius: 8px;
+
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.operation-sidebar.collapsed .operation-sidebar-status {
+  justify-content: center;
+  padding: 10px 0;
+}
+
+.operation-status-dot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background: #22c55e;
+}
+
+.operation-sidebar-status div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+.operation-sidebar-status strong {
+  font-size: 11px;
+  color: #d1d5db;
+}
+
+.operation-sidebar-status span {
+  font-size: 10px;
+  color: #6b7280;
+}
+
+/* =========================
+   SCROLLBAR
+   ========================= */
+
+.operation-sidebar-nav::-webkit-scrollbar {
+  width: 5px;
+}
+
+.operation-sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.operation-sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+}
+
+/* =========================
+   RESPONSIVE BREAKPOINTS
+   ========================= */
+
+@media (max-width: 992px) {
+  .operation-sidebar {
+    width: 220px;
+  }
+
+  .operation-sidebar.collapsed {
+    width: 68px;
+  }
+}
+
+@media (max-width: 768px) {
+  .operation-sidebar {
+    width: 68px;
+  }
+
+  .operation-sidebar-brand-text,
+  .operation-sidebar-section-title,
+  .operation-sidebar-link span,
+  .operation-sidebar-status div,
+  .operation-sidebar-toggle {
+    display: none;
+  }
+
+  .operation-sidebar-header {
+    padding: 0 16px;
+    justify-content: center;
+  }
+
+  .operation-sidebar-link {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .operation-sidebar-status {
+    justify-content: center;
+    padding: 10px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .operation-sidebar {
+    width: 60px;
+  }
+
+  .operation-sidebar-nav {
+    padding: 12px 6px;
+  }
+
+  .operation-sidebar-link {
+    height: 44px;
+  }
+}

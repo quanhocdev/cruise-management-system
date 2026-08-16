@@ -38,13 +38,22 @@ spring:
                 - Path=/api/scheduler/**
 
             # ==========================
+            # TOUR SERVICE - OPERATION
+            # ==========================
+
+            - id: tour-operation-service
+              uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
+              predicates:
+                - Path=/api/operation/**
+
+            # ==========================
             # TOUR SERVICE - CONVENIENCE
             # ==========================
 
             - id: tour-convenience-service
               uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
               predicates:
-                - Path=/api/convenience/service-areas/**,/api/convenience/areas/**
+                - Path=/api/convenience/**
 
           # ==========================
           # CORS

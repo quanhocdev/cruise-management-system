@@ -15,14 +15,30 @@ export default function useTours() {
    * =====================================================
    * LOAD TOURS
    * =====================================================
+   *
+   * statusTrip:
+   *
+   * null
+   * -> lấy tất cả
+   *
+   * "DRAFT"
+   * -> chỉ lấy DRAFT
+   *
+   * "APPROVAL_PENDING"
+   * -> chỉ lấy APPROVAL_PENDING
+   *
+   * "APPROVED"
+   * -> chỉ lấy APPROVED
+   *
+   * ...
    */
 
-  const loadTours = useCallback(async () => {
+  const loadTours = useCallback(async (statusTrip = null) => {
     setLoading(true);
     setError("");
 
     try {
-      const data = await tourService.getAllTours();
+      const data = await tourService.getAllTours(statusTrip);
 
       setTours(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -123,11 +139,49 @@ export default function useTours() {
       setSaving(false);
     }
   }, []);
-
   /**
    * =====================================================
-   * LOAD
+   * SUBMIT FOR APPROVAL
    * =====================================================
+   *
+   * DRAFT
+   *   ↓
+   * APPROVAL_PENDING
+   */
+
+  const submitForApproval = useCallback(async (id) => {
+    setSaving(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const updated = await tourService.submitForApproval(id);
+
+      setTours((prev) => prev.map((tour) => (tour.id === id ? updated : tour)));
+
+      setSuccess("Gửi Tour cho Operation duyệt thành công.");
+
+      return updated;
+    } catch (err) {
+      console.error("SUBMIT TOUR FOR APPROVAL ERROR:", err);
+
+      setError(
+        err.response?.data?.message ||
+          "Không thể gửi Tour cho Operation duyệt.",
+      );
+
+      throw err;
+    } finally {
+      setSaving(false);
+    }
+  }, []);
+  /**
+   * =====================================================
+   * INITIAL LOAD
+   * =====================================================
+   *
+   * Lần đầu vào trang:
+   * -> lấy tất cả tour
    */
 
   useEffect(() => {
@@ -151,5 +205,6 @@ export default function useTours() {
     createTour,
     updateTour,
     deleteTour,
+    submitForApproval,
   };
 }

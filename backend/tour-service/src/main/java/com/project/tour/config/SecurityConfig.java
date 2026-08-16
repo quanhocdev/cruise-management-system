@@ -55,6 +55,9 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/convenience/**")
                                                 .hasRole("CONVENIENCE")
 
+                                                .requestMatchers("/api/operation/**")
+                                                .hasRole("OPERATION")
+
                                                 // Everything else
                                                 .anyRequest()
                                                 .authenticated())

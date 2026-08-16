@@ -1,0 +1,49 @@
+.operation-notification-button {
+  position: relative;
+
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+  border-radius: 8px;
+
+  background: transparent;
+  color: #4b5563;
+
+  cursor: pointer;
+}
+
+.operation-notification-button:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.operation-notification-badge {
+  position: absolute;
+
+  top: 4px;
+  right: 3px;
+
+  min-width: 16px;
+  height: 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 4px;
+
+  border-radius: 999px;
+
+  background: #ef4444;
+  color: #ffffff;
+
+  font-size: 9px;
+  font-weight: 700;
+
+  border: 2px solid #ffffff;
+}
