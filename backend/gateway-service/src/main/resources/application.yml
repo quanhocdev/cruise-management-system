@@ -53,7 +53,7 @@ spring:
             - id: tour-convenience-service
               uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
               predicates:
-                - Path=/api/convenience/service-areas/**,/api/convenience/areas/**
+                - Path=/api/convenience/**
 
           # ==========================
           # CORS

@@ -1,6 +1,7 @@
 package com.project.tour.mapper.service;
 
 import com.project.tour.dto.service.CreateServiceRequest;
+import com.project.tour.dto.service.ServiceConvenienceResponse;
 import com.project.tour.dto.service.ServiceResponse;
 import com.project.tour.dto.service.UpdateServiceRequest;
 import com.project.tour.model.Service;
@@ -51,5 +52,22 @@ public class ServiceMapper {
         response.setUpdatedAt(service.getUpdatedAt());
 
         return response;
+    }
+
+    // CONVENIENCE MAPPER
+
+    public static ServiceConvenienceResponse toConvenienceResponse(Service service) {
+        if (service == null) {
+            return null;
+        }
+
+        return new ServiceConvenienceResponse(
+                service.getId(),
+                service.getName(),
+                service.getDescription(),
+                service.getPrice(),
+                service.getDurationMinutes(),
+                service.getMaxPassengers(),
+                service.getImageUrl());
     }
 }

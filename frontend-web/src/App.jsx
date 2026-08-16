@@ -40,10 +40,14 @@ import OperationLayout from "./layouts/OperationLayout";
 import OperationDashboard from "./modules/operation/pages/Dashboard";
 import OperationManagerTour from "./modules/operation/pages/ManagerTour";
 
+// Convenience imports
+import ConvenienceLayout from "./layouts/ConvenienceLayout";
+import ConvenienceDashboard from "./modules/convenience/pages/Dashboard";
+import ConvenienceProducts from "./modules/convenience/pages/ConvenienceProducts";
+import ConvenienceServices from "./modules/convenience/pages/ConvenienceServices";
 // Other role dashboards
 import OnboardDashboard from "./modules/onboard/pages/Dashboard";
 import ShoreDashboard from "./modules/shore/pages/Dashboard";
-import ConvenienceDashboard from "./modules/convenience/pages/Dashboard";
 import FinanceDashboard from "./modules/finance/pages/Dashboard";
 
 export default function App() {
@@ -188,21 +192,20 @@ export default function App() {
             }
           />
 
-          {/* CONVENIENCE ROUTES */}
+          {/* CONVENIENCE ROUTES - Chuẩn Outlet */}
           <Route
-            path="/convenience/*"
+            path="/convenience"
             element={
               <ProtectedRoute allowedRoles={["CONVENIENCE"]}>
-                <Routes>
-                  <Route path="dashboard" element={<ConvenienceDashboard />} />
-                  <Route
-                    path=""
-                    element={<Navigate to="dashboard" replace />}
-                  />
-                </Routes>
+                <ConvenienceLayout />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route path="dashboard" element={<ConvenienceDashboard />} />
+            <Route path="products" element={<ConvenienceProducts />} />
+            <Route path="services" element={<ConvenienceServices />} />
+            <Route index element={<Navigate to="dashboard" replace />} />
+          </Route>
 
           {/* FINANCE ROUTES */}
           <Route
