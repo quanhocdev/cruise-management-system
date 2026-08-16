@@ -1,5 +1,6 @@
 package com.project.tour.controller.tour.operation;
 
+import com.project.tour.dto.cruise.CruiseAvailabilityResponse;
 import com.project.tour.dto.tour.TourResponse;
 import com.project.tour.service.tour.operation.OperationTourService;
 
@@ -37,7 +38,7 @@ public class OperationTourController {
     // =====================================================
 
     @GetMapping("/{id}/available-cruises")
-    public ResponseEntity<?> getAvailableCruises(
+    public ResponseEntity<List<CruiseAvailabilityResponse>> getAvailableCruises(
             @PathVariable UUID id) {
 
         return ResponseEntity.ok(

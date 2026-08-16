@@ -1,0 +1,25 @@
+.operation-layout {
+  min-height: 100vh;
+  display: flex;
+  background: #f5f7fb;
+}
+
+.operation-layout-main {
+  min-width: 0;
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.operation-layout-content {
+  flex: 1;
+  padding: 24px;
+  overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+  .operation-layout-content {
+    padding: 16px;
+  }
+}
