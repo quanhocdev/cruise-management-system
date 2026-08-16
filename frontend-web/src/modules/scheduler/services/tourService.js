@@ -4,17 +4,32 @@ const TOUR_BASE_URL = "/scheduler/tours";
 
 const tourService = {
   /**
-   * Lấy tất cả Tour
+   * =====================================================
+   * LẤY DANH SÁCH TOUR
+   * =====================================================
+   *
+   * Có thể truyền:
+   *
+   * getAllTours()
+   * -> GET /scheduler/tours
+   *
+   * getAllTours("DRAFT")
+   * -> GET /scheduler/tours?statusTrip=DRAFT
    */
-  getAllTours: async () => {
-    const response = await api.get(TOUR_BASE_URL);
+  getAllTours: async (statusTrip = null) => {
+    const response = await api.get(TOUR_BASE_URL, {
+      params: statusTrip ? { statusTrip } : {},
+    });
 
     return response.data;
   },
 
   /**
-   * Lấy Tour theo ID
+   * =====================================================
+   * LẤY TOUR THEO ID
+   * =====================================================
    */
+
   getTourById: async (id) => {
     const response = await api.get(`${TOUR_BASE_URL}/${id}`);
 
@@ -22,8 +37,11 @@ const tourService = {
   },
 
   /**
-   * Lấy Tour theo code
+   * =====================================================
+   * LẤY TOUR THEO CODE
+   * =====================================================
    */
+
   getTourByCode: async (code) => {
     const response = await api.get(
       `${TOUR_BASE_URL}/code/${encodeURIComponent(code)}`,
@@ -33,7 +51,9 @@ const tourService = {
   },
 
   /**
-   * Tạo Tour
+   * =====================================================
+   * TẠO TOUR
+   * =====================================================
    *
    * Scheduler KHÔNG chọn Cruise.
    *
@@ -42,10 +62,11 @@ const tourService = {
    *   code,
    *   name,
    *   description,
-   *   dayStart,
-   *   dayEnd
+   *   startDate,
+   *   endDate
    * }
    */
+
   createTour: async (data) => {
     const response = await api.post(TOUR_BASE_URL, data);
 
@@ -53,8 +74,11 @@ const tourService = {
   },
 
   /**
-   * Cập nhật Tour
+   * =====================================================
+   * CẬP NHẬT TOUR
+   * =====================================================
    */
+
   updateTour: async (id, data) => {
     const response = await api.patch(`${TOUR_BASE_URL}/${id}`, data);
 
@@ -62,8 +86,11 @@ const tourService = {
   },
 
   /**
-   * Xóa Tour
+   * =====================================================
+   * XÓA TOUR
+   * =====================================================
    */
+
   deleteTour: async (id) => {
     await api.delete(`${TOUR_BASE_URL}/${id}`);
 

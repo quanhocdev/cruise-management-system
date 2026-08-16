@@ -6,8 +6,10 @@ import com.project.tour.dto.tour.UpdateTourRequest;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.tour.TourMapper;
 import com.project.tour.model.Tour;
+import com.project.tour.model.enums.tour.TourStatusTrip;
 import com.project.tour.repository.tour.TourRepository;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,10 +24,14 @@ public class TourService {
 
         private final TourRepository tourRepository;
 
+        private final TourStatusValidator tourStatusValidator;
+
         public TourService(
-                        TourRepository tourRepository) {
+                        TourRepository tourRepository,
+                        TourStatusValidator tourStatusValidator) {
 
                 this.tourRepository = tourRepository;
+                this.tourStatusValidator = tourStatusValidator;
         }
 
         // =====================================================
@@ -80,29 +86,58 @@ public class TourService {
         }
 
         // =====================================================
-        // GET ALL
+        // GET TOURS
         // =====================================================
 
         @Transactional(readOnly = true)
-        public List<TourResponse> getAllTours() {
+        public List<TourResponse> getTours(
+                        UUID cruiseId,
+                        TourStatusTrip statusTrip) {
 
-                return tourRepository
-                                .findAllByOrderByNameAsc()
-                                .stream()
-                                .map(TourMapper::toResponse)
-                                .toList();
-        }
+                List<Tour> tours;
 
-        // =====================================================
-        // GET BY CRUISE
-        // =====================================================
+                /*
+                 * Không có cruiseId + không có statusTrip
+                 * -> lấy tất cả tour.
+                 */
+                if (cruiseId == null && statusTrip == null) {
 
-        @Transactional(readOnly = true)
-        public List<TourResponse> getToursByCruise(
-                        UUID cruiseId) {
+                        tours = tourRepository
+                                        .findAllByOrderByNameAsc();
 
-                return tourRepository
-                                .findAllByCruise_IdOrderByNameAsc(cruiseId)
+                        /*
+                         * Có cruiseId + không có statusTrip
+                         * -> lấy tour theo cruise.
+                         */
+                } else if (cruiseId != null && statusTrip == null) {
+
+                        tours = tourRepository
+                                        .findAllByCruise_IdOrderByNameAsc(
+                                                        cruiseId);
+
+                        /*
+                         * Không có cruiseId + có statusTrip
+                         * -> lọc theo trạng thái tour.
+                         */
+                } else if (cruiseId == null && statusTrip != null) {
+
+                        tours = tourRepository
+                                        .findAllByStatusTripOrderByNameAsc(
+                                                        statusTrip);
+
+                        /*
+                         * Có cả cruiseId + statusTrip
+                         * -> lọc theo cả hai điều kiện.
+                         */
+                } else {
+
+                        tours = tourRepository
+                                        .findAllByCruise_IdAndStatusTripOrderByNameAsc(
+                                                        cruiseId,
+                                                        statusTrip);
+                }
+
+                return tours
                                 .stream()
                                 .map(TourMapper::toResponse)
                                 .toList();
@@ -121,6 +156,9 @@ public class TourService {
                                 request.endDate());
 
                 Tour tour = findById(id);
+
+                // Chỉ DRAFT mới được phép chỉnh sửa
+                tourStatusValidator.validateCanUpdate(tour);
 
                 if (tourRepository.existsByCodeIgnoreCaseAndIdNot(
                                 request.code(),
@@ -148,6 +186,9 @@ public class TourService {
                         UUID id) {
 
                 Tour tour = findById(id);
+
+                // Chỉ DRAFT mới được phép xóa
+                tourStatusValidator.validateCanDelete(tour);
 
                 tourRepository.delete(tour);
         }

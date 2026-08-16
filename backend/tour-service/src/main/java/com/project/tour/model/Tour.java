@@ -53,9 +53,12 @@ public class Tour {
     private Cruise cruise;
 
     /*
-     * Trạng thái vận hành của Tour.
+     * Trạng thái cấu hình và vận hành của Tour.
      *
-     * Scheduler tạo:
+     * Scheduler tạo Tour:
+     * DRAFT
+     *
+     * Scheduler hoàn tất Tour + Schedule + ScheduleStop:
      * APPROVAL_PENDING
      *
      * Operation duyệt:
@@ -63,10 +66,16 @@ public class Tour {
      *
      * Operation hủy:
      * CANCELLED
+     *
+     * Tour bắt đầu:
+     * IN_PROGRESS
+     *
+     * Tour kết thúc:
+     * COMPLETED
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "status_trip", nullable = false, length = 30)
-    private TourStatusTrip statusTrip = TourStatusTrip.APPROVAL_PENDING;
+    private TourStatusTrip statusTrip = TourStatusTrip.DRAFT;
 
     /*
      * Chỉ Operation được cấu hình.

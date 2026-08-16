@@ -74,7 +74,7 @@
 
 .scheduler-tour-summary {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 16px;
   margin-bottom: 24px;
 }
@@ -1227,5 +1227,99 @@
   .secondary-button,
   .primary-button {
     width: 100%;
+  }
+}
+/* =========================================================
+   TOUR FILTER
+   ========================================================= */
+
+.scheduler-tour-filter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 12px;
+
+  margin-bottom: 20px;
+  padding: 14px 16px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+
+  background: #ffffff;
+
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.scheduler-tour-filter-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  color: #334155;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.scheduler-tour-filter-label svg {
+  color: #0f766e;
+}
+
+.scheduler-tour-filter select {
+  min-width: 230px;
+  height: 40px;
+
+  padding: 0 12px;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+
+  background: #ffffff;
+  color: #334155;
+
+  font-family: inherit;
+  font-size: 14px;
+
+  outline: none;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.scheduler-tour-filter select:hover {
+  border-color: #94a3b8;
+}
+
+.scheduler-tour-filter select:focus {
+  border-color: #0f766e;
+
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+}
+
+.scheduler-tour-filter select:disabled {
+  background: #f8fafc;
+  color: #94a3b8;
+
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 600px) {
+  .scheduler-tour-filter {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .scheduler-tour-filter select {
+    width: 100%;
+    min-width: 0;
   }
 }

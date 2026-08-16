@@ -3,6 +3,7 @@ package com.project.tour.controller.tour;
 import com.project.tour.dto.tour.CreateTourRequest;
 import com.project.tour.dto.tour.TourResponse;
 import com.project.tour.dto.tour.UpdateTourRequest;
+import com.project.tour.model.enums.tour.TourStatusTrip;
 import com.project.tour.service.tour.TourService;
 
 import jakarta.validation.Valid;
@@ -66,25 +67,18 @@ public class TourController {
     }
 
     // =====================================================
-    // GET ALL / BY CRUISE
+    // GET ALL / FILTER
     // =====================================================
 
     @GetMapping
     public ResponseEntity<List<TourResponse>> getTours(
-            @RequestParam(required = false) UUID cruiseId) {
+            @RequestParam(required = false) UUID cruiseId,
+            @RequestParam(required = false) TourStatusTrip statusTrip) {
 
-        List<TourResponse> response;
-
-        if (cruiseId != null) {
-
-            response = tourService.getToursByCruise(cruiseId);
-
-        } else {
-
-            response = tourService.getAllTours();
-        }
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(
+                tourService.getTours(
+                        cruiseId,
+                        statusTrip));
     }
 
     // =====================================================

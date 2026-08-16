@@ -12,21 +12,25 @@ import java.util.UUID;
 
 public interface TourRepository extends JpaRepository<Tour, UUID> {
 
-    boolean existsByCodeIgnoreCase(String code);
+        boolean existsByCodeIgnoreCase(String code);
 
-    boolean existsByCodeIgnoreCaseAndIdNot(
-            String code,
-            UUID excludedTourId);
+        boolean existsByCodeIgnoreCaseAndIdNot(
+                        String code,
+                        UUID excludedTourId);
 
-    Optional<Tour> findByCodeIgnoreCase(String code);
+        Optional<Tour> findByCodeIgnoreCase(String code);
 
-    List<Tour> findAllByOrderByNameAsc();
+        List<Tour> findAllByOrderByNameAsc();
 
-    List<Tour> findAllByCruise_IdOrderByNameAsc(UUID cruiseId);
+        List<Tour> findAllByCruise_IdOrderByNameAsc(UUID cruiseId);
 
-    List<Tour> findAllByStatusTripOrderByNameAsc(
-            TourStatusTrip statusTrip);
+        List<Tour> findAllByStatusTripOrderByNameAsc(
+                        TourStatusTrip statusTrip);
 
-    List<Tour> findAllByStatusBookingOrderByNameAsc(
-            TourBookingStatus statusBooking);
+        List<Tour> findAllByStatusBookingOrderByNameAsc(
+                        TourBookingStatus statusBooking);
+
+        List<Tour> findAllByCruise_IdAndStatusTripOrderByNameAsc(
+                        UUID cruiseId,
+                        TourStatusTrip statusTrip);
 }
