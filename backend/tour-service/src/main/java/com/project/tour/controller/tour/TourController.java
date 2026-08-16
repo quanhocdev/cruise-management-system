@@ -108,4 +108,15 @@ public class TourController {
 
         return ResponseEntity.noContent().build();
     }
+    // =====================================================
+    // SUBMIT FOR APPROVAL
+    // =====================================================
+
+    @PatchMapping("/{id}/submit-for-approval")
+    public ResponseEntity<TourResponse> submitForApproval(
+            @PathVariable UUID id) {
+
+        return ResponseEntity.ok(
+                tourService.submitForApproval(id));
+    }
 }

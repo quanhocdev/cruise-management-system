@@ -208,6 +208,23 @@ public class TourService {
         }
 
         // =====================================================
+        // SUBMIT FOR APPROVAL
+        // =====================================================
+
+        public TourResponse submitForApproval(UUID id) {
+
+                Tour tour = findById(id);
+
+                tourStatusValidator.validateCanSubmitForApproval(tour);
+
+                tour.setStatusTrip(TourStatusTrip.APPROVAL_PENDING);
+
+                Tour updatedTour = tourRepository.save(tour);
+
+                return TourMapper.toResponse(updatedTour);
+        }
+
+        // =====================================================
         // VALIDATION
         // =====================================================
 

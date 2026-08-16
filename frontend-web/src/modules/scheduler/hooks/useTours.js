@@ -205,5 +205,6 @@ export default function useTours() {
     createTour,
     updateTour,
     deleteTour,
+    submitForApproval,
   };
 }

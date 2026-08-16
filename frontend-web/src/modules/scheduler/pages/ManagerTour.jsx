@@ -20,6 +20,7 @@ function ManagerTour() {
     createTour,
     updateTour,
     deleteTour,
+    submitForApproval,
   } = useTours();
 
   const [showModal, setShowModal] = useState(false);

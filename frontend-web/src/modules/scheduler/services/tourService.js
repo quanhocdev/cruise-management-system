@@ -96,6 +96,24 @@ const tourService = {
 
     return true;
   },
+
+  /**
+   * =====================================================
+   * GỬI TOUR ĐI DUYỆT
+   * =====================================================
+   *
+   * DRAFT
+   *   ↓
+   * APPROVAL_PENDING
+   */
+
+  submitForApproval: async (id) => {
+    const response = await api.patch(
+      `${TOUR_BASE_URL}/${id}/submit-for-approval`,
+    );
+
+    return response.data;
+  },
 };
 
 export default tourService;
