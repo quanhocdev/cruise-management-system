@@ -1,6 +1,7 @@
 package com.project.tour.controller;
 
 import com.project.tour.dto.schedule.ScheduleBookingContext;
+import com.project.tour.dto.tour.FeedbackTourContext;
 import com.project.tour.exception.AppException;
 import com.project.tour.model.Schedule;
 import com.project.tour.model.Tour;
@@ -50,12 +51,23 @@ public class InternalTourController {
                 bookingStatus(tour));
     }
 
+    @GetMapping("/{id}/feedback-context")
+    public FeedbackTourContext feedbackContext(@PathVariable UUID id,
+            @RequestHeader(value = "X-Internal-Api-Key", required = false) String apiKey) {
+        authorize(apiKey);
+        Tour tour = tourRepository.findById(id)
+            .orElseThrow(() -> new AppException("Tour not found: " + id, HttpStatus.NOT_FOUND));
+        UUID cruiseId = tour.getCruise() == null ? null : tour.getCruise().getId();
+        return new FeedbackTourContext(tour.getId(), cruiseId,
+            tour.getStatusTrip() == TourStatusTrip.COMPLETED);
+    }
+
     private String bookingStatus(Tour tour) {
         LocalDateTime now = LocalDateTime.now();
         boolean withinWindow = (tour.getBookingStart() == null || !now.isBefore(tour.getBookingStart()))
                 && (tour.getBookingEnd() == null || !now.isAfter(tour.getBookingEnd()));
         return tour.getStatusBooking() == TourBookingStatus.OPEN
-                && tour.getStatusTrip() == TourStatusTrip.UPCOMING
+                && tour.getStatusTrip() == TourStatusTrip.APPROVED
                 && withinWindow ? "OPEN" : "CLOSED";
     }
 

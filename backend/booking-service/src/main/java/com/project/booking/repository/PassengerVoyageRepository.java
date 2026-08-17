@@ -8,4 +8,5 @@ public interface PassengerVoyageRepository extends JpaRepository<PassengerVoyage
     long countByVoyageIdAndPassengerStatusIn(UUID voyageId, Collection<PassengerStatus> statuses);
     Optional<PassengerVoyage> findByNfcTagIdIgnoreCase(String nfcTagId);
     boolean existsByNfcTagIdIgnoreCase(String nfcTagId);
+    Optional<PassengerVoyage> findFirstByBooking_IdAndPassenger_UserId(Long bookingId, Long userId);
 }

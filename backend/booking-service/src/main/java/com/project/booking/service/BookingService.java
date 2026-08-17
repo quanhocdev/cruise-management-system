@@ -16,4 +16,5 @@ public interface BookingService {
     PassengerVoyageResponse board(String nfcTagId);
     PassengerVoyageResponse disembark(String nfcTagId);
     int sendDepartureReminders(LocalDate departureDate);
+    FeedbackEligibilityResponse getFeedbackEligibility(Long bookingId, Long userId);
 }

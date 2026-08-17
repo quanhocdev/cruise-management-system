@@ -182,6 +182,20 @@ public class BookingServiceImpl implements BookingService {
         return sent;
     }
 
+    @Override @Transactional(readOnly = true)
+    public FeedbackEligibilityResponse getFeedbackEligibility(Long bookingId, Long userId) {
+        Booking booking = find(bookingId);
+        PassengerVoyage passengerVoyage = passengerVoyageRepository
+            .findFirstByBooking_IdAndPassenger_UserId(bookingId, userId).orElse(null);
+        if (passengerVoyage == null)
+            return new FeedbackEligibilityResponse(booking.getId(), booking.getVoyageId(), null, false);
+        boolean participated = booking.getStatus() == BookingStatus.CONFIRMED
+            && passengerVoyage.getPassengerStatus() == PassengerStatus.REGISTERED
+            && passengerVoyage.getEmbarkationStatus() == EmbarkationStatus.DISEMBARKED;
+        return new FeedbackEligibilityResponse(booking.getId(), booking.getVoyageId(),
+            passengerVoyage.getId(), participated);
+    }
+
     private Booking find(Long id) {
         return repository.findById(id)
             .orElseThrow(() -> new BookingException(HttpStatus.NOT_FOUND, "Booking not found: " + id));
