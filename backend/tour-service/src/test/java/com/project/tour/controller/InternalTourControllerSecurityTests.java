@@ -39,12 +39,22 @@ class InternalTourControllerSecurityTests {
     @Test void returnsCapacityDepartureAndOpenStatus() throws Exception {
         Cruise cruise = new Cruise(); cruise.setMaxPassengers(120);
         Tour tour = new Tour(); tour.setId(ID); tour.setCruise(cruise);
-        tour.setStatusBooking(TourBookingStatus.OPEN); tour.setStatusTrip(TourStatusTrip.UPCOMING);
+        tour.setStatusBooking(TourBookingStatus.OPEN); tour.setStatusTrip(TourStatusTrip.APPROVED);
         tour.setBookingStart(LocalDateTime.now().minusDays(1)); tour.setBookingEnd(LocalDateTime.now().plusDays(1));
         Schedule departure = new Schedule(); departure.setRealDay(LocalDate.now().plusDays(10));
         when(tourRepository.findById(ID)).thenReturn(Optional.of(tour));
         when(scheduleRepository.findFirstByTour_IdAndStatusOrderByRealDayAsc(ID, ScheduleStatus.ACTIVE)).thenReturn(Optional.of(departure));
         mockMvc.perform(get("/internal/tours/{id}/booking-context", ID).header("X-Internal-Api-Key", "test-internal-key"))
             .andExpect(status().isOk()).andExpect(jsonPath("$.capacity").value(120)).andExpect(jsonPath("$.status").value("OPEN"));
+    }
+
+    @Test void completedTourReturnsFeedbackContext() throws Exception {
+        Cruise cruise = new Cruise(); cruise.setId(UUID.randomUUID());
+        Tour tour = new Tour(); tour.setId(ID); tour.setCruise(cruise); tour.setStatusTrip(TourStatusTrip.COMPLETED);
+        when(tourRepository.findById(ID)).thenReturn(Optional.of(tour));
+        mockMvc.perform(get("/internal/tours/{id}/feedback-context", ID)
+                .header("X-Internal-Api-Key", "test-internal-key"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.completed").value(true))
+            .andExpect(jsonPath("$.cruiseId").value(cruise.getId().toString()));
     }
 }

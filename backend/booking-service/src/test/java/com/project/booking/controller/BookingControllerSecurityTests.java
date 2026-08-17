@@ -48,6 +48,10 @@ class BookingControllerSecurityTests {
         mockMvc.perform(get("/internal/bookings/1/payment-context")
             .header("X-Internal-Api-Key", "test-internal-key")).andExpect(status().isOk());
     }
+    @Test void feedbackEligibilityRequiresInternalKey() throws Exception {
+        mockMvc.perform(get("/internal/bookings/1/feedback-eligibility").param("userId", "7"))
+            .andExpect(status().isUnauthorized());
+    }
     @Test void passengerCannotUseCheckInEndpoints() throws Exception {
         mockMvc.perform(get("/api/v1/check-in/bookings/CR00000001")
             .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_PASSENGER"))))

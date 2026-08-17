@@ -121,6 +121,23 @@ class BookingServiceImplTests {
         assertNotNull(booking.getDepartureReminderSentAt()); verify(repository).save(booking);
     }
 
+    @Test void disembarkedPassengerIsEligibleForFeedback() {
+        Booking booking = booking(BookingStatus.CONFIRMED, 10L);
+        PassengerVoyage link = passengerVoyage(booking, EmbarkationStatus.DISEMBARKED);
+        link.getPassenger().setUserId(7L);
+        when(repository.findById(1L)).thenReturn(Optional.of(booking));
+        when(passengerVoyageRepository.findFirstByBooking_IdAndPassenger_UserId(1L, 7L)).thenReturn(Optional.of(link));
+        FeedbackEligibilityResponse result = service.getFeedbackEligibility(1L, 7L);
+        assertTrue(result.participated()); assertEquals(3L, result.passengerVoyageId());
+    }
+
+    @Test void bookingOwnerWhoIsNotPassengerIsNotEligibleForFeedback() {
+        Booking booking = booking(BookingStatus.CONFIRMED, 10L);
+        when(repository.findById(1L)).thenReturn(Optional.of(booking));
+        when(passengerVoyageRepository.findFirstByBooking_IdAndPassenger_UserId(1L, 7L)).thenReturn(Optional.empty());
+        assertFalse(service.getFeedbackEligibility(1L, 7L).participated());
+    }
+
     private CreateBookingRequest request() {
         return new CreateBookingRequest(UUID.randomUUID(), "Nguyen Van A", "0900000000",
             new BigDecimal("1000000"), List.of(new CreatePassengerRequest(null, "Nguyen Van A",
