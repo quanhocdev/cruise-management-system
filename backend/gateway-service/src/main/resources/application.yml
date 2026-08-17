@@ -34,6 +34,11 @@ spring:
               predicates:
                 - Path=/api/v1/notifications/**
 
+            - id: feedback-service
+              uri: ${FEEDBACK_SERVICE_URL:http://feedback-service:8087}
+              predicates:
+                - Path=/api/v1/feedbacks/**,/api/admin/feedbacks/**
+
             # ==========================
             # TOUR SERVICE - ADMIN
             # ==========================

@@ -132,6 +132,7 @@ services:
       - booking-service
       - payment-service
       - notification-service
+      - feedback-service
 
   # ==========================
   # Auth Service
@@ -258,6 +259,30 @@ services:
     depends_on:
       postgres-operations:
         condition: service_healthy
+
+  feedback-service:
+    build:
+      context: ./backend/feedback-service
+      dockerfile: Dockerfile.dev
+    container_name: feedback-service
+    restart: always
+    ports:
+      - "8087:8087"
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-operations:5432/cruise_operations_db
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      BOOKING_SERVICE_URL: http://booking-service:8082
+      TOUR_SERVICE_URL: http://tour-service:8088
+    depends_on:
+      postgres-operations:
+        condition: service_healthy
+      booking-service:
+        condition: service_started
+      tour-service:
+        condition: service_started
 
   # ==========================
   # React Frontend
