@@ -5,15 +5,16 @@ import com.project.tour.dto.tour.TourResponse;
 import com.project.tour.dto.tour.UpdateTourRequest;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.tour.TourMapper;
-import com.project.tour.model.Cruise;
 import com.project.tour.model.Tour;
-import com.project.tour.repository.cruise.CruiseRepository;
+import com.project.tour.model.enums.tour.TourStatusTrip;
 import com.project.tour.repository.tour.TourRepository;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,152 +22,237 @@ import java.util.UUID;
 @Transactional
 public class TourService {
 
-    private final TourRepository tourRepository;
-    private final CruiseRepository cruiseRepository;
+        private final TourRepository tourRepository;
 
-    public TourService(
-            TourRepository tourRepository,
-            CruiseRepository cruiseRepository) {
+        private final TourStatusValidator tourStatusValidator;
 
-        this.tourRepository = tourRepository;
-        this.cruiseRepository = cruiseRepository;
-    }
+        public TourService(
+                        TourRepository tourRepository,
+                        TourStatusValidator tourStatusValidator) {
 
-    public TourResponse createTour(
-            CreateTourRequest request) {
-
-        if (request.getDayEnd() < request.getDayStart()) {
-            throw new AppException(
-                    "Day end must be greater than or equal to day start",
-                    HttpStatus.BAD_REQUEST);
+                this.tourRepository = tourRepository;
+                this.tourStatusValidator = tourStatusValidator;
         }
 
-        if (tourRepository.existsByCodeIgnoreCase(
-                request.getCode())) {
+        // =====================================================
+        // CREATE
+        // =====================================================
 
-            throw new AppException(
-                    "Tour code already exists",
-                    HttpStatus.CONFLICT);
+        public TourResponse createTour(
+                        CreateTourRequest request) {
+
+                validateDates(
+                                request.startDate(),
+                                request.endDate());
+
+                validateCodeNotExists(
+                                request.code());
+
+                Tour tour = TourMapper.toEntity(request);
+
+                Tour savedTour = tourRepository.save(tour);
+
+                return TourMapper.toResponse(savedTour);
         }
 
-        Cruise cruise = findCruise(request.getCruiseId());
+        // =====================================================
+        // GET BY ID
+        // =====================================================
 
-        Tour tour = TourMapper.toEntity(
-                request,
-                cruise);
+        @Transactional(readOnly = true)
+        public TourResponse getTourById(
+                        UUID id) {
 
-        Tour savedTour = tourRepository.save(tour);
+                Tour tour = findById(id);
 
-        return TourMapper.toResponse(savedTour);
-    }
-
-    @Transactional(readOnly = true)
-    public TourResponse getTourById(
-            UUID id) {
-
-        Tour tour = findById(id);
-
-        return TourMapper.toResponse(tour);
-    }
-
-    @Transactional(readOnly = true)
-    public TourResponse getTourByCode(
-            String code) {
-
-        Tour tour = tourRepository
-                .findByCodeIgnoreCase(code)
-                .orElseThrow(() -> new AppException(
-                        "Tour not found",
-                        HttpStatus.NOT_FOUND));
-
-        return TourMapper.toResponse(tour);
-    }
-
-    @Transactional(readOnly = true)
-    public List<TourResponse> getAllTours() {
-
-        return tourRepository
-                .findAllByOrderByNameAsc()
-                .stream()
-                .map(TourMapper::toResponse)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public List<TourResponse> getToursByCruise(
-            UUID cruiseId) {
-
-        if (!cruiseRepository.existsById(cruiseId)) {
-            throw new AppException(
-                    "Cruise not found",
-                    HttpStatus.NOT_FOUND);
+                return TourMapper.toResponse(tour);
         }
 
-        return tourRepository
-                .findAllByCruise_IdOrderByNameAsc(cruiseId)
-                .stream()
-                .map(TourMapper::toResponse)
-                .toList();
-    }
+        // =====================================================
+        // GET BY CODE
+        // =====================================================
 
-    public TourResponse updateTour(
-            UUID id,
-            UpdateTourRequest request) {
+        @Transactional(readOnly = true)
+        public TourResponse getTourByCode(
+                        String code) {
 
-        if (request.getDayEnd() < request.getDayStart()) {
-            throw new AppException(
-                    "Day end must be greater than or equal to day start",
-                    HttpStatus.BAD_REQUEST);
+                Tour tour = tourRepository
+                                .findByCodeIgnoreCase(code)
+                                .orElseThrow(() -> new AppException(
+                                                "Tour not found",
+                                                HttpStatus.NOT_FOUND));
+
+                return TourMapper.toResponse(tour);
         }
 
-        Tour tour = findById(id);
+        // =====================================================
+        // GET TOURS
+        // =====================================================
 
-        if (tourRepository.existsByCodeIgnoreCaseAndIdNot(
-                request.getCode(),
-                id)) {
+        @Transactional(readOnly = true)
+        public List<TourResponse> getTours(
+                        UUID cruiseId,
+                        TourStatusTrip statusTrip) {
 
-            throw new AppException(
-                    "Tour code already exists",
-                    HttpStatus.CONFLICT);
+                List<Tour> tours;
+
+                /*
+                 * Không có cruiseId + không có statusTrip
+                 * -> lấy tất cả tour.
+                 */
+                if (cruiseId == null && statusTrip == null) {
+
+                        tours = tourRepository
+                                        .findAllByOrderByNameAsc();
+
+                        /*
+                         * Có cruiseId + không có statusTrip
+                         * -> lấy tour theo cruise.
+                         */
+                } else if (cruiseId != null && statusTrip == null) {
+
+                        tours = tourRepository
+                                        .findAllByCruise_IdOrderByNameAsc(
+                                                        cruiseId);
+
+                        /*
+                         * Không có cruiseId + có statusTrip
+                         * -> lọc theo trạng thái tour.
+                         */
+                } else if (cruiseId == null && statusTrip != null) {
+
+                        tours = tourRepository
+                                        .findAllByStatusTripOrderByNameAsc(
+                                                        statusTrip);
+
+                        /*
+                         * Có cả cruiseId + statusTrip
+                         * -> lọc theo cả hai điều kiện.
+                         */
+                } else {
+
+                        tours = tourRepository
+                                        .findAllByCruise_IdAndStatusTripOrderByNameAsc(
+                                                        cruiseId,
+                                                        statusTrip);
+                }
+
+                return tours
+                                .stream()
+                                .map(TourMapper::toResponse)
+                                .toList();
         }
 
-        Cruise cruise = findCruise(request.getCruiseId());
+        // =====================================================
+        // UPDATE
+        // =====================================================
 
-        TourMapper.updateEntity(
-                tour,
-                request,
-                cruise);
+        public TourResponse updateTour(
+                        UUID id,
+                        UpdateTourRequest request) {
 
-        Tour updatedTour = tourRepository.save(tour);
+                validateDates(
+                                request.startDate(),
+                                request.endDate());
 
-        return TourMapper.toResponse(updatedTour);
-    }
+                Tour tour = findById(id);
 
-    public void deleteTour(
-            UUID id) {
+                // Chỉ DRAFT mới được phép chỉnh sửa
+                tourStatusValidator.validateCanUpdate(tour);
 
-        Tour tour = findById(id);
+                if (tourRepository.existsByCodeIgnoreCaseAndIdNot(
+                                request.code(),
+                                id)) {
 
-        tourRepository.delete(tour);
-    }
+                        throw new AppException(
+                                        "Tour code already exists",
+                                        HttpStatus.CONFLICT);
+                }
 
-    private Tour findById(
-            UUID id) {
+                TourMapper.updateEntity(
+                                tour,
+                                request);
 
-        return tourRepository
-                .findById(id)
-                .orElseThrow(() -> new AppException(
-                        "Tour not found",
-                        HttpStatus.NOT_FOUND));
-    }
+                Tour updatedTour = tourRepository.save(tour);
 
-    private Cruise findCruise(
-            UUID cruiseId) {
+                return TourMapper.toResponse(updatedTour);
+        }
 
-        return cruiseRepository
-                .findById(cruiseId)
-                .orElseThrow(() -> new AppException(
-                        "Cruise not found",
-                        HttpStatus.NOT_FOUND));
-    }
+        // =====================================================
+        // DELETE
+        // =====================================================
+
+        public void deleteTour(
+                        UUID id) {
+
+                Tour tour = findById(id);
+
+                // Chỉ DRAFT mới được phép xóa
+                tourStatusValidator.validateCanDelete(tour);
+
+                tourRepository.delete(tour);
+        }
+
+        // =====================================================
+        // FIND
+        // =====================================================
+
+        private Tour findById(
+                        UUID id) {
+
+                return tourRepository
+                                .findById(id)
+                                .orElseThrow(() -> new AppException(
+                                                "Tour not found",
+                                                HttpStatus.NOT_FOUND));
+        }
+
+        // =====================================================
+        // SUBMIT FOR APPROVAL
+        // =====================================================
+
+        public TourResponse submitForApproval(UUID id) {
+
+                Tour tour = findById(id);
+
+                tourStatusValidator.validateCanSubmitForApproval(tour);
+
+                tour.setStatusTrip(TourStatusTrip.APPROVAL_PENDING);
+
+                Tour updatedTour = tourRepository.save(tour);
+
+                return TourMapper.toResponse(updatedTour);
+        }
+
+        // =====================================================
+        // VALIDATION
+        // =====================================================
+
+        private void validateDates(
+                        LocalDate dayStart,
+                        LocalDate dayEnd) {
+
+                if (dayStart == null || dayEnd == null) {
+                        throw new AppException(
+                                        "Start date and end date are required",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                if (dayEnd.isBefore(dayStart)) {
+                        throw new AppException(
+                                        "End date must be greater than or equal to start date",
+                                        HttpStatus.BAD_REQUEST);
+                }
+        }
+
+        private void validateCodeNotExists(
+                        String code) {
+
+                if (tourRepository.existsByCodeIgnoreCase(code)) {
+
+                        throw new AppException(
+                                        "Tour code already exists",
+                                        HttpStatus.CONFLICT);
+                }
+        }
 }

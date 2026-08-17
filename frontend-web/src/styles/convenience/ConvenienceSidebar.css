@@ -1,0 +1,197 @@
+.convenience-sidebar {
+  width: 250px;
+  height: 100vh;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: #1e1b4b; /* Indigo tối */
+  color: #ffffff;
+  transition: width 0.25s ease;
+  overflow: hidden;
+}
+
+.convenience-sidebar.collapsed {
+  width: 72px;
+}
+
+/* =========================================================
+   TOP
+   ========================================================= */
+
+.convenience-sidebar-top {
+  position: relative;
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* =========================================================
+   BRAND
+   ========================================================= */
+
+.convenience-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #e0e7ff;
+  white-space: nowrap;
+}
+
+.convenience-sidebar-brand span {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+/* =========================================================
+   TOGGLE
+   ========================================================= */
+
+.convenience-sidebar-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #e0e7ff;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.convenience-sidebar-toggle:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+/* =========================================================
+   MENU
+   ========================================================= */
+
+.convenience-sidebar-menu {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 12px;
+  overflow-y: auto;
+}
+
+/* =========================================================
+   MENU ITEM
+   ========================================================= */
+
+.convenience-sidebar-item {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 0 14px;
+  border-radius: 9px;
+  color: #c7d2fe;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.convenience-sidebar-item:hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: #ffffff;
+}
+
+.convenience-sidebar-item.active {
+  background: #4338ca; /* Indigo đậm accent */
+  color: #ffffff;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
+}
+
+.convenience-sidebar-item span {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* =========================================================
+   COLLAPSED
+   ========================================================= */
+
+.convenience-sidebar.collapsed .convenience-sidebar-top {
+  justify-content: center;
+  padding: 0;
+}
+
+.convenience-sidebar.collapsed .convenience-sidebar-brand {
+  justify-content: center;
+}
+
+.convenience-sidebar.collapsed .convenience-sidebar-toggle {
+  right: -3px;
+}
+
+.convenience-sidebar.collapsed .convenience-sidebar-menu {
+  padding: 18px 12px;
+}
+
+.convenience-sidebar.collapsed .convenience-sidebar-item {
+  justify-content: center;
+  padding: 0;
+}
+
+/* =========================================================
+   BOTTOM
+   ========================================================= */
+
+.convenience-sidebar-bottom {
+  padding: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.convenience-sidebar-bottom span {
+  font-size: 12px;
+  font-weight: 600;
+  color: #e0e7ff;
+}
+
+.convenience-sidebar-bottom small {
+  font-size: 11px;
+  color: #a5b4fc;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 992px) {
+  .convenience-sidebar {
+    width: 220px;
+  }
+
+  .convenience-sidebar.collapsed {
+    width: 68px;
+  }
+}
+
+@media (max-width: 768px) {
+  .convenience-sidebar {
+    width: 72px;
+  }
+
+  .convenience-sidebar:not(.collapsed) {
+    width: 220px;
+  }
+}

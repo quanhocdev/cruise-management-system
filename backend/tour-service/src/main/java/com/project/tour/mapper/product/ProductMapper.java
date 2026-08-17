@@ -1,6 +1,7 @@
 package com.project.tour.mapper.product;
 
 import com.project.tour.dto.product.CreateProductRequest;
+import com.project.tour.dto.product.ProductConvenienceResponse;
 import com.project.tour.dto.product.ProductResponse;
 import com.project.tour.dto.product.UpdateProductRequest;
 import com.project.tour.model.Product;
@@ -47,6 +48,26 @@ public class ProductMapper {
         response.setStatus(product.getStatus());
         response.setCreatedAt(product.getCreatedAt());
         response.setUpdatedAt(product.getUpdatedAt());
+
+        return response;
+    }
+
+    /*
+     * =====================================================
+     * CONVENIENCE MAPPER
+     * =====================================================
+     */
+    public static ProductConvenienceResponse toConvenienceResponse(Product product) {
+
+        ProductConvenienceResponse response = new ProductConvenienceResponse();
+
+        response.setId(product.getId());
+        response.setName(product.getName());
+        response.setDescription(product.getDescription());
+        response.setPrice(product.getPrice());
+        response.setQuantity(product.getQuantity());
+        response.setImageUrl(product.getImageUrl());
+        response.setStatus(product.getStatus());
 
         return response;
     }

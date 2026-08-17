@@ -1,0 +1,32 @@
+.convenience-footer {
+  min-height: 44px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.convenience-footer-role {
+  color: #4338ca;
+  font-weight: 500;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 576px) {
+  .convenience-footer {
+    justify-content: center;
+    padding: 0 12px;
+  }
+
+  .convenience-footer-role {
+    display: none;
+  }
+}

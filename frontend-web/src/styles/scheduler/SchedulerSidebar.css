@@ -1,0 +1,255 @@
+/* src/styles/scheduler/SchedulerSidebar.css */
+
+.scheduler-sidebar {
+  width: 250px;
+
+  height: 100vh;
+
+  flex-shrink: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  background: #134e4a;
+
+  color: #ffffff;
+
+  transition: width 0.25s ease;
+
+  overflow: hidden;
+}
+
+.scheduler-sidebar.collapsed {
+  width: 72px;
+}
+
+/* =========================================================
+   TOP
+   ========================================================= */
+
+.scheduler-sidebar-top {
+  position: relative;
+
+  min-height: 72px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 16px;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* =========================================================
+   BRAND
+   ========================================================= */
+
+.scheduler-sidebar-brand {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  color: #ccfbf1;
+
+  white-space: nowrap;
+}
+
+.scheduler-sidebar-brand span {
+  font-size: 15px;
+
+  font-weight: 700;
+
+  letter-spacing: 0.4px;
+}
+
+/* =========================================================
+   TOGGLE
+   ========================================================= */
+
+.scheduler-sidebar-toggle {
+  position: absolute;
+
+  right: 10px;
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  width: 30px;
+  height: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: none;
+
+  border-radius: 7px;
+
+  background: rgba(255, 255, 255, 0.08);
+
+  color: #ccfbf1;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.scheduler-sidebar-toggle:hover {
+  background: rgba(255, 255, 255, 0.16);
+
+  color: #ffffff;
+}
+
+/* =========================================================
+   MENU
+   ========================================================= */
+
+.scheduler-sidebar-menu {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+
+  padding: 18px 12px;
+
+  overflow-y: auto;
+}
+
+/* =========================================================
+   MENU ITEM
+   ========================================================= */
+
+.scheduler-sidebar-item {
+  min-height: 46px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 13px;
+
+  padding: 0 14px;
+
+  border-radius: 9px;
+
+  color: #ccfbf1;
+
+  text-decoration: none;
+
+  white-space: nowrap;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.scheduler-sidebar-item:hover {
+  background: rgba(255, 255, 255, 0.09);
+
+  color: #ffffff;
+}
+
+.scheduler-sidebar-item.active {
+  background: #0f766e;
+
+  color: #ffffff;
+
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+}
+
+.scheduler-sidebar-item span {
+  font-size: 14px;
+
+  font-weight: 500;
+}
+
+/* =========================================================
+   COLLAPSED
+   ========================================================= */
+
+.scheduler-sidebar.collapsed .scheduler-sidebar-top {
+  justify-content: center;
+
+  padding: 0;
+}
+
+.scheduler-sidebar.collapsed .scheduler-sidebar-brand {
+  justify-content: center;
+}
+
+.scheduler-sidebar.collapsed .scheduler-sidebar-toggle {
+  right: -3px;
+}
+
+.scheduler-sidebar.collapsed .scheduler-sidebar-menu {
+  padding: 18px 12px;
+}
+
+.scheduler-sidebar.collapsed .scheduler-sidebar-item {
+  justify-content: center;
+
+  padding: 0;
+}
+
+/* =========================================================
+   BOTTOM
+   ========================================================= */
+
+.scheduler-sidebar-bottom {
+  padding: 16px;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.scheduler-sidebar-bottom span {
+  font-size: 12px;
+
+  font-weight: 600;
+
+  color: #ccfbf1;
+}
+
+.scheduler-sidebar-bottom small {
+  font-size: 11px;
+
+  color: #99f6e4;
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 992px) {
+  .scheduler-sidebar {
+    width: 220px;
+  }
+
+  .scheduler-sidebar.collapsed {
+    width: 68px;
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .scheduler-sidebar {
+    width: 72px;
+  }
+
+  .scheduler-sidebar:not(.collapsed) {
+    width: 220px;
+  }
+}

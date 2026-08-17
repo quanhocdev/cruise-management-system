@@ -1,0 +1,102 @@
+/* src/styles/scheduler/SchedulerHeader.css */
+
+.scheduler-header {
+  height: 72px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 28px;
+
+  background: #ffffff;
+
+  border-bottom: 1px solid #d9eeee;
+}
+
+/* =========================================================
+   LEFT
+   ========================================================= */
+
+.scheduler-header-left {
+  display: flex;
+  align-items: center;
+}
+
+.scheduler-header-left h1 {
+  margin: 0;
+
+  font-size: 20px;
+  font-weight: 700;
+
+  color: #0f766e;
+}
+
+/* =========================================================
+   RIGHT
+   ========================================================= */
+
+.scheduler-header-right {
+  display: flex;
+  align-items: center;
+
+  gap: 22px;
+}
+
+/* =========================================================
+   USER
+   ========================================================= */
+
+.scheduler-header-user {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  color: #0f766e;
+}
+
+.scheduler-header-user-info {
+  display: flex;
+  flex-direction: column;
+
+  line-height: 1.2;
+}
+
+.scheduler-header-user-name {
+  font-size: 14px;
+
+  font-weight: 600;
+
+  color: #134e4a;
+}
+
+.scheduler-header-user-role {
+  margin-top: 3px;
+
+  font-size: 12px;
+
+  color: #64748b;
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .scheduler-header {
+    height: 64px;
+
+    padding: 0 18px;
+  }
+
+  .scheduler-header-user-info {
+    display: none;
+  }
+
+  .scheduler-header-right {
+    gap: 14px;
+  }
+}

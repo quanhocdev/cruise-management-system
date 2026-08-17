@@ -3,6 +3,7 @@ package com.project.tour.controller.tour;
 import com.project.tour.dto.tour.CreateTourRequest;
 import com.project.tour.dto.tour.TourResponse;
 import com.project.tour.dto.tour.UpdateTourRequest;
+import com.project.tour.model.enums.tour.TourStatusTrip;
 import com.project.tour.service.tour.TourService;
 
 import jakarta.validation.Valid;
@@ -26,6 +27,10 @@ public class TourController {
         this.tourService = tourService;
     }
 
+    // =====================================================
+    // CREATE TOUR
+    // =====================================================
+
     @PostMapping
     public ResponseEntity<TourResponse> createTour(
             @Valid @RequestBody CreateTourRequest request) {
@@ -37,6 +42,10 @@ public class TourController {
                 .body(response);
     }
 
+    // =====================================================
+    // GET BY ID
+    // =====================================================
+
     @GetMapping("/{id}")
     public ResponseEntity<TourResponse> getTourById(
             @PathVariable UUID id) {
@@ -44,6 +53,10 @@ public class TourController {
         return ResponseEntity.ok(
                 tourService.getTourById(id));
     }
+
+    // =====================================================
+    // GET BY CODE
+    // =====================================================
 
     @GetMapping("/code/{code}")
     public ResponseEntity<TourResponse> getTourByCode(
@@ -53,20 +66,24 @@ public class TourController {
                 tourService.getTourByCode(code));
     }
 
+    // =====================================================
+    // GET ALL / FILTER
+    // =====================================================
+
     @GetMapping
     public ResponseEntity<List<TourResponse>> getTours(
-            @RequestParam(required = false) UUID cruiseId) {
+            @RequestParam(required = false) UUID cruiseId,
+            @RequestParam(required = false) TourStatusTrip statusTrip) {
 
-        List<TourResponse> response;
-
-        if (cruiseId != null) {
-            response = tourService.getToursByCruise(cruiseId);
-        } else {
-            response = tourService.getAllTours();
-        }
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(
+                tourService.getTours(
+                        cruiseId,
+                        statusTrip));
     }
+
+    // =====================================================
+    // UPDATE
+    // =====================================================
 
     @PatchMapping("/{id}")
     public ResponseEntity<TourResponse> updateTour(
@@ -74,8 +91,14 @@ public class TourController {
             @Valid @RequestBody UpdateTourRequest request) {
 
         return ResponseEntity.ok(
-                tourService.updateTour(id, request));
+                tourService.updateTour(
+                        id,
+                        request));
     }
+
+    // =====================================================
+    // DELETE
+    // =====================================================
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTour(
@@ -84,5 +107,16 @@ public class TourController {
         tourService.deleteTour(id);
 
         return ResponseEntity.noContent().build();
+    }
+    // =====================================================
+    // SUBMIT FOR APPROVAL
+    // =====================================================
+
+    @PatchMapping("/{id}/submit-for-approval")
+    public ResponseEntity<TourResponse> submitForApproval(
+            @PathVariable UUID id) {
+
+        return ResponseEntity.ok(
+                tourService.submitForApproval(id));
     }
 }

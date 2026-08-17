@@ -10,7 +10,7 @@ import com.project.tour.model.Tour;
 import com.project.tour.model.enums.ScheduleStatus;
 import com.project.tour.repository.tour.TourRepository;
 import com.project.tour.repository.tour.schedule.ScheduleRepository;
-
+import com.project.tour.model.enums.tour.TourStatusTrip;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,11 +33,22 @@ public class ScheduleService {
                 this.tourRepository = tourRepository;
         }
 
+        private void validateTourIsDraft(Tour tour) {
+
+                if (tour.getStatusTrip() != TourStatusTrip.DRAFT) {
+                        throw new AppException(
+                                        "Tour must be in DRAFT status to modify schedule",
+                                        HttpStatus.BAD_REQUEST);
+                }
+        }
+
         public ScheduleResponse create(
                         UUID tourId,
                         CreateScheduleRequest request) {
 
                 Tour tour = findTour(tourId);
+
+                validateTourIsDraft(tour);
 
                 if (scheduleRepository.existsByTour_IdAndDayNumber(
                                 tourId,
@@ -105,6 +116,7 @@ public class ScheduleService {
                 Schedule schedule = findById(
                                 tourId,
                                 scheduleId);
+                validateTourIsDraft(schedule.getTour());
 
                 if (scheduleRepository
                                 .existsByTour_IdAndDayNumberAndIdNot(
@@ -133,6 +145,8 @@ public class ScheduleService {
                 Schedule schedule = findById(
                                 tourId,
                                 scheduleId);
+
+                validateTourIsDraft(schedule.getTour());
 
                 scheduleRepository.delete(schedule);
         }
