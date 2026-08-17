@@ -193,4 +193,20 @@ public class OperationTourService {
 
                 return TourMapper.toResponse(savedTour);
         }
+
+        /**
+         * =====================================================
+         * GET TOURS ĐÃ ĐƯỢC DUYỆT
+         * =====================================================
+         */
+        @Transactional(readOnly = true)
+        public List<TourResponse> getApprovedTours() {
+
+                return tourRepository
+                                .findAllByStatusTripOrderByNameAsc(
+                                                TourStatusTrip.APPROVED)
+                                .stream()
+                                .map(TourMapper::toResponse)
+                                .toList();
+        }
 }

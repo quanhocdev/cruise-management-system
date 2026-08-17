@@ -108,7 +108,7 @@ public class Tour {
         updatedAt = now;
 
         if (statusTrip == null) {
-            statusTrip = TourStatusTrip.APPROVAL_PENDING;
+            statusTrip = TourStatusTrip.DRAFT;
         }
 
         if (statusBooking == null) {

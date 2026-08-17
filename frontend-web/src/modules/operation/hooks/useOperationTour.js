@@ -2,7 +2,8 @@ import { useCallback, useState } from "react";
 import operationTourService from "../services/operationTourService";
 
 export default function useOperationTours() {
-  const [tours, setTours] = useState([]);
+  const [pendingTours, setPendingTours] = useState([]);
+  const [approvedTours, setApprovedTours] = useState([]);
   const [availableCruises, setAvailableCruises] = useState([]);
 
   const [loading, setLoading] = useState(false);
@@ -25,12 +26,37 @@ export default function useOperationTours() {
       const tourList = Array.isArray(data)
         ? data
         : data?.content || data?.data || [];
-      setTours(tourList);
+      setPendingTours(tourList);
     } catch (err) {
       console.error("LOAD OPERATION PENDING TOURS ERROR:", err);
       setError(
         err.response?.data?.message ||
           "Không thể tải danh sách Tour chờ duyệt.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  /**
+   * LOAD Approved TOURS
+   */
+  const loadApprovedTours = useCallback(async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const data = await operationTourService.getApprovedTours();
+      // Xử lý nếu backend bọc kết quả trong data.result hoặc data.content
+      const tourList = Array.isArray(data)
+        ? data
+        : data?.content || data?.data || [];
+      setPendingTours(tourList);
+    } catch (err) {
+      console.error("LOAD OPERATION APPROVED TOURS ERROR:", err);
+      setError(
+        err.response?.data?.message ||
+          "Không thể tải danh sách Tour đã được duyệt.",
       );
     } finally {
       setLoading(false);
@@ -74,7 +100,7 @@ export default function useOperationTours() {
 
     try {
       const updated = await operationTourService.approveTour(tourId, cruiseId);
-      setTours((prev) => prev.filter((tour) => tour.id !== tourId));
+      setPendingTours((prev) => prev.filter((tour) => tour.id !== tourId));
       setSuccess("Duyệt Tour và gán du thuyền thành công.");
       return updated;
     } catch (err) {
@@ -96,16 +122,23 @@ export default function useOperationTours() {
   }, []);
 
   return {
-    tours,
+    pendingTours,
+    approvedTours,
+
     availableCruises,
+
     loading,
     cruiseLoading,
     approving,
+
     error,
     success,
+
     loadPendingTours,
+    loadApprovedTours,
     loadAvailableCruises,
     approveTour,
+
     clearAvailableCruises,
     clearMessages,
   };

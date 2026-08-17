@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import cruiseService from "../services/cruiseService";
+import cruiseDeckService from "../services/cruiseDeckService";
 
 export default function useCruiseDecks(cruiseId) {
   const [decks, setDecks] = useState([]);
@@ -21,7 +21,7 @@ export default function useCruiseDecks(cruiseId) {
     setError("");
 
     try {
-      const data = await cruiseService.getDecks(cruiseId);
+      const data = await cruiseDeckService.getDecks(cruiseId);
 
       setDecks(data);
     } catch (err) {
@@ -49,7 +49,7 @@ export default function useCruiseDecks(cruiseId) {
     setSuccess("");
 
     try {
-      const createdDecks = await cruiseService.createDecks(
+      const createdDecks = await cruiseDeckService.createDecks(
         cruiseId,
         totalDecks,
       );
@@ -92,7 +92,7 @@ export default function useCruiseDecks(cruiseId) {
     setSuccess("");
 
     try {
-      const updatedDeck = await cruiseService.updateDeck(
+      const updatedDeck = await cruiseDeckService.updateDeck(
         cruiseId,
         deckId,
         data,
@@ -128,7 +128,7 @@ export default function useCruiseDecks(cruiseId) {
     setSuccess("");
 
     try {
-      await cruiseService.deleteDeck(cruiseId, deckId);
+      await cruiseDeckService.deleteDeck(cruiseId, deckId);
 
       setDecks((previous) => previous.filter((deck) => deck.id !== deckId));
 

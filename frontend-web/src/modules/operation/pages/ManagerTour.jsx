@@ -10,7 +10,9 @@ import CruiseSelectModal from "../components/CruiseSelectModal";
 import "../styles/ManagerTour.css";
 function ManagerTour() {
   const {
-    tours,
+    pendingTours,
+    approvedTours,
+
     availableCruises,
 
     loading,
@@ -21,6 +23,7 @@ function ManagerTour() {
     success,
 
     loadPendingTours,
+    loadApprovedTours,
     loadAvailableCruises,
     approveTour,
 
@@ -43,6 +46,10 @@ function ManagerTour() {
   useEffect(() => {
     loadPendingTours();
   }, [loadPendingTours]);
+
+  useEffect(() => {
+    loadApprovedTours();
+  }, [loadApprovedTours]);
 
   /**
    * =====================================================
@@ -115,6 +122,7 @@ function ManagerTour() {
       clearAvailableCruises();
 
       await loadPendingTours();
+      await loadApprovedTours();
     } catch (err) {
       console.error("APPROVE TOUR FROM OPERATION ERROR:", err);
     }
@@ -152,6 +160,7 @@ function ManagerTour() {
     clearMessages();
 
     await loadPendingTours();
+    await loadApprovedTours();
   };
 
   return (
@@ -200,7 +209,7 @@ function ManagerTour() {
           </div>
           <div className="operation-tour-summary-info">
             <span>Tour chờ duyệt</span>
-            <strong>{tours.length}</strong>
+            <strong>{pendingTours.length}</strong>
           </div>
         </div>
 
@@ -249,7 +258,7 @@ function ManagerTour() {
 
       <div className="operation-tour-content">
         <OperationTourTable
-          tours={tours}
+          tours={pendingTours}
           loading={loading}
           onSelectCruise={handleSelectCruise}
         />

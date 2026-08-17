@@ -59,4 +59,11 @@ public class OperationTourController {
                         id,
                         cruiseId));
     }
+
+    @GetMapping("/approved")
+    public ResponseEntity<List<TourResponse>> getApprovedTours() {
+
+        return ResponseEntity.ok(
+                operationTourService.getApprovedTours());
+    }
 }
