@@ -23,7 +23,7 @@ const menuItems = [
     icon: Activity,
     path: "/onboard/activity-cruise",
   },
-  { label: "Tour chờ duyệt", icon: ClipboardCheck, path: "/onboard/tours" },
+  { label: "Tour sắp diễn ra", icon: ClipboardCheck, path: "/onboard/tours" },
   { label: "Lịch trình", icon: CalendarDays, path: "/onboard/schedules" },
   { label: "Du thuyền", icon: Ship, path: "/onboard/cruises" },
   { label: "Booking", icon: Ticket, path: "/onboard/bookings" },

@@ -50,6 +50,7 @@ import ConvenienceServices from "./modules/convenience/pages/ConvenienceServices
 import OnboardLayout from "./layouts/OnboardLayout";
 import OnboardDashboard from "./modules/onboard/pages/Dashboard";
 import OnboardActivityCruise from "./modules/onboard/pages/ActivityCruise";
+import OnboardTour from "./modules/onboard/pages/OnboardTour";
 
 import ShoreDashboard from "./modules/shore/pages/Dashboard";
 import FinanceDashboard from "./modules/finance/pages/Dashboard";
@@ -177,10 +178,7 @@ export default function App() {
             <Route path="activity-cruise" element={<OnboardActivityCruise />} />
 
             {/* Các route chưa tạo trang thì tạm thời render thông báo */}
-            <Route
-              path="tours"
-              element={<div>Trang Tour chờ duyệt (Đang phát triển)</div>}
-            />
+            <Route path="tours" element={<OnboardTour />} />
             <Route
               path="schedules"
               element={<div>Trang Lịch trình (Đang phát triển)</div>}
