@@ -2,19 +2,19 @@ import { Bell } from "lucide-react";
 
 import "../../styles/onboard/NotificationBell.css";
 
-function NotificationBell() {
-  const notificationCount = 0;
+function OnboardNotificationBell() {
+  const notificationCount = 3; // Ví dụ có 3 thông báo
 
   return (
     <button
       type="button"
-      className="operation-notification-button"
+      className="onboard-notification-button"
       title="Thông báo"
     >
       <Bell size={20} />
 
       {notificationCount > 0 && (
-        <span className="operation-notification-badge">
+        <span className="onboard-notification-badge">
           {notificationCount > 99 ? "99+" : notificationCount}
         </span>
       )}
@@ -22,4 +22,4 @@ function NotificationBell() {
   );
 }
 
-export default NotificationBell;
+export default OnboardNotificationBell;

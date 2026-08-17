@@ -45,8 +45,12 @@ import ConvenienceLayout from "./layouts/ConvenienceLayout";
 import ConvenienceDashboard from "./modules/convenience/pages/Dashboard";
 import ConvenienceProducts from "./modules/convenience/pages/ConvenienceProducts";
 import ConvenienceServices from "./modules/convenience/pages/ConvenienceServices";
-// Other role dashboards
+
+// Onboard imports
+import OnboardLayout from "./layouts/OnboardLayout";
 import OnboardDashboard from "./modules/onboard/pages/Dashboard";
+import OnboardActivityCruise from "./modules/onboard/pages/ActivityCruise";
+
 import ShoreDashboard from "./modules/shore/pages/Dashboard";
 import FinanceDashboard from "./modules/finance/pages/Dashboard";
 
@@ -162,19 +166,44 @@ export default function App() {
 
           {/* ONBOARD ROUTES */}
           <Route
-            path="/onboard/*"
+            path="/onboard"
             element={
               <ProtectedRoute allowedRoles={["ONBOARD"]}>
-                <Routes>
-                  <Route path="dashboard" element={<OnboardDashboard />} />
-                  <Route
-                    path=""
-                    element={<Navigate to="dashboard" replace />}
-                  />
-                </Routes>
+                <OnboardLayout />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route path="dashboard" element={<OnboardDashboard />} />
+            <Route path="activity-cruise" element={<OnboardActivityCruise />} />
+
+            {/* Các route chưa tạo trang thì tạm thời render thông báo */}
+            <Route
+              path="tours"
+              element={<div>Trang Tour chờ duyệt (Đang phát triển)</div>}
+            />
+            <Route
+              path="schedules"
+              element={<div>Trang Lịch trình (Đang phát triển)</div>}
+            />
+            <Route
+              path="cruises"
+              element={<div>Trang Du thuyền (Đang phát triển)</div>}
+            />
+            <Route
+              path="bookings"
+              element={<div>Trang Booking (Đang phát triển)</div>}
+            />
+            <Route
+              path="products"
+              element={<div>Trang Sản phẩm / Dịch vụ (Đang phát triển)</div>}
+            />
+            <Route
+              path="settings"
+              element={<div>Trang Cài đặt (Đang phát triển)</div>}
+            />
+
+            <Route index element={<Navigate to="dashboard" replace />} />
+          </Route>
 
           {/* SHORE ROUTES */}
           <Route
@@ -192,7 +221,7 @@ export default function App() {
             }
           />
 
-          {/* CONVENIENCE ROUTES - Chuẩn Outlet */}
+          {/* CONVENIENCE ROUTES */}
           <Route
             path="/convenience"
             element={

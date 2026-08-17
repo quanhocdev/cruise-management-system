@@ -4,42 +4,28 @@ import com.project.tour.dto.onboard.ActivityCruiseResponse;
 import com.project.tour.dto.onboard.CreateActivityCruiseRequest;
 import com.project.tour.dto.onboard.UpdateActivityCruiseRequest;
 import com.project.tour.model.ActivityCruise;
-import org.springframework.stereotype.Component;
 
-@Component
 public class ActivityCruiseMapper {
 
-    public ActivityCruise toEntity(CreateActivityCruiseRequest request) {
+    public static ActivityCruise toEntity(CreateActivityCruiseRequest request) {
         if (request == null)
             return null;
 
         ActivityCruise entity = new ActivityCruise();
-        entity.setCruiseAreaId(request.cruiseAreaId());
         entity.setName(request.name());
         entity.setDescription(request.description());
-        entity.setStartTime(request.startTime());
-        entity.setEndTime(request.endTime());
-        entity.setMaxPassengers(request.maxPassengers());
-        entity.setPrice(request.price());
-        entity.setStatus(request.status() != null ? request.status() : "ACTIVE");
-        entity.setImageUrl(request.imageUrl());
-        entity.setImagePublicId(request.imagePublicId());
+        entity.setStatus(request.status());
         return entity;
     }
 
-    public ActivityCruiseResponse toResponse(ActivityCruise entity) {
+    public static ActivityCruiseResponse toResponse(ActivityCruise entity) {
         if (entity == null)
             return null;
 
         return new ActivityCruiseResponse(
                 entity.getId(),
-                entity.getCruiseAreaId(),
                 entity.getName(),
                 entity.getDescription(),
-                entity.getStartTime(),
-                entity.getEndTime(),
-                entity.getMaxPassengers(),
-                entity.getPrice(),
                 entity.getStatus(),
                 entity.getImageUrl(),
                 entity.getImagePublicId(),
@@ -47,21 +33,18 @@ public class ActivityCruiseMapper {
                 entity.getUpdatedAt());
     }
 
-    public void updateEntityFromRequest(UpdateActivityCruiseRequest request, ActivityCruise entity) {
-        if (request == null || entity == null)
+    public static void updateEntity(ActivityCruise entity, UpdateActivityCruiseRequest request) {
+        if (entity == null || request == null)
             return;
 
-        entity.setCruiseAreaId(request.cruiseAreaId());
-        entity.setName(request.name());
-        entity.setDescription(request.description());
-        entity.setStartTime(request.startTime());
-        entity.setEndTime(request.endTime());
-        entity.setMaxPassengers(request.maxPassengers());
-        entity.setPrice(request.price());
+        if (request.name() != null && !request.name().isBlank()) {
+            entity.setName(request.name());
+        }
+        if (request.description() != null) {
+            entity.setDescription(request.description());
+        }
         if (request.status() != null) {
             entity.setStatus(request.status());
         }
-        entity.setImageUrl(request.imageUrl());
-        entity.setImagePublicId(request.imagePublicId());
     }
 }

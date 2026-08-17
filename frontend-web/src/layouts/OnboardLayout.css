@@ -1,0 +1,41 @@
+/* frontend-web/src/layouts/OnboardLayout.css */
+.onboard-layout {
+  min-height: 100vh;
+  display: flex;
+  background: #f8fafc;
+  position: relative;
+}
+
+.onboard-layout-main {
+  min-width: 0;
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.onboard-layout-content {
+  flex: 1;
+  padding: 24px;
+  overflow-x: hidden;
+}
+
+/* Layer mờ đằng sau khi bật Mobile Menu */
+.onboard-sidebar-overlay {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .onboard-layout-content {
+    padding: 16px;
+  }
+
+  .onboard-sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 45;
+  }
+}

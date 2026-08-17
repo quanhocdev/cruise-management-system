@@ -1,78 +1,177 @@
 package com.project.tour.service.onboard;
 
+import com.project.common.dto.UploadResult;
+import com.project.common.service.file.FileStorageService;
 import com.project.tour.dto.onboard.ActivityCruiseResponse;
 import com.project.tour.dto.onboard.CreateActivityCruiseRequest;
 import com.project.tour.dto.onboard.UpdateActivityCruiseRequest;
+import com.project.tour.exception.AppException;
 import com.project.tour.mapper.onboard.ActivityCruiseMapper;
 import com.project.tour.model.ActivityCruise;
+import com.project.tour.model.enums.onboard.ActivityCruiseStatus;
 import com.project.tour.repository.onboard.ActivityCruiseRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.UUID;
+
 @Service
+@Transactional
 public class ActivityCruiseService {
 
     private final ActivityCruiseRepository activityCruiseRepository;
-    private final ActivityCruiseMapper activityCruiseMapper;
+    private final FileStorageService fileStorageService;
 
-    public ActivityCruiseService(ActivityCruiseRepository activityCruiseRepository,
-            ActivityCruiseMapper activityCruiseMapper) {
+    public ActivityCruiseService(
+            ActivityCruiseRepository activityCruiseRepository,
+            FileStorageService fileStorageService) {
         this.activityCruiseRepository = activityCruiseRepository;
-        this.activityCruiseMapper = activityCruiseMapper;
+        this.fileStorageService = fileStorageService;
     }
 
-    @Transactional(readOnly = true)
-    public Page<ActivityCruiseResponse> getAllActivities(Pageable pageable) {
-        return activityCruiseRepository.findAll(pageable)
-                .map(activityCruiseMapper::toResponse);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<ActivityCruiseResponse> getActivitiesByArea(Long cruiseAreaId, Pageable pageable) {
-        return activityCruiseRepository.findByCruiseAreaId(cruiseAreaId, pageable)
-                .map(activityCruiseMapper::toResponse);
-    }
-
-    @Transactional(readOnly = true)
-    public ActivityCruiseResponse getActivityById(Long id) {
-        ActivityCruise activity = activityCruiseRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy hoạt động du thuyền với ID: " + id));
-        return activityCruiseMapper.toResponse(activity);
-    }
-
-    @Transactional
+    /*
+     * =====================================================
+     * CREATE
+     * =====================================================
+     */
     public ActivityCruiseResponse createActivity(CreateActivityCruiseRequest request) {
-        if (request.endTime().isBefore(request.startTime())) {
-            throw new IllegalArgumentException("Thời gian kết thúc không thể trước thời gian bắt đầu");
+
+        if (activityCruiseRepository.existsByNameIgnoreCase(request.name())) {
+            throw new AppException(
+                    "Activity name already exists",
+                    HttpStatus.CONFLICT);
         }
 
-        ActivityCruise activity = activityCruiseMapper.toEntity(request);
-        ActivityCruise saved = activityCruiseRepository.save(activity);
-        return activityCruiseMapper.toResponse(saved);
+        ActivityCruise activity = ActivityCruiseMapper.toEntity(request);
+
+        if (request.image() != null && !request.image().isEmpty()) {
+            UploadResult uploadResult = fileStorageService.saveMultipart(
+                    request.image(),
+                    "activity_cruises");
+
+            activity.setImageUrl(uploadResult.getUrl());
+            activity.setImagePublicId(uploadResult.getPublicId());
+        }
+
+        ActivityCruise savedActivity = activityCruiseRepository.save(activity);
+
+        return ActivityCruiseMapper.toResponse(savedActivity);
     }
 
-    @Transactional
-    public ActivityCruiseResponse updateActivity(Long id, UpdateActivityCruiseRequest request) {
-        ActivityCruise activity = activityCruiseRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy hoạt động du thuyền với ID: " + id));
+    /*
+     * =====================================================
+     * GET BY ID
+     * =====================================================
+     */
+    @Transactional(readOnly = true)
+    public ActivityCruiseResponse getActivityById(UUID id) {
 
-        if (request.endTime() != null && request.startTime() != null
-                && request.endTime().isBefore(request.startTime())) {
-            throw new IllegalArgumentException("Thời gian kết thúc không thể trước thời gian bắt đầu");
-        }
+        ActivityCruise activity = findActivity(id);
 
-        activityCruiseMapper.updateEntityFromRequest(request, activity);
-        ActivityCruise updated = activityCruiseRepository.save(activity);
-        return activityCruiseMapper.toResponse(updated);
+        return ActivityCruiseMapper.toResponse(activity);
     }
 
-    @Transactional
-    public void deleteActivity(Long id) {
-        if (!activityCruiseRepository.existsById(id)) {
-            throw new RuntimeException("Không tìm thấy hoạt động du thuyền với ID: " + id);
+    /*
+     * =====================================================
+     * GET ALL
+     * =====================================================
+     */
+    @Transactional(readOnly = true)
+    public List<ActivityCruiseResponse> getActivities() {
+
+        return activityCruiseRepository
+                .findAllByOrderByNameAsc()
+                .stream()
+                .map(ActivityCruiseMapper::toResponse)
+                .toList();
+    }
+
+    /*
+     * =====================================================
+     * GET ACTIVE
+     * =====================================================
+     */
+    @Transactional(readOnly = true)
+    public List<ActivityCruiseResponse> getActiveActivities() {
+
+        return activityCruiseRepository
+                .findAllByStatusOrderByNameAsc(ActivityCruiseStatus.ACTIVE)
+                .stream()
+                .map(ActivityCruiseMapper::toResponse)
+                .toList();
+    }
+
+    /*
+     * =====================================================
+     * PATCH (UPDATE)
+     * =====================================================
+     */
+    public ActivityCruiseResponse updateActivity(
+            UUID id,
+            UpdateActivityCruiseRequest request) {
+
+        ActivityCruise activity = findActivity(id);
+
+        if (request.name() != null
+                && activityCruiseRepository.existsByNameIgnoreCaseAndIdNot(request.name(), id)) {
+            throw new AppException(
+                    "Activity name already exists",
+                    HttpStatus.CONFLICT);
         }
-        activityCruiseRepository.deleteById(id);
+
+        String oldPublicId = activity.getImagePublicId();
+
+        ActivityCruiseMapper.updateEntity(activity, request);
+
+        if (request.image() != null && !request.image().isEmpty()) {
+
+            UploadResult uploadResult = fileStorageService.saveMultipart(
+                    request.image(),
+                    "activity_cruises");
+
+            activity.setImageUrl(uploadResult.getUrl());
+            activity.setImagePublicId(uploadResult.getPublicId());
+
+            if (oldPublicId != null && !oldPublicId.isBlank()) {
+                fileStorageService.delete(oldPublicId);
+            }
+        }
+
+        ActivityCruise updatedActivity = activityCruiseRepository.save(activity);
+
+        return ActivityCruiseMapper.toResponse(updatedActivity);
+    }
+
+    /*
+     * =====================================================
+     * DELETE
+     * =====================================================
+     */
+    public void deleteActivity(UUID id) {
+
+        ActivityCruise activity = findActivity(id);
+
+        if (activity.getImagePublicId() != null && !activity.getImagePublicId().isBlank()) {
+            fileStorageService.delete(activity.getImagePublicId());
+        }
+
+        activityCruiseRepository.delete(activity);
+    }
+
+    /*
+     * =====================================================
+     * FIND HELPER
+     * =====================================================
+     */
+    private ActivityCruise findActivity(UUID id) {
+
+        return activityCruiseRepository
+                .findById(id)
+                .orElseThrow(() -> new AppException(
+                        "Activity cruise not found",
+                        HttpStatus.NOT_FOUND));
     }
 }

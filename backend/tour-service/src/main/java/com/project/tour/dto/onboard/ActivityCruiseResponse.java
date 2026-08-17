@@ -1,18 +1,14 @@
 package com.project.tour.dto.onboard;
 
-import java.math.BigDecimal;
+import com.project.tour.model.enums.onboard.ActivityCruiseStatus;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public record ActivityCruiseResponse(
-        Long id,
-        Long cruiseAreaId,
+        UUID id,
         String name,
         String description,
-        LocalDateTime startTime,
-        LocalDateTime endTime,
-        Integer maxPassengers,
-        BigDecimal price,
-        String status,
+        ActivityCruiseStatus status,
         String imageUrl,
         String imagePublicId,
         LocalDateTime createdAt,

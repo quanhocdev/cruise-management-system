@@ -1,0 +1,356 @@
+/* CONTAINER & TABLE */
+.onboard-activity-table-container {
+  width: 100%;
+  overflow-x: auto;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+}
+
+.onboard-activity-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 14px;
+}
+
+.onboard-activity-table th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.onboard-activity-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
+  vertical-align: middle;
+}
+
+/* THUMBNAIL HÌNH ẢNH */
+.onboard-activity-thumbnail {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.onboard-activity-no-image {
+  width: 48px;
+  height: 48px;
+  background-color: #f1f5f9;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  border: 1px solid #e2e8f0;
+}
+
+.onboard-activity-desc {
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #64748b;
+}
+
+/* BADGES */
+.onboard-activity-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.onboard-activity-badge.active {
+  background-color: #d1fae5;
+  color: #059669;
+}
+
+.onboard-activity-badge.inactive {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+/* BUTTONS & ACTIONS */
+.onboard-activity-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.onboard-activity-btn-action {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.onboard-activity-btn-action.edit {
+  color: #0d9488;
+}
+
+.onboard-activity-btn-action.edit:hover {
+  background-color: #ccfbf1;
+}
+
+.onboard-activity-btn-action.delete {
+  color: #ef4444;
+}
+
+.onboard-activity-btn-action.delete:hover {
+  background-color: #fee2e2;
+}
+
+/* MODAL & UPLOAD IMAGE */
+.onboard-activity-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.onboard-activity-modal {
+  background: #ffffff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.onboard-activity-modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.onboard-activity-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #0f172a;
+}
+
+.onboard-activity-modal-close {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.onboard-activity-modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.onboard-activity-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.onboard-activity-form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.onboard-activity-form-group input,
+.onboard-activity-form-group select,
+.onboard-activity-form-group textarea {
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+}
+
+.onboard-activity-form-group input:focus,
+.onboard-activity-form-group select:focus,
+.onboard-activity-form-group textarea:focus {
+  border-color: #0d9488;
+  box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2);
+}
+
+.onboard-activity-image-upload {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.onboard-activity-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background-color: #f1f5f9;
+  border: 1px dashed #cbd5e1;
+  border-radius: 6px;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.onboard-activity-upload-btn:hover {
+  background-color: #e2e8f0;
+  border-color: #94a3b8;
+}
+
+.onboard-activity-preview-container {
+  width: 50px;
+  height: 50px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #cbd5e1;
+}
+
+.onboard-activity-image-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.onboard-activity-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.onboard-activity-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+}
+
+.onboard-activity-btn.cancel {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.onboard-activity-btn.cancel:hover {
+  background-color: #e2e8f0;
+}
+
+.onboard-activity-btn.submit {
+  background-color: #0d9488;
+  color: #ffffff;
+}
+
+.onboard-activity-btn.submit:hover {
+  background-color: #0f766e;
+}
+
+.onboard-activity-loading,
+.onboard-activity-empty {
+  padding: 30px;
+  text-align: center;
+  color: #64748b;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+/* ==========================================
+   ACTIVITY CRUISE FILTER & SEARCH STYLES
+   ========================================== */
+
+.activity-filter-container {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  background-color: #ffffff;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Ô Tìm kiếm */
+.activity-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 0 12px;
+  transition: all 0.2s ease;
+}
+
+.activity-search-box:focus-within {
+  background-color: #ffffff;
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+.activity-search-input {
+  width: 100%;
+  padding: 8px 0;
+  border: none;
+  outline: none;
+  background-color: transparent;
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.activity-search-input::placeholder {
+  color: #94a3b8;
+}
+
+/* Select Lọc trạng thái */
+.activity-status-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 0 12px;
+  transition: all 0.2s ease;
+}
+
+.activity-status-box:focus-within {
+  background-color: #ffffff;
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+.activity-status-select {
+  border: none;
+  outline: none;
+  background-color: transparent;
+  padding: 8px 0;
+  font-size: 14px;
+  color: #334155;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+/* Responsive cho màn hình nhỏ */
+@media (max-width: 640px) {
+  .activity-filter-container {
+    flex-direction: column;
+  }
+}

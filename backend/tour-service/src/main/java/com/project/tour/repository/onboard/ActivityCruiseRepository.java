@@ -1,17 +1,21 @@
 package com.project.tour.repository.onboard;
 
 import com.project.tour.model.ActivityCruise;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import com.project.tour.model.enums.onboard.ActivityCruiseStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface ActivityCruiseRepository extends JpaRepository<ActivityCruise, Long> {
+public interface ActivityCruiseRepository extends JpaRepository<ActivityCruise, UUID> {
 
-    List<ActivityCruise> findByCruiseAreaId(Long cruiseAreaId);
+    boolean existsByNameIgnoreCase(String name);
 
-    Page<ActivityCruise> findByCruiseAreaId(Long cruiseAreaId, Pageable pageable);
+    boolean existsByNameIgnoreCaseAndIdNot(String name, UUID id);
+
+    List<ActivityCruise> findAllByOrderByNameAsc();
+
+    List<ActivityCruise> findAllByStatusOrderByNameAsc(ActivityCruiseStatus status);
 }

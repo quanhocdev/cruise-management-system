@@ -1,23 +1,21 @@
 package com.project.tour.model;
 
+import com.project.tour.model.enums.onboard.ActivityCruiseStatus;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @Table(name = "activity_cruise")
 public class ActivityCruise {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "cruise_area_id", nullable = false)
-    private Long cruiseAreaId;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(nullable = false, length = 255)
     private String name;
@@ -25,20 +23,9 @@ public class ActivityCruise {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "start_time", nullable = false)
-    private LocalDateTime startTime;
-
-    @Column(name = "end_time", nullable = false)
-    private LocalDateTime endTime;
-
-    @Column(name = "max_passengers")
-    private Integer maxPassengers;
-
-    @Column(precision = 12, scale = 2)
-    private BigDecimal price;
-
-    @Column(length = 50)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20, nullable = false)
+    private ActivityCruiseStatus status;
 
     @Column(name = "image_url", length = 500)
     private String imageUrl;
@@ -54,23 +41,14 @@ public class ActivityCruise {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Default Constructor (Bắt buộc cho JPA)
     public ActivityCruise() {
     }
 
-    // All Arguments Constructor
-    public ActivityCruise(Long id, Long cruiseAreaId, String name, String description,
-            LocalDateTime startTime, LocalDateTime endTime, Integer maxPassengers,
-            BigDecimal price, String status, String imageUrl,
-            String imagePublicId, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public ActivityCruise(UUID id, String name, String description, ActivityCruiseStatus status,
+            String imageUrl, String imagePublicId, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
-        this.cruiseAreaId = cruiseAreaId;
         this.name = name;
         this.description = description;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.maxPassengers = maxPassengers;
-        this.price = price;
         this.status = status;
         this.imageUrl = imageUrl;
         this.imagePublicId = imagePublicId;
@@ -78,37 +56,12 @@ public class ActivityCruise {
         this.updatedAt = updatedAt;
     }
 
-    // Constructor dùng để tạo mới (không có id, createdAt, updatedAt)
-    public ActivityCruise(Long cruiseAreaId, String name, String description,
-            LocalDateTime startTime, LocalDateTime endTime, Integer maxPassengers,
-            BigDecimal price, String status, String imageUrl, String imagePublicId) {
-        this.cruiseAreaId = cruiseAreaId;
-        this.name = name;
-        this.description = description;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.maxPassengers = maxPassengers;
-        this.price = price;
-        this.status = status;
-        this.imageUrl = imageUrl;
-        this.imagePublicId = imagePublicId;
-    }
-
-    // Getters and Setters
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
-    }
-
-    public Long getCruiseAreaId() {
-        return cruiseAreaId;
-    }
-
-    public void setCruiseAreaId(Long cruiseAreaId) {
-        this.cruiseAreaId = cruiseAreaId;
     }
 
     public String getName() {
@@ -127,43 +80,11 @@ public class ActivityCruise {
         this.description = description;
     }
 
-    public LocalDateTime getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public LocalDateTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
-    }
-
-    public Integer getMaxPassengers() {
-        return maxPassengers;
-    }
-
-    public void setMaxPassengers(Integer maxPassengers) {
-        this.maxPassengers = maxPassengers;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public String getStatus() {
+    public ActivityCruiseStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(ActivityCruiseStatus status) {
         this.status = status;
     }
 
@@ -212,18 +133,5 @@ public class ActivityCruise {
     @Override
     public int hashCode() {
         return Objects.hash(id);
-    }
-
-    @Override
-    public String toString() {
-        return "ActivityCruise{" +
-                "id=" + id +
-                ", cruiseAreaId=" + cruiseAreaId +
-                ", name='" + name + '\'' +
-                ", startTime=" + startTime +
-                ", endTime=" + endTime +
-                ", price=" + price +
-                ", status='" + status + '\'' +
-                '}';
     }
 }
