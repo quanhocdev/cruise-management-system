@@ -1,32 +1,30 @@
 // src/modules/operation/components/OperationTourFilter.jsx
 
-import { Search, CalendarDays, X } from "lucide-react";
+import { Search, Calendar, X } from "lucide-react";
+import "../styles/OperationTourFilter.css";
 
 function OperationTourFilter({
-  keyword,
-  month,
-  year,
+  keyword = "",
+  startDate = "",
+  endDate = "",
   onKeywordChange,
-  onMonthChange,
-  onYearChange,
+  onStartDateChange,
+  onEndDateChange,
   onClear,
 }) {
+  const hasFilter = Boolean(keyword || startDate || endDate);
+
   return (
     <div className="operation-tour-filter">
-      {/* =====================================================
-          SEARCH
-          ===================================================== */}
-
+      {/* SEARCH KEYWORD */}
       <div className="operation-tour-search">
         <Search size={18} />
-
         <input
           type="text"
           value={keyword}
           onChange={(e) => onKeywordChange(e.target.value)}
           placeholder="Tìm tên Tour, mã Tour hoặc mô tả..."
         />
-
         {keyword && (
           <button
             type="button"
@@ -39,61 +37,39 @@ function OperationTourFilter({
         )}
       </div>
 
-      {/* =====================================================
-          DATE FILTER
-          ===================================================== */}
-
-      <div className="operation-tour-date-filter">
-        {/* MONTH */}
-
+      {/* DATE RANGE */}
+      <div className="operation-tour-date-range">
+        {/* TỪ NGÀY */}
         <div className="operation-tour-date-field">
-          <CalendarDays size={17} />
-
-          <select value={month} onChange={(e) => onMonthChange(e.target.value)}>
-            <option value="">Tháng</option>
-
-            {Array.from({ length: 12 }, (_, index) => {
-              const monthValue = String(index + 1).padStart(2, "0");
-
-              return (
-                <option key={monthValue} value={monthValue}>
-                  Tháng {index + 1}
-                </option>
-              );
-            })}
-          </select>
+          <Calendar size={16} />
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => onStartDateChange(e.target.value)}
+          />
         </div>
 
-        {/* YEAR */}
+        <span className="operation-tour-date-separator">-</span>
 
+        {/* ĐẾN NGÀY */}
         <div className="operation-tour-date-field">
-          <select value={year} onChange={(e) => onYearChange(e.target.value)}>
-            <option value="">Năm</option>
-
-            {Array.from({ length: 11 }, (_, index) => {
-              const currentYear = new Date().getFullYear();
-
-              const yearValue = currentYear - 5 + index;
-
-              return (
-                <option key={yearValue} value={yearValue}>
-                  {yearValue}
-                </option>
-              );
-            })}
-          </select>
+          <Calendar size={16} />
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => onEndDateChange(e.target.value)}
+          />
         </div>
 
         {/* CLEAR FILTER */}
-
-        {(keyword || month || year) && (
+        {hasFilter && (
           <button
             type="button"
             className="operation-tour-clear-filter"
             onClick={onClear}
+            title="Xóa bộ lọc"
           >
             <X size={15} />
-
             <span>Xóa lọc</span>
           </button>
         )}

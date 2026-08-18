@@ -1,7 +1,7 @@
 // src/modules/operation/components/OperationTourTable.jsx
 
 import { CheckCircle, Ship, CalendarDays, Eye, XCircle } from "lucide-react";
-
+import "../styles/OperationTourTable.css";
 function formatDate(value) {
   if (!value) {
     return "-";
@@ -23,6 +23,7 @@ function OperationTourTable({
   onApprove,
   onReject,
   onView,
+  onAssignArea,
 }) {
   const isPending = mode === "pending";
 
@@ -174,9 +175,14 @@ function OperationTourTable({
                     ================================================= */}
 
                 <td>
-                  <span className="operation-tour-assignment">
-                    Chưa phân công
-                  </span>
+                  <button
+                    type="button"
+                    className="operation-tour-assignment-button"
+                    onClick={() => onAssignArea?.(tour)}
+                    disabled={!tour.cruise}
+                  >
+                    {tour.cruise ? "Phân công khu vực" : "Chưa có du thuyền"}
+                  </button>
                 </td>
 
                 {/* =================================================

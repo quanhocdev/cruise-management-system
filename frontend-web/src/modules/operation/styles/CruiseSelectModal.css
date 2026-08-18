@@ -1,0 +1,369 @@
+/* =========================================================
+   CRUISE SELECT MODAL STYLES
+   ========================================================= */
+
+.operation-cruise-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.operation-cruise-modal {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* HEADER */
+.operation-cruise-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.operation-cruise-modal-header h2 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.operation-cruise-modal-header p {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.operation-cruise-modal-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.operation-cruise-modal-close:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+/* TOUR INFO CARD */
+.operation-cruise-tour-info {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 16px 24px 0;
+  padding: 14px 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.operation-cruise-tour-info > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.operation-cruise-tour-info span {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.operation-cruise-tour-info strong {
+  font-size: 13px;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* SECTION TITLE */
+.operation-cruise-select-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px 8px;
+}
+
+.operation-cruise-select-title > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #2563eb;
+}
+
+.operation-cruise-select-title h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.operation-cruise-select-title > span {
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* LIST CONTAINER (SCROLLABLE) */
+.operation-cruise-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.operation-cruise-loading,
+.operation-cruise-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: #64748b;
+  gap: 8px;
+}
+
+.operation-cruise-empty h3 {
+  margin: 8px 0 0;
+  color: #1e293b;
+}
+
+/* OPTION ITEM */
+.operation-cruise-option-wrapper {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.operation-cruise-option-wrapper.unavailable {
+  background: #fafafa;
+  opacity: 0.85;
+}
+
+.operation-cruise-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  background: #ffffff;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.operation-cruise-option:hover:not(.disabled) {
+  background: #f8fafc;
+}
+
+.operation-cruise-option.selected {
+  background: #eff6ff;
+}
+
+.operation-cruise-option.disabled {
+  cursor: not-allowed;
+  background: #f8fafc;
+}
+
+.operation-cruise-option-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.operation-cruise-option.selected .operation-cruise-option-icon {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.operation-cruise-option-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cruise-header-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cruise-header-row strong {
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.cruise-status-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.cruise-status-badge.available {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.cruise-status-badge.busy {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.cruise-code {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.cruise-reason {
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.flex-center {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.text-success {
+  color: #16a34a;
+}
+.text-danger {
+  color: #dc2626;
+}
+
+.operation-cruise-option-check {
+  color: #2563eb;
+  width: 24px;
+}
+
+/* CONFLICT TOURS DETAILS */
+.operation-cruise-conflicts {
+  background: #fff5f5;
+  border-top: 1px dashed #fecaca;
+  padding: 10px 14px 12px;
+  font-size: 12px;
+}
+
+.conflict-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: #991b1b;
+  margin-bottom: 6px;
+}
+
+.operation-cruise-conflicts ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #7f1d1d;
+}
+
+.operation-cruise-conflicts li {
+  margin-bottom: 2px;
+}
+
+/* FOOTER */
+.operation-cruise-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #e2e8f0;
+  background: #ffffff;
+}
+
+.operation-cruise-cancel-button {
+  padding: 9px 16px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.operation-cruise-cancel-button:hover:not(:disabled) {
+  background: #f1f5f9;
+}
+
+.operation-cruise-approve-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.operation-cruise-approve-button:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.operation-cruise-approve-button:disabled,
+.operation-cruise-cancel-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
