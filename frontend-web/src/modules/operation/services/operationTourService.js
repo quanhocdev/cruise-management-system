@@ -50,17 +50,30 @@ const operationTourService = {
   },
 
   /**
-   * POST /api/operation/tours/{id}/approve?cruiseId=...
+   * POST /api/operation/tours/{id}/assign-cruise?cruiseId=...
+   * Gán du thuyền cho Tour (vẫn ở trạng thái APPROVAL_PENDING)
    */
-  approveTour: async (tourId, cruiseId) => {
+  assignCruise: async (tourId, cruiseId) => {
     const response = await api.post(
-      `${OPERATION_TOUR_BASE_URL}/${tourId}/approve`,
+      `${OPERATION_TOUR_BASE_URL}/${tourId}/assign-cruise`,
       null,
       {
         params: {
           cruiseId,
         },
       },
+    );
+
+    return response.data;
+  },
+
+  /**
+   * POST /api/operation/tours/{id}/approve
+   * Duyệt Tour (không truyền cruiseId)
+   */
+  approveTour: async (tourId) => {
+    const response = await api.post(
+      `${OPERATION_TOUR_BASE_URL}/${tourId}/approve`,
     );
 
     return response.data;

@@ -21,7 +21,7 @@ export default function useOperationTours() {
   // =====================================================
 
   const [assignments, setAssignments] = useState([]);
-
+  const [assigning, setAssigning] = useState(false);
   // =====================================================
   // LOADING
   // =====================================================
@@ -162,6 +162,39 @@ export default function useOperationTours() {
   }, []);
 
   // =====================================================
+  // ASSIGN CRUISE
+  // =====================================================
+
+  const assignCruise = useCallback(async (tourId, cruiseId) => {
+    setAssigning(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const updated = await operationTourService.assignCruise(tourId, cruiseId);
+
+      // Cập nhật lại Tour trong danh sách pendingTours với thông tin cruise mới
+      setPendingTours((prev) =>
+        prev.map((tour) => (tour.id === tourId ? updated : tour)),
+      );
+
+      setSuccess("Gán du thuyền cho Tour thành công.");
+
+      return updated;
+    } catch (err) {
+      console.error("ASSIGN CRUISE ERROR:", err);
+
+      setError(
+        err.response?.data?.message || "Không thể gán du thuyền cho Tour.",
+      );
+
+      throw err;
+    } finally {
+      setAssigning(false);
+    }
+  }, []);
+
+  // =====================================================
   // LOAD ASSIGNMENTS
   // =====================================================
 
@@ -256,17 +289,18 @@ export default function useOperationTours() {
   // APPROVE TOUR
   // =====================================================
 
-  const approveTour = useCallback(async (tourId, cruiseId) => {
+  const approveTour = useCallback(async (tourId) => {
     setApproving(true);
     setError("");
     setSuccess("");
 
     try {
-      const updated = await operationTourService.approveTour(tourId, cruiseId);
+      const updated = await operationTourService.approveTour(tourId);
 
+      // Xóa tour đã duyệt khỏi pending list
       setPendingTours((prev) => prev.filter((tour) => tour.id !== tourId));
 
-      setSuccess("Duyệt Tour và gán du thuyền thành công.");
+      setSuccess("Duyệt Tour thành công.");
 
       return updated;
     } catch (err) {
@@ -322,6 +356,7 @@ export default function useOperationTours() {
     cruiseLoading,
     layoutLoading,
     assignmentLoading,
+    assigning,
     approving,
 
     // Messages
@@ -332,6 +367,7 @@ export default function useOperationTours() {
     loadPendingTours,
     loadApprovedTours,
     loadAvailableCruises,
+    assignCruise,
     approveTour,
 
     // Cruise layout

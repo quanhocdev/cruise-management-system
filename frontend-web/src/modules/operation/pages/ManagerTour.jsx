@@ -24,6 +24,7 @@ function ManagerTour() {
     loading,
     cruiseLoading,
     approving,
+    assigning,
     layoutLoading,
     assignmentLoading,
 
@@ -37,6 +38,7 @@ function ManagerTour() {
     loadAssignments,
     assignActivityCruiseArea,
     deleteActivityCruiseAssignment,
+    assignCruise,
     approveTour,
 
     clearAvailableCruises,
@@ -221,31 +223,42 @@ function ManagerTour() {
   };
 
   // =====================================================
-  // APPROVE
+  // ASSIGN CRUISE (GÁN DU THUYỀN MỚI TÁCH RA)
   // =====================================================
+  const handleAssignCruise = async (cruiseId) => {
+    if (!selectedTour || !cruiseId) return;
 
+    try {
+      await assignCruise(selectedTour.id, cruiseId);
+      // Gán thành công, cập nhật cruiseId đang chọn
+      setSelectedCruiseId(cruiseId);
+    } catch (err) {
+      console.error("ASSIGN CRUISE ERROR:", err);
+    }
+  };
+
+  // =====================================================
+  // APPROVE (DUYỆT TOUR - KHÔNG CẦN DUYỆT CÙNG LÚC GÁN NỮA)
+  // =====================================================
   const handleApprove = async () => {
     if (!selectedTour) return;
 
-    if (!selectedCruiseId) {
-      window.alert("Vui lòng chọn du thuyền trước khi duyệt.");
+    // Kiểm tra xem Tour đã có Cruise chưa (từ selectedTour hoặc selectedCruiseId)
+    const hasCruise = selectedTour.cruise || selectedCruiseId;
+
+    if (!hasCruise) {
+      window.alert("Vui lòng gán du thuyền cho Tour trước khi duyệt.");
       return;
     }
 
-    const selectedCruise = availableCruises.find(
-      (cruise) => cruise.id === selectedCruiseId,
-    );
-
     const confirmed = window.confirm(
-      `Bạn có chắc muốn gán du thuyền "${
-        selectedCruise?.name || ""
-      }" cho Tour "${selectedTour.name}" và duyệt Tour này không?`,
+      `Bạn có chắc chắn muốn duyệt Tour "${selectedTour.name}" không?`,
     );
 
     if (!confirmed) return;
 
     try {
-      await approveTour(selectedTour.id, selectedCruiseId);
+      await approveTour(selectedTour.id); // Chỉ truyền tourId
 
       setShowCruiseModal(false);
       setSelectedTour(null);
@@ -404,8 +417,10 @@ function ManagerTour() {
         cruises={availableCruises}
         loading={cruiseLoading}
         approving={approving}
+        assigning={assigning}
         selectedCruiseId={selectedCruiseId}
         onSelectCruise={handleSelectCruiseId}
+        onAssignCruise={handleAssignCruise}
         onApprove={handleApprove}
         onClose={handleCloseModal}
       />

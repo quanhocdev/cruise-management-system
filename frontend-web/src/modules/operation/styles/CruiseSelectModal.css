@@ -367,3 +367,92 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+/* src/modules/operation/styles/CruiseSelectModal.css */
+
+/* FOOTER LAYOUT */
+.operation-cruise-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+/* BUTTON NÚT HỦY */
+.operation-cruise-cancel-button {
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background-color: #ffffff;
+  color: #374151;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.operation-cruise-cancel-button:hover:not(:disabled) {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.operation-cruise-cancel-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* BUTTON NÚT GÁN DU THUYỀN */
+.operation-cruise-assign-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  background-color: #0284c7; /* Sky blue chủ đạo hàng hải */
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+
+.operation-cruise-assign-button:hover:not(:disabled) {
+  background-color: #0369a1;
+  box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.3);
+  transform: translateY(-1px);
+}
+
+.operation-cruise-assign-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.operation-cruise-assign-button:disabled {
+  background-color: #9ca3af;
+  color: #f3f4f6;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* SPINNER ANIMATION FOR LOADING */
+.spinner-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

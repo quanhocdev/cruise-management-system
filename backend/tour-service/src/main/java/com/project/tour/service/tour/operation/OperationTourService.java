@@ -158,48 +158,74 @@ public class OperationTourService {
          * APPROVE TOUR
          * =====================================================
          */
-        public TourResponse approveTour(
-                        UUID tourId,
-                        UUID cruiseId) {
-
-                Tour tour = tourRepository
-                                .findById(tourId)
-                                .orElseThrow(() -> new AppException(
-                                                "Tour not found",
-                                                HttpStatus.NOT_FOUND));
+        /**
+         * =====================================================
+         * 2. DUYỆT TOUR (Chỉ duyệt sau khi đã gán du thuyền)
+         * =====================================================
+         */
+        public TourResponse approveTour(UUID tourId) {
+                // 1. Kiểm tra Tour tồn tại & trạng thái PENDING
+                Tour tour = tourRepository.findById(tourId)
+                                .orElseThrow(() -> new AppException("Tour not found", HttpStatus.NOT_FOUND));
 
                 if (tour.getStatusTrip() != TourStatusTrip.APPROVAL_PENDING) {
+                        throw new AppException("Tour is not waiting for approval", HttpStatus.BAD_REQUEST);
+                }
+
+                // 2. Bắt buộc Tour phải được gán Du thuyền trước khi duyệt
+                if (tour.getCruise() == null) {
                         throw new AppException(
-                                        "Tour is not waiting for approval",
+                                        "Please assign a cruise to this tour before approving",
                                         HttpStatus.BAD_REQUEST);
                 }
 
-                Cruise cruise = cruiseRepository
-                                .findById(cruiseId)
-                                .orElseThrow(() -> new AppException(
-                                                "Cruise not found",
-                                                HttpStatus.NOT_FOUND));
+                // 3. Chuyển trạng thái sang APPROVED
+                tour.setStatusTrip(TourStatusTrip.APPROVED);
+                Tour savedTour = tourRepository.save(tour);
+
+                return TourMapper.toResponse(savedTour);
+        }
+
+        /**
+         * =====================================================
+         * 1. GÁN DU THUYỀN CHO TOUR (Vẫn giữ trạng thái PENDING)
+         * =====================================================
+         */
+        public TourResponse assignCruise(UUID tourId, UUID cruiseId) {
+                // 1. Kiểm tra Tour tồn tại & trạng thái
+                Tour tour = tourRepository.findById(tourId)
+                                .orElseThrow(() -> new AppException("Tour not found", HttpStatus.NOT_FOUND));
+
+                if (tour.getStatusTrip() != TourStatusTrip.APPROVAL_PENDING) {
+                        throw new AppException("Tour is not waiting for approval", HttpStatus.BAD_REQUEST);
+                }
+
+                // 2. Kiểm tra Cruise tồn tại & trạng thái ACTIVE
+                Cruise cruise = cruiseRepository.findById(cruiseId)
+                                .orElseThrow(() -> new AppException("Cruise not found", HttpStatus.NOT_FOUND));
 
                 if (cruise.getStatus() != CruiseStatus.ACTIVE) {
-                        throw new AppException(
-                                        "Cruise is not active",
-                                        HttpStatus.BAD_REQUEST);
+                        throw new AppException("Cruise is not active", HttpStatus.BAD_REQUEST);
                 }
 
+                // 3. Kiểm tra lịch trùng với các Tour đã duyệt/đang chạy khác
                 List<Tour> conflictingTours = findConflictingTours(
                                 cruiseId,
                                 tour.getStartDate(),
                                 tour.getEndDate());
 
-                if (!conflictingTours.isEmpty()) {
+                // Loại trừ chính Tour này nếu trước đó đã được gán cùng Cruise
+                boolean hasConflict = conflictingTours.stream()
+                                .anyMatch(t -> !t.getId().equals(tourId));
+
+                if (hasConflict) {
                         throw new AppException(
                                         "Cruise is already assigned to another tour during this period",
                                         HttpStatus.CONFLICT);
                 }
 
+                // 4. Gán Cruise vào Tour (Giữ nguyên trạng thái APPROVAL_PENDING)
                 tour.setCruise(cruise);
-                tour.setStatusTrip(TourStatusTrip.APPROVED);
-
                 Tour savedTour = tourRepository.save(tour);
 
                 return TourMapper.toResponse(savedTour);

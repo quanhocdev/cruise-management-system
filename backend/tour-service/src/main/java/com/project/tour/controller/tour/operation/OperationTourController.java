@@ -69,18 +69,26 @@ public class OperationTourController {
     }
 
     // =====================================================
-    // APPROVE TOUR
+    // 1. GÁN DU THUYỀN CHO TOUR (Vẫn giữ trạng thái PENDING)
     // =====================================================
-
-    @PostMapping("/{id}/approve")
-    public ResponseEntity<TourResponse> approveTour(
+    @PostMapping("/{id}/assign-cruise")
+    public ResponseEntity<TourResponse> assignCruise(
             @PathVariable UUID id,
             @RequestParam UUID cruiseId) {
 
         return ResponseEntity.ok(
-                operationTourService.approveTour(
-                        id,
-                        cruiseId));
+                operationTourService.assignCruise(id, cruiseId));
+    }
+
+    // =====================================================
+    // 2. DUYỆT TOUR (Chỉ gọi sau khi đã gán du thuyền + phân công xong)
+    // =====================================================
+    @PostMapping("/{id}/approve")
+    public ResponseEntity<TourResponse> approveTour(
+            @PathVariable UUID id) { // Bỏ @RequestParam UUID cruiseId
+
+        return ResponseEntity.ok(
+                operationTourService.approveTour(id));
     }
 
     // =====================================================
