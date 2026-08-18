@@ -1,10 +1,10 @@
-import { CheckCircle, Ship, CalendarDays, Eye } from "lucide-react";
+// src/modules/operation/components/OperationTourTable.jsx
+
+import { CheckCircle, Ship, CalendarDays, Eye, XCircle } from "lucide-react";
+import "../styles/OperationTourTable.css";
 
 function formatDate(value) {
-  if (!value) {
-    return "-";
-  }
-
+  if (!value) return "-";
   try {
     return new Date(value).toLocaleDateString("vi-VN");
   } catch {
@@ -12,32 +12,18 @@ function formatDate(value) {
   }
 }
 
-function getStatusLabel(status) {
-  switch (status) {
-    case "APPROVAL_PENDING":
-      return "Chờ duyệt";
+function OperationTourTable({
+  tours,
+  loading,
+  mode = "pending",
+  onSelectCruise,
+  onApprove,
+  onReject,
+  onView,
+  onAssignArea,
+}) {
+  const isPending = mode === "pending";
 
-    case "APPROVED":
-      return "Đã duyệt";
-
-    case "IN_PROGRESS":
-      return "Đang diễn ra";
-
-    case "COMPLETED":
-      return "Hoàn thành";
-
-    case "CANCELLED":
-      return "Đã hủy";
-
-    case "DRAFT":
-      return "Đang cấu hình";
-
-    default:
-      return status || "-";
-  }
-}
-
-function OperationTourTable({ tours, loading, onSelectCruise }) {
   if (loading) {
     return (
       <div className="operation-tour-table-state">
@@ -50,10 +36,14 @@ function OperationTourTable({ tours, loading, onSelectCruise }) {
     return (
       <div className="operation-tour-table-state empty">
         <CheckCircle size={40} />
-
-        <h3>Không có Tour chờ duyệt</h3>
-
-        <p>Hiện tại không có Tour nào đang chờ Operation xử lý.</p>
+        <h3>
+          {isPending ? "Không có Tour chờ duyệt" : "Không có Tour đã duyệt"}
+        </h3>
+        <p>
+          {isPending
+            ? "Hiện tại không có Tour nào đang chờ Operation xử lý."
+            : "Hiện tại chưa có Tour nào được Operation duyệt."}
+        </p>
       </div>
     );
   }
@@ -64,100 +54,141 @@ function OperationTourTable({ tours, loading, onSelectCruise }) {
         <thead>
           <tr>
             <th>Tour</th>
-
             <th>Mã Tour</th>
-
             <th>Thời gian</th>
-
             <th>Du thuyền</th>
-
-            <th>Trạng thái</th>
-
+            <th>Phân công</th>
             <th>Thao tác</th>
           </tr>
         </thead>
 
         <tbody>
-          {tours.map((tour) => (
-            <tr key={tour.id}>
-              {/* TOUR */}
-              <td>
-                <div className="operation-tour-name">
-                  <strong>{tour.name}</strong>
+          {tours.map((tour) => {
+            const hasCruise = Boolean(
+              tour.cruiseId || tour.cruise?.id || tour.cruise,
+            );
 
-                  {tour.description && <span>{tour.description}</span>}
-                </div>
-              </td>
-
-              {/* CODE */}
-              <td>
-                <span className="operation-tour-code">{tour.code}</span>
-              </td>
-
-              {/* DATE */}
-              <td>
-                <div className="operation-tour-dates">
-                  <div>
-                    <CalendarDays size={15} />
-
-                    <span>{formatDate(tour.startDate)}</span>
+            return (
+              <tr key={tour.id}>
+                {/* TOUR */}
+                <td>
+                  <div className="operation-tour-name">
+                    <strong>{tour.name}</strong>
+                    {tour.description && <span>{tour.description}</span>}
                   </div>
+                </td>
 
-                  <span className="date-separator">→</span>
+                {/* CODE */}
+                <td>
+                  <span className="operation-tour-code">
+                    {tour.code || "-"}
+                  </span>
+                </td>
 
-                  <div>
-                    <CalendarDays size={15} />
-
-                    <span>{formatDate(tour.endDate)}</span>
-                  </div>
-                </div>
-              </td>
-
-              {/* CRUISE */}
-              <td>
-                {tour.cruise ? (
-                  <div className="operation-tour-cruise">
-                    <Ship size={16} />
-
+                {/* DATE */}
+                <td>
+                  <div className="operation-tour-dates">
                     <div>
-                      <strong>{tour.cruise.name}</strong>
-
-                      <span>{tour.cruise.code}</span>
+                      <CalendarDays size={15} />
+                      <span>{formatDate(tour.startDate)}</span>
+                    </div>
+                    <span className="date-separator">→</span>
+                    <div>
+                      <CalendarDays size={15} />
+                      <span>{formatDate(tour.endDate)}</span>
                     </div>
                   </div>
-                ) : (
-                  <span className="operation-tour-no-cruise">Chưa gán</span>
-                )}
-              </td>
+                </td>
 
-              {/* STATUS */}
-              <td>
-                <span
-                  className={`operation-tour-status ${(
-                    tour.statusTrip || ""
-                  ).toLowerCase()}`}
-                >
-                  {getStatusLabel(tour.statusTrip)}
-                </span>
-              </td>
+                {/* CRUISE */}
+                <td>
+                  {hasCruise ? (
+                    <div className="operation-tour-cruise">
+                      <Ship size={16} />
+                      <div>
+                        <strong>{tour.cruise?.name || "Đã gán tàu"}</strong>
+                        {tour.cruise?.code && <span>{tour.cruise.code}</span>}
+                      </div>
 
-              {/* ACTION */}
-              <td>
-                <div className="operation-tour-actions">
+                      {isPending && (
+                        <button
+                          type="button"
+                          className="operation-tour-change-cruise-button"
+                          onClick={() => onSelectCruise?.(tour)}
+                        >
+                          Thay đổi
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className="operation-tour-assign-cruise-button"
+                      onClick={() => isPending && onSelectCruise?.(tour)}
+                      disabled={!isPending}
+                    >
+                      <Ship size={16} />
+                      <span>Gán du thuyền</span>
+                    </button>
+                  )}
+                </td>
+
+                {/* ASSIGNMENT */}
+                <td>
                   <button
                     type="button"
-                    className="operation-tour-approve-button"
-                    title="Gán du thuyền và duyệt Tour"
-                    onClick={() => onSelectCruise?.(tour)}
+                    className="operation-tour-assignment-button"
+                    onClick={() => onAssignArea?.(tour)}
+                    disabled={!hasCruise}
                   >
-                    <Ship size={16} />
-
-                    <span>Gán tàu & duyệt</span>
+                    {hasCruise ? "Phân công khu vực" : "Chưa có du thuyền"}
                   </button>
-                </div>
-              </td>
-            </tr>
-          ))}
+                </td>
+
+                {/* ACTION */}
+                <td>
+                  <div className="operation-tour-actions">
+                    {isPending ? (
+                      <>
+                        <button
+                          type="button"
+                          className="operation-tour-approve-button"
+                          onClick={() => onApprove?.(tour)}
+                          disabled={!hasCruise} // Bắt buộc phải gán tàu mới cho Duyệt
+                          title={
+                            !hasCruise
+                              ? "Cần gán du thuyền trước khi duyệt Tour"
+                              : "Duyệt Tour"
+                          }
+                        >
+                          <CheckCircle size={16} />
+                          <span>Duyệt</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          className="operation-tour-reject-button"
+                          onClick={() => onReject?.(tour)}
+                        >
+                          <XCircle size={16} />
+                          <span>Từ chối</span>
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        className="operation-tour-view-button"
+                        onClick={() => onView?.(tour)}
+                      >
+                        <Eye size={16} />
+                        <span>Xem</span>
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

@@ -1,25 +1,22 @@
 .operation-layout {
-  min-height: 100vh;
+  height: 100vh; /* Sửa min-height thành height để khóa cố định khung view */
   display: flex;
   background: #f5f7fb;
+  overflow: hidden; /* Ngăn cuộn toàn trang */
 }
 
 .operation-layout-main {
   min-width: 0;
   flex: 1;
-  min-height: 100vh;
+  height: 100%; /* Ăn theo 100vh của parent */
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .operation-layout-content {
   flex: 1;
-  padding: 24px;
-  overflow-x: hidden;
-}
-
-@media (max-width: 768px) {
-  .operation-layout-content {
-    padding: 16px;
-  }
+  min-height: 0; /* QUAN TRỌNG: Cho phép child thu nhỏ để bật scrollbar */
+  overflow: hidden; /* Để component bên trong tự quản lý scroll */
+  padding: 0; /* Bỏ padding ở đây (vì ManagerTour.css đã có padding) */
 }

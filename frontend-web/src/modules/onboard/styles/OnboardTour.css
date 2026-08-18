@@ -1,0 +1,179 @@
+/* src/modules/onboard/styles/OnboardTour.css */
+
+.onboard-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.onboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 12px;
+}
+
+.onboard-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #1f2937;
+}
+
+.onboard-table-container {
+  overflow-x: auto;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.onboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.onboard-table th,
+.onboard-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.onboard-table th {
+  background-color: #fafafa;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.tour-name {
+  font-weight: 500;
+  color: #111827;
+}
+
+.badge-approved {
+  display: inline-block;
+  background-color: #e6f7ff;
+  color: #1890ff;
+  border: 1px solid #91d5ff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.btn-action {
+  padding: 8px 16px;
+  background-color: #1890ff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.btn-action:hover {
+  background-color: #40a9ff;
+}
+
+.btn-action:disabled {
+  background-color: #d9d9d9;
+  cursor: not-allowed;
+}
+
+.onboard-empty {
+  text-align: center;
+  padding: 32px;
+  color: #8c8c8c;
+}
+
+.onboard-loading,
+.onboard-error {
+  padding: 16px;
+  text-align: center;
+  border-radius: 6px;
+}
+
+.onboard-error {
+  color: #ff4d4f;
+  background-color: #fff2f0;
+  border: 1px solid #ffccc7;
+  margin-bottom: 16px;
+}
+
+/* =====================================================
+ * RESPONSIVE LAYOUT (Mobile & Tablet)
+ * ===================================================== */
+
+/* Tablet & Mobile Layout adjustment (Dưới 768px) */
+@media screen and (max-width: 768px) {
+  .onboard-container {
+    padding: 16px;
+  }
+
+  .onboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .onboard-header h2 {
+    font-size: 1.25rem;
+  }
+
+  .onboard-header .btn-action {
+    width: 100%;
+  }
+
+  /* Biến Table thành dạng Card view trên Mobile */
+  .onboard-table-container {
+    box-shadow: none;
+    background: transparent;
+  }
+
+  .onboard-table,
+  .onboard-table thead,
+  .onboard-table tbody,
+  .onboard-table th,
+  .onboard-table td,
+  .onboard-table tr {
+    display: block;
+  }
+
+  /* Ẩn tiêu đề Table */
+  .onboard-table thead {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  .onboard-table tr {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    border: 1px solid #f0f0f0;
+  }
+
+  .onboard-table td {
+    border: none;
+    padding: 8px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: right;
+  }
+
+  .onboard-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #6b7280;
+    text-align: left;
+    padding-right: 12px;
+  }
+
+  .onboard-table td .btn-action {
+    width: auto;
+  }
+}

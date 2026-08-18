@@ -1,0 +1,618 @@
+/* --- OVERLAY & CONTAINER --- */
+.caam-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.caam-container {
+  background: #ffffff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 960px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+/* --- HEADER --- */
+.caam-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.caam-header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.caam-icon-badge {
+  background: #eff6ff;
+  color: #2563eb;
+  padding: 10px;
+  border-radius: 8px;
+  display: flex;
+}
+
+.caam-header-title h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.caam-header-title p {
+  margin: 2px 0 0 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.caam-close-btn {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+}
+
+.caam-close-btn:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+/* --- TOUR BAR --- */
+.caam-tour-bar {
+  background: #f8fafc;
+  padding: 12px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.caam-tour-info {
+  font-size: 0.875rem;
+}
+
+.caam-tour-info .label {
+  color: #6b7280;
+  margin-right: 6px;
+}
+
+.caam-tour-info .value {
+  color: #1f2937;
+}
+
+/* --- BODY & SIDEBAR --- */
+.caam-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 400px;
+}
+
+.caam-sidebar {
+  width: 260px;
+  border-right: 1px solid #e5e7eb;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+}
+
+.caam-sidebar-header {
+  padding: 12px 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 1px solid #f3f4f6;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.caam-deck-nav {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+}
+
+.caam-deck-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+}
+
+.caam-deck-item:hover {
+  background: #f3f4f6;
+}
+
+.caam-deck-item.active {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+}
+
+.caam-deck-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.caam-deck-badges {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.badge-total {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.badge-assigned {
+  font-size: 0.7rem;
+  background: #dcfce7;
+  color: #15803d;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* --- MAIN CONTENT & GRID --- */
+.caam-main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.caam-toolbar {
+  padding: 12px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.caam-search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: 320px;
+}
+
+.caam-search-box svg {
+  position: absolute;
+  left: 10px;
+  color: #9ca3af;
+}
+
+.caam-search-box input {
+  width: 100%;
+  padding: 8px 32px 8px 32px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  outline: none;
+}
+
+.caam-search-box input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.clear-search {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+}
+
+.caam-deck-title-current {
+  font-weight: 600;
+  color: #111827;
+}
+
+.caam-grid-container {
+  padding: 20px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.caam-area-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+/* --- AREA CARD --- */
+.caam-area-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 14px;
+  background: #ffffff;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all 0.15s ease-in-out;
+}
+
+.caam-area-card:hover {
+  border-color: #93c5fd;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.caam-area-card.is-selected {
+  border-color: #2563eb;
+  background: #f0fdf4;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.caam-area-card.is-assigned {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+.caam-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.caam-area-identity {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.icon-pin {
+  color: #2563eb;
+  flex-shrink: 0;
+}
+
+.caam-area-title {
+  font-size: 0.95rem;
+  color: #1f2937;
+}
+
+.caam-area-code {
+  font-size: 0.75rem;
+  background: #f3f4f6;
+  color: #4b5563;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.caam-card-rooms {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: #4b5563;
+}
+
+.caam-card-footer {
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px dashed #f1f5f9;
+}
+
+.caam-assigned-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tag-assigned {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: #166534;
+  font-weight: 500;
+}
+
+.tag-select {
+  font-size: 0.75rem;
+  color: #6b7280;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: #f3f4f6;
+  display: inline-block;
+}
+
+.tag-select.active {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.caam-delete-btn {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.caam-delete-btn:hover {
+  background: #fee2e2;
+}
+
+/* --- STATES & FOOTER --- */
+.caam-state-box,
+.caam-state-inline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: #6b7280;
+  gap: 8px;
+}
+
+.caam-empty-small {
+  padding: 16px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+.caam-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.caam-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+}
+
+.caam-footer-info {
+  font-size: 0.875rem;
+}
+
+.info-selected {
+  color: #166534;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+.info-hint {
+  color: #6b7280;
+}
+
+.caam-footer-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.caam-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid transparent;
+}
+
+.caam-btn-cancel {
+  background: #ffffff;
+  border-color: #d1d5db;
+  color: #374151;
+}
+
+.caam-btn-cancel:hover {
+  background: #f9fafb;
+}
+
+.caam-btn-submit {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.caam-btn-submit:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.caam-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ==========================================
+   RESPONSIVE MEDIA QUERIES
+   ========================================== */
+
+/* 1. Màn hình Laptop nhỏ & Tablet ngang (dưới 1024px) */
+@media (max-width: 1024px) {
+  .caam-container {
+    max-width: 95vw;
+    height: 92vh;
+  }
+
+  .caam-sidebar {
+    width: 220px; /* Thu hẹp sidebar một chút */
+  }
+
+  .caam-area-grid {
+    /* 2 cột card thay vì tự động dàn nhiều cột */
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* 2. Tablet dọc (dưới 768px) - Chuyển Sidebar lên thành thanh Nav cuộn ngang */
+@media (max-width: 768px) {
+  .caam-overlay {
+    padding: 10px;
+  }
+
+  .caam-container {
+    max-width: 100vw;
+    max-height: 98vh;
+    border-radius: 8px;
+  }
+
+  /* Chuyển bố cục Body sang chiều dọc */
+  .caam-body {
+    flex-direction: column;
+  }
+
+  /* Chuyển Sidebar thành thanh chọn tầng nằm ngang */
+  .caam-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+    background: #ffffff;
+  }
+
+  .caam-sidebar-header {
+    display: none; /* Ẩn bớt tiêu đề sidebar trên mobile để tiết kiệm diện tích */
+  }
+
+  .caam-deck-nav {
+    flex-direction: row;
+    overflow-x: auto; /* Cuộn ngang danh sách tầng */
+    padding: 8px 12px;
+    gap: 8px;
+    white-space: nowrap;
+  }
+
+  .caam-deck-item {
+    flex-shrink: 0;
+    padding: 6px 12px;
+    gap: 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+  }
+
+  .caam-deck-item.active {
+    background: #eff6ff;
+  }
+
+  .caam-deck-badges {
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Tối ưu Toolbar */
+  .caam-toolbar {
+    padding: 10px 16px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .caam-search-box {
+    max-width: 100%;
+  }
+
+  .caam-area-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .caam-grid-container {
+    padding: 12px;
+  }
+}
+
+/* 3. Mobile màn hình nhỏ (dưới 480px) */
+@media (max-width: 480px) {
+  .caam-header {
+    padding: 12px 16px;
+  }
+
+  .caam-header-title h2 {
+    font-size: 1.05rem;
+  }
+
+  .caam-tour-bar {
+    padding: 8px 16px;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  /* Grid hiển thị 1 cột duy nhất trên mobile */
+  .caam-area-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .caam-footer {
+    padding: 12px 16px;
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .caam-footer-info {
+    text-align: center;
+    font-size: 0.8rem;
+  }
+
+  .caam-footer-buttons {
+    display: flex;
+    gap: 8px;
+  }
+
+  .caam-btn {
+    flex: 1; /* Hai nút Cancel / Submit chia đều 50% màn hình */
+    justify-content: center;
+    padding: 10px 12px;
+  }
+}

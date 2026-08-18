@@ -1,0 +1,172 @@
+/* src/modules/operation/styles/OperationTourFilter.css */
+
+.operation-tour-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+/* =========================================================
+   SEARCH
+   ========================================================= */
+.operation-tour-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 40px;
+  box-sizing: border-box;
+  padding: 0 40px 0 12px;
+  background: #ffffff;
+  border: 1px solid #dbe1e8;
+  border-radius: 8px;
+  color: #64748b;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.operation-tour-search:focus-within {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+.operation-tour-search > svg {
+  flex-shrink: 0;
+  margin-right: 8px;
+}
+
+.operation-tour-search input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #1e293b;
+  font-size: 13.5px;
+}
+
+.operation-tour-search input::placeholder {
+  color: #94a3b8;
+}
+
+.operation-tour-search-clear {
+  position: absolute;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.operation-tour-search-clear:hover {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+/* =========================================================
+   DATE RANGE & FIELD
+   ========================================================= */
+.operation-tour-date-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.operation-tour-date-field {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 10px;
+  background: #ffffff;
+  border: 1px solid #dbe1e8;
+  border-radius: 8px;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+
+.operation-tour-date-field:hover {
+  border-color: #cbd5e1;
+}
+
+.operation-tour-date-field:focus-within {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+.operation-tour-date-field input[type="date"] {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Biểu tượng lịch ẩn mặc định hoặc căn chỉnh lại icon chuẩn browser */
+.operation-tour-date-field
+  input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.operation-tour-date-field
+  input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+.operation-tour-date-separator {
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+/* =========================================================
+   CLEAR BUTTON
+   ========================================================= */
+.operation-tour-clear-filter {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  background: #fff7ed;
+  color: #ea580c;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.operation-tour-clear-filter:hover {
+  background: #ffedd5;
+  border-color: #fdba74;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 600px) {
+  .operation-tour-date-range {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .operation-tour-date-separator {
+    display: none;
+  }
+}

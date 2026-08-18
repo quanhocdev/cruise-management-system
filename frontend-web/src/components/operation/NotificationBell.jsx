@@ -1,6 +1,6 @@
 import { Bell } from "lucide-react";
 
-import "../../styles/operation/NotificationBell.css";
+import "../../styles/onboard/NotificationBell.css";
 
 function NotificationBell() {
   const notificationCount = 0;

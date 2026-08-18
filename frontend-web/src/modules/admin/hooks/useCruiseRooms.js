@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import roomService from "../services/roomService";
+import cruiseRoomService from "../services/cruiseRoomService";
 import roomTypeService from "../services/roomTypeService";
 
 export default function useCruiseRooms(deckId) {
@@ -18,6 +18,8 @@ export default function useCruiseRooms(deckId) {
 
   const loadRooms = useCallback(async () => {
     if (!deckId) {
+      setRooms([]);
+      setLoading(false);
       return;
     }
 
@@ -25,11 +27,14 @@ export default function useCruiseRooms(deckId) {
     setError("");
 
     try {
-      const data = await roomService.getRoomsByDeck(deckId);
+      const data = await cruiseRoomService.getRooms(deckId);
 
       setRooms(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("🔥 LOAD ROOMS ERROR:", err);
+      console.error("🔥 RESPONSE:", err?.response);
+      console.error("🔥 RESPONSE DATA:", err?.response?.data);
+      console.error("🔥 STATUS:", err?.response?.status);
 
       setError(
         err?.response?.data?.message || "Không thể tải danh sách phòng.",
@@ -50,6 +55,9 @@ export default function useCruiseRooms(deckId) {
       setRoomTypes(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("🔥 LOAD ROOM TYPES ERROR:", err);
+      console.error("🔥 RESPONSE:", err?.response);
+      console.error("🔥 RESPONSE DATA:", err?.response?.data);
+      console.error("🔥 STATUS:", err?.response?.status);
 
       setError(
         err?.response?.data?.message || "Không thể tải danh sách loại phòng.",
@@ -67,29 +75,30 @@ export default function useCruiseRooms(deckId) {
   }, [loadRooms, loadRoomTypes]);
 
   // =====================================================
-  // CREATE ROOMS
+  // CREATE ROOM
   // =====================================================
 
-  const createRooms = async (data) => {
+  const createRoom = async (data) => {
     setError("");
     setSuccess("");
 
     try {
-      const createdRooms = await roomService.createRooms(deckId, data);
+      const createdRoom = await cruiseRoomService.createRoom(deckId, data);
 
       setRooms((previous) => [
         ...previous,
-        ...(Array.isArray(createdRooms) ? createdRooms : []),
+        ...(Array.isArray(createdRoom) ? createdRoom : [createdRoom]),
       ]);
 
-      const quantity = createdRooms?.length || data.quantity;
+      const quantity = Array.isArray(createdRoom)
+        ? createdRoom.length
+        : data?.quantity || 1;
 
       setSuccess(`Đã tạo ${quantity} phòng thành công.`);
 
-      return createdRooms;
+      return createdRoom;
     } catch (err) {
-      console.error("🔥 CREATE ROOMS ERROR:", err);
-
+      console.error("🔥 CREATE ROOM ERROR:", err);
       console.error("🔥 RESPONSE:", err?.response);
       console.error("🔥 RESPONSE DATA:", err?.response?.data);
       console.error("🔥 STATUS:", err?.response?.status);
@@ -109,7 +118,11 @@ export default function useCruiseRooms(deckId) {
     setSuccess("");
 
     try {
-      const updatedRoom = await roomService.updateRoom(deckId, roomId, data);
+      const updatedRoom = await cruiseRoomService.updateRoom(
+        deckId,
+        roomId,
+        data,
+      );
 
       setRooms((previous) =>
         previous.map((room) => (room.id === roomId ? updatedRoom : room)),
@@ -120,6 +133,9 @@ export default function useCruiseRooms(deckId) {
       return updatedRoom;
     } catch (err) {
       console.error("🔥 UPDATE ROOM ERROR:", err);
+      console.error("🔥 RESPONSE:", err?.response);
+      console.error("🔥 RESPONSE DATA:", err?.response?.data);
+      console.error("🔥 STATUS:", err?.response?.status);
 
       setError(err?.response?.data?.message || "Không thể cập nhật phòng.");
 
@@ -136,7 +152,7 @@ export default function useCruiseRooms(deckId) {
     setSuccess("");
 
     try {
-      await roomService.deleteRoom(deckId, roomId);
+      await cruiseRoomService.deleteRoom(deckId, roomId);
 
       setRooms((previous) => previous.filter((room) => room.id !== roomId));
 
@@ -145,6 +161,9 @@ export default function useCruiseRooms(deckId) {
       return true;
     } catch (err) {
       console.error("🔥 DELETE ROOM ERROR:", err);
+      console.error("🔥 RESPONSE:", err?.response);
+      console.error("🔥 RESPONSE DATA:", err?.response?.data);
+      console.error("🔥 STATUS:", err?.response?.status);
 
       setError(err?.response?.data?.message || "Không thể xóa phòng.");
 
@@ -163,7 +182,8 @@ export default function useCruiseRooms(deckId) {
     setSuccess,
 
     loadRooms,
-    createRooms,
+    loadRoomTypes,
+    createRoom,
     updateRoom,
     deleteRoom,
   };

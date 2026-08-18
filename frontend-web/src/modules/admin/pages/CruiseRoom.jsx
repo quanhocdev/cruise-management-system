@@ -24,7 +24,7 @@ export default function CruiseRoom() {
     setError,
     setSuccess,
 
-    createRooms,
+    createRoom,
     updateRoom,
     deleteRoom,
   } = useCruiseRooms(deckId);
@@ -141,7 +141,7 @@ export default function CruiseRoom() {
       setSaving(true);
 
       try {
-        const result = await createRooms({
+        const result = await createRoom({
           roomTypeId: form.roomTypeId,
 
           quantity,

@@ -1,3 +1,6 @@
+// src/modules/operation/components/CruiseSelectModal.jsx
+
+import "../styles/CruiseSelectModal.css";
 import {
   X,
   Ship,
@@ -6,6 +9,8 @@ import {
   CalendarDays,
   Ban,
   Info,
+  Anchor,
+  Loader2,
 } from "lucide-react";
 
 function formatDate(value) {
@@ -22,13 +27,25 @@ function CruiseSelectModal({
   tour,
   cruises,
   loading,
-  approving,
+  assigning,
   selectedCruiseId,
   onSelectCruise,
-  onApprove,
+  onAssignCruise,
   onClose,
 }) {
   if (!open || !tour) return null;
+
+  // Xử lý gán du thuyền thành công thì đóng Modal
+  const handleAssign = async () => {
+    if (!selectedCruiseId || !onAssignCruise) return;
+    try {
+      await onAssignCruise(selectedCruiseId);
+      onClose(); // Tự động đóng modal sau khi gán thành công
+    } catch (error) {
+      // Bắt lỗi nếu có, giữ modal để người dùng thử lại
+      console.error("Lỗi khi gán du thuyền:", error);
+    }
+  };
 
   return (
     <div className="operation-cruise-modal-overlay">
@@ -36,15 +53,15 @@ function CruiseSelectModal({
         {/* HEADER */}
         <div className="operation-cruise-modal-header">
           <div>
-            <h2>Gán du thuyền cho Tour</h2>
-            <p>Chọn du thuyền phù hợp để duyệt Tour.</p>
+            <h2>Chọn Du thuyền cho Tour</h2>
+            <p>Chọn du thuyền khả dụng để gán cho Tour này.</p>
           </div>
 
           <button
             type="button"
             className="operation-cruise-modal-close"
             onClick={onClose}
-            disabled={approving}
+            disabled={assigning}
           >
             <X size={20} />
           </button>
@@ -112,7 +129,7 @@ function CruiseSelectModal({
                       selected ? "selected" : ""
                     } ${!available ? "disabled" : ""}`}
                     onClick={() => available && onSelectCruise(cruise.id)}
-                    disabled={approving || !available}
+                    disabled={assigning || !available}
                   >
                     <div className="operation-cruise-option-icon">
                       <Ship size={22} />
@@ -121,7 +138,6 @@ function CruiseSelectModal({
                     <div className="operation-cruise-option-info">
                       <div className="cruise-header-row">
                         <strong>{cruise.name}</strong>
-                        {/* Status Badge */}
                         <span
                           className={`cruise-status-badge ${
                             available ? "available" : "busy"
@@ -133,7 +149,6 @@ function CruiseSelectModal({
 
                       <span className="cruise-code">Mã tàu: {cruise.code}</span>
 
-                      {/* Trạng thái / Lý do */}
                       <div
                         className={`cruise-reason ${
                           available ? "text-success" : "text-danger"
@@ -156,7 +171,6 @@ function CruiseSelectModal({
                     </div>
                   </button>
 
-                  {/* Hiển thị chi tiết Tour bị trùng lịch nếu có */}
                   {!available && cruise.conflictingTours?.length > 0 && (
                     <div className="operation-cruise-conflicts">
                       <div className="conflict-title">
@@ -186,21 +200,28 @@ function CruiseSelectModal({
             type="button"
             className="operation-cruise-cancel-button"
             onClick={onClose}
-            disabled={approving}
+            disabled={assigning}
           >
             Hủy
           </button>
 
           <button
             type="button"
-            className="operation-cruise-approve-button"
-            onClick={onApprove}
-            disabled={
-              !selectedCruiseId || approving || loading || cruises?.length === 0
-            }
+            className="operation-cruise-assign-button"
+            onClick={handleAssign}
+            disabled={!selectedCruiseId || assigning || loading}
           >
-            <CheckCircle size={17} />
-            {approving ? "Đang duyệt..." : "Gán tàu & Duyệt Tour"}
+            {assigning ? (
+              <>
+                <Loader2 size={17} className="spinner-icon" />
+                <span>Đang gán...</span>
+              </>
+            ) : (
+              <>
+                <Anchor size={17} />
+                <span>Xác nhận gán du thuyền</span>
+              </>
+            )}
           </button>
         </div>
       </div>
