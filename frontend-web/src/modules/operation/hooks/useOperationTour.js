@@ -140,10 +140,15 @@ export default function useOperationTours() {
     try {
       const data = await operationTourService.getCruiseLayout(tourId);
 
+      // 🔍 LOG 1: Xem chính xác response thô từ Backend gửi về
+      console.log(" [RAW BACKEND DATA] cruiseLayout:", data);
+
       const layoutList = Array.isArray(data)
         ? data
         : data?.content || data?.data || [];
 
+      // 🔍 LOG 2: Xem dữ liệu sau khi Frontend bóc tách
+      console.log(" [PROCESSED LAYOUT DATA]:", layoutList);
       setCruiseLayout(layoutList);
 
       return layoutList;

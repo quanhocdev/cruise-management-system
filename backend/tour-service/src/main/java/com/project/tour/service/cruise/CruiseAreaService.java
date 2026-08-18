@@ -1,5 +1,7 @@
 package com.project.tour.service.cruise;
 
+import com.project.common.dto.UploadResult;
+import com.project.common.service.file.FileStorageService;
 import com.project.tour.dto.cruise.area.CreateCruiseAreaRequest;
 import com.project.tour.dto.cruise.area.CruiseAreaResponse;
 import com.project.tour.dto.cruise.area.UpdateCruiseAreaRequest;
@@ -24,13 +26,16 @@ public class CruiseAreaService {
 
         private final CruiseAreaRepository cruiseAreaRepository;
         private final CruiseDeckRepository cruiseDeckRepository;
+        private final FileStorageService fileStorageService;
 
         public CruiseAreaService(
                         CruiseAreaRepository cruiseAreaRepository,
-                        CruiseDeckRepository cruiseDeckRepository) {
+                        CruiseDeckRepository cruiseDeckRepository,
+                        FileStorageService fileStorageService) {
 
                 this.cruiseAreaRepository = cruiseAreaRepository;
                 this.cruiseDeckRepository = cruiseDeckRepository;
+                this.fileStorageService = fileStorageService;
         }
 
         public CruiseAreaResponse create(
@@ -50,6 +55,18 @@ public class CruiseAreaService {
 
                 CruiseArea area = CruiseAreaMapper.toEntity(request);
                 area.setCruiseDeck(deck);
+
+                // Xử lý upload ảnh khu vực nếu có gửi file
+                if (request.getImage() != null
+                                && !request.getImage().isEmpty()) {
+
+                        UploadResult uploadResult = fileStorageService.saveMultipart(
+                                        request.getImage(),
+                                        "cruise-areas"); // Folder lưu ảnh trên Cloudinary
+
+                        area.setImageUrl(uploadResult.getUrl());
+                        area.setImagePublicId(uploadResult.getPublicId());
+                }
 
                 CruiseArea saved = cruiseAreaRepository.save(area);
 
@@ -112,7 +129,26 @@ public class CruiseAreaService {
                                         HttpStatus.CONFLICT);
                 }
 
+                String oldPublicId = area.getImagePublicId();
+
                 CruiseAreaMapper.updateEntity(area, request);
+
+                // Xử lý cập nhật ảnh mới nếu có
+                if (request.getImage() != null
+                                && !request.getImage().isEmpty()) {
+
+                        UploadResult uploadResult = fileStorageService.saveMultipart(
+                                        request.getImage(),
+                                        "cruise-areas");
+
+                        area.setImageUrl(uploadResult.getUrl());
+                        area.setImagePublicId(uploadResult.getPublicId());
+
+                        // Xóa ảnh cũ trên Cloudinary nếu có
+                        if (oldPublicId != null && !oldPublicId.isBlank()) {
+                                fileStorageService.delete(oldPublicId);
+                        }
+                }
 
                 CruiseArea updated = cruiseAreaRepository.save(area);
 
@@ -137,6 +173,13 @@ public class CruiseAreaService {
                         UUID areaId) {
 
                 CruiseArea area = findById(deckId, areaId);
+
+                // Xóa ảnh trên Cloudinary trước khi xóa bản ghi dưới DB
+                if (area.getImagePublicId() != null
+                                && !area.getImagePublicId().isBlank()) {
+
+                        fileStorageService.delete(area.getImagePublicId());
+                }
 
                 cruiseAreaRepository.delete(area);
         }

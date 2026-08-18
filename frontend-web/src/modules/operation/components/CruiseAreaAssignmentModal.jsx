@@ -12,6 +12,7 @@ import {
   Grid,
 } from "lucide-react";
 import AreaFilterToolbar from "./AreaFilterToolbar";
+import AreaDetailPreview from "./AreaDetailPreview"; // Import component preview
 import "../styles/CruiseAreaAssignmentModal.css";
 
 function CruiseAreaAssignmentModal({
@@ -31,6 +32,9 @@ function CruiseAreaAssignmentModal({
   const [selectedDeckId, setSelectedDeckId] = useState("ALL");
   const [selectedAreaId, setSelectedAreaId] = useState(null);
 
+  // State lưu loại hình được chọn (PRODUCT | SERVICE | ACTIVITY)
+  const [selectedConfigType, setSelectedConfigType] = useState("ACTIVITY");
+
   // State bộ lọc truyền xuống AreaFilterToolbar
   const [searchTerm, setSearchTerm] = useState("");
   const [viewType, setViewType] = useState("ALL"); // 'ALL' | 'AREA' | 'ROOM'
@@ -47,6 +51,7 @@ function CruiseAreaAssignmentModal({
   useEffect(() => {
     if (!open || !tour?.id) return;
     setSelectedAreaId(null);
+    setSelectedConfigType("ACTIVITY");
     setSearchTerm("");
     setSelectedDeckId("ALL");
     setViewType("ALL");
@@ -57,6 +62,7 @@ function CruiseAreaAssignmentModal({
   useEffect(() => {
     if (!open) {
       setSelectedAreaId(null);
+      setSelectedConfigType("ACTIVITY");
       setSelectedDeckId("ALL");
       setSearchTerm("");
       setViewType("ALL");
@@ -167,6 +173,14 @@ function CruiseAreaAssignmentModal({
     return list;
   }, [decks]);
 
+  // LẤY DỮ LIỆU CỦA ITEM ĐANG ĐƯỢC CHỌN (TRUYỀN VÀO PREVIEW COMPONENT)
+  const selectedItemObject = useMemo(() => {
+    if (!selectedAreaId) return null;
+    return allItemsWithDeckInfo.find(
+      (item) => String(getItemId(item)) === String(selectedAreaId),
+    );
+  }, [selectedAreaId, allItemsWithDeckInfo]);
+
   // TỔNG SỐ ĐÃ GÁN
   const totalAssignedCount = useMemo(() => {
     return allItemsWithDeckInfo.filter((item) =>
@@ -215,13 +229,21 @@ function CruiseAreaAssignmentModal({
     const itemId = getItemId(item);
     if (!itemId) return;
     if (assignmentMap.has(String(itemId))) return;
-    setSelectedAreaId((prev) => (prev === itemId ? null : itemId));
+
+    if (selectedAreaId === itemId) {
+      setSelectedAreaId(null);
+    } else {
+      setSelectedAreaId(itemId);
+      // Đặt mặc định loại hình nếu chưa chọn
+      if (!selectedConfigType) setSelectedConfigType("ACTIVITY");
+    }
   };
 
   const handleAssign = async () => {
     if (!tour?.id || !selectedAreaId) return;
     try {
-      await onAssignArea?.(tour.id, selectedAreaId);
+      // Truyền kèm cả loại hình (PRODUCT / SERVICE / ACTIVITY) lên API
+      await onAssignArea?.(tour.id, selectedAreaId, selectedConfigType);
       setSelectedAreaId(null);
       await onLoadAssignments?.(tour.id);
     } catch (err) {
@@ -325,7 +347,6 @@ function CruiseAreaAssignmentModal({
               <div className="caam-empty-small">Không có dữ liệu tầng</div>
             ) : (
               <div className="caam-deck-nav">
-                {/* TẤT CẢ CÁC TẦNG */}
                 <button
                   type="button"
                   className={`caam-deck-item ${
@@ -349,7 +370,6 @@ function CruiseAreaAssignmentModal({
                   </div>
                 </button>
 
-                {/* DANH SÁCH TỪNG TẦNG */}
                 {decks.map((deck, idx) => {
                   const dId = getDeckId(deck) || idx;
                   const isSelected = String(dId) === String(selectedDeckId);
@@ -400,101 +420,118 @@ function CruiseAreaAssignmentModal({
               setViewType={setViewType}
             />
 
-            {/* GRID HIỂN THỊ AREAS VÀ ROOMS */}
-            <div className="caam-grid-container">
-              {layoutLoading ? (
-                <div className="caam-state-box">
-                  <Loader2 size={28} className="caam-spinner" />
-                  <span>Đang tải dữ liệu...</span>
-                </div>
-              ) : filteredItems.length === 0 ? (
-                <div className="caam-state-box empty">
-                  <AlertCircle size={32} />
-                  <p>
-                    {searchTerm
-                      ? "Không tìm thấy khu vực hoặc phòng phù hợp"
-                      : "Không có dữ liệu phù hợp với bộ lọc"}
-                  </p>
-                </div>
-              ) : (
-                <div className="caam-area-grid">
-                  {filteredItems.map((item, idx) => {
-                    const itemId = getItemId(item);
-                    const isAssigned = assignmentMap.has(String(itemId));
-                    const isSelected = selectedAreaId === itemId;
-                    const isRoom = item._type === "ROOM";
+            {/* KHU VỰC HIỂN THỊ CHÍNH (CHIA ĐÔI KHI CÓ ITEM ĐƯỢC CHỌN) */}
+            <div
+              className={`caam-split-workspace ${
+                selectedAreaId ? "has-preview" : ""
+              }`}
+            >
+              {/* CỘT TRÁI: GRID CÁC DÀN KHU VỰC / PHÒNG */}
+              <div className="caam-grid-container">
+                {layoutLoading ? (
+                  <div className="caam-state-box">
+                    <Loader2 size={28} className="caam-spinner" />
+                    <span>Đang tải dữ liệu...</span>
+                  </div>
+                ) : filteredItems.length === 0 ? (
+                  <div className="caam-state-box empty">
+                    <AlertCircle size={32} />
+                    <p>
+                      {searchTerm
+                        ? "Không tìm thấy khu vực hoặc phòng phù hợp"
+                        : "Không có dữ liệu phù hợp với bộ lọc"}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="caam-area-grid">
+                    {filteredItems.map((item, idx) => {
+                      const itemId = getItemId(item);
+                      const isAssigned = assignmentMap.has(String(itemId));
+                      const isSelected = selectedAreaId === itemId;
+                      const isRoom = item._type === "ROOM";
 
-                    return (
-                      <div
-                        key={itemId || idx}
-                        className={`caam-area-card ${
-                          isAssigned ? "is-assigned" : ""
-                        } ${isSelected ? "is-selected" : ""}`}
-                        onClick={() => handleSelectItem(item)}
-                      >
-                        <div className="caam-card-header">
-                          <div className="caam-area-identity">
-                            {isRoom ? (
-                              <DoorClosed
-                                size={16}
-                                className="icon-pin"
-                                style={{ color: "#059669" }}
-                              />
-                            ) : (
-                              <MapPin size={16} className="icon-pin" />
+                      return (
+                        <div
+                          key={itemId || idx}
+                          className={`caam-area-card ${
+                            isAssigned ? "is-assigned" : ""
+                          } ${isSelected ? "is-selected" : ""}`}
+                          onClick={() => handleSelectItem(item)}
+                        >
+                          <div className="caam-card-header">
+                            <div className="caam-area-identity">
+                              {isRoom ? (
+                                <DoorClosed
+                                  size={16}
+                                  className="icon-pin"
+                                  style={{ color: "#059669" }}
+                                />
+                              ) : (
+                                <MapPin size={16} className="icon-pin" />
+                              )}
+                              <strong className="caam-area-title">
+                                {getItemName(item)}
+                              </strong>
+                            </div>
+                            {getItemCode(item) && (
+                              <span className="caam-area-code">
+                                {getItemCode(item)}
+                              </span>
                             )}
-                            <strong className="caam-area-title">
-                              {getItemName(item)}
-                            </strong>
                           </div>
-                          {getItemCode(item) && (
-                            <span className="caam-area-code">
-                              {getItemCode(item)}
-                            </span>
-                          )}
-                        </div>
 
-                        {/* HIỂN THỊ TÊN TẦNG KHI Ở CHẾ ĐỘ XEM TẤT CẢ */}
-                        {selectedDeckId === "ALL" && (
-                          <div className="caam-card-deck-tag">
-                            <Layers size={13} />
-                            <span>{item._deckName}</span>
-                          </div>
-                        )}
-
-                        {/* FOOTER BÀI CARD */}
-                        <div className="caam-card-footer">
-                          {isAssigned ? (
-                            <div className="caam-assigned-row">
-                              <span className="tag-assigned">
-                                <CheckCircle size={13} /> Đã phân công
-                              </span>
-                              <button
-                                type="button"
-                                className="caam-delete-btn"
-                                onClick={(e) =>
-                                  handleDeleteAssignment(e, itemId)
-                                }
-                                title="Gỡ phân công"
-                              >
-                                <Trash2 size={15} />
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="caam-select-row">
-                              <span
-                                className={`tag-select ${
-                                  isSelected ? "active" : ""
-                                }`}
-                              >
-                                {isSelected ? "Đã chọn" : "Bấm để chọn"}
-                              </span>
+                          {selectedDeckId === "ALL" && (
+                            <div className="caam-card-deck-tag">
+                              <Layers size={13} />
+                              <span>{item._deckName}</span>
                             </div>
                           )}
+
+                          <div className="caam-card-footer">
+                            {isAssigned ? (
+                              <div className="caam-assigned-row">
+                                <span className="tag-assigned">
+                                  <CheckCircle size={13} /> Đã phân công
+                                </span>
+                                <button
+                                  type="button"
+                                  className="caam-delete-btn"
+                                  onClick={(e) =>
+                                    handleDeleteAssignment(e, itemId)
+                                  }
+                                  title="Gỡ phân công"
+                                >
+                                  <Trash2 size={15} />
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="caam-select-row">
+                                <span
+                                  className={`tag-select ${
+                                    isSelected ? "active" : ""
+                                  }`}
+                                >
+                                  {isSelected ? "Đã chọn" : "Bấm để chọn"}
+                                </span>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* CỘT PHẢI: KHUNG ẢNH & LOẠI HÌNH CẤU HÌNH PREVIEW */}
+              {selectedAreaId && (
+                <div className="caam-preview-sidebar">
+                  <AreaDetailPreview
+                    area={selectedItemObject}
+                    selectedConfigType={selectedConfigType}
+                    onChangeConfigType={setSelectedConfigType}
+                    onSaveAssignment={handleAssign}
+                  />
                 </div>
               )}
             </div>
@@ -506,11 +543,12 @@ function CruiseAreaAssignmentModal({
           <div className="caam-footer-info">
             {selectedAreaId ? (
               <span className="info-selected">
-                <CheckCircle size={16} /> Đã chọn ID: {selectedAreaId}
+                <CheckCircle size={16} /> Đã chọn khu vực ID: {selectedAreaId} (
+                {selectedConfigType})
               </span>
             ) : (
               <span className="info-hint">
-                Chọn một khu vực hoặc phòng ở trên để phân công cho Tour
+                Chọn một khu vực hoặc phòng ở trên để xem hình ảnh và phân công
               </span>
             )}
           </div>
@@ -523,22 +561,6 @@ function CruiseAreaAssignmentModal({
               disabled={assignmentLoading}
             >
               Đóng
-            </button>
-            <button
-              type="button"
-              className="caam-btn caam-btn-submit"
-              onClick={handleAssign}
-              disabled={!selectedAreaId || assignmentLoading || layoutLoading}
-            >
-              {assignmentLoading ? (
-                <>
-                  <Loader2 size={16} className="caam-spinner" /> Đang xử lý...
-                </>
-              ) : (
-                <>
-                  <CheckCircle size={16} /> Phân công
-                </>
-              )}
             </button>
           </div>
         </div>
