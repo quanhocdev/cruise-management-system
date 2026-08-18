@@ -22,6 +22,7 @@ export default function useOperationTours() {
 
   const [assignments, setAssignments] = useState([]);
   const [assigning, setAssigning] = useState(false);
+
   // =====================================================
   // LOADING
   // =====================================================
@@ -140,14 +141,12 @@ export default function useOperationTours() {
     try {
       const data = await operationTourService.getCruiseLayout(tourId);
 
-      // 🔍 LOG 1: Xem chính xác response thô từ Backend gửi về
       console.log(" [RAW BACKEND DATA] cruiseLayout:", data);
 
       const layoutList = Array.isArray(data)
         ? data
         : data?.content || data?.data || [];
 
-      // 🔍 LOG 2: Xem dữ liệu sau khi Frontend bóc tách
       console.log(" [PROCESSED LAYOUT DATA]:", layoutList);
       setCruiseLayout(layoutList);
 
@@ -178,7 +177,6 @@ export default function useOperationTours() {
     try {
       const updated = await operationTourService.assignCruise(tourId, cruiseId);
 
-      // Cập nhật lại Tour trong danh sách pendingTours với thông tin cruise mới
       setPendingTours((prev) =>
         prev.map((tour) => (tour.id === tourId ? updated : tour)),
       );
@@ -232,30 +230,30 @@ export default function useOperationTours() {
   }, []);
 
   // =====================================================
-  // ASSIGN ACTIVITY CRUISE AREA
+  // ASSIGN ACTIVITY CRUISE AREA (SINGLE & BATCH)
   // =====================================================
 
-  const assignActivityCruiseArea = useCallback(async (tourId, cruiseAreaId) => {
+  const assignActivityCruiseArea = useCallback(async (payload) => {
     setAssignmentLoading(true);
     setError("");
     setSuccess("");
 
     try {
-      const created = await operationTourService.assignActivityCruiseArea(
-        tourId,
-        cruiseAreaId,
-      );
+      const result =
+        await operationTourService.assignActivityCruiseArea(payload);
 
-      setAssignments((prev) => [...prev, created]);
+      // Nếu gửi danh sách mảng nhiều khu vực
+      if (Array.isArray(result)) {
+        setAssignments((prev) => [...prev, ...result]);
+      } else if (result) {
+        setAssignments((prev) => [...prev, result]);
+      }
 
       setSuccess("Phân công khu vực cho Tour thành công.");
-
-      return created;
+      return result;
     } catch (err) {
       console.error("ASSIGN ACTIVITY CRUISE AREA ERROR:", err);
-
       setError(err.response?.data?.message || "Không thể phân công khu vực.");
-
       throw err;
     } finally {
       setAssignmentLoading(false);
@@ -294,16 +292,19 @@ export default function useOperationTours() {
   // APPROVE TOUR
   // =====================================================
 
-  const approveTour = useCallback(async (tourId) => {
+  const approveTour = useCallback(async (tourId, payload = null) => {
     setApproving(true);
     setError("");
     setSuccess("");
 
     try {
-      const updated = await operationTourService.approveTour(tourId);
+      const updated = await operationTourService.approveTour(tourId, payload);
 
-      // Xóa tour đã duyệt khỏi pending list
+      // Cập nhật danh sách local ở FE: Xóa tour khỏi pendingTours và thêm vào approvedTours
       setPendingTours((prev) => prev.filter((tour) => tour.id !== tourId));
+      if (updated) {
+        setApprovedTours((prev) => [...prev, updated]);
+      }
 
       setSuccess("Duyệt Tour thành công.");
 
@@ -355,6 +356,7 @@ export default function useOperationTours() {
 
     // Assignment
     assignments,
+    setAssignments, // Bổ sung setter để cập nhật trực tiếp state assignment trên FE
 
     // Loading
     loading,

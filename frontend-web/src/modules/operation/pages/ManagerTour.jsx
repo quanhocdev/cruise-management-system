@@ -54,7 +54,7 @@ function ManagerTour() {
   const [tourMode, setTourMode] = useState("pending");
 
   // =====================================================
-  // FILTER (THAY ĐỔI 1: ĐỔI STATE MONTH/YEAR THÀNH STARTDATE/ENDDATE)
+  // FILTER
   // =====================================================
 
   const [keyword, setKeyword] = useState("");
@@ -75,7 +75,6 @@ function ManagerTour() {
 
   const [showAreaModal, setShowAreaModal] = useState(false);
   const [areaTour, setAreaTour] = useState(null);
-  const [activeMode, setActiveMode] = useState("pending");
 
   // =====================================================
   // INITIAL LOAD
@@ -95,7 +94,7 @@ function ManagerTour() {
   }, [tourMode, pendingTours, approvedTours]);
 
   // =====================================================
-  // FILTER TOURS (THAY ĐỔI 2: CẬP NHẬT LOGIC LỌC THEO KHOẢNG NGÀY)
+  // FILTER TOURS
   // =====================================================
 
   const filteredTours = useMemo(() => {
@@ -129,20 +128,17 @@ function ManagerTour() {
         const tourStart = tour.startDate ? new Date(tour.startDate) : null;
         const tourEnd = tour.endDate ? new Date(tour.endDate) : null;
 
-        // Đổi thời gian về dạngYYYY-MM-DD để so sánh chuỗi chính xác
         const tourStartStr = tourStart
           ? tourStart.toISOString().split("T")[0]
           : "";
         const tourEndStr = tourEnd ? tourEnd.toISOString().split("T")[0] : "";
 
-        // Nếu người dùng chọn "Từ ngày"
         if (startDate) {
           if (tourEndStr && tourEndStr < startDate) return false;
           if (!tourEndStr && tourStartStr && tourStartStr < startDate)
             return false;
         }
 
-        // Nếu người dùng chọn "Đến ngày"
         if (endDate) {
           if (tourStartStr && tourStartStr > endDate) return false;
           if (!tourStartStr && tourEndStr && tourEndStr > endDate) return false;
@@ -163,7 +159,7 @@ function ManagerTour() {
   };
 
   // =====================================================
-  // CLEAR FILTER (THAY ĐỔI 3: CẬP NHẬT HÀM CLEAR FILTER)
+  // CLEAR FILTER
   // =====================================================
 
   const handleClearFilter = () => {
@@ -173,7 +169,7 @@ function ManagerTour() {
   };
 
   // =====================================================
-  // SELECT CRUISE
+  // SELECT CRUISE MODAL
   // =====================================================
 
   const handleSelectCruise = async (tour) => {
@@ -186,7 +182,7 @@ function ManagerTour() {
   };
 
   // =====================================================
-  // ASSIGN AREA
+  // ASSIGN AREA MODAL (MỞ MODAL PHÂN CÔNG KHU VỰC)
   // =====================================================
 
   const handleAssignArea = async (tour) => {
@@ -198,7 +194,7 @@ function ManagerTour() {
   };
 
   // =====================================================
-  // CLOSE AREA MODAL
+  // CLOSE AREA MODAL (ĐÓNG MODAL KHI ĐÃ PHÂN CÔNG XONG)
   // =====================================================
 
   const handleCloseAreaModal = () => {
@@ -223,14 +219,14 @@ function ManagerTour() {
   };
 
   // =====================================================
-  // ASSIGN CRUISE (GÁN DU THUYỀN MỚI TÁCH RA)
+  // ASSIGN CRUISE
   // =====================================================
+
   const handleAssignCruise = async (cruiseId) => {
     if (!selectedTour || !cruiseId) return;
 
     try {
       await assignCruise(selectedTour.id, cruiseId);
-      // Gán thành công, cập nhật cruiseId đang chọn
       setSelectedCruiseId(cruiseId);
     } catch (err) {
       console.error("ASSIGN CRUISE ERROR:", err);
@@ -238,38 +234,59 @@ function ManagerTour() {
   };
 
   // =====================================================
-  // APPROVE (DUYỆT TOUR - KHÔNG CẦN DUYỆT CÙNG LÚC GÁN NỮA)
+  // APPROVE TOUR TRỰC TIẾP TỪ BẢNG OUTSIDE (DUYỆT TOUR & ĐẨY KHU VỰC LÊN)
   // =====================================================
-  const handleApprove = async () => {
-    if (!selectedTour) return;
 
-    // Kiểm tra xem Tour đã có Cruise chưa (từ selectedTour hoặc selectedCruiseId)
-    const hasCruise = selectedTour.cruise || selectedCruiseId;
-
-    if (!hasCruise) {
-      window.alert("Vui lòng gán du thuyền cho Tour trước khi duyệt.");
-      return;
-    }
+  const handleApproveTour = async (tour) => {
+    if (!tour) return;
 
     const confirmed = window.confirm(
-      `Bạn có chắc chắn muốn duyệt Tour "${selectedTour.name}" không?`,
+      `Bạn có chắc chắn muốn duyệt Tour "${tour.name}" không?`,
     );
 
     if (!confirmed) return;
 
     try {
-      await approveTour(selectedTour.id); // Chỉ truyền tourId
+      // 1. Tải danh sách các khu vực đã phân công của tour này (nếu chưa có trong state)
+      let currentTourAssignments = assignments;
+      if (!assignments || assignments.length === 0) {
+        currentTourAssignments = await loadAssignments(tour.id);
+      }
 
-      setShowCruiseModal(false);
-      setSelectedTour(null);
-      setSelectedCruiseId(null);
+      // 2. Tạo payload gửi lên API Duyệt Tour bao gồm cả các khu vực đã gán
+      const payload = {
+        tourId: tour.id,
+        assignments: currentTourAssignments,
+      };
 
-      clearAvailableCruises();
+      await approveTour(tour.id, payload);
 
-      await loadPendingTours();
-      await loadApprovedTours();
+      // Refresh lại danh sách
+      await Promise.all([loadPendingTours(), loadApprovedTours()]);
     } catch (err) {
-      console.error("APPROVE TOUR FROM OPERATION ERROR:", err);
+      console.error("APPROVE TOUR ERROR:", err);
+    }
+  };
+
+  // =====================================================
+  // REJECT TOUR
+  // =====================================================
+
+  const handleRejectTour = async (tour) => {
+    if (!tour) return;
+
+    const confirmed = window.confirm(
+      `Bạn có chắc chắn muốn từ chối Tour "${tour.name}" không?`,
+    );
+
+    if (!confirmed) return;
+
+    try {
+      // Gọi API từ chối nếu có
+      console.log("Từ chối tour:", tour.id);
+      await loadPendingTours();
+    } catch (err) {
+      console.error("REJECT TOUR ERROR:", err);
     }
   };
 
@@ -364,7 +381,6 @@ function ManagerTour() {
           </button>
         </div>
 
-        {/* THAY ĐỔI 4: TRUYỀN PROPS CHÍNH XÁC CHO COMPONENT FILTER */}
         <div className="operation-tour-filter-container">
           <OperationTourFilter
             keyword={keyword}
@@ -408,6 +424,8 @@ function ManagerTour() {
           mode={tourMode}
           onSelectCruise={handleSelectCruise}
           onAssignArea={handleAssignArea}
+          onApprove={handleApproveTour}
+          onReject={handleRejectTour}
         />
       </div>
 
@@ -421,7 +439,6 @@ function ManagerTour() {
         selectedCruiseId={selectedCruiseId}
         onSelectCruise={handleSelectCruiseId}
         onAssignCruise={handleAssignCruise}
-        onApprove={handleApprove}
         onClose={handleCloseModal}
       />
 

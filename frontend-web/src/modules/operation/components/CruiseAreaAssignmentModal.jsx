@@ -12,7 +12,7 @@ import {
   Grid,
 } from "lucide-react";
 import AreaFilterToolbar from "./AreaFilterToolbar";
-import AreaDetailPreview from "./AreaDetailPreview"; // Import component preview
+import AreaDetailPreview from "./AreaDetailPreview";
 import "../styles/CruiseAreaAssignmentModal.css";
 
 function CruiseAreaAssignmentModal({
@@ -47,27 +47,22 @@ function CruiseAreaAssignmentModal({
     return [];
   }, [cruiseLayout]);
 
-  // LOAD VÀ RESET DATA KHI MỞ / ĐÓNG MODAL
+  // RESET STATE & LOAD DATA KHI MỞ/ĐÓNG MODAL HOẶC ĐỔI TOUR
   useEffect(() => {
-    if (!open || !tour?.id) return;
-    setSelectedAreaId(null);
-    setSelectedConfigType("ACTIVITY");
-    setSearchTerm("");
-    setSelectedDeckId("ALL");
-    setViewType("ALL");
-    onLoadLayout?.(tour.id);
-    onLoadAssignments?.(tour.id);
-  }, [open, tour?.id, onLoadLayout, onLoadAssignments]);
-
-  useEffect(() => {
-    if (!open) {
+    if (open && tour?.id) {
       setSelectedAreaId(null);
       setSelectedConfigType("ACTIVITY");
-      setSelectedDeckId("ALL");
       setSearchTerm("");
+      setSelectedDeckId("ALL");
       setViewType("ALL");
+
+      onLoadLayout?.(tour.id);
+      onLoadAssignments?.(tour.id);
+    } else if (!open) {
+      // Clear nhẹ state khi đóng modal
+      setSelectedAreaId(null);
     }
-  }, [open]);
+  }, [open, tour?.id, onLoadLayout, onLoadAssignments]);
 
   // MAP PHÂN CÔNG THEO ITEM ID
   const assignmentMap = useMemo(() => {
@@ -173,7 +168,7 @@ function CruiseAreaAssignmentModal({
     return list;
   }, [decks]);
 
-  // LẤY DỮ LIỆU CỦA ITEM ĐANG ĐƯỢC CHỌN (TRUYỀN VÀO PREVIEW COMPONENT)
+  // LẤY DỮ LIỆU CỦA ITEM ĐANG ĐƯỢC CHỌN
   const selectedItemObject = useMemo(() => {
     if (!selectedAreaId) return null;
     return allItemsWithDeckInfo.find(
@@ -234,20 +229,20 @@ function CruiseAreaAssignmentModal({
       setSelectedAreaId(null);
     } else {
       setSelectedAreaId(itemId);
-      // Đặt mặc định loại hình nếu chưa chọn
       if (!selectedConfigType) setSelectedConfigType("ACTIVITY");
     }
   };
 
   const handleAssign = async () => {
     if (!tour?.id || !selectedAreaId) return;
+
     try {
-      // Truyền kèm cả loại hình (PRODUCT / SERVICE / ACTIVITY) lên API
-      await onAssignArea?.(tour.id, selectedAreaId, selectedConfigType);
+      // Nếu cần truyền cả selectedConfigType lên API thì bổ sung tham số ở đây:
+      // await onAssignArea(tour.id, selectedAreaId, selectedConfigType);
+      await onAssignArea(tour.id, selectedAreaId);
       setSelectedAreaId(null);
-      await onLoadAssignments?.(tour.id);
     } catch (err) {
-      console.error("ASSIGN AREA ERROR:", err);
+      console.error("Lỗi phân công:", err);
     }
   };
 
@@ -382,7 +377,7 @@ function CruiseAreaAssignmentModal({
 
                   return (
                     <button
-                      key={dId}
+                      key={`deck-${dId}-${idx}`}
                       type="button"
                       className={`caam-deck-item ${isSelected ? "active" : ""}`}
                       onClick={() => setSelectedDeckId(dId)}
@@ -420,13 +415,13 @@ function CruiseAreaAssignmentModal({
               setViewType={setViewType}
             />
 
-            {/* KHU VỰC HIỂN THỊ CHÍNH (CHIA ĐÔI KHI CÓ ITEM ĐƯỢC CHỌN) */}
+            {/* KHU VỰC HIỂN THỊ CHÍNH */}
             <div
               className={`caam-split-workspace ${
                 selectedAreaId ? "has-preview" : ""
               }`}
             >
-              {/* CỘT TRÁI: GRID CÁC DÀN KHU VỰC / PHÒNG */}
+              {/* CỘT TRÁI: GRID CÁC KHU VỰC / PHÒNG */}
               <div className="caam-grid-container">
                 {layoutLoading ? (
                   <div className="caam-state-box">
@@ -450,9 +445,12 @@ function CruiseAreaAssignmentModal({
                       const isSelected = selectedAreaId === itemId;
                       const isRoom = item._type === "ROOM";
 
+                      // TẠO UNIQUE KEY TRÁNH LỖI DUPLICATE KEY CỦA REACT
+                      const uniqueKey = `item-${item._type}-${item._deckId}-${itemId || idx}`;
+
                       return (
                         <div
-                          key={itemId || idx}
+                          key={uniqueKey}
                           className={`caam-area-card ${
                             isAssigned ? "is-assigned" : ""
                           } ${isSelected ? "is-selected" : ""}`}
@@ -523,7 +521,7 @@ function CruiseAreaAssignmentModal({
                 )}
               </div>
 
-              {/* CỘT PHẢI: KHUNG ẢNH & LOẠI HÌNH CẤU HÌNH PREVIEW */}
+              {/* CỘT PHẢI: PREVIEW */}
               {selectedAreaId && (
                 <div className="caam-preview-sidebar">
                   <AreaDetailPreview
@@ -531,6 +529,7 @@ function CruiseAreaAssignmentModal({
                     selectedConfigType={selectedConfigType}
                     onChangeConfigType={setSelectedConfigType}
                     onSaveAssignment={handleAssign}
+                    loading={assignmentLoading}
                   />
                 </div>
               )}

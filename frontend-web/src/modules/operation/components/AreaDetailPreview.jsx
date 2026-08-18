@@ -1,97 +1,277 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
-  Image,
+  MapPin,
+  DoorClosed,
   Layers,
-  Package,
-  Bell,
-  Activity,
-  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  Check,
+  Loader2,
+  Tag,
+  Info,
+  ImageOff,
 } from "lucide-react";
 import "../styles/AreaDetailPreview.css";
+
+const BASE_URL = "http://localhost:8080";
 
 function AreaDetailPreview({
   area,
   selectedConfigType,
   onChangeConfigType,
-  onSaveAssignment, // Hàm gọi khi bấm nút Phân công ở cột phải
-  isSaving = false,
+  onSaveAssignment,
+  loading,
 }) {
-  if (!area) {
-    return (
-      <div className="area-preview-empty">
-        <Image size={40} className="icon-placeholder" />
-        <p>Vui lòng chọn một khu vực để xem chi tiết và phân công</p>
-      </div>
-    );
-  }
+  const [currentImageIdx, setCurrentImageIdx] = useState(0);
 
-  const { name, description, imageUrl, _deckName } = area;
+  useEffect(() => {
+    setCurrentImageIdx(0);
+    console.log("==> [LOG 1] Dữ liệu area truyền vào:", area);
+  }, [area]);
+
+  if (!area) return null;
+
+  const isRoom = area._type === "ROOM";
+
+  // 1. Hàm chuẩn hóa URL hình ảnh
+  const formatImageUrl = (img) => {
+    if (!img) return null;
+
+    let url = "";
+    if (typeof img === "string") url = img;
+    else if (typeof img === "object" && img.url) url = img.url;
+    else if (typeof img === "object" && img.path) url = img.path;
+
+    if (!url) return null;
+
+    // Giữ nguyên 100% nếu là link Cloudinary/HTTP/HTTPS
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+      return url;
+    }
+
+    const cleanPath = url.startsWith("/") ? url : `/${url}`;
+    return `${BASE_URL}${cleanPath}`;
+  };
+
+  // 2. Trích xuất toàn bộ ảnh (Khai báo TRƯỚC khi gọi)
+  const extractImages = () => {
+    const rawList =
+      area.images ||
+      area.imageUrl ||
+      area.imageList ||
+      area.photos ||
+      area.image ||
+      [];
+
+    const list = Array.isArray(rawList) ? rawList : [rawList];
+    const result = list.map(formatImageUrl).filter(Boolean);
+
+    console.log("==> [LOG 2] Mảng URL ảnh trích xuất thành công:", result);
+
+    return result;
+  };
+
+  // 3. Thực thi lấy danh sách ảnh sau khi hàm đã khai báo xong
+  const images = extractImages();
+
+  const handleNextImage = (e) => {
+    e.stopPropagation();
+    setCurrentImageIdx((prev) => (prev + 1) % images.length);
+  };
+
+  const handlePrevImage = (e) => {
+    e.stopPropagation();
+    setCurrentImageIdx((prev) => (prev - 1 + images.length) % images.length);
+  };
 
   const configOptions = [
-    { id: "PRODUCT", label: "Sản phẩm", icon: Package },
-    { id: "SERVICE", label: "Dịch vụ", icon: Bell },
-    { id: "ACTIVITY", label: "Hoạt động", icon: Activity },
+    {
+      type: "ACTIVITY",
+      label: "Hoạt động (Activity)",
+      desc: "Tổ chức sự kiện, vui chơi, hoạt động nhóm.",
+    },
+    {
+      type: "SERVICE",
+      label: "Dịch vụ (Service)",
+      desc: "Khu vực Spa, Nhà hàng, Quầy bar, Gym...",
+    },
+    {
+      type: "PRODUCT",
+      label: "Sản phẩm / Phòng (Product)",
+      desc: "Gán phòng nghỉ hoặc dịch vụ lưu trú cụ thể.",
+    },
   ];
 
   return (
-    <div className="area-preview-card">
-      {/* 1. KHUNG ẢNH KHU VỰC */}
-      <div className="area-preview-image-wrapper">
-        {imageUrl ? (
-          <img src={imageUrl} alt={name} className="area-preview-img" />
+    <div className="adp-container">
+      {/* HEADER */}
+      <div className="adp-header">
+        <div className="adp-type-badge">
+          {isRoom ? (
+            <>
+              <DoorClosed size={14} /> <span>Phòng nghỉ</span>
+            </>
+          ) : (
+            <>
+              <MapPin size={14} /> <span>Khu vực chung</span>
+            </>
+          )}
+        </div>
+        <h3 className="adp-title">
+          {area.name || area.roomNumber || "Chi tiết"}
+        </h3>
+        {area.code && <span className="adp-code">Mã: {area.code}</span>}
+      </div>
+
+      {/* KHU VỰC HIỂN THỊ ẢNH (CAROUSEL SLIDER) */}
+      <div className="adp-gallery">
+        {images.length > 0 ? (
+          <div className="adp-slider">
+            <img
+              src={images[currentImageIdx]}
+              alt={`${area.name || "Preview"} - ${currentImageIdx + 1}`}
+              className="adp-image"
+              onError={(e) => {
+                console.error(
+                  "==> [LOG 3] Lỗi tải ảnh từ URL:",
+                  images[currentImageIdx],
+                );
+                e.target.src = "https://placehold.co/600x400?text=Loi+Annh";
+              }}
+            />
+
+            {/* Đếm số lượng ảnh */}
+            <span className="adp-image-counter">
+              {currentImageIdx + 1} / {images.length}
+            </span>
+
+            {/* Nút chuyển ảnh nếu có từ 2 ảnh trở lên */}
+            {images.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  className="adp-nav-btn prev"
+                  onClick={handlePrevImage}
+                >
+                  <ChevronLeft size={18} />
+                </button>
+                <button
+                  type="button"
+                  className="adp-nav-btn next"
+                  onClick={handleNextImage}
+                >
+                  <ChevronRight size={18} />
+                </button>
+
+                {/* Dots indicator */}
+                <div className="adp-dots">
+                  {images.map((_, idx) => (
+                    <span
+                      key={idx}
+                      className={`dot ${idx === currentImageIdx ? "active" : ""}`}
+                      onClick={() => setCurrentImageIdx(idx)}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
         ) : (
-          <div className="area-preview-no-img">
-            <Image size={32} />
-            <span>Chưa có hình ảnh khu vực</span>
+          <div className="adp-no-image">
+            <ImageOff size={36} />
+            <span>Khu vực này chưa có hình ảnh</span>
           </div>
         )}
-        {_deckName && (
-          <span className="area-preview-deck-badge">
-            <Layers size={13} /> {_deckName}
+      </div>
+
+      {/* DANH SÁCH ẢNH NHỎ (THUMBNAILS) NẾU CÓ NHIỀU ẢNH */}
+      {images.length > 1 && (
+        <div className="adp-thumbnails">
+          {images.map((imgUrl, idx) => (
+            <div
+              key={idx}
+              className={`adp-thumb-item ${idx === currentImageIdx ? "active" : ""}`}
+              onClick={() => setCurrentImageIdx(idx)}
+            >
+              <img src={imgUrl} alt={`thumb-${idx}`} />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* THÔNG TIN CHI TIẾT */}
+      <div className="adp-info-section">
+        <div className="adp-info-row">
+          <span className="label">
+            <Layers size={14} /> Vị trí tầng:
           </span>
+          <span className="value">{area._deckName || "Chưa xác định"}</span>
+        </div>
+
+        {area.capacity && (
+          <div className="adp-info-row">
+            <span className="label">
+              <Info size={14} /> Sức chứa:
+            </span>
+            <span className="value">{area.capacity} người</span>
+          </div>
+        )}
+
+        {area.description && (
+          <div className="adp-description">
+            <p>{area.description}</p>
+          </div>
         )}
       </div>
 
-      {/* 2. THÔNG TIN KHU VỰC */}
-      <div className="area-preview-info">
-        <h3 className="area-preview-title">{name}</h3>
-        {description && <p className="area-preview-desc">{description}</p>}
-      </div>
+      {/* CHỌN CẤU HÌNH LOẠI HÌNH */}
+      <div className="adp-config-section">
+        <div className="adp-section-title">
+          <Tag size={15} />
+          <span>Chọn loại hình gán vào Tour</span>
+        </div>
 
-      {/* 3. THANH CHỌN LOẠI HÌNH & NÚT PHÂN CÔNG */}
-      <div className="area-preview-config">
-        <label className="config-label">
-          Phân công loại hình cho khu vực này:
-        </label>
-
-        <div className="segmented-control">
-          {configOptions.map((opt) => {
-            const IconComponent = opt.icon;
-            const isSelected = selectedConfigType === opt.id;
-
+        <div className="adp-config-options">
+          {configOptions.map((option) => {
+            const isChecked = selectedConfigType === option.type;
             return (
-              <button
-                key={opt.id}
-                type="button"
-                className={`segmented-item ${isSelected ? "active" : ""}`}
-                onClick={() => onChangeConfigType(opt.id)}
+              <div
+                key={option.type}
+                className={`adp-config-item ${isChecked ? "selected" : ""}`}
+                onClick={() => onChangeConfigType?.(option.type)}
               >
-                <IconComponent size={16} className="segmented-icon" />
-                <span>{opt.label}</span>
-              </button>
+                <div className="adp-radio">
+                  {isChecked && <div className="adp-radio-inner" />}
+                </div>
+                <div className="adp-config-content">
+                  <div className="adp-config-label">{option.label}</div>
+                  <div className="adp-config-desc">{option.desc}</div>
+                </div>
+              </div>
             );
           })}
         </div>
+      </div>
 
-        {/* NÚT PHÂN CÔNG NẰM NGAY DƯỚI 3 NÚT CHỌN */}
+      {/* HÀNH ĐỘNG HÀNG ĐẦU */}
+      <div className="adp-actions">
         <button
           type="button"
-          className="btn-assign-submit"
-          disabled={!selectedConfigType || isSaving}
+          className="adp-save-btn"
           onClick={onSaveAssignment}
+          disabled={loading}
         >
-          <CheckCircle size={16} />
-          <span>{isSaving ? "Đang lưu..." : "Phân công khu vực này"}</span>
+          {loading ? (
+            <>
+              <Loader2 size={18} className="adp-spinner" />
+              <span>Đang lưu...</span>
+            </>
+          ) : (
+            <>
+              <Check size={18} />
+              <span>Xác nhận phân công</span>
+            </>
+          )}
         </button>
       </div>
     </div>

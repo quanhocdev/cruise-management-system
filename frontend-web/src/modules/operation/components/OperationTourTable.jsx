@@ -140,6 +140,11 @@ function OperationTourTable({
                     className="operation-tour-assignment-button"
                     onClick={() => onAssignArea?.(tour)}
                     disabled={!hasCruise}
+                    title={
+                      !hasCruise
+                        ? "Vui lòng gán du thuyền trước khi phân công khu vực"
+                        : "Phân công khu vực"
+                    }
                   >
                     {hasCruise ? "Phân công khu vực" : "Chưa có du thuyền"}
                   </button>
@@ -154,7 +159,7 @@ function OperationTourTable({
                           type="button"
                           className="operation-tour-approve-button"
                           onClick={() => onApprove?.(tour)}
-                          disabled={!hasCruise} // Bắt buộc phải gán tàu mới cho Duyệt
+                          disabled={!hasCruise}
                           title={
                             !hasCruise
                               ? "Cần gán du thuyền trước khi duyệt Tour"
