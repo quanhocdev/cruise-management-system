@@ -9,7 +9,8 @@ public record OperationCruiseLayoutResponse(
 
         Integer deckNumber,
 
-        List<OperationCruiseAreaResponse> areas
+        List<OperationCruiseAreaResponse> areas,
+        List<OperationRoomResponse> rooms
 
 ) {
 }

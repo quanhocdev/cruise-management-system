@@ -2,13 +2,16 @@ package com.project.tour.service.tour.operation;
 
 import com.project.tour.dto.cruise.CruiseAvailabilityResponse;
 import com.project.tour.dto.tour.TourResponse;
-import com.project.tour.dto.tour.operation.OperationCruiseAreaResponse;
 import com.project.tour.dto.tour.operation.OperationCruiseLayoutResponse;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.tour.TourMapper;
+import com.project.tour.mapper.tour.operation.OperationCruiseMapper;
 import com.project.tour.model.Cruise;
+import com.project.tour.model.CruiseArea;
 import com.project.tour.model.CruiseDeck;
+import com.project.tour.model.Room;
 import com.project.tour.model.Tour;
+import com.project.tour.model.enums.RoomStatus;
 import com.project.tour.model.enums.cruise.CruiseAreaStatus;
 import com.project.tour.model.enums.cruise.CruiseDeckStatus;
 import com.project.tour.model.enums.cruise.CruiseStatus;
@@ -20,6 +23,7 @@ import com.project.tour.repository.tour.TourRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.project.tour.repository.room.RoomRepository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -32,63 +36,50 @@ public class OperationTourService {
         private final CruiseRepository cruiseRepository;
         private final CruiseDeckRepository cruiseDeckRepository;
         private final CruiseAreaRepository cruiseAreaRepository;
+        private final RoomRepository roomRepository;
 
         public OperationTourService(
                         TourRepository tourRepository,
                         CruiseRepository cruiseRepository,
                         CruiseDeckRepository cruiseDeckRepository,
-                        CruiseAreaRepository cruiseAreaRepository) {
-
+                        CruiseAreaRepository cruiseAreaRepository,
+                        RoomRepository roomRepository) {
                 this.tourRepository = tourRepository;
                 this.cruiseRepository = cruiseRepository;
                 this.cruiseDeckRepository = cruiseDeckRepository;
                 this.cruiseAreaRepository = cruiseAreaRepository;
+                this.roomRepository = roomRepository;
         }
 
         /**
-         * =====================================================
          * GET TOURS CHỜ DUYỆT
-         * =====================================================
          */
         @Transactional(readOnly = true)
         public List<TourResponse> getPendingTours() {
-
                 return tourRepository
-                                .findAllByStatusTripOrderByNameAsc(
-                                                TourStatusTrip.APPROVAL_PENDING)
+                                .findAllByStatusTripOrderByNameAsc(TourStatusTrip.APPROVAL_PENDING)
                                 .stream()
                                 .map(TourMapper::toResponse)
                                 .toList();
         }
 
         /**
-         * =====================================================
          * LẤY DANH SÁCH TẤT CẢ CRUISE KÈM TRẠNG THÁI KHẢ DỤNG CHO TOUR
-         * =====================================================
          */
         @Transactional(readOnly = true)
         public List<CruiseAvailabilityResponse> getAvailableCruises(UUID tourId) {
 
-                // 1. Kiểm tra Tour tồn tại & trạng thái
-                Tour tour = tourRepository
-                                .findById(tourId)
-                                .orElseThrow(() -> new AppException(
-                                                "Tour not found",
-                                                HttpStatus.NOT_FOUND));
+                Tour tour = tourRepository.findById(tourId)
+                                .orElseThrow(() -> new AppException("Tour not found", HttpStatus.NOT_FOUND));
 
                 if (tour.getStatusTrip() != TourStatusTrip.APPROVAL_PENDING) {
-                        throw new AppException(
-                                        "Tour is not waiting for approval",
-                                        HttpStatus.BAD_REQUEST);
+                        throw new AppException("Tour is not waiting for approval", HttpStatus.BAD_REQUEST);
                 }
 
-                // 2. Lấy tất cả du thuyền trong hệ thống
                 List<Cruise> allCruises = cruiseRepository.findAll();
 
-                // 3. Duyệt danh sách du thuyền và tính toán trạng thái khả dụng
                 return allCruises.stream().map(cruise -> {
 
-                        // Trường hợp 1: Tàu không ở trạng thái ACTIVE (VD: MAINTENANCE, INACTIVE)
                         if (cruise.getStatus() != CruiseStatus.ACTIVE) {
                                 return new CruiseAvailabilityResponse(
                                                 cruise.getId(),
@@ -100,13 +91,11 @@ public class OperationTourService {
                                                 List.of());
                         }
 
-                        // Trường hợp 2: Tàu ACTIVE -> Kiểm tra lịch trùng bằng hàm findConflictingTours
                         List<Tour> conflictingTours = findConflictingTours(
                                         cruise.getId(),
                                         tour.getStartDate(),
                                         tour.getEndDate());
 
-                        // Loại trừ chính Tour này khỏi danh sách trùng (nếu có)
                         List<CruiseAvailabilityResponse.ConflictingTourInfo> conflictInfos = conflictingTours.stream()
                                         .filter(t -> !t.getId().equals(tourId))
                                         .map(t -> new CruiseAvailabilityResponse.ConflictingTourInfo(
@@ -135,36 +124,20 @@ public class OperationTourService {
         }
 
         /**
-         * =====================================================
          * KIỂM TRA CRUISE CÓ BỊ TRÙNG LỊCH KHÔNG
-         * =====================================================
          */
-        private List<Tour> findConflictingTours(
-                        UUID cruiseId,
-                        LocalDate startDate,
-                        LocalDate endDate) {
-
+        private List<Tour> findConflictingTours(UUID cruiseId, LocalDate startDate, LocalDate endDate) {
                 return tourRepository.findConflictingTours(
                                 cruiseId,
-                                List.of(
-                                                TourStatusTrip.APPROVED,
-                                                TourStatusTrip.IN_PROGRESS),
+                                List.of(TourStatusTrip.APPROVED, TourStatusTrip.IN_PROGRESS),
                                 startDate,
                                 endDate);
         }
 
         /**
-         * =====================================================
-         * APPROVE TOUR
-         * =====================================================
-         */
-        /**
-         * =====================================================
-         * 2. DUYỆT TOUR (Chỉ duyệt sau khi đã gán du thuyền)
-         * =====================================================
+         * DUYỆT TOUR (Sau khi đã gán du thuyền)
          */
         public TourResponse approveTour(UUID tourId) {
-                // 1. Kiểm tra Tour tồn tại & trạng thái PENDING
                 Tour tour = tourRepository.findById(tourId)
                                 .orElseThrow(() -> new AppException("Tour not found", HttpStatus.NOT_FOUND));
 
@@ -172,14 +145,11 @@ public class OperationTourService {
                         throw new AppException("Tour is not waiting for approval", HttpStatus.BAD_REQUEST);
                 }
 
-                // 2. Bắt buộc Tour phải được gán Du thuyền trước khi duyệt
                 if (tour.getCruise() == null) {
-                        throw new AppException(
-                                        "Please assign a cruise to this tour before approving",
+                        throw new AppException("Please assign a cruise to this tour before approving",
                                         HttpStatus.BAD_REQUEST);
                 }
 
-                // 3. Chuyển trạng thái sang APPROVED
                 tour.setStatusTrip(TourStatusTrip.APPROVED);
                 Tour savedTour = tourRepository.save(tour);
 
@@ -187,12 +157,9 @@ public class OperationTourService {
         }
 
         /**
-         * =====================================================
-         * 1. GÁN DU THUYỀN CHO TOUR (Vẫn giữ trạng thái PENDING)
-         * =====================================================
+         * GÁN DU THUYỀN CHO TOUR (Vẫn giữ PENDING)
          */
         public TourResponse assignCruise(UUID tourId, UUID cruiseId) {
-                // 1. Kiểm tra Tour tồn tại & trạng thái
                 Tour tour = tourRepository.findById(tourId)
                                 .orElseThrow(() -> new AppException("Tour not found", HttpStatus.NOT_FOUND));
 
@@ -200,7 +167,6 @@ public class OperationTourService {
                         throw new AppException("Tour is not waiting for approval", HttpStatus.BAD_REQUEST);
                 }
 
-                // 2. Kiểm tra Cruise tồn tại & trạng thái ACTIVE
                 Cruise cruise = cruiseRepository.findById(cruiseId)
                                 .orElseThrow(() -> new AppException("Cruise not found", HttpStatus.NOT_FOUND));
 
@@ -208,13 +174,11 @@ public class OperationTourService {
                         throw new AppException("Cruise is not active", HttpStatus.BAD_REQUEST);
                 }
 
-                // 3. Kiểm tra lịch trùng với các Tour đã duyệt/đang chạy khác
                 List<Tour> conflictingTours = findConflictingTours(
                                 cruiseId,
                                 tour.getStartDate(),
                                 tour.getEndDate());
 
-                // Loại trừ chính Tour này nếu trước đó đã được gán cùng Cruise
                 boolean hasConflict = conflictingTours.stream()
                                 .anyMatch(t -> !t.getId().equals(tourId));
 
@@ -224,7 +188,6 @@ public class OperationTourService {
                                         HttpStatus.CONFLICT);
                 }
 
-                // 4. Gán Cruise vào Tour (Giữ nguyên trạng thái APPROVAL_PENDING)
                 tour.setCruise(cruise);
                 Tour savedTour = tourRepository.save(tour);
 
@@ -232,63 +195,50 @@ public class OperationTourService {
         }
 
         /**
-         * =====================================================
          * GET TOURS ĐÃ ĐƯỢC DUYỆT
-         * =====================================================
          */
         @Transactional(readOnly = true)
         public List<TourResponse> getApprovedTours() {
-
                 return tourRepository
-                                .findAllByStatusTripOrderByNameAsc(
-                                                TourStatusTrip.APPROVED)
+                                .findAllByStatusTripOrderByNameAsc(TourStatusTrip.APPROVED)
                                 .stream()
                                 .map(TourMapper::toResponse)
                                 .toList();
         }
 
+        /**
+         * LẤY LAYOUT DU THUYỀN DÀNH CHO OPERATOR
+         */
         @Transactional(readOnly = true)
-        public List<OperationCruiseLayoutResponse> getCruiseLayout(
-                        UUID tourId) {
+        public List<OperationCruiseLayoutResponse> getCruiseLayout(UUID tourId) {
 
                 Tour tour = tourRepository.findById(tourId)
-                                .orElseThrow(() -> new AppException(
-                                                "Tour not found",
-                                                HttpStatus.NOT_FOUND));
+                                .orElseThrow(() -> new AppException("Tour not found", HttpStatus.NOT_FOUND));
 
-                // Tour chưa được gán Cruise
                 if (tour.getCruise() == null) {
-                        throw new AppException(
-                                        "Tour has no cruise assigned",
-                                        HttpStatus.BAD_REQUEST);
+                        throw new AppException("Tour has no cruise assigned", HttpStatus.BAD_REQUEST);
                 }
 
                 UUID cruiseId = tour.getCruise().getId();
 
                 List<CruiseDeck> decks = cruiseDeckRepository
-                                .findAllByCruise_IdAndStatusOrderByDeckNumberAsc(
-                                                cruiseId,
-                                                CruiseDeckStatus.ACTIVE);
+                                .findAllByCruise_IdAndStatusOrderByDeckNumberAsc(cruiseId, CruiseDeckStatus.ACTIVE);
 
                 return decks.stream()
                                 .map(deck -> {
+                                        // 1. Lấy danh sách CruiseArea active
+                                        List<CruiseArea> areas = cruiseAreaRepository
+                                                        .findAllByCruiseDeck_IdAndStatusOrderByNameAsc(deck.getId(),
+                                                                        CruiseAreaStatus.ACTIVE);
 
-                                        List<OperationCruiseAreaResponse> areas = cruiseAreaRepository
-                                                        .findAllByCruiseDeck_IdAndStatusOrderByNameAsc(
-                                                                        deck.getId(),
-                                                                        CruiseAreaStatus.ACTIVE)
-                                                        .stream()
-                                                        .map(area -> new OperationCruiseAreaResponse(
-                                                                        area.getId(),
-                                                                        area.getName(),
-                                                                        area.getDescription(),
-                                                                        area.getStatus()))
-                                                        .toList();
+                                        // 2. Query thêm danh sách Room thuộc deck này
+                                        List<Room> rooms = roomRepository
+                                                        .findAllByCruiseDeck_IdAndStatusOrderByCodeAsc(deck.getId(),
+                                                                        RoomStatus.ACTIVE); // Thay đổi tên hàm theo
+                                                                                            // Repository của bạn
 
-                                        return new OperationCruiseLayoutResponse(
-                                                        deck.getId(),
-                                                        deck.getDeckNumber(),
-                                                        areas);
+                                        // 3. Truyền đủ 3 tham số vào mapper
+                                        return OperationCruiseMapper.toLayoutResponse(deck, areas, rooms);
                                 })
                                 .toList();
         }
