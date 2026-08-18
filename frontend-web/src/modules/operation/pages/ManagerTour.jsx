@@ -194,7 +194,7 @@ function ManagerTour() {
   };
 
   // =====================================================
-  // CLOSE AREA MODAL (ĐÓNG MODAL KHI ĐÃ PHÂN CÔNG XONG)
+  // CLOSE AREA MODAL
   // =====================================================
 
   const handleCloseAreaModal = () => {
@@ -234,7 +234,7 @@ function ManagerTour() {
   };
 
   // =====================================================
-  // APPROVE TOUR TRỰC TIẾP TỪ BẢNG OUTSIDE (DUYỆT TOUR & ĐẨY KHU VỰC LÊN)
+  // APPROVE TOUR
   // =====================================================
 
   const handleApproveTour = async (tour) => {
@@ -247,13 +247,11 @@ function ManagerTour() {
     if (!confirmed) return;
 
     try {
-      // 1. Tải danh sách các khu vực đã phân công của tour này (nếu chưa có trong state)
       let currentTourAssignments = assignments;
       if (!assignments || assignments.length === 0) {
         currentTourAssignments = await loadAssignments(tour.id);
       }
 
-      // 2. Tạo payload gửi lên API Duyệt Tour bao gồm cả các khu vực đã gán
       const payload = {
         tourId: tour.id,
         assignments: currentTourAssignments,
@@ -261,7 +259,6 @@ function ManagerTour() {
 
       await approveTour(tour.id, payload);
 
-      // Refresh lại danh sách
       await Promise.all([loadPendingTours(), loadApprovedTours()]);
     } catch (err) {
       console.error("APPROVE TOUR ERROR:", err);
@@ -282,7 +279,6 @@ function ManagerTour() {
     if (!confirmed) return;
 
     try {
-      // Gọi API từ chối nếu có
       console.log("Từ chối tour:", tour.id);
       await loadPendingTours();
     } catch (err) {

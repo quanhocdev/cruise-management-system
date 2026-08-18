@@ -17,7 +17,7 @@
   background: #ffffff;
   border-radius: 12px;
   width: 100%;
-  max-width: 960px;
+  max-width: 1080px; /* Mở rộng một chút để chứa vừa Split Workspace */
   max-height: 90vh;
   display: flex;
   flex-direction: column;
@@ -99,6 +99,7 @@
 
 .caam-tour-info .value {
   color: #1f2937;
+  font-weight: 600;
 }
 
 /* --- BODY & SIDEBAR --- */
@@ -106,11 +107,12 @@
   display: flex;
   flex: 1;
   overflow: hidden;
-  min-height: 400px;
+  min-height: 420px;
 }
 
 .caam-sidebar {
-  width: 260px;
+  width: 250px;
+  flex-shrink: 0;
   border-right: 1px solid #e5e7eb;
   background: #fafafa;
   display: flex;
@@ -164,6 +166,7 @@
   align-items: center;
   gap: 8px;
   font-weight: 500;
+  font-size: 0.875rem;
 }
 
 .caam-deck-badges {
@@ -187,7 +190,7 @@
   font-weight: 500;
 }
 
-/* --- MAIN CONTENT & GRID --- */
+/* --- MAIN CONTENT & WORKSPACE --- */
 .caam-main-content {
   flex: 1;
   display: flex;
@@ -196,55 +199,12 @@
   background: #ffffff;
 }
 
-.caam-toolbar {
-  padding: 12px 20px;
-  border-bottom: 1px solid #e5e7eb;
+.caam-split-workspace {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-}
-
-.caam-search-box {
-  position: relative;
-  display: flex;
-  align-items: center;
+  gap: 0;
   flex: 1;
-  max-width: 320px;
-}
-
-.caam-search-box svg {
-  position: absolute;
-  left: 10px;
-  color: #9ca3af;
-}
-
-.caam-search-box input {
-  width: 100%;
-  padding: 8px 32px 8px 32px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  outline: none;
-}
-
-.caam-search-box input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
-}
-
-.clear-search {
-  position: absolute;
-  right: 8px;
-  background: none;
-  border: none;
-  color: #9ca3af;
-  cursor: pointer;
-}
-
-.caam-deck-title-current {
-  font-weight: 600;
-  color: #111827;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .caam-grid-container {
@@ -255,112 +215,113 @@
 
 .caam-area-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 16px;
 }
 
-/* --- AREA CARD --- */
-.caam-area-card {
+/* --- CARD ITEM (AREA & ROOM) --- */
+.caam-card {
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 14px;
   background: #ffffff;
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  transition: all 0.15s ease-in-out;
+  justify-content: space-between;
+  gap: 12px;
+  position: relative;
+  transition: all 0.2s ease-in-out;
 }
 
-.caam-area-card:hover {
+.caam-card:hover {
   border-color: #93c5fd;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
 }
 
-.caam-area-card.is-selected {
+.caam-card.selected {
   border-color: #2563eb;
-  background: #f0fdf4;
+  background: #f0f7ff;
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
 
-.caam-area-card.is-assigned {
+.caam-card.assigned {
   background: #f8fafc;
   border-color: #cbd5e1;
-  cursor: not-allowed;
-  opacity: 0.85;
 }
 
 .caam-card-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-}
-
-.caam-area-identity {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.icon-pin {
-  color: #2563eb;
-  flex-shrink: 0;
-}
-
-.caam-area-title {
-  font-size: 0.95rem;
-  color: #1f2937;
-}
-
-.caam-area-code {
-  font-size: 0.75rem;
-  background: #f3f4f6;
-  color: #4b5563;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.caam-card-rooms {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.8rem;
-  color: #4b5563;
-}
-
-.caam-card-footer {
-  margin-top: auto;
-  padding-top: 8px;
-  border-top: 1px dashed #f1f5f9;
-}
-
-.caam-assigned-row {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
 }
 
-.tag-assigned {
+.caam-card-type {
   display: flex;
   align-items: center;
   gap: 4px;
   font-size: 0.75rem;
-  color: #166534;
-  font-weight: 500;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
 }
 
-.tag-select {
-  font-size: 0.75rem;
+.caam-card-type.type-area {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.caam-card-type.type-room {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.caam-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.caam-card-body h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.caam-card-body .deck-info {
+  margin: 0;
+  font-size: 0.8rem;
   color: #6b7280;
-  padding: 4px 8px;
-  border-radius: 4px;
-  background: #f3f4f6;
-  display: inline-block;
 }
 
-.tag-select.active {
-  background: #2563eb;
-  color: #ffffff;
+.room-status-badge {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  width: fit-content;
+}
+
+.room-status-badge.available {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.caam-card-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: #15803d;
+  font-weight: 600;
+  background: #f0fdf4;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #bbf7d0;
+  width: fit-content;
 }
 
 .caam-delete-btn {
@@ -370,10 +331,35 @@
   cursor: pointer;
   padding: 4px;
   border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
 }
 
 .caam-delete-btn:hover {
   background: #fee2e2;
+}
+
+/* --- PREVIEW SIDEBAR --- */
+.caam-preview-sidebar {
+  width: 320px;
+  flex-shrink: 0;
+  border-left: 1px solid #e5e7eb;
+  background: #fafafa;
+  overflow-y: auto;
+  animation: slideInRight 0.2s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* --- STATES & FOOTER --- */
@@ -422,7 +408,7 @@
 }
 
 .info-selected {
-  color: #166534;
+  color: #15803d;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -460,25 +446,13 @@
   background: #f9fafb;
 }
 
-.caam-btn-submit {
-  background: #2563eb;
-  color: #ffffff;
-}
-
-.caam-btn-submit:hover:not(:disabled) {
-  background: #1d4ed8;
-}
-
 .caam-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-/* ==========================================
-   RESPONSIVE MEDIA QUERIES
-   ========================================== */
+/* --- RESPONSIVE MEDIA QUERIES --- */
 
-/* 1. Màn hình Laptop nhỏ & Tablet ngang (dưới 1024px) */
 @media (max-width: 1024px) {
   .caam-container {
     max-width: 95vw;
@@ -486,16 +460,21 @@
   }
 
   .caam-sidebar {
-    width: 220px; /* Thu hẹp sidebar một chút */
+    width: 220px;
   }
 
-  .caam-area-grid {
-    /* 2 cột card thay vì tự động dàn nhiều cột */
-    grid-template-columns: repeat(2, 1fr);
+  .caam-split-workspace.has-preview {
+    flex-direction: column;
+  }
+
+  .caam-preview-sidebar {
+    width: 100%;
+    max-height: 280px;
+    border-left: none;
+    border-top: 1px solid #e5e7eb;
   }
 }
 
-/* 2. Tablet dọc (dưới 768px) - Chuyển Sidebar lên thành thanh Nav cuộn ngang */
 @media (max-width: 768px) {
   .caam-overlay {
     padding: 10px;
@@ -507,12 +486,10 @@
     border-radius: 8px;
   }
 
-  /* Chuyển bố cục Body sang chiều dọc */
   .caam-body {
     flex-direction: column;
   }
 
-  /* Chuyển Sidebar thành thanh chọn tầng nằm ngang */
   .caam-sidebar {
     width: 100%;
     border-right: none;
@@ -521,12 +498,12 @@
   }
 
   .caam-sidebar-header {
-    display: none; /* Ẩn bớt tiêu đề sidebar trên mobile để tiết kiệm diện tích */
+    display: none;
   }
 
   .caam-deck-nav {
     flex-direction: row;
-    overflow-x: auto; /* Cuộn ngang danh sách tầng */
+    overflow-x: auto;
     padding: 8px 12px;
     gap: 8px;
     white-space: nowrap;
@@ -540,28 +517,6 @@
     border: 1px solid #e2e8f0;
   }
 
-  .caam-deck-item.active {
-    background: #eff6ff;
-  }
-
-  .caam-deck-badges {
-    flex-direction: row;
-    align-items: center;
-    gap: 6px;
-  }
-
-  /* Tối ưu Toolbar */
-  .caam-toolbar {
-    padding: 10px 16px;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-  }
-
-  .caam-search-box {
-    max-width: 100%;
-  }
-
   .caam-area-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
@@ -572,14 +527,9 @@
   }
 }
 
-/* 3. Mobile màn hình nhỏ (dưới 480px) */
 @media (max-width: 480px) {
   .caam-header {
     padding: 12px 16px;
-  }
-
-  .caam-header-title h2 {
-    font-size: 1.05rem;
   }
 
   .caam-tour-bar {
@@ -588,7 +538,6 @@
     gap: 4px;
   }
 
-  /* Grid hiển thị 1 cột duy nhất trên mobile */
   .caam-area-grid {
     grid-template-columns: 1fr;
   }
@@ -602,63 +551,10 @@
 
   .caam-footer-info {
     text-align: center;
-    font-size: 0.8rem;
-  }
-
-  .caam-footer-buttons {
-    display: flex;
-    gap: 8px;
   }
 
   .caam-btn {
-    flex: 1; /* Hai nút Cancel / Submit chia đều 50% màn hình */
+    flex: 1;
     justify-content: center;
-    padding: 10px 12px;
-  }
-}
-/* WORKSPACE CHIA CỘT FLEXBOX */
-.caam-split-workspace {
-  display: flex;
-  gap: 16px;
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
-
-/* Cột danh sách khu vực */
-.caam-split-workspace .caam-grid-container {
-  flex: 1;
-  overflow-y: auto;
-  transition: all 0.3s ease;
-}
-
-/* Cột Preview bên phải khi chọn khu vực */
-.caam-preview-sidebar {
-  width: 340px;
-  flex-shrink: 0;
-  overflow-y: auto;
-  animation: slideInRight 0.25s ease-out;
-}
-
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-/* Responsive cho màn hình nhỏ */
-@media (max-width: 1024px) {
-  .caam-split-workspace.has-preview {
-    flex-direction: column;
-  }
-
-  .caam-preview-sidebar {
-    width: 100%;
-    max-height: 300px;
   }
 }

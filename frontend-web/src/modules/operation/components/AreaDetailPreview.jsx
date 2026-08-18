@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   MapPin,
   DoorClosed,
@@ -10,6 +10,8 @@ import {
   Tag,
   Info,
   ImageOff,
+  UserCheck,
+  Bookmark,
 } from "lucide-react";
 import "../styles/AreaDetailPreview.css";
 
@@ -24,17 +26,15 @@ function AreaDetailPreview({
 }) {
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
 
+  // Reset index ảnh khi thay đổi area
   useEffect(() => {
     setCurrentImageIdx(0);
-    console.log("==> [LOG 1] Dữ liệu area truyền vào:", area);
   }, [area]);
 
-  if (!area) return null;
-
-  const isRoom = area._type === "ROOM";
+  const isRoom = area?._type === "ROOM";
 
   // 1. Hàm chuẩn hóa URL hình ảnh
-  const formatImageUrl = (img) => {
+  const formatImageUrl = useCallback((img) => {
     if (!img) return null;
 
     let url = "";
@@ -44,17 +44,23 @@ function AreaDetailPreview({
 
     if (!url) return null;
 
-    // Giữ nguyên 100% nếu là link Cloudinary/HTTP/HTTPS
-    if (url.startsWith("http://") || url.startsWith("https://")) {
+    if (
+      url.startsWith("http://") ||
+      url.startsWith("https://") ||
+      url.startsWith("data:") ||
+      url.startsWith("blob:")
+    ) {
       return url;
     }
 
     const cleanPath = url.startsWith("/") ? url : `/${url}`;
     return `${BASE_URL}${cleanPath}`;
-  };
+  }, []);
 
-  // 2. Trích xuất toàn bộ ảnh (Khai báo TRƯỚC khi gọi)
-  const extractImages = () => {
+  // 2. Trích xuất toàn bộ ảnh
+  const images = useMemo(() => {
+    if (!area) return [];
+
     const rawList =
       area.images ||
       area.imageUrl ||
@@ -64,25 +70,22 @@ function AreaDetailPreview({
       [];
 
     const list = Array.isArray(rawList) ? rawList : [rawList];
-    const result = list.map(formatImageUrl).filter(Boolean);
-
-    console.log("==> [LOG 2] Mảng URL ảnh trích xuất thành công:", result);
-
-    return result;
-  };
-
-  // 3. Thực thi lấy danh sách ảnh sau khi hàm đã khai báo xong
-  const images = extractImages();
+    return list.map(formatImageUrl).filter(Boolean);
+  }, [area, formatImageUrl]);
 
   const handleNextImage = (e) => {
     e.stopPropagation();
+    if (images.length === 0) return;
     setCurrentImageIdx((prev) => (prev + 1) % images.length);
   };
 
   const handlePrevImage = (e) => {
     e.stopPropagation();
+    if (images.length === 0) return;
     setCurrentImageIdx((prev) => (prev - 1 + images.length) % images.length);
   };
+
+  if (!area) return null;
 
   const configOptions = [
     {
@@ -101,6 +104,8 @@ function AreaDetailPreview({
       desc: "Gán phòng nghỉ hoặc dịch vụ lưu trú cụ thể.",
     },
   ];
+
+  const currentImgUrl = images[currentImageIdx] || images[0];
 
   return (
     <div className="adp-container">
@@ -128,24 +133,18 @@ function AreaDetailPreview({
         {images.length > 0 ? (
           <div className="adp-slider">
             <img
-              src={images[currentImageIdx]}
+              src={currentImgUrl}
               alt={`${area.name || "Preview"} - ${currentImageIdx + 1}`}
               className="adp-image"
               onError={(e) => {
-                console.error(
-                  "==> [LOG 3] Lỗi tải ảnh từ URL:",
-                  images[currentImageIdx],
-                );
-                e.target.src = "https://placehold.co/600x400?text=Loi+Annh";
+                e.target.src = "https://placehold.co/600x400?text=Loi+Anh";
               }}
             />
 
-            {/* Đếm số lượng ảnh */}
             <span className="adp-image-counter">
               {currentImageIdx + 1} / {images.length}
             </span>
 
-            {/* Nút chuyển ảnh nếu có từ 2 ảnh trở lên */}
             {images.length > 1 && (
               <>
                 <button
@@ -163,12 +162,13 @@ function AreaDetailPreview({
                   <ChevronRight size={18} />
                 </button>
 
-                {/* Dots indicator */}
                 <div className="adp-dots">
                   {images.map((_, idx) => (
                     <span
                       key={idx}
-                      className={`dot ${idx === currentImageIdx ? "active" : ""}`}
+                      className={`dot ${
+                        idx === currentImageIdx ? "active" : ""
+                      }`}
                       onClick={() => setCurrentImageIdx(idx)}
                     />
                   ))}
@@ -179,18 +179,20 @@ function AreaDetailPreview({
         ) : (
           <div className="adp-no-image">
             <ImageOff size={36} />
-            <span>Khu vực này chưa có hình ảnh</span>
+            <span>Chưa có hình ảnh</span>
           </div>
         )}
       </div>
 
-      {/* DANH SÁCH ẢNH NHỎ (THUMBNAILS) NẾU CÓ NHIỀU ẢNH */}
+      {/* DANH SÁCH ẢNH NHỎ (THUMBNAILS) */}
       {images.length > 1 && (
         <div className="adp-thumbnails">
           {images.map((imgUrl, idx) => (
             <div
               key={idx}
-              className={`adp-thumb-item ${idx === currentImageIdx ? "active" : ""}`}
+              className={`adp-thumb-item ${
+                idx === currentImageIdx ? "active" : ""
+              }`}
               onClick={() => setCurrentImageIdx(idx)}
             >
               <img src={imgUrl} alt={`thumb-${idx}`} />
@@ -199,7 +201,7 @@ function AreaDetailPreview({
         </div>
       )}
 
-      {/* THÔNG TIN CHI TIẾT */}
+      {/* THÔNG TIN CHI TIẾT CHUNG */}
       <div className="adp-info-section">
         <div className="adp-info-row">
           <span className="label">
@@ -224,56 +226,87 @@ function AreaDetailPreview({
         )}
       </div>
 
-      {/* CHỌN CẤU HÌNH LOẠI HÌNH */}
-      <div className="adp-config-section">
-        <div className="adp-section-title">
-          <Tag size={15} />
-          <span>Chọn loại hình gán vào Tour</span>
-        </div>
+      {/* PHÂN NHÁNH GIAO DIỆN KHU VỰC VS PHÒNG */}
+      {isRoom ? (
+        /* --- GIAO DIỆN DÀNH CHUYÊN CHO PHÒNG NGHỈ (TĨNH) --- */
+        <div className="adp-room-status-section">
+          <div className="adp-section-title">
+            <Bookmark size={15} />
+            <span>Trạng thái đặt phòng (Booking)</span>
+          </div>
 
-        <div className="adp-config-options">
-          {configOptions.map((option) => {
-            const isChecked = selectedConfigType === option.type;
-            return (
-              <div
-                key={option.type}
-                className={`adp-config-item ${isChecked ? "selected" : ""}`}
-                onClick={() => onChangeConfigType?.(option.type)}
-              >
-                <div className="adp-radio">
-                  {isChecked && <div className="adp-radio-inner" />}
-                </div>
-                <div className="adp-config-content">
-                  <div className="adp-config-label">{option.label}</div>
-                  <div className="adp-config-desc">{option.desc}</div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+          <div className="adp-status-box occupied">
+            <div className="adp-info-row">
+              <span className="label">Trạng thái:</span>
+              <span className="status-badge occupied-badge">Đã đặt phòng</span>
+            </div>
 
-      {/* HÀNH ĐỘNG HÀNG ĐẦU */}
-      <div className="adp-actions">
-        <button
-          type="button"
-          className="adp-save-btn"
-          onClick={onSaveAssignment}
-          disabled={loading}
-        >
-          {loading ? (
-            <>
-              <Loader2 size={18} className="adp-spinner" />
-              <span>Đang lưu...</span>
-            </>
-          ) : (
-            <>
-              <Check size={18} />
-              <span>Xác nhận phân công</span>
-            </>
-          )}
-        </button>
-      </div>
+            <div className="adp-info-row">
+              <span className="label">Mã Booking ID:</span>
+              <span className="value code-highlight">BK-2026-8892</span>
+            </div>
+
+            <div className="adp-info-row">
+              <span className="label">
+                <UserCheck size={14} /> Người ở hiện tại:
+              </span>
+              <span className="value">Nguyễn Văn A (Khách đoàn)</span>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* --- GIAO DIỆN DÀNH CHO KHU VỰC CHUNG (CÓ CẤU HÌNH & LƯU) --- */
+        <>
+          <div className="adp-config-section">
+            <div className="adp-section-title">
+              <Tag size={15} />
+              <span>Chọn loại hình gán vào Tour</span>
+            </div>
+
+            <div className="adp-config-options">
+              {configOptions.map((option) => {
+                const isChecked = selectedConfigType === option.type;
+                return (
+                  <div
+                    key={option.type}
+                    className={`adp-config-item ${isChecked ? "selected" : ""}`}
+                    onClick={() => onChangeConfigType?.(option.type)}
+                  >
+                    <div className="adp-radio">
+                      {isChecked && <div className="adp-radio-inner" />}
+                    </div>
+                    <div className="adp-config-content">
+                      <div className="adp-config-label">{option.label}</div>
+                      <div className="adp-config-desc">{option.desc}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="adp-actions">
+            <button
+              type="button"
+              className="adp-save-btn"
+              onClick={onSaveAssignment}
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 size={18} className="adp-spinner" />
+                  <span>Đang lưu...</span>
+                </>
+              ) : (
+                <>
+                  <Check size={18} />
+                  <span>Xác nhận phân công</span>
+                </>
+              )}
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }

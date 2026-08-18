@@ -3,62 +3,49 @@ import operationTourService from "../services/operationTourService";
 
 export default function useOperationTours() {
   // =====================================================
-  // TOURS
+  // TOURS & CRUISE STATES
   // =====================================================
-
   const [pendingTours, setPendingTours] = useState([]);
   const [approvedTours, setApprovedTours] = useState([]);
-
-  // =====================================================
-  // CRUISE
-  // =====================================================
-
   const [availableCruises, setAvailableCruises] = useState([]);
   const [cruiseLayout, setCruiseLayout] = useState([]);
 
   // =====================================================
-  // ASSIGNMENT
+  // ASSIGNMENTS (Bảng ActivityCruiseTour)
   // =====================================================
-
   const [assignments, setAssignments] = useState([]);
-  const [assigning, setAssigning] = useState(false);
 
   // =====================================================
-  // LOADING
+  // LOADING STATES
   // =====================================================
-
   const [loading, setLoading] = useState(false);
   const [cruiseLoading, setCruiseLoading] = useState(false);
   const [layoutLoading, setLayoutLoading] = useState(false);
   const [assignmentLoading, setAssignmentLoading] = useState(false);
+  const [assigning, setAssigning] = useState(false);
   const [approving, setApproving] = useState(false);
 
   // =====================================================
-  // MESSAGE
+  // MESSAGES
   // =====================================================
-
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
   // =====================================================
-  // LOAD PENDING TOURS
+  // TOURS API
   // =====================================================
-
   const loadPendingTours = useCallback(async () => {
     setLoading(true);
     setError("");
 
     try {
       const data = await operationTourService.getPendingTours();
-
       const tourList = Array.isArray(data)
         ? data
         : data?.content || data?.data || [];
-
       setPendingTours(tourList);
     } catch (err) {
       console.error("LOAD OPERATION PENDING TOURS ERROR:", err);
-
       setError(
         err.response?.data?.message ||
           "Không thể tải danh sách Tour chờ duyệt.",
@@ -68,25 +55,18 @@ export default function useOperationTours() {
     }
   }, []);
 
-  // =====================================================
-  // LOAD APPROVED TOURS
-  // =====================================================
-
   const loadApprovedTours = useCallback(async () => {
     setLoading(true);
     setError("");
 
     try {
       const data = await operationTourService.getApprovedTours();
-
       const tourList = Array.isArray(data)
         ? data
         : data?.content || data?.data || [];
-
       setApprovedTours(tourList);
     } catch (err) {
       console.error("LOAD OPERATION APPROVED TOURS ERROR:", err);
-
       setError(
         err.response?.data?.message ||
           "Không thể tải danh sách Tour đã được duyệt.",
@@ -97,9 +77,8 @@ export default function useOperationTours() {
   }, []);
 
   // =====================================================
-  // LOAD AVAILABLE CRUISES
+  // CRUISE & LAYOUT API
   // =====================================================
-
   const loadAvailableCruises = useCallback(async (tourId) => {
     setCruiseLoading(true);
     setError("");
@@ -107,31 +86,22 @@ export default function useOperationTours() {
 
     try {
       const data = await operationTourService.getAvailableCruises(tourId);
-
       const cruiseList = Array.isArray(data)
         ? data
         : data?.content || data?.data || [];
-
       setAvailableCruises(cruiseList);
-
       return cruiseList;
     } catch (err) {
       console.error("LOAD AVAILABLE CRUISES ERROR:", err);
-
       setError(
         err.response?.data?.message ||
           "Không thể tải danh sách du thuyền khả dụng.",
       );
-
       return [];
     } finally {
       setCruiseLoading(false);
     }
   }, []);
-
-  // =====================================================
-  // LOAD CRUISE LAYOUT
-  // =====================================================
 
   const loadCruiseLayout = useCallback(async (tourId) => {
     setLayoutLoading(true);
@@ -140,34 +110,22 @@ export default function useOperationTours() {
 
     try {
       const data = await operationTourService.getCruiseLayout(tourId);
-
-      console.log(" [RAW BACKEND DATA] cruiseLayout:", data);
-
       const layoutList = Array.isArray(data)
         ? data
         : data?.content || data?.data || [];
-
-      console.log(" [PROCESSED LAYOUT DATA]:", layoutList);
       setCruiseLayout(layoutList);
-
       return layoutList;
     } catch (err) {
       console.error("LOAD CRUISE LAYOUT ERROR:", err);
-
       setError(
         err.response?.data?.message ||
           "Không thể tải sơ đồ tầng và khu vực của du thuyền.",
       );
-
       return [];
     } finally {
       setLayoutLoading(false);
     }
   }, []);
-
-  // =====================================================
-  // ASSIGN CRUISE
-  // =====================================================
 
   const assignCruise = useCallback(async (tourId, cruiseId) => {
     setAssigning(true);
@@ -176,21 +134,16 @@ export default function useOperationTours() {
 
     try {
       const updated = await operationTourService.assignCruise(tourId, cruiseId);
-
       setPendingTours((prev) =>
         prev.map((tour) => (tour.id === tourId ? updated : tour)),
       );
-
       setSuccess("Gán du thuyền cho Tour thành công.");
-
       return updated;
     } catch (err) {
       console.error("ASSIGN CRUISE ERROR:", err);
-
       setError(
         err.response?.data?.message || "Không thể gán du thuyền cho Tour.",
       );
-
       throw err;
     } finally {
       setAssigning(false);
@@ -198,9 +151,8 @@ export default function useOperationTours() {
   }, []);
 
   // =====================================================
-  // LOAD ASSIGNMENTS
+  // ASSIGNMENTS API (BẢNG ActivityCruiseTour)
   // =====================================================
-
   const loadAssignments = useCallback(async (tourId) => {
     setAssignmentLoading(true);
     setError("");
@@ -208,62 +160,73 @@ export default function useOperationTours() {
     try {
       const data =
         await operationTourService.getActivityCruiseAssignments(tourId);
-
       const assignmentList = Array.isArray(data)
         ? data
         : data?.content || data?.data || [];
-
       setAssignments(assignmentList);
-
       return assignmentList;
     } catch (err) {
       console.error("LOAD ACTIVITY CRUISE ASSIGNMENTS ERROR:", err);
-
       setError(
         err.response?.data?.message || "Không thể tải danh sách phân công.",
       );
-
       return [];
     } finally {
       setAssignmentLoading(false);
     }
   }, []);
 
-  // =====================================================
-  // ASSIGN ACTIVITY CRUISE AREA (SINGLE & BATCH)
-  // =====================================================
+  /**
+   * Phân công 1 khu vực cho Hoạt động (Tạo bản ghi mới trong bảng ActivityCruiseTour)
+   */
+  /**
+   * Phân công 1 khu vực cho Hoạt động (Tạo bản ghi mới trong bảng ActivityCruiseTour)
+   */
+  const assignActivityCruiseArea = useCallback(
+    async (tourIdOrPayload, cruiseAreaId) => {
+      setAssignmentLoading(true);
+      setError("");
+      setSuccess("");
 
-  const assignActivityCruiseArea = useCallback(async (payload) => {
-    setAssignmentLoading(true);
-    setError("");
-    setSuccess("");
+      try {
+        // Tự động chuẩn hóa dữ liệu thành Object JSON hợp lệ
+        let payload = {};
+        if (typeof tourIdOrPayload === "object" && tourIdOrPayload !== null) {
+          payload = tourIdOrPayload;
+        } else {
+          payload = {
+            tourId: Number(tourIdOrPayload),
+            cruiseAreaId: Number(cruiseAreaId),
+          };
+        }
 
-    try {
-      const result =
-        await operationTourService.assignActivityCruiseArea(payload);
+        console.log("👉 PAYLOAD GỬI LÊN SPRING BOOT:", payload);
 
-      // Nếu gửi danh sách mảng nhiều khu vực
-      if (Array.isArray(result)) {
-        setAssignments((prev) => [...prev, ...result]);
-      } else if (result) {
-        setAssignments((prev) => [...prev, result]);
+        const result =
+          await operationTourService.assignActivityCruiseArea(payload);
+
+        // Cập nhật lại danh sách assignments local
+        setAssignments((prev) => {
+          const exists = prev.some((item) => item.id === result.id);
+          return exists ? prev : [...prev, result];
+        });
+
+        setSuccess("Lưu phân công khu vực thành công.");
+        return result;
+      } catch (err) {
+        console.error("ASSIGN ACTIVITY CRUISE AREA ERROR:", err);
+        setError(err.response?.data?.message || "Không thể phân công khu vực.");
+        throw err;
+      } finally {
+        setAssignmentLoading(false);
       }
+    },
+    [],
+  );
 
-      setSuccess("Phân công khu vực cho Tour thành công.");
-      return result;
-    } catch (err) {
-      console.error("ASSIGN ACTIVITY CRUISE AREA ERROR:", err);
-      setError(err.response?.data?.message || "Không thể phân công khu vực.");
-      throw err;
-    } finally {
-      setAssignmentLoading(false);
-    }
-  }, []);
-
-  // =====================================================
-  // DELETE ASSIGNMENT
-  // =====================================================
-
+  /**
+   * Xóa phân công khu vực theo assignmentId
+   */
   const deleteActivityCruiseAssignment = useCallback(async (assignmentId) => {
     setAssignmentLoading(true);
     setError("");
@@ -276,12 +239,10 @@ export default function useOperationTours() {
         prev.filter((assignment) => assignment.id !== assignmentId),
       );
 
-      setSuccess("Đã xóa phân công khu vực.");
+      setSuccess("Đã hủy phân công khu vực.");
     } catch (err) {
       console.error("DELETE ACTIVITY CRUISE ASSIGNMENT ERROR:", err);
-
       setError(err.response?.data?.message || "Không thể xóa phân công.");
-
       throw err;
     } finally {
       setAssignmentLoading(false);
@@ -291,7 +252,6 @@ export default function useOperationTours() {
   // =====================================================
   // APPROVE TOUR
   // =====================================================
-
   const approveTour = useCallback(async (tourId, payload = null) => {
     setApproving(true);
     setError("");
@@ -300,20 +260,16 @@ export default function useOperationTours() {
     try {
       const updated = await operationTourService.approveTour(tourId, payload);
 
-      // Cập nhật danh sách local ở FE: Xóa tour khỏi pendingTours và thêm vào approvedTours
       setPendingTours((prev) => prev.filter((tour) => tour.id !== tourId));
       if (updated) {
         setApprovedTours((prev) => [...prev, updated]);
       }
 
       setSuccess("Duyệt Tour thành công.");
-
       return updated;
     } catch (err) {
       console.error("APPROVE TOUR ERROR:", err);
-
       setError(err.response?.data?.message || "Không thể duyệt Tour.");
-
       throw err;
     } finally {
       setApproving(false);
@@ -321,44 +277,24 @@ export default function useOperationTours() {
   }, []);
 
   // =====================================================
-  // CLEAR
+  // CLEAR HELPERS
   // =====================================================
-
-  const clearAvailableCruises = useCallback(() => {
-    setAvailableCruises([]);
-  }, []);
-
-  const clearCruiseLayout = useCallback(() => {
-    setCruiseLayout([]);
-  }, []);
-
-  const clearAssignments = useCallback(() => {
-    setAssignments([]);
-  }, []);
-
+  const clearAvailableCruises = useCallback(() => setAvailableCruises([]), []);
+  const clearCruiseLayout = useCallback(() => setCruiseLayout([]), []);
+  const clearAssignments = useCallback(() => setAssignments([]), []);
   const clearMessages = useCallback(() => {
     setError("");
     setSuccess("");
   }, []);
 
-  // =====================================================
-  // RETURN
-  // =====================================================
-
   return {
-    // Tours
     pendingTours,
     approvedTours,
-
-    // Cruise
     availableCruises,
     cruiseLayout,
-
-    // Assignment
     assignments,
-    setAssignments, // Bổ sung setter để cập nhật trực tiếp state assignment trên FE
+    setAssignments,
 
-    // Loading
     loading,
     cruiseLoading,
     layoutLoading,
@@ -366,26 +302,21 @@ export default function useOperationTours() {
     assigning,
     approving,
 
-    // Messages
     error,
     success,
 
-    // Tour APIs
     loadPendingTours,
     loadApprovedTours,
     loadAvailableCruises,
     assignCruise,
     approveTour,
 
-    // Cruise layout
     loadCruiseLayout,
 
-    // Assignment
     loadAssignments,
     assignActivityCruiseArea,
     deleteActivityCruiseAssignment,
 
-    // Clear
     clearAvailableCruises,
     clearCruiseLayout,
     clearAssignments,

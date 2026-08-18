@@ -1,4 +1,3 @@
-// src/modules/operation/services/operationTourService.js
 import api from "../../../api/axios";
 
 const OPERATION_TOUR_BASE_URL = "/operation/tours";
@@ -34,7 +33,6 @@ const operationTourService = {
 
   /**
    * GET /api/operation/tours/{id}/cruise-layout
-   *
    * Lấy toàn bộ Deck + Area của Cruise đang được gán cho Tour.
    */
   getCruiseLayout: async (tourId) => {
@@ -46,7 +44,7 @@ const operationTourService = {
 
   /**
    * POST /api/operation/tours/{id}/assign-cruise?cruiseId=...
-   * Gán du thuyền cho Tour (vẫn ở trạng thái APPROVAL_PENDING)
+   * Gán du thuyền cho Tour (Tour vẫn ở trạng thái APPROVAL_PENDING)
    */
   assignCruise: async (tourId, cruiseId) => {
     const response = await api.post(
@@ -63,7 +61,7 @@ const operationTourService = {
 
   /**
    * POST /api/operation/tours/{id}/approve
-   * Duyệt Tour - Đổi trạng thái sang APPROVED và đồng thời đẩy danh sách phân công khu vực/role lên hệ thống
+   * Duyệt Tour - Đổi trạng thái sang APPROVED sau khi đã phân công xong khu vực
    */
   approveTour: async (tourId, payload = null) => {
     const response = await api.post(
@@ -75,7 +73,7 @@ const operationTourService = {
 
   /**
    * GET /api/operation/activity-cruise-tour-assignment/tour/{tourId}
-   * Lấy các khu vực đã được phân công cho Tour.
+   * Lấy danh sách các khu vực đã phân công cho Tour (Bảng ActivityCruiseTour)
    */
   getActivityCruiseAssignments: async (tourId) => {
     const response = await api.get(
@@ -86,15 +84,20 @@ const operationTourService = {
 
   /**
    * POST /api/operation/activity-cruise-tour-assignment
-   * Phân công Area cho Tour kèm theo configType / role (nhận vào object đơn hoặc mảng cấu hình)
+   * Phân công 1 khu vực Hoạt động cho Tour: payload = { tourId, cruiseAreaId }
    */
   assignActivityCruiseArea: async (payload) => {
-    const response = await api.post(OPERATION_ASSIGNMENT_BASE_URL, payload);
+    const response = await api.post(OPERATION_ASSIGNMENT_BASE_URL, payload, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
     return response.data;
   },
 
   /**
    * DELETE /api/operation/activity-cruise-tour-assignment/{id}
+   * Xóa phân công khu vực theo Primary Key Assignment ID
    */
   deleteActivityCruiseAssignment: async (assignmentId) => {
     const response = await api.delete(

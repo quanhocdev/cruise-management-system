@@ -19,27 +19,22 @@ function CruiseAreaAssignmentModal({
   open,
   tour,
   cruiseLayout,
-  assignments,
-  layoutLoading,
-  assignmentLoading,
+  assignments = [],
+  layoutLoading = false,
+  assignmentLoading = false,
   onLoadLayout,
   onLoadAssignments,
   onAssignArea,
   onDeleteAssignment,
   onClose,
 }) {
-  // State chọn Tầng ('ALL' hoặc deckId) và Item được chọn để gán
   const [selectedDeckId, setSelectedDeckId] = useState("ALL");
   const [selectedAreaId, setSelectedAreaId] = useState(null);
-
-  // State lưu loại hình được chọn (PRODUCT | SERVICE | ACTIVITY)
   const [selectedConfigType, setSelectedConfigType] = useState("ACTIVITY");
-
-  // State bộ lọc truyền xuống AreaFilterToolbar
   const [searchTerm, setSearchTerm] = useState("");
   const [viewType, setViewType] = useState("ALL"); // 'ALL' | 'AREA' | 'ROOM'
 
-  // NORMALIZE CÁC TẦNG (DECKS)
+  // NORMALIZE DECKS
   const decks = useMemo(() => {
     if (Array.isArray(cruiseLayout)) return cruiseLayout;
     if (Array.isArray(cruiseLayout?.decks)) return cruiseLayout.decks;
@@ -47,7 +42,7 @@ function CruiseAreaAssignmentModal({
     return [];
   }, [cruiseLayout]);
 
-  // RESET STATE & LOAD DATA KHI MỞ/ĐÓNG MODAL HOẶC ĐỔI TOUR
+  // RESET STATE & LOAD DATA
   useEffect(() => {
     if (open && tour?.id) {
       setSelectedAreaId(null);
@@ -58,13 +53,10 @@ function CruiseAreaAssignmentModal({
 
       onLoadLayout?.(tour.id);
       onLoadAssignments?.(tour.id);
-    } else if (!open) {
-      // Clear nhẹ state khi đóng modal
-      setSelectedAreaId(null);
     }
   }, [open, tour?.id, onLoadLayout, onLoadAssignments]);
 
-  // MAP PHÂN CÔNG THEO ITEM ID
+  // MAP PHÂN CÔNG (UUID String Key)
   const assignmentMap = useMemo(() => {
     if (!Array.isArray(assignments)) return new Map();
     const map = new Map();
@@ -83,7 +75,7 @@ function CruiseAreaAssignmentModal({
     return map;
   }, [assignments]);
 
-  // HELPER FUNCTIONS Truy xuất dữ liệu
+  // HELPER FUNCTIONS
   const getCruiseName = () => {
     if (tour?.cruise?.name) return tour.cruise.name;
     if (tour?.cruiseName) return tour.cruiseName;
@@ -133,15 +125,13 @@ function CruiseAreaAssignmentModal({
   const getItemCode = (item) =>
     item?.code || item?.areaCode || item?.roomCode || "";
 
-  // TỔNG HỢP CẢ AREAS VÀ ROOMS DƯỚI DẠNG DANH SÁCH MỤC ĐỘC LẬP
+  // TỔNG HỢP AREAS VÀ ROOMS
   const allItemsWithDeckInfo = useMemo(() => {
     const list = [];
-
     decks.forEach((deck) => {
       const dId = getDeckId(deck);
       const dName = getDeckName(deck);
 
-      // 1. Bóc tách danh sách Khu vực (Areas)
       const rawAreas = deck?.areas || deck?.cruiseAreas || deck?.areaList || [];
       rawAreas.forEach((area) => {
         list.push({
@@ -152,7 +142,6 @@ function CruiseAreaAssignmentModal({
         });
       });
 
-      // 2. Bóc tách danh sách Phòng (Rooms/Cabins) nằm độc lập ở Deck
       const rawRooms =
         deck?.rooms || deck?.cabins || deck?.roomList || deck?.cabinList || [];
       rawRooms.forEach((room) => {
@@ -168,7 +157,21 @@ function CruiseAreaAssignmentModal({
     return list;
   }, [decks]);
 
-  // LẤY DỮ LIỆU CỦA ITEM ĐANG ĐƯỢC CHỌN
+  // THỐNG KÊ THEO TẦNG
+  const deckStatsMap = useMemo(() => {
+    const stats = new Map();
+    allItemsWithDeckInfo.forEach((item) => {
+      const key = String(item._deckId);
+      const current = stats.get(key) || { total: 0, assigned: 0 };
+      current.total += 1;
+      if (assignmentMap.has(String(getItemId(item)))) {
+        current.assigned += 1;
+      }
+      stats.set(key, current);
+    });
+    return stats;
+  }, [allItemsWithDeckInfo, assignmentMap]);
+
   const selectedItemObject = useMemo(() => {
     if (!selectedAreaId) return null;
     return allItemsWithDeckInfo.find(
@@ -176,32 +179,28 @@ function CruiseAreaAssignmentModal({
     );
   }, [selectedAreaId, allItemsWithDeckInfo]);
 
-  // TỔNG SỐ ĐÃ GÁN
   const totalAssignedCount = useMemo(() => {
     return allItemsWithDeckInfo.filter((item) =>
       assignmentMap.has(String(getItemId(item))),
     ).length;
   }, [allItemsWithDeckInfo, assignmentMap]);
 
-  // LỌC DANH SÁCH THEO TẦNG, LOẠI (AREA/ROOM) VÀ TỪ KHÓA TÌM KIẾM
+  // LỌC DANH SÁCH
   const filteredItems = useMemo(() => {
     let result = allItemsWithDeckInfo;
 
-    // 1. Lọc theo Tầng
     if (selectedDeckId !== "ALL") {
       result = result.filter(
         (item) => String(item._deckId) === String(selectedDeckId),
       );
     }
 
-    // 2. Lọc theo Loại (Phòng vs Khu vực)
     if (viewType === "ROOM") {
       result = result.filter((item) => item._type === "ROOM");
     } else if (viewType === "AREA") {
       result = result.filter((item) => item._type === "AREA");
     }
 
-    // 3. Lọc theo Từ khóa tìm kiếm
     if (searchTerm.trim()) {
       const query = searchTerm.toLowerCase().trim();
       result = result.filter((item) => {
@@ -223,9 +222,8 @@ function CruiseAreaAssignmentModal({
   const handleSelectItem = (item) => {
     const itemId = getItemId(item);
     if (!itemId) return;
-    if (assignmentMap.has(String(itemId))) return;
 
-    if (selectedAreaId === itemId) {
+    if (String(selectedAreaId) === String(itemId)) {
       setSelectedAreaId(null);
     } else {
       setSelectedAreaId(itemId);
@@ -234,12 +232,28 @@ function CruiseAreaAssignmentModal({
   };
 
   const handleAssign = async () => {
-    if (!tour?.id || !selectedAreaId) return;
+    const rawTourId = tour?.id ?? tour?.tourId;
+    const rawAreaId =
+      typeof selectedAreaId === "object" ? selectedAreaId?.id : selectedAreaId;
+
+    const tourIdStr = rawTourId ? String(rawTourId).trim() : "";
+    const areaIdStr = rawAreaId ? String(rawAreaId).trim() : "";
+
+    if (!tourIdStr || !areaIdStr) {
+      console.error("❌ Thiếu tourId hoặc cruiseAreaId:", {
+        tourIdStr,
+        areaIdStr,
+      });
+      return;
+    }
+
+    const payload = {
+      tourId: tourIdStr,
+      cruiseAreaId: areaIdStr,
+    };
 
     try {
-      // Nếu cần truyền cả selectedConfigType lên API thì bổ sung tham số ở đây:
-      // await onAssignArea(tour.id, selectedAreaId, selectedConfigType);
-      await onAssignArea(tour.id, selectedAreaId);
+      await onAssignArea(payload);
       setSelectedAreaId(null);
     } catch (err) {
       console.error("Lỗi phân công:", err);
@@ -368,12 +382,10 @@ function CruiseAreaAssignmentModal({
                 {decks.map((deck, idx) => {
                   const dId = getDeckId(deck) || idx;
                   const isSelected = String(dId) === String(selectedDeckId);
-                  const deckItems = allItemsWithDeckInfo.filter(
-                    (item) => String(item._deckId) === String(dId),
-                  );
-                  const assignedCount = deckItems.filter((item) =>
-                    assignmentMap.has(String(getItemId(item))),
-                  ).length;
+                  const stats = deckStatsMap.get(String(dId)) || {
+                    total: 0,
+                    assigned: 0,
+                  };
 
                   return (
                     <button
@@ -387,15 +399,13 @@ function CruiseAreaAssignmentModal({
                         <span>{getDeckName(deck)}</span>
                       </div>
                       <div className="caam-deck-badges">
-                        <span className="badge-total">
-                          {deckItems.length} mục
-                        </span>
-                        {assignedCount > 0 && (
+                        <span className="badge-total">{stats.total} mục</span>
+                        {stats.assigned > 0 && (
                           <span
                             className="badge-assigned"
                             title="Số mục đã gán"
                           >
-                            {assignedCount} đã gán
+                            {stats.assigned} đã gán
                           </span>
                         )}
                       </div>
@@ -415,13 +425,12 @@ function CruiseAreaAssignmentModal({
               setViewType={setViewType}
             />
 
-            {/* KHU VỰC HIỂN THỊ CHÍNH */}
             <div
               className={`caam-split-workspace ${
                 selectedAreaId ? "has-preview" : ""
               }`}
             >
-              {/* CỘT TRÁI: GRID CÁC KHU VỰC / PHÒNG */}
+              {/* GRID */}
               <div className="caam-grid-container">
                 {layoutLoading ? (
                   <div className="caam-state-box">
@@ -439,81 +448,67 @@ function CruiseAreaAssignmentModal({
                   </div>
                 ) : (
                   <div className="caam-area-grid">
-                    {filteredItems.map((item, idx) => {
+                    {filteredItems.map((item) => {
                       const itemId = getItemId(item);
                       const isAssigned = assignmentMap.has(String(itemId));
-                      const isSelected = selectedAreaId === itemId;
-                      const isRoom = item._type === "ROOM";
-
-                      // TẠO UNIQUE KEY TRÁNH LỖI DUPLICATE KEY CỦA REACT
-                      const uniqueKey = `item-${item._type}-${item._deckId}-${itemId || idx}`;
+                      const isSelected =
+                        String(selectedAreaId) === String(itemId);
+                      const isArea = item._type === "AREA";
 
                       return (
                         <div
-                          key={uniqueKey}
-                          className={`caam-area-card ${
-                            isAssigned ? "is-assigned" : ""
-                          } ${isSelected ? "is-selected" : ""}`}
+                          key={itemId}
+                          className={`caam-card ${
+                            isArea ? "is-area" : "is-room"
+                          } ${isAssigned ? "assigned" : ""} ${
+                            isSelected ? "selected" : ""
+                          }`}
                           onClick={() => handleSelectItem(item)}
                         >
                           <div className="caam-card-header">
-                            <div className="caam-area-identity">
-                              {isRoom ? (
-                                <DoorClosed
-                                  size={16}
-                                  className="icon-pin"
-                                  style={{ color: "#059669" }}
-                                />
+                            <span
+                              className={`caam-card-type ${
+                                isArea ? "type-area" : "type-room"
+                              }`}
+                            >
+                              {isArea ? (
+                                <Grid size={16} />
                               ) : (
-                                <MapPin size={16} className="icon-pin" />
+                                <DoorClosed size={16} />
                               )}
-                              <strong className="caam-area-title">
-                                {getItemName(item)}
-                              </strong>
-                            </div>
-                            {getItemCode(item) && (
-                              <span className="caam-area-code">
-                                {getItemCode(item)}
+                              {isArea ? "Khu vực" : "Phòng nghỉ"}
+                            </span>
+
+                            {isAssigned && (
+                              <button
+                                type="button"
+                                className="caam-delete-btn"
+                                onClick={(e) =>
+                                  handleDeleteAssignment(e, itemId)
+                                }
+                                title="Hủy phân công"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            )}
+                          </div>
+
+                          <div className="caam-card-body">
+                            <h4>{getItemName(item)}</h4>
+                            <p className="deck-info">{item._deckName}</p>
+
+                            {!isArea && (
+                              <span className="room-status-badge available">
+                                Trống
                               </span>
                             )}
                           </div>
 
-                          {selectedDeckId === "ALL" && (
-                            <div className="caam-card-deck-tag">
-                              <Layers size={13} />
-                              <span>{item._deckName}</span>
+                          {isAssigned && (
+                            <div className="caam-card-badge">
+                              <CheckCircle size={14} /> Đã phân công
                             </div>
                           )}
-
-                          <div className="caam-card-footer">
-                            {isAssigned ? (
-                              <div className="caam-assigned-row">
-                                <span className="tag-assigned">
-                                  <CheckCircle size={13} /> Đã phân công
-                                </span>
-                                <button
-                                  type="button"
-                                  className="caam-delete-btn"
-                                  onClick={(e) =>
-                                    handleDeleteAssignment(e, itemId)
-                                  }
-                                  title="Gỡ phân công"
-                                >
-                                  <Trash2 size={15} />
-                                </button>
-                              </div>
-                            ) : (
-                              <div className="caam-select-row">
-                                <span
-                                  className={`tag-select ${
-                                    isSelected ? "active" : ""
-                                  }`}
-                                >
-                                  {isSelected ? "Đã chọn" : "Bấm để chọn"}
-                                </span>
-                              </div>
-                            )}
-                          </div>
                         </div>
                       );
                     })}
@@ -521,7 +516,7 @@ function CruiseAreaAssignmentModal({
                 )}
               </div>
 
-              {/* CỘT PHẢI: PREVIEW */}
+              {/* PREVIEW SIDEBAR */}
               {selectedAreaId && (
                 <div className="caam-preview-sidebar">
                   <AreaDetailPreview
@@ -537,12 +532,12 @@ function CruiseAreaAssignmentModal({
           </div>
         </div>
 
-        {/* FOOTER MODAL */}
+        {/* FOOTER */}
         <div className="caam-footer">
           <div className="caam-footer-info">
             {selectedAreaId ? (
               <span className="info-selected">
-                <CheckCircle size={16} /> Đã chọn khu vực ID: {selectedAreaId} (
+                <CheckCircle size={16} /> Đã chọn mục ID: {selectedAreaId} (
                 {selectedConfigType})
               </span>
             ) : (
