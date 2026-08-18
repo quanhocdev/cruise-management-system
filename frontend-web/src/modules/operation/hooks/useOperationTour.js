@@ -51,7 +51,7 @@ export default function useOperationTours() {
       const tourList = Array.isArray(data)
         ? data
         : data?.content || data?.data || [];
-      setPendingTours(tourList);
+      setApprovedTours(tourList);
     } catch (err) {
       console.error("LOAD OPERATION APPROVED TOURS ERROR:", err);
       setError(

@@ -4,7 +4,7 @@ import com.project.tour.dto.tour.schedule.CreateScheduleRequest;
 import com.project.tour.dto.tour.schedule.ScheduleResponse;
 import com.project.tour.dto.tour.schedule.UpdateScheduleRequest;
 import com.project.tour.exception.AppException;
-import com.project.tour.mapper.tour.ScheduleMapper;
+import com.project.tour.mapper.tour.schedule.ScheduleMapper;
 import com.project.tour.model.Schedule;
 import com.project.tour.model.Tour;
 import com.project.tour.model.enums.ScheduleStatus;

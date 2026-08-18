@@ -2,6 +2,7 @@ package com.project.tour.controller.tour.operation;
 
 import com.project.tour.dto.cruise.CruiseAvailabilityResponse;
 import com.project.tour.dto.tour.TourResponse;
+import com.project.tour.dto.tour.operation.OperationCruiseLayoutResponse;
 import com.project.tour.service.tour.operation.OperationTourService;
 
 import org.springframework.http.ResponseEntity;
@@ -46,6 +47,28 @@ public class OperationTourController {
     }
 
     // =====================================================
+    // GET CRUISE LAYOUT
+    //
+    // Tour
+    // └── Cruise
+    // ├── Deck 1
+    // │ ├── Area A
+    // │ └── Area B
+    // ├── Deck 2
+    // │ └── Area C
+    // └── ...
+    //
+    // =====================================================
+
+    @GetMapping("/{id}/cruise-layout")
+    public ResponseEntity<List<OperationCruiseLayoutResponse>> getCruiseLayout(
+            @PathVariable UUID id) {
+
+        return ResponseEntity.ok(
+                operationTourService.getCruiseLayout(id));
+    }
+
+    // =====================================================
     // APPROVE TOUR
     // =====================================================
 
@@ -59,6 +82,10 @@ public class OperationTourController {
                         id,
                         cruiseId));
     }
+
+    // =====================================================
+    // GET APPROVED TOURS
+    // =====================================================
 
     @GetMapping("/approved")
     public ResponseEntity<List<TourResponse>> getApprovedTours() {

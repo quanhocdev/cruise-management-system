@@ -2,19 +2,24 @@ package com.project.tour.service.tour.operation;
 
 import com.project.tour.dto.cruise.CruiseAvailabilityResponse;
 import com.project.tour.dto.tour.TourResponse;
+import com.project.tour.dto.tour.operation.OperationCruiseAreaResponse;
+import com.project.tour.dto.tour.operation.OperationCruiseLayoutResponse;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.tour.TourMapper;
 import com.project.tour.model.Cruise;
+import com.project.tour.model.CruiseDeck;
 import com.project.tour.model.Tour;
+import com.project.tour.model.enums.cruise.CruiseAreaStatus;
+import com.project.tour.model.enums.cruise.CruiseDeckStatus;
 import com.project.tour.model.enums.cruise.CruiseStatus;
 import com.project.tour.model.enums.tour.TourStatusTrip;
+import com.project.tour.repository.cruise.CruiseAreaRepository;
+import com.project.tour.repository.cruise.CruiseDeckRepository;
 import com.project.tour.repository.cruise.CruiseRepository;
 import com.project.tour.repository.tour.TourRepository;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -25,13 +30,19 @@ public class OperationTourService {
 
         private final TourRepository tourRepository;
         private final CruiseRepository cruiseRepository;
+        private final CruiseDeckRepository cruiseDeckRepository;
+        private final CruiseAreaRepository cruiseAreaRepository;
 
         public OperationTourService(
                         TourRepository tourRepository,
-                        CruiseRepository cruiseRepository) {
+                        CruiseRepository cruiseRepository,
+                        CruiseDeckRepository cruiseDeckRepository,
+                        CruiseAreaRepository cruiseAreaRepository) {
 
                 this.tourRepository = tourRepository;
                 this.cruiseRepository = cruiseRepository;
+                this.cruiseDeckRepository = cruiseDeckRepository;
+                this.cruiseAreaRepository = cruiseAreaRepository;
         }
 
         /**
@@ -207,6 +218,52 @@ public class OperationTourService {
                                                 TourStatusTrip.APPROVED)
                                 .stream()
                                 .map(TourMapper::toResponse)
+                                .toList();
+        }
+
+        @Transactional(readOnly = true)
+        public List<OperationCruiseLayoutResponse> getCruiseLayout(
+                        UUID tourId) {
+
+                Tour tour = tourRepository.findById(tourId)
+                                .orElseThrow(() -> new AppException(
+                                                "Tour not found",
+                                                HttpStatus.NOT_FOUND));
+
+                // Tour chưa được gán Cruise
+                if (tour.getCruise() == null) {
+                        throw new AppException(
+                                        "Tour has no cruise assigned",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                UUID cruiseId = tour.getCruise().getId();
+
+                List<CruiseDeck> decks = cruiseDeckRepository
+                                .findAllByCruise_IdAndStatusOrderByDeckNumberAsc(
+                                                cruiseId,
+                                                CruiseDeckStatus.ACTIVE);
+
+                return decks.stream()
+                                .map(deck -> {
+
+                                        List<OperationCruiseAreaResponse> areas = cruiseAreaRepository
+                                                        .findAllByCruiseDeck_IdAndStatusOrderByNameAsc(
+                                                                        deck.getId(),
+                                                                        CruiseAreaStatus.ACTIVE)
+                                                        .stream()
+                                                        .map(area -> new OperationCruiseAreaResponse(
+                                                                        area.getId(),
+                                                                        area.getName(),
+                                                                        area.getDescription(),
+                                                                        area.getStatus()))
+                                                        .toList();
+
+                                        return new OperationCruiseLayoutResponse(
+                                                        deck.getId(),
+                                                        deck.getDeckNumber(),
+                                                        areas);
+                                })
                                 .toList();
         }
 }
