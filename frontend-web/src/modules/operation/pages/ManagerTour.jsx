@@ -68,7 +68,8 @@ function ManagerTour() {
     error: productError,
     success: productSuccess,
     loadProductAssignments,
-
+    assignProduct,
+    deleteProductAssignment,
     clearProductAssignments,
     clearMessages: clearProductMessages,
   } = useProductTourAssignments();
@@ -220,6 +221,7 @@ function ManagerTour() {
     await Promise.all([
       loadCruiseLayout(tour.id),
       loadActivityAssignments(tour.id),
+      loadProductAssignments(tour.id),
     ]);
   };
 
@@ -227,7 +229,7 @@ function ManagerTour() {
   // CLOSE AREA MODAL
   // =====================================================
   const handleCloseAreaModal = () => {
-    if (activityLoading || layoutLoading) {
+    if (activityLoading || productLoading || layoutLoading) {
       return;
     }
 
@@ -236,6 +238,7 @@ function ManagerTour() {
 
     clearCruiseLayout();
     clearActivityAssignments();
+    clearProductAssignments();
     clearAllMessages();
   };
 
@@ -481,13 +484,21 @@ function ManagerTour() {
         open={showAreaModal}
         tour={areaTour}
         cruiseLayout={cruiseLayout}
-        assignments={activityAssignments}
+        activityAssignments={activityAssignments}
+        productAssignments={productAssignments}
         layoutLoading={layoutLoading}
-        assignmentLoading={activityLoading}
+        assignmentLoading={activityLoading || productLoading}
         onLoadLayout={loadCruiseLayout}
-        onLoadAssignments={loadActivityAssignments}
+        onLoadAssignments={async (tourId) => {
+          await Promise.all([
+            loadActivityAssignments(tourId),
+            loadProductAssignments(tourId),
+          ]);
+        }}
         onAssignArea={assignActivityArea}
-        onDeleteAssignment={deleteActivityAssignment}
+        onAssignProduct={assignProduct}
+        onDeleteActivityAssignment={deleteActivityAssignment}
+        onDeleteProductAssignment={deleteProductAssignment}
         onClose={handleCloseAreaModal}
       />
     </div>

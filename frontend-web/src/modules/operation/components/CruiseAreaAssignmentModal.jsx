@@ -90,16 +90,24 @@ function CruiseAreaAssignmentModal({
   open,
   tour,
   cruiseLayout,
-  assignments = [],
+
+  activityAssignments = [],
+  productAssignments = [],
+
   layoutLoading = false,
   assignmentLoading = false,
-  defaultConfigType = "ACTIVITY", // Mặc định là Hoạt động nếu không truyền
+
+  defaultConfigType = "ACTIVITY",
+
   onLoadLayout,
   onLoadAssignments,
+
   onAssignArea,
   onAssignProduct,
-  onAssignService,
-  onDeleteAssignment,
+
+  onDeleteActivityAssignment,
+  onDeleteProductAssignment,
+
   onClose,
 }) {
   const [selectedDeckId, setSelectedDeckId] = useState("ALL");
@@ -120,49 +128,98 @@ function CruiseAreaAssignmentModal({
 
   // RESET STATE & LOAD DATA
   useEffect(() => {
-    if (open && tour?.id) {
-      setSelectedAreaId(null);
-      setSelectedConfigType(defaultConfigType);
-      setSearchTerm("");
-      setSelectedDeckId("ALL");
-      setViewType("ALL");
+    if (!open || !tour?.id) return;
 
-      onLoadLayout?.(tour.id);
-      onLoadAssignments?.(tour.id);
-    }
-  }, [open, tour?.id, defaultConfigType, onLoadLayout, onLoadAssignments]);
+    setSelectedAreaId(null);
+    setSelectedConfigType(defaultConfigType);
+    setSearchTerm("");
+    setSelectedDeckId("ALL");
+    setViewType("ALL");
+
+    onLoadLayout?.(tour.id);
+    onLoadAssignments?.(tour.id);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, tour?.id]);
 
   // MAP PHÂN CÔNG TỪ DATABASE
-  const assignmentMap = useMemo(() => {
-    if (!Array.isArray(assignments)) return new Map();
+  const activityAssignmentMap = useMemo(() => {
     const map = new Map();
-    assignments.forEach((item) => {
+
+    activityAssignments.forEach((item) => {
       const id =
         item.cruiseAreaId ||
         item.areaId ||
         item.cruiseArea?.id ||
-        item.area?.id ||
-        item.roomId ||
-        item.cabinId;
-      if (id !== undefined && id !== null) {
+        item.area?.id;
+
+      if (id) {
         map.set(String(id), item);
       }
     });
+
     return map;
-  }, [assignments]);
+  }, [activityAssignments]);
+
+  const productAssignmentMap = useMemo(() => {
+    const map = new Map();
+
+    productAssignments.forEach((item) => {
+      const id =
+        item.cruiseAreaId ||
+        item.areaId ||
+        item.cruiseArea?.id ||
+        item.area?.id;
+
+      if (id) {
+        map.set(String(id), item);
+      }
+    });
+
+    return map;
+  }, [productAssignments]);
+  const getAssignment = (itemId) => {
+    const key = String(itemId);
+
+    const activity = activityAssignmentMap.get(key);
+    if (activity) {
+      return {
+        type: "ACTIVITY",
+        data: activity,
+      };
+    }
+
+    const product = productAssignmentMap.get(key);
+    if (product) {
+      return {
+        type: "PRODUCT",
+        data: product,
+      };
+    }
+
+    return null;
+  };
 
   const getCruiseName = useCallback(() => {
     if (tour?.cruise?.name) return tour.cruise.name;
     if (tour?.cruiseName) return tour.cruiseName;
     if (cruiseLayout?.cruise?.name) return cruiseLayout.cruise.name;
     if (cruiseLayout?.cruiseName) return cruiseLayout.cruiseName;
-    if (Array.isArray(assignments) && assignments.length > 0) {
-      const first = assignments[0];
+
+    const allAssignments = [
+      ...(Array.isArray(activityAssignments) ? activityAssignments : []),
+      ...(Array.isArray(productAssignments) ? productAssignments : []),
+    ];
+
+    if (allAssignments.length > 0) {
+      const first = allAssignments[0];
       const cruise = first?.cruiseArea?.cruise || first?.cruise;
+
       if (cruise?.name) return cruise.name;
     }
+
     return "Chưa xác định";
-  }, [tour, cruiseLayout, assignments]);
+  }, [tour, cruiseLayout, activityAssignments, productAssignments]);
 
   // TỔNG HỢP AREAS VÀ ROOMS
   const allItemsWithDeckInfo = useMemo(() => {
@@ -203,13 +260,13 @@ function CruiseAreaAssignmentModal({
       const key = String(item._deckId);
       const current = stats.get(key) || { total: 0, assigned: 0 };
       current.total += 1;
-      if (assignmentMap.has(String(getItemId(item)))) {
+      if (getAssignment(getItemId(item))) {
         current.assigned += 1;
       }
       stats.set(key, current);
     });
     return stats;
-  }, [allItemsWithDeckInfo, assignmentMap]);
+  }, [allItemsWithDeckInfo, activityAssignmentMap, productAssignmentMap]);
 
   const selectedItemObject = useMemo(() => {
     if (!selectedAreaId) return null;
@@ -219,10 +276,9 @@ function CruiseAreaAssignmentModal({
   }, [selectedAreaId, allItemsWithDeckInfo]);
 
   const totalAssignedCount = useMemo(() => {
-    return allItemsWithDeckInfo.filter((item) =>
-      assignmentMap.has(String(getItemId(item))),
-    ).length;
-  }, [allItemsWithDeckInfo, assignmentMap]);
+    return allItemsWithDeckInfo.filter((item) => getAssignment(getItemId(item)))
+      .length;
+  }, [allItemsWithDeckInfo, activityAssignmentMap, productAssignmentMap]);
 
   // LỌC DANH SÁCH
   const filteredItems = useMemo(() => {
@@ -268,76 +324,53 @@ function CruiseAreaAssignmentModal({
       setSelectedAreaId(itemId);
 
       // 🎯 LẤY LOẠI HÌNH THỰC TẾ TỪ DATABASE
-      const existingAssignment = assignmentMap.get(String(itemId));
+      const existingAssignment = getAssignment(itemId);
+
       if (existingAssignment) {
-        const actualType = detectConfigType(
-          existingAssignment,
-          defaultConfigType,
-        );
-        setSelectedConfigType(actualType);
+        setSelectedConfigType(existingAssignment.type);
       } else {
-        // Nếu chưa gán thì lấy theo loại hình của Item (ROOM -> PRODUCT, AREA -> defaultConfigType)
         const itemType = item._type === "ROOM" ? "PRODUCT" : defaultConfigType;
+
         setSelectedConfigType(itemType);
       }
     }
   };
 
   const handleAssign = async () => {
-    const rawTourId = tour?.id ?? tour?.tourId;
-    const rawAreaId =
-      typeof selectedAreaId === "object" ? selectedAreaId?.id : selectedAreaId;
+    const tourId = tour?.id ?? tour?.tourId;
+    const cruiseAreaId = selectedAreaId;
 
-    const tourIdStr = rawTourId ? String(rawTourId).trim() : "";
-    const areaIdStr = rawAreaId ? String(rawAreaId).trim() : "";
-
-    if (!tourIdStr || !areaIdStr) {
-      console.error("❌ Thiếu tourId hoặc cruiseAreaId:", {
-        tourIdStr,
-        areaIdStr,
-      });
+    if (!tourId || !cruiseAreaId) {
       return;
     }
 
     const payload = {
-      tourId: tourIdStr,
-      cruiseAreaId: areaIdStr,
-      configType: selectedConfigType,
+      tourId: String(tourId),
+      cruiseAreaId: String(cruiseAreaId),
     };
 
     try {
-      switch (selectedConfigType) {
-        case "PRODUCT":
-        case "ROOM":
-          if (onAssignProduct) {
-            await onAssignProduct(payload);
-          } else {
-            await onAssignArea?.(payload);
-          }
-          break;
+      if (selectedConfigType === "ACTIVITY") {
+        await onAssignArea?.(payload);
+      }
 
-        case "SERVICE":
-          if (onAssignService) {
-            await onAssignService(payload);
-          } else {
-            await onAssignArea?.(payload);
-          }
-          break;
+      if (selectedConfigType === "PRODUCT") {
+        await onAssignProduct?.(payload);
+      }
 
-        case "ACTIVITY":
-        default:
-          await onAssignArea?.(payload);
-          break;
+      if (selectedConfigType === "SERVICE") {
+        // Sau này:
+        // await onAssignService?.(payload);
       }
 
       setSelectedAreaId(null);
-      await onLoadAssignments?.(tour.id);
+      await onLoadAssignments?.(tourId);
     } catch (err) {
       console.error("Lỗi phân công:", err);
     }
   };
 
-  const handleDeleteAssignment = async (e, cruiseAreaId) => {
+  const handleDeleteAssignment = async (e, cruiseAreaId, configType) => {
     if (e && typeof e.stopPropagation === "function") {
       e.stopPropagation();
     }
@@ -356,11 +389,13 @@ function CruiseAreaAssignmentModal({
 
     try {
       setIsDeleting(true);
-      await onDeleteAssignment?.(
-        currentTourId,
-        cruiseAreaId,
-        selectedConfigType,
-      );
+
+      if (configType === "ACTIVITY") {
+        await onDeleteActivityAssignment?.(currentTourId, cruiseAreaId);
+      } else if (configType === "PRODUCT") {
+        await onDeleteProductAssignment?.(currentTourId, cruiseAreaId);
+      }
+
       await onLoadAssignments?.(currentTourId);
     } catch (err) {
       console.error("Lỗi khi xóa phân công:", err);
@@ -368,7 +403,6 @@ function CruiseAreaAssignmentModal({
       setIsDeleting(false);
     }
   };
-
   const handleClose = () => {
     if (assignmentLoading || isDeleting) return;
     onClose?.();
@@ -532,7 +566,7 @@ function CruiseAreaAssignmentModal({
                   <div className="caam-area-grid">
                     {filteredItems.map((item) => {
                       const itemId = getItemId(item);
-                      const assignment = assignmentMap.get(String(itemId));
+                      const assignment = getAssignment(itemId);
                       const isAssigned = Boolean(assignment);
                       const isSelected =
                         String(selectedAreaId) === String(itemId);
@@ -566,9 +600,13 @@ function CruiseAreaAssignmentModal({
                               <button
                                 type="button"
                                 className="caam-delete-btn"
-                                onClick={(e) =>
-                                  handleDeleteAssignment(e, itemId)
-                                }
+                                onClick={(e) => {
+                                  handleDeleteAssignment(
+                                    e,
+                                    itemId,
+                                    assignment.type,
+                                  );
+                                }}
                                 title="Hủy phân công"
                                 disabled={isGlobalLoading}
                               >
@@ -604,13 +642,12 @@ function CruiseAreaAssignmentModal({
               {selectedAreaId && (
                 <div className="caam-preview-sidebar">
                   {(() => {
-                    const selectedAssignment = assignmentMap.get(
-                      String(selectedAreaId),
-                    );
+                    const selectedAssignment = getAssignment(selectedAreaId);
+
                     const isAssigned = Boolean(selectedAssignment);
-                    // 🎯 LẤY CHÍNH XÁC CONFIG TYPE ĐÃ DÙNG TRONG DATABASE
+
                     const assignedTypeFromDb = isAssigned
-                      ? detectConfigType(selectedAssignment, defaultConfigType)
+                      ? selectedAssignment.type
                       : null;
 
                     return (
@@ -623,11 +660,19 @@ function CruiseAreaAssignmentModal({
                         onSaveAssignment={handleAssign}
                         onUnassign={(item) => {
                           const areaId = getItemId(item) || selectedAreaId;
+
                           if (!areaId) {
                             alert("Không tìm thấy ID khu vực để xóa!");
                             return;
                           }
-                          handleDeleteAssignment(null, areaId);
+
+                          const assignment = getAssignment(areaId);
+
+                          handleDeleteAssignment(
+                            null,
+                            areaId,
+                            assignment?.type || selectedConfigType,
+                          );
                         }}
                         loading={isGlobalLoading}
                       />
