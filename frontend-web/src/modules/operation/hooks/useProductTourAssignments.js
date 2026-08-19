@@ -1,4 +1,3 @@
-// src/modules/operation/hooks/useProductTourAssignments.js
 import { useCallback, useState } from "react";
 import productTourAssignmentService from "../services/productTourAssignmentService";
 
@@ -7,6 +6,17 @@ export default function useProductTourAssignments() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  // Hàm xóa thông báo lỗi / thành công
+  const clearMessages = useCallback(() => {
+    setError("");
+    setSuccess("");
+  }, []);
+
+  // Hàm dọn dẹp danh sách phân công sản phẩm/tiện ích
+  const clearProductAssignments = useCallback(() => {
+    setProductAssignments([]);
+  }, []);
 
   const loadProductAssignments = useCallback(async (tourId) => {
     setLoading(true);
@@ -51,13 +61,28 @@ export default function useProductTourAssignments() {
     }
   }, []);
 
-  const deleteProductAssignment = useCallback(async (id) => {
+  /**
+   * Xóa phân công tiện ích theo tourId và cruiseAreaId
+   */
+  const deleteProductAssignment = useCallback(async (tourId, cruiseAreaId) => {
     setLoading(true);
     setError("");
     setSuccess("");
     try {
-      await productTourAssignmentService.delete(id);
-      setProductAssignments((prev) => prev.filter((item) => item.id !== id));
+      await productTourAssignmentService.delete(tourId, cruiseAreaId);
+
+      // Cập nhật State: lọc bỏ item có cruiseAreaId khớp
+      setProductAssignments((prev) =>
+        prev.filter((item) => {
+          const targetAreaId =
+            item.cruiseAreaId ||
+            item.areaId ||
+            item.cruiseArea?.id ||
+            item.area?.id;
+          return String(targetAreaId) !== String(cruiseAreaId);
+        }),
+      );
+
       setSuccess("Đã xóa phân công tiện ích.");
     } catch (err) {
       console.error("DELETE PRODUCT ASSIGNMENT ERROR:", err);
@@ -78,5 +103,7 @@ export default function useProductTourAssignments() {
     loadProductAssignments,
     assignProduct,
     deleteProductAssignment,
+    clearProductAssignments,
+    clearMessages,
   };
 }

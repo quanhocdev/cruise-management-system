@@ -51,6 +51,41 @@ const getItemName = (item) =>
 const getItemCode = (item) =>
   item?.code || item?.areaCode || item?.roomCode || "";
 
+/**
+ * 🎯 HÀM NHẬN BIẾT LOẠI HÌNH PHÂN CÔNG TỪ DATABASE / API RESPONSE
+ */
+const detectConfigType = (assignment, fallbackType = "ACTIVITY") => {
+  if (!assignment) return fallbackType;
+
+  // 1. Nếu Backend trả về trực tiếp configType hoặc type
+  const type =
+    assignment.configType || assignment.type || assignment.assignmentType;
+  if (type) {
+    const upper = String(type).toUpperCase();
+    if (upper.includes("PRODUCT") || upper.includes("ROOM")) return "PRODUCT";
+    if (upper.includes("SERVICE")) return "SERVICE";
+    if (upper.includes("ACTIVITY")) return "ACTIVITY";
+  }
+
+  // 2. Nhận biết dựa trên các Object / ID con trả về từ DB
+  if (assignment.activityId || assignment.activity || assignment.tourActivity) {
+    return "ACTIVITY";
+  }
+  if (
+    assignment.productId ||
+    assignment.product ||
+    assignment.room ||
+    assignment.cabin
+  ) {
+    return "PRODUCT";
+  }
+  if (assignment.serviceId || assignment.service) {
+    return "SERVICE";
+  }
+
+  return fallbackType;
+};
+
 function CruiseAreaAssignmentModal({
   open,
   tour,
@@ -58,18 +93,22 @@ function CruiseAreaAssignmentModal({
   assignments = [],
   layoutLoading = false,
   assignmentLoading = false,
+  defaultConfigType = "ACTIVITY", // Mặc định là Hoạt động nếu không truyền
   onLoadLayout,
   onLoadAssignments,
   onAssignArea,
+  onAssignProduct,
+  onAssignService,
   onDeleteAssignment,
   onClose,
 }) {
   const [selectedDeckId, setSelectedDeckId] = useState("ALL");
   const [selectedAreaId, setSelectedAreaId] = useState(null);
-  const [selectedConfigType, setSelectedConfigType] = useState("ACTIVITY");
+  const [selectedConfigType, setSelectedConfigType] =
+    useState(defaultConfigType);
   const [searchTerm, setSearchTerm] = useState("");
-  const [viewType, setViewType] = useState("ALL"); // 'ALL' | 'AREA' | 'ROOM'
-  const [isDeleting, setIsDeleting] = useState(false); // Quản lý trạng thái xóa riêng
+  const [viewType, setViewType] = useState("ALL");
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // NORMALIZE DECKS
   const decks = useMemo(() => {
@@ -83,7 +122,7 @@ function CruiseAreaAssignmentModal({
   useEffect(() => {
     if (open && tour?.id) {
       setSelectedAreaId(null);
-      setSelectedConfigType("ACTIVITY");
+      setSelectedConfigType(defaultConfigType);
       setSearchTerm("");
       setSelectedDeckId("ALL");
       setViewType("ALL");
@@ -91,9 +130,9 @@ function CruiseAreaAssignmentModal({
       onLoadLayout?.(tour.id);
       onLoadAssignments?.(tour.id);
     }
-  }, [open, tour?.id, onLoadLayout, onLoadAssignments]);
+  }, [open, tour?.id, defaultConfigType, onLoadLayout, onLoadAssignments]);
 
-  // MAP PHÂN CÔNG (UUID String Key -> Assignment Object)
+  // MAP PHÂN CÔNG TỪ DATABASE
   const assignmentMap = useMemo(() => {
     if (!Array.isArray(assignments)) return new Map();
     const map = new Map();
@@ -227,7 +266,20 @@ function CruiseAreaAssignmentModal({
       setSelectedAreaId(null);
     } else {
       setSelectedAreaId(itemId);
-      if (!selectedConfigType) setSelectedConfigType("ACTIVITY");
+
+      // 🎯 LẤY LOẠI HÌNH THỰC TẾ TỪ DATABASE
+      const existingAssignment = assignmentMap.get(String(itemId));
+      if (existingAssignment) {
+        const actualType = detectConfigType(
+          existingAssignment,
+          defaultConfigType,
+        );
+        setSelectedConfigType(actualType);
+      } else {
+        // Nếu chưa gán thì lấy theo loại hình của Item (ROOM -> PRODUCT, AREA -> defaultConfigType)
+        const itemType = item._type === "ROOM" ? "PRODUCT" : defaultConfigType;
+        setSelectedConfigType(itemType);
+      }
     }
   };
 
@@ -254,7 +306,30 @@ function CruiseAreaAssignmentModal({
     };
 
     try {
-      await onAssignArea?.(payload);
+      switch (selectedConfigType) {
+        case "PRODUCT":
+        case "ROOM":
+          if (onAssignProduct) {
+            await onAssignProduct(payload);
+          } else {
+            await onAssignArea?.(payload);
+          }
+          break;
+
+        case "SERVICE":
+          if (onAssignService) {
+            await onAssignService(payload);
+          } else {
+            await onAssignArea?.(payload);
+          }
+          break;
+
+        case "ACTIVITY":
+        default:
+          await onAssignArea?.(payload);
+          break;
+      }
+
       setSelectedAreaId(null);
       await onLoadAssignments?.(tour.id);
     } catch (err) {
@@ -269,13 +344,8 @@ function CruiseAreaAssignmentModal({
 
     const currentTourId = tour?.id || tour?.tourId;
 
-    console.log("🚀 Gọi DELETE với:", { tourId: currentTourId, cruiseAreaId });
-
     if (!currentTourId || !cruiseAreaId || cruiseAreaId === "undefined") {
-      console.error("❌ Thiếu tourId hoặc cruiseAreaId hợp lệ!", {
-        currentTourId,
-        cruiseAreaId,
-      });
+      console.error("❌ Thiếu tourId hoặc cruiseAreaId hợp lệ!");
       alert("Không thể xóa do thông tin khu vực hoặc tour không hợp lệ.");
       return;
     }
@@ -286,11 +356,11 @@ function CruiseAreaAssignmentModal({
 
     try {
       setIsDeleting(true);
-
-      // TRUYỀN ĐỦ 2 THAM SỐ: tourId VÀ cruiseAreaId
-      await onDeleteAssignment?.(currentTourId, cruiseAreaId);
-
-      // Tải lại danh sách phân công mới
+      await onDeleteAssignment?.(
+        currentTourId,
+        cruiseAreaId,
+        selectedConfigType,
+      );
       await onLoadAssignments?.(currentTourId);
     } catch (err) {
       console.error("Lỗi khi xóa phân công:", err);
@@ -298,6 +368,7 @@ function CruiseAreaAssignmentModal({
       setIsDeleting(false);
     }
   };
+
   const handleClose = () => {
     if (assignmentLoading || isDeleting) return;
     onClose?.();
@@ -537,12 +608,16 @@ function CruiseAreaAssignmentModal({
                       String(selectedAreaId),
                     );
                     const isAssigned = Boolean(selectedAssignment);
+                    // 🎯 LẤY CHÍNH XÁC CONFIG TYPE ĐÃ DÙNG TRONG DATABASE
+                    const assignedTypeFromDb = isAssigned
+                      ? detectConfigType(selectedAssignment, defaultConfigType)
+                      : null;
 
                     return (
                       <AreaDetailPreview
                         area={selectedItemObject}
                         isAssigned={isAssigned}
-                        assignedType={selectedAssignment?.configType}
+                        assignedType={assignedTypeFromDb}
                         selectedConfigType={selectedConfigType}
                         onChangeConfigType={setSelectedConfigType}
                         onSaveAssignment={handleAssign}
@@ -569,8 +644,8 @@ function CruiseAreaAssignmentModal({
           <div className="caam-footer-info">
             {selectedAreaId ? (
               <span className="info-selected">
-                <CheckCircle size={16} /> Đã chọn mục ID: {selectedAreaId} (
-                {selectedConfigType})
+                <CheckCircle size={16} /> Đã chọn:{" "}
+                {getItemName(selectedItemObject)} ({selectedConfigType})
               </span>
             ) : (
               <span className="info-hint">

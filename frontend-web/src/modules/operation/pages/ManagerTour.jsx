@@ -3,10 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { RefreshCw, Ship, CheckCircle, AlertCircle } from "lucide-react";
 
-// Import 3 hook độc lập
+// Import các hook hiện có
 import useOperationTours from "../hooks/useOperationTours";
 import useTourCruiseAssignments from "../hooks/useTourCruiseAssignments";
 import useActivityTourAssignments from "../hooks/useActivityTourAssignments";
+import useProductTourAssignments from "../hooks/useProductTourAssignments";
 
 import OperationTourFilter from "../components/OperationTourFilter";
 import OperationTourTable from "../components/OperationTourTable";
@@ -60,14 +61,28 @@ function ManagerTour() {
     clearMessages: clearActivityMessages,
   } = useActivityTourAssignments();
 
-  // Gom các thông báo Lỗi & Thành công từ cả 3 hooks
-  const error = tourError || cruiseError || activityError;
-  const success = tourSuccess || cruiseSuccess || activitySuccess;
+  // 4. Hook quản lý Phân công Sản phẩm
+  const {
+    productAssignments,
+    productLoading,
+    error: productError,
+    success: productSuccess,
+    loadProductAssignments,
+
+    clearProductAssignments,
+    clearMessages: clearProductMessages,
+  } = useProductTourAssignments();
+
+  // Gom các thông báo Lỗi & Thành công
+  const error = tourError || cruiseError || activityError || productError;
+  const success =
+    tourSuccess || cruiseSuccess || activitySuccess || productSuccess;
 
   const clearAllMessages = () => {
     clearTourMessages();
     clearCruiseMessages();
     clearActivityMessages();
+    clearProductMessages();
   };
 
   // =====================================================
@@ -181,21 +196,21 @@ function ManagerTour() {
     clearAllMessages();
     setSelectedTour(tour);
 
-    // 1. Lấy ID du thuyền đã gán trước đó để highlight
     const currentCruiseId = tour?.cruiseId || tour?.cruise?.id || null;
     setSelectedCruiseId(currentCruiseId);
 
-    // 2. Mở Modal
     setShowCruiseModal(true);
 
-    // 3. Tải song song cả danh sách tàu trống VÀ danh sách khu vực đã phân công của Tour
+    // Tải song song danh sách tàu trống, khu vực và sản phẩm
     await Promise.all([
       loadAvailableCruises(tour.id),
-      loadActivityAssignments(tour.id), // Fetch phân công để Modal biết tour đã gán khu vực chưa
+      loadActivityAssignments(tour.id),
+      loadProductAssignments(tour.id),
     ]);
   };
+
   // =====================================================
-  // ASSIGN AREA MODAL (MỞ MODAL PHÂN CÔNG KHU VỰC)
+  // ASSIGN AREA MODAL
   // =====================================================
   const handleAssignArea = async (tour) => {
     clearAllMessages();
@@ -259,14 +274,29 @@ function ManagerTour() {
     if (!confirmed) return;
 
     try {
-      let currentTourAssignments = activityAssignments;
-      if (!activityAssignments || activityAssignments.length === 0) {
-        currentTourAssignments = await loadActivityAssignments(tour.id);
+      // 1. Lấy dữ liệu Hoạt động
+      let currentActivityAssignments = activityAssignments;
+      if (
+        !currentActivityAssignments ||
+        currentActivityAssignments.length === 0
+      ) {
+        currentActivityAssignments = await loadActivityAssignments(tour.id);
       }
 
+      // 2. Lấy dữ liệu Sản phẩm
+      let currentProductAssignments = productAssignments;
+      if (
+        !currentProductAssignments ||
+        currentProductAssignments.length === 0
+      ) {
+        currentProductAssignments = await loadProductAssignments(tour.id);
+      }
+
+      // 3. Đóng gói Payload lưu vào Database
       const payload = {
         tourId: tour.id,
-        assignments: currentTourAssignments,
+        assignments: currentActivityAssignments || [],
+        productAssignments: currentProductAssignments || [],
       };
 
       await approveTour(tour.id, payload);
@@ -307,6 +337,7 @@ function ManagerTour() {
     setSelectedCruiseId(null);
 
     clearAvailableCruises();
+    clearProductAssignments();
     clearAllMessages();
   };
 
@@ -330,8 +361,8 @@ function ManagerTour() {
             <h1>Quản lý Tour</h1>
           </div>
           <p>
-            Quản lý Tour chờ duyệt, Tour đã duyệt và phân công khu vực hoạt động
-            trên du thuyền.
+            Quản lý Tour chờ duyệt, Tour đã duyệt và phân công khu vực hoạt
+            động, sản phẩm trên du thuyền.
           </p>
         </div>
 
@@ -435,9 +466,9 @@ function ManagerTour() {
       <CruiseSelectModal
         open={showCruiseModal}
         tour={selectedTour}
-        assignments={activityAssignments} // 👈 TRUYỀN DANH SÁCH PHÂN CÔNG VÀO ĐÂY
+        assignments={activityAssignments}
         cruises={availableCruises}
-        loading={cruiseLoading || activityLoading} // 👈 Kết hợp loading để giao diện mượt hơn
+        loading={cruiseLoading || activityLoading || productLoading}
         approving={approving}
         assigning={assigning}
         selectedCruiseId={selectedCruiseId}

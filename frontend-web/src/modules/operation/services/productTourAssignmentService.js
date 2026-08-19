@@ -24,11 +24,13 @@ const productTourAssignmentService = {
   },
 
   /**
-   * DELETE /api/operation/product-tour-assignment/{id}
-   * Xóa phân công tiện ích/sản phẩm
+   * DELETE /api/operation/product-tour-assignment/tour/{tourId}/area/{cruiseAreaId}
+   * Xóa phân công tiện ích theo tourId và cruiseAreaId (Chuẩn hóa với Activity)
    */
-  delete: async (id) => {
-    const response = await api.delete(`${BASE_URL}/${id}`);
+  delete: async (tourId, cruiseAreaId) => {
+    const response = await api.delete(
+      `${BASE_URL}/tour/${tourId}/area/${cruiseAreaId}`,
+    );
     return response.data;
   },
 };

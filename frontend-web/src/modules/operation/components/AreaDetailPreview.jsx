@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   MapPin,
   DoorClosed,
@@ -10,20 +10,34 @@ import {
   Tag,
   Info,
   ImageOff,
-  UserCheck,
-  Bookmark,
   Trash2,
   CheckCircle2,
 } from "lucide-react";
 import "../styles/AreaDetailPreview.css";
 
-const BASE_URL = "http://localhost:8080";
-
 const CONFIG_LABEL_MAP = {
   ACTIVITY: "Hoạt động trên tàu",
   SERVICE: "Dịch vụ",
-  PRODUCT: "Sản phẩm",
+  PRODUCT: "Sản phẩm / Phòng",
 };
+
+const CONFIG_OPTIONS = [
+  {
+    type: "ACTIVITY",
+    label: "Hoạt động (Activity)",
+    desc: "Tổ chức sự kiện, vui chơi, hoạt động nhóm.",
+  },
+  {
+    type: "SERVICE",
+    label: "Dịch vụ (Service)",
+    desc: "Khu vực Spa, Nhà hàng, Quầy bar, Gym...",
+  },
+  {
+    type: "PRODUCT",
+    label: "Sản phẩm / Phòng (Product)",
+    desc: "Gán phòng nghỉ hoặc dịch vụ lưu trú cụ thể.",
+  },
+];
 
 function AreaDetailPreview({
   area,
@@ -33,21 +47,20 @@ function AreaDetailPreview({
   onChangeConfigType,
   onSaveAssignment,
   onUnassign,
-  loading,
+  loading = false,
 }) {
-  console.log("Dữ liệu Area nhận được:", area);
-  console.log("Trạng thái isAssignedProp truyền vào:", isAssignedProp);
-
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
 
-  // Reset index ảnh khi thay đổi area
+  // Reset slider chỉ số ảnh khi đổi khu vực/phòng
   useEffect(() => {
     setCurrentImageIdx(0);
   }, [area]);
 
-  const isRoom = area?._type === "ROOM";
+  if (!area) return null;
 
-  // KIỂM TRA ĐÃ PHÂN CÔNG (BỔ SUNG isAssignedProp VÀO ĐÂY)
+  const isRoom = area?._type === "ROOM" || area?.type === "ROOM";
+
+  // Kiểm tra trạng thái gán
   const isAssigned = Boolean(
     isAssignedProp ||
     area?.isAssigned ||
@@ -56,34 +69,8 @@ function AreaDetailPreview({
     area?.status === "ASSIGNED",
   );
 
-  // 1. Hàm chuẩn hóa URL hình ảnh
-  const formatImageUrl = useCallback((img) => {
-    if (!img) return null;
-
-    let url = "";
-    if (typeof img === "string") url = img;
-    else if (typeof img === "object" && img.url) url = img.url;
-    else if (typeof img === "object" && img.path) url = img.path;
-
-    if (!url) return null;
-
-    if (
-      url.startsWith("http://") ||
-      url.startsWith("https://") ||
-      url.startsWith("data:") ||
-      url.startsWith("blob:")
-    ) {
-      return url;
-    }
-
-    const cleanPath = url.startsWith("/") ? url : `/${url}`;
-    return `${BASE_URL}${cleanPath}`;
-  }, []);
-
-  // 2. Trích xuất toàn bộ ảnh
+  // Trích xuất danh sách ảnh đã chuẩn hóa
   const images = useMemo(() => {
-    if (!area) return [];
-
     const rawList =
       area.images ||
       area.imageUrl ||
@@ -93,8 +80,10 @@ function AreaDetailPreview({
       [];
 
     const list = Array.isArray(rawList) ? rawList : [rawList];
-    return list.map(formatImageUrl).filter(Boolean);
-  }, [area, formatImageUrl]);
+    return list
+      .map((img) => (typeof img === "string" ? img : img?.url || img?.path))
+      .filter(Boolean);
+  }, [area]);
 
   const handleNextImage = (e) => {
     e.stopPropagation();
@@ -108,33 +97,12 @@ function AreaDetailPreview({
     setCurrentImageIdx((prev) => (prev - 1 + images.length) % images.length);
   };
 
-  if (!area) return null;
-
-  const configOptions = [
-    {
-      type: "ACTIVITY",
-      label: "Hoạt động (Activity)",
-      desc: "Tổ chức sự kiện, vui chơi, hoạt động nhóm.",
-    },
-    {
-      type: "SERVICE",
-      label: "Dịch vụ (Service)",
-      desc: "Khu vực Spa, Nhà hàng, Quầy bar, Gym...",
-    },
-    {
-      type: "PRODUCT",
-      label: "Sản phẩm / Phòng (Product)",
-      desc: "Gán phòng nghỉ hoặc dịch vụ lưu trú cụ thể.",
-    },
-  ];
-
   const currentImgUrl = images[currentImageIdx] || images[0];
   const displayAssignedType =
     assignedType ||
     selectedConfigType ||
     area?.assignedType ||
-    area?.configType ||
-    area?.type;
+    area?.configType;
   const assignedLabel =
     CONFIG_LABEL_MAP[displayAssignedType] || "Chưa xác định loại hình";
 
@@ -159,7 +127,7 @@ function AreaDetailPreview({
         {area.code && <span className="adp-code">Mã: {area.code}</span>}
       </div>
 
-      {/* KHU VỰC HIỂN THỊ ẢNH (CAROUSEL SLIDER) */}
+      {/* GALLERY / SLIDER */}
       <div className="adp-gallery">
         {images.length > 0 ? (
           <div className="adp-slider">
@@ -215,7 +183,7 @@ function AreaDetailPreview({
         )}
       </div>
 
-      {/* DANH SÁCH ẢNH NHỎ (THUMBNAILS) */}
+      {/* THUMBNAILS */}
       {images.length > 1 && (
         <div className="adp-thumbnails">
           {images.map((imgUrl, idx) => (
@@ -232,7 +200,7 @@ function AreaDetailPreview({
         </div>
       )}
 
-      {/* THÔNG TIN CHI TIẾT CHUNG */}
+      {/* THÔNG TIN CHI TIẾT */}
       <div className="adp-info-section">
         <div className="adp-info-row">
           <span className="label">
@@ -257,9 +225,9 @@ function AreaDetailPreview({
         )}
       </div>
 
-      {/* PHÂN NHÁNH XỬ LÝ */}
+      {/* PHÂN NHÁNH TRẠNG THÁI GÁN */}
       {isAssigned ? (
-        /* --- TRƯỜNG HỢP 1: ĐÃ PHÂN CÔNG --- */
+        /* TRƯỜNG HỢP 1: ĐÃ PHÂN CÔNG */
         <div className="adp-assigned-section">
           <div className="adp-status-box assigned-box">
             <div className="adp-status-header">
@@ -298,35 +266,8 @@ function AreaDetailPreview({
             </button>
           </div>
         </div>
-      ) : isRoom ? (
-        /* --- TRƯỜNG HỢP 2: PHÒNG NGHỈ CHƯA ĐẶT --- */
-        <div className="adp-room-status-section">
-          <div className="adp-section-title">
-            <Bookmark size={15} />
-            <span>Trạng thái đặt phòng (Booking)</span>
-          </div>
-
-          <div className="adp-status-box occupied">
-            <div className="adp-info-row">
-              <span className="label">Trạng thái:</span>
-              <span className="status-badge occupied-badge">Đã đặt phòng</span>
-            </div>
-
-            <div className="adp-info-row">
-              <span className="label">Mã Booking ID:</span>
-              <span className="value code-highlight">BK-2026-8892</span>
-            </div>
-
-            <div className="adp-info-row">
-              <span className="label">
-                <UserCheck size={14} /> Người ở hiện tại:
-              </span>
-              <span className="value">Nguyễn Văn A (Khách đoàn)</span>
-            </div>
-          </div>
-        </div>
       ) : (
-        /* --- TRƯỜNG HỢP 3: KHU VỰC CHƯA PHÂN CÔNG (MỚI ĐƯỢC CHỌN & LƯU) --- */
+        /* TRƯỜNG HỢP 2: CHƯA PHÂN CÔNG */
         <>
           <div className="adp-config-section">
             <div className="adp-section-title">
@@ -335,7 +276,7 @@ function AreaDetailPreview({
             </div>
 
             <div className="adp-config-options">
-              {configOptions.map((option) => {
+              {CONFIG_OPTIONS.map((option) => {
                 const isChecked = selectedConfigType === option.type;
                 return (
                   <div
@@ -361,7 +302,7 @@ function AreaDetailPreview({
               type="button"
               className="adp-save-btn"
               onClick={onSaveAssignment}
-              disabled={loading}
+              disabled={loading || !selectedConfigType}
             >
               {loading ? (
                 <>

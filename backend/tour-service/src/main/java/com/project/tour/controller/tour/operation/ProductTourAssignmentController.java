@@ -19,9 +19,7 @@ public class ProductTourAssignmentController {
 
     private final ProductTourAssignmentService assignmentService;
 
-    public ProductTourAssignmentController(
-            ProductTourAssignmentService assignmentService) {
-
+    public ProductTourAssignmentController(ProductTourAssignmentService assignmentService) {
         this.assignmentService = assignmentService;
     }
 
@@ -44,18 +42,21 @@ public class ProductTourAssignmentController {
     public ResponseEntity<List<ProductTourAssignmentResponse>> getByTour(
             @PathVariable UUID tourId) {
 
-        return ResponseEntity.ok(
-                assignmentService.getByTour(tourId));
+        return ResponseEntity.ok(assignmentService.getByTour(tourId));
     }
 
     /**
-     * Xóa phân công tiện ích khi vẫn đang WAITING_CONFIG.
+     * Xóa phân công tiện ích theo tourId và cruiseAreaId (Chuẩn đồng bộ với
+     * Activity)
+     * URL: DELETE
+     * /api/operation/product-tour-assignment/tour/{tourId}/area/{cruiseAreaId}
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/tour/{tourId}/area/{cruiseAreaId}")
     public ResponseEntity<Void> delete(
-            @PathVariable UUID id) {
+            @PathVariable UUID tourId,
+            @PathVariable UUID cruiseAreaId) {
 
-        assignmentService.deleteAssignment(id);
+        assignmentService.deleteAssignment(tourId, cruiseAreaId);
 
         return ResponseEntity.noContent().build();
     }
