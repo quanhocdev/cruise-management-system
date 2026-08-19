@@ -93,6 +93,7 @@ function CruiseAreaAssignmentModal({
 
   activityAssignments = [],
   productAssignments = [],
+  serviceAssignments = [],
 
   layoutLoading = false,
   assignmentLoading = false,
@@ -104,9 +105,11 @@ function CruiseAreaAssignmentModal({
 
   onAssignArea,
   onAssignProduct,
+  onAssignService,
 
   onDeleteActivityAssignment,
   onDeleteProductAssignment,
+  onDeleteServiceAssignment,
 
   onClose,
 }) {
@@ -197,9 +200,34 @@ function CruiseAreaAssignmentModal({
       };
     }
 
+    const service = serviceAssignmentMap.get(key);
+    if (service) {
+      return {
+        type: "SERVICE",
+        data: service,
+      };
+    }
+
     return null;
   };
 
+  const serviceAssignmentMap = useMemo(() => {
+    const map = new Map();
+
+    serviceAssignments.forEach((item) => {
+      const id =
+        item.cruiseAreaId ||
+        item.areaId ||
+        item.cruiseArea?.id ||
+        item.area?.id;
+
+      if (id) {
+        map.set(String(id), item);
+      }
+    });
+
+    return map;
+  }, [serviceAssignments]);
   const getCruiseName = useCallback(() => {
     if (tour?.cruise?.name) return tour.cruise.name;
     if (tour?.cruiseName) return tour.cruiseName;
@@ -209,8 +237,8 @@ function CruiseAreaAssignmentModal({
     const allAssignments = [
       ...(Array.isArray(activityAssignments) ? activityAssignments : []),
       ...(Array.isArray(productAssignments) ? productAssignments : []),
+      ...(Array.isArray(serviceAssignments) ? serviceAssignments : []),
     ];
-
     if (allAssignments.length > 0) {
       const first = allAssignments[0];
       const cruise = first?.cruiseArea?.cruise || first?.cruise;
@@ -219,7 +247,13 @@ function CruiseAreaAssignmentModal({
     }
 
     return "Chưa xác định";
-  }, [tour, cruiseLayout, activityAssignments, productAssignments]);
+  }, [
+    tour,
+    cruiseLayout,
+    activityAssignments,
+    productAssignments,
+    serviceAssignments,
+  ]);
 
   // TỔNG HỢP AREAS VÀ ROOMS
   const allItemsWithDeckInfo = useMemo(() => {
@@ -266,7 +300,12 @@ function CruiseAreaAssignmentModal({
       stats.set(key, current);
     });
     return stats;
-  }, [allItemsWithDeckInfo, activityAssignmentMap, productAssignmentMap]);
+  }, [
+    allItemsWithDeckInfo,
+    activityAssignmentMap,
+    productAssignmentMap,
+    serviceAssignmentMap,
+  ]);
 
   const selectedItemObject = useMemo(() => {
     if (!selectedAreaId) return null;
@@ -278,7 +317,12 @@ function CruiseAreaAssignmentModal({
   const totalAssignedCount = useMemo(() => {
     return allItemsWithDeckInfo.filter((item) => getAssignment(getItemId(item)))
       .length;
-  }, [allItemsWithDeckInfo, activityAssignmentMap, productAssignmentMap]);
+  }, [
+    allItemsWithDeckInfo,
+    activityAssignmentMap,
+    productAssignmentMap,
+    serviceAssignmentMap,
+  ]);
 
   // LỌC DANH SÁCH
   const filteredItems = useMemo(() => {
@@ -340,7 +384,16 @@ function CruiseAreaAssignmentModal({
     const tourId = tour?.id ?? tour?.tourId;
     const cruiseAreaId = selectedAreaId;
 
+    console.log("========== HANDLE ASSIGN ==========");
+    console.log("tourId:", tourId);
+    console.log("cruiseAreaId:", cruiseAreaId);
+    console.log("selectedConfigType:", selectedConfigType);
+    console.log("onAssignArea:", onAssignArea);
+    console.log("onAssignProduct:", onAssignProduct);
+    console.log("onAssignService:", onAssignService);
+
     if (!tourId || !cruiseAreaId) {
+      console.error("❌ Thiếu tourId hoặc cruiseAreaId");
       return;
     }
 
@@ -349,27 +402,53 @@ function CruiseAreaAssignmentModal({
       cruiseAreaId: String(cruiseAreaId),
     };
 
+    console.log("📦 Payload:", payload);
+
     try {
       if (selectedConfigType === "ACTIVITY") {
-        await onAssignArea?.(payload);
+        console.log("🔥 ASSIGN ACTIVITY");
+
+        if (!onAssignArea) {
+          console.error("❌ onAssignArea chưa được truyền vào!");
+          return;
+        }
+
+        await onAssignArea(payload);
       }
 
       if (selectedConfigType === "PRODUCT") {
-        await onAssignProduct?.(payload);
+        console.log("🔥 ASSIGN PRODUCT");
+
+        if (!onAssignProduct) {
+          console.error("❌ onAssignProduct chưa được truyền vào!");
+          return;
+        }
+
+        await onAssignProduct(payload);
       }
 
       if (selectedConfigType === "SERVICE") {
-        // Sau này:
-        // await onAssignService?.(payload);
+        console.log("🔥 ASSIGN SERVICE");
+
+        if (!onAssignService) {
+          console.error("❌ onAssignService chưa được truyền vào!");
+          return;
+        }
+
+        await onAssignService(payload);
       }
 
+      console.log("✅ ASSIGN SUCCESS");
+
       setSelectedAreaId(null);
+
       await onLoadAssignments?.(tourId);
     } catch (err) {
-      console.error("Lỗi phân công:", err);
+      console.error("❌ LỖI PHÂN CÔNG:", err);
+      console.error("Response:", err?.response);
+      console.error("Response data:", err?.response?.data);
     }
   };
-
   const handleDeleteAssignment = async (e, cruiseAreaId, configType) => {
     if (e && typeof e.stopPropagation === "function") {
       e.stopPropagation();
@@ -394,6 +473,8 @@ function CruiseAreaAssignmentModal({
         await onDeleteActivityAssignment?.(currentTourId, cruiseAreaId);
       } else if (configType === "PRODUCT") {
         await onDeleteProductAssignment?.(currentTourId, cruiseAreaId);
+      } else if (configType === "SERVICE") {
+        await onDeleteServiceAssignment?.(currentTourId, cruiseAreaId);
       }
 
       await onLoadAssignments?.(currentTourId);

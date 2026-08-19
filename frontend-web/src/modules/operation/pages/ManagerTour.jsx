@@ -1,6 +1,6 @@
 // src/modules/operation/pages/ManagerTour.jsx
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { RefreshCw, Ship, CheckCircle, AlertCircle } from "lucide-react";
 
 // Import các hook hiện có
@@ -8,6 +8,7 @@ import useOperationTours from "../hooks/useOperationTours";
 import useTourCruiseAssignments from "../hooks/useTourCruiseAssignments";
 import useActivityTourAssignments from "../hooks/useActivityTourAssignments";
 import useProductTourAssignments from "../hooks/useProductTourAssignments";
+import useServiceTourAssignments from "../hooks/useServiceTourAssignments";
 
 import OperationTourFilter from "../components/OperationTourFilter";
 import OperationTourTable from "../components/OperationTourTable";
@@ -74,18 +75,37 @@ function ManagerTour() {
     clearMessages: clearProductMessages,
   } = useProductTourAssignments();
 
+  // 5. Hook quản lý Phân công Dịch vụ
+  const {
+    serviceAssignments,
+    serviceLoading,
+    serviceError,
+    serviceSuccess,
+    loadServiceAssignments,
+    assignServiceArea,
+    deleteServiceAssignment,
+    clearServiceAssignments,
+    clearMessages: clearServiceMessages,
+  } = useServiceTourAssignments();
+
   // Gom các thông báo Lỗi & Thành công
-  const error = tourError || cruiseError || activityError || productError;
+  const error =
+    tourError || cruiseError || activityError || productError || serviceError;
+
   const success =
-    tourSuccess || cruiseSuccess || activitySuccess || productSuccess;
+    tourSuccess ||
+    cruiseSuccess ||
+    activitySuccess ||
+    productSuccess ||
+    serviceSuccess;
 
   const clearAllMessages = () => {
     clearTourMessages();
     clearCruiseMessages();
     clearActivityMessages();
     clearProductMessages();
+    clearServiceMessages();
   };
-
   // =====================================================
   // VIEW MODE
   // =====================================================
@@ -207,8 +227,20 @@ function ManagerTour() {
       loadAvailableCruises(tour.id),
       loadActivityAssignments(tour.id),
       loadProductAssignments(tour.id),
+      loadServiceAssignments(tour.id),
     ]);
   };
+
+  const handleLoadAreaAssignments = useCallback(
+    async (tourId) => {
+      await Promise.all([
+        loadActivityAssignments(tourId),
+        loadProductAssignments(tourId),
+        loadServiceAssignments(tourId),
+      ]);
+    },
+    [loadActivityAssignments, loadProductAssignments, loadServiceAssignments],
+  );
 
   // =====================================================
   // ASSIGN AREA MODAL
@@ -222,6 +254,7 @@ function ManagerTour() {
       loadCruiseLayout(tour.id),
       loadActivityAssignments(tour.id),
       loadProductAssignments(tour.id),
+      loadServiceAssignments(tour.id),
     ]);
   };
 
@@ -229,7 +262,7 @@ function ManagerTour() {
   // CLOSE AREA MODAL
   // =====================================================
   const handleCloseAreaModal = () => {
-    if (activityLoading || productLoading || layoutLoading) {
+    if (activityLoading || productLoading || serviceLoading || layoutLoading) {
       return;
     }
 
@@ -239,6 +272,7 @@ function ManagerTour() {
     clearCruiseLayout();
     clearActivityAssignments();
     clearProductAssignments();
+    clearServiceAssignments();
     clearAllMessages();
   };
 
@@ -341,6 +375,7 @@ function ManagerTour() {
 
     clearAvailableCruises();
     clearProductAssignments();
+    clearServiceAssignments();
     clearAllMessages();
   };
 
@@ -486,19 +521,17 @@ function ManagerTour() {
         cruiseLayout={cruiseLayout}
         activityAssignments={activityAssignments}
         productAssignments={productAssignments}
+        serviceAssignments={serviceAssignments}
         layoutLoading={layoutLoading}
-        assignmentLoading={activityLoading || productLoading}
+        assignmentLoading={activityLoading || productLoading || serviceLoading}
         onLoadLayout={loadCruiseLayout}
-        onLoadAssignments={async (tourId) => {
-          await Promise.all([
-            loadActivityAssignments(tourId),
-            loadProductAssignments(tourId),
-          ]);
-        }}
+        onLoadAssignments={handleLoadAreaAssignments}
         onAssignArea={assignActivityArea}
         onAssignProduct={assignProduct}
+        onAssignService={assignServiceArea}
         onDeleteActivityAssignment={deleteActivityAssignment}
         onDeleteProductAssignment={deleteProductAssignment}
+        onDeleteServiceAssignment={deleteServiceAssignment}
         onClose={handleCloseAreaModal}
       />
     </div>

@@ -24,21 +24,20 @@ const CONFIG_LABEL_MAP = {
 const CONFIG_OPTIONS = [
   {
     type: "ACTIVITY",
-    label: "Hoạt động (Activity)",
-    desc: "Tổ chức sự kiện, vui chơi, hoạt động nhóm.",
+    label: "Hoạt động",
+    desc: "Phân công khu vực cho hoạt động trên du thuyền.",
   },
   {
     type: "SERVICE",
-    label: "Dịch vụ (Service)",
-    desc: "Khu vực Spa, Nhà hàng, Quầy bar, Gym...",
+    label: "Dịch vụ",
+    desc: "Phân công khu vực cho dịch vụ trên du thuyền.",
   },
   {
     type: "PRODUCT",
-    label: "Sản phẩm / Phòng (Product)",
-    desc: "Gán phòng nghỉ hoặc dịch vụ lưu trú cụ thể.",
+    label: "Sản phẩm",
+    desc: "Phân công khu vực hoặc phòng cho sản phẩm.",
   },
 ];
-
 function AreaDetailPreview({
   area,
   isAssigned: isAssignedProp,
