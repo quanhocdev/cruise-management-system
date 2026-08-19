@@ -1,50 +1,50 @@
-package com.project.tour.mapper.product;
+// package com.project.tour.mapper.product;
 
-import com.project.tour.dto.product.area.CreateProductAreaRequest;
-import com.project.tour.dto.product.area.ProductAreaResponse;
-import com.project.tour.dto.product.area.UpdateProductAreaRequest;
-import com.project.tour.model.ProductArea;
+// import com.project.tour.dto.product.area.CreateProductAreaRequest;
+// import com.project.tour.dto.product.area.ProductAreaResponse;
+// import com.project.tour.dto.product.area.UpdateProductAreaRequest;
+// import com.project.tour.model.ProductArea;
 
-public class ProductAreaMapper {
+// public class ProductAreaMapper {
 
-    public static ProductArea toEntity(
-            CreateProductAreaRequest request) {
+// public static ProductArea toEntity(
+// CreateProductAreaRequest request) {
 
-        return new ProductArea();
-    }
+// return new ProductArea();
+// }
 
-    public static void updateEntity(
-            ProductArea productArea,
-            UpdateProductAreaRequest request) {
+// public static void updateEntity(
+// ProductArea productArea,
+// UpdateProductAreaRequest request) {
 
-        // Hiện tại chưa có field nào để update.
-    }
+// // Hiện tại chưa có field nào để update.
+// }
 
-    public static ProductAreaResponse toResponse(
-            ProductArea productArea) {
+// public static ProductAreaResponse toResponse(
+// ProductArea productArea) {
 
-        ProductAreaResponse response = new ProductAreaResponse();
+// ProductAreaResponse response = new ProductAreaResponse();
 
-        response.setId(productArea.getId());
+// response.setId(productArea.getId());
 
-        response.setAreaId(
-                productArea.getCruiseArea().getId());
+// response.setAreaId(
+// productArea.getCruiseArea().getId());
 
-        response.setAreaName(
-                productArea.getCruiseArea().getName());
+// response.setAreaName(
+// productArea.getCruiseArea().getName());
 
-        response.setProductId(
-                productArea.getProduct().getId());
+// response.setProductId(
+// productArea.getProduct().getId());
 
-        response.setProductName(
-                productArea.getProduct().getName());
+// response.setProductName(
+// productArea.getProduct().getName());
 
-        response.setCreatedAt(
-                productArea.getCreatedAt());
+// response.setCreatedAt(
+// productArea.getCreatedAt());
 
-        response.setUpdatedAt(
-                productArea.getUpdatedAt());
+// response.setUpdatedAt(
+// productArea.getUpdatedAt());
 
-        return response;
-    }
-}
+// return response;
+// }
+// }
