@@ -138,15 +138,13 @@ public class ActivityCruiseTourAssignmentService {
         /**
          * Xóa phân công khi chưa được Onboard cấu hình.
          */
-        public void deleteAssignment(UUID id) {
-
-                ActivityCruiseTour assignment = assignmentRepository.findById(id)
-                                .orElseThrow(() -> new AppException(
-                                                "Assignment not found",
-                                                HttpStatus.NOT_FOUND));
+        @Transactional
+        public void deleteByTourAndArea(UUID tourId, UUID cruiseAreaId) {
+                ActivityCruiseTour assignment = assignmentRepository
+                                .findByTourIdAndCruiseAreaId(tourId, cruiseAreaId)
+                                .orElseThrow(() -> new AppException("Assignment not found", HttpStatus.NOT_FOUND));
 
                 if (assignment.getStatus() != ActivityCruiseTourStatus.WAITING_CONFIG) {
-
                         throw new AppException(
                                         "Cannot delete an assignment that has already been configured",
                                         HttpStatus.BAD_REQUEST);

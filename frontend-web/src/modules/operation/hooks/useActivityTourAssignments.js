@@ -78,18 +78,26 @@ export default function useActivityTourAssignments() {
   );
 
   /**
-   * Xóa phân công khu vực hoạt động
+   * Xóa phân công khu vực hoạt động theo tourId và cruiseAreaId
    */
-  const deleteActivityAssignment = useCallback(async (assignmentId) => {
+  const deleteActivityAssignment = useCallback(async (tourId, cruiseAreaId) => {
     setLoading(true);
     setError("");
     setSuccess("");
 
     try {
-      await activityTourAssignmentService.delete(assignmentId);
+      await activityTourAssignmentService.delete(tourId, cruiseAreaId);
 
+      // Cập nhật State linh hoạt: hỗ trợ lọc cả trường hợp cruiseAreaId, areaId hoặc nested object
       setActivityAssignments((prev) =>
-        prev.filter((assignment) => assignment.id !== assignmentId),
+        prev.filter((item) => {
+          const targetId =
+            item.cruiseAreaId ||
+            item.areaId ||
+            item.cruiseArea?.id ||
+            item.area?.id;
+          return String(targetId) !== String(cruiseAreaId);
+        }),
       );
 
       setSuccess("Đã hủy phân công khu vực hoạt động.");

@@ -27,6 +27,4 @@ public interface ActivityCruiseTourAssignmentRepository
         // Kiểm tra đã phân công khu vực này cho tour chưa
         Optional<ActivityCruiseTour> findByTourIdAndCruiseAreaId(UUID tourId, UUID cruiseAreaId);
 
-        // Xóa phân công theo tourId và cruiseAreaId
-        void deleteByTourIdAndCruiseAreaId(UUID tourId, UUID cruiseAreaId);
 }

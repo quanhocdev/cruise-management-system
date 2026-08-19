@@ -26,11 +26,13 @@ const activityTourAssignmentService = {
   },
 
   /**
-   * DELETE /api/operation/activity-cruise-tour-assignment/{id}
-   * Xóa phân công khu vực hoạt động theo Primary Key Assignment ID
+   * DELETE /api/operation/activity-cruise-tour-assignment/tour/{tourId}/area/{cruiseAreaId}
+   * Xóa phân công khu vực hoạt động theo tourId và cruiseAreaId
    */
-  delete: async (assignmentId) => {
-    const response = await api.delete(`${BASE_URL}/${assignmentId}`);
+  delete: async (tourId, cruiseAreaId) => {
+    const response = await api.delete(
+      `${BASE_URL}/tour/${tourId}/area/${cruiseAreaId}`,
+    );
     return response.data;
   },
 };

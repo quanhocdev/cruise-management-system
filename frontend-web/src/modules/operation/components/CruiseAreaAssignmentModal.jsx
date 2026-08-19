@@ -14,7 +14,7 @@ import AreaFilterToolbar from "./AreaFilterToolbar";
 import AreaDetailPreview from "./AreaDetailPreview";
 import "../styles/CruiseAreaAssignmentModal.css";
 
-// HELPER FUNCTIONS (Đưa ra ngoài để tránh khởi tạo lại mỗi lần render)
+// HELPER FUNCTIONS
 const getDeckId = (deck) => deck?.deckId || deck?.id;
 
 const getDeckName = (deck) => {
@@ -69,6 +69,7 @@ function CruiseAreaAssignmentModal({
   const [selectedConfigType, setSelectedConfigType] = useState("ACTIVITY");
   const [searchTerm, setSearchTerm] = useState("");
   const [viewType, setViewType] = useState("ALL"); // 'ALL' | 'AREA' | 'ROOM'
+  const [isDeleting, setIsDeleting] = useState(false); // Quản lý trạng thái xóa riêng
 
   // NORMALIZE DECKS
   const decks = useMemo(() => {
@@ -92,7 +93,7 @@ function CruiseAreaAssignmentModal({
     }
   }, [open, tour?.id, onLoadLayout, onLoadAssignments]);
 
-  // MAP PHÂN CÔNG (UUID String Key)
+  // MAP PHÂN CÔNG (UUID String Key -> Assignment Object)
   const assignmentMap = useMemo(() => {
     if (!Array.isArray(assignments)) return new Map();
     const map = new Map();
@@ -249,52 +250,62 @@ function CruiseAreaAssignmentModal({
     const payload = {
       tourId: tourIdStr,
       cruiseAreaId: areaIdStr,
-      configType: selectedConfigType, // Thêm configType nếu backend yêu cầu
+      configType: selectedConfigType,
     };
 
     try {
-      await onAssignArea(payload);
+      await onAssignArea?.(payload);
       setSelectedAreaId(null);
+      await onLoadAssignments?.(tour.id);
     } catch (err) {
       console.error("Lỗi phân công:", err);
     }
   };
 
-  const handleDeleteAssignment = async (e, itemId) => {
-    e.stopPropagation();
-    const assignment = assignmentMap.get(String(itemId));
-    if (!assignment?.id) return;
+  const handleDeleteAssignment = async (e, cruiseAreaId) => {
+    if (e && typeof e.stopPropagation === "function") {
+      e.stopPropagation();
+    }
 
-    const itemName =
-      assignment?.cruiseArea?.name ||
-      assignment?.area?.name ||
-      assignment?.room?.name ||
-      "Mục này";
+    const currentTourId = tour?.id || tour?.tourId;
 
-    if (
-      !window.confirm(
-        `Bạn có chắc chắn muốn hủy phân công "${itemName}" không?`,
-      )
-    )
+    console.log("🚀 Gọi DELETE với:", { tourId: currentTourId, cruiseAreaId });
+
+    if (!currentTourId || !cruiseAreaId || cruiseAreaId === "undefined") {
+      console.error("❌ Thiếu tourId hoặc cruiseAreaId hợp lệ!", {
+        currentTourId,
+        cruiseAreaId,
+      });
+      alert("Không thể xóa do thông tin khu vực hoặc tour không hợp lệ.");
       return;
+    }
+
+    if (!window.confirm("Bạn có chắc chắn muốn xóa phân công này?")) {
+      return;
+    }
 
     try {
-      await onDeleteAssignment?.(assignment.id);
-      if (String(selectedAreaId) === String(itemId)) {
-        setSelectedAreaId(null);
-      }
-      await onLoadAssignments?.(tour.id);
+      setIsDeleting(true);
+
+      // TRUYỀN ĐỦ 2 THAM SỐ: tourId VÀ cruiseAreaId
+      await onDeleteAssignment?.(currentTourId, cruiseAreaId);
+
+      // Tải lại danh sách phân công mới
+      await onLoadAssignments?.(currentTourId);
     } catch (err) {
-      console.error("DELETE ASSIGNMENT ERROR:", err);
+      console.error("Lỗi khi xóa phân công:", err);
+    } finally {
+      setIsDeleting(false);
     }
   };
-
   const handleClose = () => {
-    if (assignmentLoading) return;
+    if (assignmentLoading || isDeleting) return;
     onClose?.();
   };
 
   if (!open || !tour) return null;
+
+  const isGlobalLoading = assignmentLoading || isDeleting;
 
   return (
     <div className="caam-overlay">
@@ -316,7 +327,7 @@ function CruiseAreaAssignmentModal({
             type="button"
             className="caam-close-btn"
             onClick={handleClose}
-            disabled={assignmentLoading}
+            disabled={isGlobalLoading}
           >
             <X size={20} />
           </button>
@@ -450,7 +461,8 @@ function CruiseAreaAssignmentModal({
                   <div className="caam-area-grid">
                     {filteredItems.map((item) => {
                       const itemId = getItemId(item);
-                      const isAssigned = assignmentMap.has(String(itemId));
+                      const assignment = assignmentMap.get(String(itemId));
+                      const isAssigned = Boolean(assignment);
                       const isSelected =
                         String(selectedAreaId) === String(itemId);
                       const isArea = item._type === "AREA";
@@ -487,6 +499,7 @@ function CruiseAreaAssignmentModal({
                                   handleDeleteAssignment(e, itemId)
                                 }
                                 title="Hủy phân công"
+                                disabled={isGlobalLoading}
                               >
                                 <Trash2 size={16} />
                               </button>
@@ -520,7 +533,6 @@ function CruiseAreaAssignmentModal({
               {selectedAreaId && (
                 <div className="caam-preview-sidebar">
                   {(() => {
-                    // TÌM BẢN GHI PHÂN CÔNG CỦA MỤC ĐANG CHỌN
                     const selectedAssignment = assignmentMap.get(
                       String(selectedAreaId),
                     );
@@ -535,13 +547,14 @@ function CruiseAreaAssignmentModal({
                         onChangeConfigType={setSelectedConfigType}
                         onSaveAssignment={handleAssign}
                         onUnassign={(item) => {
-                          const itemId = getItemId(item) || selectedAreaId;
-                          handleDeleteAssignment(
-                            { stopPropagation: () => {} },
-                            itemId,
-                          );
+                          const areaId = getItemId(item) || selectedAreaId;
+                          if (!areaId) {
+                            alert("Không tìm thấy ID khu vực để xóa!");
+                            return;
+                          }
+                          handleDeleteAssignment(null, areaId);
                         }}
-                        loading={assignmentLoading}
+                        loading={isGlobalLoading}
                       />
                     );
                   })()}
@@ -571,7 +584,7 @@ function CruiseAreaAssignmentModal({
               type="button"
               className="caam-btn caam-btn-cancel"
               onClick={handleClose}
-              disabled={assignmentLoading}
+              disabled={isGlobalLoading}
             >
               Đóng
             </button>
