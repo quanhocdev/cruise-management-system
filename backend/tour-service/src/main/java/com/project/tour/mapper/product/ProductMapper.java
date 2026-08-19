@@ -15,10 +15,10 @@ public class ProductMapper {
 
         Product product = new Product();
 
-        product.setName(request.getName());
-        product.setDescription(request.getDescription());
-        product.setPrice(request.getPrice());
-        product.setQuantity(request.getQuantity());
+        product.setName(request.name());
+        product.setDescription(request.description());
+        product.setPrice(request.price());
+        product.setStockQuantity(request.stockQuantity());
 
         return product;
     }
@@ -27,29 +27,26 @@ public class ProductMapper {
             Product product,
             UpdateProductRequest request) {
 
-        product.setName(request.getName());
-        product.setDescription(request.getDescription());
-        product.setPrice(request.getPrice());
-        product.setQuantity(request.getQuantity());
-        product.setStatus(request.getStatus());
+        product.setName(request.name());
+        product.setDescription(request.description());
+        product.setPrice(request.price());
+        product.setStockQuantity(request.stockQuantity());
+        product.setStatus(request.status());
     }
 
     public static ProductResponse toResponse(Product product) {
 
-        ProductResponse response = new ProductResponse();
-
-        response.setId(product.getId());
-        response.setName(product.getName());
-        response.setDescription(product.getDescription());
-        response.setPrice(product.getPrice());
-        response.setQuantity(product.getQuantity());
-        response.setImageUrl(product.getImageUrl());
-        response.setImagePublicId(product.getImagePublicId());
-        response.setStatus(product.getStatus());
-        response.setCreatedAt(product.getCreatedAt());
-        response.setUpdatedAt(product.getUpdatedAt());
-
-        return response;
+        return new ProductResponse(
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
+                product.getPrice(),
+                product.getStockQuantity(),
+                product.getImageUrl(),
+                product.getImagePublicId(),
+                product.getStatus(),
+                product.getCreatedAt(),
+                product.getUpdatedAt());
     }
 
     /*
@@ -59,16 +56,13 @@ public class ProductMapper {
      */
     public static ProductConvenienceResponse toConvenienceResponse(Product product) {
 
-        ProductConvenienceResponse response = new ProductConvenienceResponse();
-
-        response.setId(product.getId());
-        response.setName(product.getName());
-        response.setDescription(product.getDescription());
-        response.setPrice(product.getPrice());
-        response.setQuantity(product.getQuantity());
-        response.setImageUrl(product.getImageUrl());
-        response.setStatus(product.getStatus());
-
-        return response;
+        return new ProductConvenienceResponse(
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
+                product.getPrice(),
+                product.getStockQuantity(),
+                product.getImageUrl(),
+                product.getStatus());
     }
 }
