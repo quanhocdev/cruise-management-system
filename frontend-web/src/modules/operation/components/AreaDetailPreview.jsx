@@ -12,18 +12,32 @@ import {
   ImageOff,
   UserCheck,
   Bookmark,
+  Trash2,
+  CheckCircle2,
 } from "lucide-react";
 import "../styles/AreaDetailPreview.css";
 
 const BASE_URL = "http://localhost:8080";
 
+const CONFIG_LABEL_MAP = {
+  ACTIVITY: "Hoạt động trên tàu",
+  SERVICE: "Dịch vụ",
+  PRODUCT: "Sản phẩm",
+};
+
 function AreaDetailPreview({
   area,
+  isAssigned: isAssignedProp,
+  assignedType,
   selectedConfigType,
   onChangeConfigType,
   onSaveAssignment,
+  onUnassign,
   loading,
 }) {
+  console.log("Dữ liệu Area nhận được:", area);
+  console.log("Trạng thái isAssignedProp truyền vào:", isAssignedProp);
+
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
 
   // Reset index ảnh khi thay đổi area
@@ -32,6 +46,15 @@ function AreaDetailPreview({
   }, [area]);
 
   const isRoom = area?._type === "ROOM";
+
+  // KIỂM TRA ĐÃ PHÂN CÔNG (BỔ SUNG isAssignedProp VÀO ĐÂY)
+  const isAssigned = Boolean(
+    isAssignedProp ||
+    area?.isAssigned ||
+    area?.assigned ||
+    area?.assignmentId ||
+    area?.status === "ASSIGNED",
+  );
 
   // 1. Hàm chuẩn hóa URL hình ảnh
   const formatImageUrl = useCallback((img) => {
@@ -106,6 +129,14 @@ function AreaDetailPreview({
   ];
 
   const currentImgUrl = images[currentImageIdx] || images[0];
+  const displayAssignedType =
+    assignedType ||
+    selectedConfigType ||
+    area?.assignedType ||
+    area?.configType ||
+    area?.type;
+  const assignedLabel =
+    CONFIG_LABEL_MAP[displayAssignedType] || "Chưa xác định loại hình";
 
   return (
     <div className="adp-container">
@@ -226,9 +257,49 @@ function AreaDetailPreview({
         )}
       </div>
 
-      {/* PHÂN NHÁNH GIAO DIỆN KHU VỰC VS PHÒNG */}
-      {isRoom ? (
-        /* --- GIAO DIỆN DÀNH CHUYÊN CHO PHÒNG NGHỈ (TĨNH) --- */
+      {/* PHÂN NHÁNH XỬ LÝ */}
+      {isAssigned ? (
+        /* --- TRƯỜNG HỢP 1: ĐÃ PHÂN CÔNG --- */
+        <div className="adp-assigned-section">
+          <div className="adp-status-box assigned-box">
+            <div className="adp-status-header">
+              <CheckCircle2 size={18} color="#16a34a" />
+              <span className="assigned-title">Đã phân công vào Tour</span>
+            </div>
+
+            <div className="adp-info-row" style={{ marginTop: "12px" }}>
+              <span
+                className="value font-semibold"
+                style={{ color: "#2563eb", fontWeight: "600" }}
+              >
+                {assignedLabel}
+              </span>
+            </div>
+          </div>
+
+          <div className="adp-actions" style={{ marginTop: "16px" }}>
+            <button
+              type="button"
+              className="adp-unassign-btn"
+              onClick={() => onUnassign?.(area)}
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 size={18} className="adp-spinner" />
+                  <span>Đang xử lý...</span>
+                </>
+              ) : (
+                <>
+                  <Trash2 size={18} />
+                  <span>Hủy gán khỏi Tour</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      ) : isRoom ? (
+        /* --- TRƯỜNG HỢP 2: PHÒNG NGHỈ CHƯA ĐẶT --- */
         <div className="adp-room-status-section">
           <div className="adp-section-title">
             <Bookmark size={15} />
@@ -255,7 +326,7 @@ function AreaDetailPreview({
           </div>
         </div>
       ) : (
-        /* --- GIAO DIỆN DÀNH CHO KHU VỰC CHUNG (CÓ CẤU HÌNH & LƯU) --- */
+        /* --- TRƯỜNG HỢP 3: KHU VỰC CHƯA PHÂN CÔNG (MỚI ĐƯỢC CHỌN & LƯU) --- */
         <>
           <div className="adp-config-section">
             <div className="adp-section-title">

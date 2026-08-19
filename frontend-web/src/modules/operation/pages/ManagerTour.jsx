@@ -3,7 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { RefreshCw, Ship, CheckCircle, AlertCircle } from "lucide-react";
 
-import useOperationTours from "../hooks/useOperationTour";
+// Import 3 hook độc lập
+import useOperationTours from "../hooks/useOperationTours";
+import useTourCruiseAssignments from "../hooks/useTourCruiseAssignments";
+import useActivityTourAssignments from "../hooks/useActivityTourAssignments";
 
 import OperationTourFilter from "../components/OperationTourFilter";
 import OperationTourTable from "../components/OperationTourTable";
@@ -13,50 +16,68 @@ import CruiseAreaAssignmentModal from "../components/CruiseAreaAssignmentModal";
 import "../styles/ManagerTour.css";
 
 function ManagerTour() {
+  // 1. Hook quản lý Tour (Pending / Approved & Duyệt)
   const {
     pendingTours,
     approvedTours,
-
-    availableCruises,
-    cruiseLayout,
-    assignments,
-
-    loading,
-    cruiseLoading,
+    loading: toursLoading,
     approving,
-    assigning,
-    layoutLoading,
-    assignmentLoading,
-
-    error,
-    success,
-
+    error: tourError,
+    success: tourSuccess,
     loadPendingTours,
     loadApprovedTours,
+    approveTour,
+    clearMessages: clearTourMessages,
+  } = useOperationTours();
+
+  // 2. Hook quản lý Du thuyền (Tìm du thuyền trống, Layout & Gán du thuyền)
+  const {
+    availableCruises,
+    cruiseLayout,
+    cruiseLoading,
+    layoutLoading,
+    assigning,
+    error: cruiseError,
+    success: cruiseSuccess,
     loadAvailableCruises,
     loadCruiseLayout,
-    loadAssignments,
-    assignActivityCruiseArea,
-    deleteActivityCruiseAssignment,
     assignCruise,
-    approveTour,
-
     clearAvailableCruises,
     clearCruiseLayout,
-    clearAssignments,
-    clearMessages,
-  } = useOperationTours();
+    clearMessages: clearCruiseMessages,
+  } = useTourCruiseAssignments();
+
+  // 3. Hook quản lý Phân công Khu vực Hoạt động
+  const {
+    activityAssignments,
+    activityLoading,
+    error: activityError,
+    success: activitySuccess,
+    loadActivityAssignments,
+    assignActivityArea,
+    deleteActivityAssignment,
+    clearActivityAssignments,
+    clearMessages: clearActivityMessages,
+  } = useActivityTourAssignments();
+
+  // Gom các thông báo Lỗi & Thành công từ cả 3 hooks
+  const error = tourError || cruiseError || activityError;
+  const success = tourSuccess || cruiseSuccess || activitySuccess;
+
+  const clearAllMessages = () => {
+    clearTourMessages();
+    clearCruiseMessages();
+    clearActivityMessages();
+  };
 
   // =====================================================
   // VIEW MODE
   // =====================================================
-
   const [tourMode, setTourMode] = useState("pending");
 
   // =====================================================
   // FILTER
   // =====================================================
-
   const [keyword, setKeyword] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -64,7 +85,6 @@ function ManagerTour() {
   // =====================================================
   // CRUISE MODAL
   // =====================================================
-
   const [selectedTour, setSelectedTour] = useState(null);
   const [selectedCruiseId, setSelectedCruiseId] = useState(null);
   const [showCruiseModal, setShowCruiseModal] = useState(false);
@@ -72,14 +92,12 @@ function ManagerTour() {
   // =====================================================
   // AREA MODAL
   // =====================================================
-
   const [showAreaModal, setShowAreaModal] = useState(false);
   const [areaTour, setAreaTour] = useState(null);
 
   // =====================================================
   // INITIAL LOAD
   // =====================================================
-
   useEffect(() => {
     loadPendingTours();
     loadApprovedTours();
@@ -88,7 +106,6 @@ function ManagerTour() {
   // =====================================================
   // CURRENT TOURS
   // =====================================================
-
   const currentTours = useMemo(() => {
     return tourMode === "pending" ? pendingTours : approvedTours;
   }, [tourMode, pendingTours, approvedTours]);
@@ -96,15 +113,10 @@ function ManagerTour() {
   // =====================================================
   // FILTER TOURS
   // =====================================================
-
   const filteredTours = useMemo(() => {
     const normalizedKeyword = keyword.trim().toLowerCase();
 
     return currentTours.filter((tour) => {
-      // -----------------------------------------------
-      // KEYWORD
-      // -----------------------------------------------
-
       if (normalizedKeyword) {
         const name = String(tour.name || "").toLowerCase();
         const code = String(tour.code || "").toLowerCase();
@@ -119,10 +131,6 @@ function ManagerTour() {
           return false;
         }
       }
-
-      // -----------------------------------------------
-      // DATE RANGE FILTER
-      // -----------------------------------------------
 
       if (startDate || endDate) {
         const tourStart = tour.startDate ? new Date(tour.startDate) : null;
@@ -152,16 +160,14 @@ function ManagerTour() {
   // =====================================================
   // CHANGE MODE
   // =====================================================
-
   const handleChangeMode = (mode) => {
-    clearMessages();
+    clearAllMessages();
     setTourMode(mode);
   };
 
   // =====================================================
   // CLEAR FILTER
   // =====================================================
-
   const handleClearFilter = () => {
     setKeyword("");
     setStartDate("");
@@ -171,34 +177,42 @@ function ManagerTour() {
   // =====================================================
   // SELECT CRUISE MODAL
   // =====================================================
-
   const handleSelectCruise = async (tour) => {
-    clearMessages();
+    clearAllMessages();
     setSelectedTour(tour);
-    setSelectedCruiseId(null);
+
+    // 1. Lấy ID du thuyền đã gán trước đó để highlight
+    const currentCruiseId = tour?.cruiseId || tour?.cruise?.id || null;
+    setSelectedCruiseId(currentCruiseId);
+
+    // 2. Mở Modal
     setShowCruiseModal(true);
 
-    await loadAvailableCruises(tour.id);
+    // 3. Tải song song cả danh sách tàu trống VÀ danh sách khu vực đã phân công của Tour
+    await Promise.all([
+      loadAvailableCruises(tour.id),
+      loadActivityAssignments(tour.id), // Fetch phân công để Modal biết tour đã gán khu vực chưa
+    ]);
   };
-
   // =====================================================
   // ASSIGN AREA MODAL (MỞ MODAL PHÂN CÔNG KHU VỰC)
   // =====================================================
-
   const handleAssignArea = async (tour) => {
-    clearMessages();
+    clearAllMessages();
     setAreaTour(tour);
     setShowAreaModal(true);
 
-    await Promise.all([loadCruiseLayout(tour.id), loadAssignments(tour.id)]);
+    await Promise.all([
+      loadCruiseLayout(tour.id),
+      loadActivityAssignments(tour.id),
+    ]);
   };
 
   // =====================================================
   // CLOSE AREA MODAL
   // =====================================================
-
   const handleCloseAreaModal = () => {
-    if (assignmentLoading || layoutLoading) {
+    if (activityLoading || layoutLoading) {
       return;
     }
 
@@ -206,14 +220,13 @@ function ManagerTour() {
     setAreaTour(null);
 
     clearCruiseLayout();
-    clearAssignments();
-    clearMessages();
+    clearActivityAssignments();
+    clearAllMessages();
   };
 
   // =====================================================
   // SELECT CRUISE ID
   // =====================================================
-
   const handleSelectCruiseId = (cruiseId) => {
     setSelectedCruiseId(cruiseId);
   };
@@ -221,13 +234,13 @@ function ManagerTour() {
   // =====================================================
   // ASSIGN CRUISE
   // =====================================================
-
   const handleAssignCruise = async (cruiseId) => {
     if (!selectedTour || !cruiseId) return;
 
     try {
       await assignCruise(selectedTour.id, cruiseId);
       setSelectedCruiseId(cruiseId);
+      await loadPendingTours();
     } catch (err) {
       console.error("ASSIGN CRUISE ERROR:", err);
     }
@@ -236,7 +249,6 @@ function ManagerTour() {
   // =====================================================
   // APPROVE TOUR
   // =====================================================
-
   const handleApproveTour = async (tour) => {
     if (!tour) return;
 
@@ -247,9 +259,9 @@ function ManagerTour() {
     if (!confirmed) return;
 
     try {
-      let currentTourAssignments = assignments;
-      if (!assignments || assignments.length === 0) {
-        currentTourAssignments = await loadAssignments(tour.id);
+      let currentTourAssignments = activityAssignments;
+      if (!activityAssignments || activityAssignments.length === 0) {
+        currentTourAssignments = await loadActivityAssignments(tour.id);
       }
 
       const payload = {
@@ -258,7 +270,6 @@ function ManagerTour() {
       };
 
       await approveTour(tour.id, payload);
-
       await Promise.all([loadPendingTours(), loadApprovedTours()]);
     } catch (err) {
       console.error("APPROVE TOUR ERROR:", err);
@@ -268,7 +279,6 @@ function ManagerTour() {
   // =====================================================
   // REJECT TOUR
   // =====================================================
-
   const handleRejectTour = async (tour) => {
     if (!tour) return;
 
@@ -289,7 +299,6 @@ function ManagerTour() {
   // =====================================================
   // CLOSE CRUISE MODAL
   // =====================================================
-
   const handleCloseModal = () => {
     if (approving) return;
 
@@ -298,22 +307,20 @@ function ManagerTour() {
     setSelectedCruiseId(null);
 
     clearAvailableCruises();
-    clearMessages();
+    clearAllMessages();
   };
 
   // =====================================================
   // REFRESH
   // =====================================================
-
   const handleRefresh = async () => {
-    clearMessages();
+    clearAllMessages();
     await Promise.all([loadPendingTours(), loadApprovedTours()]);
   };
 
   // =====================================================
   // RENDER
   // =====================================================
-
   return (
     <div className="operation-tour-page">
       <div className="operation-tour-header">
@@ -332,11 +339,11 @@ function ManagerTour() {
           type="button"
           className="operation-tour-refresh-button"
           onClick={handleRefresh}
-          disabled={loading}
+          disabled={toursLoading}
         >
           <RefreshCw
             size={18}
-            className={loading ? "operation-tour-spin" : ""}
+            className={toursLoading ? "operation-tour-spin" : ""}
           />
           <span>Làm mới</span>
         </button>
@@ -416,7 +423,7 @@ function ManagerTour() {
       <div className="operation-tour-content">
         <OperationTourTable
           tours={filteredTours}
-          loading={loading}
+          loading={toursLoading}
           mode={tourMode}
           onSelectCruise={handleSelectCruise}
           onAssignArea={handleAssignArea}
@@ -428,8 +435,9 @@ function ManagerTour() {
       <CruiseSelectModal
         open={showCruiseModal}
         tour={selectedTour}
+        assignments={activityAssignments} // 👈 TRUYỀN DANH SÁCH PHÂN CÔNG VÀO ĐÂY
         cruises={availableCruises}
-        loading={cruiseLoading}
+        loading={cruiseLoading || activityLoading} // 👈 Kết hợp loading để giao diện mượt hơn
         approving={approving}
         assigning={assigning}
         selectedCruiseId={selectedCruiseId}
@@ -442,13 +450,13 @@ function ManagerTour() {
         open={showAreaModal}
         tour={areaTour}
         cruiseLayout={cruiseLayout}
-        assignments={assignments}
+        assignments={activityAssignments}
         layoutLoading={layoutLoading}
-        assignmentLoading={assignmentLoading}
+        assignmentLoading={activityLoading}
         onLoadLayout={loadCruiseLayout}
-        onLoadAssignments={loadAssignments}
-        onAssignArea={assignActivityCruiseArea}
-        onDeleteAssignment={deleteActivityCruiseAssignment}
+        onLoadAssignments={loadActivityAssignments}
+        onAssignArea={assignActivityArea}
+        onDeleteAssignment={deleteActivityAssignment}
         onClose={handleCloseAreaModal}
       />
     </div>

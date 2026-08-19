@@ -1,5 +1,4 @@
-// src/modules/operation/components/CruiseSelectModal.jsx
-
+import React from "react";
 import "../styles/CruiseSelectModal.css";
 import {
   X,
@@ -11,6 +10,8 @@ import {
   Info,
   Anchor,
   Loader2,
+  AlertTriangle,
+  Lock,
 } from "lucide-react";
 
 function formatDate(value) {
@@ -25,7 +26,8 @@ function formatDate(value) {
 function CruiseSelectModal({
   open,
   tour,
-  cruises,
+  cruises = [],
+  assignments = [], // Có thể truyền trực tiếp assignments từ parent vào nếu tour không chứa sẵn
   loading,
   assigning,
   selectedCruiseId,
@@ -35,17 +37,71 @@ function CruiseSelectModal({
 }) {
   if (!open || !tour) return null;
 
-  // Xử lý gán du thuyền thành công thì đóng Modal
+  // 1. Lấy ID du thuyền hiện tại đang được gán cho Tour này
+  const currentAssignedCruiseId =
+    tour?.cruiseId || tour?.cruise?.id || tour?.assignedCruiseId || null;
+
+  // 2. Lấy danh sách các khu vực/phòng đã được phân công cho Tour này
+  const tourAssignments =
+    Array.isArray(assignments) && assignments.length > 0
+      ? assignments
+      : tour?.assignedAreas ||
+        tour?.assignedZones ||
+        tour?.assignedRooms || // 👈 Thêm kiểm tra phòng
+        tour?.areaAssignments || // 👈 Thêm kiểm tra khu vực
+        tour?.roomAssignments || // 👈 Thêm
+        tour?.areas ||
+        tour?.assignments ||
+        [];
+
+  const assignedCount = tourAssignments.length;
+  const hasAssignedAreas = assignedCount > 0;
+
+  // ✅ ĐẶT CONSOLE.LOG Ở ĐÂY (Sau khi các biến đã được khai báo)
+  console.log("DEBUG MODAL DATA:", {
+    tourObject: tour,
+    assignmentsProp: assignments,
+    detectedAssignments: tourAssignments,
+    hasAssignedAreas: hasAssignedAreas,
+  });
+
+  // Xử lý gán du thuyền
   const handleAssign = async () => {
-    if (!selectedCruiseId || !onAssignCruise) return;
+    // Chặn tuyệt đối nếu đã có khu vực phân công hoặc chưa chọn tàu mới
+    if (
+      !selectedCruiseId ||
+      !onAssignCruise ||
+      hasAssignedAreas ||
+      selectedCruiseId === currentAssignedCruiseId
+    ) {
+      return;
+    }
+
     try {
       await onAssignCruise(selectedCruiseId);
-      onClose(); // Tự động đóng modal sau khi gán thành công
+      onClose();
     } catch (error) {
-      // Bắt lỗi nếu có, giữ modal để người dùng thử lại
       console.error("Lỗi khi gán du thuyền:", error);
     }
   };
+
+  // SẮP XẾP DANH SÁCH DU THUYỀN
+  const sortedCruises = [...(cruises || [])].sort((a, b) => {
+    const isACurrent =
+      currentAssignedCruiseId && currentAssignedCruiseId === a.id;
+    const isBCurrent =
+      currentAssignedCruiseId && currentAssignedCruiseId === b.id;
+
+    if (isACurrent && !isBCurrent) return -1;
+    if (!isACurrent && isBCurrent) return 1;
+
+    const isAAvailable = a.isAvailable;
+    const isBAvailable = b.isAvailable;
+    if (isAAvailable && !isBAvailable) return -1;
+    if (!isAAvailable && isBAvailable) return 1;
+
+    return (a.name || "").localeCompare(b.name || "");
+  });
 
   return (
     <div className="operation-cruise-modal-overlay">
@@ -71,12 +127,12 @@ function CruiseSelectModal({
         <div className="operation-cruise-tour-info">
           <div>
             <span>Tour</span>
-            <strong>{tour.name}</strong>
+            <strong>{tour.name || "-"}</strong>
           </div>
 
           <div>
             <span>Mã Tour</span>
-            <strong>{tour.code}</strong>
+            <strong>{tour.code || "-"}</strong>
           </div>
 
           <div>
@@ -89,6 +145,20 @@ function CruiseSelectModal({
             </strong>
           </div>
         </div>
+
+        {/* THÔNG BÁO CẢNH BÁO BỊ KHÓA DO ĐÃ CÓ KHU VỰC PHÂN CÔNG */}
+        {hasAssignedAreas && (
+          <div className="operation-cruise-warning-banner">
+            <AlertTriangle size={20} className="warning-icon" />
+            <div>
+              <strong>Không thể thay đổi du thuyền!</strong>
+              <p>
+                Tour đã được gán <b>{assignedCount} khu vực </b>. Vui lòng xóa
+                khu vực được phân công của Tour trước khi đổi du thuyền
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* TITLE */}
         <div className="operation-cruise-select-title">
@@ -103,33 +173,46 @@ function CruiseSelectModal({
         <div className="operation-cruise-list">
           {loading ? (
             <div className="operation-cruise-loading">
-              Đang kiểm tra lịch khả dụng của các du thuyền...
+              <Loader2 size={24} className="spinner-icon" />
+              <span>Đang kiểm tra lịch khả dụng của các du thuyền...</span>
             </div>
-          ) : cruises?.length === 0 ? (
+          ) : sortedCruises.length === 0 ? (
             <div className="operation-cruise-empty">
               <AlertCircle size={40} />
               <h3>Không tìm thấy du thuyền</h3>
               <p>Chưa có dữ liệu du thuyền trong hệ thống.</p>
             </div>
           ) : (
-            cruises.map((cruise) => {
-              const selected = selectedCruiseId === cruise.id;
-              const available = cruise.isAvailable;
+            sortedCruises.map((cruise) => {
+              const isSelected = selectedCruiseId === cruise.id;
+              const isCurrentlyAssigned =
+                currentAssignedCruiseId &&
+                currentAssignedCruiseId === cruise.id;
+
+              // Điều kiện khả dụng gốc từ lịch trùng
+              const isScheduleAvailable =
+                cruise.isAvailable || isCurrentlyAssigned;
+
+              // 📍 Nếu đã có phân công khu vực => KHÓA tất cả các tàu KHÁC tàu hiện tại
+              const isCardDisabled =
+                assigning ||
+                !isScheduleAvailable ||
+                (hasAssignedAreas && !isCurrentlyAssigned);
 
               return (
                 <div
                   key={cruise.id}
                   className={`operation-cruise-option-wrapper ${
-                    !available ? "unavailable" : ""
-                  }`}
+                    isCurrentlyAssigned ? "currently-assigned" : ""
+                  } ${isCardDisabled ? "unavailable" : ""}`}
                 >
                   <button
                     type="button"
                     className={`operation-cruise-option ${
-                      selected ? "selected" : ""
-                    } ${!available ? "disabled" : ""}`}
-                    onClick={() => available && onSelectCruise(cruise.id)}
-                    disabled={assigning || !available}
+                      isSelected ? "selected" : ""
+                    } ${isCardDisabled ? "disabled" : ""}`}
+                    onClick={() => !isCardDisabled && onSelectCruise(cruise.id)}
+                    disabled={isCardDisabled}
                   >
                     <div className="operation-cruise-option-icon">
                       <Ship size={22} />
@@ -138,56 +221,89 @@ function CruiseSelectModal({
                     <div className="operation-cruise-option-info">
                       <div className="cruise-header-row">
                         <strong>{cruise.name}</strong>
-                        <span
-                          className={`cruise-status-badge ${
-                            available ? "available" : "busy"
-                          }`}
-                        >
-                          {available ? "Khả dụng" : "Không thể chọn"}
-                        </span>
+
+                        {isCurrentlyAssigned ? (
+                          <span className="cruise-status-badge current">
+                            Đang gán cho Tour
+                          </span>
+                        ) : hasAssignedAreas ? (
+                          <span className="cruise-status-badge busy">
+                            <Lock size={12} /> Không thể chọn
+                          </span>
+                        ) : (
+                          <span
+                            className={`cruise-status-badge ${
+                              isScheduleAvailable ? "available" : "busy"
+                            }`}
+                          >
+                            {isScheduleAvailable
+                              ? "Khả dụng"
+                              : "Không thể chọn"}
+                          </span>
+                        )}
                       </div>
 
                       <span className="cruise-code">Mã tàu: {cruise.code}</span>
 
+                      {/* LÝ DO HỢP LỆ / KHÔNG HỢP LỆ */}
                       <div
                         className={`cruise-reason ${
-                          available ? "text-success" : "text-danger"
+                          isCurrentlyAssigned ||
+                          (isScheduleAvailable && !hasAssignedAreas)
+                            ? "text-success"
+                            : "text-danger"
                         }`}
                       >
-                        {available ? (
+                        {isCurrentlyAssigned ? (
                           <span className="flex-center">
-                            <CheckCircle size={13} /> {cruise.reason}
+                            <CheckCircle size={13} /> Du thuyền hiện tại của
+                            Tour
+                          </span>
+                        ) : hasAssignedAreas ? (
+                          <span className="flex-center">
+                            <Ban size={13} /> Cần hủy phân công khu vực trước
+                            khi chọn
+                          </span>
+                        ) : isScheduleAvailable ? (
+                          <span className="flex-center">
+                            <CheckCircle size={13} />{" "}
+                            {cruise.reason || "Sẵn sàng gán"}
                           </span>
                         ) : (
                           <span className="flex-center">
-                            <Ban size={13} /> {cruise.reason}
+                            <Ban size={13} />{" "}
+                            {cruise.reason || "Trùng lịch vận hành"}
                           </span>
                         )}
                       </div>
                     </div>
 
                     <div className="operation-cruise-option-check">
-                      {selected && <CheckCircle size={22} />}
+                      {isSelected && <CheckCircle size={22} />}
                     </div>
                   </button>
 
-                  {!available && cruise.conflictingTours?.length > 0 && (
-                    <div className="operation-cruise-conflicts">
-                      <div className="conflict-title">
-                        <Info size={13} /> Danh sách Tour bị trùng lịch:
+                  {/* DANH SÁCH TOUR TRÙNG LỊCH (NẾU CÓ) */}
+                  {!isScheduleAvailable &&
+                    cruise.conflictingTours?.length > 0 && (
+                      <div className="operation-cruise-conflicts">
+                        <div className="conflict-title">
+                          <Info size={13} /> Danh sách Tour bị trùng lịch:
+                        </div>
+                        <ul>
+                          {cruise.conflictingTours.map((conflict) => (
+                            <li key={conflict.tourId || conflict.id}>
+                              <strong>
+                                {conflict.tourCode || conflict.code}
+                              </strong>{" "}
+                              - {conflict.tourName || conflict.name} (
+                              {formatDate(conflict.startDate)} →{" "}
+                              {formatDate(conflict.endDate)})
+                            </li>
+                          ))}
+                        </ul>
                       </div>
-                      <ul>
-                        {cruise.conflictingTours.map((conflict) => (
-                          <li key={conflict.tourId}>
-                            <strong>{conflict.tourCode}</strong> -{" "}
-                            {conflict.tourName} (
-                            {formatDate(conflict.startDate)} →{" "}
-                            {formatDate(conflict.endDate)})
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                    )}
                 </div>
               );
             })
@@ -209,7 +325,13 @@ function CruiseSelectModal({
             type="button"
             className="operation-cruise-assign-button"
             onClick={handleAssign}
-            disabled={!selectedCruiseId || assigning || loading}
+            disabled={
+              !selectedCruiseId ||
+              assigning ||
+              loading ||
+              hasAssignedAreas ||
+              selectedCruiseId === currentAssignedCruiseId
+            }
           >
             {assigning ? (
               <>
@@ -219,7 +341,11 @@ function CruiseSelectModal({
             ) : (
               <>
                 <Anchor size={17} />
-                <span>Xác nhận gán du thuyền</span>
+                <span>
+                  {hasAssignedAreas
+                    ? "Đã có phân công khu vực (Đã khóa)"
+                    : "Xác nhận gán du thuyền"}
+                </span>
               </>
             )}
           </button>
