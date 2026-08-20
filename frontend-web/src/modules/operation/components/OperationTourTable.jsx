@@ -1,5 +1,3 @@
-// src/modules/operation/components/OperationTourTable.jsx
-
 import {
   CheckCircle,
   Ship,
@@ -23,14 +21,15 @@ function formatDate(value) {
 function OperationTourTable({
   tours,
   loading,
-  mode = "pending",
+  mode = "APPROVAL_PENDING", // Mặc định khớp với key của tab
   onSelectCruise,
   onApprove,
   onReject,
   onView,
   onAssignArea,
 }) {
-  const isPending = mode === "pending";
+  // So sánh chuẩn với trạng thái APPROVAL_PENDING
+  const isPending = mode === "APPROVAL_PENDING" || mode === "pending";
 
   if (loading) {
     return (
@@ -45,12 +44,12 @@ function OperationTourTable({
       <div className="operation-tour-table-state empty">
         <CheckCircle size={40} />
         <h3>
-          {isPending ? "Không có Tour chờ duyệt" : "Không có Tour đã duyệt"}
+          {isPending ? "Không có Tour chờ duyệt" : "Không có dữ liệu Tour"}
         </h3>
         <p>
           {isPending
             ? "Hiện tại không có Tour nào đang chờ Operation xử lý."
-            : "Hiện tại chưa có Tour nào được Operation duyệt."}
+            : "Hiện tại không có Tour nào trong danh mục này."}
         </p>
       </div>
     );
@@ -118,7 +117,7 @@ function OperationTourTable({
                         {tour.cruise?.code && <span>{tour.cruise.code}</span>}
                       </div>
 
-                      {/* Phân biệt nút bấm theo chế độ Pending vs Approved */}
+                      {/* Nút thay đổi tàu khi CHỜ DUYỆT, các trạng thái khác chỉ Xem chi tiết */}
                       {isPending ? (
                         <button
                           type="button"
@@ -185,6 +184,7 @@ function OperationTourTable({
                 {/* ACTION */}
                 <td>
                   <div className="operation-tour-actions">
+                    {/* Khi CHỜ DUYỆT -> Hiện Duyệt + Từ chối */}
                     {isPending ? (
                       <>
                         <button
@@ -212,6 +212,7 @@ function OperationTourTable({
                         </button>
                       </>
                     ) : (
+                      /* Các trạng thái khác -> Hiện Xem chi tiết */
                       <button
                         type="button"
                         className="operation-tour-view-button"
