@@ -2,20 +2,24 @@ package com.project.tour.dto.tour.onboard;
 
 import com.project.tour.model.enums.onboard.ActivityCruiseTourStatus;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 public record OnboardActivityCruiseTourResponse(
 
-        UUID id,
+                UUID id,
 
-        UUID tourId,
-        String tourCode,
-        String tourName,
+                UUID tourId,
+                String tourCode,
+                String tourName,
 
-        UUID cruiseAreaId,
-        String cruiseAreaName,
+                LocalDate tourStartDate,
+                LocalDate tourEndDate,
 
-        ActivityCruiseTourStatus status
+                UUID cruiseAreaId,
+                String cruiseAreaName,
+
+                ActivityCruiseTourStatus status
 
 ) {
 }

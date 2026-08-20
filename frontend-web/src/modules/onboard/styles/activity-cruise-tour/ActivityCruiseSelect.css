@@ -1,0 +1,166 @@
+/* src/modules/onboard/styles/activity-cruise-tour/ActivityCruiseSelect.css */
+
+.activity-cruise-select {
+  width: 100%;
+  position: relative;
+}
+
+.activity-cruise-select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.activity-cruise-select-input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 42px 0 14px;
+
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  background: #fff;
+
+  color: #1f2937;
+  font-size: 14px;
+  font-family: inherit;
+
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.activity-cruise-select-input:hover:not(:disabled) {
+  border-color: #aeb8c8;
+}
+
+.activity-cruise-select-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.activity-cruise-select-input:disabled {
+  background: #f5f7fa;
+  color: #8a94a6;
+  cursor: not-allowed;
+}
+
+.activity-cruise-select-input.has-error {
+  border-color: #dc2626;
+}
+
+.activity-cruise-select-input.has-error:focus {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+/* =========================================================
+   ICON
+   ========================================================= */
+
+.activity-cruise-select-chevron,
+.activity-cruise-select-loading {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+
+  transform: translateY(-50%);
+
+  pointer-events: none;
+}
+
+.activity-cruise-select-chevron {
+  color: #6b7280;
+}
+
+.activity-cruise-select-loading {
+  color: #2563eb;
+  animation: activity-cruise-select-spin 0.8s linear infinite;
+}
+
+@keyframes activity-cruise-select-spin {
+  from {
+    transform: translateY(-50%) rotate(0deg);
+  }
+
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
+}
+
+/* =========================================================
+   ERROR / HINT
+   ========================================================= */
+
+.activity-cruise-select-error,
+.activity-cruise-select-hint {
+  display: block;
+  margin-top: 6px;
+
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.activity-cruise-select-error {
+  color: #dc2626;
+}
+
+.activity-cruise-select-hint {
+  color: #6b7280;
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .activity-cruise-select-input {
+    min-height: 42px;
+    padding-left: 12px;
+    padding-right: 40px;
+    font-size: 14px;
+  }
+
+  .activity-cruise-select-chevron,
+  .activity-cruise-select-loading {
+    right: 12px;
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 480px) {
+  .activity-cruise-select-input {
+    min-height: 44px;
+    padding-left: 12px;
+    padding-right: 38px;
+    font-size: 13px;
+    border-radius: 7px;
+  }
+
+  .activity-cruise-select-chevron,
+  .activity-cruise-select-loading {
+    right: 11px;
+  }
+
+  .activity-cruise-select-error,
+  .activity-cruise-select-hint {
+    font-size: 11px;
+  }
+}
+
+/* =========================================================
+   VERY SMALL DEVICES
+   ========================================================= */
+
+@media (max-width: 360px) {
+  .activity-cruise-select-input {
+    min-height: 42px;
+    font-size: 12px;
+  }
+}

@@ -22,10 +22,12 @@ public final class OnboardActivityCruiseTourMapper {
                 tour != null ? tour.getCode() : null,
                 tour != null ? tour.getName() : null,
 
+                tour != null ? tour.getStartDate() : null,
+                tour != null ? tour.getEndDate() : null,
+
                 cruiseArea != null ? cruiseArea.getId() : null,
                 cruiseArea != null ? cruiseArea.getName() : null,
 
                 assignment.getStatus());
     }
-
 }

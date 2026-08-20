@@ -6,7 +6,6 @@ import {
   ClipboardCheck,
   CalendarDays,
   Ticket,
-  Package,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -17,18 +16,42 @@ import {
 import "../../styles/onboard/OnboardSidebar.css";
 
 const menuItems = [
-  { label: "Dashboard", icon: LayoutDashboard, path: "/onboard", end: true },
   {
-    label: "Hoạt động du thuyền",
+    label: "Dashboard",
+    icon: LayoutDashboard,
+    path: "/onboard",
+    end: true,
+  },
+  {
+    label: "Cấu hình hoạt động",
     icon: Activity,
     path: "/onboard/activity-cruise",
   },
-  { label: "Tour sắp diễn ra", icon: ClipboardCheck, path: "/onboard/tours" },
-  { label: "Lịch trình", icon: CalendarDays, path: "/onboard/schedules" },
-  { label: "Du thuyền", icon: Ship, path: "/onboard/cruises" },
-  { label: "Booking", icon: Ticket, path: "/onboard/bookings" },
-  { label: "Sản phẩm / Dịch vụ", icon: Package, path: "/onboard/products" },
-  { label: "Cài đặt", icon: Settings, path: "/onboard/settings" },
+  {
+    label: "Tour sắp diễn ra",
+    icon: ClipboardCheck,
+    path: "/onboard/tours",
+  },
+  {
+    label: "Lịch trình",
+    icon: CalendarDays,
+    path: "/onboard/schedules",
+  },
+  {
+    label: "Du thuyền",
+    icon: Ship,
+    path: "/onboard/cruises",
+  },
+  {
+    label: "Booking",
+    icon: Ticket,
+    path: "/onboard/bookings",
+  },
+  {
+    label: "Cài đặt",
+    icon: Settings,
+    path: "/onboard/settings",
+  },
 ];
 
 function OnboardSidebar({ mobileOpen, onCloseMobile }) {
@@ -57,7 +80,7 @@ function OnboardSidebar({ mobileOpen, onCloseMobile }) {
           )}
         </div>
 
-        {/* Toggle ở Desktop */}
+        {/* Toggle Desktop */}
         <button
           type="button"
           className="onboard-sidebar-toggle desktop-only"
@@ -67,7 +90,7 @@ function OnboardSidebar({ mobileOpen, onCloseMobile }) {
           {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
         </button>
 
-        {/* Nút đóng ở Mobile */}
+        {/* Close Mobile */}
         <button
           type="button"
           className="onboard-sidebar-toggle mobile-only"
@@ -99,6 +122,7 @@ function OnboardSidebar({ mobileOpen, onCloseMobile }) {
               title={collapsed && !mobileOpen ? item.label : undefined}
             >
               <Icon size={19} className="onboard-nav-icon" />
+
               {isExpanded && <span>{item.label}</span>}
             </NavLink>
           );
