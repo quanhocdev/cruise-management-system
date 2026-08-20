@@ -1,6 +1,14 @@
 // src/modules/operation/components/OperationTourTable.jsx
 
-import { CheckCircle, Ship, CalendarDays, Eye, XCircle } from "lucide-react";
+import {
+  CheckCircle,
+  Ship,
+  CalendarDays,
+  Eye,
+  XCircle,
+  Info,
+  ShieldCheck,
+} from "lucide-react";
 import "../styles/OperationTourTable.css";
 
 function formatDate(value) {
@@ -110,13 +118,24 @@ function OperationTourTable({
                         {tour.cruise?.code && <span>{tour.cruise.code}</span>}
                       </div>
 
-                      {isPending && (
+                      {/* Phân biệt nút bấm theo chế độ Pending vs Approved */}
+                      {isPending ? (
                         <button
                           type="button"
                           className="operation-tour-change-cruise-button"
                           onClick={() => onSelectCruise?.(tour)}
                         >
                           Thay đổi
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="operation-tour-view-cruise-button"
+                          onClick={() => onSelectCruise?.(tour)}
+                          title="Xem thông tin du thuyền"
+                        >
+                          <Info size={14} />
+                          <span>Chi tiết</span>
                         </button>
                       )}
                     </div>
@@ -137,16 +156,29 @@ function OperationTourTable({
                 <td>
                   <button
                     type="button"
-                    className="operation-tour-assignment-button"
+                    className={`operation-tour-assignment-button ${
+                      !isPending ? "readonly" : ""
+                    }`}
                     onClick={() => onAssignArea?.(tour)}
                     disabled={!hasCruise}
                     title={
                       !hasCruise
-                        ? "Vui lòng gán du thuyền trước khi phân công khu vực"
-                        : "Phân công khu vực"
+                        ? "Vui lòng gán du thuyền trước"
+                        : isPending
+                          ? "Phân công khu vực"
+                          : "Xem sơ đồ & kiểm soát khu vực"
                     }
                   >
-                    {hasCruise ? "Phân công khu vực" : "Chưa có du thuyền"}
+                    {!hasCruise ? (
+                      "Chưa có du thuyền"
+                    ) : isPending ? (
+                      "Phân công khu vực"
+                    ) : (
+                      <>
+                        <ShieldCheck size={15} />
+                        <span>Kiểm soát khu vực</span>
+                      </>
+                    )}
                   </button>
                 </td>
 
@@ -186,7 +218,7 @@ function OperationTourTable({
                         onClick={() => onView?.(tour)}
                       >
                         <Eye size={16} />
-                        <span>Xem</span>
+                        <span>Xem chi tiết</span>
                       </button>
                     )}
                   </div>

@@ -1,0 +1,166 @@
+/* =========================================================
+   TOOLBAR & STATUS TABS (OperationTourHeaderToolbar)
+   ========================================================= */
+
+/* Container bao bọc toàn bộ cụm Tab Bar + Bộ lọc */
+.operation-tour-toolbar-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+  width: 100%;
+}
+
+/* 1. HÀNG TAB TRẠNG THÁI: Grid 6 cột tràn 100% chiều ngang */
+.operation-tour-status-tabs {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  background: #f1f5f9;
+  padding: 6px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  width: 100%;
+}
+
+/* Nút Tab: Thêm sẵn border transparent để không bị thay đổi kích thước khi active */
+.status-tab-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 11px; /* Giảm nhẹ padding để bù cho 1.5px border */
+  border-radius: 8px;
+  border: 1.5px solid transparent; /* Giữ cố định khung để tránh giật layout */
+  background: transparent;
+  color: #64748b;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease-in-out;
+  width: 100%;
+  box-sizing: border-box; /* Bắt buộc kích thước bao gồm cả border */
+}
+
+.status-tab-btn .tab-left-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-tab-btn:hover {
+  color: #1e293b;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.status-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 11px;
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
+  transition: all 0.15s ease-in-out;
+}
+
+/* =========================================================
+   MÀU SẮC & BORDER KHI TAB ĐƯỢC CHỌN (ACTIVE)
+   ========================================================= */
+
+/* Trạng thái Active chung */
+.status-tab-btn.active {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+/* 1. Chờ duyệt (Approval Pending) - Vàng / Cam */
+.status-tab-btn.status-approval_pending.active {
+  color: #d97706;
+  background: #fffbebf5;
+  border-color: #f59e0b;
+}
+.status-tab-btn.status-approval_pending.active .status-count-badge {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+/* 2. Đã duyệt (Approved) - Xanh dương */
+.status-tab-btn.status-approved.active {
+  color: #2563eb;
+  background: #eff6ff;
+  border-color: #3b82f6;
+}
+.status-tab-btn.status-approved.active .status-count-badge {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+/* 3. Sẵn sàng (Ready) - Xanh lam nhẹ (Cyan) */
+.status-tab-btn.status-ready.active {
+  color: #0891b2;
+  background: #ecfeff;
+  border-color: #06b6d4;
+}
+.status-tab-btn.status-ready.active .status-count-badge {
+  background: #cffaff;
+  color: #0e7490;
+}
+
+/* 4. Đang diễn ra (In Progress) - Tím */
+.status-tab-btn.status-in_progress.active {
+  color: #7c3aed;
+  background: #f5f3ff;
+  border-color: #8b5cf6;
+}
+.status-tab-btn.status-in_progress.active .status-count-badge {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+/* 5. Hoàn thành (Completed) - Xanh lá */
+.status-tab-btn.status-completed.active {
+  color: #16a34a;
+  background: #f0fdf4;
+  border-color: #22c55e;
+}
+.status-tab-btn.status-completed.active .status-count-badge {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+/* 6. Đã hủy (Cancelled) - Đỏ */
+.status-tab-btn.status-cancelled.active {
+  color: #dc2626;
+  background: #fef2f2;
+  border-color: #ef4444;
+}
+.status-tab-btn.status-cancelled.active .status-count-badge {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* Bọc ngoài component filter */
+.operation-tour-filter-bar {
+  width: 100%;
+}
+
+/* RESPONSIVE FOR TABS */
+@media (max-width: 1024px) {
+  .operation-tour-status-tabs {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .operation-tour-status-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .status-tab-btn {
+    flex: 0 0 auto;
+    width: auto;
+  }
+}

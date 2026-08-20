@@ -1,196 +1,116 @@
-/* src/modules/operation/styles/OperationTourFilter.css */
-
+/* Container bọc ngoài cùng: Ép Search và Date nằm cùng 1 hàng ngang */
 .operation-tour-filter {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 12px !important;
+  width: 100% !important;
+  background: #ffffff;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
-/* =========================================================
-   SEARCH
-   ========================================================= */
+/* 1. KHUNG TÌM KIẾM (Chiếm toàn bộ khoảng trống bên trái) */
 .operation-tour-search {
-  position: relative;
   display: flex;
   align-items: center;
-  width: 100%;
-  height: 40px;
-  box-sizing: border-box;
-  padding: 0 36px 0 12px; /* Giảm padding right từ 40px xuống 36px cho vừa nút clear */
-  background: #ffffff;
-  border: 1px solid #dbe1e8;
+  gap: 8px;
+  flex: 1 !important; /* Tự phình to tràn hết chiều rộng còn dư */
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
-  color: #64748b;
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.operation-tour-search:focus-within {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
-}
-
-.operation-tour-search > svg {
-  flex-shrink: 0;
-  margin-right: 10px;
+  padding: 6px 12px;
 }
 
 .operation-tour-search input {
   width: 100%;
-  height: 100%;
   border: none;
   outline: none;
   background: transparent;
-  color: #1e293b;
   font-size: 13.5px;
-  padding: 0; /* Bỏ padding mặc định của browser */
+  color: #1e293b;
 }
 
-.operation-tour-search input::placeholder {
+.operation-tour-search svg {
   color: #94a3b8;
+  flex-shrink: 0;
 }
 
 .operation-tour-search-clear {
-  position: absolute;
-  right: 6px;
-  top: 50%;
-  transform: translateY(-50%); /* Căn giữa tuyệt đối chiều dọc */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
   border: none;
-  border-radius: 6px;
   background: transparent;
   color: #94a3b8;
   cursor: pointer;
-  padding: 0;
+  display: flex;
+  align-items: center;
+  padding: 2px;
 }
 
 .operation-tour-search-clear:hover {
-  background: #f1f5f9;
-  color: #334155;
+  color: #ef4444;
 }
 
-/* =========================================================
-   DATE RANGE & FIELD
-   ========================================================= */
+/* 2. KHUNG CHỌN NGÀY THÁNG (Ép nằm bên phải, gom gọn lại) */
 .operation-tour-date-range {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex: 0 0 auto !important; /* Không cho phình to */
 }
 
+/* Từng ô input ngày */
 .operation-tour-date-field {
-  flex: 1;
   display: flex;
   align-items: center;
-  gap: 8px;
-  height: 38px;
-  padding: 0 10px;
-  background: #ffffff;
-  border: 1px solid #dbe1e8;
+  gap: 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
-  color: #64748b;
-  box-sizing: border-box;
-  transition: all 0.2s ease;
-}
-
-.operation-tour-date-field:hover {
-  border-color: #cbd5e1;
-}
-
-.operation-tour-date-field:focus-within {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
-}
-
-.operation-tour-date-field svg {
-  flex-shrink: 0;
+  padding: 6px 10px;
+  width: 145px !important; /* Độ rộng vừa đẹp cho ô date */
 }
 
 .operation-tour-date-field input[type="date"] {
   width: 100%;
-  height: 100%;
   border: none;
   outline: none;
   background: transparent;
-  color: #334155;
   font-size: 13px;
-  font-weight: 500;
-  font-family: inherit;
+  color: #334155;
   cursor: pointer;
-  padding: 0;
-  display: flex;
-  align-items: center; /* Căn dọc nội dung date trong Webkit */
 }
 
-/* Ẩn bớt icon lịch mặc định trình duyệt để dùng Icon Lucide đồng nhất, hoặc chỉnh vị trí icon */
-.operation-tour-date-field
-  input[type="date"]::-webkit-calendar-picker-indicator {
-  cursor: pointer;
-  opacity: 0.6;
-  margin: 0;
-  padding: 0;
+.operation-tour-date-field svg {
+  color: #94a3b8;
+  flex-shrink: 0;
 }
 
-.operation-tour-date-field
-  input[type="date"]::-webkit-calendar-picker-indicator:hover {
-  opacity: 1;
-}
-
+/* Dấu gạch ngang giữa 2 ngày */
 .operation-tour-date-separator {
   color: #94a3b8;
   font-weight: 600;
-  user-select: none;
-  padding: 0 2px;
+  font-size: 13px;
 }
 
-/* =========================================================
-   CLEAR BUTTON
-   ========================================================= */
+/* Nút xóa lọc */
 .operation-tour-clear-filter {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 4px;
-  height: 38px;
-  padding: 0 12px;
-  border: 1px solid #fed7aa;
-  border-radius: 8px;
-  background: #fff7ed;
-  color: #ea580c;
+  padding: 6px 12px;
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #dc2626;
+  border-radius: 6px;
   font-size: 12.5px;
   font-weight: 600;
-  white-space: nowrap;
   cursor: pointer;
-  flex-shrink: 0; /* Đảm bảo nút không bị co lại làm méo chữ */
-  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .operation-tour-clear-filter:hover {
-  background: #ffedd5;
-  border-color: #fdba74;
-}
-
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
-@media (max-width: 600px) {
-  .operation-tour-date-range {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .operation-tour-date-separator {
-    display: none;
-  }
-
-  .operation-tour-clear-filter {
-    width: 100%;
-  }
+  background: #fee2e2;
 }

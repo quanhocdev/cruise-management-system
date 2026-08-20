@@ -22,7 +22,7 @@ const menuItems = [
     end: true,
   },
   {
-    label: "Tour chờ duyệt",
+    label: "Quản lý tour",
     icon: ClipboardCheck,
     path: "/operation/tours",
   },
