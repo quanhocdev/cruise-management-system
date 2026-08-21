@@ -45,6 +45,7 @@ import ConvenienceLayout from "./layouts/ConvenienceLayout";
 import ConvenienceDashboard from "./modules/convenience/pages/Dashboard";
 import ConvenienceProducts from "./modules/convenience/pages/ConvenienceProducts";
 import ConvenienceServices from "./modules/convenience/pages/ConvenienceServices";
+import ConvenienceTourConfigPage from "./modules/convenience/pages/ConvenienceTourConfigPage";
 
 // Onboard imports
 import OnboardLayout from "./layouts/OnboardLayout";
@@ -232,8 +233,14 @@ export default function App() {
             }
           >
             <Route path="dashboard" element={<ConvenienceDashboard />} />
+
             <Route path="products" element={<ConvenienceProducts />} />
+
             <Route path="services" element={<ConvenienceServices />} />
+
+            {/* CẤU HÌNH TOUR */}
+            <Route path="tour-config" element={<ConvenienceTourConfigPage />} />
+
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
 

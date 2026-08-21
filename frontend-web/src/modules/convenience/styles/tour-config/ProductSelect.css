@@ -1,0 +1,245 @@
+/* =========================================================
+   PRODUCT SELECT
+   src/modules/convenience/styles/tour-config/ProductSelect.css
+   ========================================================= */
+
+.convenience-product-select {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   SELECT WRAPPER
+   ========================================================= */
+
+.convenience-product-select-wrapper {
+  position: relative;
+
+  width: 100%;
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   SELECT INPUT
+   ========================================================= */
+
+.convenience-product-select-input {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+
+  box-sizing: border-box;
+
+  appearance: none;
+  -webkit-appearance: none;
+
+  padding: 0 42px 0 13px;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+
+  outline: none;
+
+  background: #ffffff;
+
+  color: #0f172a;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background-color 0.18s ease;
+}
+
+.convenience-product-select-input:hover:not(:disabled) {
+  border-color: #94a3b8;
+}
+
+.convenience-product-select-input:focus {
+  border-color: #64748b;
+
+  box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.12);
+}
+
+.convenience-product-select-input:disabled {
+  background: #f8fafc;
+  color: #94a3b8;
+
+  cursor: not-allowed;
+}
+
+.convenience-product-select-input option {
+  color: #0f172a;
+  background: #ffffff;
+}
+
+/* =========================================================
+   DROPDOWN ICON
+   ========================================================= */
+
+.convenience-product-select-icon,
+.convenience-product-select-loading {
+  position: absolute;
+
+  top: 50%;
+  right: 13px;
+
+  width: 17px;
+  height: 17px;
+
+  transform: translateY(-50%);
+
+  pointer-events: none;
+}
+
+.convenience-product-select-icon {
+  color: #64748b;
+}
+
+.convenience-product-select-loading {
+  color: #64748b;
+
+  animation: convenience-product-select-spin 0.8s linear infinite;
+}
+
+@keyframes convenience-product-select-spin {
+  from {
+    transform: translateY(-50%) rotate(0deg);
+  }
+
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
+}
+
+/* =========================================================
+   ERROR STATE
+   ========================================================= */
+
+.convenience-product-select-wrapper.has-error
+  .convenience-product-select-input {
+  border-color: #ef4444;
+}
+
+.convenience-product-select-wrapper.has-error
+  .convenience-product-select-input:focus {
+  border-color: #ef4444;
+
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.convenience-product-select-error {
+  display: block;
+
+  margin-top: 6px;
+
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: 500;
+
+  color: #dc2626;
+}
+
+/* =========================================================
+   EMPTY / HINT
+   ========================================================= */
+
+.convenience-product-select-hint {
+  display: block;
+
+  margin-top: 6px;
+
+  font-size: 12px;
+  line-height: 1.45;
+
+  color: #94a3b8;
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1024px) {
+  .convenience-product-select-input {
+    height: 41px;
+
+    padding-left: 12px;
+    padding-right: 40px;
+
+    font-size: 13px;
+  }
+
+  .convenience-product-select-icon,
+  .convenience-product-select-loading {
+    right: 12px;
+
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 640px) {
+  .convenience-product-select-input {
+    height: 40px;
+
+    padding-left: 11px;
+    padding-right: 38px;
+
+    border-radius: 8px;
+
+    font-size: 13px;
+  }
+
+  .convenience-product-select-icon,
+  .convenience-product-select-loading {
+    right: 11px;
+
+    width: 16px;
+    height: 16px;
+  }
+
+  .convenience-product-select-error,
+  .convenience-product-select-hint {
+    margin-top: 5px;
+
+    font-size: 11px;
+  }
+}
+
+/* =========================================================
+   VERY SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 380px) {
+  .convenience-product-select-input {
+    height: 38px;
+
+    padding-left: 10px;
+    padding-right: 36px;
+
+    font-size: 12px;
+  }
+
+  .convenience-product-select-icon,
+  .convenience-product-select-loading {
+    right: 10px;
+
+    width: 15px;
+    height: 15px;
+  }
+}

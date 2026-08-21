@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
-  LayoutDashboard, // Import thêm icon Dashboard
+  LayoutDashboard,
   ConciergeBell,
   Package,
+  ClipboardList,
   ChevronLeft,
   ChevronRight,
   Sparkles,
@@ -27,6 +28,11 @@ const menuItems = [
     icon: Package,
     path: "/convenience/products",
   },
+  {
+    label: "Cấu hình Tour",
+    icon: ClipboardList,
+    path: "/convenience/tour-config",
+  },
 ];
 
 function ConvenienceSidebar() {
@@ -37,9 +43,11 @@ function ConvenienceSidebar() {
       {/* =====================================================
           TOP
          ===================================================== */}
+
       <div className="convenience-sidebar-top">
         <div className="convenience-sidebar-brand">
           <Sparkles size={24} />
+
           {!collapsed && <span>CONVENIENCE</span>}
         </div>
 
@@ -56,6 +64,7 @@ function ConvenienceSidebar() {
       {/* =====================================================
           MENU
          ===================================================== */}
+
       <nav className="convenience-sidebar-menu">
         {menuItems.map((item) => {
           const Icon = item.icon;
@@ -70,6 +79,7 @@ function ConvenienceSidebar() {
               title={collapsed ? item.label : undefined}
             >
               <Icon size={20} />
+
               {!collapsed && <span>{item.label}</span>}
             </NavLink>
           );
@@ -79,6 +89,7 @@ function ConvenienceSidebar() {
       {/* =====================================================
           BOTTOM
          ===================================================== */}
+
       {!collapsed && (
         <div className="convenience-sidebar-bottom">
           <span>Convenience Portal</span>
