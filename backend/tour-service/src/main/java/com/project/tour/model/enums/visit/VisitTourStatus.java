@@ -1,18 +1,14 @@
-// src/main/java/com/project/tour/model/enums/visit/VisitTourStatus.java
-
 package com.project.tour.model.enums.visit;
 
 public enum VisitTourStatus {
 
-    WAITING_CONFIG,
+    NOT_STARTED, // Đã cấu hình, chờ tour diễn ra
 
-    AVAILABLE,
+    IN_PROGRESS, // Đang diễn ra
 
-    IN_PROGRESS,
+    COMPLETED, // Đã kết thúc
 
-    COMPLETED,
+    DELAYED, // Bị trì hoãn
 
-    DELAYED,
-
-    CANCELLED
+    CANCELLED // Bị hủy
 }

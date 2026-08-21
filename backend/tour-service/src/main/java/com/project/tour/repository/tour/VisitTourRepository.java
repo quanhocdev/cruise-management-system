@@ -1,6 +1,7 @@
 package com.project.tour.repository.tour;
 
 import com.project.tour.model.VisitTour;
+import com.project.tour.model.enums.visit.VisitTourStatus;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -60,4 +61,8 @@ public interface VisitTourRepository
     })
     List<VisitTour> findAllByScheduleStop_IdInOrderByStartTimeAsc(
             Collection<UUID> scheduleStopIds);
+
+    List<VisitTour> findAllByScheduleStop_IdInAndStatusOrderByStartTimeAsc(
+            List<UUID> scheduleStopIds,
+            VisitTourStatus status);
 }

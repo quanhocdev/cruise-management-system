@@ -116,6 +116,9 @@ public class VisitTourServiceImpl
         ScheduleStop scheduleStop = findScheduleStop(
                 request.scheduleStopId());
 
+        validator.validateTourCanModify(
+                scheduleStop.getSchedule().getTour());
+
         validator.validateTimeRange(
                 scheduleStop,
                 request.startTime(),
@@ -126,7 +129,7 @@ public class VisitTourServiceImpl
                 scheduleStop);
 
         visitTour.setStatus(
-                VisitTourStatus.WAITING_CONFIG);
+                VisitTourStatus.NOT_STARTED);
 
         VisitTour saved = visitTourRepository.save(
                 visitTour);
@@ -146,6 +149,11 @@ public class VisitTourServiceImpl
             UpdateVisitTourRequest request) {
 
         VisitTour visitTour = findById(id);
+
+        validator.validateTourCanModify(
+                visitTour.getScheduleStop()
+                        .getSchedule()
+                        .getTour());
 
         validator.validateUpdate(
                 request);
@@ -216,6 +224,11 @@ public class VisitTourServiceImpl
     public void delete(UUID id) {
 
         VisitTour visitTour = findById(id);
+
+        validator.validateTourCanModify(
+                visitTour.getScheduleStop()
+                        .getSchedule()
+                        .getTour());
 
         visitTourRepository.delete(
                 visitTour);

@@ -6,7 +6,8 @@ import com.project.tour.exception.AppException;
 import com.project.tour.model.ScheduleStop;
 import com.project.tour.model.VisitTour;
 import com.project.tour.model.enums.visit.VisitTourStatus;
-
+import com.project.tour.model.Tour;
+import com.project.tour.model.enums.tour.TourStatusTrip;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -130,17 +131,14 @@ public class VisitTourValidator {
 
         boolean allowed = switch (currentStatus) {
 
-            case WAITING_CONFIG ->
-                newStatus == VisitTourStatus.AVAILABLE
-                        || newStatus == VisitTourStatus.CANCELLED;
-
-            case AVAILABLE ->
+            case NOT_STARTED ->
                 newStatus == VisitTourStatus.IN_PROGRESS
                         || newStatus == VisitTourStatus.CANCELLED;
 
             case IN_PROGRESS ->
                 newStatus == VisitTourStatus.COMPLETED
-                        || newStatus == VisitTourStatus.DELAYED;
+                        || newStatus == VisitTourStatus.DELAYED
+                        || newStatus == VisitTourStatus.CANCELLED;
 
             case DELAYED ->
                 newStatus == VisitTourStatus.IN_PROGRESS
@@ -238,5 +236,28 @@ public class VisitTourValidator {
         return new AppException(
                 message,
                 HttpStatus.BAD_REQUEST);
+    }
+
+    // =====================================================
+    // TOUR STATUS - MODIFY
+    // =====================================================
+
+    public void validateTourCanModify(
+            Tour tour) {
+
+        if (tour == null) {
+            throw badRequest(
+                    "Tour is required");
+        }
+
+        TourStatusTrip status = tour.getStatusTrip();
+
+        if (status != TourStatusTrip.APPROVED
+                && status != TourStatusTrip.IN_PROGRESS) {
+
+            throw badRequest(
+                    "Visit tour cannot be modified when tour status is "
+                            + status);
+        }
     }
 }

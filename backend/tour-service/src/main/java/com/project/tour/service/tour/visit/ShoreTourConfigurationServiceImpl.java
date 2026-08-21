@@ -7,6 +7,8 @@ import com.project.tour.model.Schedule;
 import com.project.tour.model.ScheduleStop;
 import com.project.tour.model.Tour;
 import com.project.tour.model.VisitTour;
+import com.project.tour.model.enums.tour.TourStatusTrip;
+import com.project.tour.model.enums.visit.VisitTourStatus;
 import com.project.tour.repository.tour.TourRepository;
 import com.project.tour.repository.tour.VisitTourRepository;
 import com.project.tour.repository.tour.schedule.ScheduleRepository;
@@ -46,16 +48,24 @@ public class ShoreTourConfigurationServiceImpl
     @Override
     @Transactional(readOnly = true)
     public ShoreTourConfigurationResponse getConfiguration(
-            UUID tourId) {
-
+            UUID tourId,
+            VisitTourStatus status) {
         // =================================================
         // 1. TOUR
         // =================================================
 
+        List<TourStatusTrip> allowedStatuses = List.of(
+                TourStatusTrip.APPROVED,
+                TourStatusTrip.READY,
+                TourStatusTrip.IN_PROGRESS,
+                TourStatusTrip.COMPLETED);
+
         Tour tour = tourRepository
-                .findById(tourId)
+                .findByIdAndStatusTripIn(
+                        tourId,
+                        allowedStatuses)
                 .orElseThrow(() -> new AppException(
-                        "Tour not found",
+                        "Tour not found or is not available for shore configuration",
                         HttpStatus.NOT_FOUND));
 
         // =================================================
@@ -110,9 +120,21 @@ public class ShoreTourConfigurationServiceImpl
         // 4. ALL VISIT TOURS
         // =================================================
 
-        List<VisitTour> visitTours = visitTourRepository
-                .findAllByScheduleStop_IdInOrderByStartTimeAsc(
-                        stopIds);
+        List<VisitTour> visitTours;
+
+        if (status == null) {
+
+            visitTours = visitTourRepository
+                    .findAllByScheduleStop_IdInOrderByStartTimeAsc(
+                            stopIds);
+
+        } else {
+
+            visitTours = visitTourRepository
+                    .findAllByScheduleStop_IdInAndStatusOrderByStartTimeAsc(
+                            stopIds,
+                            status);
+        }
 
         Map<UUID, List<VisitTour>> visitToursByStop = visitTours.stream()
                 .collect(Collectors.groupingBy(
