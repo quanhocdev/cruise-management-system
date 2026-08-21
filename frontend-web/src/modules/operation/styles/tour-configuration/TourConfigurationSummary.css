@@ -1,0 +1,194 @@
+/* src/styles/tour-configuration/TourConfigurationSummary.css */
+
+/* =====================================================
+   SECTION BASE & CONTAINER
+   ===================================================== */
+.tour-configuration-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* =====================================================
+   HEADER SECTION
+   ===================================================== */
+.tour-configuration-summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.tour-configuration-summary-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.tour-configuration-summary-header p {
+  font-size: 14px;
+  color: #64748b;
+  margin: 4px 0 0 0;
+}
+
+/* Result Badge */
+.tour-configuration-summary-result {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tour-configuration-summary-result.complete {
+  background-color: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+.tour-configuration-summary-result.incomplete {
+  background-color: #fff1f2;
+  color: #e11d48;
+  border: 1px solid #fecdd3;
+}
+
+/* =====================================================
+   CARDS GRID
+   ===================================================== */
+.tour-configuration-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+/* Individual Card */
+.tour-configuration-summary-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 10px;
+  background-color: #f8fafc;
+  border: 1px solid #f1f5f9;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.tour-configuration-summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Card Icons Distinct Colors */
+.tour-configuration-summary-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  background-color: #e0f2fe;
+  color: #0284c7;
+}
+
+/* Biểu tượng phân biệt theo key nếu cần */
+.tour-configuration-summary-card:nth-child(2)
+  .tour-configuration-summary-card-icon {
+  background-color: #f0fdf4;
+  color: #16a34a;
+}
+
+.tour-configuration-summary-card:nth-child(3)
+  .tour-configuration-summary-card-icon {
+  background-color: #f3e8ff;
+  color: #9333ea;
+}
+
+/* Card Content */
+.tour-configuration-summary-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.tour-configuration-summary-card-content span {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.tour-configuration-summary-card-content strong {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.tour-configuration-summary-card-content strong small {
+  font-size: 14px;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.tour-configuration-summary-card-content p {
+  font-size: 12px;
+  color: #475569;
+  margin: 2px 0 0 0;
+  font-weight: 500;
+}
+
+/* =====================================================
+   RESPONSIVE MEDIA QUERIES
+   ===================================================== */
+
+/* Tablet (<= 768px) */
+@media (max-width: 768px) {
+  .tour-configuration-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tour-configuration-summary-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tour-configuration-summary-result {
+    align-self: flex-start;
+  }
+}
+
+/* Mobile (<= 480px) */
+@media (max-width: 480px) {
+  .tour-configuration-summary {
+    padding: 16px;
+  }
+
+  .tour-configuration-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tour-configuration-summary-header h2 {
+    font-size: 18px;
+  }
+
+  .tour-configuration-summary-card {
+    padding: 12px;
+  }
+}

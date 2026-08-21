@@ -1,5 +1,7 @@
 // src/modules/operation/pages/ManagerTour.jsx
 
+import { useNavigate } from "react-router-dom";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CheckCircle, AlertCircle } from "lucide-react";
 
@@ -19,6 +21,17 @@ import CruiseAreaAssignmentModal from "../components/CruiseAreaAssignmentModal";
 import "../styles/ManagerTour.css";
 
 function ManagerTour() {
+  const navigate = useNavigate(); // Khai báo hook chuyển trang
+
+  // Hàm xử lý khi bấm Xem chi tiết
+  // Kiểm tra dữ liệu tour xem thuộc tính ID chính xác là gì (id, tripId, hay tourId)
+  const handleViewTour = (tour) => {
+    // 1. Nếu trang Cấu hình cần tour.id
+    const targetId = tour.id || tour.tourId || tour.tripId;
+
+    // Hoặc truyền đầy đủ param nếu trang cấu hình nhận cả 2
+    navigate(`/operation/tour-configuration?tourId=${targetId}`);
+  };
   // 1. Hook quản lý Tour
   const {
     pendingTours,
@@ -287,10 +300,6 @@ function ManagerTour() {
     }
   };
 
-  const handleViewTour = (tour) => {
-    handleAssignArea(tour);
-  };
-
   const handleApproveTour = async (tour) => {
     if (!tour) return;
 
@@ -407,11 +416,11 @@ function ManagerTour() {
           tours={filteredTours}
           loading={toursLoading}
           mode={tourMode}
+          onView={handleViewTour}
           onSelectCruise={handleSelectCruise}
           onAssignArea={handleAssignArea}
           onApprove={handleApproveTour}
           onReject={handleRejectTour}
-          onView={handleViewTour}
         />
       </div>
 

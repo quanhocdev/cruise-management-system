@@ -39,6 +39,7 @@ import ManagerScheduleStops from "./modules/scheduler/pages/ManagerScheduleStops
 import OperationLayout from "./layouts/OperationLayout";
 import OperationDashboard from "./modules/operation/pages/Dashboard";
 import OperationManagerTour from "./modules/operation/pages/ManagerTour";
+import OperationTourConfiguration from "./modules/operation/pages/OperationTourConfiguration";
 
 // Convenience imports
 import ConvenienceLayout from "./layouts/ConvenienceLayout";
@@ -163,6 +164,10 @@ export default function App() {
           >
             <Route path="dashboard" element={<OperationDashboard />} />
             <Route path="tours" element={<OperationManagerTour />} />
+            <Route
+              path="tour-configuration"
+              element={<OperationTourConfiguration />}
+            />
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
 
