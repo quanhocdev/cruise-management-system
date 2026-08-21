@@ -19,7 +19,9 @@ public interface VisitTourService {
 
     List<VisitTourResponse> getByTour(UUID tourId);
 
-    VisitTourResponse create(CreateVisitTourRequest request);
+    VisitTourResponse create(
+            UUID scheduleStopId,
+            CreateVisitTourRequest request);
 
     VisitTourResponse update(
             UUID id,

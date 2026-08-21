@@ -65,7 +65,7 @@ public class VisitTour {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
-    private VisitTourStatus status = VisitTourStatus.WAITING_CONFIG;
+    private VisitTourStatus status = VisitTourStatus.NOT_STARTED;
 
     /*
      * Nhà cung cấp tour địa phương.
@@ -89,7 +89,7 @@ public class VisitTour {
         updatedAt = now;
 
         if (status == null) {
-            status = VisitTourStatus.WAITING_CONFIG;
+            status = VisitTourStatus.NOT_STARTED;
         }
     }
 

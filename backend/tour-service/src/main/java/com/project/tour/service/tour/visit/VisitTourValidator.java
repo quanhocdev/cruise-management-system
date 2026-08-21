@@ -29,11 +29,6 @@ public class VisitTourValidator {
                     "Request must not be null");
         }
 
-        if (request.scheduleStopId() == null) {
-            throw badRequest(
-                    "Schedule stop is required");
-        }
-
         validateName(request.name());
 
         validateTime(

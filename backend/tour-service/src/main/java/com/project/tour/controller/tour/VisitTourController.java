@@ -76,14 +76,17 @@ public class VisitTourController {
     // CREATE
     // =====================================================
 
-    @PostMapping
+    @PostMapping("/schedule-stops/{scheduleStopId}/visit-tours")
     public ResponseEntity<VisitTourResponse> create(
+            @PathVariable UUID scheduleStopId,
             @RequestBody CreateVisitTourRequest request) {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(
-                        visitTourService.create(request));
+                        visitTourService.create(
+                                scheduleStopId,
+                                request));
     }
 
     // =====================================================

@@ -109,12 +109,13 @@ public class VisitTourServiceImpl
     @Override
     @Transactional
     public VisitTourResponse create(
+            UUID scheduleStopId,
             CreateVisitTourRequest request) {
 
         validator.validateCreate(request);
 
         ScheduleStop scheduleStop = findScheduleStop(
-                request.scheduleStopId());
+                scheduleStopId);
 
         validator.validateTourCanModify(
                 scheduleStop.getSchedule().getTour());
@@ -128,14 +129,9 @@ public class VisitTourServiceImpl
                 request,
                 scheduleStop);
 
-        visitTour.setStatus(
-                VisitTourStatus.NOT_STARTED);
+        VisitTour saved = visitTourRepository.save(visitTour);
 
-        VisitTour saved = visitTourRepository.save(
-                visitTour);
-
-        return VisitTourMapper.toResponse(
-                saved);
+        return VisitTourMapper.toResponse(saved);
     }
 
     // =====================================================

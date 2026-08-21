@@ -4,11 +4,8 @@ package com.project.tour.dto.visit;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 public record CreateVisitTourRequest(
-
-        UUID scheduleStopId,
 
         String name,
 
