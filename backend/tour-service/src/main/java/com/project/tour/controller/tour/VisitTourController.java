@@ -1,0 +1,118 @@
+package com.project.tour.controller.tour;
+
+import com.project.tour.dto.visit.CreateVisitTourRequest;
+import com.project.tour.dto.visit.UpdateVisitTourRequest;
+import com.project.tour.dto.visit.VisitTourResponse;
+import com.project.tour.service.tour.visit.VisitTourService;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api/shore/visit-tours")
+public class VisitTourController {
+
+    private final VisitTourService visitTourService;
+
+    public VisitTourController(
+            VisitTourService visitTourService) {
+
+        this.visitTourService = visitTourService;
+    }
+
+    // =====================================================
+    // GET ALL
+    // =====================================================
+
+    @GetMapping
+    public ResponseEntity<List<VisitTourResponse>> getAll() {
+
+        return ResponseEntity.ok(
+                visitTourService.getAll());
+    }
+
+    // =====================================================
+    // GET BY ID
+    // =====================================================
+
+    @GetMapping("/{id}")
+    public ResponseEntity<VisitTourResponse> getById(
+            @PathVariable UUID id) {
+
+        return ResponseEntity.ok(
+                visitTourService.getById(id));
+    }
+
+    // =====================================================
+    // GET BY SCHEDULE STOP
+    // =====================================================
+
+    @GetMapping("/schedule-stop/{scheduleStopId}")
+    public ResponseEntity<List<VisitTourResponse>> getByScheduleStop(
+            @PathVariable UUID scheduleStopId) {
+
+        return ResponseEntity.ok(
+                visitTourService.getByScheduleStop(
+                        scheduleStopId));
+    }
+
+    // =====================================================
+    // GET BY TOUR
+    // =====================================================
+
+    @GetMapping("/tour/{tourId}")
+    public ResponseEntity<List<VisitTourResponse>> getByTour(
+            @PathVariable UUID tourId) {
+
+        return ResponseEntity.ok(
+                visitTourService.getByTour(tourId));
+    }
+
+    // =====================================================
+    // CREATE
+    // =====================================================
+
+    @PostMapping
+    public ResponseEntity<VisitTourResponse> create(
+            @RequestBody CreateVisitTourRequest request) {
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(
+                        visitTourService.create(request));
+    }
+
+    // =====================================================
+    // PATCH
+    // =====================================================
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<VisitTourResponse> update(
+            @PathVariable UUID id,
+            @RequestBody UpdateVisitTourRequest request) {
+
+        return ResponseEntity.ok(
+                visitTourService.update(
+                        id,
+                        request));
+    }
+
+    // =====================================================
+    // DELETE
+    // =====================================================
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(
+            @PathVariable UUID id) {
+
+        visitTourService.delete(id);
+
+        return ResponseEntity
+                .noContent()
+                .build();
+    }
+}
