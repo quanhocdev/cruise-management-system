@@ -4,7 +4,11 @@ import com.project.booking.dto.*;
 import com.project.booking.client.*;
 import com.project.booking.exception.BookingException;
 import com.project.booking.model.Booking;
+import com.project.booking.model.Passenger;
+import com.project.booking.model.PassengerVoyage;
 import com.project.booking.model.enums.BookingStatus;
+import com.project.booking.model.enums.EmbarkationStatus;
+import com.project.booking.model.enums.PassengerStatus;
 import com.project.booking.repository.BookingRepository;
 import com.project.booking.repository.PassengerRepository;
 import com.project.booking.repository.PassengerVoyageRepository;
@@ -25,9 +29,10 @@ class BookingServiceImplTests {
     @Mock PassengerRepository passengerRepository;
     @Mock PassengerVoyageRepository passengerVoyageRepository;
     @Mock TourClient tourClient;
+    @Mock NotificationClient notificationClient;
     BookingServiceImpl service;
     @BeforeEach void setUp() {
-        service = new BookingServiceImpl(repository, passengerRepository, passengerVoyageRepository, tourClient);
+        service = new BookingServiceImpl(repository, passengerRepository, passengerVoyageRepository, tourClient, notificationClient);
     }
 
     @Test void createUsesAuthenticatedUserAndPendingStatus() {
@@ -80,6 +85,59 @@ class BookingServiceImplTests {
         assertThrows(BookingException.class, () -> service.confirmPayment(1L, 10L));
     }
 
+    @Test void checkInAssignsNfcAndRejectsSecondCheckIn() {
+        Booking booking = booking(BookingStatus.CONFIRMED, 10L); booking.setBookingCode("CR00000001");
+        PassengerVoyage link = passengerVoyage(booking, EmbarkationStatus.NOT_CHECKED_IN);
+        when(repository.findByBookingCodeIgnoreCase("CR00000001")).thenReturn(Optional.of(booking));
+        when(passengerVoyageRepository.findById(3L)).thenReturn(Optional.of(link));
+        when(passengerVoyageRepository.existsByNfcTagIdIgnoreCase("TAG-01")).thenReturn(false);
+        when(passengerVoyageRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        PassengerVoyageResponse result = service.checkIn("CR00000001", 3L, "tag-01");
+        assertEquals(EmbarkationStatus.CHECKED_IN, result.embarkationStatus());
+        assertEquals("TAG-01", result.nfcTagId());
+        assertThrows(BookingException.class, () -> service.checkIn("CR00000001", 3L, "tag-02"));
+    }
+
+    @Test void nfcLifecycleRequiresCorrectOrder() {
+        Booking booking = booking(BookingStatus.CONFIRMED, 10L);
+        PassengerVoyage link = passengerVoyage(booking, EmbarkationStatus.CHECKED_IN); link.setNfcTagId("TAG-01");
+        when(passengerVoyageRepository.findByNfcTagIdIgnoreCase("TAG-01")).thenReturn(Optional.of(link));
+        when(passengerVoyageRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        assertEquals(EmbarkationStatus.BOARDED, service.board("tag-01").embarkationStatus());
+        assertEquals(EmbarkationStatus.DISEMBARKED, service.disembark("tag-01").embarkationStatus());
+        assertThrows(BookingException.class, () -> service.board("tag-01"));
+    }
+
+    @Test void departureReminderIsSentOnlyOnceAfterSuccessfulDelivery() {
+        java.time.LocalDate tomorrow = java.time.LocalDate.now().plusDays(1);
+        Booking booking = booking(BookingStatus.CONFIRMED, 10L); booking.setBookingCode("CR00000001");
+        booking.setVoyageStartDate(tomorrow);
+        when(repository.findAllByStatusAndVoyageStartDateAndDepartureReminderSentAtIsNull(BookingStatus.CONFIRMED, tomorrow))
+            .thenReturn(List.of(booking));
+        when(passengerVoyageRepository.findAllByBooking_IdOrderByIdAsc(1L)).thenReturn(List.of());
+        when(notificationClient.send(eq(7L), isNull(), eq("DEPARTURE_REMINDER"), anyString(), anyString(), eq(1L)))
+            .thenReturn(true);
+        assertEquals(1, service.sendDepartureReminders(tomorrow));
+        assertNotNull(booking.getDepartureReminderSentAt()); verify(repository).save(booking);
+    }
+
+    @Test void disembarkedPassengerIsEligibleForFeedback() {
+        Booking booking = booking(BookingStatus.CONFIRMED, 10L);
+        PassengerVoyage link = passengerVoyage(booking, EmbarkationStatus.DISEMBARKED);
+        link.getPassenger().setUserId(7L);
+        when(repository.findById(1L)).thenReturn(Optional.of(booking));
+        when(passengerVoyageRepository.findFirstByBooking_IdAndPassenger_UserId(1L, 7L)).thenReturn(Optional.of(link));
+        FeedbackEligibilityResponse result = service.getFeedbackEligibility(1L, 7L);
+        assertTrue(result.participated()); assertEquals(3L, result.passengerVoyageId());
+    }
+
+    @Test void bookingOwnerWhoIsNotPassengerIsNotEligibleForFeedback() {
+        Booking booking = booking(BookingStatus.CONFIRMED, 10L);
+        when(repository.findById(1L)).thenReturn(Optional.of(booking));
+        when(passengerVoyageRepository.findFirstByBooking_IdAndPassenger_UserId(1L, 7L)).thenReturn(Optional.empty());
+        assertFalse(service.getFeedbackEligibility(1L, 7L).participated());
+    }
+
     private CreateBookingRequest request() {
         return new CreateBookingRequest(UUID.randomUUID(), "Nguyen Van A", "0900000000",
             new BigDecimal("1000000"), List.of(new CreatePassengerRequest(null, "Nguyen Van A",
@@ -91,5 +149,12 @@ class BookingServiceImplTests {
         b.setTotalAmount(new BigDecimal("1000000"));
         b.setStatus(status); b.setPaymentId(paymentId); b.setCreatedAt(Instant.now()); b.setUpdatedAt(Instant.now());
         return b;
+    }
+    private PassengerVoyage passengerVoyage(Booking booking, EmbarkationStatus status) {
+        Passenger passenger = new Passenger(); passenger.setId(2L); passenger.setFullName("Nguyen Van A");
+        PassengerVoyage link = new PassengerVoyage(); link.setId(3L); link.setPassenger(passenger);
+        link.setBooking(booking); link.setVoyageId(booking.getVoyageId());
+        link.setPassengerStatus(PassengerStatus.REGISTERED); link.setEmbarkationStatus(status);
+        return link;
     }
 }

@@ -4,6 +4,7 @@ import com.project.booking.model.enums.BookingStatus;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
@@ -24,6 +25,8 @@ public class Booking {
     @Column(name = "payment_id") private Long paymentId;
     @Column(name = "created_at", nullable = false) private Instant createdAt;
     @Column(name = "updated_at", nullable = false) private Instant updatedAt;
+    @Column(name = "voyage_start_date") private LocalDate voyageStartDate;
+    @Column(name = "departure_reminder_sent_at") private Instant departureReminderSentAt;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -47,4 +50,8 @@ public class Booking {
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
+    public LocalDate getVoyageStartDate() { return voyageStartDate; }
+    public void setVoyageStartDate(LocalDate value) { this.voyageStartDate = value; }
+    public Instant getDepartureReminderSentAt() { return departureReminderSentAt; }
+    public void setDepartureReminderSentAt(Instant value) { this.departureReminderSentAt = value; }
 }

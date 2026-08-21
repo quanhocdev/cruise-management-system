@@ -22,10 +22,13 @@ public class BookingServiceImpl implements BookingService {
     private final PassengerRepository passengerRepository;
     private final PassengerVoyageRepository passengerVoyageRepository;
     private final TourClient tourClient;
+    private final NotificationClient notificationClient;
     public BookingServiceImpl(BookingRepository repository, PassengerRepository passengerRepository,
-                              PassengerVoyageRepository passengerVoyageRepository, TourClient tourClient) {
+                              PassengerVoyageRepository passengerVoyageRepository, TourClient tourClient,
+                              NotificationClient notificationClient) {
         this.repository = repository; this.passengerRepository = passengerRepository;
         this.passengerVoyageRepository = passengerVoyageRepository; this.tourClient = tourClient;
+        this.notificationClient = notificationClient;
     }
 
     @Override @Transactional
@@ -38,6 +41,7 @@ public class BookingServiceImpl implements BookingService {
         booking.setPrimaryContactName(request.primaryContactName().trim());
         booking.setPrimaryContactPhone(request.primaryContactPhone().trim());
         booking.setTotalAmount(request.totalAmount());
+        booking.setVoyageStartDate(voyage.startDate());
         booking.setStatus(BookingStatus.PENDING_PAYMENT); booking.setCreatedAt(now); booking.setUpdatedAt(now);
         Booking saved = repository.save(booking);
         for (CreatePassengerRequest item : request.passengers()) {
@@ -77,7 +81,10 @@ public class BookingServiceImpl implements BookingService {
         passengerVoyageRepository.findAllByBooking_IdOrderByIdAsc(id).forEach(link -> {
             link.setPassengerStatus(PassengerStatus.CANCELLED); passengerVoyageRepository.save(link);
         });
-        return toResponse(repository.save(booking));
+        Booking saved = repository.save(booking);
+        notificationClient.send(saved.getCreatedByUserId(), firstEmail(saved), "BOOKING_CANCELLED",
+            "Booking cancelled", "Your booking #" + saved.getId() + " has been cancelled.", saved.getId());
+        return toResponse(saved);
     }
 
     @Override @Transactional(readOnly = true)
@@ -100,24 +107,137 @@ public class BookingServiceImpl implements BookingService {
         passengerVoyageRepository.findAllByBooking_IdOrderByIdAsc(id).forEach(link -> {
             link.setPassengerStatus(PassengerStatus.REGISTERED); passengerVoyageRepository.save(link);
         });
-        return toResponse(repository.save(booking));
+        Booking saved = repository.save(booking);
+        notificationClient.send(saved.getCreatedByUserId(), firstEmail(saved), "PAYMENT_SUCCESS",
+            "Payment successful", "Payment confirmed. Your booking code is " + saved.getBookingCode() + ".",
+            saved.getId());
+        return toResponse(saved);
+    }
+
+    @Override @Transactional(readOnly = true)
+    public BookingResponse getByCode(String bookingCode, Long requesterId, boolean privileged) {
+        Booking booking = findByCode(bookingCode);
+        if (!privileged && !Objects.equals(booking.getCreatedByUserId(), requesterId))
+            throw new BookingException(HttpStatus.FORBIDDEN, "You cannot access this booking");
+        return toResponse(booking);
+    }
+
+    @Override @Transactional
+    public PassengerVoyageResponse checkIn(String bookingCode, Long passengerVoyageId, String nfcTagId) {
+        Booking booking = findByCode(bookingCode);
+        if (booking.getStatus() != BookingStatus.CONFIRMED)
+            throw new BookingException(HttpStatus.CONFLICT, "Only a confirmed booking can be checked in");
+        PassengerVoyage link = findPassengerVoyage(passengerVoyageId);
+        if (!Objects.equals(link.getBooking().getId(), booking.getId()))
+            throw new BookingException(HttpStatus.BAD_REQUEST, "Passenger does not belong to this booking");
+        if (link.getPassengerStatus() != PassengerStatus.REGISTERED)
+            throw new BookingException(HttpStatus.CONFLICT, "Passenger is not registered for this voyage");
+        if (link.getEmbarkationStatus() != EmbarkationStatus.NOT_CHECKED_IN)
+            throw new BookingException(HttpStatus.CONFLICT, "Passenger has already been checked in");
+        String normalizedTag = normalizeTag(nfcTagId);
+        if (passengerVoyageRepository.existsByNfcTagIdIgnoreCase(normalizedTag))
+            throw new BookingException(HttpStatus.CONFLICT, "NFC tag is already assigned");
+        link.setNfcTagId(normalizedTag);
+        link.setEmbarkationStatus(EmbarkationStatus.CHECKED_IN);
+        link.setCheckedInAt(Instant.now());
+        PassengerVoyage saved = passengerVoyageRepository.save(link);
+        notificationClient.send(booking.getCreatedByUserId(), saved.getPassenger().getEmail(), "CHECK_IN_SUCCESS",
+            "Check-in successful", saved.getPassenger().getFullName() + " has checked in successfully.", booking.getId());
+        return toPassengerResponse(saved);
+    }
+
+    @Override @Transactional
+    public PassengerVoyageResponse board(String nfcTagId) {
+        PassengerVoyage link = findByNfc(nfcTagId);
+        if (link.getEmbarkationStatus() != EmbarkationStatus.CHECKED_IN)
+            throw new BookingException(HttpStatus.CONFLICT, "Passenger must be checked in before boarding");
+        link.setEmbarkationStatus(EmbarkationStatus.BOARDED);
+        link.setBoardedAt(Instant.now());
+        return toPassengerResponse(passengerVoyageRepository.save(link));
+    }
+
+    @Override @Transactional
+    public PassengerVoyageResponse disembark(String nfcTagId) {
+        PassengerVoyage link = findByNfc(nfcTagId);
+        if (link.getEmbarkationStatus() != EmbarkationStatus.BOARDED)
+            throw new BookingException(HttpStatus.CONFLICT, "Passenger must be on board before disembarking");
+        link.setEmbarkationStatus(EmbarkationStatus.DISEMBARKED);
+        link.setDisembarkedAt(Instant.now());
+        return toPassengerResponse(passengerVoyageRepository.save(link));
+    }
+
+    @Override @Transactional
+    public int sendDepartureReminders(java.time.LocalDate departureDate) {
+        int sent = 0;
+        for (Booking booking : repository.findAllByStatusAndVoyageStartDateAndDepartureReminderSentAtIsNull(
+                BookingStatus.CONFIRMED, departureDate)) {
+            boolean delivered = notificationClient.send(booking.getCreatedByUserId(), firstEmail(booking),
+                "DEPARTURE_REMINDER", "Upcoming cruise departure",
+                "Your cruise departs on " + departureDate + ". Booking code: " + booking.getBookingCode() + ".",
+                booking.getId());
+            if (delivered) {
+                booking.setDepartureReminderSentAt(Instant.now()); repository.save(booking); sent++;
+            }
+        }
+        return sent;
+    }
+
+    @Override @Transactional(readOnly = true)
+    public FeedbackEligibilityResponse getFeedbackEligibility(Long bookingId, Long userId) {
+        Booking booking = find(bookingId);
+        PassengerVoyage passengerVoyage = passengerVoyageRepository
+            .findFirstByBooking_IdAndPassenger_UserId(bookingId, userId).orElse(null);
+        if (passengerVoyage == null)
+            return new FeedbackEligibilityResponse(booking.getId(), booking.getVoyageId(), null, false);
+        boolean participated = booking.getStatus() == BookingStatus.CONFIRMED
+            && passengerVoyage.getPassengerStatus() == PassengerStatus.REGISTERED
+            && passengerVoyage.getEmbarkationStatus() == EmbarkationStatus.DISEMBARKED;
+        return new FeedbackEligibilityResponse(booking.getId(), booking.getVoyageId(),
+            passengerVoyage.getId(), participated);
     }
 
     private Booking find(Long id) {
         return repository.findById(id)
             .orElseThrow(() -> new BookingException(HttpStatus.NOT_FOUND, "Booking not found: " + id));
     }
+    private Booking findByCode(String bookingCode) {
+        String normalized = bookingCode == null ? "" : bookingCode.trim();
+        return repository.findByBookingCodeIgnoreCase(normalized)
+            .orElseThrow(() -> new BookingException(HttpStatus.NOT_FOUND, "Booking code not found"));
+    }
+    private PassengerVoyage findPassengerVoyage(Long id) {
+        return passengerVoyageRepository.findById(id)
+            .orElseThrow(() -> new BookingException(HttpStatus.NOT_FOUND, "Passenger voyage not found: " + id));
+    }
+    private PassengerVoyage findByNfc(String nfcTagId) {
+        return passengerVoyageRepository.findByNfcTagIdIgnoreCase(normalizeTag(nfcTagId))
+            .orElseThrow(() -> new BookingException(HttpStatus.NOT_FOUND, "NFC tag is not assigned"));
+    }
+    private String normalizeTag(String nfcTagId) {
+        if (nfcTagId == null || nfcTagId.isBlank())
+            throw new BookingException(HttpStatus.BAD_REQUEST, "NFC tag ID is required");
+        return nfcTagId.trim().toUpperCase(java.util.Locale.ROOT);
+    }
+    private String firstEmail(Booking booking) {
+        return passengerVoyageRepository.findAllByBooking_IdOrderByIdAsc(booking.getId()).stream()
+            .map(PassengerVoyage::getPassenger).map(Passenger::getEmail)
+            .filter(Objects::nonNull).filter(email -> !email.isBlank()).findFirst().orElse(null);
+    }
     private BookingResponse toResponse(Booking b) {
         List<PassengerVoyageResponse> passengers = passengerVoyageRepository
             .findAllByBooking_IdOrderByIdAsc(b.getId()).stream().map(link -> {
-                Passenger p = link.getPassenger();
-                return new PassengerVoyageResponse(link.getId(), p.getId(), p.getUserId(), p.getFullName(),
-                    p.getDateOfBirth(), p.getGender(), p.getPhoneNumber(), p.getEmail(), link.getCabinId(),
-                    link.getPassengerStatus(), link.getEmbarkationStatus());
+                return toPassengerResponse(link);
             }).toList();
         return new BookingResponse(b.getId(), b.getVoyageId(), b.getBookingCode(), b.getCreatedByUserId(),
             b.getPrimaryContactName(), b.getPrimaryContactPhone(), b.getTotalAmount(), b.getStatus(), b.getPaymentId(),
             b.getCreatedAt(), b.getUpdatedAt(), passengers);
+    }
+    private PassengerVoyageResponse toPassengerResponse(PassengerVoyage link) {
+        Passenger p = link.getPassenger();
+        return new PassengerVoyageResponse(link.getId(), p.getId(), p.getUserId(), p.getFullName(),
+            p.getDateOfBirth(), p.getGender(), p.getPhoneNumber(), p.getEmail(), link.getCabinId(),
+            link.getPassengerStatus(), link.getEmbarkationStatus(), link.getNfcTagId(),
+            link.getCheckedInAt(), link.getBoardedAt(), link.getDisembarkedAt());
     }
     private String generateBookingCode(Long bookingId) {
         for (int attempt = 0; attempt < 10; attempt++) {
