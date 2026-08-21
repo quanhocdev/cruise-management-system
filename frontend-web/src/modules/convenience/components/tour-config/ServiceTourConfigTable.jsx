@@ -1,4 +1,5 @@
 // src/modules/convenience/tour-config/ServiceTourConfigTable.jsx
+
 import React, { useMemo, useState } from "react";
 import { AlertCircle, Edit3, Plus, RefreshCw, Wrench } from "lucide-react";
 
@@ -30,7 +31,7 @@ const ServiceTourConfigTable = () => {
   }, [serviceTours]);
 
   // =====================================================
-  // OPEN
+  // OPEN MODAL
   // =====================================================
 
   const handleOpenConfig = (assignment) => {
@@ -38,7 +39,7 @@ const ServiceTourConfigTable = () => {
   };
 
   // =====================================================
-  // CLOSE
+  // CLOSE MODAL
   // =====================================================
 
   const handleCloseModal = () => {
@@ -50,7 +51,7 @@ const ServiceTourConfigTable = () => {
   };
 
   // =====================================================
-  // SUBMIT
+  // SUBMIT CONFIG
   // =====================================================
 
   const handleSubmit = async (assignmentId, payload) => {
@@ -70,7 +71,7 @@ const ServiceTourConfigTable = () => {
   };
 
   // =====================================================
-  // STATUS
+  // STATUS LABEL
   // =====================================================
 
   const getStatusLabel = (status) => {
@@ -100,6 +101,7 @@ const ServiceTourConfigTable = () => {
     return (
       <div className="service-tour-config-loading">
         <RefreshCw size={20} className="spin" />
+
         <span>Đang tải danh sách dịch vụ...</span>
       </div>
     );
@@ -107,7 +109,9 @@ const ServiceTourConfigTable = () => {
 
   return (
     <>
-      {/* HEADER */}
+      {/* =====================================================
+          HEADER
+          ===================================================== */}
 
       <div className="service-tour-config-toolbar">
         <div>
@@ -126,20 +130,26 @@ const ServiceTourConfigTable = () => {
           disabled={loading}
         >
           <RefreshCw size={16} className={loading ? "spin" : ""} />
-          Làm mới
+
+          <span>Làm mới</span>
         </button>
       </div>
 
-      {/* ERROR */}
+      {/* =====================================================
+          ERROR
+          ===================================================== */}
 
       {error && (
         <div className="service-tour-config-error">
           <AlertCircle size={18} />
+
           <span>{error}</span>
         </div>
       )}
 
-      {/* EMPTY */}
+      {/* =====================================================
+          EMPTY
+          ===================================================== */}
 
       {configurableTours.length === 0 && !error ? (
         <div className="service-tour-config-empty">
@@ -150,7 +160,9 @@ const ServiceTourConfigTable = () => {
           <p>Hiện tại không có dịch vụ nào đang chờ hoặc đã cấu hình.</p>
         </div>
       ) : (
-        /* TABLE */
+        /* =====================================================
+           TABLE
+           ===================================================== */
 
         <div className="service-tour-config-table-wrapper">
           <table className="service-tour-config-table">
@@ -169,7 +181,9 @@ const ServiceTourConfigTable = () => {
             <tbody>
               {configurableTours.map((assignment) => (
                 <tr key={assignment.id}>
-                  {/* TOUR */}
+                  {/* =================================================
+                      TOUR
+                      ================================================= */}
 
                   <td>
                     <div className="service-tour-config-tour">
@@ -179,7 +193,9 @@ const ServiceTourConfigTable = () => {
                     </div>
                   </td>
 
-                  {/* AREA */}
+                  {/* =================================================
+                      AREA
+                      ================================================= */}
 
                   <td>
                     <div className="service-tour-config-area">
@@ -191,7 +207,9 @@ const ServiceTourConfigTable = () => {
                     </div>
                   </td>
 
-                  {/* SERVICE */}
+                  {/* =================================================
+                      SERVICE
+                      ================================================= */}
 
                   <td>
                     {assignment.serviceName ? (
@@ -203,27 +221,41 @@ const ServiceTourConfigTable = () => {
                         )}
                       </div>
                     ) : (
-                      <span>Chưa chọn dịch vụ</span>
+                      <span className="service-tour-config-muted">
+                        Chưa chọn dịch vụ
+                      </span>
                     )}
                   </td>
 
-                  {/* MAX PASSENGERS */}
+                  {/* =================================================
+                      MAX PASSENGERS
+                      ================================================= */}
 
                   <td>
-                    {assignment.maxPassengers != null
-                      ? assignment.maxPassengers
-                      : "—"}
+                    {assignment.maxPassengers != null ? (
+                      <span>{assignment.maxPassengers}</span>
+                    ) : (
+                      <span className="service-tour-config-muted">—</span>
+                    )}
                   </td>
 
-                  {/* DURATION */}
+                  {/* =================================================
+                      DURATION
+                      ================================================= */}
 
                   <td>
-                    {assignment.durationMinutes != null
-                      ? `${assignment.durationMinutes} phút`
-                      : "—"}
+                    {assignment.durationMinutes != null ? (
+                      <span>{assignment.durationMinutes} phút</span>
+                    ) : (
+                      <span className="service-tour-config-unlimited">
+                        Không giới hạn
+                      </span>
+                    )}
                   </td>
 
-                  {/* STATUS */}
+                  {/* =================================================
+                      STATUS
+                      ================================================= */}
 
                   <td>
                     <span
@@ -235,7 +267,9 @@ const ServiceTourConfigTable = () => {
                     </span>
                   </td>
 
-                  {/* ACTION */}
+                  {/* =================================================
+                      ACTION
+                      ================================================= */}
 
                   <td>
                     {assignment.status === "WAITING_CONFIG" && (
@@ -245,7 +279,8 @@ const ServiceTourConfigTable = () => {
                         onClick={() => handleOpenConfig(assignment)}
                       >
                         <Plus size={16} />
-                        Cấu hình
+
+                        <span>Cấu hình</span>
                       </button>
                     )}
 
@@ -256,7 +291,8 @@ const ServiceTourConfigTable = () => {
                         onClick={() => handleOpenConfig(assignment)}
                       >
                         <Edit3 size={16} />
-                        Chỉnh sửa
+
+                        <span>Chỉnh sửa</span>
                       </button>
                     )}
                   </td>
@@ -267,7 +303,9 @@ const ServiceTourConfigTable = () => {
         </div>
       )}
 
-      {/* MODAL */}
+      {/* =====================================================
+          CONFIG MODAL
+          ===================================================== */}
 
       {selectedAssignment && (
         <ServiceTourConfigModal

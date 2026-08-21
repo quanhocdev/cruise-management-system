@@ -7,31 +7,94 @@ import org.springframework.stereotype.Component;
 @Component
 public class ServiceTourAssignmentMapper {
 
-    public ServiceTourAssignmentResponse toResponse(ServiceTour entity) {
+        public ServiceTourAssignmentResponse toResponse(ServiceTour entity) {
 
-        return new ServiceTourAssignmentResponse(
-                entity.getId(),
+                return new ServiceTourAssignmentResponse(
 
-                entity.getTour() != null
-                        ? entity.getTour().getId()
-                        : null,
+                                // =====================================================
+                                // ASSIGNMENT
+                                // =====================================================
 
-                entity.getCruiseArea() != null
-                        ? entity.getCruiseArea().getId()
-                        : null,
+                                entity.getId(),
 
-                entity.getService() != null
-                        ? entity.getService().getId()
-                        : null,
+                                // =====================================================
+                                // TOUR
+                                // =====================================================
 
-                entity.getMaxPassengers(),
+                                entity.getTour() != null
+                                                ? entity.getTour().getId()
+                                                : null,
 
-                entity.getDurationMinutes(),
+                                entity.getTour() != null
+                                                ? entity.getTour().getCode()
+                                                : null,
 
-                entity.getStatus(),
+                                entity.getTour() != null
+                                                ? entity.getTour().getName()
+                                                : null,
 
-                entity.getCreatedAt(),
+                                // =====================================================
+                                // CRUISE AREA
+                                // =====================================================
 
-                entity.getUpdatedAt());
-    }
+                                entity.getCruiseArea() != null
+                                                ? entity.getCruiseArea().getId()
+                                                : null,
+
+                                entity.getCruiseArea() != null
+                                                ? entity.getCruiseArea().getName()
+                                                : null,
+
+                                // =====================================================
+                                // CRUISE DECK
+                                // =====================================================
+
+                                entity.getCruiseArea() != null
+                                                && entity.getCruiseArea().getCruiseDeck() != null
+                                                                ? entity.getCruiseArea().getCruiseDeck().getId()
+                                                                : null,
+
+                                entity.getCruiseArea() != null
+                                                && entity.getCruiseArea().getCruiseDeck() != null
+                                                                ? entity.getCruiseArea().getCruiseDeck().getDeckNumber()
+                                                                : null,
+
+                                // =====================================================
+                                // SERVICE
+                                // =====================================================
+
+                                entity.getService() != null
+                                                ? entity.getService().getId()
+                                                : null,
+
+                                entity.getService() != null
+                                                ? entity.getService().getName()
+                                                : null,
+
+                                entity.getService() != null
+                                                ? entity.getService().getDescription()
+                                                : null,
+
+                                // =====================================================
+                                // CONFIGURATION
+                                // =====================================================
+
+                                entity.getMaxPassengers(),
+
+                                entity.getDurationMinutes(),
+
+                                // =====================================================
+                                // STATUS
+                                // =====================================================
+
+                                entity.getStatus(),
+
+                                // =====================================================
+                                // TIMESTAMP
+                                // =====================================================
+
+                                entity.getCreatedAt(),
+
+                                entity.getUpdatedAt());
+        }
 }

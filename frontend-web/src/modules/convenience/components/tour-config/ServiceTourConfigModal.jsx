@@ -1,9 +1,10 @@
 // src/modules/convenience/tour-config/ServiceTourConfigModal.jsx
+
 import React, { useEffect, useState } from "react";
 import { Clock3, Save, Users, Wrench, X } from "lucide-react";
-import "../../styles/tour-config/ServiceTourConfigModal.css";
 
 import ServiceSelect from "./ServiceSelect";
+import "../../styles/tour-config/ServiceTourConfigModal.css";
 
 const ServiceTourConfigModal = ({
   assignment,
@@ -15,6 +16,7 @@ const ServiceTourConfigModal = ({
     serviceId: "",
     maxPassengers: "",
     durationMinutes: "",
+    unlimitedDuration: false,
   });
 
   const [errors, setErrors] = useState({});
@@ -28,6 +30,9 @@ const ServiceTourConfigModal = ({
       return;
     }
 
+    const unlimited =
+      assignment.durationMinutes == null || assignment.durationMinutes === 0;
+
     setFormData({
       serviceId: assignment.serviceId || "",
 
@@ -37,9 +42,11 @@ const ServiceTourConfigModal = ({
           : "",
 
       durationMinutes:
-        assignment.durationMinutes != null
+        !unlimited && assignment.durationMinutes != null
           ? String(assignment.durationMinutes)
           : "",
+
+      unlimitedDuration: unlimited,
     });
 
     setErrors({});
@@ -84,6 +91,29 @@ const ServiceTourConfigModal = ({
   };
 
   // =====================================================
+  // DURATION MODE
+  // =====================================================
+
+  const handleDurationModeChange = (event) => {
+    const unlimited = event.target.value === "UNLIMITED";
+
+    setFormData((previous) => ({
+      ...previous,
+      unlimitedDuration: unlimited,
+
+      // Nếu chọn không giới hạn -> null khi submit
+      // Nếu chuyển lại có giới hạn -> giữ giá trị cũ,
+      // nếu chưa có thì mặc định 60 phút
+      durationMinutes: unlimited ? "" : previous.durationMinutes || "60",
+    }));
+
+    setErrors((previous) => ({
+      ...previous,
+      durationMinutes: "",
+    }));
+  };
+
+  // =====================================================
   // VALIDATE
   // =====================================================
 
@@ -98,8 +128,11 @@ const ServiceTourConfigModal = ({
       nextErrors.maxPassengers = "Số hành khách tối đa phải lớn hơn 0";
     }
 
-    if (!formData.durationMinutes || Number(formData.durationMinutes) <= 0) {
-      nextErrors.durationMinutes = "Thời lượng phải lớn hơn 0 phút";
+    // Chỉ validate duration khi KHÔNG chọn không giới hạn
+    if (!formData.unlimitedDuration) {
+      if (!formData.durationMinutes || Number(formData.durationMinutes) <= 0) {
+        nextErrors.durationMinutes = "Thời lượng phải lớn hơn 0 phút";
+      }
     }
 
     setErrors(nextErrors);
@@ -121,7 +154,11 @@ const ServiceTourConfigModal = ({
     const payload = {
       serviceId: formData.serviceId,
       maxPassengers: Number(formData.maxPassengers),
-      durationMinutes: Number(formData.durationMinutes),
+
+      // Không giới hạn => null
+      durationMinutes: formData.unlimitedDuration
+        ? null
+        : Number(formData.durationMinutes),
     };
 
     await onSubmit?.(assignment.id, payload);
@@ -139,10 +176,12 @@ const ServiceTourConfigModal = ({
       }}
     >
       <div className="service-tour-config-modal">
-        {/* HEADER */}
+        {/* =====================================================
+            HEADER
+            ===================================================== */}
 
         <div className="service-tour-config-modal-header">
-          <div>
+          <div className="service-tour-config-modal-header-content">
             <span className="service-tour-config-modal-eyebrow">
               {isEditing ? "Chỉnh sửa cấu hình" : "Cấu hình dịch vụ"}
             </span>
@@ -167,42 +206,45 @@ const ServiceTourConfigModal = ({
           </button>
         </div>
 
-        {/* FORM */}
+        {/* =====================================================
+            FORM
+            ===================================================== */}
 
         <form
           className="service-tour-config-modal-form"
           onSubmit={handleSubmit}
         >
-          {/* SERVICE */}
+          {/* ===================================================
+              SERVICE
+              =================================================== */}
 
           <div className="service-tour-config-field">
             <label>
               <Wrench size={15} />
-              Dịch vụ
-              <span>*</span>
+              <span>Dịch vụ</span>
+              <b>*</b>
             </label>
 
             <ServiceSelect
               value={formData.serviceId}
               onChange={handleServiceChange}
               disabled={submitting}
+              error={errors.serviceId}
             />
-
-            {errors.serviceId && (
-              <span className="service-tour-config-field-error">
-                {errors.serviceId}
-              </span>
-            )}
           </div>
 
-          {/* PASSENGERS + DURATION */}
+          {/* ===================================================
+              PASSENGERS + DURATION
+              =================================================== */}
 
           <div className="service-tour-config-two-columns">
+            {/* PASSENGERS */}
+
             <div className="service-tour-config-field">
               <label>
                 <Users size={15} />
-                Số hành khách tối đa
-                <span>*</span>
+                <span>Số hành khách tối đa</span>
+                <b>*</b>
               </label>
 
               <input
@@ -223,27 +265,53 @@ const ServiceTourConfigModal = ({
               )}
             </div>
 
+            {/* DURATION */}
+
             <div className="service-tour-config-field">
               <label>
                 <Clock3 size={15} />
-                Thời lượng
-                <span>*</span>
+                <span>Thời lượng</span>
               </label>
 
-              <div className="service-tour-config-duration">
-                <input
-                  type="number"
-                  name="durationMinutes"
-                  min="1"
-                  step="1"
-                  value={formData.durationMinutes}
-                  onChange={handleChange}
-                  disabled={submitting}
-                  placeholder="Ví dụ: 60"
-                />
+              {/* CHỌN CÓ / KHÔNG GIỚI HẠN */}
 
-                <span>phút</span>
-              </div>
+              <select
+                className="service-tour-config-duration-select"
+                value={formData.unlimitedDuration ? "UNLIMITED" : "LIMITED"}
+                onChange={handleDurationModeChange}
+                disabled={submitting}
+              >
+                <option value="LIMITED">Có giới hạn thời gian</option>
+
+                <option value="UNLIMITED">Không giới hạn</option>
+              </select>
+
+              {/* INPUT THỜI GIAN */}
+
+              {!formData.unlimitedDuration && (
+                <div className="service-tour-config-duration">
+                  <input
+                    type="number"
+                    name="durationMinutes"
+                    min="1"
+                    step="1"
+                    value={formData.durationMinutes}
+                    onChange={handleChange}
+                    disabled={submitting}
+                    placeholder="Ví dụ: 60"
+                  />
+
+                  <span>phút</span>
+                </div>
+              )}
+
+              {/* UNLIMITED HINT */}
+
+              {formData.unlimitedDuration && (
+                <small className="service-tour-config-duration-hint">
+                  Dịch vụ này không giới hạn thời gian sử dụng.
+                </small>
+              )}
 
               {errors.durationMinutes && (
                 <span className="service-tour-config-field-error">
@@ -253,7 +321,9 @@ const ServiceTourConfigModal = ({
             </div>
           </div>
 
-          {/* FOOTER */}
+          {/* =====================================================
+              FOOTER
+              ===================================================== */}
 
           <div className="service-tour-config-modal-footer">
             <button
@@ -272,11 +342,13 @@ const ServiceTourConfigModal = ({
             >
               <Save size={17} />
 
-              {submitting
-                ? "Đang lưu..."
-                : isEditing
-                  ? "Lưu thay đổi"
-                  : "Lưu cấu hình"}
+              <span>
+                {submitting
+                  ? "Đang lưu..."
+                  : isEditing
+                    ? "Lưu thay đổi"
+                    : "Lưu cấu hình"}
+              </span>
             </button>
           </div>
         </form>

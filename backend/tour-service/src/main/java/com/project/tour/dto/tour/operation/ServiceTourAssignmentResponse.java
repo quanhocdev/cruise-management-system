@@ -7,23 +7,29 @@ import java.util.UUID;
 
 public record ServiceTourAssignmentResponse(
 
-        UUID id,
+                UUID id,
 
-        UUID tourId,
+                UUID tourId,
+                String tourCode,
+                String tourName,
 
-        UUID cruiseAreaId,
+                UUID cruiseAreaId,
+                String cruiseAreaName,
 
-        UUID serviceId,
+                UUID cruiseDeckId,
+                Integer deckNumber,
 
-        Integer maxPassengers,
+                UUID serviceId,
+                String serviceName,
+                String serviceDescription,
 
-        Integer durationMinutes,
+                Integer maxPassengers,
+                Integer durationMinutes,
 
-        ServiceTourStatus status,
+                ServiceTourStatus status,
 
-        Instant createdAt,
-
-        Instant updatedAt
+                Instant createdAt,
+                Instant updatedAt
 
 ) {
 }
