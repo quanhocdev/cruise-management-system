@@ -51,11 +51,12 @@ public class ActivityCruiseTourAssignmentController {
     /**
      * Xóa phân công khi vẫn đang WAITING_CONFIG.
      */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(
-            @PathVariable UUID id) {
+    @DeleteMapping("/tour/{tourId}/area/{cruiseAreaId}")
+    public ResponseEntity<Void> deleteByTourAndArea(
+            @PathVariable UUID tourId,
+            @PathVariable UUID cruiseAreaId) {
 
-        assignmentService.deleteAssignment(id);
+        assignmentService.deleteByTourAndArea(tourId, cruiseAreaId);
 
         return ResponseEntity.noContent().build();
     }

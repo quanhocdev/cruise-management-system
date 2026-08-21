@@ -1,0 +1,97 @@
+package com.project.tour.controller.tour.onboard;
+
+import com.project.tour.dto.tour.onboard.ActivityCruiseTourConfigRequest;
+import com.project.tour.dto.tour.onboard.OnboardActivityCruiseTourResponse;
+import com.project.tour.dto.tour.operation.ActivityCruiseTourAssignmentResponse;
+import com.project.tour.service.tour.onboard.ActivityCruiseTourConfigService;
+import com.project.tour.service.tour.onboard.OnboardActivityCruiseTourService;
+
+import jakarta.validation.Valid;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api/onboard/activity-cruise-tours")
+public class OnboardActivityCruiseTourController {
+
+    private final OnboardActivityCruiseTourService onboardService;
+    private final ActivityCruiseTourConfigService configService;
+
+    public OnboardActivityCruiseTourController(
+            OnboardActivityCruiseTourService onboardService,
+            ActivityCruiseTourConfigService configService) {
+
+        this.onboardService = onboardService;
+        this.configService = configService;
+    }
+
+    // =====================================================
+    // GET PENDING CONFIG
+    // =====================================================
+
+    /**
+     * Lấy các hoạt động mà ONBOARD cần cấu hình.
+     *
+     * Chỉ lấy:
+     * - Tour đã APPROVED
+     * - ActivityCruiseTour đang WAITING_CONFIG
+     */
+    @GetMapping("/pending-config")
+    public ResponseEntity<List<OnboardActivityCruiseTourResponse>> getPendingConfig() {
+
+        return ResponseEntity.ok(
+                onboardService.getPendingConfig());
+    }
+
+    // =====================================================
+    // POST CONFIG
+    // =====================================================
+
+    /**
+     * ONBOARD cấu hình hoạt động lần đầu.
+     *
+     * Chỉ được gọi khi:
+     *
+     * ActivityCruiseTour.status = WAITING_CONFIG
+     *
+     * Sau khi thành công:
+     *
+     * WAITING_CONFIG -> NOT_STARTED
+     */
+    @PostMapping("/{assignmentId}/config")
+    public ResponseEntity<ActivityCruiseTourAssignmentResponse> configure(
+            @PathVariable UUID assignmentId,
+            @Valid @RequestBody ActivityCruiseTourConfigRequest request) {
+
+        return ResponseEntity.ok(
+                configService.configure(
+                        assignmentId,
+                        request));
+    }
+
+    // =====================================================
+    // PATCH CONFIG
+    // =====================================================
+
+    /**
+     * ONBOARD cập nhật lại cấu hình hoạt động.
+     *
+     * Chỉ được cập nhật khi:
+     *
+     * ActivityCruiseTour.status = NOT_STARTED
+     */
+    @PatchMapping("/{assignmentId}/config")
+    public ResponseEntity<ActivityCruiseTourAssignmentResponse> updateConfig(
+            @PathVariable UUID assignmentId,
+            @Valid @RequestBody ActivityCruiseTourConfigRequest request) {
+
+        return ResponseEntity.ok(
+                configService.updateConfig(
+                        assignmentId,
+                        request));
+    }
+}

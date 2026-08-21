@@ -1,6 +1,8 @@
 package com.project.tour.mapper.tour;
 
+import com.project.tour.dto.tour.onboard.ActivityCruiseTourConfigRequest;
 import com.project.tour.dto.tour.operation.ActivityCruiseTourAssignmentResponse;
+import com.project.tour.model.ActivityCruise;
 import com.project.tour.model.ActivityCruiseTour;
 
 public final class ActivityCruiseTourAssignmentMapper {
@@ -59,5 +61,25 @@ public final class ActivityCruiseTourAssignmentMapper {
                                 assignment.getStatus(),
                                 assignment.getCreatedAt(),
                                 assignment.getUpdatedAt());
+        }
+
+        public static void applyConfig(
+                        ActivityCruiseTour assignment,
+                        ActivityCruiseTourConfigRequest request,
+                        ActivityCruise activityCruise) {
+
+                assignment.setActivityCruise(activityCruise);
+
+                assignment.setStartTime(
+                                request.startTime());
+
+                assignment.setEndTime(
+                                request.endTime());
+
+                assignment.setMaxPassengers(
+                                request.maxPassengers());
+
+                assignment.setPrice(
+                                request.price());
         }
 }

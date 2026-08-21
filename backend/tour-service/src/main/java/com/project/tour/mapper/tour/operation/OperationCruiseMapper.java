@@ -19,7 +19,8 @@ public class OperationCruiseMapper {
                 area.getId(),
                 area.getName(),
                 area.getDescription(),
-                area.getStatus());
+                area.getStatus(),
+                area.getImageUrl());
     }
 
     public static OperationRoomResponse toRoomResponse(Room room) {

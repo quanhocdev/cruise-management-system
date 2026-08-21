@@ -1,0 +1,296 @@
+/* src/modules/operation/styles/OperationTourConfiguration.css */
+
+.operation-tour-configuration-page {
+  padding: 24px;
+  background-color: #f8fafc;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-sizing: border-box;
+}
+
+/* =====================================================
+   HEADER & ACTIONS
+   ===================================================== */
+.operation-tour-configuration-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background-color: #ffffff;
+  padding: 16px 24px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.operation-tour-configuration-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.operation-tour-configuration-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.operation-tour-configuration-back:hover {
+  background-color: #e2e8f0;
+  color: #0f172a;
+}
+
+.operation-tour-title span {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  display: block;
+}
+
+.operation-tour-title h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 2px 0 0 0;
+}
+
+.operation-tour-configuration-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  background-color: #ffffff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.operation-tour-configuration-refresh:hover:not(:disabled) {
+  background-color: #eff6ff;
+  border-color: #93c5fd;
+}
+
+.operation-tour-configuration-refresh:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =====================================================
+   SECTIONS & TABLES WRAPPER
+   ===================================================== */
+.operation-tour-configuration-section {
+  background-color: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* =====================================================
+   BOTTOM ACTION (CREATE PACKAGE)
+   ===================================================== */
+.operation-tour-configuration-package {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px 24px;
+  gap: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.operation-tour-configuration-package strong {
+  font-size: 16px;
+  color: #0f172a;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.operation-tour-configuration-package p {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+.operation-tour-configuration-create-package {
+  padding: 10px 20px;
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.operation-tour-configuration-create-package:hover:not(:disabled) {
+  background-color: #1d4ed8;
+}
+
+.operation-tour-configuration-create-package:disabled {
+  background-color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* =====================================================
+   STATES (LOADING & ERROR)
+   ===================================================== */
+.operation-tour-configuration-loading,
+.operation-tour-configuration-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  margin: 24px;
+}
+
+.operation-tour-configuration-loading span {
+  font-size: 15px;
+  color: #475569;
+  font-weight: 500;
+}
+
+.operation-tour-configuration-error {
+  background-color: #fef2f2;
+  border-color: #fecaca;
+  color: #dc2626;
+  justify-content: flex-start;
+}
+
+.operation-tour-configuration-error strong {
+  display: block;
+  font-size: 16px;
+}
+
+.operation-tour-configuration-error p {
+  margin: 2px 0 0 0;
+  font-size: 14px;
+  color: #991b1b;
+}
+
+.operation-tour-configuration-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =====================================================
+   RESPONSIVE MEDIA QUERIES
+   ===================================================== */
+
+/* Tablet & Màn hình nhỏ (<= 1024px) */
+@media (max-width: 1024px) {
+  .operation-tour-configuration-page {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .operation-tour-title h1 {
+    font-size: 18px;
+  }
+}
+
+/* Tablet dọc & Phân giải Mobile rộng (<= 768px) */
+@media (max-width: 768px) {
+  .operation-tour-configuration-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .operation-tour-configuration-header-left {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .operation-tour-configuration-refresh {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .operation-tour-configuration-package {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px;
+  }
+
+  .operation-tour-configuration-create-package {
+    width: 100%;
+    text-align: center;
+  }
+
+  .operation-tour-configuration-section {
+    padding: 12px;
+    overflow-x: auto; /* Cho phép cuộn ngang bảng nếu vượt khung */
+  }
+}
+
+/* Mobile nhỏ (<= 480px) */
+@media (max-width: 480px) {
+  .operation-tour-configuration-page {
+    padding: 12px;
+  }
+
+  .operation-tour-title h1 {
+    font-size: 16px;
+  }
+
+  .operation-tour-configuration-back {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+}
+/* src/styles/OperationTourConfiguration.css */
+
+.operation-tour-configuration-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  padding: 24px;
+  /* Đảm bảo khung ngoài cho phép cuộn mượt */
+  overflow-y: auto;
+  max-height: 100vh;
+}
+
+.operation-tour-configuration-tables {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}

@@ -24,137 +24,132 @@ import java.util.UUID;
 @Transactional
 public class ActivityCruiseTourAssignmentService {
 
-    private final ActivityCruiseTourAssignmentRepository assignmentRepository;
-    private final TourRepository tourRepository;
-    private final CruiseAreaRepository cruiseAreaRepository;
+        private final ActivityCruiseTourAssignmentRepository assignmentRepository;
+        private final TourRepository tourRepository;
+        private final CruiseAreaRepository cruiseAreaRepository;
 
-    public ActivityCruiseTourAssignmentService(
-            ActivityCruiseTourAssignmentRepository assignmentRepository,
-            TourRepository tourRepository,
-            CruiseAreaRepository cruiseAreaRepository) {
+        public ActivityCruiseTourAssignmentService(
+                        ActivityCruiseTourAssignmentRepository assignmentRepository,
+                        TourRepository tourRepository,
+                        CruiseAreaRepository cruiseAreaRepository) {
 
-        this.assignmentRepository = assignmentRepository;
-        this.tourRepository = tourRepository;
-        this.cruiseAreaRepository = cruiseAreaRepository;
-    }
-
-    /**
-     * Operation phân công một khu vực cho Tour.
-     *
-     * Chỉ tạo assignment.
-     *
-     * activityCruise = null
-     * startTime = null
-     * endTime = null
-     * maxPassengers = null
-     * price = null
-     *
-     * status = WAITING_CONFIG
-     */
-    public ActivityCruiseTourAssignmentResponse assign(
-            ActivityCruiseTourAssignmentRequest request) {
-
-        Tour tour = tourRepository
-                .findById(request.tourId())
-                .orElseThrow(() -> new AppException(
-                        "Tour not found",
-                        HttpStatus.NOT_FOUND));
-
-        if (tour.getStatusTrip() != TourStatusTrip.APPROVED) {
-            throw new AppException(
-                    "Tour must be approved before assigning cruise activities",
-                    HttpStatus.BAD_REQUEST);
+                this.assignmentRepository = assignmentRepository;
+                this.tourRepository = tourRepository;
+                this.cruiseAreaRepository = cruiseAreaRepository;
         }
 
-        CruiseArea cruiseArea = cruiseAreaRepository
-                .findById(request.cruiseAreaId())
-                .orElseThrow(() -> new AppException(
-                        "Cruise area not found",
-                        HttpStatus.NOT_FOUND));
+        /**
+         * Operation phân công một khu vực cho Tour.
+         *
+         * Chỉ tạo assignment.
+         *
+         * activityCruise = null
+         * startTime = null
+         * endTime = null
+         * maxPassengers = null
+         * price = null
+         *
+         * status = WAITING_CONFIG
+         */
+        public ActivityCruiseTourAssignmentResponse assign(
+                        ActivityCruiseTourAssignmentRequest request) {
 
-        if (cruiseArea.getStatus() == null) {
-            throw new AppException(
-                    "Cruise area status is invalid",
-                    HttpStatus.BAD_REQUEST);
+                Tour tour = tourRepository
+                                .findById(request.tourId())
+                                .orElseThrow(() -> new AppException(
+                                                "Tour not found",
+                                                HttpStatus.NOT_FOUND));
+
+                // NẾU TOUR CẦN Ở TRẠNG THÁI PENDING HOẶC APPROVED THÌ CÓ THỂ BỎ BỚT HOẶC ĐIỀU
+                // CHỈNH CHECK STATUS Ở ĐÂY
+                // Ví dụ: Cho phép phân công khi Tour đang chờ duyệt hoặc đã duyệt
+
+                CruiseArea cruiseArea = cruiseAreaRepository
+                                .findById(request.cruiseAreaId())
+                                .orElseThrow(() -> new AppException(
+                                                "Cruise area not found",
+                                                HttpStatus.NOT_FOUND));
+
+                if (cruiseArea.getStatus() == null) {
+                        throw new AppException(
+                                        "Cruise area status is invalid",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                if (cruiseArea.getCruiseDeck() == null) {
+                        throw new AppException(
+                                        "Cruise area is not assigned to a deck",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                if (tour.getCruise() == null) {
+                        throw new AppException(
+                                        "Tour has not been assigned to a cruise",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                if (!tour.getCruise().getId()
+                                .equals(cruiseArea.getCruiseDeck().getCruise().getId())) {
+
+                        throw new AppException(
+                                        "Cruise area does not belong to the cruise assigned to this tour",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                // Chống trùng lặp bản ghi
+                return assignmentRepository.findByTourIdAndCruiseAreaId(request.tourId(), request.cruiseAreaId())
+                                .map(ActivityCruiseTourAssignmentMapper::toResponse)
+                                .orElseGet(() -> {
+                                        ActivityCruiseTour assignment = new ActivityCruiseTour();
+                                        assignment.setTour(tour);
+                                        assignment.setCruiseArea(cruiseArea);
+                                        assignment.setActivityCruise(null);
+                                        assignment.setStartTime(null);
+                                        assignment.setEndTime(null);
+                                        assignment.setMaxPassengers(null);
+                                        assignment.setPrice(null);
+                                        assignment.setStatus(ActivityCruiseTourStatus.WAITING_CONFIG);
+
+                                        ActivityCruiseTour saved = assignmentRepository.save(assignment);
+                                        return ActivityCruiseTourAssignmentMapper.toResponse(saved);
+                                });
         }
 
-        if (cruiseArea.getCruiseDeck() == null) {
-            throw new AppException(
-                    "Cruise area is not assigned to a deck",
-                    HttpStatus.BAD_REQUEST);
+        /**
+         * Lấy toàn bộ phân công của một Tour.
+         */
+        @Transactional(readOnly = true)
+        public List<ActivityCruiseTourAssignmentResponse> getByTour(
+                        UUID tourId) {
+
+                if (!tourRepository.existsById(tourId)) {
+                        throw new AppException(
+                                        "Tour not found",
+                                        HttpStatus.NOT_FOUND);
+                }
+
+                return assignmentRepository
+                                .findAllByTourIdOrderByCreatedAtAsc(tourId)
+                                .stream()
+                                .map(ActivityCruiseTourAssignmentMapper::toResponse)
+                                .toList();
         }
 
-        if (tour.getCruise() == null) {
-            throw new AppException(
-                    "Tour has not been assigned to a cruise",
-                    HttpStatus.BAD_REQUEST);
+        /**
+         * Xóa phân công khi chưa được Onboard cấu hình.
+         */
+        @Transactional
+        public void deleteByTourAndArea(UUID tourId, UUID cruiseAreaId) {
+                ActivityCruiseTour assignment = assignmentRepository
+                                .findByTourIdAndCruiseAreaId(tourId, cruiseAreaId)
+                                .orElseThrow(() -> new AppException("Assignment not found", HttpStatus.NOT_FOUND));
+
+                if (assignment.getStatus() != ActivityCruiseTourStatus.WAITING_CONFIG) {
+                        throw new AppException(
+                                        "Cannot delete an assignment that has already been configured",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                assignmentRepository.delete(assignment);
         }
-
-        if (!tour.getCruise().getId()
-                .equals(cruiseArea.getCruiseDeck().getCruise().getId())) {
-
-            throw new AppException(
-                    "Cruise area does not belong to the cruise assigned to this tour",
-                    HttpStatus.BAD_REQUEST);
-        }
-
-        ActivityCruiseTour assignment = new ActivityCruiseTour();
-
-        assignment.setTour(tour);
-        assignment.setCruiseArea(cruiseArea);
-
-        // Chờ Onboard cấu hình.
-        assignment.setActivityCruise(null);
-        assignment.setStartTime(null);
-        assignment.setEndTime(null);
-        assignment.setMaxPassengers(null);
-        assignment.setPrice(null);
-
-        assignment.setStatus(
-                ActivityCruiseTourStatus.WAITING_CONFIG);
-
-        ActivityCruiseTour saved = assignmentRepository.save(assignment);
-
-        return ActivityCruiseTourAssignmentMapper.toResponse(saved);
-    }
-
-    /**
-     * Lấy toàn bộ phân công của một Tour.
-     */
-    @Transactional(readOnly = true)
-    public List<ActivityCruiseTourAssignmentResponse> getByTour(
-            UUID tourId) {
-
-        if (!tourRepository.existsById(tourId)) {
-            throw new AppException(
-                    "Tour not found",
-                    HttpStatus.NOT_FOUND);
-        }
-
-        return assignmentRepository
-                .findAllByTourIdOrderByCreatedAtAsc(tourId)
-                .stream()
-                .map(ActivityCruiseTourAssignmentMapper::toResponse)
-                .toList();
-    }
-
-    /**
-     * Xóa phân công khi chưa được Onboard cấu hình.
-     */
-    public void deleteAssignment(UUID id) {
-
-        ActivityCruiseTour assignment = assignmentRepository.findById(id)
-                .orElseThrow(() -> new AppException(
-                        "Assignment not found",
-                        HttpStatus.NOT_FOUND));
-
-        if (assignment.getStatus() != ActivityCruiseTourStatus.WAITING_CONFIG) {
-
-            throw new AppException(
-                    "Cannot delete an assignment that has already been configured",
-                    HttpStatus.BAD_REQUEST);
-        }
-
-        assignmentRepository.delete(assignment);
-    }
 }

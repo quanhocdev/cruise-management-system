@@ -6,13 +6,15 @@ import java.util.UUID;
 
 public record OperationCruiseAreaResponse(
 
-        UUID id,
+                UUID id,
 
-        String name,
+                String name,
 
-        String description,
+                String description,
 
-        CruiseAreaStatus status
+                CruiseAreaStatus status,
+
+                String imageUrl
 
 ) {
 }

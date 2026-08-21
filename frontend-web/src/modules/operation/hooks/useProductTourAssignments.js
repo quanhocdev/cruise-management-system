@@ -1,0 +1,110 @@
+// src/modules/operation/hooks/useProductTourAssignments.js
+import { useCallback, useState } from "react";
+import productTourAssignmentService from "../services/productTourAssignmentService";
+
+export default function useProductTourAssignments() {
+  const [productAssignments, setProductAssignments] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  // Hàm xóa thông báo lỗi / thành công
+  const clearMessages = useCallback(() => {
+    setError("");
+    setSuccess("");
+  }, []);
+
+  // Hàm dọn dẹp danh sách phân công sản phẩm/tiện ích
+  const clearProductAssignments = useCallback(() => {
+    setProductAssignments([]);
+  }, []);
+
+  const loadProductAssignments = useCallback(async (tourId) => {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await productTourAssignmentService.getByTour(tourId);
+      const list = Array.isArray(data)
+        ? data
+        : data?.content || data?.data || [];
+      setProductAssignments(list);
+      return list;
+    } catch (err) {
+      console.error("LOAD PRODUCT ASSIGNMENTS ERROR:", err);
+      setError(
+        err.response?.data?.message ||
+          "Không thể tải danh sách phân công tiện ích.",
+      );
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const assignProduct = useCallback(async (payload) => {
+    setLoading(true);
+    setError("");
+    setSuccess("");
+    try {
+      const result = await productTourAssignmentService.assign(payload);
+      setProductAssignments((prev) => {
+        const exists = prev.some((item) => item.id === result.id);
+        return exists ? prev : [...prev, result];
+      });
+      setSuccess("Phân công tiện ích thành công.");
+      return result;
+    } catch (err) {
+      console.error("ASSIGN PRODUCT ERROR:", err);
+      setError(err.response?.data?.message || "Không thể phân công tiện ích.");
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  /**
+   * Xóa phân công tiện ích theo tourId và cruiseAreaId
+   */
+  const deleteProductAssignment = useCallback(async (tourId, cruiseAreaId) => {
+    setLoading(true);
+    setError("");
+    setSuccess("");
+    try {
+      await productTourAssignmentService.delete(tourId, cruiseAreaId);
+
+      // Cập nhật State: lọc bỏ item có cruiseAreaId khớp
+      setProductAssignments((prev) =>
+        prev.filter((item) => {
+          const targetAreaId =
+            item.cruiseAreaId ||
+            item.areaId ||
+            item.cruiseArea?.id ||
+            item.area?.id;
+          return String(targetAreaId) !== String(cruiseAreaId);
+        }),
+      );
+
+      setSuccess("Đã xóa phân công tiện ích.");
+    } catch (err) {
+      console.error("DELETE PRODUCT ASSIGNMENT ERROR:", err);
+      setError(
+        err.response?.data?.message || "Không thể xóa phân công tiện ích.",
+      );
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  return {
+    productAssignments,
+    productLoading: loading,
+    productError: error,
+    productSuccess: success,
+    loadProductAssignments,
+    assignProduct,
+    deleteProductAssignment,
+    clearProductAssignments,
+    clearMessages,
+  };
+}

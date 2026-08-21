@@ -61,6 +61,9 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/onboard/**")
                                                 .hasRole("ONBOARD")
 
+                                                .requestMatchers("/api/shore/**")
+                                                .hasRole("SHORE")
+
                                                 // Everything else
                                                 .anyRequest()
                                                 .authenticated())

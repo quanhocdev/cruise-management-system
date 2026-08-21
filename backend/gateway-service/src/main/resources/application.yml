@@ -5,6 +5,10 @@ spring:
   application:
     name: gateway-service
 
+  # TẮT BANNER ASCII SPRING BOOT
+  main:
+    banner-mode: "off"
+
   cloud:
     gateway:
       server:
@@ -64,6 +68,15 @@ spring:
               predicates:
                 - Path=/api/onboard/**
 
+            # ==========================
+            # TOUR SERVICE - SHORE
+            # ==========================
+
+            - id: tour-shore-service
+              uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
+              predicates:
+                - Path=/api/shore/**
+
           # ==========================
           # CORS
           # ==========================
@@ -98,6 +111,8 @@ jwt:
 
 logging:
   level:
-    org.springframework.cloud.gateway: DEBUG
+    root: INFO
+    org.springframework: WARN
+    org.springframework.cloud.gateway: INFO
     org.springframework.web: INFO
     org.springframework.security: INFO

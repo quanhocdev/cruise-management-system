@@ -1,7 +1,7 @@
 // AreaFilterToolbar.jsx
 import React from "react";
 import { Search, Filter, X } from "lucide-react";
-
+import "../styles/AreaFilterToolbar.css";
 function AreaFilterToolbar({
   searchTerm,
   setSearchTerm,

@@ -167,6 +167,16 @@ public class OperationTourService {
                         throw new AppException("Tour is not waiting for approval", HttpStatus.BAD_REQUEST);
                 }
 
+                // =========================================================================
+                // BỔ SUNG: CHẶN ĐỔI TÀU NẾU TOUR ĐÃ ĐƯỢC GÁN DU THUYỀN TRƯỚC ĐÓ
+                // =========================================================================
+                if (tour.getCruise() != null) {
+                        throw new AppException(
+                                        "Tour has already been assigned a cruise. Please unassign first before selecting a new one.",
+                                        HttpStatus.BAD_REQUEST);
+                }
+                // =========================================================================
+
                 Cruise cruise = cruiseRepository.findById(cruiseId)
                                 .orElseThrow(() -> new AppException("Cruise not found", HttpStatus.NOT_FOUND));
 

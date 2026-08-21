@@ -5,7 +5,7 @@
 .operation-tour-page {
   display: flex;
   flex-direction: column;
-  height: 100%; /* Sửa calc(...) thành 100% để ăn theo thẻ main cha */
+  height: 100%; /* Ăn theo thẻ main cha */
   padding: 24px;
   box-sizing: border-box;
   overflow: hidden;
@@ -13,7 +13,6 @@
 
 /* KHÓA CỐ ĐỊNH CÁC PHẦN KHÔNG CHO CO GIÃN */
 .operation-tour-header,
-.operation-tour-toolbar,
 .operation-tour-success,
 .operation-tour-error,
 .operation-tour-list-header {
@@ -127,136 +126,6 @@
 }
 
 /* =========================================================
-   SUMMARY CARDS & TOOLBAR
-   ========================================================= */
-
-.operation-tour-toolbar {
-  display: grid;
-  grid-template-columns: minmax(420px, 1fr) minmax(300px, 420px);
-  align-items: stretch;
-  gap: 20px;
-  margin-bottom: 16px;
-}
-
-.operation-tour-modes {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.operation-tour-modes .operation-tour-summary-card {
-  min-height: 96px;
-  box-sizing: border-box;
-}
-
-.operation-tour-summary-card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px 20px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
-  cursor: pointer;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    border-color 0.2s ease;
-}
-
-.operation-tour-summary-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
-}
-
-.operation-tour-summary-card.active {
-  border-color: #2563eb;
-  background-color: #f8fafc;
-  box-shadow:
-    0 0 0 2px rgba(37, 99, 235, 0.08),
-    0 6px 16px rgba(15, 23, 42, 0.06);
-}
-
-.operation-tour-summary-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  flex-shrink: 0;
-}
-
-.operation-tour-summary-card.warning .operation-tour-summary-icon {
-  background: #fffbe0;
-  color: #d97706;
-}
-
-.operation-tour-summary-card.success .operation-tour-summary-icon {
-  background: #dcfce7;
-  color: #16a34a;
-}
-
-.operation-tour-summary-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.operation-tour-summary-info span {
-  color: #64748b;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-}
-
-.operation-tour-summary-info strong {
-  color: #0f172a;
-  font-size: 22px;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.operation-status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 2px;
-}
-
-.operation-status-badge strong {
-  font-size: 14px !important;
-  font-weight: 600 !important;
-  color: #15803d !important;
-}
-
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: #22c55e;
-  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
-  animation: status-pulse 2s infinite;
-}
-
-@keyframes status-pulse {
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
-  }
-  70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
-  }
-  100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
-  }
-}
-
-/* =========================================================
    LIST HEADER & CONTENT (BẢNG DỮ LIỆU)
    ========================================================= */
 
@@ -300,7 +169,7 @@
 
 .operation-tour-content {
   flex: 1;
-  min-height: 0; /* BẮT BUỘC: Cho phép co lại để kích hoạt cuộn trong bảng */
+  min-height: 0; /* Cho phép co lại để kích hoạt cuộn trong bảng */
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-bottom-left-radius: 10px;
@@ -313,12 +182,6 @@
 /* =========================================================
    RESPONSIVE
    ========================================================= */
-
-@media (max-width: 1000px) {
-  .operation-tour-toolbar {
-    grid-template-columns: 1fr;
-  }
-}
 
 @media (max-width: 768px) {
   .operation-tour-page {
@@ -333,9 +196,5 @@
 
   .operation-tour-refresh-button {
     width: 100%;
-  }
-
-  .operation-tour-modes {
-    grid-template-columns: 1fr;
   }
 }

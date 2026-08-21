@@ -545,3 +545,51 @@
     display: none;
   }
 }
+/* ==========================================
+   BUTTON XEM CHI TIẾT DU THUYỀN (TOUR ĐÃ DUYỆT)
+   ========================================== */
+.operation-tour-view-cruise-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #0284c7;
+  background-color: #e0f2fe;
+  border: 1px solid #bae6fd;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.operation-tour-view-cruise-button:hover {
+  background-color: #bae6fd;
+  color: #0369a1;
+  border-color: #7dd3fc;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.operation-tour-view-cruise-button svg {
+  flex-shrink: 0;
+}
+
+/* ==========================================
+   NÚT KIỂM SOÁT KHU VỰC (TOUR ĐÃ DUYỆT)
+   ========================================== */
+.operation-tour-assignment-button.readonly {
+  background-color: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.operation-tour-assignment-button.readonly:hover {
+  background-color: #dcfce7;
+  border-color: #86efac;
+  color: #15803d;
+}
