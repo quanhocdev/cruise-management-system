@@ -3,6 +3,7 @@ package com.project.payment.service;
 import com.project.payment.dto.*;
 import com.project.payment.client.BookingClient;
 import com.project.payment.client.BookingPaymentContext;
+import com.project.payment.client.NotificationClient;
 import com.project.payment.exception.PaymentException;
 import com.project.payment.mapper.PaymentMapper;
 import com.project.payment.model.Payment;
@@ -18,17 +19,19 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceImplTests {
     @Mock PaymentRepository repository;
     @Mock PaymentProvider provider;
     @Mock BookingClient bookingClient;
+    @Mock NotificationClient notificationClient;
     PaymentServiceImpl service;
 
     @BeforeEach void setUp() {
         when(provider.getPaymentMethod()).thenReturn(PaymentMethod.VNPAY);
-        service = new PaymentServiceImpl(repository, new PaymentMapper(), List.of(provider), bookingClient, 15);
+        service = new PaymentServiceImpl(repository, new PaymentMapper(), List.of(provider), bookingClient, notificationClient, 15);
     }
 
     @Test void createPaymentUsesAuthenticatedPayerAndReturnsSandboxUrl() {
@@ -66,6 +69,17 @@ class PaymentServiceImplTests {
         assertEquals("02", response.RspCode());
     }
 
+    @Test void failedCallbackCreatesOneNotificationEvent() {
+        Payment payment = payment(PaymentStatus.PENDING);
+        when(provider.verifyCallback(anyMap())).thenReturn(true);
+        when(provider.getTransactionCode(anyMap())).thenReturn("123456");
+        when(repository.findById(10L)).thenReturn(Optional.of(payment));
+        when(repository.save(any(Payment.class))).thenAnswer(i -> i.getArgument(0));
+        Map<String, String> params = callback(); params.put("vnp_ResponseCode", "24"); params.put("vnp_TransactionStatus", "02");
+        service.handleVnPayReturn(params);
+        verify(notificationClient).paymentFailed(7L, 10L, 100L);
+    }
+
     private CreatePaymentRequest request() {
         CreatePaymentRequest request = new CreatePaymentRequest(); request.setReferenceId(100L);
         request.setReferenceType(PaymentReferenceType.BOOKING); request.setAmount(new BigDecimal("1000000"));
@@ -73,6 +87,7 @@ class PaymentServiceImplTests {
     }
     private Payment payment(PaymentStatus status) {
         Payment payment = new Payment(); payment.setId(10L); payment.setPayerId(7L);
+        payment.setReferenceId(100L); payment.setReferenceType(PaymentReferenceType.BOOKING);
         payment.setAmount(new BigDecimal("1000000")); payment.setStatus(status);
         payment.setCreatedAt(Instant.now()); payment.setUpdatedAt(Instant.now()); return payment;
     }

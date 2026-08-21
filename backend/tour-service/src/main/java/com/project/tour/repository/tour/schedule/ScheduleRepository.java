@@ -30,4 +30,8 @@ public interface ScheduleRepository extends JpaRepository<Schedule, UUID> {
         List<Schedule> findAllByTour_IdAndStatusOrderByDayNumberAsc(
                         UUID tourId,
                         ScheduleStatus status);
+
+        Optional<Schedule> findFirstByTour_IdAndStatusOrderByRealDayAsc(
+                        UUID tourId,
+                        ScheduleStatus status);
 }
