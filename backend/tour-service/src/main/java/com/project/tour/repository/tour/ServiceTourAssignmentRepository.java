@@ -2,9 +2,12 @@ package com.project.tour.repository.tour;
 
 import com.project.tour.model.ServiceTour;
 import com.project.tour.model.enums.convenience.ServiceTourStatus;
+import com.project.tour.model.enums.tour.TourStatusTrip;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -62,4 +65,19 @@ public interface ServiceTourAssignmentRepository
         void deleteByTourIdAndCruiseAreaId(
                         UUID tourId,
                         UUID cruiseAreaId);
+
+        @Query("""
+                        SELECT st
+                        FROM ServiceTour st
+                        JOIN FETCH st.tour t
+                        JOIN FETCH st.cruiseArea ca
+                        JOIN FETCH ca.cruiseDeck cd
+                        LEFT JOIN FETCH st.service s
+                        WHERE t.statusTrip = :tourStatus
+                          AND st.status IN :statuses
+                        ORDER BY st.createdAt ASC
+                        """)
+        List<ServiceTour> findConfigurable(
+                        @Param("tourStatus") TourStatusTrip tourStatus,
+                        @Param("statuses") List<ServiceTourStatus> statuses);
 }

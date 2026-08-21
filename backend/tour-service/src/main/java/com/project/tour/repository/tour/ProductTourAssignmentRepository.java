@@ -16,36 +16,51 @@ import java.util.UUID;
 
 @Repository
 public interface ProductTourAssignmentRepository
-                extends JpaRepository<ProductTour, UUID> {
+    extends JpaRepository<ProductTour, UUID> {
 
-        @EntityGraph(attributePaths = { "tour", "cruiseArea", "cruiseArea.cruiseDeck", "product" })
-        List<ProductTour> findAllByTourIdOrderByCreatedAtAsc(UUID tourId);
+  @EntityGraph(attributePaths = { "tour", "cruiseArea", "cruiseArea.cruiseDeck", "product" })
+  List<ProductTour> findAllByTourIdOrderByCreatedAtAsc(UUID tourId);
 
-        @EntityGraph(attributePaths = { "tour", "cruiseArea", "cruiseArea.cruiseDeck", "product" })
-        List<ProductTour> findAllByStatusOrderByCreatedAtAsc(ProductTourStatus status);
+  @EntityGraph(attributePaths = { "tour", "cruiseArea", "cruiseArea.cruiseDeck", "product" })
+  List<ProductTour> findAllByStatusOrderByCreatedAtAsc(ProductTourStatus status);
 
-        @EntityGraph(attributePaths = { "tour", "cruiseArea", "cruiseArea.cruiseDeck", "product" })
-        List<ProductTour> findAllByTourIdAndStatusOrderByCreatedAtAsc(
-                        UUID tourId, ProductTourStatus status);
+  @EntityGraph(attributePaths = { "tour", "cruiseArea", "cruiseArea.cruiseDeck", "product" })
+  List<ProductTour> findAllByTourIdAndStatusOrderByCreatedAtAsc(
+      UUID tourId, ProductTourStatus status);
 
-        // Kiểm tra đã phân công khu vực này cho tour chưa
-        Optional<ProductTour> findByTourIdAndCruiseAreaId(UUID tourId, UUID cruiseAreaId);
+  // Kiểm tra đã phân công khu vực này cho tour chưa
+  Optional<ProductTour> findByTourIdAndCruiseAreaId(UUID tourId, UUID cruiseAreaId);
 
-        // Xóa phân công theo tourId và cruiseAreaId
-        void deleteByTourIdAndCruiseAreaId(UUID tourId, UUID cruiseAreaId);
+  // Xóa phân công theo tourId và cruiseAreaId
+  void deleteByTourIdAndCruiseAreaId(UUID tourId, UUID cruiseAreaId);
 
-        @Query("""
-                        SELECT pt
-                        FROM ProductTour pt
-                        JOIN FETCH pt.tour t
-                        JOIN FETCH pt.cruiseArea ca
-                        JOIN FETCH ca.cruiseDeck cd
-                        LEFT JOIN FETCH pt.product p
-                        WHERE t.statusTrip = :tourStatus
-                          AND pt.status = :productTourStatus
-                        ORDER BY pt.createdAt ASC
-                        """)
-        List<ProductTour> findPendingConfig(
-                        @Param("tourStatus") TourStatusTrip tourStatus,
-                        @Param("productTourStatus") ProductTourStatus productTourStatus);
+  @Query("""
+      SELECT pt
+      FROM ProductTour pt
+      JOIN FETCH pt.tour t
+      JOIN FETCH pt.cruiseArea ca
+      JOIN FETCH ca.cruiseDeck cd
+      LEFT JOIN FETCH pt.product p
+      WHERE t.statusTrip = :tourStatus
+        AND pt.status = :productTourStatus
+      ORDER BY pt.createdAt ASC
+      """)
+  List<ProductTour> findPendingConfig(
+      @Param("tourStatus") TourStatusTrip tourStatus,
+      @Param("productTourStatus") ProductTourStatus productTourStatus);
+
+  @Query("""
+      SELECT pt
+      FROM ProductTour pt
+      JOIN FETCH pt.tour t
+      JOIN FETCH pt.cruiseArea ca
+      JOIN FETCH ca.cruiseDeck cd
+      LEFT JOIN FETCH pt.product p
+      WHERE t.statusTrip = :tourStatus
+        AND pt.status IN :statuses
+      ORDER BY pt.createdAt ASC
+      """)
+  List<ProductTour> findConfigurable(
+      @Param("tourStatus") TourStatusTrip tourStatus,
+      @Param("statuses") List<ProductTourStatus> statuses);
 }
