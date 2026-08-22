@@ -54,7 +54,11 @@ import OnboardDashboard from "./modules/onboard/pages/Dashboard";
 import OnboardActivityCruiseTour from "./modules/onboard/pages/ActivityCruiseTour";
 import OnboardTour from "./modules/onboard/pages/OnboardTour";
 
+import ShoreLayout from "./layouts/ShoreLayout";
 import ShoreDashboard from "./modules/shore/pages/Dashboard";
+import ShoreManagerTour from "./modules/shore/pages/ShoreManagerTour";
+import VisitTourConfiguration from "./modules/shore/pages/VisitTourConfiguration";
+
 import FinanceDashboard from "./modules/finance/pages/Dashboard";
 
 export default function App() {
@@ -214,19 +218,24 @@ export default function App() {
 
           {/* SHORE ROUTES */}
           <Route
-            path="/shore/*"
+            path="/shore"
             element={
               <ProtectedRoute allowedRoles={["SHORE"]}>
-                <Routes>
-                  <Route path="dashboard" element={<ShoreDashboard />} />
-                  <Route
-                    path=""
-                    element={<Navigate to="dashboard" replace />}
-                  />
-                </Routes>
+                <ShoreLayout />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route path="dashboard" element={<ShoreDashboard />} />
+
+            <Route path="tours" element={<ShoreManagerTour />} />
+
+            <Route
+              path="visit-tour-configuration"
+              element={<VisitTourConfiguration />}
+            />
+
+            <Route index element={<Navigate to="dashboard" replace />} />
+          </Route>
 
           {/* CONVENIENCE ROUTES */}
           <Route

@@ -1,4 +1,4 @@
-// shore/pages/Dashboard.jsx
+// src/modules/shore/pages/Dashboard.jsx
 import React from "react";
 
 const ShoreDashboard = () => {

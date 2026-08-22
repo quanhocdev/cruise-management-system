@@ -15,43 +15,52 @@ import java.util.UUID;
 
 public interface TourRepository extends JpaRepository<Tour, UUID> {
 
-  boolean existsByCodeIgnoreCase(String code);
+    boolean existsByCodeIgnoreCase(String code);
 
-  boolean existsByCodeIgnoreCaseAndIdNot(
-      String code,
-      UUID excludedTourId);
+    boolean existsByCodeIgnoreCaseAndIdNot(
+            String code,
+            UUID excludedTourId);
 
-  Optional<Tour> findByCodeIgnoreCase(String code);
+    Optional<Tour> findByCodeIgnoreCase(String code);
 
-  List<Tour> findAllByOrderByNameAsc();
+    List<Tour> findAllByOrderByNameAsc();
 
-  List<Tour> findAllByCruise_IdOrderByNameAsc(UUID cruiseId);
+    List<Tour> findAllByCruise_IdOrderByNameAsc(
+            UUID cruiseId);
 
-  List<Tour> findAllByStatusTripOrderByNameAsc(
-      TourStatusTrip statusTrip);
+    List<Tour> findAllByStatusTripOrderByNameAsc(
+            TourStatusTrip statusTrip);
 
-  List<Tour> findAllByStatusBookingOrderByNameAsc(
-      TourBookingStatus statusBooking);
+    // =====================================================
+    // SHORE
+    // Lấy các Tour mà Shore được phép quản lý
+    // =====================================================
 
-  List<Tour> findAllByCruise_IdAndStatusTripOrderByNameAsc(
-      UUID cruiseId,
-      TourStatusTrip statusTrip);
+    List<Tour> findAllByStatusTripInOrderByStartDateAsc(
+            List<TourStatusTrip> statuses);
 
-  Optional<Tour> findByIdAndStatusTripIn(
-      UUID id,
-      List<TourStatusTrip> statuses);
+    List<Tour> findAllByStatusBookingOrderByNameAsc(
+            TourBookingStatus statusBooking);
 
-  @Query("""
-          SELECT t
-          FROM Tour t
-          WHERE t.cruise.id = :cruiseId
-            AND t.statusTrip IN :statuses
-            AND t.startDate <= :endDate
-            AND t.endDate >= :startDate
-      """)
-  List<Tour> findConflictingTours(
-      @Param("cruiseId") UUID cruiseId,
-      @Param("statuses") List<TourStatusTrip> statuses,
-      @Param("startDate") LocalDate startDate,
-      @Param("endDate") LocalDate endDate);
+    List<Tour> findAllByCruise_IdAndStatusTripOrderByNameAsc(
+            UUID cruiseId,
+            TourStatusTrip statusTrip);
+
+    Optional<Tour> findByIdAndStatusTripIn(
+            UUID id,
+            List<TourStatusTrip> statuses);
+
+    @Query("""
+                SELECT t
+                FROM Tour t
+                WHERE t.cruise.id = :cruiseId
+                  AND t.statusTrip IN :statuses
+                  AND t.startDate <= :endDate
+                  AND t.endDate >= :startDate
+            """)
+    List<Tour> findConflictingTours(
+            @Param("cruiseId") UUID cruiseId,
+            @Param("statuses") List<TourStatusTrip> statuses,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
 }
