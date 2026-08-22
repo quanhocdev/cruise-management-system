@@ -50,6 +50,31 @@ services:
       retries: 5
 
   # ==========================
+  # 1. PostgreSQL cho Convenience Service
+  # ==========================
+  postgres-convenience:
+    image: postgres:15-alpine
+    container_name: cruise_postgres_convenience
+    restart: always
+    environment:
+      POSTGRES_DB: convenience_service_db
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5434:5432" # Map cổng 5434 ra máy thật
+    volumes:
+      - postgres_convenience_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER:-postgres} -d convenience_service_db",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==========================
   # Redis
   # ==========================
   redis:
@@ -78,11 +103,12 @@ services:
       - "5050:80"
     logging:
       driver: "none"
-      # driver: "json-file"
     depends_on:
       postgres-auth:
         condition: service_healthy
       postgres-tour:
+        condition: service_healthy
+      postgres-convenience: # (ĐÃ THÊM DATABASE MỚI VÀO ĐÂY)
         condition: service_healthy
 
   # ==========================
@@ -113,6 +139,7 @@ services:
     depends_on:
       - auth-service
       - tour-service
+      - convenience-service # (ĐÃ THÊM SERVICE MỚI VÀO ĐÂY)
 
   # ==========================
   # Auth Service
@@ -172,6 +199,32 @@ services:
         condition: service_healthy
 
   # ==========================
+  # 2. Convenience Service (THÊM MỚI)
+  # ==========================
+  convenience-service:
+    build:
+      context: ./backend
+      dockerfile: convenience-service/Dockerfile.dev
+    container_name: convenience-service
+    restart: always
+    ports:
+      - "8084:8084"
+    working_dir: /app/convenience-service
+    volumes:
+      - ./backend/convenience-service/src:/app/convenience-service/src
+      - ./backend/common/src:/app/common/src
+      - /app/convenience-service/target
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-convenience:5432/${CONVENIENCE_DB_NAME:-convenience_service_db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    depends_on:
+      postgres-convenience:
+        condition: service_healthy
+
+  # ==========================
   # React Frontend
   # ==========================
   frontend-web:
@@ -196,3 +249,4 @@ services:
 volumes:
   postgres_auth_data:
   postgres_tour_data:
+  postgres_convenience_data: # 3. (THÊM VOLUME MỚI VÀO ĐÂY)

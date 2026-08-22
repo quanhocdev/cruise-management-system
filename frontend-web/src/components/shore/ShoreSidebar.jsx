@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { NavLink } from "react-router-dom";
+// src/components/shore/ShoreSidebar.jsx
 
+import { useState } from "react";
+import { NavLink, useLocation } from "react-router-dom"; // Import thêm useLocation
 import {
   LayoutDashboard,
   ClipboardList,
-  Map,
   Ship,
   ChevronLeft,
   ChevronRight,
@@ -26,11 +26,8 @@ const MENU_SECTIONS = [
         label: "Danh sách Tour",
         icon: ClipboardList,
         path: "/shore/tours",
-      },
-      {
-        label: "Cấu hình Visit Tour",
-        icon: Map,
-        path: "/shore/visit-tour-configuration",
+        // Thêm các sub-paths liên quan để duy trì trạng thái active
+        extraPaths: ["/shore/visit-tour-configuration"],
       },
     ],
   },
@@ -38,6 +35,7 @@ const MENU_SECTIONS = [
 
 function ShoreSidebar() {
   const [collapsed, setCollapsed] = useState(false);
+  const location = useLocation(); // Lấy pathname hiện tại
 
   const toggleSidebar = () => {
     setCollapsed((prev) => !prev);
@@ -90,13 +88,19 @@ function ShoreSidebar() {
             {section.items.map((item) => {
               const Icon = item.icon;
 
+              // Kiểm tra xem pathname hiện tại có khớp với item.path hoặc extraPaths không
+              const isCustomActive =
+                location.pathname === item.path ||
+                (item.extraPaths &&
+                  item.extraPaths.some((p) => location.pathname.startsWith(p)));
+
               return (
                 <NavLink
                   key={item.path}
                   to={item.path}
                   end={item.end}
-                  className={({ isActive }) =>
-                    `shore-sidebar-link ${isActive ? "active" : ""}`
+                  className={() =>
+                    `shore-sidebar-link ${isCustomActive ? "active" : ""}`
                   }
                   title={collapsed ? item.label : undefined}
                 >

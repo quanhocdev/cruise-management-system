@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 import useShoreTourConfiguration from "../hooks/useShoreTourConfiguration";
 import useVisitTours from "../hooks/useVisitTours";
@@ -36,6 +37,8 @@ const STATUS_OPTIONS = [
 ];
 
 function VisitTourConfiguration() {
+  const navigate = useNavigate();
+
   /*
    * =====================================================
    * URL SEARCH PARAMS & FILTER STATE
@@ -107,6 +110,16 @@ function VisitTourConfiguration() {
     }
 
     setSearchParams(nextParams);
+  };
+
+  /*
+   * =====================================================
+   * BACK TO TOURS HANDLER
+   * =====================================================
+   */
+
+  const handleBackToTours = () => {
+    navigate("/shore/tours");
   };
 
   /*
@@ -235,11 +248,29 @@ function VisitTourConfiguration() {
 
           <p>Không tìm thấy tourId trong URL.</p>
 
-          <p>
+          <p style={{ marginBottom: "1.25rem" }}>
             Ví dụ:
             <br />
             <code>/shore/visit-tour-configuration?tourId=TOUR_ID</code>
           </p>
+
+          <button
+            type="button"
+            onClick={handleBackToTours}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              padding: "0.5rem 1rem",
+              borderRadius: "6px",
+              border: "1px solid var(--border-color)",
+              backgroundColor: "var(--bg-card)",
+              cursor: "pointer",
+            }}
+          >
+            <ArrowLeft size={16} />
+            <span>Quay lại Danh sách Tour</span>
+          </button>
         </div>
       </div>
     );
@@ -254,15 +285,44 @@ function VisitTourConfiguration() {
   return (
     <div className="visit-tour-configuration">
       {/* =================================================
-          PAGE HEADER
+          PAGE HEADER WITH BACK BUTTON
           ================================================= */}
 
-      <div className="visit-tour-configuration-header">
+      <div
+        className="visit-tour-configuration-header"
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <div>
           <h1>Cấu hình Visit Tour</h1>
 
           <p>Quản lý các tour tham quan trên bờ theo lịch trình của Tour.</p>
         </div>
+
+        <button
+          type="button"
+          onClick={handleBackToTours}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            padding: "0.5rem 1rem",
+            fontSize: "0.875rem",
+            fontWeight: "500",
+            color: "var(--text-main)",
+            backgroundColor: "var(--bg-card)",
+            border: "1px solid var(--border-color)",
+            borderRadius: "8px",
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+          }}
+        >
+          <ArrowLeft size={18} />
+          <span>Danh sách Tour</span>
+        </button>
       </div>
 
       {/* =================================================
