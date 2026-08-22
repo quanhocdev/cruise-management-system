@@ -1,5 +1,5 @@
 import VisitTourStop from "./VisitTourStop";
-
+import "../../styles/VisitTourSchedule.css";
 function VisitTourSchedule({
   schedule,
   onCreate,

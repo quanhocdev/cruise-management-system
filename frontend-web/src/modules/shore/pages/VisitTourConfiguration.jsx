@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import useShoreTourConfiguration from "../hooks/useShoreTourConfiguration";
 import useVisitTours from "../hooks/useVisitTours";
-
+import "../styles/VisitTourConfiguration.css";
 import VisitTourFilter from "../components/visit-tour/VisitTourFilter";
 import VisitTourSchedule from "../components/visit-tour/VisitTourSchedule";
 import VisitTourFormModal from "../components/visit-tour/VisitTourFormModal";
@@ -37,34 +38,17 @@ const STATUS_OPTIONS = [
 function VisitTourConfiguration() {
   /*
    * =====================================================
-   * TOUR ID
+   * URL SEARCH PARAMS & FILTER STATE
    * =====================================================
-   *
-   * Tạm thời lấy từ query string:
-   *
-   * /shore/visit-tour-configuration?tourId=xxx
-   *
-   * Sau này nếu route của bạn là:
-   *
-   * /shore/tours/:tourId/configuration
-   *
-   * thì chỉ cần đổi sang useParams().
    */
 
-  const searchParams = new URLSearchParams(window.location.search);
+  const [searchParams, setSearchParams] = useSearchParams();
   const tourId = searchParams.get("tourId");
+  const status = searchParams.get("status") || "";
 
   /*
    * =====================================================
-   * FILTER
-   * =====================================================
-   */
-
-  const [status, setStatus] = useState("");
-
-  /*
-   * =====================================================
-   * MODAL
+   * MODAL STATE
    * =====================================================
    */
 
@@ -82,8 +66,8 @@ function VisitTourConfiguration() {
     configuration,
     loading: configurationLoading,
     error: configurationError,
-    fetchConfiguration,
-  } = useShoreTourConfiguration();
+    reload: fetchConfiguration,
+  } = useShoreTourConfiguration(tourId, status || null);
 
   /*
    * =====================================================
@@ -101,25 +85,29 @@ function VisitTourConfiguration() {
 
   /*
    * =====================================================
-   * LOAD CONFIGURATION
-   * =====================================================
-   */
-
-  useEffect(() => {
-    if (!tourId) {
-      return;
-    }
-
-    fetchConfiguration(tourId, status || undefined);
-  }, [tourId, status, fetchConfiguration]);
-
-  /*
-   * =====================================================
    * STATUS OPTIONS
    * =====================================================
    */
 
   const statusOptions = useMemo(() => STATUS_OPTIONS, []);
+
+  /*
+   * =====================================================
+   * FILTER CHANGE HANDLER
+   * =====================================================
+   */
+
+  const handleStatusFilterChange = (newStatus) => {
+    const nextParams = new URLSearchParams(searchParams);
+
+    if (newStatus) {
+      nextParams.set("status", newStatus);
+    } else {
+      nextParams.delete("status");
+    }
+
+    setSearchParams(nextParams);
+  };
 
   /*
    * =====================================================
@@ -163,7 +151,7 @@ function VisitTourConfiguration() {
     try {
       await deleteVisitTour(visitTour.id);
 
-      await fetchConfiguration(tourId, status || undefined);
+      await fetchConfiguration();
     } catch (error) {
       console.error("DELETE VISIT TOUR ERROR:", error);
     }
@@ -185,7 +173,7 @@ function VisitTourConfiguration() {
         status: newStatus,
       });
 
-      await fetchConfiguration(tourId, status || undefined);
+      await fetchConfiguration();
     } catch (error) {
       console.error("UPDATE VISIT TOUR STATUS ERROR:", error);
     }
@@ -209,7 +197,7 @@ function VisitTourConfiguration() {
       setEditingVisitTour(null);
       setSelectedScheduleStop(null);
 
-      await fetchConfiguration(tourId, status || undefined);
+      await fetchConfiguration();
     } catch (error) {
       console.error("SAVE VISIT TOUR ERROR:", error);
 
@@ -283,12 +271,14 @@ function VisitTourConfiguration() {
 
       {configurationError && (
         <div className="visit-tour-configuration-error">
-          {configurationError}
+          {configurationError.message || String(configurationError)}
         </div>
       )}
 
       {visitTourError && (
-        <div className="visit-tour-configuration-error">{visitTourError}</div>
+        <div className="visit-tour-configuration-error">
+          {visitTourError.message || String(visitTourError)}
+        </div>
       )}
 
       {/* =================================================
@@ -297,7 +287,7 @@ function VisitTourConfiguration() {
 
       <VisitTourFilter
         status={status}
-        onStatusChange={setStatus}
+        onStatusChange={handleStatusFilterChange}
         statusOptions={statusOptions}
       />
 

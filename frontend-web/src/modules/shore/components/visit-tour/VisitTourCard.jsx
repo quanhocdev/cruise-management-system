@@ -1,5 +1,5 @@
 import { Clock, Pencil, Trash2, Users } from "lucide-react";
-
+import "../../styles/VisitTourCard.css";
 const STATUS_LABELS = {
   NOT_STARTED: "Chưa bắt đầu",
   IN_PROGRESS: "Đang diễn ra",

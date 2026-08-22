@@ -1,7 +1,7 @@
 import { Plus } from "lucide-react";
 
 import VisitTourCard from "./VisitTourCard";
-
+import "../../styles/VisitTourStop.css";
 function VisitTourStop({ stop, onCreate, onEdit, onDelete, onStatusChange }) {
   return (
     <section className="visit-tour-stop">

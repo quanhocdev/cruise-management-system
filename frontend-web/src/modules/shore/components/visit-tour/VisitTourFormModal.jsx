@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
-
+import "../../styles/VisitTourFormModal.css";
 const EMPTY_FORM = {
   name: "",
   description: "",

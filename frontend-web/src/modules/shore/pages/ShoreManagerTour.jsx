@@ -1,6 +1,6 @@
 // src/modules/shore/pages/ShoreManagerTour.jsx
 
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   CalendarDays,
@@ -8,25 +8,74 @@ import {
   Clock,
   RefreshCw,
   Ship,
+  Filter,
 } from "lucide-react";
-
+import "../styles/ShoreManagerTour.css";
 import useShoreTours from "../hooks/useShoreTours";
 
 function ShoreManagerTour() {
   const navigate = useNavigate();
-
   const { tours, loading, error, reload } = useShoreTours();
+
+  // State cho bộ lọc trạng thái
+  const [selectedStatus, setSelectedStatus] = useState("ALL");
 
   /*
    * =====================================================
-   * SORT TOURS
+   * STATUS OPTIONS & LABELS
    * =====================================================
-   *
-   * Ưu tiên Tour đang chạy / sắp chạy,
-   * sau đó mới đến Tour đã hoàn thành.
    */
+  const statusOptions = [
+    { value: "ALL", label: "Tất cả trạng thái" },
+    { value: "IN_PROGRESS", label: "Đang diễn ra" },
+    { value: "READY", label: "Sẵn sàng" },
+    { value: "APPROVED", label: "Đã duyệt" },
+    { value: "COMPLETED", label: "Đã hoàn thành" },
+  ];
 
-  const sortedTours = useMemo(() => {
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case "APPROVED":
+        return "Đã duyệt";
+      case "READY":
+        return "Sẵn sàng";
+      case "IN_PROGRESS":
+        return "Đang diễn ra";
+      case "COMPLETED":
+        return "Đã hoàn thành";
+      default:
+        return status || "Không xác định";
+    }
+  };
+
+  const getStatusClass = (status) => {
+    switch (status) {
+      case "APPROVED":
+        return "approved";
+      case "READY":
+        return "ready";
+      case "IN_PROGRESS":
+        return "in-progress";
+      case "COMPLETED":
+        return "completed";
+      default:
+        return "";
+    }
+  };
+
+  /*
+   * =====================================================
+   * FILTER & SORT TOURS
+   * =====================================================
+   */
+  const filteredAndSortedTours = useMemo(() => {
+    // 1. Lọc theo trạng thái được chọn
+    const filtered = tours.filter((tour) => {
+      if (selectedStatus === "ALL") return true;
+      return tour.statusTrip === selectedStatus;
+    });
+
+    // 2. Sắp xếp thứ tự ưu tiên
     const statusOrder = {
       IN_PROGRESS: 1,
       READY: 2,
@@ -34,7 +83,7 @@ function ShoreManagerTour() {
       COMPLETED: 4,
     };
 
-    return [...tours].sort((a, b) => {
+    return filtered.sort((a, b) => {
       const statusA = statusOrder[a.statusTrip] || 99;
       const statusB = statusOrder[b.statusTrip] || 99;
 
@@ -44,100 +93,34 @@ function ShoreManagerTour() {
 
       return new Date(a.startDate || 0) - new Date(b.startDate || 0);
     });
-  }, [tours]);
+  }, [tours, selectedStatus]);
 
   /*
    * =====================================================
-   * STATUS
+   * HANDLERS
    * =====================================================
    */
-
-  const getStatusLabel = (status) => {
-    switch (status) {
-      case "APPROVED":
-        return "Đã duyệt";
-
-      case "READY":
-        return "Sẵn sàng";
-
-      case "IN_PROGRESS":
-        return "Đang diễn ra";
-
-      case "COMPLETED":
-        return "Đã hoàn thành";
-
-      default:
-        return status || "Không xác định";
-    }
-  };
-
-  /*
-   * =====================================================
-   * STATUS CLASS
-   * =====================================================
-   */
-
-  const getStatusClass = (status) => {
-    switch (status) {
-      case "APPROVED":
-        return "approved";
-
-      case "READY":
-        return "ready";
-
-      case "IN_PROGRESS":
-        return "in-progress";
-
-      case "COMPLETED":
-        return "completed";
-
-      default:
-        return "";
-    }
-  };
-
-  /*
-   * =====================================================
-   * OPEN CONFIGURATION
-   * =====================================================
-   */
-
   const handleConfiguration = (tourId) => {
     navigate(`/shore/visit-tour-configuration?tourId=${tourId}`);
   };
 
-  /*
-   * =====================================================
-   * FORMAT DATE
-   * =====================================================
-   */
-
   const formatDate = (date) => {
-    if (!date) {
-      return "—";
-    }
-
+    if (!date) return "—";
     const parsedDate = new Date(date);
-
-    if (Number.isNaN(parsedDate.getTime())) {
-      return date;
-    }
-
+    if (Number.isNaN(parsedDate.getTime())) return date;
     return parsedDate.toLocaleDateString("vi-VN");
   };
 
   /*
    * =====================================================
-   * LOADING
+   * RENDER LOADING
    * =====================================================
    */
-
   if (loading) {
     return (
       <div className="shore-manager-tour">
         <div className="shore-manager-tour-loading">
           <RefreshCw size={22} className="shore-manager-tour-spinner" />
-
           <span>Đang tải danh sách Tour...</span>
         </div>
       </div>
@@ -146,20 +129,15 @@ function ShoreManagerTour() {
 
   /*
    * =====================================================
-   * RENDER
+   * MAIN RENDER
    * =====================================================
    */
-
   return (
     <div className="shore-manager-tour">
-      {/* =================================================
-          HEADER
-          ================================================= */}
-
+      {/* HEADER */}
       <div className="shore-manager-tour-header">
         <div>
           <h1>Quản lý Tour bờ</h1>
-
           <p>
             Xem các Tour được phân công và cấu hình hoạt động tham quan trên bờ.
           </p>
@@ -172,69 +150,70 @@ function ShoreManagerTour() {
           disabled={loading}
         >
           <RefreshCw size={17} />
-
           <span>Làm mới</span>
         </button>
       </div>
 
-      {/* =================================================
-          ERROR
-          ================================================= */}
-
+      {/* ERROR STATE */}
       {error && (
         <div className="shore-manager-tour-error">
           <span>Không thể tải danh sách Tour.</span>
-
           <button type="button" onClick={reload}>
             Thử lại
           </button>
         </div>
       )}
 
-      {/* =================================================
-          SUMMARY
-          ================================================= */}
-
+      {/* FILTER & SUMMARY BAR */}
       {!error && (
-        <div className="shore-manager-tour-summary">
+        <div className="shore-manager-tour-toolbar">
           <div className="shore-manager-tour-summary-item">
             <span>Tổng số Tour</span>
+            <strong>{filteredAndSortedTours.length}</strong>
+          </div>
 
-            <strong>{sortedTours.length}</strong>
+          <div className="shore-manager-tour-filter-box">
+            <Filter size={16} />
+            <label htmlFor="tour-status-filter">Trạng thái:</label>
+            <select
+              id="tour-status-filter"
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+            >
+              {statusOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       )}
 
-      {/* =================================================
-          EMPTY
-          ================================================= */}
-
-      {!error && sortedTours.length === 0 && (
+      {/* EMPTY STATE */}
+      {!error && filteredAndSortedTours.length === 0 && (
         <div className="shore-manager-tour-empty">
           <Ship size={42} />
-
-          <h2>Chưa có Tour</h2>
-
-          <p>Hiện tại chưa có Tour nào được phép cấu hình cho Shore.</p>
+          <h2>Khôn tìm thấy Tour phù hợp</h2>
+          <p>
+            {selectedStatus === "ALL"
+              ? "Hiện tại chưa có Tour nào được phép cấu hình cho Shore."
+              : "Không có Tour nào phù hợp với trạng thái đã lọc."}
+          </p>
         </div>
       )}
 
-      {/* =================================================
-          TOUR LIST
-          ================================================= */}
-
-      {!error && sortedTours.length > 0 && (
+      {/* TOUR LIST */}
+      {!error && filteredAndSortedTours.length > 0 && (
         <div className="shore-manager-tour-list">
-          {sortedTours.map((tour) => (
+          {filteredAndSortedTours.map((tour) => (
             <article key={tour.id} className="shore-manager-tour-card">
               {/* CARD HEADER */}
-
               <div className="shore-manager-tour-card-header">
                 <div className="shore-manager-tour-card-title">
                   <span className="shore-manager-tour-code">
                     {tour.code || "—"}
                   </span>
-
                   <h2>{tour.name || "Tour không có tên"}</h2>
                 </div>
 
@@ -248,7 +227,6 @@ function ShoreManagerTour() {
               </div>
 
               {/* DESCRIPTION */}
-
               {tour.description && (
                 <p className="shore-manager-tour-description">
                   {tour.description}
@@ -256,14 +234,11 @@ function ShoreManagerTour() {
               )}
 
               {/* INFORMATION */}
-
               <div className="shore-manager-tour-info">
                 <div className="shore-manager-tour-info-item">
                   <CalendarDays size={18} />
-
                   <div>
                     <span>Thời gian</span>
-
                     <strong>
                       {formatDate(tour.startDate)}
                       {" → "}
@@ -274,27 +249,22 @@ function ShoreManagerTour() {
 
                 <div className="shore-manager-tour-info-item">
                   <Ship size={18} />
-
                   <div>
                     <span>Du thuyền</span>
-
                     <strong>{tour.cruiseName || "—"}</strong>
                   </div>
                 </div>
 
                 <div className="shore-manager-tour-info-item">
                   <Clock size={18} />
-
                   <div>
                     <span>Trạng thái</span>
-
                     <strong>{getStatusLabel(tour.statusTrip)}</strong>
                   </div>
                 </div>
               </div>
 
               {/* ACTION */}
-
               <div className="shore-manager-tour-card-footer">
                 <button
                   type="button"
@@ -302,7 +272,6 @@ function ShoreManagerTour() {
                   onClick={() => handleConfiguration(tour.id)}
                 >
                   <span>Cấu hình Visit Tour</span>
-
                   <ChevronRight size={18} />
                 </button>
               </div>

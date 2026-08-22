@@ -1,3 +1,4 @@
+import "../../styles/VisitTourFilter.css";
 function VisitTourFilter({ status, onStatusChange, statusOptions }) {
   return (
     <section className="visit-tour-filter">
