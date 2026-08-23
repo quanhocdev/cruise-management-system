@@ -22,6 +22,8 @@ class FeedbackControllerSecurityTests {
     @Autowired MockMvc mockMvc; @MockitoBean FeedbackService service;
     UUID id = UUID.fromString("11111111-1111-1111-1111-111111111111");
     @Test void publicCanReadTourFeedback() throws Exception { mockMvc.perform(get("/api/v1/feedbacks/tours/{id}", id)).andExpect(status().isOk()); }
+    @Test void publicCanReadTargetFeedback() throws Exception { mockMvc.perform(
+        get("/api/v1/feedbacks/targets/ONBOARD_ACTIVITY/{id}", id)).andExpect(status().isOk()); }
     @Test void createRequiresAuthentication() throws Exception { mockMvc.perform(post("/api/v1/feedbacks")
         .contentType("application/json").content(body())).andExpect(status().isUnauthorized()); }
     @Test void passengerCanCreateFeedback() throws Exception { mockMvc.perform(post("/api/v1/feedbacks")
@@ -34,5 +36,5 @@ class FeedbackControllerSecurityTests {
         .with(jwt().jwt(j -> j.claim("userId", 1L)).authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
         .contentType("application/json").content("{\"status\":\"HIDDEN\",\"reason\":\"Spam\"}"))
         .andExpect(status().isOk()); }
-    private String body() { return "{\"bookingId\":10,\"rating\":5,\"content\":\"Excellent\",\"imageUrls\":[]}"; }
+    private String body() { return "{\"bookingId\":10,\"feedbackType\":\"TRIP\",\"rating\":5,\"content\":\"Excellent\",\"imageUrls\":[]}"; }
 }

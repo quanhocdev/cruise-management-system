@@ -32,10 +32,11 @@ class FeedbackServiceImplTests {
         assertEquals(cruiseId, result.cruiseId());
     }
 
-    @Test void duplicateFeedbackIsRejectedBeforeRemoteCalls() {
-        when(repository.existsByBookingIdAndReviewerUserId(10L, 7L)).thenReturn(true);
+    @Test void duplicateFeedbackForSameTargetIsRejected() {
+        stubEligible();
+        when(repository.existsByBookingIdAndReviewerUserIdAndFeedbackTypeAndTargetTypeAndTargetId(
+            10L, 7L, FeedbackType.TRIP, FeedbackTargetType.TOUR, tourId)).thenReturn(true);
         assertThrows(FeedbackException.class, () -> service.create(createRequest(), 7L));
-        verifyNoInteractions(bookingClient, tourClient);
     }
 
     @Test void passengerWhoDidNotDisembarkCannotReview() {
@@ -53,7 +54,25 @@ class FeedbackServiceImplTests {
     @Test void invalidOrDuplicateImageUrlsAreRejected() {
         stubEligible();
         assertThrows(FeedbackException.class, () -> service.create(
-            new CreateFeedbackRequest(10L, 5, "Good", List.of("http://unsafe.test/a.jpg")), 7L));
+            new CreateFeedbackRequest(10L, FeedbackType.TRIP, null, null, 5, "Good", List.of("http://unsafe.test/a.jpg")), 7L));
+    }
+
+    @Test void completedOnboardActivityCanBeReviewedSeparately() {
+        UUID activityId = UUID.randomUUID(); stubEligible();
+        when(tourClient.targetContext(tourId, "ONBOARD_ACTIVITY", activityId))
+            .thenReturn(new com.project.feedback.client.FeedbackTargetContext(tourId, "ONBOARD_ACTIVITY", activityId, true));
+        when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
+        FeedbackResponse result = service.create(new CreateFeedbackRequest(10L, FeedbackType.ACTIVITY,
+            FeedbackTargetType.ONBOARD_ACTIVITY, activityId, 4, "Fun", List.of()), 7L);
+        assertEquals(FeedbackType.ACTIVITY, result.feedbackType());
+        assertEquals(activityId, result.targetId());
+    }
+
+    @Test void mismatchedFeedbackAndTargetTypesAreRejected() {
+        stubEligible();
+        assertThrows(FeedbackException.class, () -> service.create(new CreateFeedbackRequest(10L,
+            FeedbackType.ACTIVITY, FeedbackTargetType.SERVICE, UUID.randomUUID(), 4, "Good", List.of()), 7L));
+        verify(tourClient, never()).targetContext(any(), any(), any());
     }
 
     @Test void onlyOwnerCanUpdateFeedback() {
@@ -74,9 +93,10 @@ class FeedbackServiceImplTests {
         when(bookingClient.eligibility(10L, 7L)).thenReturn(new FeedbackEligibility(10L, tourId, 20L, true));
         when(tourClient.context(tourId)).thenReturn(new FeedbackTourContext(tourId, cruiseId, true));
     }
-    private CreateFeedbackRequest createRequest() { return new CreateFeedbackRequest(10L, 5, "Excellent cruise",
+    private CreateFeedbackRequest createRequest() { return new CreateFeedbackRequest(10L, FeedbackType.TRIP, null, null, 5, "Excellent cruise",
         List.of("https://cdn.example.com/review.jpg")); }
     private Feedback feedback() { Feedback f = new Feedback(); f.setId(1L); f.setBookingId(10L); f.setPassengerVoyageId(20L);
         f.setReviewerUserId(7L); f.setTourId(tourId); f.setCruiseId(cruiseId); f.setRating(5); f.setContent("Good");
+        f.setFeedbackType(FeedbackType.TRIP); f.setTargetType(FeedbackTargetType.TOUR); f.setTargetId(tourId);
         f.setImageUrls(new ArrayList<>()); f.setStatus(FeedbackStatus.PUBLISHED); f.setCreatedAt(Instant.now()); f.setUpdatedAt(Instant.now()); return f; }
 }

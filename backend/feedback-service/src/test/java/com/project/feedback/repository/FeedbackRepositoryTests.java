@@ -34,9 +34,21 @@ class FeedbackRepositoryTests {
             repository.saveAndFlush(feedback(1L, 7L, tourId, cruiseId, 4, FeedbackStatus.PUBLISHED)));
     }
 
+    @Test void sameBookingCanReviewDifferentTargets() {
+        UUID tourId = UUID.randomUUID(); UUID cruiseId = UUID.randomUUID();
+        Feedback trip = feedback(1L, 7L, tourId, cruiseId, 5, FeedbackStatus.PUBLISHED);
+        repository.saveAndFlush(trip);
+        Feedback activity = feedback(1L, 7L, tourId, cruiseId, 4, FeedbackStatus.PUBLISHED);
+        activity.setFeedbackType(FeedbackType.ACTIVITY);
+        activity.setTargetType(FeedbackTargetType.ONBOARD_ACTIVITY);
+        activity.setTargetId(UUID.randomUUID());
+        assertDoesNotThrow(() -> repository.saveAndFlush(activity));
+    }
+
     private Feedback feedback(Long bookingId, Long userId, UUID tourId, UUID cruiseId, int rating, FeedbackStatus status) {
         Feedback f = new Feedback(); f.setBookingId(bookingId); f.setPassengerVoyageId(bookingId * 10);
         f.setReviewerUserId(userId); f.setTourId(tourId); f.setCruiseId(cruiseId); f.setRating(rating);
+        f.setFeedbackType(FeedbackType.TRIP); f.setTargetType(FeedbackTargetType.TOUR); f.setTargetId(tourId);
         f.setContent("Review"); f.setImageUrls(new ArrayList<>()); f.setStatus(status);
         f.setCreatedAt(Instant.now()); f.setUpdatedAt(Instant.now()); return f;
     }
