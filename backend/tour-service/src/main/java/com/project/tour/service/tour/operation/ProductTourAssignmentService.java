@@ -87,15 +87,15 @@ public class ProductTourAssignmentService {
                                         // Lưu vào Database của tour-service
                                         AssignmentProduct savedAssignment = assignmentRepository.save(newAssignment);
 
-                                        // Bắn Kafka Event dùng TourAssignedEvent chung
+                                        // Bắn Kafka Event dùng TourAssignedEvent chung vào topic
+                                        // "tour-assignment-topic"
                                         TourAssignedEvent event = new TourAssignedEvent(
                                                         request.tourId(),
                                                         request.cruiseAreaId(),
                                                         "PRODUCT",
                                                         "CREATE");
 
-                                        kafkaTemplate.send("tour-product-assignment-topic", request.tourId().toString(),
-                                                        event);
+                                        kafkaTemplate.send("tour-assignment-topic", request.tourId().toString(), event);
 
                                         return savedAssignment;
                                 });
@@ -135,13 +135,14 @@ public class ProductTourAssignmentService {
                 // 1. Xóa trong DB của tour-service
                 assignmentRepository.deleteByTourIdAndCruiseAreaId(tourId, cruiseAreaId);
 
-                // 2. Bắn Kafka Event dùng TourAssignedEvent chung
+                // 2. Bắn Kafka Event dùng TourAssignedEvent chung vào topic
+                // "tour-assignment-topic"
                 TourAssignedEvent event = new TourAssignedEvent(
                                 tourId,
                                 cruiseAreaId,
                                 "PRODUCT",
                                 "DELETE");
 
-                kafkaTemplate.send("tour-product-assignment-topic", tourId.toString(), event);
+                kafkaTemplate.send("tour-assignment-topic", tourId.toString(), event);
         }
 }

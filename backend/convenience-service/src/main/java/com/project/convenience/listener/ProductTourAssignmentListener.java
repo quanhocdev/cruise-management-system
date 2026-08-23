@@ -20,12 +20,18 @@ public class ProductTourAssignmentListener {
         this.productTourService = productTourService;
     }
 
-    @KafkaListener(topics = "tour-product-assignment-topic", groupId = "convenience-group", containerFactory = "kafkaListenerContainerFactory")
+    @KafkaListener(topics = "tour-assignment-topic", groupId = "product-cruise-group-v1", containerFactory = "kafkaListenerContainerFactory")
     public void onProductTourAssigned(
             TourAssignedEvent event,
             @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
             @Header(KafkaHeaders.OFFSET) long offset,
             @Header(value = KafkaHeaders.RECEIVED_KEY, required = false) String key) {
+
+        // Lọc bỏ event nếu không phải là PRODUCT
+        if (event.areaType() != null && !"PRODUCT".equalsIgnoreCase(event.areaType())) {
+            return;
+        }
+
         log.info("==> [Kafka Consumer] Nhận Event Product từ Partition: {}, Offset: {}, Action: {}", partition, offset,
                 event.action());
         log.info("==> [Data] Tour ID: {}, Cruise Area ID: {}", event.tourId(), event.cruiseAreaId());

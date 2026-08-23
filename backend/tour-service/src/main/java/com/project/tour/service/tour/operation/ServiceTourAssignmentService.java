@@ -23,6 +23,9 @@ import java.util.UUID;
 @Transactional
 public class ServiceTourAssignmentService {
 
+        // Khai báo hằng số Topic chung dùng cho tất cả các loại assignment
+        private static final String TOUR_ASSIGNMENT_TOPIC = "tour-assignment-topic";
+
         private final AssignmentServiceRepository assignmentRepository;
         private final TourRepository tourRepository;
         private final CruiseAreaRepository cruiseAreaRepository;
@@ -102,15 +105,14 @@ public class ServiceTourAssignmentService {
                                         // Lưu vào Database của tour-service
                                         AssignmentService savedAssignment = assignmentRepository.save(newAssignment);
 
-                                        // Bắn Kafka Event sang topic với areaType "SERVICE" và action "CREATE"
+                                        // Bắn Kafka Event sang TOPIC CHUNG với areaType "SERVICE" và action "CREATE"
                                         TourAssignedEvent event = new TourAssignedEvent(
                                                         request.tourId(),
                                                         request.cruiseAreaId(),
                                                         "SERVICE",
                                                         "CREATE");
 
-                                        kafkaTemplate.send("tour-service-assignment-topic", request.tourId().toString(),
-                                                        event);
+                                        kafkaTemplate.send(TOUR_ASSIGNMENT_TOPIC, request.tourId().toString(), event);
 
                                         return savedAssignment;
                                 });
@@ -155,13 +157,13 @@ public class ServiceTourAssignmentService {
                 // 1. Xóa trong DB của tour-service
                 assignmentRepository.deleteByTourIdAndCruiseAreaId(tourId, cruiseAreaId);
 
-                // 2. Bắn Kafka Event với areaType "SERVICE" và action "DELETE"
+                // 2. Bắn Kafka Event sang TOPIC CHUNG với areaType "SERVICE" và action "DELETE"
                 TourAssignedEvent event = new TourAssignedEvent(
                                 tourId,
                                 cruiseAreaId,
                                 "SERVICE",
                                 "DELETE");
 
-                kafkaTemplate.send("tour-service-assignment-topic", tourId.toString(), event);
+                kafkaTemplate.send(TOUR_ASSIGNMENT_TOPIC, tourId.toString(), event);
         }
 }

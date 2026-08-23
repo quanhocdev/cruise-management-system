@@ -66,14 +66,15 @@ public class ActivityCruiseTourAssignmentService {
                                         HttpStatus.BAD_REQUEST);
                 }
 
-                // 4. Bắn Kafka Event với areaType "ACTIVITY" và action "CREATE"
+                // 4. Bắn Kafka Event với areaType "ACTIVITY" và action "CREATE" vào topic chung
+                // "tour-assignment-topic"
                 TourAssignedEvent event = new TourAssignedEvent(
                                 request.tourId(),
                                 request.cruiseAreaId(),
                                 "ACTIVITY",
                                 "CREATE");
 
-                kafkaTemplate.send("tour-activity-assignment-topic", request.tourId().toString(), event);
+                kafkaTemplate.send("tour-assignment-topic", request.tourId().toString(), event);
         }
 
         /**
@@ -91,13 +92,14 @@ public class ActivityCruiseTourAssignmentService {
                         throw new AppException("Cruise area not found", HttpStatus.NOT_FOUND);
                 }
 
-                // Bắn Kafka Event với areaType "ACTIVITY" và action "DELETE"
+                // Bắn Kafka Event với areaType "ACTIVITY" và action "DELETE" vào topic chung
+                // "tour-assignment-topic"
                 TourAssignedEvent event = new TourAssignedEvent(
                                 tourId,
                                 cruiseAreaId,
                                 "ACTIVITY",
                                 "DELETE");
 
-                kafkaTemplate.send("tour-activity-assignment-topic", tourId.toString(), event);
+                kafkaTemplate.send("tour-assignment-topic", tourId.toString(), event);
         }
 }
