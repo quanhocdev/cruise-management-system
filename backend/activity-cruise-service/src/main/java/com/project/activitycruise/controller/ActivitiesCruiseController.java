@@ -1,9 +1,9 @@
-package com.project.tour.controller.onboard;
+package com.project.activitycruise.controller;
 
-import com.project.tour.dto.onboard.ActivityCruiseResponse;
-import com.project.tour.dto.onboard.CreateActivityCruiseRequest;
-import com.project.tour.dto.onboard.UpdateActivityCruiseRequest;
-import com.project.tour.service.onboard.ActivityCruiseService;
+import com.project.activitycruise.dto.ActivityCruiseResponse;
+import com.project.activitycruise.dto.CreateActivityCruiseRequest;
+import com.project.activitycruise.dto.UpdateActivityCruiseRequest;
+import com.project.activitycruise.service.ActivityCruiseService;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

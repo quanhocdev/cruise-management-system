@@ -1,11 +1,9 @@
 package com.project.activitycruise.service;
 
-import com.project.activitycruise.dto.onboard.OnboardActivityCruiseTourResponse;
+import com.project.activitycruise.dto.OnboardActivityCruiseTourResponse;
+import com.project.activitycruise.mapper.ActivityCruiseTourMapper;
 import com.project.activitycruise.model.enums.ActivityCruiseTourStatus;
-import com.project.tour.mapper.tour.onboard.OnboardActivityCruiseTourMapper;
-import com.project.tour.model.enums.tour.TourStatusTrip;
-import com.project.tour.repository.tour.ActivityCruiseTourAssignmentRepository;
-
+import com.project.activitycruise.repository.ActivityCruiseTourAssignmentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,29 +14,28 @@ import java.util.List;
 public class OnboardActivityCruiseTourService {
 
     private final ActivityCruiseTourAssignmentRepository assignmentRepository;
+    private final ActivityCruiseTourMapper activityCruiseTourMapper;
 
     public OnboardActivityCruiseTourService(
-            ActivityCruiseTourAssignmentRepository assignmentRepository) {
+            ActivityCruiseTourAssignmentRepository assignmentRepository,
+            ActivityCruiseTourMapper activityCruiseTourMapper) {
 
         this.assignmentRepository = assignmentRepository;
+        this.activityCruiseTourMapper = activityCruiseTourMapper;
     }
 
     /**
      * Lấy các ActivityCruiseTour mà ONBOARD cần cấu hình.
      *
      * Điều kiện:
-     *
-     * Tour = APPROVED
      * ActivityCruiseTour = WAITING_CONFIG
      */
     public List<OnboardActivityCruiseTourResponse> getPendingConfig() {
 
         return assignmentRepository
-                .findAllByTour_StatusTripAndStatusOrderByCreatedAtAsc(
-                        TourStatusTrip.APPROVED,
-                        ActivityCruiseTourStatus.WAITING_CONFIG)
+                .findPendingConfig(ActivityCruiseTourStatus.WAITING_CONFIG)
                 .stream()
-                .map(OnboardActivityCruiseTourMapper::toResponse)
+                .map(activityCruiseTourMapper::toResponse)
                 .toList();
     }
 }

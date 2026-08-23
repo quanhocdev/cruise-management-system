@@ -5,11 +5,16 @@ import com.project.activitycruise.dto.CreateActivityCruiseRequest;
 import com.project.activitycruise.dto.UpdateActivityCruiseRequest;
 import com.project.activitycruise.model.ActivityCruise;
 
-public class ActivityCruiseMapper {
+public final class ActivityCruiseMapper {
+
+    private ActivityCruiseMapper() {
+        // Private constructor để ngăn tạo instance của Utility Class
+    }
 
     public static ActivityCruise toEntity(CreateActivityCruiseRequest request) {
-        if (request == null)
+        if (request == null) {
             return null;
+        }
 
         ActivityCruise entity = new ActivityCruise();
         entity.setName(request.name());
@@ -19,8 +24,9 @@ public class ActivityCruiseMapper {
     }
 
     public static ActivityCruiseResponse toResponse(ActivityCruise entity) {
-        if (entity == null)
+        if (entity == null) {
             return null;
+        }
 
         return new ActivityCruiseResponse(
                 entity.getId(),
@@ -34,8 +40,9 @@ public class ActivityCruiseMapper {
     }
 
     public static void updateEntity(ActivityCruise entity, UpdateActivityCruiseRequest request) {
-        if (entity == null || request == null)
+        if (entity == null || request == null) {
             return;
+        }
 
         if (request.name() != null && !request.name().isBlank()) {
             entity.setName(request.name());

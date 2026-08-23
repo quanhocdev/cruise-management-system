@@ -1,20 +1,21 @@
 package com.project.activitycruise.service;
 
-import com.project.activitycruise.dto.onboard.ActivityCruiseTourConfigRequest;
+import com.project.activitycruise.dto.OnboardActivityCruiseTourResponse;
+import com.project.activitycruise.dto.ActivityCruiseTourConfigRequest;
+import com.project.activitycruise.exception.AppException;
+import com.project.activitycruise.mapper.ActivityCruiseTourMapper;
 import com.project.activitycruise.model.ActivityCruise;
 import com.project.activitycruise.model.ActivityCruiseTour;
 import com.project.activitycruise.model.enums.ActivityCruiseStatus;
 import com.project.activitycruise.model.enums.ActivityCruiseTourStatus;
-import com.project.tour.dto.tour.operation.ActivityCruiseTourAssignmentResponse;
-import com.project.tour.exception.AppException;
-import com.project.tour.mapper.tour.ActivityCruiseTourAssignmentMapper;
-import com.project.tour.repository.onboard.ActivityCruiseRepository;
-import com.project.tour.repository.tour.ActivityCruiseTourAssignmentRepository;
+import com.project.activitycruise.repository.ActivityCruiseRepository;
+import com.project.activitycruise.repository.ActivityCruiseTourAssignmentRepository;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -23,13 +24,16 @@ public class ActivityCruiseTourConfigService {
 
         private final ActivityCruiseTourAssignmentRepository assignmentRepository;
         private final ActivityCruiseRepository activityCruiseRepository;
+        private final ActivityCruiseTourMapper activityCruiseTourMapper;
 
         public ActivityCruiseTourConfigService(
                         ActivityCruiseTourAssignmentRepository assignmentRepository,
-                        ActivityCruiseRepository activityCruiseRepository) {
+                        ActivityCruiseRepository activityCruiseRepository,
+                        ActivityCruiseTourMapper activityCruiseTourMapper) {
 
                 this.assignmentRepository = assignmentRepository;
                 this.activityCruiseRepository = activityCruiseRepository;
+                this.activityCruiseTourMapper = activityCruiseTourMapper;
         }
 
         // =====================================================
@@ -41,14 +45,12 @@ public class ActivityCruiseTourConfigService {
          * Onboard cấu hình lần đầu cho assignment.
          *
          * Chỉ được cấu hình khi assignment đang:
-         *
          * WAITING_CONFIG
          *
          * Sau khi cấu hình thành công:
-         *
          * WAITING_CONFIG -> NOT_STARTED
          */
-        public ActivityCruiseTourAssignmentResponse configure(
+        public OnboardActivityCruiseTourResponse configure(
                         UUID assignmentId,
                         ActivityCruiseTourConfigRequest request) {
 
@@ -100,7 +102,7 @@ public class ActivityCruiseTourConfigService {
                 // Apply configuration
                 // -------------------------------------------------
 
-                ActivityCruiseTourAssignmentMapper.applyConfig(
+                activityCruiseTourMapper.applyConfig(
                                 assignment,
                                 request,
                                 activityCruise);
@@ -113,7 +115,7 @@ public class ActivityCruiseTourConfigService {
 
                 ActivityCruiseTour saved = assignmentRepository.save(assignment);
 
-                return ActivityCruiseTourAssignmentMapper.toResponse(saved);
+                return activityCruiseTourMapper.toResponse(saved);
         }
 
         // =====================================================
@@ -125,13 +127,12 @@ public class ActivityCruiseTourConfigService {
          * Onboard cập nhật lại cấu hình.
          *
          * Chỉ cho phép cập nhật khi assignment đã:
-         *
          * NOT_STARTED
          *
          * Không cho PATCH assignment đang WAITING_CONFIG
          * vì WAITING_CONFIG phải dùng POST để cấu hình lần đầu.
          */
-        public ActivityCruiseTourAssignmentResponse updateConfig(
+        public OnboardActivityCruiseTourResponse updateConfig(
                         UUID assignmentId,
                         ActivityCruiseTourConfigRequest request) {
 
@@ -183,7 +184,7 @@ public class ActivityCruiseTourConfigService {
                 // Apply configuration mới
                 // -------------------------------------------------
 
-                ActivityCruiseTourAssignmentMapper.applyConfig(
+                activityCruiseTourMapper.applyConfig(
                                 assignment,
                                 request,
                                 activityCruise);
@@ -196,7 +197,7 @@ public class ActivityCruiseTourConfigService {
 
                 ActivityCruiseTour saved = assignmentRepository.save(assignment);
 
-                return ActivityCruiseTourAssignmentMapper.toResponse(saved);
+                return activityCruiseTourMapper.toResponse(saved);
         }
 
         // =====================================================
@@ -204,8 +205,8 @@ public class ActivityCruiseTourConfigService {
         // =====================================================
 
         private void validateTime(
-                        java.time.LocalDateTime startTime,
-                        java.time.LocalDateTime endTime) {
+                        LocalDateTime startTime,
+                        LocalDateTime endTime) {
 
                 if (!startTime.isBefore(endTime)) {
                         throw new AppException(

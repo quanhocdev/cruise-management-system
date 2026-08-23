@@ -7,9 +7,9 @@ import com.project.activitycruise.model.ActivityCruise;
 import com.project.activitycruise.model.enums.ActivityCruiseStatus;
 import com.project.common.dto.UploadResult;
 import com.project.common.service.file.FileStorageService;
-import com.project.tour.exception.AppException;
-import com.project.tour.mapper.onboard.ActivityCruiseMapper;
-import com.project.tour.repository.onboard.ActivityCruiseRepository;
+import com.project.activitycruise.exception.AppException;
+import com.project.activitycruise.mapper.ActivityCruiseMapper;
+import com.project.activitycruise.repository.ActivityCruiseRepository;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
