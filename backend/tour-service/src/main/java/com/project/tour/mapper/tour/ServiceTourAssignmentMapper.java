@@ -1,100 +1,63 @@
 package com.project.tour.mapper.tour;
 
+import com.project.tour.dto.tour.operation.ServiceTourAssignmentRequest;
 import com.project.tour.dto.tour.operation.ServiceTourAssignmentResponse;
-import com.project.tour.model.ServiceTour;
+import com.project.tour.model.AssignmentService;
+import com.project.tour.model.CruiseArea;
+import com.project.tour.model.CruiseDeck;
+import com.project.tour.model.Tour;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ServiceTourAssignmentMapper {
 
-        public ServiceTourAssignmentResponse toResponse(ServiceTour entity) {
+        /**
+         * Map Request -> Entity để lưu Database bên tour-service.
+         */
+        public AssignmentService toEntity(ServiceTourAssignmentRequest request) {
+                if (request == null) {
+                        return null;
+                }
+
+                AssignmentService entity = new AssignmentService();
+                entity.setTourId(request.tourId());
+                entity.setCruiseAreaId(request.cruiseAreaId());
+                return entity;
+        }
+
+        /**
+         * Map Entity -> Response kèm theo thông tin hiển thị từ Tour & CruiseArea.
+         */
+        public ServiceTourAssignmentResponse toResponse(
+                        AssignmentService entity,
+                        Tour tour,
+                        CruiseArea cruiseArea) {
+
+                if (entity == null) {
+                        return null;
+                }
+
+                CruiseDeck cruiseDeck = (cruiseArea != null) ? cruiseArea.getCruiseDeck() : null;
 
                 return new ServiceTourAssignmentResponse(
-
-                                // =====================================================
-                                // ASSIGNMENT
-                                // =====================================================
-
+                                // Assignment Info
                                 entity.getId(),
 
-                                // =====================================================
-                                // TOUR
-                                // =====================================================
+                                // Tour Info
+                                entity.getTourId(),
+                                tour != null ? tour.getCode() : null,
+                                tour != null ? tour.getName() : null,
 
-                                entity.getTour() != null
-                                                ? entity.getTour().getId()
-                                                : null,
+                                // Cruise Area Info
+                                entity.getCruiseAreaId(),
+                                cruiseArea != null ? cruiseArea.getName() : null,
 
-                                entity.getTour() != null
-                                                ? entity.getTour().getCode()
-                                                : null,
+                                // Cruise Deck Info
+                                cruiseDeck != null ? cruiseDeck.getId() : null,
+                                cruiseDeck != null ? cruiseDeck.getDeckNumber() : null,
 
-                                entity.getTour() != null
-                                                ? entity.getTour().getName()
-                                                : null,
-
-                                // =====================================================
-                                // CRUISE AREA
-                                // =====================================================
-
-                                entity.getCruiseArea() != null
-                                                ? entity.getCruiseArea().getId()
-                                                : null,
-
-                                entity.getCruiseArea() != null
-                                                ? entity.getCruiseArea().getName()
-                                                : null,
-
-                                // =====================================================
-                                // CRUISE DECK
-                                // =====================================================
-
-                                entity.getCruiseArea() != null
-                                                && entity.getCruiseArea().getCruiseDeck() != null
-                                                                ? entity.getCruiseArea().getCruiseDeck().getId()
-                                                                : null,
-
-                                entity.getCruiseArea() != null
-                                                && entity.getCruiseArea().getCruiseDeck() != null
-                                                                ? entity.getCruiseArea().getCruiseDeck().getDeckNumber()
-                                                                : null,
-
-                                // =====================================================
-                                // SERVICE
-                                // =====================================================
-
-                                entity.getService() != null
-                                                ? entity.getService().getId()
-                                                : null,
-
-                                entity.getService() != null
-                                                ? entity.getService().getName()
-                                                : null,
-
-                                entity.getService() != null
-                                                ? entity.getService().getDescription()
-                                                : null,
-
-                                // =====================================================
-                                // CONFIGURATION
-                                // =====================================================
-
-                                entity.getMaxPassengers(),
-
-                                entity.getDurationMinutes(),
-
-                                // =====================================================
-                                // STATUS
-                                // =====================================================
-
-                                entity.getStatus(),
-
-                                // =====================================================
-                                // TIMESTAMP
-                                // =====================================================
-
+                                // Timestamps
                                 entity.getCreatedAt(),
-
                                 entity.getUpdatedAt());
         }
 }
