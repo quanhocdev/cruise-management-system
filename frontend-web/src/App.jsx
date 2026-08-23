@@ -9,6 +9,7 @@ import RegisterPage from "./modules/auth/pages/RegisterPage";
 import LoginPage from "./modules/auth/pages/LoginPage";
 import VerifyOtpPage from "./modules/auth/pages/VerifyOtpPage";
 import ActivatePage from "./modules/auth/pages/ActivatePage";
+import PaymentResultPage from "./modules/payment/pages/PaymentResultPage";
 
 // Admin imports
 import AdminLayout from "./layouts/AdminLayout";
@@ -68,6 +69,7 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/verify-email" element={<VerifyOtpPage />} />
+          <Route path="/payment/result" element={<PaymentResultPage />} />
 
           {/* ADMIN ROUTES */}
           <Route
