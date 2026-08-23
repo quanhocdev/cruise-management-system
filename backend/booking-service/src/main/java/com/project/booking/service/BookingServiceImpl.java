@@ -22,10 +22,13 @@ public class BookingServiceImpl implements BookingService {
     private final PassengerRepository passengerRepository;
     private final PassengerVoyageRepository passengerVoyageRepository;
     private final TourClient tourClient;
+    private final NotificationClient notificationClient;
     public BookingServiceImpl(BookingRepository repository, PassengerRepository passengerRepository,
-                              PassengerVoyageRepository passengerVoyageRepository, TourClient tourClient) {
+                              PassengerVoyageRepository passengerVoyageRepository, TourClient tourClient,
+                              NotificationClient notificationClient) {
         this.repository = repository; this.passengerRepository = passengerRepository;
         this.passengerVoyageRepository = passengerVoyageRepository; this.tourClient = tourClient;
+        this.notificationClient = notificationClient;
     }
 
     @Override @Transactional
@@ -38,6 +41,7 @@ public class BookingServiceImpl implements BookingService {
         booking.setPrimaryContactName(request.primaryContactName().trim());
         booking.setPrimaryContactPhone(request.primaryContactPhone().trim());
         booking.setTotalAmount(request.totalAmount());
+        booking.setVoyageStartDate(voyage.startDate());
         booking.setStatus(BookingStatus.PENDING_PAYMENT); booking.setCreatedAt(now); booking.setUpdatedAt(now);
         Booking saved = repository.save(booking);
         for (CreatePassengerRequest item : request.passengers()) {
@@ -77,7 +81,10 @@ public class BookingServiceImpl implements BookingService {
         passengerVoyageRepository.findAllByBooking_IdOrderByIdAsc(id).forEach(link -> {
             link.setPassengerStatus(PassengerStatus.CANCELLED); passengerVoyageRepository.save(link);
         });
-        return toResponse(repository.save(booking));
+        Booking saved = repository.save(booking);
+        notificationClient.send(saved.getCreatedByUserId(), firstEmail(saved), "BOOKING_CANCELLED",
+            "Booking cancelled", "Your booking #" + saved.getId() + " has been cancelled.", saved.getId());
+        return toResponse(saved);
     }
 
     @Override @Transactional(readOnly = true)
@@ -100,12 +107,37 @@ public class BookingServiceImpl implements BookingService {
         passengerVoyageRepository.findAllByBooking_IdOrderByIdAsc(id).forEach(link -> {
             link.setPassengerStatus(PassengerStatus.REGISTERED); passengerVoyageRepository.save(link);
         });
-        return toResponse(repository.save(booking));
+        Booking saved = repository.save(booking);
+        notificationClient.send(saved.getCreatedByUserId(), firstEmail(saved), "PAYMENT_SUCCESS",
+            "Payment successful", "Payment confirmed. Your booking code is " + saved.getBookingCode() + ".",
+            saved.getId());
+        return toResponse(saved);
+    }
+
+    @Override @Transactional
+    public int sendDepartureReminders(java.time.LocalDate departureDate) {
+        int sent = 0;
+        for (Booking booking : repository.findAllByStatusAndVoyageStartDateAndDepartureReminderSentAtIsNull(
+                BookingStatus.CONFIRMED, departureDate)) {
+            boolean delivered = notificationClient.send(booking.getCreatedByUserId(), firstEmail(booking),
+                "DEPARTURE_REMINDER", "Upcoming cruise departure",
+                "Your cruise departs on " + departureDate + ". Booking code: " + booking.getBookingCode() + ".",
+                booking.getId());
+            if (delivered) {
+                booking.setDepartureReminderSentAt(Instant.now()); repository.save(booking); sent++;
+            }
+        }
+        return sent;
     }
 
     private Booking find(Long id) {
         return repository.findById(id)
             .orElseThrow(() -> new BookingException(HttpStatus.NOT_FOUND, "Booking not found: " + id));
+    }
+    private String firstEmail(Booking booking) {
+        return passengerVoyageRepository.findAllByBooking_IdOrderByIdAsc(booking.getId()).stream()
+            .map(PassengerVoyage::getPassenger).map(Passenger::getEmail)
+            .filter(Objects::nonNull).filter(email -> !email.isBlank()).findFirst().orElse(null);
     }
     private BookingResponse toResponse(Booking b) {
         List<PassengerVoyageResponse> passengers = passengerVoyageRepository
