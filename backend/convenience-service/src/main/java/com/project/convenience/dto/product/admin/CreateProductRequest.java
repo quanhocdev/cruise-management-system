@@ -1,6 +1,5 @@
-package com.project.tour.dto.product;
+package com.project.convenience.dto.product.admin;
 
-import com.project.tour.model.enums.ProductStatus;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -10,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 
-public record UpdateProductRequest(
+public record CreateProductRequest(
         @NotBlank(message = "Product name is required") @Size(max = 150, message = "Product name must not exceed 150 characters") String name,
 
         @Size(max = 5000, message = "Description must not exceed 5000 characters") String description,
@@ -18,8 +17,6 @@ public record UpdateProductRequest(
         @NotNull(message = "Price is required") @DecimalMin(value = "0.0", inclusive = true, message = "Price must be greater than or equal to 0") BigDecimal price,
 
         @NotNull(message = "Stock quantity is required") @PositiveOrZero(message = "Stock quantity must be greater than or equal to 0") Integer stockQuantity,
-
-        @NotNull(message = "Status is required") ProductStatus status,
 
         MultipartFile image) {
 }

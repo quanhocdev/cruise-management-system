@@ -1,9 +1,9 @@
-package com.project.tour.controller.tour.convenience;
+package com.project.convenience.controller.product.convenience;
 
-import com.project.tour.dto.tour.convenience.product.ProductTourConfigRequest;
-import com.project.tour.dto.tour.convenience.product.ProductTourResponse;
-import com.project.tour.service.tour.convenience.ProductTourConfigService;
-import com.project.tour.service.tour.convenience.ProductTourService;
+import com.project.convenience.dto.product.convenience.ProductTourConfigRequest; // Sửa package DTO
+import com.project.convenience.dto.product.convenience.ProductTourResponse; // Sửa package DTO
+import com.project.convenience.service.product.ProductTourConfigService;
+import com.project.convenience.service.product.ProductTourService;
 
 import jakarta.validation.Valid;
 
@@ -36,7 +36,6 @@ public class ProductTourController {
          * Lấy các ProductTour đang chờ cấu hình.
          *
          * Điều kiện:
-         * - Tour = APPROVED
          * - ProductTour = WAITING_CONFIG
          */
         @GetMapping("/pending-config")

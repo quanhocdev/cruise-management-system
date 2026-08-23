@@ -1,10 +1,10 @@
-package com.project.tour.service.product;
+package com.project.convenience.service.product;
 
-import com.project.tour.dto.product.ProductConvenienceResponse;
-import com.project.tour.mapper.product.ProductMapper;
-import com.project.tour.model.Product;
-import com.project.tour.model.enums.ProductStatus;
-import com.project.tour.repository.product.ProductRepository;
+import com.project.convenience.dto.product.convenience.ProductConvenienceResponse;
+import com.project.convenience.mapper.ProductMapper;
+import com.project.convenience.model.Product;
+import com.project.convenience.model.enums.ProductStatus;
+import com.project.convenience.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

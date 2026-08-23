@@ -1,6 +1,6 @@
-package com.project.tour.dto.product;
+package com.project.convenience.dto.product.admin;
 
-import com.project.tour.model.enums.ProductStatus;
+import com.project.convenience.model.enums.ProductStatus;
 
 import java.math.BigDecimal;
 import java.time.Instant;

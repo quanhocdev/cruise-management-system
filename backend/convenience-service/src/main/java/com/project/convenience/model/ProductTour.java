@@ -1,6 +1,6 @@
-package com.project.tour.model;
+package com.project.convenience.model;
 
-import com.project.tour.model.enums.convenience.ProductTourStatus;
+import com.project.convenience.model.enums.ProductTourStatus;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -15,35 +15,30 @@ public class ProductTour {
     private UUID id;
 
     /*
-     * Tour mà tiện ích/sản phẩm này thuộc về.
+     * LƯU ID CỦA TOUR (Thuộc tour-service)
+     * Không dùng @ManyToOne Tour tour nữa
      */
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "tour_id", nullable = false)
-    private Tour tour;
+    @Column(name = "tour_id", nullable = false)
+    private UUID tourId;
 
     /*
-     * Sản phẩm/Tiện ích master do Operation chọn phân công.
+     * LƯU ID CỦA CRUISE AREA (Thuộc tour-service)
+     * Không dùng @ManyToOne CruiseArea cruiseArea nữa
+     */
+    @Column(name = "cruise_area_id", nullable = false)
+    private UUID cruiseAreaId;
+
+    /*
+     * Sản phẩm/Tiện ích master vẫy thuộc convenience-service này
+     * nên GIỮ NGUYÊN @ManyToOne
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
 
-    /*
-     * Khu vực phục vụ/giao nhận trên du thuyền (Tùy chọn).
-     */
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "cruise_area_id", nullable = false)
-    private CruiseArea cruiseArea;
-
-    /*
-     * Số lượng sản phẩm/tiện ích Operation cấp/định mức cho Tour này.
-     */
     @Column(name = "quantity")
     private Integer quantity;
 
-    /*
-     * Trạng thái của tiện ích/sản phẩm trong Tour.
-     */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private ProductTourStatus status = ProductTourStatus.WAITING_CONFIG;
@@ -57,7 +52,6 @@ public class ProductTour {
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();
-
         createdAt = now;
         updatedAt = now;
 
@@ -86,12 +80,20 @@ public class ProductTour {
         this.id = id;
     }
 
-    public Tour getTour() {
-        return tour;
+    public UUID getTourId() {
+        return tourId;
     }
 
-    public void setTour(Tour tour) {
-        this.tour = tour;
+    public void setTourId(UUID tourId) {
+        this.tourId = tourId;
+    }
+
+    public UUID getCruiseAreaId() {
+        return cruiseAreaId;
+    }
+
+    public void setCruiseAreaId(UUID cruiseAreaId) {
+        this.cruiseAreaId = cruiseAreaId;
     }
 
     public Product getProduct() {
@@ -100,14 +102,6 @@ public class ProductTour {
 
     public void setProduct(Product product) {
         this.product = product;
-    }
-
-    public CruiseArea getCruiseArea() {
-        return cruiseArea;
-    }
-
-    public void setCruiseArea(CruiseArea cruiseArea) {
-        this.cruiseArea = cruiseArea;
     }
 
     public Integer getQuantity() {

@@ -1,10 +1,9 @@
-package com.project.tour.service.tour.convenience;
+package com.project.convenience.service.product;
 
-import com.project.tour.dto.tour.convenience.product.ProductTourResponse;
-import com.project.tour.mapper.tour.ProductTourAssignmentMapper;
-import com.project.tour.model.enums.convenience.ProductTourStatus;
-import com.project.tour.model.enums.tour.TourStatusTrip;
-import com.project.tour.repository.tour.ProductTourAssignmentRepository;
+import com.project.convenience.dto.product.convenience.ProductTourResponse; // Sửa package DTO
+import com.project.convenience.mapper.ProductTourMapper; // Sửa package Mapper
+import com.project.convenience.model.enums.ProductTourStatus;
+import com.project.convenience.repository.ProductTourRepository; // Sửa Repository mới
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,12 +14,12 @@ import java.util.List;
 @Transactional
 public class ProductTourService {
 
-    private final ProductTourAssignmentRepository productTourRepository;
-    private final ProductTourAssignmentMapper mapper;
+    private final ProductTourRepository productTourRepository;
+    private final ProductTourMapper mapper;
 
     public ProductTourService(
-            ProductTourAssignmentRepository productTourRepository,
-            ProductTourAssignmentMapper mapper) {
+            ProductTourRepository productTourRepository,
+            ProductTourMapper mapper) {
 
         this.productTourRepository = productTourRepository;
         this.mapper = mapper;
@@ -31,14 +30,9 @@ public class ProductTourService {
     // =====================================================
 
     /**
-     * Lấy các ProductTour mà Convenience có thể cấu hình
-     * hoặc chỉnh sửa.
+     * Lấy các ProductTour mà Convenience có thể cấu hình hoặc chỉnh sửa.
      *
-     * Điều kiện:
-     *
-     * Tour.statusTrip = APPROVED
-     *
-     * ProductTour.status:
+     * Điều kiện ProductTour.status:
      * - WAITING_CONFIG
      * - NOT_STARTED
      */
@@ -47,7 +41,6 @@ public class ProductTourService {
 
         return productTourRepository
                 .findConfigurable(
-                        TourStatusTrip.APPROVED,
                         List.of(
                                 ProductTourStatus.WAITING_CONFIG,
                                 ProductTourStatus.NOT_STARTED))

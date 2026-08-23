@@ -1,9 +1,9 @@
 package com.project.convenience.mapper;
 
-import com.project.convenience.dto.product.CreateProductRequest;
-import com.project.convenience.dto.product.ProductConvenienceResponse;
-import com.project.convenience.dto.product.ProductResponse;
-import com.project.convenience.dto.product.UpdateProductRequest;
+import com.project.convenience.dto.product.admin.CreateProductRequest;
+import com.project.convenience.dto.product.admin.ProductResponse;
+import com.project.convenience.dto.product.admin.UpdateProductRequest;
+import com.project.convenience.dto.product.convenience.ProductConvenienceResponse;
 import com.project.convenience.model.Product;
 
 public class ProductMapper {

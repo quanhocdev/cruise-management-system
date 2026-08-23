@@ -1,4 +1,4 @@
-package com.project.tour.model.enums.convenience;
+package com.project.convenience.model.enums;
 
 public enum ProductTourStatus {
 

@@ -1,12 +1,10 @@
 package com.project.convenience.controller.product.admin;
 
-import com.project.convenience.dto.product.CreateProductRequest;
-import com.project.convenience.dto.product.ProductResponse;
-import com.project.convenience.dto.product.UpdateProductRequest;
+import com.project.convenience.dto.product.admin.CreateProductRequest;
+import com.project.convenience.dto.product.admin.ProductResponse;
+import com.project.convenience.dto.product.admin.UpdateProductRequest;
 import com.project.convenience.service.product.ProductService;
-
 import jakarta.validation.Valid;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,11 +24,7 @@ public class ProductController {
                 this.productService = productService;
         }
 
-        /*
-         * =====================================================
-         * CREATE PRODUCT
-         * =====================================================
-         */
+        // Tạo sản phẩm mới
         @PostMapping
         public ResponseEntity<ProductResponse> createProduct(
                         @Valid @ModelAttribute CreateProductRequest request) {
@@ -42,11 +36,7 @@ public class ProductController {
                                 .body(response);
         }
 
-        /*
-         * =====================================================
-         * GET ALL PRODUCTS
-         * =====================================================
-         */
+        // Lấy danh sách sản phẩm
         @GetMapping
         public ResponseEntity<List<ProductResponse>> getProducts(
                         @RequestParam(defaultValue = "false") boolean activeOnly) {
@@ -62,11 +52,7 @@ public class ProductController {
                 return ResponseEntity.ok(response);
         }
 
-        /*
-         * =====================================================
-         * GET PRODUCT BY ID
-         * =====================================================
-         */
+        // Lấy sản phẩm theo ID
         @GetMapping("/{productId}")
         public ResponseEntity<ProductResponse> getProductById(
                         @PathVariable UUID productId) {
@@ -75,11 +61,7 @@ public class ProductController {
                                 productService.getProductById(productId));
         }
 
-        /*
-         * =====================================================
-         * UPDATE PRODUCT
-         * =====================================================
-         */
+        // Thay đổi thông tin sản phẩm
         @PatchMapping("/{productId}")
         public ResponseEntity<ProductResponse> updateProduct(
                         @PathVariable UUID productId,
@@ -91,11 +73,7 @@ public class ProductController {
                                                 request));
         }
 
-        /*
-         * =====================================================
-         * DELETE PRODUCT
-         * =====================================================
-         */
+        // Xóa sản phẩm
         @DeleteMapping("/{productId}")
         public ResponseEntity<Void> deleteProduct(
                         @PathVariable UUID productId) {

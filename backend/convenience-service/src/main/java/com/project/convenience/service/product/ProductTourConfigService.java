@@ -1,15 +1,15 @@
-package com.project.tour.service.tour.convenience;
+package com.project.convenience.service.product;
 
-import com.project.tour.dto.tour.convenience.product.ProductTourConfigRequest;
-import com.project.tour.dto.tour.convenience.product.ProductTourResponse;
-import com.project.tour.exception.AppException;
-import com.project.tour.mapper.tour.ProductTourAssignmentMapper;
-import com.project.tour.model.Product;
-import com.project.tour.model.ProductTour;
-import com.project.tour.model.enums.ProductStatus;
-import com.project.tour.model.enums.convenience.ProductTourStatus;
-import com.project.tour.repository.product.ProductRepository;
-import com.project.tour.repository.tour.ProductTourAssignmentRepository;
+import com.project.convenience.dto.product.convenience.ProductTourConfigRequest;
+import com.project.convenience.dto.product.convenience.ProductTourResponse;
+import com.project.convenience.exception.AppException; // Đã đổi package Exception
+import com.project.convenience.mapper.ProductTourMapper; // Đã đổi Mapper
+import com.project.convenience.model.Product;
+import com.project.convenience.model.ProductTour;
+import com.project.convenience.model.enums.ProductStatus;
+import com.project.convenience.model.enums.ProductTourStatus;
+import com.project.convenience.repository.ProductRepository;
+import com.project.convenience.repository.ProductTourRepository; // Đã đổi Repository
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -21,14 +21,14 @@ import java.util.UUID;
 @Transactional
 public class ProductTourConfigService {
 
-    private final ProductTourAssignmentRepository productTourRepository;
+    private final ProductTourRepository productTourRepository;
     private final ProductRepository productRepository;
-    private final ProductTourAssignmentMapper mapper;
+    private final ProductTourMapper mapper;
 
     public ProductTourConfigService(
-            ProductTourAssignmentRepository productTourRepository,
+            ProductTourRepository productTourRepository,
             ProductRepository productRepository,
-            ProductTourAssignmentMapper mapper) {
+            ProductTourMapper mapper) {
 
         this.productTourRepository = productTourRepository;
         this.productRepository = productRepository;
@@ -82,7 +82,6 @@ public class ProductTourConfigService {
      * Cập nhật cấu hình ProductTour.
      *
      * Chỉ được sửa khi:
-     *
      * NOT_STARTED
      */
     public ProductTourResponse updateConfig(

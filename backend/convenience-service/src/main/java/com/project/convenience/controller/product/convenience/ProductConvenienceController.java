@@ -1,7 +1,7 @@
-package com.project.tour.controller.product.convenience;
+package com.project.convenience.controller.product.convenience;
 
-import com.project.tour.dto.product.ProductConvenienceResponse;
-import com.project.tour.service.product.ProductConvenienceService;
+import com.project.convenience.dto.product.convenience.ProductConvenienceResponse;
+import com.project.convenience.service.product.ProductConvenienceService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,22 +18,14 @@ public class ProductConvenienceController {
         this.productConvenienceService = productConvenienceService;
     }
 
-    /*
-     * =====================================================
-     * GET ALL PRODUCTS FOR CONVENIENCE (READ-ONLY)
-     * =====================================================
-     */
+    // Lấy danh sách sản phẩm cho tiện ích (chỉ đọc)
     @GetMapping
     public ResponseEntity<List<ProductConvenienceResponse>> getProducts() {
         List<ProductConvenienceResponse> response = productConvenienceService.getProducts();
         return ResponseEntity.ok(response);
     }
 
-    /*
-     * =====================================================
-     * GET PRODUCT BY ID FOR CONVENIENCE (READ-ONLY)
-     * =====================================================
-     */
+    // Lấy sản phẩm theo ID cho tiện ích (chỉ đọc)
     @GetMapping("/{productId}")
     public ResponseEntity<ProductConvenienceResponse> getProductById(@PathVariable UUID productId) {
         ProductConvenienceResponse response = productConvenienceService.getProductById(productId);
