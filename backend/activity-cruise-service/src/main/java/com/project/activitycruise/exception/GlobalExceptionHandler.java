@@ -1,4 +1,6 @@
-package com.project.convenience.exception;
+package com.project.activitycruise.exception;
+
+import com.project.activitycruise.dto.error.ApiErrorResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -10,8 +12,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
-
-import com.project.convenience.dto.error.ApiErrorResponse;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;

@@ -49,11 +49,6 @@ public class ProductMapper {
                 product.getUpdatedAt());
     }
 
-    /*
-     * =====================================================
-     * CONVENIENCE MAPPER
-     * =====================================================
-     */
     public static ProductConvenienceResponse toConvenienceResponse(Product product) {
 
         return new ProductConvenienceResponse(

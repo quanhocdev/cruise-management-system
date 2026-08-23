@@ -60,7 +60,7 @@ public class KafkaConsumerConfig {
     }
 
     // =========================================================================
-    // 2. Consumer Config cho SERVICE Event (Bổ sung mới)
+    // 2. Consumer Config cho SERVICE Event
     // =========================================================================
     @Bean
     public ConsumerFactory<String, ServiceTourAssignedEvent> serviceConsumerFactory() {
