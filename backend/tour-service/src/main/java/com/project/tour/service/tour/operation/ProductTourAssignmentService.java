@@ -1,5 +1,6 @@
 package com.project.tour.service.tour.operation;
 
+import com.project.common.event.ProductTourAssignedEvent;
 import com.project.tour.dto.tour.operation.ProductTourAssignmentRequest;
 import com.project.tour.dto.tour.operation.ProductTourAssignmentResponse;
 import com.project.tour.exception.AppException;
@@ -10,8 +11,8 @@ import com.project.tour.model.Tour;
 import com.project.tour.repository.cruise.CruiseAreaRepository;
 import com.project.tour.repository.tour.AssignmentProductRepository;
 import com.project.tour.repository.tour.TourRepository;
-
 import org.springframework.http.HttpStatus;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,17 +27,20 @@ public class ProductTourAssignmentService {
         private final TourRepository tourRepository;
         private final CruiseAreaRepository cruiseAreaRepository;
         private final ProductTourAssignmentMapper assignmentMapper;
+        private final KafkaTemplate<String, Object> kafkaTemplate; // 1. Khai báo thuộc tính KafkaTemplate
 
         public ProductTourAssignmentService(
                         AssignmentProductRepository assignmentRepository,
                         TourRepository tourRepository,
                         CruiseAreaRepository cruiseAreaRepository,
-                        ProductTourAssignmentMapper assignmentMapper) {
+                        ProductTourAssignmentMapper assignmentMapper,
+                        KafkaTemplate<String, Object> kafkaTemplate) { // 2. Inject qua Constructor
 
                 this.assignmentRepository = assignmentRepository;
                 this.tourRepository = tourRepository;
                 this.cruiseAreaRepository = cruiseAreaRepository;
                 this.assignmentMapper = assignmentMapper;
+                this.kafkaTemplate = kafkaTemplate;
         }
 
         /**
@@ -76,9 +80,23 @@ public class ProductTourAssignmentService {
                 AssignmentProduct assignment = assignmentRepository
                                 .findByTourIdAndCruiseAreaId(request.tourId(), request.cruiseAreaId())
                                 .orElseGet(() -> {
-                                        AssignmentProduct newAssignment = new AssignmentProduct(request.tourId(),
+                                        AssignmentProduct newAssignment = new AssignmentProduct(
+                                                        request.tourId(),
                                                         request.cruiseAreaId());
-                                        return assignmentRepository.save(newAssignment);
+
+                                        // Lưu vào Database của tour-service
+                                        AssignmentProduct savedAssignment = assignmentRepository.save(newAssignment);
+
+                                        // Bắn Kafka Event sang topic với type hardcode là "PRODUCT"
+                                        ProductTourAssignedEvent event = new ProductTourAssignedEvent(
+                                                        request.tourId(),
+                                                        request.cruiseAreaId(),
+                                                        "PRODUCT");
+
+                                        kafkaTemplate.send("tour-product-assignment-topic", request.tourId().toString(),
+                                                        event);
+
+                                        return savedAssignment;
                                 });
 
                 return assignmentMapper.toResponse(assignment, tour, cruiseArea);
