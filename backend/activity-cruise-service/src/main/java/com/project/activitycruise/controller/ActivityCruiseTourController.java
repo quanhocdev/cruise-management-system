@@ -3,7 +3,7 @@ package com.project.activitycruise.controller;
 import com.project.activitycruise.dto.ActivityCruiseTourConfigRequest;
 import com.project.activitycruise.dto.OnboardActivityCruiseTourResponse;
 import com.project.activitycruise.service.ActivityCruiseTourConfigService;
-import com.project.activitycruise.service.OnboardActivityCruiseTourService;
+import com.project.activitycruise.service.ActivityCruiseTourService;
 
 import jakarta.validation.Valid;
 
@@ -15,16 +15,16 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/onboard/activity-cruise-tours")
-public class OnboardActivityCruiseTourController {
+public class ActivityCruiseTourController {
 
-        private final OnboardActivityCruiseTourService onboardService;
+        private final ActivityCruiseTourService activityCruiseTourService;
         private final ActivityCruiseTourConfigService configService;
 
-        public OnboardActivityCruiseTourController(
-                        OnboardActivityCruiseTourService onboardService,
+        public ActivityCruiseTourController(
+                        ActivityCruiseTourService activityCruiseTourService,
                         ActivityCruiseTourConfigService configService) {
 
-                this.onboardService = onboardService;
+                this.activityCruiseTourService = activityCruiseTourService;
                 this.configService = configService;
         }
 
@@ -42,7 +42,7 @@ public class OnboardActivityCruiseTourController {
         public ResponseEntity<List<OnboardActivityCruiseTourResponse>> getPendingConfig() {
 
                 return ResponseEntity.ok(
-                                onboardService.getPendingConfig());
+                                activityCruiseTourService.getPendingConfig());
         }
 
         // =====================================================

@@ -1,6 +1,6 @@
 package com.project.tour.service.tour.operation;
 
-import com.project.common.event.ProductTourAssignedEvent; // Dùng chung Event DTO với Product
+import com.project.common.event.TourAssignedEvent;
 import com.project.tour.dto.tour.operation.ActivityCruiseTourAssignmentRequest;
 import com.project.tour.exception.AppException;
 import com.project.tour.model.CruiseArea;
@@ -67,7 +67,7 @@ public class ActivityCruiseTourAssignmentService {
                 }
 
                 // 4. Bắn Kafka Event với areaType "ACTIVITY" và action "CREATE"
-                ProductTourAssignedEvent event = new ProductTourAssignedEvent(
+                TourAssignedEvent event = new TourAssignedEvent(
                                 request.tourId(),
                                 request.cruiseAreaId(),
                                 "ACTIVITY",
@@ -92,7 +92,7 @@ public class ActivityCruiseTourAssignmentService {
                 }
 
                 // Bắn Kafka Event với areaType "ACTIVITY" và action "DELETE"
-                ProductTourAssignedEvent event = new ProductTourAssignedEvent(
+                TourAssignedEvent event = new TourAssignedEvent(
                                 tourId,
                                 cruiseAreaId,
                                 "ACTIVITY",

@@ -1,6 +1,6 @@
 package com.project.convenience.listener;
 
-import com.project.common.event.ProductTourAssignedEvent;
+import com.project.common.event.TourAssignedEvent;
 import com.project.convenience.service.product.ProductTourService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +22,7 @@ public class ProductTourAssignmentListener {
 
     @KafkaListener(topics = "tour-product-assignment-topic", groupId = "convenience-group", containerFactory = "kafkaListenerContainerFactory")
     public void onProductTourAssigned(
-            ProductTourAssignedEvent event,
+            TourAssignedEvent event,
             @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
             @Header(KafkaHeaders.OFFSET) long offset,
             @Header(value = KafkaHeaders.RECEIVED_KEY, required = false) String key) {

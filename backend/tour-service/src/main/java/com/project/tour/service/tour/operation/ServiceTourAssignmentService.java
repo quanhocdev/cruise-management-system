@@ -1,6 +1,6 @@
 package com.project.tour.service.tour.operation;
 
-import com.project.common.event.ServiceTourAssignedEvent;
+import com.project.common.event.TourAssignedEvent;
 import com.project.tour.dto.tour.operation.ServiceTourAssignmentRequest;
 import com.project.tour.dto.tour.operation.ServiceTourAssignmentResponse;
 import com.project.tour.exception.AppException;
@@ -103,7 +103,7 @@ public class ServiceTourAssignmentService {
                                         AssignmentService savedAssignment = assignmentRepository.save(newAssignment);
 
                                         // Bắn Kafka Event sang topic với areaType "SERVICE" và action "CREATE"
-                                        ServiceTourAssignedEvent event = new ServiceTourAssignedEvent(
+                                        TourAssignedEvent event = new TourAssignedEvent(
                                                         request.tourId(),
                                                         request.cruiseAreaId(),
                                                         "SERVICE",
@@ -156,7 +156,7 @@ public class ServiceTourAssignmentService {
                 assignmentRepository.deleteByTourIdAndCruiseAreaId(tourId, cruiseAreaId);
 
                 // 2. Bắn Kafka Event với areaType "SERVICE" và action "DELETE"
-                ServiceTourAssignedEvent event = new ServiceTourAssignedEvent(
+                TourAssignedEvent event = new TourAssignedEvent(
                                 tourId,
                                 cruiseAreaId,
                                 "SERVICE",

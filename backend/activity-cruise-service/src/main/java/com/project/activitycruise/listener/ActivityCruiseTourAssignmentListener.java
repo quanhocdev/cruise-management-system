@@ -1,7 +1,7 @@
 package com.project.activitycruise.listener;
 
-import com.project.common.event.ProductTourAssignedEvent;
-import com.project.activitycruise.service.ActivityCruiseTourService; // Điều chỉnh tên Service tương ứng bên bạn
+import com.project.common.event.TourAssignedEvent;
+import com.project.activitycruise.service.ActivityCruiseTourService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -22,7 +22,7 @@ public class ActivityCruiseTourAssignmentListener {
 
     @KafkaListener(topics = "tour-activity-assignment-topic", groupId = "activity-cruise-group-v1", containerFactory = "activityKafkaListenerContainerFactory")
     public void onActivityTourAssigned(
-            ProductTourAssignedEvent event,
+            TourAssignedEvent event,
             @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
             @Header(KafkaHeaders.OFFSET) long offset,
             @Header(value = KafkaHeaders.RECEIVED_KEY, required = false) String key) {

@@ -1,6 +1,6 @@
 package com.project.activitycruise.config;
 
-import com.project.common.event.ProductTourAssignedEvent;
+import com.project.common.event.TourAssignedEvent;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,17 +32,17 @@ public class KafkaConsumerConfig {
     }
 
     // =========================================================================
-    // Consumer Config cho ACTIVITY Event (dùng chung ProductTourAssignedEvent)
+    // Consumer Config cho ACTIVITY Event (dùng TourAssignedEvent)
     // =========================================================================
     @Bean
-    public ConsumerFactory<String, ProductTourAssignedEvent> activityConsumerFactory() {
-        JsonDeserializer<ProductTourAssignedEvent> jsonDeserializer = new JsonDeserializer<>(
-                ProductTourAssignedEvent.class);
+    public ConsumerFactory<String, TourAssignedEvent> activityConsumerFactory() {
+        JsonDeserializer<TourAssignedEvent> jsonDeserializer = new JsonDeserializer<>(
+                TourAssignedEvent.class);
         jsonDeserializer.addTrustedPackages("*");
         jsonDeserializer.setUseTypeHeaders(false);
         jsonDeserializer.setRemoveTypeHeaders(true);
 
-        ErrorHandlingDeserializer<ProductTourAssignedEvent> errorHandlingDeserializer = new ErrorHandlingDeserializer<>(
+        ErrorHandlingDeserializer<TourAssignedEvent> errorHandlingDeserializer = new ErrorHandlingDeserializer<>(
                 jsonDeserializer);
 
         Map<String, Object> props = baseConsumerProps();
@@ -52,8 +52,8 @@ public class KafkaConsumerConfig {
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, ProductTourAssignedEvent> activityKafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, ProductTourAssignedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    public ConcurrentKafkaListenerContainerFactory<String, TourAssignedEvent> activityKafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, TourAssignedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(activityConsumerFactory());
         return factory;
     }
