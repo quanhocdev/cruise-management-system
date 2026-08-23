@@ -1,109 +1,58 @@
 package com.project.convenience.mapper;
 
 import com.project.convenience.dto.service.convenience.ServiceTourResponse;
-import com.project.tour.model.CruiseArea;
-import com.project.tour.model.Service;
-import com.project.tour.model.ServiceTour;
-
+import com.project.convenience.model.Service;
+import com.project.convenience.model.ServiceTour;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ServiceTourMapper {
 
         public ServiceTourResponse toResponse(ServiceTour entity) {
-
                 if (entity == null) {
                         return null;
                 }
 
-                var tour = entity.getTour();
                 Service service = entity.getService();
-                CruiseArea cruiseArea = entity.getCruiseArea();
-
-                var cruiseDeck = cruiseArea != null
-                                ? cruiseArea.getCruiseDeck()
-                                : null;
 
                 return new ServiceTourResponse(
-
                                 entity.getId(),
 
                                 // =====================================================
-                                // TOUR
+                                // TOUR INFO (Lưu UUID, thông tin text sẽ populate sau via Feign)
                                 // =====================================================
-
-                                tour != null
-                                                ? tour.getId()
-                                                : null,
-
-                                tour != null
-                                                ? tour.getCode()
-                                                : null,
-
-                                tour != null
-                                                ? tour.getName()
-                                                : null,
+                                entity.getTourId(),
+                                null, // tourCode
+                                null, // tourName
 
                                 // =====================================================
-                                // SERVICE
+                                // SERVICE INFO (Nội bộ convenience-service)
                                 // =====================================================
-
-                                service != null
-                                                ? service.getId()
-                                                : null,
-
-                                service != null
-                                                ? service.getName()
-                                                : null,
-
-                                service != null
-                                                ? service.getDescription()
-                                                : null,
-
-                                service != null
-                                                ? service.getPrice()
-                                                : null,
-
-                                service != null
-                                                ? service.getImageUrl()
-                                                : null,
+                                service != null ? service.getId() : null,
+                                service != null ? service.getName() : null,
+                                service != null ? service.getDescription() : null,
+                                service != null ? service.getPrice() : null,
+                                service != null ? service.getImageUrl() : null,
 
                                 // =====================================================
-                                // CRUISE AREA
+                                // CRUISE AREA INFO (Lưu UUID, thông tin text sẽ populate sau via Feign)
                                 // =====================================================
-
-                                cruiseArea != null
-                                                ? cruiseArea.getId()
-                                                : null,
-
-                                cruiseArea != null
-                                                ? cruiseArea.getName()
-                                                : null,
+                                entity.getCruiseAreaId(),
+                                null, // cruiseAreaName
 
                                 // =====================================================
-                                // CRUISE DECK
+                                // CRUISE DECK INFO (Populate sau via Feign)
                                 // =====================================================
-
-                                cruiseDeck != null
-                                                ? cruiseDeck.getId()
-                                                : null,
-
-                                cruiseDeck != null
-                                                ? cruiseDeck.getDeckNumber()
-                                                : null,
+                                null, // cruiseDeckId
+                                null, // deckNumber
 
                                 // =====================================================
-                                // TOUR CONFIG
+                                // CONFIGURATION
                                 // =====================================================
-
                                 entity.getMaxPassengers(),
-
                                 entity.getDurationMinutes(),
-
                                 entity.getStatus(),
-
                                 entity.getCreatedAt(),
-
                                 entity.getUpdatedAt());
         }
 }

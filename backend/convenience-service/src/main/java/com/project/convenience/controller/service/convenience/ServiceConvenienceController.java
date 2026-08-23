@@ -1,7 +1,7 @@
-package com.project.convenience.controller.product.convenience;
+package com.project.convenience.controller.service.convenience;
 
-import com.project.tour.dto.service.ServiceConvenienceResponse;
-import com.project.tour.service.service.ServiceConvenienceService;
+import com.project.convenience.dto.service.convenience.ServiceConvenienceResponse;
+import com.project.convenience.service.service.ServiceConvenienceService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

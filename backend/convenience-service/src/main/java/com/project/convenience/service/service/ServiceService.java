@@ -1,15 +1,15 @@
-package com.project.tour.service.service;
+package com.project.convenience.service.service;
 
 import com.project.common.dto.UploadResult;
 import com.project.common.service.file.FileStorageService;
 import com.project.convenience.mapper.ServiceMapper;
 import com.project.convenience.model.Service;
-import com.project.convenience.dto.service.CreateServiceRequest;
-import com.project.tour.dto.service.ServiceResponse;
-import com.project.tour.dto.service.UpdateServiceRequest;
-import com.project.tour.exception.AppException;
-import com.project.tour.model.enums.ServiceStatus;
-import com.project.tour.repository.service.ServiceRepository;
+import com.project.convenience.dto.service.admin.CreateServiceRequest;
+import com.project.convenience.dto.service.admin.ServiceResponse;
+import com.project.convenience.dto.service.admin.UpdateServiceRequest;
+import com.project.convenience.exception.AppException;
+import com.project.convenience.model.enums.ServiceStatus;
+import com.project.convenience.repository.ServiceRepository;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;

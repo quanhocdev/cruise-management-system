@@ -2,14 +2,15 @@ package com.project.convenience.service.service;
 
 import com.project.convenience.dto.service.convenience.ServiceTourResponse;
 import com.project.convenience.mapper.ServiceTourMapper;
+import com.project.convenience.model.ServiceTour;
 import com.project.convenience.model.enums.ServiceTourStatus;
-import com.project.tour.model.enums.tour.TourStatusTrip;
 import com.project.convenience.repository.ServiceTourRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -27,27 +28,44 @@ public class ServiceTourService {
         }
 
         // =====================================================
+        // Xử lý Event CREATE từ Kafka
+        // =====================================================
+        public void createServiceTourFromEvent(UUID tourId, UUID cruiseAreaId) {
+                // 1. Kiểm tra cặp (tourId, cruiseAreaId) đã tồn tại chưa
+                boolean exists = serviceTourRepository.findByTourIdAndCruiseAreaId(tourId, cruiseAreaId).isPresent();
+                if (exists) {
+                        return; // Bỏ qua nếu đã tồn tại (chống duplicate khi Kafka retry)
+                }
+
+                // 2. Khởi tạo Entity ServiceTour mới ở trạng thái WAITING_CONFIG
+                ServiceTour serviceTour = new ServiceTour();
+                serviceTour.setTourId(tourId);
+                serviceTour.setCruiseAreaId(cruiseAreaId);
+                serviceTour.setStatus(ServiceTourStatus.WAITING_CONFIG);
+
+                // 3. Lưu DB
+                serviceTourRepository.save(serviceTour);
+        }
+
+        // =====================================================
+        // Xử lý Event DELETE từ Kafka
+        // =====================================================
+        public void deleteServiceTourFromEvent(UUID tourId, UUID cruiseAreaId) {
+                serviceTourRepository.findByTourIdAndCruiseAreaId(tourId, cruiseAreaId)
+                                .ifPresent(serviceTourRepository::delete);
+        }
+
+        // =====================================================
         // GET CONFIGURABLE SERVICES
         // =====================================================
-
         /**
-         * Lấy các ServiceTour mà Convenience có thể cấu hình
-         * hoặc chỉnh sửa.
-         *
-         * Điều kiện:
-         *
-         * Tour.statusTrip = APPROVED
-         *
-         * ServiceTour.status:
-         * - WAITING_CONFIG
-         * - NOT_STARTED
+         * Lấy danh sách các ServiceTour đang chờ cấu hình hoặc chưa bắt đầu.
          */
         @Transactional(readOnly = true)
         public List<ServiceTourResponse> getPendingConfig() {
 
                 return serviceTourRepository
                                 .findConfigurable(
-                                                TourStatusTrip.APPROVED,
                                                 List.of(
                                                                 ServiceTourStatus.WAITING_CONFIG,
                                                                 ServiceTourStatus.NOT_STARTED))

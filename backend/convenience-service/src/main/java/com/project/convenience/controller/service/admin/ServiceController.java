@@ -1,9 +1,9 @@
-package com.project.convenience.controller.product.admin;
+package com.project.convenience.controller.service.admin;
 
-import com.project.tour.dto.service.CreateServiceRequest;
-import com.project.tour.dto.service.ServiceResponse;
-import com.project.tour.dto.service.UpdateServiceRequest;
-import com.project.tour.service.service.ServiceService;
+import com.project.convenience.dto.service.admin.CreateServiceRequest;
+import com.project.convenience.dto.service.admin.ServiceResponse;
+import com.project.convenience.dto.service.admin.UpdateServiceRequest;
+import com.project.convenience.service.service.ServiceService;
 
 import jakarta.validation.Valid;
 
