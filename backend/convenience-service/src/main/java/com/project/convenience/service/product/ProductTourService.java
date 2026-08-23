@@ -28,11 +28,10 @@ public class ProductTourService {
     }
 
     // =====================================================
-    // HÀM MỚI BỔ SUNG: Xử lý Event từ Kafka
+    // Xử lý Event CREATE từ Kafka
     // =====================================================
     public void createProductTourFromEvent(UUID tourId, UUID cruiseAreaId) {
-        // 1. Kiểm tra cặp (tourId, cruiseAreaId) đã tồn tại trong DB chưa bằng hàm sẵn
-        // có trong Repository
+        // 1. Kiểm tra cặp (tourId, cruiseAreaId) đã tồn tại trong DB chưa
         boolean exists = productTourRepository.findByTourIdAndCruiseAreaId(tourId, cruiseAreaId).isPresent();
         if (exists) {
             return; // Nếu đã tạo rồi thì bỏ qua (tránh duplicate khi Kafka retry)
@@ -46,6 +45,14 @@ public class ProductTourService {
 
         // 3. Lưu vào DB
         productTourRepository.save(productTour);
+    }
+
+    // =====================================================
+    // HÀM MỚI BỔ SUNG: Xử lý Event DELETE từ Kafka
+    // =====================================================
+    public void deleteProductTourFromEvent(UUID tourId, UUID cruiseAreaId) {
+        productTourRepository.findByTourIdAndCruiseAreaId(tourId, cruiseAreaId)
+                .ifPresent(productTourRepository::delete);
     }
 
     // =====================================================

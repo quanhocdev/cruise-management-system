@@ -27,14 +27,14 @@ public class ProductTourAssignmentService {
         private final TourRepository tourRepository;
         private final CruiseAreaRepository cruiseAreaRepository;
         private final ProductTourAssignmentMapper assignmentMapper;
-        private final KafkaTemplate<String, Object> kafkaTemplate; // 1. Khai báo thuộc tính KafkaTemplate
+        private final KafkaTemplate<String, Object> kafkaTemplate;
 
         public ProductTourAssignmentService(
                         AssignmentProductRepository assignmentRepository,
                         TourRepository tourRepository,
                         CruiseAreaRepository cruiseAreaRepository,
                         ProductTourAssignmentMapper assignmentMapper,
-                        KafkaTemplate<String, Object> kafkaTemplate) { // 2. Inject qua Constructor
+                        KafkaTemplate<String, Object> kafkaTemplate) {
 
                 this.assignmentRepository = assignmentRepository;
                 this.tourRepository = tourRepository;
@@ -87,11 +87,12 @@ public class ProductTourAssignmentService {
                                         // Lưu vào Database của tour-service
                                         AssignmentProduct savedAssignment = assignmentRepository.save(newAssignment);
 
-                                        // Bắn Kafka Event sang topic với type hardcode là "PRODUCT"
+                                        // Bắn Kafka Event sang topic với areaType "PRODUCT" và action "CREATE"
                                         ProductTourAssignedEvent event = new ProductTourAssignedEvent(
                                                         request.tourId(),
                                                         request.cruiseAreaId(),
-                                                        "PRODUCT");
+                                                        "PRODUCT",
+                                                        "CREATE");
 
                                         kafkaTemplate.send("tour-product-assignment-topic", request.tourId().toString(),
                                                         event);
@@ -131,6 +132,16 @@ public class ProductTourAssignmentService {
                         throw new AppException("Assignment not found", HttpStatus.NOT_FOUND);
                 }
 
+                // 1. Xóa trong DB của tour-service
                 assignmentRepository.deleteByTourIdAndCruiseAreaId(tourId, cruiseAreaId);
+
+                // 2. Bắn Kafka Event với areaType "PRODUCT" và action "DELETE"
+                ProductTourAssignedEvent event = new ProductTourAssignedEvent(
+                                tourId,
+                                cruiseAreaId,
+                                "PRODUCT",
+                                "DELETE");
+
+                kafkaTemplate.send("tour-product-assignment-topic", tourId.toString(), event);
         }
 }

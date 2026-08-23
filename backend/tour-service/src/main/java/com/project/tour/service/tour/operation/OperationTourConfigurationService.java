@@ -2,7 +2,7 @@ package com.project.tour.service.tour.operation;
 
 import com.project.tour.dto.tour.operation.ActivityCruiseTourAssignmentResponse;
 import com.project.tour.dto.tour.operation.OperationTourConfigurationResponse;
-import com.project.tour.dto.tour.operation.ProductTourAssignmentResponse; // Fix package import
+import com.project.tour.dto.tour.operation.ProductTourAssignmentResponse;
 import com.project.tour.dto.tour.operation.ServiceTourAssignmentResponse;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.tour.ActivityCruiseTourAssignmentMapper;
@@ -10,12 +10,11 @@ import com.project.tour.mapper.tour.ProductTourAssignmentMapper;
 import com.project.tour.mapper.tour.ServiceTourAssignmentMapper;
 import com.project.tour.model.CruiseArea;
 import com.project.tour.model.Tour;
+import com.project.tour.repository.cruise.CruiseAreaRepository;
 import com.project.tour.repository.tour.ActivityCruiseTourAssignmentRepository;
 import com.project.tour.repository.tour.AssignmentProductRepository;
-import com.project.tour.repository.cruise.CruiseAreaRepository;
-import com.project.tour.repository.tour.ServiceTourAssignmentRepository;
+import com.project.tour.repository.tour.AssignmentServiceRepository; // Đã đổi tên Repository
 import com.project.tour.repository.tour.TourRepository;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,9 +28,9 @@ public class OperationTourConfigurationService {
 
         private final TourRepository tourRepository;
         private final ActivityCruiseTourAssignmentRepository activityRepository;
-        private final AssignmentProductRepository assignmentProductRepository; // Fix tên class
-        private final CruiseAreaRepository cruiseAreaRepository; // Inject thêm để lấy CruiseArea cho Mapper
-        private final ServiceTourAssignmentRepository serviceRepository;
+        private final AssignmentProductRepository assignmentProductRepository;
+        private final CruiseAreaRepository cruiseAreaRepository;
+        private final AssignmentServiceRepository serviceRepository; // Đã sửa kiểu dữ liệu
 
         private final ProductTourAssignmentMapper productMapper;
         private final ServiceTourAssignmentMapper serviceMapper;
@@ -41,7 +40,7 @@ public class OperationTourConfigurationService {
                         ActivityCruiseTourAssignmentRepository activityRepository,
                         AssignmentProductRepository assignmentProductRepository,
                         CruiseAreaRepository cruiseAreaRepository,
-                        ServiceTourAssignmentRepository serviceRepository,
+                        AssignmentServiceRepository serviceRepository, // Đã sửa ở constructor
                         ProductTourAssignmentMapper productMapper,
                         ServiceTourAssignmentMapper serviceMapper) {
 
@@ -81,7 +80,6 @@ public class OperationTourConfigurationService {
                                 .findAllByTourIdOrderByCreatedAtAsc(tourId)
                                 .stream()
                                 .map(assignment -> {
-                                        // Fetch CruiseArea để truyền đủ 3 tham số vào mapper
                                         CruiseArea cruiseArea = cruiseAreaRepository
                                                         .findById(assignment.getCruiseAreaId())
                                                         .orElse(null);
@@ -90,12 +88,19 @@ public class OperationTourConfigurationService {
                                 .toList();
 
                 // =====================================================
-                // SERVICE
+                // SERVICE (AssignmentService)
                 // =====================================================
                 List<ServiceTourAssignmentResponse> services = serviceRepository
                                 .findAllByTourIdOrderByCreatedAtAsc(tourId)
                                 .stream()
-                                .map(serviceMapper::toResponse)
+                                .map(assignment -> {
+                                        CruiseArea cruiseArea = cruiseAreaRepository
+                                                        .findById(assignment.getCruiseAreaId())
+                                                        .orElse(null);
+                                        return serviceMapper.toResponse(assignment, tour, cruiseArea); // Sửa mapper
+                                                                                                       // truyền 3 tham
+                                                                                                       // số
+                                })
                                 .toList();
 
                 // =====================================================
@@ -138,7 +143,7 @@ public class OperationTourConfigurationService {
         }
 
         // =====================================================
-        // PRODUCT VALIDATION (Đã sửa lại khớp với DTO)
+        // PRODUCT VALIDATION
         // =====================================================
         private boolean isProductConfigurationComplete(
                         List<ProductTourAssignmentResponse> products) {
@@ -147,7 +152,6 @@ public class OperationTourConfigurationService {
                         return false;
                 }
 
-                // Kiểm tra xem các trường quan trọng trong DTO có bị null không
                 return products.stream().allMatch(product -> product.id() != null && product.cruiseAreaId() != null);
         }
 
@@ -161,8 +165,6 @@ public class OperationTourConfigurationService {
                         return false;
                 }
 
-                return services.stream().allMatch(service -> service.serviceId() != null
-                                && service.maxPassengers() != null
-                                && service.maxPassengers() > 0);
+                return services.stream().allMatch(service -> service.id() != null && service.cruiseAreaId() != null);
         }
 }

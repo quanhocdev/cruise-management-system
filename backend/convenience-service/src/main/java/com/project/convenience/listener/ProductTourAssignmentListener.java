@@ -14,7 +14,7 @@ public class ProductTourAssignmentListener {
 
     private static final Logger log = LoggerFactory.getLogger(ProductTourAssignmentListener.class);
 
-    private final ProductTourService productTourService; // Inject Service xử lý DB
+    private final ProductTourService productTourService;
 
     public ProductTourAssignmentListener(ProductTourService productTourService) {
         this.productTourService = productTourService;
@@ -26,16 +26,22 @@ public class ProductTourAssignmentListener {
             @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
             @Header(KafkaHeaders.OFFSET) long offset,
             @Header(value = KafkaHeaders.RECEIVED_KEY, required = false) String key) {
-        log.info("==> [Kafka Consumer] Nhận Event từ Partition: {}, Offset: {}, Key: {}", partition, offset, key);
+        log.info("==> [Kafka Consumer] Nhận Event Product từ Partition: {}, Offset: {}, Action: {}", partition, offset,
+                event.action());
         log.info("==> [Data] Tour ID: {}, Cruise Area ID: {}", event.tourId(), event.cruiseAreaId());
 
-        // Gọi Service nghiệp vụ để lưu/cập nhật DB bên convenience-service
         try {
-            productTourService.createProductTourFromEvent(event.tourId(), event.cruiseAreaId());
-
-            log.info("==> [Kafka Consumer] Xử lý đồng bộ tiện ích thành công cho Tour ID: {}", event.tourId());
+            if ("DELETE".equalsIgnoreCase(event.action())) {
+                // Gọi hàm xóa trong Service của convenience-service
+                productTourService.deleteProductTourFromEvent(event.tourId(), event.cruiseAreaId());
+                log.info("==> [Kafka Consumer] Xóa đồng bộ tiện ích thành công cho Tour ID: {}", event.tourId());
+            } else {
+                // Mặc định hoặc CREATE: Tạo/Cập nhật bản ghi
+                productTourService.createProductTourFromEvent(event.tourId(), event.cruiseAreaId());
+                log.info("==> [Kafka Consumer] Xử lý đồng bộ tiện ích thành công cho Tour ID: {}", event.tourId());
+            }
         } catch (Exception e) {
-            log.error("==> [Kafka Consumer] Lỗi khi xử lý Event cho Tour ID: {}", event.tourId(), e);
+            log.error("==> [Kafka Consumer] Lỗi khi xử lý Event Product cho Tour ID: {}", event.tourId(), e);
             throw e;
         }
     }
