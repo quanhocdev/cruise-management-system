@@ -23,4 +23,15 @@ public class TourClient {
         } catch (FeedbackException ex) { throw ex; }
         catch (RuntimeException ex) { throw new FeedbackException(HttpStatus.BAD_GATEWAY, "Cannot verify tour completion"); }
     }
+
+    public FeedbackTargetContext targetContext(UUID tourId, String targetType, UUID targetId) {
+        try {
+            FeedbackTargetContext result = client.get()
+                .uri("/internal/tours/{tourId}/feedback-targets/{targetType}/{targetId}", tourId, targetType, targetId)
+                .header("X-Internal-Api-Key", apiKey).retrieve().body(FeedbackTargetContext.class);
+            if (result == null) throw new FeedbackException(HttpStatus.BAD_GATEWAY, "Tour service returned an empty response");
+            return result;
+        } catch (FeedbackException ex) { throw ex; }
+        catch (RuntimeException ex) { throw new FeedbackException(HttpStatus.BAD_GATEWAY, "Cannot verify feedback target"); }
+    }
 }

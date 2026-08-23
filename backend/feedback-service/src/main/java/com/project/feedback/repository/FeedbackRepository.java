@@ -7,13 +7,20 @@ import org.springframework.data.repository.query.Param;
 import java.util.*;
 
 public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
-    boolean existsByBookingIdAndReviewerUserId(Long bookingId, Long reviewerUserId);
+    boolean existsByBookingIdAndReviewerUserIdAndFeedbackTypeAndTargetTypeAndTargetId(
+        Long bookingId, Long reviewerUserId, FeedbackType feedbackType, FeedbackTargetType targetType, UUID targetId);
     List<Feedback> findAllByReviewerUserIdOrderByCreatedAtDesc(Long reviewerUserId);
-    List<Feedback> findAllByTourIdAndStatusOrderByCreatedAtDesc(UUID tourId, FeedbackStatus status);
-    List<Feedback> findAllByCruiseIdAndStatusOrderByCreatedAtDesc(UUID cruiseId, FeedbackStatus status);
+    List<Feedback> findAllByTourIdAndFeedbackTypeAndStatusOrderByCreatedAtDesc(
+        UUID tourId, FeedbackType feedbackType, FeedbackStatus status);
+    List<Feedback> findAllByCruiseIdAndFeedbackTypeAndStatusOrderByCreatedAtDesc(
+        UUID cruiseId, FeedbackType feedbackType, FeedbackStatus status);
+    List<Feedback> findAllByTargetTypeAndTargetIdAndStatusOrderByCreatedAtDesc(
+        FeedbackTargetType targetType, UUID targetId, FeedbackStatus status);
     List<Feedback> findAllByOrderByCreatedAtDesc();
-    @Query("select new com.project.feedback.dto.RatingSummary(count(f), coalesce(avg(f.rating), 0.0)) from Feedback f where f.tourId = :id and f.status = com.project.feedback.model.FeedbackStatus.PUBLISHED")
+    @Query("select new com.project.feedback.dto.RatingSummary(count(f), coalesce(avg(f.rating), 0.0)) from Feedback f where f.tourId = :id and f.feedbackType = com.project.feedback.model.FeedbackType.TRIP and f.status = com.project.feedback.model.FeedbackStatus.PUBLISHED")
     RatingSummary summarizeTour(@Param("id") UUID id);
-    @Query("select new com.project.feedback.dto.RatingSummary(count(f), coalesce(avg(f.rating), 0.0)) from Feedback f where f.cruiseId = :id and f.status = com.project.feedback.model.FeedbackStatus.PUBLISHED")
+    @Query("select new com.project.feedback.dto.RatingSummary(count(f), coalesce(avg(f.rating), 0.0)) from Feedback f where f.cruiseId = :id and f.feedbackType = com.project.feedback.model.FeedbackType.TRIP and f.status = com.project.feedback.model.FeedbackStatus.PUBLISHED")
     RatingSummary summarizeCruise(@Param("id") UUID id);
+    @Query("select new com.project.feedback.dto.RatingSummary(count(f), coalesce(avg(f.rating), 0.0)) from Feedback f where f.targetType = :type and f.targetId = :id and f.status = com.project.feedback.model.FeedbackStatus.PUBLISHED")
+    RatingSummary summarizeTarget(@Param("type") FeedbackTargetType type, @Param("id") UUID id);
 }

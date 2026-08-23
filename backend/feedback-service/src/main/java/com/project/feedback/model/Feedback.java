@@ -6,9 +6,10 @@ import java.util.*;
 
 @Entity
 @Table(name = "feedbacks", uniqueConstraints = @UniqueConstraint(
-    name = "uk_feedback_booking_reviewer", columnNames = {"booking_id", "reviewer_user_id"}), indexes = {
+    name = "uk_feedback_booking_target", columnNames = {"booking_id", "reviewer_user_id", "feedback_type", "target_type", "target_id"}), indexes = {
     @Index(name = "idx_feedback_tour_status", columnList = "tour_id,status"),
-    @Index(name = "idx_feedback_cruise_status", columnList = "cruise_id,status")
+    @Index(name = "idx_feedback_cruise_status", columnList = "cruise_id,status"),
+    @Index(name = "idx_feedback_target_status", columnList = "target_type,target_id,status")
 })
 public class Feedback {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
@@ -17,6 +18,9 @@ public class Feedback {
     @Column(name = "reviewer_user_id", nullable = false) private Long reviewerUserId;
     @Column(name = "tour_id", nullable = false) private UUID tourId;
     @Column(name = "cruise_id", nullable = false) private UUID cruiseId;
+    @Enumerated(EnumType.STRING) @Column(name = "feedback_type", length = 20) private FeedbackType feedbackType;
+    @Enumerated(EnumType.STRING) @Column(name = "target_type", length = 30) private FeedbackTargetType targetType;
+    @Column(name = "target_id") private UUID targetId;
     @Column(nullable = false) private Integer rating;
     @Column(nullable = false, columnDefinition = "TEXT") private String content;
     @ElementCollection(fetch = FetchType.EAGER)
@@ -35,6 +39,9 @@ public class Feedback {
     public Long getReviewerUserId() { return reviewerUserId; } public void setReviewerUserId(Long v) { reviewerUserId = v; }
     public UUID getTourId() { return tourId; } public void setTourId(UUID v) { tourId = v; }
     public UUID getCruiseId() { return cruiseId; } public void setCruiseId(UUID v) { cruiseId = v; }
+    public FeedbackType getFeedbackType() { return feedbackType; } public void setFeedbackType(FeedbackType v) { feedbackType = v; }
+    public FeedbackTargetType getTargetType() { return targetType; } public void setTargetType(FeedbackTargetType v) { targetType = v; }
+    public UUID getTargetId() { return targetId; } public void setTargetId(UUID v) { targetId = v; }
     public Integer getRating() { return rating; } public void setRating(Integer v) { rating = v; }
     public String getContent() { return content; } public void setContent(String v) { content = v; }
     public List<String> getImageUrls() { return imageUrls; } public void setImageUrls(List<String> v) { imageUrls = v; }

@@ -1,6 +1,7 @@
 package com.project.feedback.service;
 
 import com.project.feedback.dto.*;
+import com.project.feedback.model.FeedbackTargetType;
 import java.util.*;
 
 public interface FeedbackService {
@@ -10,8 +11,10 @@ public interface FeedbackService {
     List<FeedbackResponse> getMine(Long userId);
     List<PublicFeedbackResponse> getTourFeedback(UUID tourId);
     List<PublicFeedbackResponse> getCruiseFeedback(UUID cruiseId);
+    List<PublicFeedbackResponse> getTargetFeedback(FeedbackTargetType targetType, UUID targetId);
     RatingSummary summarizeTour(UUID tourId);
     RatingSummary summarizeCruise(UUID cruiseId);
+    RatingSummary summarizeTarget(FeedbackTargetType targetType, UUID targetId);
     List<FeedbackResponse> getAllForAdmin();
     FeedbackResponse moderate(Long id, ModerateFeedbackRequest request, Long adminId);
 }

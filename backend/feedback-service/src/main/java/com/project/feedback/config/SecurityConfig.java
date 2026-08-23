@@ -18,7 +18,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(a -> a
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/feedbacks/tours/**", "/api/v1/feedbacks/cruises/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/feedbacks/tours/**", "/api/v1/feedbacks/cruises/**",
+                    "/api/v1/feedbacks/targets/**").permitAll()
                 .requestMatchers("/api/admin/feedbacks/**").hasRole("ADMIN")
                 .anyRequest().authenticated())
             .oauth2ResourceServer(o -> o.bearerTokenResolver(resolver).jwt(j -> j.jwtAuthenticationConverter(converter))).build();

@@ -2,6 +2,7 @@ package com.project.feedback.controller;
 
 import com.project.feedback.dto.*;
 import com.project.feedback.exception.FeedbackException;
+import com.project.feedback.model.FeedbackTargetType;
 import com.project.feedback.service.FeedbackService;
 import jakarta.validation.Valid;
 import org.springframework.http.*;
@@ -28,6 +29,14 @@ public class FeedbackController {
     @GetMapping("/tours/{tourId}/summary") RatingSummary tourSummary(@PathVariable UUID tourId) { return service.summarizeTour(tourId); }
     @GetMapping("/cruises/{cruiseId}") List<PublicFeedbackResponse> cruise(@PathVariable UUID cruiseId) { return service.getCruiseFeedback(cruiseId); }
     @GetMapping("/cruises/{cruiseId}/summary") RatingSummary cruiseSummary(@PathVariable UUID cruiseId) { return service.summarizeCruise(cruiseId); }
+    @GetMapping("/targets/{targetType}/{targetId}") List<PublicFeedbackResponse> target(
+        @PathVariable FeedbackTargetType targetType, @PathVariable UUID targetId) {
+        return service.getTargetFeedback(targetType, targetId);
+    }
+    @GetMapping("/targets/{targetType}/{targetId}/summary") RatingSummary targetSummary(
+        @PathVariable FeedbackTargetType targetType, @PathVariable UUID targetId) {
+        return service.summarizeTarget(targetType, targetId);
+    }
     private Long userId(Jwt jwt) {
         Object claim = jwt.getClaim("userId"); if (claim instanceof Number n) return n.longValue();
         try { return Long.valueOf(String.valueOf(claim)); }
