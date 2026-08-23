@@ -1,0 +1,7 @@
+FROM maven:3.9-eclipse-temurin-17
+WORKDIR /app
+COPY notification-service/pom.xml notification-service/pom.xml
+WORKDIR /app/notification-service
+RUN mvn dependency:go-offline -B
+COPY notification-service/src src
+CMD ["mvn", "spring-boot:run", "-Dspring-boot.run.fork=false"]
