@@ -25,9 +25,10 @@ class BookingServiceImplTests {
     @Mock PassengerRepository passengerRepository;
     @Mock PassengerVoyageRepository passengerVoyageRepository;
     @Mock TourClient tourClient;
+    @Mock NotificationClient notificationClient;
     BookingServiceImpl service;
     @BeforeEach void setUp() {
-        service = new BookingServiceImpl(repository, passengerRepository, passengerVoyageRepository, tourClient);
+        service = new BookingServiceImpl(repository, passengerRepository, passengerVoyageRepository, tourClient, notificationClient);
     }
 
     @Test void createUsesAuthenticatedUserAndPendingStatus() {
@@ -73,6 +74,8 @@ class BookingServiceImplTests {
         BookingResponse result = service.confirmPayment(1L, 10L);
         assertEquals(BookingStatus.CONFIRMED, result.status());
         assertNotNull(result.bookingCode());
+        verify(notificationClient).send(eq(7L), isNull(), eq("PAYMENT_SUCCESS"),
+            anyString(), contains(result.bookingCode()), eq(1L));
     }
 
     @Test void cancelledBookingCannotBePaid() {
