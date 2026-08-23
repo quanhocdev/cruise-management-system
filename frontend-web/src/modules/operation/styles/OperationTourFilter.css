@@ -1,0 +1,116 @@
+/* Container bọc ngoài cùng: Ép Search và Date nằm cùng 1 hàng ngang */
+.operation-tour-filter {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 12px !important;
+  width: 100% !important;
+  background: #ffffff;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+/* 1. KHUNG TÌM KIẾM (Chiếm toàn bộ khoảng trống bên trái) */
+.operation-tour-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 !important; /* Tự phình to tràn hết chiều rộng còn dư */
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 6px 12px;
+}
+
+.operation-tour-search input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 13.5px;
+  color: #1e293b;
+}
+
+.operation-tour-search svg {
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.operation-tour-search-clear {
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+}
+
+.operation-tour-search-clear:hover {
+  color: #ef4444;
+}
+
+/* 2. KHUNG CHỌN NGÀY THÁNG (Ép nằm bên phải, gom gọn lại) */
+.operation-tour-date-range {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex: 0 0 auto !important; /* Không cho phình to */
+}
+
+/* Từng ô input ngày */
+.operation-tour-date-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 6px 10px;
+  width: 145px !important; /* Độ rộng vừa đẹp cho ô date */
+}
+
+.operation-tour-date-field input[type="date"] {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 13px;
+  color: #334155;
+  cursor: pointer;
+}
+
+.operation-tour-date-field svg {
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+/* Dấu gạch ngang giữa 2 ngày */
+.operation-tour-date-separator {
+  color: #94a3b8;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* Nút xóa lọc */
+.operation-tour-clear-filter {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #dc2626;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.operation-tour-clear-filter:hover {
+  background: #fee2e2;
+}

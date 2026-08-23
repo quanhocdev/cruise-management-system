@@ -39,14 +39,21 @@ import ManagerScheduleStops from "./modules/scheduler/pages/ManagerScheduleStops
 import OperationLayout from "./layouts/OperationLayout";
 import OperationDashboard from "./modules/operation/pages/Dashboard";
 import OperationManagerTour from "./modules/operation/pages/ManagerTour";
+import OperationTourConfiguration from "./modules/operation/pages/OperationTourConfiguration";
 
 // Convenience imports
 import ConvenienceLayout from "./layouts/ConvenienceLayout";
 import ConvenienceDashboard from "./modules/convenience/pages/Dashboard";
 import ConvenienceProducts from "./modules/convenience/pages/ConvenienceProducts";
 import ConvenienceServices from "./modules/convenience/pages/ConvenienceServices";
-// Other role dashboards
+import ConvenienceTourConfigPage from "./modules/convenience/pages/ConvenienceTourConfigPage";
+
+// Onboard imports
+import OnboardLayout from "./layouts/OnboardLayout";
 import OnboardDashboard from "./modules/onboard/pages/Dashboard";
+import OnboardActivityCruiseTour from "./modules/onboard/pages/ActivityCruiseTour";
+import OnboardTour from "./modules/onboard/pages/OnboardTour";
+
 import ShoreDashboard from "./modules/shore/pages/Dashboard";
 import FinanceDashboard from "./modules/finance/pages/Dashboard";
 
@@ -157,24 +164,53 @@ export default function App() {
           >
             <Route path="dashboard" element={<OperationDashboard />} />
             <Route path="tours" element={<OperationManagerTour />} />
+            <Route
+              path="tour-configuration"
+              element={<OperationTourConfiguration />}
+            />
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
 
           {/* ONBOARD ROUTES */}
           <Route
-            path="/onboard/*"
+            path="/onboard"
             element={
               <ProtectedRoute allowedRoles={["ONBOARD"]}>
-                <Routes>
-                  <Route path="dashboard" element={<OnboardDashboard />} />
-                  <Route
-                    path=""
-                    element={<Navigate to="dashboard" replace />}
-                  />
-                </Routes>
+                <OnboardLayout />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route path="dashboard" element={<OnboardDashboard />} />
+
+            <Route
+              path="activity-cruise"
+              element={<OnboardActivityCruiseTour />}
+            />
+
+            <Route path="tours" element={<OnboardTour />} />
+
+            <Route
+              path="schedules"
+              element={<div>Trang Lịch trình (Đang phát triển)</div>}
+            />
+
+            <Route
+              path="cruises"
+              element={<div>Trang Du thuyền (Đang phát triển)</div>}
+            />
+
+            <Route
+              path="bookings"
+              element={<div>Trang Booking (Đang phát triển)</div>}
+            />
+
+            <Route
+              path="settings"
+              element={<div>Trang Cài đặt (Đang phát triển)</div>}
+            />
+
+            <Route index element={<Navigate to="dashboard" replace />} />
+          </Route>
 
           {/* SHORE ROUTES */}
           <Route
@@ -192,7 +228,7 @@ export default function App() {
             }
           />
 
-          {/* CONVENIENCE ROUTES - Chuẩn Outlet */}
+          {/* CONVENIENCE ROUTES */}
           <Route
             path="/convenience"
             element={
@@ -202,8 +238,14 @@ export default function App() {
             }
           >
             <Route path="dashboard" element={<ConvenienceDashboard />} />
+
             <Route path="products" element={<ConvenienceProducts />} />
+
             <Route path="services" element={<ConvenienceServices />} />
+
+            {/* CẤU HÌNH TOUR */}
+            <Route path="tour-config" element={<ConvenienceTourConfigPage />} />
+
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
 

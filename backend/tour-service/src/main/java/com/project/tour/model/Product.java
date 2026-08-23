@@ -27,7 +27,7 @@ public class Product {
     private BigDecimal price;
 
     @Column(nullable = false)
-    private Integer quantity;
+    private Integer stockQuantity;
 
     @Column(length = 500)
     private String imageUrl;
@@ -94,12 +94,12 @@ public class Product {
         this.price = price;
     }
 
-    public Integer getQuantity() {
-        return quantity;
+    public Integer getStockQuantity() {
+        return stockQuantity;
     }
 
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
+    public void setStockQuantity(Integer stockQuantity) {
+        this.stockQuantity = stockQuantity;
     }
 
     public String getImageUrl() {

@@ -1,0 +1,560 @@
+/* --- OVERLAY & CONTAINER --- */
+.caam-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.caam-container {
+  background: #ffffff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 1080px; /* Mở rộng một chút để chứa vừa Split Workspace */
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+/* --- HEADER --- */
+.caam-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.caam-header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.caam-icon-badge {
+  background: #eff6ff;
+  color: #2563eb;
+  padding: 10px;
+  border-radius: 8px;
+  display: flex;
+}
+
+.caam-header-title h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.caam-header-title p {
+  margin: 2px 0 0 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.caam-close-btn {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+}
+
+.caam-close-btn:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+/* --- TOUR BAR --- */
+.caam-tour-bar {
+  background: #f8fafc;
+  padding: 12px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.caam-tour-info {
+  font-size: 0.875rem;
+}
+
+.caam-tour-info .label {
+  color: #6b7280;
+  margin-right: 6px;
+}
+
+.caam-tour-info .value {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+/* --- BODY & SIDEBAR --- */
+.caam-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 420px;
+}
+
+.caam-sidebar {
+  width: 250px;
+  flex-shrink: 0;
+  border-right: 1px solid #e5e7eb;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+}
+
+.caam-sidebar-header {
+  padding: 12px 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 1px solid #f3f4f6;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.caam-deck-nav {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+}
+
+.caam-deck-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+}
+
+.caam-deck-item:hover {
+  background: #f3f4f6;
+}
+
+.caam-deck-item.active {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+}
+
+.caam-deck-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.caam-deck-badges {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.badge-total {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.badge-assigned {
+  font-size: 0.7rem;
+  background: #dcfce7;
+  color: #15803d;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* --- MAIN CONTENT & WORKSPACE --- */
+.caam-main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.caam-split-workspace {
+  display: flex;
+  gap: 0;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.caam-grid-container {
+  padding: 20px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.caam-area-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+/* --- CARD ITEM (AREA & ROOM) --- */
+.caam-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 14px;
+  background: #ffffff;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  position: relative;
+  transition: all 0.2s ease-in-out;
+}
+
+.caam-card:hover {
+  border-color: #93c5fd;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
+}
+
+.caam-card.selected {
+  border-color: #2563eb;
+  background: #f0f7ff;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.caam-card.assigned {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.caam-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.caam-card-type {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.caam-card-type.type-area {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.caam-card-type.type-room {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.caam-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.caam-card-body h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.caam-card-body .deck-info {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.room-status-badge {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  width: fit-content;
+}
+
+.room-status-badge.available {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.caam-card-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: #15803d;
+  font-weight: 600;
+  background: #f0fdf4;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #bbf7d0;
+  width: fit-content;
+}
+
+.caam-delete-btn {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.caam-delete-btn:hover {
+  background: #fee2e2;
+}
+
+/* --- PREVIEW SIDEBAR --- */
+.caam-preview-sidebar {
+  width: 320px;
+  flex-shrink: 0;
+  border-left: 1px solid #e5e7eb;
+  background: #fafafa;
+  overflow-y: auto;
+  animation: slideInRight 0.2s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* --- STATES & FOOTER --- */
+.caam-state-box,
+.caam-state-inline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: #6b7280;
+  gap: 8px;
+}
+
+.caam-empty-small {
+  padding: 16px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+.caam-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.caam-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+}
+
+.caam-footer-info {
+  font-size: 0.875rem;
+}
+
+.info-selected {
+  color: #15803d;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+.info-hint {
+  color: #6b7280;
+}
+
+.caam-footer-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.caam-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid transparent;
+}
+
+.caam-btn-cancel {
+  background: #ffffff;
+  border-color: #d1d5db;
+  color: #374151;
+}
+
+.caam-btn-cancel:hover {
+  background: #f9fafb;
+}
+
+.caam-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* --- RESPONSIVE MEDIA QUERIES --- */
+
+@media (max-width: 1024px) {
+  .caam-container {
+    max-width: 95vw;
+    height: 92vh;
+  }
+
+  .caam-sidebar {
+    width: 220px;
+  }
+
+  .caam-split-workspace.has-preview {
+    flex-direction: column;
+  }
+
+  .caam-preview-sidebar {
+    width: 100%;
+    max-height: 280px;
+    border-left: none;
+    border-top: 1px solid #e5e7eb;
+  }
+}
+
+@media (max-width: 768px) {
+  .caam-overlay {
+    padding: 10px;
+  }
+
+  .caam-container {
+    max-width: 100vw;
+    max-height: 98vh;
+    border-radius: 8px;
+  }
+
+  .caam-body {
+    flex-direction: column;
+  }
+
+  .caam-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+    background: #ffffff;
+  }
+
+  .caam-sidebar-header {
+    display: none;
+  }
+
+  .caam-deck-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 8px 12px;
+    gap: 8px;
+    white-space: nowrap;
+  }
+
+  .caam-deck-item {
+    flex-shrink: 0;
+    padding: 6px 12px;
+    gap: 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+  }
+
+  .caam-area-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .caam-grid-container {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .caam-header {
+    padding: 12px 16px;
+  }
+
+  .caam-tour-bar {
+    padding: 8px 16px;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .caam-area-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .caam-footer {
+    padding: 12px 16px;
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .caam-footer-info {
+    text-align: center;
+  }
+
+  .caam-btn {
+    flex: 1;
+    justify-content: center;
+  }
+}

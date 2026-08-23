@@ -8,6 +8,7 @@ import com.project.tour.dto.product.UpdateProductRequest;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.product.ProductMapper;
 import com.project.tour.model.Product;
+import com.project.tour.model.enums.ProductStatus;
 import com.project.tour.repository.product.ProductRepository;
 
 import org.springframework.http.HttpStatus;
@@ -37,12 +38,9 @@ public class ProductService {
          * CREATE
          * =====================================================
          */
-        public ProductResponse createProduct(
-                        CreateProductRequest request) {
+        public ProductResponse createProduct(CreateProductRequest request) {
 
-                if (productRepository.existsByNameIgnoreCase(
-                                request.getName())) {
-
+                if (productRepository.existsByNameIgnoreCase(request.name())) {
                         throw new AppException(
                                         "Product name already exists",
                                         HttpStatus.CONFLICT);
@@ -50,16 +48,13 @@ public class ProductService {
 
                 Product product = ProductMapper.toEntity(request);
 
-                if (request.getImage() != null
-                                && !request.getImage().isEmpty()) {
-
+                if (request.image() != null && !request.image().isEmpty()) {
                         UploadResult uploadResult = fileStorageService.saveMultipart(
-                                        request.getImage(),
+                                        request.image(),
                                         "products");
 
                         product.setImageUrl(uploadResult.getUrl());
-                        product.setImagePublicId(
-                                        uploadResult.getPublicId());
+                        product.setImagePublicId(uploadResult.getPublicId());
                 }
 
                 Product savedProduct = productRepository.save(product);
@@ -73,8 +68,7 @@ public class ProductService {
          * =====================================================
          */
         @Transactional(readOnly = true)
-        public ProductResponse getProductById(
-                        UUID productId) {
+        public ProductResponse getProductById(UUID productId) {
 
                 Product product = findProduct(productId);
 
@@ -105,8 +99,7 @@ public class ProductService {
         public List<ProductResponse> getActiveProducts() {
 
                 return productRepository
-                                .findAllByStatusOrderByNameAsc(
-                                                com.project.tour.model.enums.ProductStatus.ACTIVE)
+                                .findAllByStatusOrderByNameAsc(ProductStatus.ACTIVE)
                                 .stream()
                                 .map(ProductMapper::toResponse)
                                 .toList();
@@ -123,10 +116,9 @@ public class ProductService {
 
                 Product product = findProduct(productId);
 
-                if (productRepository
-                                .existsByNameIgnoreCaseAndIdNot(
-                                                request.getName(),
-                                                productId)) {
+                if (productRepository.existsByNameIgnoreCaseAndIdNot(
+                                request.name(),
+                                productId)) {
 
                         throw new AppException(
                                         "Product name already exists",
@@ -135,26 +127,17 @@ public class ProductService {
 
                 String oldPublicId = product.getImagePublicId();
 
-                ProductMapper.updateEntity(
-                                product,
-                                request);
+                ProductMapper.updateEntity(product, request);
 
-                if (request.getImage() != null
-                                && !request.getImage().isEmpty()) {
-
+                if (request.image() != null && !request.image().isEmpty()) {
                         UploadResult uploadResult = fileStorageService.saveMultipart(
-                                        request.getImage(),
+                                        request.image(),
                                         "products");
 
-                        product.setImageUrl(
-                                        uploadResult.getUrl());
+                        product.setImageUrl(uploadResult.getUrl());
+                        product.setImagePublicId(uploadResult.getPublicId());
 
-                        product.setImagePublicId(
-                                        uploadResult.getPublicId());
-
-                        if (oldPublicId != null
-                                        && !oldPublicId.isBlank()) {
-
+                        if (oldPublicId != null && !oldPublicId.isBlank()) {
                                 fileStorageService.delete(oldPublicId);
                         }
                 }
@@ -176,8 +159,7 @@ public class ProductService {
                 if (product.getImagePublicId() != null
                                 && !product.getImagePublicId().isBlank()) {
 
-                        fileStorageService.delete(
-                                        product.getImagePublicId());
+                        fileStorageService.delete(product.getImagePublicId());
                 }
 
                 productRepository.delete(product);
@@ -185,7 +167,7 @@ public class ProductService {
 
         /*
          * =====================================================
-         * FIND
+         * FIND HELPER
          * =====================================================
          */
         private Product findProduct(UUID productId) {

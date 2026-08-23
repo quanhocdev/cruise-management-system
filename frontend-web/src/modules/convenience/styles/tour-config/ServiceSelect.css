@@ -1,0 +1,246 @@
+/* =========================================================
+   SERVICE SELECT
+   ========================================================= */
+
+.convenience-service-select {
+  width: 100%;
+}
+
+/* =========================================================
+   SELECT WRAPPER
+   ========================================================= */
+
+.convenience-service-select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.convenience-service-select-wrapper.has-error
+  .convenience-service-select-input {
+  border-color: #ef4444;
+  background: #fffafa;
+}
+
+/* =========================================================
+   SELECT INPUT
+   ========================================================= */
+
+.convenience-service-select-input {
+  width: 100%;
+  min-height: 42px;
+  box-sizing: border-box;
+
+  padding: 0 42px 0 12px;
+
+  border: 1px solid #d8e0eb;
+  border-radius: 9px;
+
+  outline: none;
+
+  background: #ffffff;
+  color: #334155;
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+
+  appearance: none;
+  -webkit-appearance: none;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.convenience-service-select-input:hover:not(:disabled) {
+  border-color: #bfdbfe;
+}
+
+.convenience-service-select-input:focus {
+  border-color: #60a5fa;
+
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.convenience-service-select-input:disabled {
+  background: #f8fafc;
+  color: #94a3b8;
+
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+/* =========================================================
+   SELECT OPTION
+   ========================================================= */
+
+.convenience-service-select-input option {
+  background: #ffffff;
+  color: #334155;
+
+  font-size: 13px;
+}
+
+/* =========================================================
+   DROPDOWN ICON
+   ========================================================= */
+
+.convenience-service-select-icon {
+  position: absolute;
+
+  top: 50%;
+  right: 13px;
+
+  transform: translateY(-50%);
+
+  color: #64748b;
+
+  pointer-events: none;
+}
+
+.convenience-service-select-wrapper.has-error .convenience-service-select-icon {
+  color: #ef4444;
+}
+
+/* =========================================================
+   LOADING ICON
+   ========================================================= */
+
+.convenience-service-select-loading {
+  position: absolute;
+
+  top: 50%;
+  right: 13px;
+
+  transform: translateY(-50%);
+
+  color: #2563eb;
+
+  pointer-events: none;
+
+  animation: convenience-service-select-spin 0.9s linear infinite;
+}
+
+@keyframes convenience-service-select-spin {
+  from {
+    transform: translateY(-50%) rotate(0deg);
+  }
+
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
+}
+
+/* =========================================================
+   ERROR
+   ========================================================= */
+
+.convenience-service-select-error {
+  display: block;
+
+  margin-top: 6px;
+
+  color: #dc2626;
+
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+/* =========================================================
+   EMPTY / HINT
+   ========================================================= */
+
+.convenience-service-select-hint {
+  display: block;
+
+  margin-top: 6px;
+
+  color: #94a3b8;
+
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .convenience-service-select-input {
+    min-height: 40px;
+
+    padding-left: 11px;
+    padding-right: 40px;
+
+    font-size: 13px;
+  }
+
+  .convenience-service-select-icon,
+  .convenience-service-select-loading {
+    right: 12px;
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 576px) {
+  .convenience-service-select-input {
+    min-height: 40px;
+
+    border-radius: 8px;
+
+    font-size: 12px;
+  }
+
+  .convenience-service-select-error,
+  .convenience-service-select-hint {
+    margin-top: 5px;
+
+    font-size: 10px;
+  }
+
+  .convenience-service-select-icon,
+  .convenience-service-select-loading {
+    right: 11px;
+  }
+}
+
+/* =========================================================
+   VERY SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 400px) {
+  .convenience-service-select-input {
+    min-height: 38px;
+
+    padding-left: 10px;
+    padding-right: 36px;
+
+    font-size: 11px;
+  }
+
+  .convenience-service-select-icon,
+  .convenience-service-select-loading {
+    right: 10px;
+  }
+}
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .convenience-service-select-input {
+    transition: none;
+  }
+
+  .convenience-service-select-loading {
+    animation: none;
+  }
+}

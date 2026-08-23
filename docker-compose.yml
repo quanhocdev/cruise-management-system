@@ -95,6 +95,9 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
     ports:
       - "5050:80"
+    logging:
+      driver: "none"
+      # driver: "json-file"
     depends_on:
       postgres-auth:
         condition: service_healthy

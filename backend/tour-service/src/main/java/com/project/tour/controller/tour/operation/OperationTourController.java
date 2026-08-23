@@ -2,7 +2,10 @@ package com.project.tour.controller.tour.operation;
 
 import com.project.tour.dto.cruise.CruiseAvailabilityResponse;
 import com.project.tour.dto.tour.TourResponse;
-import com.project.tour.service.tour.operation.OperationTourService;
+import com.project.tour.dto.tour.operation.OperationCruiseLayoutResponse;
+import com.project.tour.service.tour.operation.TourApprovalService;
+import com.project.tour.service.tour.operation.TourCruiseAssignmentService;
+import com.project.tour.service.tour.operation.TourLayoutService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,49 +17,69 @@ import java.util.UUID;
 @RequestMapping("/api/operation/tours")
 public class OperationTourController {
 
-    private final OperationTourService operationTourService;
+        private final TourApprovalService tourApprovalService;
+        private final TourCruiseAssignmentService tourCruiseAssignmentService;
+        private final TourLayoutService tourLayoutService;
 
-    public OperationTourController(
-            OperationTourService operationTourService) {
+        public OperationTourController(
+                        TourApprovalService tourApprovalService,
+                        TourCruiseAssignmentService tourCruiseAssignmentService,
+                        TourLayoutService tourLayoutService) {
+                this.tourApprovalService = tourApprovalService;
+                this.tourCruiseAssignmentService = tourCruiseAssignmentService;
+                this.tourLayoutService = tourLayoutService;
+        }
 
-        this.operationTourService = operationTourService;
-    }
+        // =====================================================
+        // GET TOURS WAITING FOR APPROVAL
+        // =====================================================
+        @GetMapping("/pending")
+        public ResponseEntity<List<TourResponse>> getPendingTours() {
+                return ResponseEntity.ok(tourApprovalService.getPendingTours());
+        }
 
-    // =====================================================
-    // GET TOURS WAITING FOR APPROVAL
-    // =====================================================
+        // =====================================================
+        // GET AVAILABLE CRUISES
+        // =====================================================
+        @GetMapping("/{id}/available-cruises")
+        public ResponseEntity<List<CruiseAvailabilityResponse>> getAvailableCruises(
+                        @PathVariable UUID id) {
+                return ResponseEntity.ok(tourCruiseAssignmentService.getAvailableCruises(id));
+        }
 
-    @GetMapping("/pending")
-    public ResponseEntity<List<TourResponse>> getPendingTours() {
+        // =====================================================
+        // GET CRUISE LAYOUT
+        // =====================================================
+        @GetMapping("/{id}/cruise-layout")
+        public ResponseEntity<List<OperationCruiseLayoutResponse>> getCruiseLayout(
+                        @PathVariable UUID id) {
+                return ResponseEntity.ok(tourLayoutService.getCruiseLayout(id));
+        }
 
-        return ResponseEntity.ok(
-                operationTourService.getPendingTours());
-    }
+        // =====================================================
+        // 1. GÁN DU THUYỀN CHO TOUR (Vẫn giữ trạng thái PENDING)
+        // =====================================================
+        @PostMapping("/{id}/assign-cruise")
+        public ResponseEntity<TourResponse> assignCruise(
+                        @PathVariable UUID id,
+                        @RequestParam UUID cruiseId) {
+                return ResponseEntity.ok(tourCruiseAssignmentService.assignCruise(id, cruiseId));
+        }
 
-    // =====================================================
-    // GET AVAILABLE CRUISES
-    // =====================================================
+        // =====================================================
+        // 2. DUYỆT TOUR (Chỉ gọi sau khi đã gán du thuyền + phân công xong)
+        // =====================================================
+        @PostMapping("/{id}/approve")
+        public ResponseEntity<TourResponse> approveTour(
+                        @PathVariable UUID id) {
+                return ResponseEntity.ok(tourApprovalService.approveTour(id));
+        }
 
-    @GetMapping("/{id}/available-cruises")
-    public ResponseEntity<List<CruiseAvailabilityResponse>> getAvailableCruises(
-            @PathVariable UUID id) {
-
-        return ResponseEntity.ok(
-                operationTourService.getAvailableCruises(id));
-    }
-
-    // =====================================================
-    // APPROVE TOUR
-    // =====================================================
-
-    @PostMapping("/{id}/approve")
-    public ResponseEntity<TourResponse> approveTour(
-            @PathVariable UUID id,
-            @RequestParam UUID cruiseId) {
-
-        return ResponseEntity.ok(
-                operationTourService.approveTour(
-                        id,
-                        cruiseId));
-    }
+        // =====================================================
+        // GET APPROVED TOURS
+        // =====================================================
+        @GetMapping("/approved")
+        public ResponseEntity<List<TourResponse>> getApprovedTours() {
+                return ResponseEntity.ok(tourApprovalService.getApprovedTours());
+        }
 }

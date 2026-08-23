@@ -1,0 +1,595 @@
+/* =========================================================
+   OPERATION TOUR TABLE
+   ========================================================= */
+
+/* Wrapper chứa thẻ <table> */
+.operation-tour-table-wrapper {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  overflow: auto; /* Bật thanh cuộn dọc và ngang riêng cho bảng */
+}
+
+/* Cố định Header của bảng khi cuộn xuống */
+.operation-tour-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #f8fafc;
+}
+
+/* =========================================================
+   TABLE
+   ========================================================= */
+
+.operation-tour-table {
+  width: 100%;
+  min-width: 1100px;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 14px;
+}
+
+/* =========================================================
+   TABLE HEADER
+   ========================================================= */
+
+.operation-tour-table thead th {
+  padding: 15px 18px;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.operation-tour-table thead th:first-child {
+  padding-left: 22px;
+}
+
+.operation-tour-table thead th:last-child {
+  padding-right: 22px;
+}
+
+/* =========================================================
+   TABLE BODY
+   ========================================================= */
+
+.operation-tour-table tbody tr {
+  background: #ffffff;
+  transition: background-color 0.15s ease;
+}
+
+.operation-tour-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.operation-tour-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.operation-tour-table tbody td {
+  padding: 16px 18px;
+  color: #1e293b;
+  vertical-align: middle;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.operation-tour-table tbody td:first-child {
+  padding-left: 22px;
+}
+
+.operation-tour-table tbody td:last-child {
+  padding-right: 22px;
+}
+
+/* =========================================================
+   TOUR NAME
+   ========================================================= */
+
+.operation-tour-name {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-width: 260px;
+}
+
+.operation-tour-name strong {
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.operation-tour-name span {
+  max-width: 250px;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.45;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* =========================================================
+   TOUR CODE
+   ========================================================= */
+
+.operation-tour-code {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 9px;
+
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+
+  color: #334155;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  font-weight: 600;
+
+  white-space: nowrap;
+}
+
+/* =========================================================
+   DATE
+   ========================================================= */
+
+.operation-tour-dates {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  color: #475569;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.operation-tour-dates > div {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.operation-tour-dates svg {
+  flex-shrink: 0;
+  color: #94a3b8;
+}
+
+.date-separator {
+  color: #cbd5e1;
+  font-weight: 700;
+}
+
+/* =========================================================
+   CRUISE
+   ========================================================= */
+
+.operation-tour-cruise {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 200px;
+
+  color: #0284c7;
+}
+
+.operation-tour-cruise > svg {
+  flex-shrink: 0;
+}
+
+.operation-tour-cruise > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.operation-tour-cruise strong {
+  max-width: 160px;
+
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 600;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.operation-tour-cruise span {
+  color: #64748b;
+  font-size: 12px;
+}
+
+/* =========================================================
+   CHANGE CRUISE BUTTON
+   ========================================================= */
+
+.operation-tour-change-cruise-button {
+  flex-shrink: 0;
+
+  padding: 5px 8px;
+
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+
+  background: #eff6ff;
+  color: #2563eb;
+
+  font-size: 11px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.operation-tour-change-cruise-button:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
+/* =========================================================
+   ASSIGN CRUISE
+   ========================================================= */
+
+.operation-tour-assign-cruise-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  padding: 8px 12px;
+
+  border: 1px dashed #93c5fd;
+  border-radius: 7px;
+
+  background: #eff6ff;
+  color: #2563eb;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.operation-tour-assign-cruise-button:hover:not(:disabled) {
+  background: #dbeafe;
+  border-color: #60a5fa;
+}
+
+.operation-tour-assign-cruise-button:disabled {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   ASSIGNMENT
+   ========================================================= */
+
+.operation-tour-assignment-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 135px;
+  padding: 8px 12px;
+
+  border: 1px solid #c7d2fe;
+  border-radius: 7px;
+
+  background: #eef2ff;
+  color: #4338ca;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.operation-tour-assignment-button:hover:not(:disabled) {
+  background: #e0e7ff;
+  border-color: #a5b4fc;
+  color: #3730a3;
+  box-shadow: 0 2px 5px rgba(67, 56, 202, 0.08);
+}
+
+.operation-tour-assignment-button:disabled {
+  background: #f8fafc;
+  border-color: #e5e7eb;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
+
+.operation-tour-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   APPROVE BUTTON
+   ========================================================= */
+
+.operation-tour-approve-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  padding: 8px 12px;
+
+  border: 1px solid #2563eb;
+  border-radius: 7px;
+
+  background: #2563eb;
+  color: #ffffff;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.operation-tour-approve-button:hover {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  box-shadow: 0 3px 8px rgba(37, 99, 235, 0.2);
+}
+
+/* =========================================================
+   REJECT BUTTON
+   ========================================================= */
+
+.operation-tour-reject-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  padding: 8px 12px;
+
+  border: 1px solid #fecaca;
+  border-radius: 7px;
+
+  background: #fef2f2;
+  color: #dc2626;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.operation-tour-reject-button:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
+/* =========================================================
+   VIEW BUTTON
+   ========================================================= */
+
+.operation-tour-view-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  padding: 8px 13px;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+
+  background: #ffffff;
+  color: #475569;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.operation-tour-view-button:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+/* =========================================================
+   BUTTON COMMON
+   ========================================================= */
+
+.operation-tour-approve-button:focus-visible,
+.operation-tour-reject-button:focus-visible,
+.operation-tour-view-button:focus-visible,
+.operation-tour-assignment-button:focus-visible,
+.operation-tour-assign-cruise-button:focus-visible,
+.operation-tour-change-cruise-button:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
+}
+
+/* =========================================================
+   LOADING / EMPTY STATE
+   ========================================================= */
+
+.operation-tour-table-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 280px;
+  padding: 50px 20px;
+
+  text-align: center;
+
+  background: #ffffff;
+  color: #64748b;
+}
+
+.operation-tour-table-state.empty svg {
+  margin-bottom: 12px;
+  color: #10b981;
+}
+
+.operation-tour-table-state h3 {
+  margin: 0 0 7px;
+
+  color: #172033;
+  font-size: 18px;
+  font-weight: 650;
+}
+
+.operation-tour-table-state p {
+  max-width: 420px;
+  margin: 0;
+
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1200px) {
+  .operation-tour-table {
+    min-width: 1000px;
+  }
+
+  .operation-tour-table thead th,
+  .operation-tour-table tbody td {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .operation-tour-name {
+    max-width: 220px;
+  }
+}
+
+@media (max-width: 768px) {
+  .operation-tour-table-wrapper {
+    border-radius: 0;
+  }
+
+  .operation-tour-table {
+    min-width: 1000px;
+  }
+
+  .operation-tour-table thead th {
+    padding: 12px 14px;
+    font-size: 11px;
+  }
+
+  .operation-tour-table tbody td {
+    padding: 13px 14px;
+  }
+
+  .operation-tour-name {
+    max-width: 200px;
+  }
+
+  .operation-tour-dates {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+  }
+
+  .date-separator {
+    display: none;
+  }
+}
+/* ==========================================
+   BUTTON XEM CHI TIẾT DU THUYỀN (TOUR ĐÃ DUYỆT)
+   ========================================== */
+.operation-tour-view-cruise-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #0284c7;
+  background-color: #e0f2fe;
+  border: 1px solid #bae6fd;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.operation-tour-view-cruise-button:hover {
+  background-color: #bae6fd;
+  color: #0369a1;
+  border-color: #7dd3fc;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.operation-tour-view-cruise-button svg {
+  flex-shrink: 0;
+}
+
+/* ==========================================
+   NÚT KIỂM SOÁT KHU VỰC (TOUR ĐÃ DUYỆT)
+   ========================================== */
+.operation-tour-assignment-button.readonly {
+  background-color: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.operation-tour-assignment-button.readonly:hover {
+  background-color: #dcfce7;
+  border-color: #86efac;
+  color: #15803d;
+}

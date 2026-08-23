@@ -1,0 +1,657 @@
+/* =========================================================
+   SERVICE TOUR CONFIG MODAL
+   ========================================================= */
+
+.service-tour-config-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background: rgba(15, 23, 42, 0.52);
+  backdrop-filter: blur(4px);
+
+  animation: service-tour-config-fade-in 0.18s ease-out;
+}
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+
+.service-tour-config-modal {
+  width: min(720px, 100%);
+  max-height: calc(100vh - 48px);
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+
+  box-shadow:
+    0 24px 60px rgba(15, 23, 42, 0.18),
+    0 8px 24px rgba(15, 23, 42, 0.08);
+
+  animation: service-tour-config-slide-up 0.2s ease-out;
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.service-tour-config-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding: 24px 26px 20px;
+
+  border-bottom: 1px solid #eef0f3;
+  background: #ffffff;
+}
+
+.service-tour-config-modal-header-content {
+  min-width: 0;
+  flex: 1;
+}
+
+.service-tour-config-modal-eyebrow {
+  display: inline-block;
+
+  margin-bottom: 6px;
+
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  color: #64748b;
+}
+
+.service-tour-config-modal-header h2 {
+  margin: 0;
+
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.3;
+
+  color: #0f172a;
+
+  overflow-wrap: anywhere;
+}
+
+.service-tour-config-modal-header p {
+  margin: 6px 0 0;
+
+  font-size: 13px;
+  line-height: 1.5;
+
+  color: #64748b;
+
+  overflow-wrap: anywhere;
+}
+
+/* =========================================================
+   CLOSE BUTTON
+   ========================================================= */
+
+.service-tour-config-modal-close {
+  flex: 0 0 auto;
+
+  width: 36px;
+  height: 36px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 9px;
+
+  background: #ffffff;
+  color: #64748b;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.service-tour-config-modal-close:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+
+  transform: translateY(-1px);
+}
+
+.service-tour-config-modal-close:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   FORM
+   ========================================================= */
+
+.service-tour-config-modal-form {
+  display: flex;
+  flex-direction: column;
+
+  gap: 20px;
+
+  padding: 24px 26px 26px;
+
+  overflow-y: auto;
+}
+
+/* =========================================================
+   FIELD
+   ========================================================= */
+
+.service-tour-config-field {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+.service-tour-config-field label {
+  min-height: 20px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.4;
+
+  color: #334155;
+}
+
+.service-tour-config-field label svg {
+  flex: 0 0 auto;
+
+  color: #64748b;
+}
+
+.service-tour-config-field label span {
+  min-width: 0;
+}
+
+.service-tour-config-field label b {
+  font-size: 13px;
+  font-weight: 700;
+
+  color: #dc2626;
+}
+
+/* =========================================================
+   INPUT / SELECT BASE
+   ========================================================= */
+
+.service-tour-config-field input,
+.service-tour-config-field select {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+
+  box-sizing: border-box;
+
+  padding: 0 12px;
+
+  border: 1px solid #d7dce3;
+  border-radius: 9px;
+
+  outline: none;
+
+  background: #ffffff;
+  color: #0f172a;
+
+  font-family: inherit;
+  font-size: 14px;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+
+.service-tour-config-field input::placeholder {
+  color: #94a3b8;
+}
+
+.service-tour-config-field input:hover:not(:disabled),
+.service-tour-config-field select:hover:not(:disabled) {
+  border-color: #b8c0cc;
+}
+
+.service-tour-config-field input:focus,
+.service-tour-config-field select:focus {
+  border-color: #64748b;
+
+  box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.12);
+}
+
+.service-tour-config-field input:disabled,
+.service-tour-config-field select:disabled {
+  background: #f8fafc;
+  color: #94a3b8;
+
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   TWO COLUMNS
+   ========================================================= */
+
+.service-tour-config-two-columns {
+  display: grid;
+
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+
+  gap: 18px;
+
+  align-items: start;
+}
+
+/* =========================================================
+   DURATION MODE SELECT
+   ========================================================= */
+
+.service-tour-config-duration-select {
+  appearance: none;
+
+  cursor: pointer;
+
+  padding-right: 36px !important;
+
+  background-image:
+    linear-gradient(45deg, transparent 50%, #64748b 50%),
+    linear-gradient(135deg, #64748b 50%, transparent 50%);
+
+  background-position:
+    calc(100% - 17px) 18px,
+    calc(100% - 12px) 18px;
+
+  background-size:
+    5px 5px,
+    5px 5px;
+
+  background-repeat: no-repeat;
+}
+
+/* =========================================================
+   DURATION INPUT
+   ========================================================= */
+
+.service-tour-config-duration {
+  width: 100%;
+
+  display: flex;
+  align-items: stretch;
+
+  margin-top: 1px;
+}
+
+.service-tour-config-duration input {
+  flex: 1 1 auto;
+
+  min-width: 0;
+
+  border-radius: 9px 0 0 9px;
+}
+
+.service-tour-config-duration span {
+  flex: 0 0 auto;
+
+  min-width: 58px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 10px;
+
+  box-sizing: border-box;
+
+  border: 1px solid #d7dce3;
+  border-left: 0;
+
+  border-radius: 0 9px 9px 0;
+
+  background: #f8fafc;
+  color: #64748b;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* =========================================================
+   UNLIMITED HINT
+   ========================================================= */
+
+.service-tour-config-duration-hint {
+  display: block;
+
+  margin-top: 1px;
+
+  font-size: 12px;
+  line-height: 1.5;
+
+  color: #64748b;
+}
+
+/* =========================================================
+   ERROR
+   ========================================================= */
+
+.service-tour-config-field-error {
+  display: block;
+
+  margin-top: -2px;
+
+  font-size: 12px;
+  line-height: 1.45;
+
+  color: #dc2626;
+}
+
+/* =========================================================
+   SERVICE SELECT ERROR COMPATIBILITY
+   ========================================================= */
+
+.service-tour-config-field .convenience-service-select {
+  width: 100%;
+}
+
+.service-tour-config-field .convenience-service-select-wrapper {
+  width: 100%;
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.service-tour-config-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 10px;
+
+  padding-top: 4px;
+
+  border-top: 1px solid #eef0f3;
+}
+
+/* =========================================================
+   BUTTON BASE
+   ========================================================= */
+
+.service-tour-config-cancel,
+.service-tour-config-submit {
+  min-height: 40px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  padding: 0 16px;
+
+  border-radius: 9px;
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 650;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+.service-tour-config-cancel {
+  border: 1px solid #d7dce3;
+
+  background: #ffffff;
+  color: #475569;
+}
+
+.service-tour-config-cancel:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.service-tour-config-submit {
+  border: 1px solid #0f172a;
+
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.service-tour-config-submit:hover:not(:disabled) {
+  background: #1e293b;
+  border-color: #1e293b;
+
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.16);
+
+  transform: translateY(-1px);
+}
+
+.service-tour-config-cancel:disabled,
+.service-tour-config-submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+.service-tour-config-modal-form::-webkit-scrollbar {
+  width: 7px;
+}
+
+.service-tour-config-modal-form::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.service-tour-config-modal-form::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+.service-tour-config-modal-form::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* =========================================================
+   ANIMATION
+   ========================================================= */
+
+@keyframes service-tour-config-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes service-tour-config-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.99);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .service-tour-config-overlay {
+    padding: 16px;
+  }
+
+  .service-tour-config-modal {
+    width: min(100%, 640px);
+
+    max-height: calc(100vh - 32px);
+
+    border-radius: 15px;
+  }
+
+  .service-tour-config-modal-header {
+    padding: 20px;
+  }
+
+  .service-tour-config-modal-form {
+    padding: 20px;
+  }
+
+  .service-tour-config-two-columns {
+    grid-template-columns: 1fr;
+
+    gap: 18px;
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 520px) {
+  .service-tour-config-overlay {
+    align-items: flex-end;
+
+    padding: 0;
+  }
+
+  .service-tour-config-modal {
+    width: 100%;
+    max-height: 94vh;
+
+    border-radius: 18px 18px 0 0;
+  }
+
+  .service-tour-config-modal-header {
+    padding: 18px 16px 16px;
+
+    gap: 12px;
+  }
+
+  .service-tour-config-modal-header h2 {
+    font-size: 19px;
+  }
+
+  .service-tour-config-modal-header p {
+    font-size: 12px;
+  }
+
+  .service-tour-config-modal-close {
+    width: 34px;
+    height: 34px;
+  }
+
+  .service-tour-config-modal-form {
+    gap: 18px;
+
+    padding: 18px 16px 20px;
+  }
+
+  .service-tour-config-two-columns {
+    grid-template-columns: 1fr;
+
+    gap: 16px;
+  }
+
+  .service-tour-config-modal-footer {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 8px;
+
+    padding-top: 14px;
+  }
+
+  .service-tour-config-cancel,
+  .service-tour-config-submit {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   VERY SMALL DEVICES
+   ========================================================= */
+
+@media (max-width: 360px) {
+  .service-tour-config-modal-header {
+    padding: 16px 13px 14px;
+  }
+
+  .service-tour-config-modal-form {
+    padding: 16px 13px 18px;
+  }
+
+  .service-tour-config-modal-footer {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .service-tour-config-overlay,
+  .service-tour-config-modal {
+    animation: none;
+  }
+
+  .service-tour-config-modal-close,
+  .service-tour-config-cancel,
+  .service-tour-config-submit,
+  .service-tour-config-field input,
+  .service-tour-config-field select {
+    transition: none;
+  }
+}

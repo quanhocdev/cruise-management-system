@@ -1,6 +1,19 @@
 import { useEffect, useState } from "react";
 import { Alert, Button, Form, Image, Modal, Spinner } from "react-bootstrap";
 
+// Hàm hỗ trợ format hiển thị số (ví dụ: 500000 -> "500.000")
+const formatNumber = (val) => {
+  if (!val && val !== 0) return "";
+  const cleanStr = String(val).replace(/\D/g, "");
+  return cleanStr ? new Intl.NumberFormat("vi-VN").format(cleanStr) : "";
+};
+
+// Hàm parse chuỗi format về lại số thuần (ví dụ: "500.000" -> 500000)
+const parseNumber = (val) => {
+  if (!val) return "";
+  return String(val).replace(/\D/g, "");
+};
+
 export default function ProductFormModal({
   show,
   saving,
@@ -12,29 +25,29 @@ export default function ProductFormModal({
   const [form, setForm] = useState({
     name: "",
     description: "",
-    price: "",
+    price: "", // Lưu giá trị raw number (ví dụ: "500000")
     quantity: "",
     status: "ACTIVE",
     image: null,
   });
 
+  const [displayPrice, setDisplayPrice] = useState(""); // Lưu giá trị hiển thị dạng đẹp ("500.000")
   const [previewUrl, setPreviewUrl] = useState("");
 
   useEffect(() => {
-    if (!show) {
-      return;
-    }
+    if (!show) return;
 
     if (editingProduct) {
+      const rawPrice = editingProduct.price ?? "";
       setForm({
         name: editingProduct.name || "",
         description: editingProduct.description || "",
-        price: editingProduct.price ?? "",
+        price: rawPrice,
         quantity: editingProduct.quantity ?? "",
         status: editingProduct.status || "ACTIVE",
         image: null,
       });
-
+      setDisplayPrice(formatNumber(rawPrice));
       setPreviewUrl(editingProduct.imageUrl || "");
     } else {
       setForm({
@@ -45,23 +58,38 @@ export default function ProductFormModal({
         status: "ACTIVE",
         image: null,
       });
-
+      setDisplayPrice("");
       setPreviewUrl("");
     }
   }, [show, editingProduct]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-
     setForm((previous) => ({
       ...previous,
       [name]: value,
     }));
   };
 
+  // Xử lý riêng cho Input Giá tiền khi người dùng gõ
+  const handlePriceChange = (event) => {
+    const rawValue = parseNumber(event.target.value);
+    setForm((prev) => ({ ...prev, price: rawValue }));
+    setDisplayPrice(formatNumber(rawValue));
+  };
+
+  // Nút bấm gõ nhanh thêm 3 số 0 (phím tắt +000)
+  const handleAddZeros = (count) => {
+    const currentPrice = form.price || "0";
+    const newPrice = currentPrice + "0".repeat(count);
+    // Giới hạn max tránh tràn số (VD max 1 tỷ)
+    if (Number(newPrice) > 1000000000) return;
+    setForm((prev) => ({ ...prev, price: newPrice }));
+    setDisplayPrice(formatNumber(newPrice));
+  };
+
   const handleImageChange = (event) => {
     const file = event.target.files?.[0] || null;
-
     setForm((previous) => ({
       ...previous,
       image: file,
@@ -77,24 +105,25 @@ export default function ProductFormModal({
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!form.name.trim()) {
-      return;
-    }
+    if (!form.name.trim()) return;
 
-    if (form.price === "" || Number(form.price) < 0) {
-      return;
-    }
+    const numericPrice = Number(form.price || 0);
+    const numericQuantity = Number(form.quantity || 0);
 
-    if (form.quantity === "" || Number(form.quantity) < 0) {
-      return;
-    }
+    if (form.price === "" || numericPrice < 0) return;
+    if (form.quantity === "" || numericQuantity < 0) return;
 
     const formData = new FormData();
 
     formData.append("name", form.name.trim());
-    formData.append("description", form.description.trim());
-    formData.append("price", form.price);
-    formData.append("quantity", form.quantity);
+    formData.append(
+      "description",
+      form.description ? form.description.trim() : "",
+    );
+    formData.append("price", numericPrice.toString());
+
+    // 🔴 ĐỔI TỪ "quantity" THÀNH "stockQuantity" Ở ĐÂY
+    formData.append("stockQuantity", numericQuantity.toString());
 
     if (editingProduct) {
       formData.append("status", form.status);
@@ -106,7 +135,6 @@ export default function ProductFormModal({
 
     await onSubmit(formData);
   };
-
   return (
     <Modal show={show} onHide={onClose} centered size="lg" backdrop="static">
       <Form onSubmit={handleSubmit}>
@@ -123,7 +151,6 @@ export default function ProductFormModal({
             <Form.Label>
               Tên sản phẩm <span className="text-danger">*</span>
             </Form.Label>
-
             <Form.Control
               type="text"
               name="name"
@@ -138,7 +165,6 @@ export default function ProductFormModal({
 
           <Form.Group className="mb-3">
             <Form.Label>Mô tả</Form.Label>
-
             <Form.Control
               as="textarea"
               rows={4}
@@ -149,37 +175,62 @@ export default function ProductFormModal({
               maxLength={5000}
               disabled={saving}
             />
-
             <Form.Text muted>{form.description.length}/5000</Form.Text>
           </Form.Group>
 
           <div className="row">
+            {/* INPUT GIÁ TIỀN ĐÃ ĐƯỢC NÂNG CẤP */}
             <div className="col-md-6">
               <Form.Group className="mb-3">
                 <Form.Label>
-                  Giá <span className="text-danger">*</span>
+                  Giá (VNĐ) <span className="text-danger">*</span>
                 </Form.Label>
+                <div className="input-group">
+                  <Form.Control
+                    type="text"
+                    name="price"
+                    value={displayPrice}
+                    onChange={handlePriceChange}
+                    placeholder="0"
+                    disabled={saving}
+                    required
+                  />
+                  <span className="input-group-text">₫</span>
+                </div>
 
-                <Form.Control
-                  type="number"
-                  name="price"
-                  value={form.price}
-                  onChange={handleChange}
-                  min="0"
-                  step="0.01"
-                  placeholder="0"
-                  disabled={saving}
-                  required
-                />
+                {/* Các nút thêm nhanh 3 số 0 / 6 số 0 */}
+                <div className="d-flex gap-1 mt-1">
+                  <Button
+                    type="button"
+                    variant="outline-secondary"
+                    size="sm"
+                    className="py-0 px-2"
+                    style={{ fontSize: "0.75rem" }}
+                    onClick={() => handleAddZeros(3)}
+                    disabled={saving || !form.price}
+                  >
+                    +000 (.000)
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline-secondary"
+                    size="sm"
+                    className="py-0 px-2"
+                    style={{ fontSize: "0.75rem" }}
+                    onClick={() => handleAddZeros(6)}
+                    disabled={saving || !form.price}
+                  >
+                    +000.000
+                  </Button>
+                </div>
               </Form.Group>
             </div>
 
             <div className="col-md-6">
               <Form.Group className="mb-3">
                 <Form.Label>
-                  Số lượng <span className="text-danger">*</span>
+                  Số lượng tồn kho <span className="text-danger">*</span>
                 </Form.Label>
-
                 <Form.Control
                   type="number"
                   name="quantity"
@@ -198,7 +249,6 @@ export default function ProductFormModal({
           {editingProduct && (
             <Form.Group className="mb-3">
               <Form.Label>Trạng thái</Form.Label>
-
               <Form.Select
                 name="status"
                 value={form.status}
@@ -206,7 +256,6 @@ export default function ProductFormModal({
                 disabled={saving}
               >
                 <option value="ACTIVE">Đang hoạt động</option>
-
                 <option value="INACTIVE">Ngừng hoạt động</option>
               </Form.Select>
             </Form.Group>
@@ -214,21 +263,18 @@ export default function ProductFormModal({
 
           <Form.Group className="mb-3">
             <Form.Label>Hình ảnh</Form.Label>
-
             <Form.Control
               type="file"
               accept="image/*"
               onChange={handleImageChange}
               disabled={saving}
             />
-
             <Form.Text muted>Chọn hình ảnh sản phẩm.</Form.Text>
           </Form.Group>
 
           {previewUrl && (
             <div className="product-form-image-preview">
               <Form.Label>Xem trước</Form.Label>
-
               <div>
                 <Image
                   src={previewUrl}

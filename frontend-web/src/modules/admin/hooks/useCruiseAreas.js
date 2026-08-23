@@ -1,6 +1,6 @@
 // src/modules/admin/hooks/useCruises.js
 import { useCallback, useEffect, useState } from "react";
-import cruiseService from "../services/cruiseService";
+import cruiseAreaService from "../services/cruiseAreaService";
 
 export default function useCruiseAreas(deckId) {
   const [areas, setAreas] = useState([]);
@@ -22,7 +22,7 @@ export default function useCruiseAreas(deckId) {
     setError("");
 
     try {
-      const data = await cruiseService.getAreas(deckId);
+      const data = await cruiseAreaService.getAreas(deckId);
 
       setAreas(data);
     } catch (err) {
@@ -52,7 +52,7 @@ export default function useCruiseAreas(deckId) {
     setSuccess("");
 
     try {
-      const createdArea = await cruiseService.createArea(deckId, formData);
+      const createdArea = await cruiseAreaService.createArea(deckId, formData);
 
       setAreas((previous) =>
         [...previous, createdArea].sort((a, b) =>
@@ -84,7 +84,7 @@ export default function useCruiseAreas(deckId) {
     setSuccess("");
 
     try {
-      const updatedArea = await cruiseService.updateArea(
+      const updatedArea = await cruiseAreaService.updateArea(
         deckId,
         areaId,
         formData,
@@ -120,7 +120,10 @@ export default function useCruiseAreas(deckId) {
     setSuccess("");
 
     try {
-      const updatedArea = await cruiseService.deactivateArea(deckId, areaId);
+      const updatedArea = await cruiseAreaService.deactivateArea(
+        deckId,
+        areaId,
+      );
 
       setAreas((previous) =>
         previous
@@ -152,7 +155,7 @@ export default function useCruiseAreas(deckId) {
     setSuccess("");
 
     try {
-      await cruiseService.deleteArea(deckId, areaId);
+      await cruiseAreaService.deleteArea(deckId, areaId);
 
       setAreas((previous) => previous.filter((area) => area.id !== areaId));
 

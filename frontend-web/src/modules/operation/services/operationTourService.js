@@ -12,27 +12,21 @@ const operationTourService = {
   },
 
   /**
-   * GET /api/operation/tours/{id}/available-cruises
+   * GET /api/operation/tours/approved
    */
-  getAvailableCruises: async (tourId) => {
-    const response = await api.get(
-      `${OPERATION_TOUR_BASE_URL}/${tourId}/available-cruises`,
-    );
+  getApprovedTours: async () => {
+    const response = await api.get(`${OPERATION_TOUR_BASE_URL}/approved`);
     return response.data;
   },
 
   /**
-   * POST /api/operation/tours/{id}/approve?cruiseId=...
+   * POST /api/operation/tours/{id}/approve
+   * Duyệt Tour - Đổi trạng thái sang APPROVED sau khi đã phân công xong khu vực
    */
-  approveTour: async (tourId, cruiseId) => {
+  approveTour: async (tourId, payload = null) => {
     const response = await api.post(
       `${OPERATION_TOUR_BASE_URL}/${tourId}/approve`,
-      null,
-      {
-        params: {
-          cruiseId,
-        },
-      },
+      payload,
     );
     return response.data;
   },

@@ -1,0 +1,206 @@
+/* src/styles/tour-configuration/ProductConfigurationTable.css */
+
+/* =====================================================
+   SECTION BASE & HEADER
+   ===================================================== */
+.product-configuration-table-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.product-configuration-table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.product-configuration-table-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.product-configuration-table-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background-color: #f0fdf4;
+  color: #16a34a;
+  flex-shrink: 0;
+}
+
+.product-configuration-table-title h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.product-configuration-table-title p {
+  font-size: 13px;
+  color: #64748b;
+  margin: 2px 0 0 0;
+}
+
+.product-configuration-table-count {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background-color: #f1f5f9;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* =====================================================
+   EMPTY STATE
+   ===================================================== */
+.product-configuration-table-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 32px;
+  background-color: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* =====================================================
+   TABLE & CONTENT WRAPPER
+   ===================================================== */
+.product-configuration-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background-color: #ffffff;
+}
+
+.product-configuration-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 14px;
+}
+
+.product-configuration-table th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.product-configuration-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
+  vertical-align: middle;
+}
+
+.product-configuration-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.product-configuration-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+/* =====================================================
+   COLUMN SPECIFIC STYLES
+   ===================================================== */
+
+/* Product Name Column */
+.product-configuration-name {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.product-configuration-name strong {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.product-configuration-name span {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+/* Status Badge */
+.product-configuration-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Configured State */
+.product-configuration-status.configured {
+  background-color: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+/* Waiting / Unconfigured State */
+.product-configuration-status.waiting {
+  background-color: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fef3c7;
+}
+
+/* =====================================================
+   RESPONSIVE MEDIA QUERIES
+   ===================================================== */
+
+/* Tablet (<= 768px) */
+@media (max-width: 768px) {
+  .product-configuration-table-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .product-configuration-table-count {
+    align-self: flex-start;
+  }
+
+  .product-configuration-table th,
+  .product-configuration-table td {
+    padding: 10px 12px;
+  }
+}
+
+/* Mobile (<= 480px) */
+@media (max-width: 480px) {
+  .product-configuration-table-title h2 {
+    font-size: 16px;
+  }
+
+  .product-configuration-table-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .product-configuration-table-empty {
+    padding: 20px 16px;
+    font-size: 13px;
+  }
+}

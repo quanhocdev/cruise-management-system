@@ -1,0 +1,32 @@
+.onboard-footer {
+  height: 48px;
+  background-color: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.onboard-footer-links {
+  display: flex;
+  gap: 16px;
+}
+
+.onboard-footer-link {
+  color: #64748b;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.onboard-footer-link:hover {
+  color: #0d9488;
+}
+
+@media (max-width: 768px) {
+  .onboard-footer {
+    padding: 0 16px;
+  }
+}
