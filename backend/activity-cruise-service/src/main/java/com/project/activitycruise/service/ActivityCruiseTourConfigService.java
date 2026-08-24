@@ -36,20 +36,6 @@ public class ActivityCruiseTourConfigService {
                 this.activityCruiseTourMapper = activityCruiseTourMapper;
         }
 
-        // =====================================================
-        // CREATE CONFIGURATION
-        // POST
-        // =====================================================
-
-        /**
-         * Onboard cấu hình lần đầu cho assignment.
-         *
-         * Chỉ được cấu hình khi assignment đang:
-         * WAITING_CONFIG
-         *
-         * Sau khi cấu hình thành công:
-         * WAITING_CONFIG -> NOT_STARTED
-         */
         public OnboardActivityCruiseTourResponse configure(
                         UUID assignmentId,
                         ActivityCruiseTourConfigRequest request) {
@@ -60,19 +46,11 @@ public class ActivityCruiseTourConfigService {
                                                 "Activity cruise tour assignment not found",
                                                 HttpStatus.NOT_FOUND));
 
-                // -------------------------------------------------
-                // Chỉ cho cấu hình assignment đang WAITING_CONFIG
-                // -------------------------------------------------
-
                 if (assignment.getStatus() != ActivityCruiseTourStatus.WAITING_CONFIG) {
                         throw new AppException(
                                         "Activity cruise tour is not waiting for configuration",
                                         HttpStatus.BAD_REQUEST);
                 }
-
-                // -------------------------------------------------
-                // Lấy ActivityCruise master
-                // -------------------------------------------------
 
                 ActivityCruise activityCruise = activityCruiseRepository
                                 .findById(request.activityCruiseId())
@@ -80,58 +58,29 @@ public class ActivityCruiseTourConfigService {
                                                 "Activity cruise not found",
                                                 HttpStatus.NOT_FOUND));
 
-                // -------------------------------------------------
-                // Kiểm tra ActivityCruise có đang hoạt động không
-                // -------------------------------------------------
-
                 if (activityCruise.getStatus() != ActivityCruiseStatus.ACTIVE) {
                         throw new AppException(
                                         "Activity cruise is not active",
                                         HttpStatus.BAD_REQUEST);
                 }
 
-                // -------------------------------------------------
-                // Validate thời gian
-                // -------------------------------------------------
-
                 validateTime(
                                 request.startTime(),
                                 request.endTime());
-
-                // -------------------------------------------------
-                // Apply configuration
-                // -------------------------------------------------
 
                 activityCruiseTourMapper.applyConfig(
                                 assignment,
                                 request,
                                 activityCruise);
 
-                // -------------------------------------------------
-                // Cấu hình lần đầu hoàn tất
-                // -------------------------------------------------
-
-                assignment.setStatus(ActivityCruiseTourStatus.NOT_STARTED);
+                // Đã cấu hình xong nhưng Tour chưa READY
+                assignment.setStatus(ActivityCruiseTourStatus.CONFIGURED);
 
                 ActivityCruiseTour saved = assignmentRepository.save(assignment);
 
                 return activityCruiseTourMapper.toResponse(saved);
         }
 
-        // =====================================================
-        // UPDATE CONFIGURATION
-        // PATCH
-        // =====================================================
-
-        /**
-         * Onboard cập nhật lại cấu hình.
-         *
-         * Chỉ cho phép cập nhật khi assignment đã:
-         * NOT_STARTED
-         *
-         * Không cho PATCH assignment đang WAITING_CONFIG
-         * vì WAITING_CONFIG phải dùng POST để cấu hình lần đầu.
-         */
         public OnboardActivityCruiseTourResponse updateConfig(
                         UUID assignmentId,
                         ActivityCruiseTourConfigRequest request) {
@@ -142,19 +91,11 @@ public class ActivityCruiseTourConfigService {
                                                 "Activity cruise tour assignment not found",
                                                 HttpStatus.NOT_FOUND));
 
-                // -------------------------------------------------
-                // Chỉ cho cập nhật assignment đã cấu hình
-                // -------------------------------------------------
-
-                if (assignment.getStatus() != ActivityCruiseTourStatus.NOT_STARTED) {
+                if (assignment.getStatus() != ActivityCruiseTourStatus.CONFIGURED) {
                         throw new AppException(
-                                        "Only configured activities can be updated",
+                                        "Only CONFIGURED activities can be updated",
                                         HttpStatus.BAD_REQUEST);
                 }
-
-                // -------------------------------------------------
-                // Lấy ActivityCruise master
-                // -------------------------------------------------
 
                 ActivityCruise activityCruise = activityCruiseRepository
                                 .findById(request.activityCruiseId())
@@ -162,38 +103,23 @@ public class ActivityCruiseTourConfigService {
                                                 "Activity cruise not found",
                                                 HttpStatus.NOT_FOUND));
 
-                // -------------------------------------------------
-                // ActivityCruise phải đang ACTIVE
-                // -------------------------------------------------
-
                 if (activityCruise.getStatus() != ActivityCruiseStatus.ACTIVE) {
                         throw new AppException(
                                         "Activity cruise is not active",
                                         HttpStatus.BAD_REQUEST);
                 }
 
-                // -------------------------------------------------
-                // Validate thời gian
-                // -------------------------------------------------
-
                 validateTime(
                                 request.startTime(),
                                 request.endTime());
-
-                // -------------------------------------------------
-                // Apply configuration mới
-                // -------------------------------------------------
 
                 activityCruiseTourMapper.applyConfig(
                                 assignment,
                                 request,
                                 activityCruise);
 
-                // -------------------------------------------------
-                // Giữ nguyên NOT_STARTED
-                // -------------------------------------------------
-
-                assignment.setStatus(ActivityCruiseTourStatus.NOT_STARTED);
+                // PATCH vẫn đang ở trạng thái đã cấu hình
+                assignment.setStatus(ActivityCruiseTourStatus.CONFIGURED);
 
                 ActivityCruiseTour saved = assignmentRepository.save(assignment);
 
@@ -207,6 +133,12 @@ public class ActivityCruiseTourConfigService {
         private void validateTime(
                         LocalDateTime startTime,
                         LocalDateTime endTime) {
+
+                if (startTime == null || endTime == null) {
+                        throw new AppException(
+                                        "Start time and end time are required",
+                                        HttpStatus.BAD_REQUEST);
+                }
 
                 if (!startTime.isBefore(endTime)) {
                         throw new AppException(
