@@ -1,6 +1,5 @@
 package com.project.tour.service.tour.operation;
 
-import com.project.common.event.TourAssignedEvent;
 import com.project.tour.dto.tour.operation.ServiceTourAssignmentRequest;
 import com.project.tour.dto.tour.operation.ServiceTourAssignmentResponse;
 import com.project.tour.exception.AppException;
@@ -11,8 +10,8 @@ import com.project.tour.model.Tour;
 import com.project.tour.repository.cruise.CruiseAreaRepository;
 import com.project.tour.repository.tour.AssignmentServiceRepository;
 import com.project.tour.repository.tour.TourRepository;
+
 import org.springframework.http.HttpStatus;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,48 +22,56 @@ import java.util.UUID;
 @Transactional
 public class ServiceTourAssignmentService {
 
-        // Khai báo hằng số Topic chung dùng cho tất cả các loại assignment
-        private static final String TOUR_ASSIGNMENT_TOPIC = "tour-assignment-topic";
-
         private final AssignmentServiceRepository assignmentRepository;
         private final TourRepository tourRepository;
         private final CruiseAreaRepository cruiseAreaRepository;
         private final ServiceTourAssignmentMapper assignmentMapper;
-        private final KafkaTemplate<String, Object> kafkaTemplate;
 
         public ServiceTourAssignmentService(
                         AssignmentServiceRepository assignmentRepository,
                         TourRepository tourRepository,
                         CruiseAreaRepository cruiseAreaRepository,
-                        ServiceTourAssignmentMapper assignmentMapper,
-                        KafkaTemplate<String, Object> kafkaTemplate) {
+                        ServiceTourAssignmentMapper assignmentMapper) {
 
                 this.assignmentRepository = assignmentRepository;
                 this.tourRepository = tourRepository;
                 this.cruiseAreaRepository = cruiseAreaRepository;
                 this.assignmentMapper = assignmentMapper;
-                this.kafkaTemplate = kafkaTemplate;
         }
 
         /**
-         * Operation phân công một khu vực dịch vụ cho Tour (Tạo bản ghi trong bảng
-         * assignment_service).
+         * Operation phân công một khu vực dịch vụ cho Tour.
+         *
+         * Chỉ lưu assignment vào DB của tour-service.
+         *
+         * Chưa bắn Kafka.
+         * Kafka chỉ được bắn khi Tour được APPROVED.
          */
-        public ServiceTourAssignmentResponse assign(ServiceTourAssignmentRequest request) {
+        public ServiceTourAssignmentResponse assign(
+                        ServiceTourAssignmentRequest request) {
 
-                // 1. Kiểm tra Tour tồn tại
+                // =====================================================
+                // 1. Kiểm tra Tour
+                // =====================================================
+
                 Tour tour = tourRepository.findById(request.tourId())
                                 .orElseThrow(() -> new AppException(
                                                 "Tour not found",
                                                 HttpStatus.NOT_FOUND));
 
-                // 2. Kiểm tra CruiseArea tồn tại
+                // =====================================================
+                // 2. Kiểm tra CruiseArea
+                // =====================================================
+
                 CruiseArea cruiseArea = cruiseAreaRepository.findById(request.cruiseAreaId())
                                 .orElseThrow(() -> new AppException(
                                                 "Cruise area not found",
                                                 HttpStatus.NOT_FOUND));
 
-                // 3. Validate logic nghiệp vụ (Area & Tour phải cùng thuộc một du thuyền)
+                // =====================================================
+                // 3. Validate CruiseArea
+                // =====================================================
+
                 if (cruiseArea.getStatus() == null) {
                         throw new AppException(
                                         "Cruise area status is invalid",
@@ -77,47 +84,54 @@ public class ServiceTourAssignmentService {
                                         HttpStatus.BAD_REQUEST);
                 }
 
+                // =====================================================
+                // 4. Tour phải được gán Cruise
+                // =====================================================
+
                 if (tour.getCruise() == null) {
                         throw new AppException(
                                         "Tour has not been assigned to a cruise",
                                         HttpStatus.BAD_REQUEST);
                 }
 
-                if (!tour.getCruise().getId().equals(cruiseArea.getCruiseDeck().getCruise().getId())) {
+                // =====================================================
+                // 5. CruiseArea phải thuộc cùng Cruise với Tour
+                // =====================================================
+
+                if (!tour.getCruise().getId()
+                                .equals(cruiseArea.getCruiseDeck().getCruise().getId())) {
+
                         throw new AppException(
                                         "Cruise area does not belong to the cruise assigned to this tour",
                                         HttpStatus.BAD_REQUEST);
                 }
 
-                /*
-                 * Chống phân công trùng.
-                 * Nếu Tour + CruiseArea đã tồn tại thì giữ nguyên và trả lại assignment hiện
-                 * tại.
-                 */
+                // =====================================================
+                // 6. Chống phân công trùng
+                // =====================================================
+
                 AssignmentService assignment = assignmentRepository
-                                .findByTourIdAndCruiseAreaId(request.tourId(), request.cruiseAreaId())
+                                .findByTourIdAndCruiseAreaId(
+                                                request.tourId(),
+                                                request.cruiseAreaId())
                                 .orElseGet(() -> {
 
                                         AssignmentService newAssignment = new AssignmentService(
                                                         request.tourId(),
                                                         request.cruiseAreaId());
 
-                                        // Lưu vào Database của tour-service
-                                        AssignmentService savedAssignment = assignmentRepository.save(newAssignment);
-
-                                        // Bắn Kafka Event sang TOPIC CHUNG với areaType "SERVICE" và action "CREATE"
-                                        TourAssignedEvent event = new TourAssignedEvent(
-                                                        request.tourId(),
-                                                        request.cruiseAreaId(),
-                                                        "SERVICE",
-                                                        "CREATE");
-
-                                        kafkaTemplate.send(TOUR_ASSIGNMENT_TOPIC, request.tourId().toString(), event);
-
-                                        return savedAssignment;
+                                        // Chỉ lưu vào DB của tour-service.
+                                        return assignmentRepository.save(newAssignment);
                                 });
 
-                return assignmentMapper.toResponse(assignment, tour, cruiseArea);
+                // =====================================================
+                // 7. Trả response
+                // =====================================================
+
+                return assignmentMapper.toResponse(
+                                assignment,
+                                tour,
+                                cruiseArea);
         }
 
         /**
@@ -135,35 +149,50 @@ public class ServiceTourAssignmentService {
                                 .findAllByTourIdOrderByCreatedAtAsc(tourId)
                                 .stream()
                                 .map(assignment -> {
+
                                         CruiseArea cruiseArea = cruiseAreaRepository
-                                                        .findById(assignment.getCruiseAreaId()).orElse(null);
-                                        return assignmentMapper.toResponse(assignment, tour, cruiseArea);
+                                                        .findById(assignment.getCruiseAreaId())
+                                                        .orElse(null);
+
+                                        return assignmentMapper.toResponse(
+                                                        assignment,
+                                                        tour,
+                                                        cruiseArea);
                                 })
                                 .toList();
         }
 
         /**
-         * Xóa phân công dịch vụ theo tourId và cruiseAreaId.
+         * Xóa phân công dịch vụ.
+         *
+         * Chỉ xóa trong DB của tour-service.
+         *
+         * Không bắn Kafka.
          */
         @Transactional
-        public void deleteAssignment(UUID tourId, UUID cruiseAreaId) {
+        public void deleteAssignment(
+                        UUID tourId,
+                        UUID cruiseAreaId) {
 
-                if (!assignmentRepository.existsByTourIdAndCruiseAreaId(tourId, cruiseAreaId)) {
+                // =====================================================
+                // 1. Kiểm tra assignment tồn tại
+                // =====================================================
+
+                if (!assignmentRepository.existsByTourIdAndCruiseAreaId(
+                                tourId,
+                                cruiseAreaId)) {
+
                         throw new AppException(
                                         "Assignment not found",
                                         HttpStatus.NOT_FOUND);
                 }
 
-                // 1. Xóa trong DB của tour-service
-                assignmentRepository.deleteByTourIdAndCruiseAreaId(tourId, cruiseAreaId);
+                // =====================================================
+                // 2. Xóa assignment
+                // =====================================================
 
-                // 2. Bắn Kafka Event sang TOPIC CHUNG với areaType "SERVICE" và action "DELETE"
-                TourAssignedEvent event = new TourAssignedEvent(
+                assignmentRepository.deleteByTourIdAndCruiseAreaId(
                                 tourId,
-                                cruiseAreaId,
-                                "SERVICE",
-                                "DELETE");
-
-                kafkaTemplate.send(TOUR_ASSIGNMENT_TOPIC, tourId.toString(), event);
+                                cruiseAreaId);
         }
 }
