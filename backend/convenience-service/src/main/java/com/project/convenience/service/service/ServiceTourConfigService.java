@@ -47,7 +47,7 @@ public class ServiceTourConfigService {
          *
          * Sau khi thành công:
          *
-         * WAITING_CONFIG -> NOT_STARTED
+         * WAITING_CONFIG -> CONFIGURED
          */
         public ServiceTourResponse configure(
                         UUID assignmentId,
@@ -73,7 +73,7 @@ public class ServiceTourConfigService {
                                 request,
                                 service);
 
-                serviceTour.setStatus(ServiceTourStatus.NOT_STARTED);
+                serviceTour.setStatus(ServiceTourStatus.CONFIGURED);
 
                 ServiceTour saved = serviceTourRepository.save(serviceTour);
 
@@ -89,11 +89,11 @@ public class ServiceTourConfigService {
          *
          * Chỉ cho phép khi:
          *
-         * NOT_STARTED
+         * CONFIGURED
          *
          * Trạng thái sau khi cập nhật:
          *
-         * NOT_STARTED -> NOT_STARTED
+         * CONFIGURED -> CONFIGURED
          */
         public ServiceTourResponse updateConfig(
                         UUID assignmentId,
@@ -105,10 +105,10 @@ public class ServiceTourConfigService {
                                                 "Service tour assignment not found",
                                                 HttpStatus.NOT_FOUND));
 
-                if (serviceTour.getStatus() != ServiceTourStatus.NOT_STARTED) {
+                if (serviceTour.getStatus() != ServiceTourStatus.CONFIGURED) {
 
                         throw new AppException(
-                                        "Only NOT_STARTED service tour can be updated",
+                                        "Only CONFIGURED service tour can be updated",
                                         HttpStatus.BAD_REQUEST);
                 }
 
@@ -119,7 +119,7 @@ public class ServiceTourConfigService {
                                 request,
                                 service);
 
-                serviceTour.setStatus(ServiceTourStatus.NOT_STARTED);
+                serviceTour.setStatus(ServiceTourStatus.CONFIGURED);
 
                 ServiceTour saved = serviceTourRepository.save(serviceTour);
 

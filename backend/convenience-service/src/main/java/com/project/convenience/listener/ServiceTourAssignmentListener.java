@@ -1,6 +1,7 @@
 package com.project.convenience.listener;
 
-import com.project.common.event.TourAssignedEvent;
+import com.project.common.event.TourApprovedEvent;
+import com.project.common.event.TourAssignmentEvent;
 import com.project.convenience.service.service.ServiceTourService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,41 +17,82 @@ public class ServiceTourAssignmentListener {
 
     private final ServiceTourService serviceTourService;
 
-    public ServiceTourAssignmentListener(ServiceTourService serviceTourService) {
+    public ServiceTourAssignmentListener(
+            ServiceTourService serviceTourService) {
+
         this.serviceTourService = serviceTourService;
     }
 
-    // 1. Đổi topics = "tour-assignment-topic"
-    // 2. Giữ groupId riêng = "service-cruise-group-v1" (hoặc "convenience-group")
-    @KafkaListener(topics = "tour-assignment-topic", groupId = "service-cruise-group-v1", containerFactory = "serviceKafkaListenerContainerFactory")
-    public void onServiceTourAssigned(
-            TourAssignedEvent event,
+    // =========================================================
+    // LISTEN TOUR APPROVED
+    // =========================================================
+
+    @KafkaListener(topics = "tour-approved-topic", groupId = "service-cruise-group-v1", containerFactory = "serviceKafkaListenerContainerFactory")
+    public void onTourApproved(
+            TourApprovedEvent event,
             @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
             @Header(KafkaHeaders.OFFSET) long offset,
             @Header(value = KafkaHeaders.RECEIVED_KEY, required = false) String key) {
 
-        // Bỏ qua nếu event này thuộc về loại phân công khác (ACTIVITY hoặc PRODUCT)
-        if (event.areaType() != null && !"SERVICE".equalsIgnoreCase(event.areaType())) {
+        log.info(
+                "==> [Kafka Consumer] Nhận TourApprovedEvent - " +
+                        "Partition: {}, Offset: {}, Tour ID: {}",
+                partition,
+                offset,
+                event.tourId());
+
+        if (event.assignments() == null ||
+                event.assignments().isEmpty()) {
+
+            log.info(
+                    "==> [Kafka Consumer] Tour {} không có assignment",
+                    event.tourId());
+
             return;
         }
 
-        log.info("==> [Kafka Consumer] Nhận Event Service từ Partition: {}, Offset: {}, Action: {}", partition, offset,
-                event.action());
-        log.info("==> [Data] Tour ID: {}, Cruise Area ID: {}", event.tourId(), event.cruiseAreaId());
+        // =====================================================
+        // DUYỆT CÁC ASSIGNMENT
+        // =====================================================
 
-        try {
-            if ("DELETE".equalsIgnoreCase(event.action())) {
-                // Gọi hàm xóa trong Service của convenience-service
-                serviceTourService.deleteServiceTourFromEvent(event.tourId(), event.cruiseAreaId());
-                log.info("==> [Kafka Consumer] Xóa đồng bộ dịch vụ thành công cho Tour ID: {}", event.tourId());
-            } else {
-                // Mặc định hoặc CREATE: Tạo mới bản ghi WAITING_CONFIG
-                serviceTourService.createServiceTourFromEvent(event.tourId(), event.cruiseAreaId());
-                log.info("==> [Kafka Consumer] Xử lý đồng bộ dịch vụ thành công cho Tour ID: {}", event.tourId());
+        for (TourAssignmentEvent assignment : event.assignments()) {
+
+            // Chỉ Service xử lý SERVICE
+            if (!"SERVICE".equalsIgnoreCase(
+                    assignment.areaType())) {
+
+                continue;
             }
-        } catch (Exception e) {
-            log.error("==> [Kafka Consumer] Lỗi khi xử lý Event Service cho Tour ID: {}", event.tourId(), e);
-            throw e;
+
+            log.info(
+                    "==> [Service] Tour ID: {}, Cruise Area ID: {}, Area Type: {}",
+                    assignment.tourId(),
+                    assignment.cruiseAreaId(),
+                    assignment.areaType());
+
+            try {
+
+                serviceTourService.createServiceTourFromEvent(
+                        assignment.tourId(),
+                        assignment.cruiseAreaId());
+
+                log.info(
+                        "==> [Service] Tạo ServiceTour thành công - " +
+                                "Tour ID: {}, Cruise Area ID: {}",
+                        assignment.tourId(),
+                        assignment.cruiseAreaId());
+
+            } catch (Exception e) {
+
+                log.error(
+                        "==> [Service] Lỗi xử lý ServiceTour - " +
+                                "Tour ID: {}, Cruise Area ID: {}",
+                        assignment.tourId(),
+                        assignment.cruiseAreaId(),
+                        e);
+
+                throw e;
+            }
         }
     }
 }

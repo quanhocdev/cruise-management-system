@@ -59,16 +59,14 @@ public class ServiceTourService {
         // GET CONFIGURABLE SERVICES
         // =====================================================
         /**
-         * Lấy danh sách các ServiceTour đang chờ cấu hình hoặc chưa bắt đầu.
+         * Lấy danh sách các ServiceTour đang chờ cấu hình
          */
         @Transactional(readOnly = true)
         public List<ServiceTourResponse> getPendingConfig() {
 
                 return serviceTourRepository
                                 .findConfigurable(
-                                                List.of(
-                                                                ServiceTourStatus.WAITING_CONFIG,
-                                                                ServiceTourStatus.NOT_STARTED))
+                                                List.of(ServiceTourStatus.WAITING_CONFIG))
                                 .stream()
                                 .map(serviceTourMapper::toResponse)
                                 .toList();
