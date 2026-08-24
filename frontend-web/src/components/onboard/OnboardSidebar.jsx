@@ -3,7 +3,6 @@ import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
   Ship,
-  ClipboardCheck,
   CalendarDays,
   Ticket,
   Settings,
@@ -26,11 +25,6 @@ const menuItems = [
     label: "Cấu hình hoạt động",
     icon: Activity,
     path: "/onboard/activity-cruise",
-  },
-  {
-    label: "Tour sắp diễn ra",
-    icon: ClipboardCheck,
-    path: "/onboard/tours",
   },
   {
     label: "Lịch trình",

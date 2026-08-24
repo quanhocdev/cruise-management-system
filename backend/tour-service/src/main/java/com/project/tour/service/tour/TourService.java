@@ -9,7 +9,6 @@ import com.project.tour.model.Tour;
 import com.project.tour.model.enums.tour.TourStatusTrip;
 import com.project.tour.repository.tour.TourRepository;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
