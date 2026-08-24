@@ -2,13 +2,15 @@ package com.project.convenience.model.enums;
 
 public enum ProductTourStatus {
 
-    WAITING_CONFIG, // Operation đã phân công, ONBOARD chưa cấu hình
+    WAITING_CONFIG, // Operation đã phân công, Onboard chưa cấu hình
 
-    NOT_STARTED, // Đã cấu hình, chờ tour chạy
+    CONFIGURED, // Onboard đã cấu hình xong
 
-    IN_PROGRESS, // Đang mở phục vụ/bán trong tour
+    NOT_STARTED, // Tour đã READY, nhưng chưa bắt đầu chạy
 
-    OUT_OF_STOCK, // Đã hết số lượng cấp cho tour này
+    IN_PROGRESS, // Tour đang chạy
+
+    OUT_OF_STOCK, // Hết số lượng
 
     COMPLETED // Tour kết thúc
 }

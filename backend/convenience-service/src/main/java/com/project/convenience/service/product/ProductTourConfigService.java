@@ -3,13 +3,13 @@ package com.project.convenience.service.product;
 import com.project.convenience.exception.AppException;
 import com.project.convenience.dto.product.convenience.ProductTourConfigRequest;
 import com.project.convenience.dto.product.convenience.ProductTourResponse;
-import com.project.convenience.mapper.ProductTourMapper; // Đã đổi Mapper
+import com.project.convenience.mapper.ProductTourMapper;
 import com.project.convenience.model.Product;
 import com.project.convenience.model.ProductTour;
 import com.project.convenience.model.enums.ProductStatus;
 import com.project.convenience.model.enums.ProductTourStatus;
 import com.project.convenience.repository.ProductRepository;
-import com.project.convenience.repository.ProductTourRepository; // Đã đổi Repository
+import com.project.convenience.repository.ProductTourRepository;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -44,7 +44,7 @@ public class ProductTourConfigService {
      *
      * WAITING_CONFIG
      * ↓
-     * NOT_STARTED
+     * CONFIGURED
      */
     public ProductTourResponse configure(
             UUID assignmentId,
@@ -67,7 +67,7 @@ public class ProductTourConfigService {
 
         productTour.setProduct(product);
         productTour.setQuantity(request.quantity());
-        productTour.setStatus(ProductTourStatus.NOT_STARTED);
+        productTour.setStatus(ProductTourStatus.CONFIGURED);
 
         ProductTour saved = productTourRepository.save(productTour);
 
@@ -82,7 +82,7 @@ public class ProductTourConfigService {
      * Cập nhật cấu hình ProductTour.
      *
      * Chỉ được sửa khi:
-     * NOT_STARTED
+     * CONFIGURED
      */
     public ProductTourResponse updateConfig(
             UUID assignmentId,
@@ -93,9 +93,9 @@ public class ProductTourConfigService {
                         "Product tour assignment not found",
                         HttpStatus.NOT_FOUND));
 
-        if (productTour.getStatus() != ProductTourStatus.NOT_STARTED) {
+        if (productTour.getStatus() != ProductTourStatus.CONFIGURED) {
             throw new AppException(
-                    "Only NOT_STARTED product tour can be updated",
+                    "Only CONFIGURED product tour can be updated",
                     HttpStatus.BAD_REQUEST);
         }
 

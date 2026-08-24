@@ -27,45 +27,61 @@ public class ProductTourService {
         this.mapper = mapper;
     }
 
-    // =====================================================
-    // Xử lý Event CREATE từ Kafka
-    // =====================================================
-    public void createProductTourFromEvent(UUID tourId, UUID cruiseAreaId) {
-        // 1. Kiểm tra cặp (tourId, cruiseAreaId) đã tồn tại trong DB chưa
-        boolean exists = productTourRepository.findByTourIdAndCruiseAreaId(tourId, cruiseAreaId).isPresent();
+    // =========================================================
+    // TẠO PRODUCT TOUR TỪ TOUR APPROVED EVENT
+    // =========================================================
+
+    /**
+     * Tạo ProductTour khi Operation đã duyệt Tour
+     * và assignment có areaType = PRODUCT.
+     *
+     * Trạng thái ban đầu:
+     *
+     * WAITING_CONFIG
+     *
+     * Nếu Kafka gửi lại event thì không tạo duplicate.
+     */
+    public void createProductTourFromEvent(
+            UUID tourId,
+            UUID cruiseAreaId) {
+
+        boolean exists = productTourRepository
+                .findByTourIdAndCruiseAreaId(
+                        tourId,
+                        cruiseAreaId)
+                .isPresent();
+
+        // Kafka có thể retry event -> chống duplicate
         if (exists) {
-            return; // Nếu đã tạo rồi thì bỏ qua (tránh duplicate khi Kafka retry)
+            return;
         }
 
-        // 2. Khởi tạo Entity ProductTour mới
         ProductTour productTour = new ProductTour();
+
         productTour.setTourId(tourId);
         productTour.setCruiseAreaId(cruiseAreaId);
-        productTour.setStatus(ProductTourStatus.WAITING_CONFIG); // Trạng thái chờ cấu hình
+        productTour.setStatus(
+                ProductTourStatus.WAITING_CONFIG);
 
-        // 3. Lưu vào DB
         productTourRepository.save(productTour);
     }
 
-    // =====================================================
-    // HÀM MỚI BỔ SUNG: Xử lý Event DELETE từ Kafka
-    // =====================================================
-    public void deleteProductTourFromEvent(UUID tourId, UUID cruiseAreaId) {
-        productTourRepository.findByTourIdAndCruiseAreaId(tourId, cruiseAreaId)
-                .ifPresent(productTourRepository::delete);
-    }
+    // =========================================================
+    // GET PRODUCT TOUR CẦN CẤU HÌNH
+    // =========================================================
 
-    // =====================================================
-    // GET CONFIGURABLE PRODUCTS
-    // =====================================================
+    /**
+     *
+     * WAITING_CONFIG:
+     * Chưa cấu hình lần đầu.
+     */
     @Transactional(readOnly = true)
     public List<ProductTourResponse> getPendingConfig() {
 
         return productTourRepository
                 .findConfigurable(
                         List.of(
-                                ProductTourStatus.WAITING_CONFIG,
-                                ProductTourStatus.NOT_STARTED))
+                                ProductTourStatus.WAITING_CONFIG))
                 .stream()
                 .map(mapper::toProductTourResponse)
                 .toList();
