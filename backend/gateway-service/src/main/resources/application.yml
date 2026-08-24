@@ -59,20 +59,20 @@ spring:
                 - Path=/api/convenience/**,/api/admin/products/**
 
             # ==========================
-            # TOUR SERVICE - ONBOARD
+            # ACTIVITY CRUISE SERVICE - ONBOARD
             # ==========================
 
-            - id: tour-onboard-service
-              uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
+            - id: activity-cruise-service
+              uri: ${ACTIVITY_SERVICE_URL:http://activity-cruise-service:8083}
               predicates:
                 - Path=/api/onboard/**
 
             # ==========================
-            # TOUR SERVICE - SHORE
+            # ACTIVITY VISIT SERVICE - SHORE
             # ==========================
 
-            - id: tour-shore-service
-              uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
+            - id: activity-visit-service
+              uri: ${ACTIVITY_VISIT_SERVICE_URL:http://activity-visit-service:8087}
               predicates:
                 - Path=/api/shore/**
 

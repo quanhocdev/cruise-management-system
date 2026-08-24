@@ -74,6 +74,53 @@ services:
       timeout: 5s
       retries: 5
 
+  postgres-activity-cruise:
+    image: postgres:15-alpine
+    container_name: postgres_activity_cruise
+    restart: always
+    environment:
+      POSTGRES_DB: activity_cruise_service_db
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_activity_cruise_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER:-postgres} -d activity_cruise_service_db",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==========================
+  # PostgreSQL cho Activity Visit Service
+  # ==========================
+  postgres-activity-visit:
+    image: postgres:15-alpine
+    container_name: postgres_activity_visit
+    restart: always
+    environment:
+      POSTGRES_DB: activity_visit_service_db
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5436:5432"
+    volumes:
+      - postgres_activity_visit_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER:-postgres} -d activity_visit_service_db",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # ==========================
   # Redis
   # ==========================
@@ -168,6 +215,10 @@ services:
         condition: service_healthy
       postgres-convenience:
         condition: service_healthy
+      postgres-activity-cruise:
+        condition: service_healthy
+      postgres-activity-visit:
+        condition: service_healthy
 
   # ==========================
   # API Gateway
@@ -187,17 +238,20 @@ services:
     environment:
       AUTH_SERVICE_URL: http://auth-service:8081
       BOOKING_SERVICE_URL: http://booking-service:8082
-      ACTIVITY_SERVICE_URL: http://activity-service:8083
+      ACTIVITY_SERVICE_URL: http://activity-cruise-service:8083
       CONVENIENCE_SERVICE_URL: http://convenience-service:8084
       PAYMENT_SERVICE_URL: http://payment-service:8085
       NOTIFICATION_SERVICE_URL: http://notification-service:8086
-      FEEDBACK_SERVICE_URL: http://feedback-service:8087
+      ACTIVITY_VISIT_SERVICE_URL: http://activity-visit-service:8087
       TOUR_SERVICE_URL: http://tour-service:8088
+      FEEDBACK_SERVICE_URL: http://feedback-service:8089
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
     depends_on:
       - auth-service
       - tour-service
       - convenience-service
+      - activity-cruise-service
+      - activity-visit-service
 
   # ==========================
   # Auth Service
@@ -288,6 +342,64 @@ services:
       kafka:
         condition: service_started
 
+    # ==========================
+  # Activity Cruise Service
+  # ==========================
+  activity-cruise-service:
+    build:
+      context: ./backend
+      dockerfile: activity-cruise-service/Dockerfile.dev
+    container_name: activity-cruise-service
+    restart: always
+    ports:
+      - "8083:8083"
+    working_dir: /app/activity-cruise-service
+    volumes:
+      - ./backend/activity-cruise-service/src:/app/activity-cruise-service/src
+      - ./backend/common/src:/app/common/src
+      - /app/activity-cruise-service/target
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-activity-cruise:5432/${ACTIVITY_CRUISE_DB_NAME:-activity_cruise_service_db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    depends_on:
+      postgres-activity-cruise:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
+    # ==========================
+  # Activity Visit Service
+  # ==========================
+  activity-visit-service:
+    build:
+      context: ./backend
+      dockerfile: activity-visit-service/Dockerfile.dev
+    container_name: activity-visit-service
+    restart: always
+    ports:
+      - "8087:8087"
+    working_dir: /app/activity-visit-service
+    volumes:
+      - ./backend/activity-visit-service/src:/app/activity-visit-service/src
+      - ./backend/common/src:/app/common/src
+      - /app/activity-visit-service/target
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-activity-visit:5432/${ACTIVITY_VISIT_DB_NAME:-activity_visit_service_db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    depends_on:
+      postgres-activity-visit:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
   # ==========================
   # React Frontend
   # ==========================
@@ -314,4 +426,6 @@ volumes:
   postgres_auth_data:
   postgres_tour_data:
   postgres_convenience_data:
+  postgres_activity_cruise_data:
+  postgres_activity_visit_data:
   kafka_data:

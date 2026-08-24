@@ -17,4 +17,4 @@ public record TourAssignedEvent(
     public TourAssignedEvent(UUID tourId, UUID cruiseAreaId, String areaType) {
         this(tourId, cruiseAreaId, areaType, "CREATE", Instant.now().toString());
     }
-}
+}// // mvn clean install -DskipTests

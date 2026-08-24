@@ -52,7 +52,6 @@ import ConvenienceTourConfigPage from "./modules/convenience/pages/ConvenienceTo
 import OnboardLayout from "./layouts/OnboardLayout";
 import OnboardDashboard from "./modules/onboard/pages/Dashboard";
 import OnboardActivityCruiseTour from "./modules/onboard/pages/ActivityCruiseTour";
-import OnboardTour from "./modules/onboard/pages/OnboardTour";
 
 import ShoreLayout from "./layouts/ShoreLayout";
 import ShoreDashboard from "./modules/shore/pages/Dashboard";
@@ -190,8 +189,6 @@ export default function App() {
               path="activity-cruise"
               element={<OnboardActivityCruiseTour />}
             />
-
-            <Route path="tours" element={<OnboardTour />} />
 
             <Route
               path="schedules"
