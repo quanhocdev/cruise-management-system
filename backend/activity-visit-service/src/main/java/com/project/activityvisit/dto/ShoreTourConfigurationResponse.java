@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import com.project.tour.model.enums.visit.VisitTourStatus;
+import com.project.activityvisit.model.enums.VisitTourStatus;
 
 public record ShoreTourConfigurationResponse(
 

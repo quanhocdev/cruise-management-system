@@ -1,9 +1,8 @@
 package com.project.activityvisit.repository;
 
-import com.project.tour.model.VisitTour;
-import com.project.tour.model.enums.visit.VisitTourStatus;
+import com.project.activityvisit.model.VisitTour;
+import com.project.activityvisit.model.enums.VisitTourStatus;
 
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Collection;
@@ -14,55 +13,49 @@ import java.util.UUID;
 public interface VisitTourRepository
                 extends JpaRepository<VisitTour, UUID> {
 
-        @EntityGraph(attributePaths = {
-                        "scheduleStop",
-                        "scheduleStop.schedule",
-                        "scheduleStop.schedule.tour",
-                        "scheduleStop.port"
-        })
+        // =====================================================
+        // GET ALL
+        // =====================================================
+
         List<VisitTour> findAllByOrderByCreatedAtDesc();
 
+        // =====================================================
+        // GET BY ID
+        // =====================================================
+
         @Override
-        @EntityGraph(attributePaths = {
-                        "scheduleStop",
-                        "scheduleStop.schedule",
-                        "scheduleStop.schedule.tour",
-                        "scheduleStop.port"
-        })
         Optional<VisitTour> findById(UUID id);
 
-        @EntityGraph(attributePaths = {
-                        "scheduleStop",
-                        "scheduleStop.schedule",
-                        "scheduleStop.schedule.tour",
-                        "scheduleStop.port"
-        })
+        // =====================================================
+        // GET BY SCHEDULE STOP
+        // =====================================================
+
         List<VisitTour> findAllByScheduleStopIdOrderByStartTimeAsc(
                         UUID scheduleStopId);
 
-        @EntityGraph(attributePaths = {
-                        "scheduleStop",
-                        "scheduleStop.schedule",
-                        "scheduleStop.schedule.tour",
-                        "scheduleStop.port"
-        })
-        List<VisitTour> findAllByScheduleStopScheduleTourIdOrderByStartTimeAsc(
+        // =====================================================
+        // GET BY TOUR
+        // =====================================================
+
+        List<VisitTour> findAllByTourIdOrderByStartTimeAsc(
                         UUID tourId);
+
+        // =====================================================
+        // GET BY TOUR + STATUS
+        // =====================================================
+
+        List<VisitTour> findAllByTourIdAndStatusOrderByStartTimeAsc(
+                        UUID tourId,
+                        VisitTourStatus status);
 
         // =====================================================
         // SHORE CONFIGURATION
         // =====================================================
 
-        @EntityGraph(attributePaths = {
-                        "scheduleStop",
-                        "scheduleStop.schedule",
-                        "scheduleStop.schedule.tour",
-                        "scheduleStop.port"
-        })
-        List<VisitTour> findAllByScheduleStop_IdInOrderByStartTimeAsc(
+        List<VisitTour> findAllByScheduleStopIdInOrderByStartTimeAsc(
                         Collection<UUID> scheduleStopIds);
 
-        List<VisitTour> findAllByScheduleStop_IdInAndStatusOrderByStartTimeAsc(
-                        List<UUID> scheduleStopIds,
+        List<VisitTour> findAllByScheduleStopIdInAndStatusOrderByStartTimeAsc(
+                        Collection<UUID> scheduleStopIds,
                         VisitTourStatus status);
 }

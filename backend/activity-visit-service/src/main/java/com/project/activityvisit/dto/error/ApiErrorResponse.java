@@ -1,4 +1,4 @@
-package com.project.convenience.dto.error;
+package com.project.activityvisit.dto.error;
 
 import java.time.LocalDateTime;
 import java.util.Map;

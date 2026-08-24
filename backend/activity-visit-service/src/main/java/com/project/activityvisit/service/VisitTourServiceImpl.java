@@ -3,13 +3,10 @@ package com.project.activityvisit.service;
 import com.project.activityvisit.dto.CreateVisitTourRequest;
 import com.project.activityvisit.dto.UpdateVisitTourRequest;
 import com.project.activityvisit.dto.VisitTourResponse;
+import com.project.activityvisit.mapper.VisitTourMapper;
+import com.project.activityvisit.model.VisitTour;
 import com.project.activityvisit.repository.VisitTourRepository;
-import com.project.tour.exception.AppException;
-import com.project.tour.mapper.tour.VisitTourMapper;
-import com.project.tour.model.ScheduleStop;
-import com.project.tour.model.VisitTour;
-import com.project.tour.model.enums.visit.VisitTourStatus;
-import com.project.tour.repository.tour.schedule.ScheduleStopRepository;
+import com.project.activityvisit.exception.AppException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -19,22 +16,16 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-public class VisitTourServiceImpl
-                implements VisitTourService {
+public class VisitTourServiceImpl implements VisitTourService {
 
         private final VisitTourRepository visitTourRepository;
-        private final ScheduleStopRepository scheduleStopRepository;
         private final VisitTourValidator validator;
 
         public VisitTourServiceImpl(
                         VisitTourRepository visitTourRepository,
-                        ScheduleStopRepository scheduleStopRepository,
                         VisitTourValidator validator) {
 
                 this.visitTourRepository = visitTourRepository;
-
-                this.scheduleStopRepository = scheduleStopRepository;
-
                 this.validator = validator;
         }
 
@@ -59,13 +50,11 @@ public class VisitTourServiceImpl
 
         @Override
         @Transactional(readOnly = true)
-        public VisitTourResponse getById(
-                        UUID id) {
+        public VisitTourResponse getById(UUID id) {
 
                 VisitTour visitTour = findById(id);
 
-                return VisitTourMapper.toResponse(
-                                visitTour);
+                return VisitTourMapper.toResponse(visitTour);
         }
 
         // =====================================================
@@ -95,8 +84,7 @@ public class VisitTourServiceImpl
                         UUID tourId) {
 
                 return visitTourRepository
-                                .findAllByScheduleStopScheduleTourIdOrderByStartTimeAsc(
-                                                tourId)
+                                .findAllByTourIdOrderByStartTimeAsc(tourId)
                                 .stream()
                                 .map(VisitTourMapper::toResponse)
                                 .toList();
@@ -114,20 +102,15 @@ public class VisitTourServiceImpl
 
                 validator.validateCreate(request);
 
-                ScheduleStop scheduleStop = findScheduleStop(
-                                scheduleStopId);
+                VisitTour visitTour = VisitTourMapper.toEntity(request);
 
-                validator.validateTourCanModify(
-                                scheduleStop.getSchedule().getTour());
+                visitTour.setScheduleStopId(scheduleStopId);
 
                 validator.validateTimeRange(
-                                scheduleStop,
+                                visitTour.getArriveAt(),
+                                visitTour.getLeaveAt(),
                                 request.startTime(),
                                 request.endTime());
-
-                VisitTour visitTour = VisitTourMapper.toEntity(
-                                request,
-                                scheduleStop);
 
                 VisitTour saved = visitTourRepository.save(visitTour);
 
@@ -146,69 +129,21 @@ public class VisitTourServiceImpl
 
                 VisitTour visitTour = findById(id);
 
-                validator.validateTourCanModify(
-                                visitTour.getScheduleStop()
-                                                .getSchedule()
-                                                .getTour());
+                validator.validateUpdate(request);
 
-                validator.validateUpdate(
+                VisitTourMapper.updateEntity(
+                                visitTour,
                                 request);
 
-                /*
-                 * ScheduleStop không được thay đổi
-                 * bằng PATCH.
-                 */
-
-                if (request.name() != null) {
-                        visitTour.setName(
-                                        request.name().trim());
-                }
-
-                if (request.description() != null) {
-                        visitTour.setDescription(
-                                        request.description());
-                }
-
-                if (request.startTime() != null) {
-                        visitTour.setStartTime(
-                                        request.startTime());
-                }
-
-                if (request.endTime() != null) {
-                        visitTour.setEndTime(
-                                        request.endTime());
-                }
-
-                if (request.maxPassengers() != null) {
-                        visitTour.setMaxPassengers(
-                                        request.maxPassengers());
-                }
-
-                if (request.price() != null) {
-                        visitTour.setPrice(
-                                        request.price());
-                }
-
-                if (request.status() != null) {
-
-                        validator.validateStatusTransition(
-                                        visitTour.getStatus(),
-                                        request.status());
-
-                        visitTour.setStatus(
-                                        request.status());
-                }
-
                 validator.validateTimeRange(
-                                visitTour.getScheduleStop(),
+                                visitTour.getArriveAt(),
+                                visitTour.getLeaveAt(),
                                 visitTour.getStartTime(),
                                 visitTour.getEndTime());
 
-                VisitTour saved = visitTourRepository.save(
-                                visitTour);
+                VisitTour saved = visitTourRepository.save(visitTour);
 
-                return VisitTourMapper.toResponse(
-                                saved);
+                return VisitTourMapper.toResponse(saved);
         }
 
         // =====================================================
@@ -221,36 +156,19 @@ public class VisitTourServiceImpl
 
                 VisitTour visitTour = findById(id);
 
-                validator.validateTourCanModify(
-                                visitTour.getScheduleStop()
-                                                .getSchedule()
-                                                .getTour());
-
-                visitTourRepository.delete(
-                                visitTour);
+                visitTourRepository.delete(visitTour);
         }
 
         // =====================================================
-        // FINDERS
+        // FINDER
         // =====================================================
 
-        private VisitTour findById(
-                        UUID id) {
+        private VisitTour findById(UUID id) {
 
                 return visitTourRepository
                                 .findById(id)
                                 .orElseThrow(() -> new AppException(
                                                 "Visit tour not found",
-                                                HttpStatus.NOT_FOUND));
-        }
-
-        private ScheduleStop findScheduleStop(
-                        UUID id) {
-
-                return scheduleStopRepository
-                                .findById(id)
-                                .orElseThrow(() -> new AppException(
-                                                "Schedule stop not found",
                                                 HttpStatus.NOT_FOUND));
         }
 }

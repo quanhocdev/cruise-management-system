@@ -1,4 +1,4 @@
-package com.project.convenience.exception;
+package com.project.activityvisit.exception;
 
 import org.springframework.http.HttpStatus;
 

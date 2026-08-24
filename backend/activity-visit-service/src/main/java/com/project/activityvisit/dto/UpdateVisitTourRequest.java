@@ -1,6 +1,6 @@
 package com.project.activityvisit.dto;
 
-import com.project.tour.model.enums.visit.VisitTourStatus;
+import com.project.activityvisit.model.enums.VisitTourStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

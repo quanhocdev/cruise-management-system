@@ -1,14 +1,9 @@
-// src/main/java/com/project/tour/mapper/tour/VisitTourMapper.java
-
-package com.project.tour.mapper.tour;
+package com.project.activityvisit.mapper;
 
 import com.project.activityvisit.dto.CreateVisitTourRequest;
 import com.project.activityvisit.dto.UpdateVisitTourRequest;
 import com.project.activityvisit.dto.VisitTourResponse;
-import com.project.tour.model.Schedule;
-import com.project.tour.model.ScheduleStop;
-import com.project.tour.model.Tour;
-import com.project.tour.model.VisitTour;
+import com.project.activityvisit.model.VisitTour;
 
 public final class VisitTourMapper {
 
@@ -20,12 +15,10 @@ public final class VisitTourMapper {
     // =====================================================
 
     public static VisitTour toEntity(
-            CreateVisitTourRequest request,
-            ScheduleStop scheduleStop) {
+            CreateVisitTourRequest request) {
 
         VisitTour visitTour = new VisitTour();
 
-        visitTour.setScheduleStop(scheduleStop);
         visitTour.setName(request.name());
         visitTour.setDescription(request.description());
         visitTour.setStartTime(request.startTime());
@@ -45,7 +38,7 @@ public final class VisitTourMapper {
             UpdateVisitTourRequest request) {
 
         if (request.name() != null) {
-            visitTour.setName(request.name());
+            visitTour.setName(request.name().trim());
         }
 
         if (request.description() != null) {
@@ -77,37 +70,53 @@ public final class VisitTourMapper {
     // ENTITY -> RESPONSE
     // =====================================================
 
-    public static VisitTourResponse toResponse(VisitTour visitTour) {
-
-        ScheduleStop stop = visitTour.getScheduleStop();
-        Schedule schedule = stop.getSchedule();
-        Tour tour = schedule.getTour();
+    public static VisitTourResponse toResponse(
+            VisitTour visitTour) {
 
         return new VisitTourResponse(
+
                 visitTour.getId(),
 
+                // =================================================
                 // TOUR
-                tour.getId(),
-                tour.getCode(),
-                tour.getName(),
+                // =================================================
 
+                visitTour.getTourId(),
+                visitTour.getTourCode(),
+                visitTour.getTourName(),
+
+                // =================================================
                 // SCHEDULE
-                schedule.getId(),
-                schedule.getDayNumber(),
+                // =================================================
 
+                visitTour.getScheduleId(),
+                visitTour.getDayNumber(),
+
+                // =================================================
                 // SCHEDULE STOP
-                stop.getId(),
-                stop.getStopOrder(),
+                // =================================================
 
+                visitTour.getScheduleStopId(),
+                visitTour.getStopOrder(),
+
+                // =================================================
                 // PORT
-                stop.getPort().getId(),
-                stop.getPort().getName(),
+                // =================================================
 
+                visitTour.getPortId(),
+                visitTour.getPortName(),
+
+                // =================================================
                 // SHIP ARRIVAL / DEPARTURE
-                stop.getArriveAt(),
-                stop.getLeaveAt(),
+                // =================================================
 
+                visitTour.getArriveAt(),
+                visitTour.getLeaveAt(),
+
+                // =================================================
                 // VISIT TOUR
+                // =================================================
+
                 visitTour.getName(),
                 visitTour.getDescription(),
                 visitTour.getStartTime(),
@@ -116,7 +125,10 @@ public final class VisitTourMapper {
                 visitTour.getPrice(),
                 visitTour.getStatus(),
 
+                // =================================================
                 // AUDIT
+                // =================================================
+
                 visitTour.getCreatedAt(),
                 visitTour.getUpdatedAt());
     }

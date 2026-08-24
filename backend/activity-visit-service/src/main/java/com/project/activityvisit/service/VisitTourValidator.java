@@ -2,11 +2,9 @@ package com.project.activityvisit.service;
 
 import com.project.activityvisit.dto.CreateVisitTourRequest;
 import com.project.activityvisit.dto.UpdateVisitTourRequest;
-import com.project.tour.exception.AppException;
-import com.project.tour.model.ScheduleStop;
-import com.project.tour.model.enums.visit.VisitTourStatus;
-import com.project.tour.model.Tour;
-import com.project.tour.model.enums.tour.TourStatusTrip;
+import com.project.activityvisit.exception.AppException;
+import com.project.activityvisit.model.enums.VisitTourStatus;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -66,38 +64,36 @@ public class VisitTourValidator {
                         validatePrice(
                                         request.price());
                 }
+
+                // Nếu PATCH truyền cả hai thì kiểm tra lại khoảng thời gian
+                if (request.startTime() != null
+                                && request.endTime() != null) {
+
+                        validateTime(
+                                        request.startTime(),
+                                        request.endTime());
+                }
         }
 
         // =====================================================
-        // TIME RANGE
+        // TIME
         // =====================================================
 
-        public void validateTimeRange(
-                        ScheduleStop scheduleStop,
+        public void validateTime(
                         LocalDateTime startTime,
                         LocalDateTime endTime) {
 
-                if (scheduleStop == null) {
+                if (startTime == null
+                                || endTime == null) {
+
                         throw badRequest(
-                                        "Schedule stop is required");
+                                        "Start time and end time are required");
                 }
 
-                validateTime(
-                                startTime,
-                                endTime);
-
-                if (startTime.isBefore(
-                                scheduleStop.getArriveAt())) {
+                if (!startTime.isBefore(endTime)) {
 
                         throw badRequest(
-                                        "Visit tour cannot start before the ship arrives at the port");
-                }
-
-                if (endTime.isAfter(
-                                scheduleStop.getLeaveAt())) {
-
-                        throw badRequest(
-                                        "Visit tour cannot end after the ship leaves the port");
+                                        "Start time must be before end time");
                 }
         }
 
@@ -124,6 +120,14 @@ public class VisitTourValidator {
                 }
 
                 boolean allowed = switch (currentStatus) {
+
+                        case WAITING_CONFIG ->
+                                newStatus == VisitTourStatus.CONFIGURED
+                                                || newStatus == VisitTourStatus.CANCELLED;
+
+                        case CONFIGURED ->
+                                newStatus == VisitTourStatus.NOT_STARTED
+                                                || newStatus == VisitTourStatus.CANCELLED;
 
                         case NOT_STARTED ->
                                 newStatus == VisitTourStatus.IN_PROGRESS
@@ -169,28 +173,6 @@ public class VisitTourValidator {
         }
 
         // =====================================================
-        // TIME
-        // =====================================================
-
-        private void validateTime(
-                        LocalDateTime startTime,
-                        LocalDateTime endTime) {
-
-                if (startTime == null
-                                || endTime == null) {
-
-                        throw badRequest(
-                                        "Start time and end time are required");
-                }
-
-                if (!startTime.isBefore(endTime)) {
-
-                        throw badRequest(
-                                        "Start time must be before end time");
-                }
-        }
-
-        // =====================================================
         // MAX PASSENGERS
         // =====================================================
 
@@ -232,26 +214,27 @@ public class VisitTourValidator {
                                 HttpStatus.BAD_REQUEST);
         }
 
-        // =====================================================
-        // TOUR STATUS - MODIFY
-        // =====================================================
+        public void validateTimeRange(
+                        LocalDateTime arriveAt,
+                        LocalDateTime leaveAt,
+                        LocalDateTime startTime,
+                        LocalDateTime endTime) {
 
-        public void validateTourCanModify(
-                        Tour tour) {
-
-                if (tour == null) {
+                if (arriveAt == null || leaveAt == null) {
                         throw badRequest(
-                                        "Tour is required");
+                                        "Ship arrival and departure time are required");
                 }
 
-                TourStatusTrip status = tour.getStatusTrip();
+                validateTime(startTime, endTime);
 
-                if (status != TourStatusTrip.APPROVED
-                                && status != TourStatusTrip.IN_PROGRESS) {
-
+                if (startTime.isBefore(arriveAt)) {
                         throw badRequest(
-                                        "Visit tour cannot be modified when tour status is "
-                                                        + status);
+                                        "Visit tour cannot start before the ship arrives at the port");
+                }
+
+                if (endTime.isAfter(leaveAt)) {
+                        throw badRequest(
+                                        "Visit tour cannot end after the ship leaves the port");
                 }
         }
 }
