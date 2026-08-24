@@ -2,9 +2,9 @@
 
 package com.project.tour.mapper.tour;
 
-import com.project.tour.dto.visit.CreateVisitTourRequest;
-import com.project.tour.dto.visit.UpdateVisitTourRequest;
-import com.project.tour.dto.visit.VisitTourResponse;
+import com.project.activityvisit.dto.CreateVisitTourRequest;
+import com.project.activityvisit.dto.UpdateVisitTourRequest;
+import com.project.activityvisit.dto.VisitTourResponse;
 import com.project.tour.model.Schedule;
 import com.project.tour.model.ScheduleStop;
 import com.project.tour.model.Tour;

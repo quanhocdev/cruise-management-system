@@ -1,7 +1,8 @@
-package com.project.tour.service.tour.visit;
+package com.project.activityvisit.service;
 
+import com.project.activityvisit.dto.ShoreTourConfigurationResponse;
+import com.project.activityvisit.repository.VisitTourRepository;
 import com.project.tour.dto.tour.TourResponse;
-import com.project.tour.dto.visit.ShoreTourConfigurationResponse;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.tour.TourMapper;
 import com.project.tour.mapper.tour.visit.ShoreTourConfigurationMapper;
@@ -12,7 +13,6 @@ import com.project.tour.model.VisitTour;
 import com.project.tour.model.enums.tour.TourStatusTrip;
 import com.project.tour.model.enums.visit.VisitTourStatus;
 import com.project.tour.repository.tour.TourRepository;
-import com.project.tour.repository.tour.VisitTourRepository;
 import com.project.tour.repository.tour.schedule.ScheduleRepository;
 import com.project.tour.repository.tour.schedule.ScheduleStopRepository;
 

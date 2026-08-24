@@ -1,9 +1,9 @@
-package com.project.tour.controller.tour;
+package com.project.activityvisit.controller;
 
+import com.project.activityvisit.dto.ShoreTourConfigurationResponse;
+import com.project.activityvisit.service.ShoreTourConfigurationService;
 import com.project.tour.dto.tour.TourResponse;
-import com.project.tour.dto.visit.ShoreTourConfigurationResponse;
 import com.project.tour.model.enums.visit.VisitTourStatus;
-import com.project.tour.service.tour.visit.ShoreTourConfigurationService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -1,7 +1,7 @@
-package com.project.tour.service.tour.visit;
+package com.project.activityvisit.service;
 
-import com.project.tour.dto.visit.CreateVisitTourRequest;
-import com.project.tour.dto.visit.UpdateVisitTourRequest;
+import com.project.activityvisit.dto.CreateVisitTourRequest;
+import com.project.activityvisit.dto.UpdateVisitTourRequest;
 import com.project.tour.exception.AppException;
 import com.project.tour.model.ScheduleStop;
 import com.project.tour.model.enums.visit.VisitTourStatus;
