@@ -5,6 +5,7 @@ import com.project.activitycruise.mapper.ActivityCruiseTourMapper;
 import com.project.activitycruise.model.ActivityCruiseTour;
 import com.project.activitycruise.model.enums.ActivityCruiseTourStatus;
 import com.project.activitycruise.repository.ActivityCruiseTourAssignmentRepository;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,9 +30,15 @@ public class ActivityCruiseTourService {
     // =====================================================
     // Xử lý Event CREATE từ Kafka
     // =====================================================
-    public void createActivityTourFromEvent(UUID tourId, UUID cruiseAreaId) {
+
+    public void createActivityTourFromEvent(
+            UUID tourId,
+            UUID cruiseAreaId) {
+
         boolean exists = assignmentRepository
-                .findByTourIdAndCruiseAreaId(tourId, cruiseAreaId)
+                .findByTourIdAndCruiseAreaId(
+                        tourId,
+                        cruiseAreaId)
                 .isPresent();
 
         if (exists) {
@@ -39,9 +46,11 @@ public class ActivityCruiseTourService {
         }
 
         ActivityCruiseTour activityTour = new ActivityCruiseTour();
+
         activityTour.setTourId(tourId);
         activityTour.setCruiseAreaId(cruiseAreaId);
-        activityTour.setStatus(ActivityCruiseTourStatus.WAITING_CONFIG);
+        activityTour.setStatus(
+                ActivityCruiseTourStatus.WAITING_CONFIG);
 
         assignmentRepository.save(activityTour);
     }
@@ -49,21 +58,28 @@ public class ActivityCruiseTourService {
     // =====================================================
     // Xử lý Event DELETE từ Kafka
     // =====================================================
-    public void deleteActivityTourFromEvent(UUID tourId, UUID cruiseAreaId) {
+
+    public void deleteActivityTourFromEvent(
+            UUID tourId,
+            UUID cruiseAreaId) {
+
         assignmentRepository
-                .findByTourIdAndCruiseAreaId(tourId, cruiseAreaId)
+                .findByTourIdAndCruiseAreaId(
+                        tourId,
+                        cruiseAreaId)
                 .ifPresent(assignmentRepository::delete);
     }
 
     // =====================================================
-    // GET CONFIGURABLE ACTIVITIES (Tương tự Product & Service)
+    // GET ACTIVITIES ĐANG CHỜ CẤU HÌNH
     // =====================================================
+
     @Transactional(readOnly = true)
     public List<OnboardActivityCruiseTourResponse> getPendingConfig() {
+
         return assignmentRepository
-                .findConfigurable(List.of(
-                        ActivityCruiseTourStatus.WAITING_CONFIG,
-                        ActivityCruiseTourStatus.NOT_STARTED))
+                .findPendingConfig(
+                        ActivityCruiseTourStatus.WAITING_CONFIG)
                 .stream()
                 .map(activityCruiseTourMapper::toResponse)
                 .toList();

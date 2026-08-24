@@ -3,6 +3,7 @@ package com.project.convenience.listener;
 import com.project.common.event.TourApprovedEvent;
 import com.project.common.event.TourAssignmentEvent;
 import com.project.convenience.service.service.ServiceTourService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;

@@ -28,16 +28,6 @@ public class ActivityCruiseTourController {
                 this.configService = configService;
         }
 
-        // =====================================================
-        // GET PENDING CONFIG
-        // =====================================================
-
-        /**
-         * Lấy các hoạt động mà ONBOARD cần cấu hình.
-         *
-         * Chỉ lấy:
-         * - ActivityCruiseTour đang WAITING_CONFIG
-         */
         @GetMapping("/pending-config")
         public ResponseEntity<List<OnboardActivityCruiseTourResponse>> getPendingConfig() {
 
@@ -45,19 +35,6 @@ public class ActivityCruiseTourController {
                                 activityCruiseTourService.getPendingConfig());
         }
 
-        // =====================================================
-        // POST CONFIG
-        // =====================================================
-
-        /**
-         * ONBOARD cấu hình hoạt động lần đầu.
-         *
-         * Chỉ được gọi khi:
-         * ActivityCruiseTour.status = WAITING_CONFIG
-         *
-         * Sau khi thành công:
-         * WAITING_CONFIG -> NOT_STARTED
-         */
         @PostMapping("/{assignmentId}/config")
         public ResponseEntity<OnboardActivityCruiseTourResponse> configure(
                         @PathVariable UUID assignmentId,
@@ -69,16 +46,6 @@ public class ActivityCruiseTourController {
                                                 request));
         }
 
-        // =====================================================
-        // PATCH CONFIG
-        // =====================================================
-
-        /**
-         * ONBOARD cập nhật lại cấu hình hoạt động.
-         *
-         * Chỉ được cập nhật khi:
-         * ActivityCruiseTour.status = NOT_STARTED
-         */
         @PatchMapping("/{assignmentId}/config")
         public ResponseEntity<OnboardActivityCruiseTourResponse> updateConfig(
                         @PathVariable UUID assignmentId,
