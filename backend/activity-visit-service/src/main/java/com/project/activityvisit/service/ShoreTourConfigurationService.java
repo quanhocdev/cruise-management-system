@@ -1,16 +1,17 @@
-package com.project.activityvisit.service;
+// package com.project.activityvisit.service;
 
-import com.project.activityvisit.dto.ShoreTourConfigurationResponse;
-import com.project.tour.dto.tour.TourResponse;
-import com.project.tour.model.enums.visit.VisitTourStatus;
-import java.util.List;
-import java.util.UUID;
+// import com.project.activityvisit.dto.ShoreTourConfigurationResponse;
+// import com.project.activityvisit.dto.TourSummaryResponse;
+// import com.project.activityvisit.model.enums.VisitTourStatus;
 
-public interface ShoreTourConfigurationService {
+// import java.util.List;
+// import java.util.UUID;
 
-    List<TourResponse> getAvailableTours();
+// public interface ShoreTourConfigurationService {
 
-    ShoreTourConfigurationResponse getConfiguration(
-            UUID tourId,
-            VisitTourStatus status);
-}
+// List<TourSummaryResponse> getAvailableTours();
+
+// ShoreTourConfigurationResponse getConfiguration(
+// UUID tourId,
+// VisitTourStatus status);
+// }

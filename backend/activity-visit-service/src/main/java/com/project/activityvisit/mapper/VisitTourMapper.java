@@ -78,43 +78,14 @@ public final class VisitTourMapper {
                 visitTour.getId(),
 
                 // =================================================
-                // TOUR
+                // REFERENCES
                 // =================================================
 
                 visitTour.getTourId(),
-                visitTour.getTourCode(),
-                visitTour.getTourName(),
-
-                // =================================================
-                // SCHEDULE
-                // =================================================
-
-                visitTour.getScheduleId(),
-                visitTour.getDayNumber(),
-
-                // =================================================
-                // SCHEDULE STOP
-                // =================================================
-
                 visitTour.getScheduleStopId(),
-                visitTour.getStopOrder(),
 
                 // =================================================
-                // PORT
-                // =================================================
-
-                visitTour.getPortId(),
-                visitTour.getPortName(),
-
-                // =================================================
-                // SHIP ARRIVAL / DEPARTURE
-                // =================================================
-
-                visitTour.getArriveAt(),
-                visitTour.getLeaveAt(),
-
-                // =================================================
-                // VISIT TOUR
+                // VISIT TOUR CONFIGURATION
                 // =================================================
 
                 visitTour.getName(),

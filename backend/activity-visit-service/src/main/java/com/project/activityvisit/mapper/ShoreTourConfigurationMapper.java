@@ -15,45 +15,31 @@ public final class ShoreTourConfigurationMapper {
         }
 
         // =====================================================
-        // VISIT TOURS -> SHORE TOUR CONFIGURATION RESPONSE
+        // BUILD RESPONSE
         // =====================================================
 
         public static ShoreTourConfigurationResponse toResponse(
-                        List<VisitTour> visitTours) {
+                        UUID tourId,
+                        String tourCode,
+                        String tourName,
+                        String tourDescription,
 
-                if (visitTours == null || visitTours.isEmpty()) {
-                        return null;
+                        List<ScheduleConfigurationData> schedules) {
+
+                if (schedules == null) {
+                        schedules = Collections.emptyList();
                 }
 
-                VisitTour first = visitTours.get(0);
-
-                // =====================================================
-                // GROUP BY SCHEDULE
-                // =====================================================
-
-                Map<UUID, List<VisitTour>> visitToursBySchedule = visitTours.stream()
-                                .collect(Collectors.groupingBy(
-                                                VisitTour::getScheduleId));
-
-                // =====================================================
-                // BUILD SCHEDULE CONFIGURATIONS
-                // =====================================================
-
-                List<ShoreTourConfigurationResponse.ScheduleConfiguration> schedules = visitToursBySchedule.values()
-                                .stream()
-                                .map(ShoreTourConfigurationMapper::toScheduleConfiguration)
-                                .toList();
-
                 return new ShoreTourConfigurationResponse(
-                                first.getTourId(),
-                                first.getTourCode(),
-                                first.getTourName(),
-                                null, // tourDescription chưa có trong VisitTour
-
-                                null, // startDate chưa có trong VisitTour
-                                null, // endDate chưa có trong VisitTour
-
-                                schedules);
+                                tourId,
+                                tourCode,
+                                tourName,
+                                tourDescription,
+                                null,
+                                null,
+                                schedules.stream()
+                                                .map(ShoreTourConfigurationMapper::toScheduleConfiguration)
+                                                .toList());
         }
 
         // =====================================================
@@ -61,29 +47,17 @@ public final class ShoreTourConfigurationMapper {
         // =====================================================
 
         private static ShoreTourConfigurationResponse.ScheduleConfiguration toScheduleConfiguration(
-                        List<VisitTour> visitTours) {
-
-                VisitTour first = visitTours.get(0);
-
-                // =====================================================
-                // GROUP BY SCHEDULE STOP
-                // =====================================================
-
-                Map<UUID, List<VisitTour>> visitToursByStop = visitTours.stream()
-                                .collect(Collectors.groupingBy(
-                                                VisitTour::getScheduleStopId));
-
-                List<ShoreTourConfigurationResponse.ScheduleStopConfiguration> stops = visitToursByStop.values()
-                                .stream()
-                                .map(ShoreTourConfigurationMapper::toScheduleStopConfiguration)
-                                .toList();
+                        ScheduleConfigurationData data) {
 
                 return new ShoreTourConfigurationResponse.ScheduleConfiguration(
-                                first.getScheduleId(),
-                                first.getDayNumber(),
-                                null, // realDay chưa có trong VisitTour
-                                null, // scheduleName chưa có trong VisitTour
-                                stops);
+                                data.scheduleId(),
+                                data.dayNumber(),
+                                data.realDay(),
+                                data.scheduleName(),
+                                data.stops()
+                                                .stream()
+                                                .map(ShoreTourConfigurationMapper::toScheduleStopConfiguration)
+                                                .toList());
         }
 
         // =====================================================
@@ -91,28 +65,24 @@ public final class ShoreTourConfigurationMapper {
         // =====================================================
 
         private static ShoreTourConfigurationResponse.ScheduleStopConfiguration toScheduleStopConfiguration(
-                        List<VisitTour> visitTours) {
-
-                VisitTour first = visitTours.get(0);
-
-                List<ShoreTourConfigurationResponse.VisitTourConfiguration> visitTourConfigurations = visitTours
-                                .stream()
-                                .map(ShoreTourConfigurationMapper::toVisitTourConfiguration)
-                                .toList();
+                        ScheduleStopConfigurationData data) {
 
                 return new ShoreTourConfigurationResponse.ScheduleStopConfiguration(
 
-                                first.getScheduleStopId(),
+                                data.scheduleStopId(),
 
-                                first.getPortId(),
-                                first.getPortName(),
+                                data.portId(),
+                                data.portName(),
 
-                                first.getStopOrder(),
+                                data.stopOrder(),
 
-                                first.getArriveAt(),
-                                first.getLeaveAt(),
+                                data.arriveAt(),
+                                data.leaveAt(),
 
-                                visitTourConfigurations);
+                                data.visitTours()
+                                                .stream()
+                                                .map(ShoreTourConfigurationMapper::toVisitTourConfiguration)
+                                                .toList());
         }
 
         // =====================================================
@@ -137,5 +107,33 @@ public final class ShoreTourConfigurationMapper {
                                 visitTour.getPrice(),
 
                                 visitTour.getStatus());
+        }
+
+        // =====================================================
+        // INTERNAL DATA
+        // =====================================================
+
+        public record ScheduleConfigurationData(
+
+                        UUID scheduleId,
+                        Integer dayNumber,
+                        java.time.LocalDate realDay,
+                        String scheduleName,
+                        List<ScheduleStopConfigurationData> stops) {
+        }
+
+        public record ScheduleStopConfigurationData(
+
+                        UUID scheduleStopId,
+
+                        UUID portId,
+                        String portName,
+
+                        Integer stopOrder,
+
+                        java.time.LocalDateTime arriveAt,
+                        java.time.LocalDateTime leaveAt,
+
+                        List<VisitTour> visitTours) {
         }
 }

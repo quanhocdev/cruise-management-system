@@ -22,78 +22,39 @@ public class VisitTour {
     private UUID id;
 
     // =====================================================
-    // TOUR
+    // TOUR REFERENCE
     // =====================================================
 
     @Column(name = "tour_id", nullable = false)
     private UUID tourId;
 
-    @Column(name = "tour_code", nullable = false, length = 100)
-    private String tourCode;
-
-    @Column(name = "tour_name", nullable = false, length = 200)
-    private String tourName;
-
     // =====================================================
-    // SCHEDULE
-    // =====================================================
-
-    @Column(name = "schedule_id", nullable = false)
-    private UUID scheduleId;
-
-    @Column(name = "day_number", nullable = false)
-    private Integer dayNumber;
-
-    // =====================================================
-    // SCHEDULE STOP
+    // SCHEDULE STOP REFERENCE
     // =====================================================
 
     @Column(name = "schedule_stop_id", nullable = false)
     private UUID scheduleStopId;
 
-    @Column(name = "stop_order", nullable = false)
-    private Integer stopOrder;
-
-    // =====================================================
-    // PORT
-    // =====================================================
-
-    @Column(name = "port_id", nullable = false)
-    private UUID portId;
-
-    @Column(name = "port_name", nullable = false, length = 200)
-    private String portName;
-
-    // =====================================================
-    // SHIP ARRIVAL / DEPARTURE
-    // =====================================================
-
-    @Column(name = "arrive_at", nullable = false)
-    private LocalDateTime arriveAt;
-
-    @Column(name = "leave_at", nullable = false)
-    private LocalDateTime leaveAt;
-
     // =====================================================
     // VISIT TOUR CONFIGURATION
     // =====================================================
 
-    @Column(nullable = false, length = 200)
+    @Column(nullable = true, length = 200)
     private String name;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "start_time", nullable = false)
+    @Column(name = "start_time")
     private LocalDateTime startTime;
 
-    @Column(name = "end_time", nullable = false)
+    @Column(name = "end_time")
     private LocalDateTime endTime;
 
-    @Column(name = "max_passengers", nullable = false)
+    @Column(name = "max_passengers")
     private Integer maxPassengers;
 
-    @Column(nullable = false, precision = 15, scale = 2)
+    @Column(nullable = true, precision = 15, scale = 2)
     private BigDecimal price;
 
     // =====================================================
@@ -133,7 +94,6 @@ public class VisitTour {
 
     @PreUpdate
     protected void onUpdate() {
-
         updatedAt = LocalDateTime.now();
     }
 
@@ -157,84 +117,12 @@ public class VisitTour {
         this.tourId = tourId;
     }
 
-    public String getTourCode() {
-        return tourCode;
-    }
-
-    public void setTourCode(String tourCode) {
-        this.tourCode = tourCode;
-    }
-
-    public String getTourName() {
-        return tourName;
-    }
-
-    public void setTourName(String tourName) {
-        this.tourName = tourName;
-    }
-
-    public UUID getScheduleId() {
-        return scheduleId;
-    }
-
-    public void setScheduleId(UUID scheduleId) {
-        this.scheduleId = scheduleId;
-    }
-
-    public Integer getDayNumber() {
-        return dayNumber;
-    }
-
-    public void setDayNumber(Integer dayNumber) {
-        this.dayNumber = dayNumber;
-    }
-
     public UUID getScheduleStopId() {
         return scheduleStopId;
     }
 
     public void setScheduleStopId(UUID scheduleStopId) {
         this.scheduleStopId = scheduleStopId;
-    }
-
-    public Integer getStopOrder() {
-        return stopOrder;
-    }
-
-    public void setStopOrder(Integer stopOrder) {
-        this.stopOrder = stopOrder;
-    }
-
-    public UUID getPortId() {
-        return portId;
-    }
-
-    public void setPortId(UUID portId) {
-        this.portId = portId;
-    }
-
-    public String getPortName() {
-        return portName;
-    }
-
-    public void setPortName(String portName) {
-        this.portName = portName;
-    }
-
-    public LocalDateTime getArriveAt() {
-        return arriveAt;
-    }
-
-    public void setArriveAt(LocalDateTime arriveAt) {
-        this.arriveAt = arriveAt;
-    }
-
-    public LocalDateTime getLeaveAt() {
-        return leaveAt;
-    }
-
-    public void setLeaveAt(LocalDateTime leaveAt) {
-        this.leaveAt = leaveAt;
     }
 
     public String getName() {

@@ -1,35 +1,37 @@
-package com.project.convenience.listener;
+package com.project.activityvisit.listener;
 
+import com.project.activityvisit.service.VisitTourService;
 import com.project.common.event.TourApprovedEvent;
 import com.project.common.event.TourAssignmentEvent;
 import com.project.common.event.enums.TourAssignmentType;
-import com.project.convenience.service.service.ServiceTourService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ServiceTourAssignmentListener {
+public class ActivityVisitTourAssignmentListener {
 
-        private static final Logger log = LoggerFactory.getLogger(ServiceTourAssignmentListener.class);
+        private static final Logger log = LoggerFactory.getLogger(
+                        ActivityVisitTourAssignmentListener.class);
 
-        private final ServiceTourService serviceTourService;
+        private final VisitTourService visitTourService;
 
-        public ServiceTourAssignmentListener(
-                        ServiceTourService serviceTourService) {
+        public ActivityVisitTourAssignmentListener(
+                        VisitTourService visitTourService) {
 
-                this.serviceTourService = serviceTourService;
+                this.visitTourService = visitTourService;
         }
 
         // =========================================================
         // LISTEN TOUR APPROVED
         // =========================================================
 
-        @KafkaListener(topics = "tour-approved-topic", groupId = "service-cruise-group-v1", containerFactory = "serviceKafkaListenerContainerFactory")
+        @KafkaListener(topics = "tour-approved-topic", groupId = "activity-visit-group-v1", containerFactory = "activityVisitKafkaListenerContainerFactory")
         public void onTourApproved(
                         TourApprovedEvent event,
                         @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
@@ -42,10 +44,6 @@ public class ServiceTourAssignmentListener {
                                 partition,
                                 offset,
                                 event.tourId());
-
-                // =====================================================
-                // KIỂM TRA ASSIGNMENT
-                // =====================================================
 
                 if (event.assignments() == null ||
                                 event.assignments().isEmpty()) {
@@ -63,41 +61,38 @@ public class ServiceTourAssignmentListener {
 
                 for (TourAssignmentEvent assignment : event.assignments()) {
 
-                        // =================================================
-                        // CHỈ SERVICE XỬ LÝ SERVICE
-                        // =================================================
+                        // Chỉ Activity Visit xử lý ACTIVITY_VISIT
+                        if (assignment.type() != TourAssignmentType.ACTIVITY_VISIT) {
 
-                        if (assignment.type() != TourAssignmentType.SERVICE) {
                                 continue;
                         }
 
                         log.info(
-                                        "==> [Service] Tour ID: {}, Target ID: {}, Type: {}",
+                                        "==> [Activity Visit] " +
+                                                        "Tour ID: {}, Schedule Stop ID: {}, Type: {}",
                                         assignment.tourId(),
                                         assignment.targetId(),
                                         assignment.type());
 
-                        // =================================================
-                        // TẠO SERVICE TOUR
-                        // =================================================
-
                         try {
 
-                                serviceTourService.createServiceTourFromEvent(
+                                visitTourService.createVisitTourFromEvent(
                                                 assignment.tourId(),
                                                 assignment.targetId());
 
                                 log.info(
-                                                "==> [Service] Tạo ServiceTour thành công - " +
-                                                                "Tour ID: {}, Target ID: {}",
+                                                "==> [Activity Visit] " +
+                                                                "Tạo VisitTour thành công - " +
+                                                                "Tour ID: {}, Schedule Stop ID: {}",
                                                 assignment.tourId(),
                                                 assignment.targetId());
 
                         } catch (Exception e) {
 
                                 log.error(
-                                                "==> [Service] Lỗi xử lý ServiceTour - " +
-                                                                "Tour ID: {}, Target ID: {}",
+                                                "==> [Activity Visit] " +
+                                                                "Lỗi xử lý VisitTour - " +
+                                                                "Tour ID: {}, Schedule Stop ID: {}",
                                                 assignment.tourId(),
                                                 assignment.targetId(),
                                                 e);

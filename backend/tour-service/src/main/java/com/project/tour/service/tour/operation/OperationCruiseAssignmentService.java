@@ -5,9 +5,14 @@ import com.project.common.event.enums.TourAssignmentType;
 import com.project.tour.model.AssignmentActivityCruise;
 import com.project.tour.model.AssignmentProduct;
 import com.project.tour.model.AssignmentService;
+import com.project.tour.model.Schedule;
+import com.project.tour.model.ScheduleStop;
 import com.project.tour.repository.tour.AssignmentActivityCruiseRepository;
 import com.project.tour.repository.tour.AssignmentProductRepository;
 import com.project.tour.repository.tour.AssignmentServiceRepository;
+import com.project.tour.repository.tour.schedule.ScheduleRepository;
+import com.project.tour.repository.tour.schedule.ScheduleStopRepository;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,25 +28,34 @@ public class OperationCruiseAssignmentService {
         private final AssignmentServiceRepository assignmentServiceRepository;
         private final AssignmentActivityCruiseRepository assignmentActivityCruiseRepository;
 
+        private final ScheduleRepository scheduleRepository;
+        private final ScheduleStopRepository scheduleStopRepository;
+
         public OperationCruiseAssignmentService(
                         AssignmentProductRepository assignmentProductRepository,
                         AssignmentServiceRepository assignmentServiceRepository,
-                        AssignmentActivityCruiseRepository assignmentActivityCruiseRepository) {
+                        AssignmentActivityCruiseRepository assignmentActivityCruiseRepository,
+                        ScheduleRepository scheduleRepository,
+                        ScheduleStopRepository scheduleStopRepository) {
 
                 this.assignmentProductRepository = assignmentProductRepository;
                 this.assignmentServiceRepository = assignmentServiceRepository;
                 this.assignmentActivityCruiseRepository = assignmentActivityCruiseRepository;
+
+                this.scheduleRepository = scheduleRepository;
+                this.scheduleStopRepository = scheduleStopRepository;
         }
 
         /**
-         * Lấy toàn bộ phân công của một Tour.
+         * Lấy toàn bộ assignment của một Tour.
          *
-         * Đọc từ 3 bảng:
-         * - assignment_product
-         * - assignment_service
-         * - assignment_activity_cruise
+         * PRODUCT / SERVICE / ACTIVITY_CRUISE:
+         * - Lấy từ các bảng assignment tương ứng.
          *
-         * Sau đó chuyển thành List<TourAssignmentEvent>.
+         * ACTIVITY_VISIT:
+         * - Không có bảng assignment.
+         * - Mỗi ScheduleStop của Tour được xem là một target
+         * để Activity Visit cấu hình.
          *
          * Không gửi Kafka ở đây.
          */
@@ -95,6 +109,33 @@ public class OperationCruiseAssignmentService {
                                                         assignment.getTourId(),
                                                         assignment.getCruiseAreaId(),
                                                         TourAssignmentType.ACTIVITY_CRUISE));
+                }
+
+                // =====================================================
+                // ACTIVITY VISIT
+                // =====================================================
+
+                List<Schedule> schedules = scheduleRepository
+                                .findAllByTour_IdOrderByDayNumberAsc(tourId);
+
+                if (!schedules.isEmpty()) {
+
+                        List<UUID> scheduleIds = schedules.stream()
+                                        .map(Schedule::getId)
+                                        .toList();
+
+                        List<ScheduleStop> scheduleStops = scheduleStopRepository
+                                        .findAllBySchedule_IdInOrderBySchedule_DayNumberAscStopOrderAsc(
+                                                        scheduleIds);
+
+                        for (ScheduleStop scheduleStop : scheduleStops) {
+
+                                assignments.add(
+                                                new TourAssignmentEvent(
+                                                                tourId,
+                                                                scheduleStop.getId(),
+                                                                TourAssignmentType.ACTIVITY_VISIT));
+                        }
                 }
 
                 return assignments;

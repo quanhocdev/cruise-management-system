@@ -58,4 +58,8 @@ public interface VisitTourRepository
         List<VisitTour> findAllByScheduleStopIdInAndStatusOrderByStartTimeAsc(
                         Collection<UUID> scheduleStopIds,
                         VisitTourStatus status);
+
+        boolean existsByTourIdAndScheduleStopId(
+                        UUID tourId,
+                        UUID scheduleStopId);
 }

@@ -1,5 +1,3 @@
-// src/main/java/com/project/tour/dto/visit/VisitTourResponse.java
-
 package com.project.activityvisit.dto;
 
 import com.project.activityvisit.model.enums.VisitTourStatus;
@@ -10,43 +8,29 @@ import java.util.UUID;
 
 public record VisitTourResponse(
 
-                UUID id,
+        UUID id,
 
-                // TOUR
-                UUID tourId,
-                String tourCode,
-                String tourName,
+        UUID tourId,
 
-                // SCHEDULE
-                UUID scheduleId,
-                Integer dayNumber,
+        UUID scheduleStopId,
 
-                // SCHEDULE STOP
-                UUID scheduleStopId,
-                Integer stopOrder,
+        String name,
 
-                // PORT
-                UUID portId,
-                String portName,
+        String description,
 
-                // THỜI GIAN TÀU
-                LocalDateTime arriveAt,
-                LocalDateTime leaveAt,
+        LocalDateTime startTime,
 
-                // VISIT TOUR
-                String name,
-                String description,
+        LocalDateTime endTime,
 
-                LocalDateTime startTime,
-                LocalDateTime endTime,
+        Integer maxPassengers,
 
-                Integer maxPassengers,
+        BigDecimal price,
 
-                BigDecimal price,
+        VisitTourStatus status,
 
-                VisitTourStatus status,
+        LocalDateTime createdAt,
 
-                // AUDIT
-                LocalDateTime createdAt,
-                LocalDateTime updatedAt) {
+        LocalDateTime updatedAt
+
+) {
 }

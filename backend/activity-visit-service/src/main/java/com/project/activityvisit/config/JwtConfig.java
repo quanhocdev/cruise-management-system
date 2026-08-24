@@ -1,4 +1,4 @@
-package com.project.convenience.config;
+package com.project.activityvisit.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -17,33 +17,33 @@ import java.nio.charset.StandardCharsets;
 @Configuration
 public class JwtConfig {
 
-    private final String jwtSecret;
+        private final String jwtSecret;
 
-    public JwtConfig(
-            @Value("${jwt.secret}") String jwtSecret) {
-        this.jwtSecret = jwtSecret;
-    }
+        public JwtConfig(
+                        @Value("${jwt.secret}") String jwtSecret) {
+                this.jwtSecret = jwtSecret;
+        }
 
-    @Bean
-    public JwtDecoder jwtDecoder() {
-        SecretKey secretKey = new SecretKeySpec(
-                jwtSecret.getBytes(StandardCharsets.UTF_8),
-                MacAlgorithm.HS256.getName());
+        @Bean
+        public JwtDecoder jwtDecoder() {
+                SecretKey secretKey = new SecretKeySpec(
+                                jwtSecret.getBytes(StandardCharsets.UTF_8),
+                                MacAlgorithm.HS256.getName());
 
-        NimbusJwtDecoder decoder = NimbusJwtDecoder
-                .withSecretKey(secretKey)
-                .macAlgorithm(MacAlgorithm.HS256)
-                .build();
+                NimbusJwtDecoder decoder = NimbusJwtDecoder
+                                .withSecretKey(secretKey)
+                                .macAlgorithm(MacAlgorithm.HS256)
+                                .build();
 
-        JwtClaimValidator<String> accessTokenValidator = new JwtClaimValidator<>(
-                "tokenType",
-                "ACCESS"::equals);
+                JwtClaimValidator<String> accessTokenValidator = new JwtClaimValidator<>(
+                                "tokenType",
+                                "ACCESS"::equals);
 
-        decoder.setJwtValidator(
-                new DelegatingOAuth2TokenValidator<Jwt>(
-                        JwtValidators.createDefault(),
-                        accessTokenValidator));
+                decoder.setJwtValidator(
+                                new DelegatingOAuth2TokenValidator<Jwt>(
+                                                JwtValidators.createDefault(),
+                                                accessTokenValidator));
 
-        return decoder;
-    }
+                return decoder;
+        }
 }

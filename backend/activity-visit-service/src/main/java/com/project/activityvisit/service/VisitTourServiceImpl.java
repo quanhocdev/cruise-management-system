@@ -3,10 +3,10 @@ package com.project.activityvisit.service;
 import com.project.activityvisit.dto.CreateVisitTourRequest;
 import com.project.activityvisit.dto.UpdateVisitTourRequest;
 import com.project.activityvisit.dto.VisitTourResponse;
+import com.project.activityvisit.exception.AppException;
 import com.project.activityvisit.mapper.VisitTourMapper;
 import com.project.activityvisit.model.VisitTour;
 import com.project.activityvisit.repository.VisitTourRepository;
-import com.project.activityvisit.exception.AppException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -104,13 +104,19 @@ public class VisitTourServiceImpl implements VisitTourService {
 
                 VisitTour visitTour = VisitTourMapper.toEntity(request);
 
+                /*
+                 * scheduleStopId được nhận từ Kafka / request.
+                 *
+                 * Các thông tin:
+                 * - tourId
+                 * - scheduleId
+                 * - portId
+                 * - arriveAt
+                 * - leaveAt
+                 *
+                 * không được lấy từ VisitTour nữa.
+                 */
                 visitTour.setScheduleStopId(scheduleStopId);
-
-                validator.validateTimeRange(
-                                visitTour.getArriveAt(),
-                                visitTour.getLeaveAt(),
-                                request.startTime(),
-                                request.endTime());
 
                 VisitTour saved = visitTourRepository.save(visitTour);
 
@@ -135,11 +141,60 @@ public class VisitTourServiceImpl implements VisitTourService {
                                 visitTour,
                                 request);
 
-                validator.validateTimeRange(
-                                visitTour.getArriveAt(),
-                                visitTour.getLeaveAt(),
-                                visitTour.getStartTime(),
-                                visitTour.getEndTime());
+                VisitTour saved = visitTourRepository.save(visitTour);
+
+                return VisitTourMapper.toResponse(saved);
+        }
+
+        // =====================================================
+        // KAFKA - CREATE FROM TOUR APPROVED
+        // =====================================================
+
+        @Override
+        @Transactional
+        public VisitTourResponse createVisitTourFromEvent(
+                        UUID tourId,
+                        UUID scheduleStopId) {
+
+                // =================================================
+                // KIỂM TRA DUPLICATE
+                // =================================================
+
+                if (visitTourRepository.existsByTourIdAndScheduleStopId(
+                                tourId,
+                                scheduleStopId)) {
+
+                        throw new AppException(
+                                        "VisitTour already exists for this tour and schedule stop",
+                                        HttpStatus.CONFLICT);
+                }
+
+                // =================================================
+                // TẠO VISIT TOUR
+                // =================================================
+
+                VisitTour visitTour = new VisitTour();
+
+                visitTour.setTourId(tourId);
+                visitTour.setScheduleStopId(scheduleStopId);
+
+                /*
+                 * Kafka hiện tại chỉ gửi:
+                 *
+                 * - tourId
+                 * - scheduleStopId
+                 *
+                 * Vì vậy các thông tin cấu hình vẫn để null:
+                 *
+                 * - name
+                 * - description
+                 * - startTime
+                 * - endTime
+                 * - maxPassengers
+                 * - price
+                 *
+                 * status mặc định = WAITING_CONFIG
+                 */
 
                 VisitTour saved = visitTourRepository.save(visitTour);
 

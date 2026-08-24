@@ -27,5 +27,10 @@ public interface VisitTourService {
                         UUID id,
                         UpdateVisitTourRequest request);
 
+        VisitTourResponse createVisitTourFromEvent(
+                        UUID tourId,
+                        UUID scheduleStopId);
+
         void delete(UUID id);
+
 }

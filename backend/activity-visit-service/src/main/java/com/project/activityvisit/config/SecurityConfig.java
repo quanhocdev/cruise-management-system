@@ -1,4 +1,4 @@
-package com.project.convenience.config;
+package com.project.activityvisit.config;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;

@@ -1,184 +1,184 @@
-package com.project.activityvisit.service;
+// package com.project.activityvisit.service;
 
-import com.project.activityvisit.dto.ShoreTourConfigurationResponse;
-import com.project.activityvisit.repository.VisitTourRepository;
-import com.project.tour.dto.tour.TourResponse;
-import com.project.tour.exception.AppException;
-import com.project.tour.mapper.tour.TourMapper;
-import com.project.tour.mapper.tour.visit.ShoreTourConfigurationMapper;
-import com.project.tour.model.Schedule;
-import com.project.tour.model.ScheduleStop;
-import com.project.tour.model.Tour;
-import com.project.tour.model.VisitTour;
-import com.project.tour.model.enums.tour.TourStatusTrip;
-import com.project.tour.model.enums.visit.VisitTourStatus;
-import com.project.tour.repository.tour.TourRepository;
-import com.project.tour.repository.tour.schedule.ScheduleRepository;
-import com.project.tour.repository.tour.schedule.ScheduleStopRepository;
+// import com.project.activityvisit.dto.ShoreTourConfigurationResponse;
+// import com.project.activityvisit.repository.VisitTourRepository;
+// import com.project.tour.dto.tour.TourResponse;
+// import com.project.tour.exception.AppException;
+// import com.project.tour.mapper.tour.TourMapper;
+// import com.project.tour.mapper.tour.visit.ShoreTourConfigurationMapper;
+// import com.project.tour.model.Schedule;
+// import com.project.tour.model.ScheduleStop;
+// import com.project.tour.model.Tour;
+// import com.project.tour.model.VisitTour;
+// import com.project.tour.model.enums.tour.TourStatusTrip;
+// import com.project.tour.model.enums.visit.VisitTourStatus;
+// import com.project.tour.repository.tour.TourRepository;
+// import com.project.tour.repository.tour.schedule.ScheduleRepository;
+// import com.project.tour.repository.tour.schedule.ScheduleStopRepository;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+// import org.springframework.http.HttpStatus;
+// import org.springframework.stereotype.Service;
+// import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
+// import java.util.Collections;
+// import java.util.List;
+// import java.util.Map;
+// import java.util.UUID;
+// import java.util.stream.Collectors;
 
-@Service
-public class ShoreTourConfigurationServiceImpl
-                implements ShoreTourConfigurationService {
+// @Service
+// public class ShoreTourConfigurationServiceImpl
+// implements ShoreTourConfigurationService {
 
-        private final TourRepository tourRepository;
-        private final ScheduleRepository scheduleRepository;
-        private final ScheduleStopRepository scheduleStopRepository;
-        private final VisitTourRepository visitTourRepository;
+// private final TourRepository tourRepository;
+// private final ScheduleRepository scheduleRepository;
+// private final ScheduleStopRepository scheduleStopRepository;
+// private final VisitTourRepository visitTourRepository;
 
-        public ShoreTourConfigurationServiceImpl(
-                        TourRepository tourRepository,
-                        ScheduleRepository scheduleRepository,
-                        ScheduleStopRepository scheduleStopRepository,
-                        VisitTourRepository visitTourRepository) {
+// public ShoreTourConfigurationServiceImpl(
+// TourRepository tourRepository,
+// ScheduleRepository scheduleRepository,
+// ScheduleStopRepository scheduleStopRepository,
+// VisitTourRepository visitTourRepository) {
 
-                this.tourRepository = tourRepository;
-                this.scheduleRepository = scheduleRepository;
-                this.scheduleStopRepository = scheduleStopRepository;
-                this.visitTourRepository = visitTourRepository;
-        }
+// this.tourRepository = tourRepository;
+// this.scheduleRepository = scheduleRepository;
+// this.scheduleStopRepository = scheduleStopRepository;
+// this.visitTourRepository = visitTourRepository;
+// }
 
-        // =====================================================
-        // GET TOURS FOR SHORE
-        // =====================================================
+// // =====================================================
+// // GET TOURS FOR SHORE
+// // =====================================================
 
-        @Override
-        @Transactional(readOnly = true)
-        public List<TourResponse> getAvailableTours() {
+// @Override
+// @Transactional(readOnly = true)
+// public List<TourResponse> getAvailableTours() {
 
-                List<TourStatusTrip> allowedStatuses = List.of(
-                                TourStatusTrip.APPROVED,
-                                TourStatusTrip.READY,
-                                TourStatusTrip.IN_PROGRESS,
-                                TourStatusTrip.COMPLETED);
+// List<TourStatusTrip> allowedStatuses = List.of(
+// TourStatusTrip.APPROVED,
+// TourStatusTrip.READY,
+// TourStatusTrip.IN_PROGRESS,
+// TourStatusTrip.COMPLETED);
 
-                return tourRepository
-                                .findAllByStatusTripInOrderByStartDateAsc(
-                                                allowedStatuses)
-                                .stream()
-                                .map(TourMapper::toResponse)
-                                .toList();
-        }
+// return tourRepository
+// .findAllByStatusTripInOrderByStartDateAsc(
+// allowedStatuses)
+// .stream()
+// .map(TourMapper::toResponse)
+// .toList();
+// }
 
-        // =====================================================
-        // GET TOUR CONFIGURATION
-        // =====================================================
+// // =====================================================
+// // GET TOUR CONFIGURATION
+// // =====================================================
 
-        @Override
-        @Transactional(readOnly = true)
-        public ShoreTourConfigurationResponse getConfiguration(
-                        UUID tourId,
-                        VisitTourStatus status) {
+// @Override
+// @Transactional(readOnly = true)
+// public ShoreTourConfigurationResponse getConfiguration(
+// UUID tourId,
+// VisitTourStatus status) {
 
-                // =================================================
-                // 1. TOUR
-                // =================================================
+// // =================================================
+// // 1. TOUR
+// // =================================================
 
-                List<TourStatusTrip> allowedStatuses = List.of(
-                                TourStatusTrip.APPROVED,
-                                TourStatusTrip.READY,
-                                TourStatusTrip.IN_PROGRESS,
-                                TourStatusTrip.COMPLETED);
+// List<TourStatusTrip> allowedStatuses = List.of(
+// TourStatusTrip.APPROVED,
+// TourStatusTrip.READY,
+// TourStatusTrip.IN_PROGRESS,
+// TourStatusTrip.COMPLETED);
 
-                Tour tour = tourRepository
-                                .findByIdAndStatusTripIn(
-                                                tourId,
-                                                allowedStatuses)
-                                .orElseThrow(() -> new AppException(
-                                                "Tour not found or is not available for shore configuration",
-                                                HttpStatus.NOT_FOUND));
+// Tour tour = tourRepository
+// .findByIdAndStatusTripIn(
+// tourId,
+// allowedStatuses)
+// .orElseThrow(() -> new AppException(
+// "Tour not found or is not available for shore configuration",
+// HttpStatus.NOT_FOUND));
 
-                // =================================================
-                // 2. SCHEDULES
-                // =================================================
+// // =================================================
+// // 2. SCHEDULES
+// // =================================================
 
-                List<Schedule> schedules = scheduleRepository
-                                .findAllByTour_IdOrderByDayNumberAsc(
-                                                tourId);
+// List<Schedule> schedules = scheduleRepository
+// .findAllByTour_IdOrderByDayNumberAsc(
+// tourId);
 
-                if (schedules.isEmpty()) {
+// if (schedules.isEmpty()) {
 
-                        return ShoreTourConfigurationMapper.toResponse(
-                                        tour,
-                                        Collections.emptyList(),
-                                        Collections.emptyMap(),
-                                        Collections.emptyMap());
-                }
+// return ShoreTourConfigurationMapper.toResponse(
+// tour,
+// Collections.emptyList(),
+// Collections.emptyMap(),
+// Collections.emptyMap());
+// }
 
-                List<UUID> scheduleIds = schedules.stream()
-                                .map(Schedule::getId)
-                                .toList();
+// List<UUID> scheduleIds = schedules.stream()
+// .map(Schedule::getId)
+// .toList();
 
-                // =================================================
-                // 3. ALL SCHEDULE STOPS
-                // =================================================
+// // =================================================
+// // 3. ALL SCHEDULE STOPS
+// // =================================================
 
-                List<ScheduleStop> stops = scheduleStopRepository
-                                .findAllBySchedule_IdInOrderBySchedule_DayNumberAscStopOrderAsc(
-                                                scheduleIds);
+// List<ScheduleStop> stops = scheduleStopRepository
+// .findAllBySchedule_IdInOrderBySchedule_DayNumberAscStopOrderAsc(
+// scheduleIds);
 
-                Map<UUID, List<ScheduleStop>> stopsBySchedule = stops.stream()
-                                .collect(Collectors.groupingBy(
-                                                stop -> stop
-                                                                .getSchedule()
-                                                                .getId()));
+// Map<UUID, List<ScheduleStop>> stopsBySchedule = stops.stream()
+// .collect(Collectors.groupingBy(
+// stop -> stop
+// .getSchedule()
+// .getId()));
 
-                if (stops.isEmpty()) {
+// if (stops.isEmpty()) {
 
-                        return ShoreTourConfigurationMapper.toResponse(
-                                        tour,
-                                        schedules,
-                                        stopsBySchedule,
-                                        Collections.emptyMap());
-                }
+// return ShoreTourConfigurationMapper.toResponse(
+// tour,
+// schedules,
+// stopsBySchedule,
+// Collections.emptyMap());
+// }
 
-                List<UUID> stopIds = stops.stream()
-                                .map(ScheduleStop::getId)
-                                .toList();
+// List<UUID> stopIds = stops.stream()
+// .map(ScheduleStop::getId)
+// .toList();
 
-                // =================================================
-                // 4. ALL VISIT TOURS
-                // =================================================
+// // =================================================
+// // 4. ALL VISIT TOURS
+// // =================================================
 
-                List<VisitTour> visitTours;
+// List<VisitTour> visitTours;
 
-                if (status == null) {
+// if (status == null) {
 
-                        visitTours = visitTourRepository
-                                        .findAllByScheduleStop_IdInOrderByStartTimeAsc(
-                                                        stopIds);
+// visitTours = visitTourRepository
+// .findAllByScheduleStop_IdInOrderByStartTimeAsc(
+// stopIds);
 
-                } else {
+// } else {
 
-                        visitTours = visitTourRepository
-                                        .findAllByScheduleStop_IdInAndStatusOrderByStartTimeAsc(
-                                                        stopIds,
-                                                        status);
-                }
+// visitTours = visitTourRepository
+// .findAllByScheduleStop_IdInAndStatusOrderByStartTimeAsc(
+// stopIds,
+// status);
+// }
 
-                Map<UUID, List<VisitTour>> visitToursByStop = visitTours.stream()
-                                .collect(Collectors.groupingBy(
-                                                visitTour -> visitTour
-                                                                .getScheduleStop()
-                                                                .getId()));
+// Map<UUID, List<VisitTour>> visitToursByStop = visitTours.stream()
+// .collect(Collectors.groupingBy(
+// visitTour -> visitTour
+// .getScheduleStop()
+// .getId()));
 
-                // =================================================
-                // 5. BUILD RESPONSE
-                // =================================================
+// // =================================================
+// // 5. BUILD RESPONSE
+// // =================================================
 
-                return ShoreTourConfigurationMapper.toResponse(
-                                tour,
-                                schedules,
-                                stopsBySchedule,
-                                visitToursByStop);
-        }
-}
+// return ShoreTourConfigurationMapper.toResponse(
+// tour,
+// schedules,
+// stopsBySchedule,
+// visitToursByStop);
+// }
+// }
