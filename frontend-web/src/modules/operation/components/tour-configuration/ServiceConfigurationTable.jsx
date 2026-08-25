@@ -2,30 +2,17 @@
 
 import React from "react";
 import { CheckCircle2, Wrench, XCircle } from "lucide-react";
-import { isServiceConfigured } from "../../utils/tourConfigurationUtils";
 
 import "../../styles/tour-configuration/ServiceConfigurationTable.css";
 
 const ServiceConfigurationTable = ({ services = [] }) => {
-  const safeServices = services || [];
-
-  const getStatusLabel = (status) => {
-    switch (status) {
-      case "WAITING_CONFIG":
-        return "Chờ cấu hình";
-      case "NOT_STARTED":
-        return "Đã cấu hình";
-      case "IN_PROGRESS":
-        return "Đang hoạt động";
-      case "COMPLETED":
-        return "Đã kết thúc";
-      default:
-        return status || "Không xác định";
-    }
-  };
+  const safeServices = Array.isArray(services) ? services : [];
 
   return (
     <section className="service-configuration-table-section">
+      {/* =========================================================
+          HEADER
+          ========================================================= */}
       <div className="service-configuration-table-header">
         <div className="service-configuration-table-title">
           <div className="service-configuration-table-icon">
@@ -34,21 +21,29 @@ const ServiceConfigurationTable = ({ services = [] }) => {
 
           <div>
             <h2>Dịch vụ</h2>
-            <p>Các dịch vụ được Operation phân công cho tour.</p>
+
+            <p>Các dịch vụ đã được cấu hình cho Tour.</p>
           </div>
         </div>
 
         <span className="service-configuration-table-count">
-          {safeServices.length} phân công
+          {safeServices.length} dịch vụ
         </span>
       </div>
 
+      {/* =========================================================
+          EMPTY
+          ========================================================= */}
       {safeServices.length === 0 ? (
         <div className="service-configuration-table-empty">
           <XCircle size={24} />
-          <span>Tour chưa được phân công dịch vụ.</span>
+
+          <span>Tour chưa có dịch vụ được cấu hình.</span>
         </div>
       ) : (
+        /* =======================================================
+           TABLE
+           ======================================================= */
         <div className="service-configuration-table-wrapper">
           <table className="service-configuration-table">
             <thead>
@@ -61,49 +56,44 @@ const ServiceConfigurationTable = ({ services = [] }) => {
             </thead>
 
             <tbody>
-              {safeServices.map((item, index) => {
-                const configured = isServiceConfigured(item);
+              {safeServices.map((item, index) => (
+                <tr key={item.id || `service-${index}`}>
+                  {/* =================================================
+                      SERVICE
+                      ================================================= */}
+                  <td>
+                    <div className="service-configuration-name">
+                      <strong>{item.serviceName || "Chưa xác định"}</strong>
 
-                return (
-                  <tr key={item.id || `service-${index}`}>
-                    <td>
-                      <div className="service-configuration-name">
-                        <strong>
-                          {item.serviceName || "Chưa chọn dịch vụ"}
-                        </strong>
+                      {item.serviceId && <span>{item.serviceId}</span>}
+                    </div>
+                  </td>
 
-                        {item.serviceId && <span>{item.serviceId}</span>}
-                      </div>
-                    </td>
+                  {/* =================================================
+                      DESCRIPTION
+                      ================================================= */}
+                  <td className="service-configuration-description">
+                    {item.description || "—"}
+                  </td>
 
-                    <td className="service-configuration-description">
-                      {item.description || "—"}
-                    </td>
+                  {/* =================================================
+                      MAX PASSENGERS
+                      ================================================= */}
+                  <td>
+                    {item.maxPassengers != null ? item.maxPassengers : "—"}
+                  </td>
 
-                    <td>
-                      {item.maxPassengers != null ? item.maxPassengers : "—"}
-                    </td>
-
-                    <td>
-                      <span
-                        className={`service-configuration-status ${
-                          configured ? "configured" : "waiting"
-                        }`}
-                      >
-                        {configured ? (
-                          <CheckCircle2 size={14} />
-                        ) : (
-                          <XCircle size={14} />
-                        )}
-
-                        {configured
-                          ? "Đã cấu hình"
-                          : getStatusLabel(item.status)}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
+                  {/* =================================================
+                      STATUS
+                      ================================================= */}
+                  <td>
+                    <span className="service-configuration-status configured">
+                      <CheckCircle2 size={14} />
+                      Đã cấu hình
+                    </span>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

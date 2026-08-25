@@ -2,33 +2,18 @@
 
 import React from "react";
 import { CheckCircle2, Package, XCircle } from "lucide-react";
-import {
-  isProductConfigured,
-  formatVND,
-} from "../../utils/tourConfigurationUtils";
+import { formatVND } from "../../utils/tourConfigurationUtils";
 
 import "../../styles/tour-configuration/ProductConfigurationTable.css";
 
 const ProductConfigurationTable = ({ products = [] }) => {
-  const safeProducts = products || [];
-
-  const getStatusLabel = (status) => {
-    switch (status) {
-      case "WAITING_CONFIG":
-        return "Chờ cấu hình";
-      case "NOT_STARTED":
-        return "Đã cấu hình";
-      case "IN_PROGRESS":
-        return "Đang hoạt động";
-      case "COMPLETED":
-        return "Đã kết thúc";
-      default:
-        return status || "Không xác định";
-    }
-  };
+  const safeProducts = Array.isArray(products) ? products : [];
 
   return (
     <section className="product-configuration-table-section">
+      {/* =========================================================
+          HEADER
+          ========================================================= */}
       <div className="product-configuration-table-header">
         <div className="product-configuration-table-title">
           <div className="product-configuration-table-icon">
@@ -37,21 +22,29 @@ const ProductConfigurationTable = ({ products = [] }) => {
 
           <div>
             <h2>Sản phẩm</h2>
-            <p>Các sản phẩm được Operation phân công cho tour.</p>
+
+            <p>Các sản phẩm đã được cấu hình cho Tour.</p>
           </div>
         </div>
 
         <span className="product-configuration-table-count">
-          {safeProducts.length} phân công
+          {safeProducts.length} sản phẩm
         </span>
       </div>
 
+      {/* =========================================================
+          EMPTY
+          ========================================================= */}
       {safeProducts.length === 0 ? (
         <div className="product-configuration-table-empty">
           <XCircle size={24} />
-          <span>Tour chưa được phân công sản phẩm.</span>
+
+          <span>Tour chưa có sản phẩm được cấu hình.</span>
         </div>
       ) : (
+        /* =======================================================
+           TABLE
+           ======================================================= */
         <div className="product-configuration-table-wrapper">
           <table className="product-configuration-table">
             <thead>
@@ -66,45 +59,46 @@ const ProductConfigurationTable = ({ products = [] }) => {
 
             <tbody>
               {safeProducts.map((item, index) => {
-                const configured = isProductConfigured(item);
                 const totalPrice =
                   item.price != null && item.quantity != null
-                    ? item.price * item.quantity
+                    ? Number(item.price) * Number(item.quantity)
                     : null;
 
                 return (
                   <tr key={item.id || `product-${index}`}>
+                    {/* =================================================
+                        PRODUCT
+                        ================================================= */}
                     <td>
                       <div className="product-configuration-name">
-                        <strong>
-                          {item.productName || "Chưa chọn sản phẩm"}
-                        </strong>
+                        <strong>{item.productName || "Chưa xác định"}</strong>
 
                         {item.productId && <span>{item.productId}</span>}
                       </div>
                     </td>
 
+                    {/* =================================================
+                        QUANTITY
+                        ================================================= */}
                     <td>{item.quantity != null ? item.quantity : "—"}</td>
 
+                    {/* =================================================
+                        UNIT PRICE
+                        ================================================= */}
                     <td>{formatVND(item.price)}</td>
 
+                    {/* =================================================
+                        TOTAL
+                        ================================================= */}
                     <td>{formatVND(totalPrice)}</td>
 
+                    {/* =================================================
+                        STATUS
+                        ================================================= */}
                     <td>
-                      <span
-                        className={`product-configuration-status ${
-                          configured ? "configured" : "waiting"
-                        }`}
-                      >
-                        {configured ? (
-                          <CheckCircle2 size={14} />
-                        ) : (
-                          <XCircle size={14} />
-                        )}
-
-                        {configured
-                          ? "Đã cấu hình"
-                          : getStatusLabel(item.status)}
+                      <span className="product-configuration-status configured">
+                        <CheckCircle2 size={14} />
+                        Đã cấu hình
                       </span>
                     </td>
                   </tr>

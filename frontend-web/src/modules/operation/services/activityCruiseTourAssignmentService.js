@@ -1,11 +1,11 @@
-// src/modules/operation/services/serviceTourAssignmentService.js
+// src/modules/operation/services/activityCruiseTourAssignmentService.js
 
 import api from "../../../api/axios";
 
-const BASE_URL = "/operation/service-tour-assignment";
-const CONFIGURED_BASE_URL = "/operation/service-tours";
+const BASE_URL = "/operation/activity-cruise-tour-assignment";
+const CONFIGURED_BASE_URL = "/operation/activity-cruise-tours";
 
-const serviceTourAssignmentService = {
+const activityCruiseTourAssignmentService = {
   /**
    * =========================================================
    * API PHÂN CÔNG CŨ
@@ -13,7 +13,9 @@ const serviceTourAssignmentService = {
    */
 
   /**
-   * GET /api/operation/service-tour-assignment/tour/{tourId}
+   * GET /api/operation/activity-cruise-tour-assignment/tour/{tourId}
+   *
+   * Lấy danh sách các khu vực đã phân công hoạt động cho Tour.
    */
   getByTour: async (tourId) => {
     const response = await api.get(`${BASE_URL}/tour/${tourId}`);
@@ -22,7 +24,10 @@ const serviceTourAssignmentService = {
   },
 
   /**
-   * POST /api/operation/service-tour-assignment
+   * POST /api/operation/activity-cruise-tour-assignment
+   *
+   * Phân công 1 khu vực Hoạt động cho Tour.
+   * payload = { tourId, cruiseAreaId }
    */
   assign: async (payload) => {
     const response = await api.post(BASE_URL, payload, {
@@ -36,7 +41,9 @@ const serviceTourAssignmentService = {
 
   /**
    * DELETE
-   * /api/operation/service-tour-assignment/tour/{tourId}/area/{cruiseAreaId}
+   * /api/operation/activity-cruise-tour-assignment/tour/{tourId}/area/{cruiseAreaId}
+   *
+   * Xóa phân công khu vực hoạt động.
    */
   delete: async (tourId, cruiseAreaId) => {
     const response = await api.delete(
@@ -48,15 +55,14 @@ const serviceTourAssignmentService = {
 
   /**
    * =========================================================
-   * API LẤY SERVICE TOUR ĐÃ CẤU HÌNH
+   * API NHẬN CẤU HÌNH ĐÃ HOÀN THÀNH
    * =========================================================
    */
 
   /**
-   * GET /api/operation/service-tours
+   * GET /api/operation/activity-cruise-tours
    *
-   * Lấy tất cả ServiceTour đã được service-service
-   * cấu hình và gửi sang tour-service.
+   * Lấy tất cả ActivityCruiseTour đã được cấu hình.
    */
   getAllConfigured: async () => {
     const response = await api.get(CONFIGURED_BASE_URL);
@@ -65,9 +71,9 @@ const serviceTourAssignmentService = {
   },
 
   /**
-   * GET /api/operation/service-tours/tour/{tourId}
+   * GET /api/operation/activity-cruise-tours/tour/{tourId}
    *
-   * Lấy toàn bộ ServiceTour đã cấu hình của một Tour.
+   * Lấy các ActivityCruiseTour đã cấu hình của một Tour.
    */
   getConfiguredByTour: async (tourId) => {
     const response = await api.get(`${CONFIGURED_BASE_URL}/tour/${tourId}`);
@@ -76,4 +82,4 @@ const serviceTourAssignmentService = {
   },
 };
 
-export default serviceTourAssignmentService;
+export default activityCruiseTourAssignmentService;
