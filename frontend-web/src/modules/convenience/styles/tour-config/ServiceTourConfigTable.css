@@ -298,15 +298,31 @@
 }
 
 /* =========================================================
+   STT
+   ========================================================= */
+
+.service-tour-config-table thead th:first-child,
+.service-tour-config-table tbody td:first-child {
+  width: 48px;
+  min-width: 48px;
+
+  text-align: center;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+/* =========================================================
    TOUR
    ========================================================= */
 
 .service-tour-config-tour {
-  min-width: 150px;
+  min-width: 170px;
 
   display: flex;
-  flex-direction: column;
-  gap: 3px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
 }
 
 .service-tour-config-tour strong {
@@ -334,11 +350,13 @@
    ========================================================= */
 
 .service-tour-config-area {
-  min-width: 130px;
+  min-width: 150px;
 
   display: flex;
-  flex-direction: column;
-  gap: 3px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
 }
 
 .service-tour-config-area strong {
@@ -356,6 +374,7 @@
 .service-tour-config-area span {
   color: #94a3b8;
   font-size: 12px;
+  white-space: nowrap;
 }
 
 /* =========================================================
@@ -496,6 +515,37 @@
   transform: translateY(1px);
 }
 
+/* ---------------------------------------------------------
+   VIEW (EYE) BUTTON — nút xem chi tiết Tour / Khu vực
+   --------------------------------------------------------- */
+
+.service-tour-config-action--view {
+  min-height: 24px;
+  min-width: 24px;
+  padding: 2px 4px;
+
+  border: 1px solid transparent;
+  border-radius: 6px;
+
+  background: transparent;
+  color: #94a3b8;
+
+  font-size: 0;
+  font-weight: 400;
+}
+
+.service-tour-config-action--view:hover {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #2563eb;
+
+  box-shadow: none;
+}
+
+.service-tour-config-action--view:active {
+  transform: translateY(1px);
+}
+
 /* =========================================================
    SPINNER
    ========================================================= */
@@ -631,6 +681,11 @@
     padding: 0 9px;
 
     font-size: 11px;
+  }
+
+  .service-tour-config-action--view {
+    min-height: 22px;
+    min-width: 22px;
   }
 }
 

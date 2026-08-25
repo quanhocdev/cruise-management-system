@@ -10,6 +10,7 @@ import {
   ChevronRight,
   X,
   Activity,
+  ListChecks,
 } from "lucide-react";
 
 import "../../styles/onboard/OnboardSidebar.css";
@@ -20,6 +21,11 @@ const menuItems = [
     icon: LayoutDashboard,
     path: "/onboard",
     end: true,
+  },
+  {
+    label: "Danh mục hoạt động",
+    icon: ListChecks,
+    path: "/onboard/activities-catalog",
   },
   {
     label: "Cấu hình hoạt động",
