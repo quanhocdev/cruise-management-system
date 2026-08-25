@@ -1,10 +1,15 @@
 package com.project.tour.service.tour.operation;
 
 import com.project.common.event.ProductTourConfiguredEvent;
+import com.project.tour.dto.tour.operation.AssignmentProductResponse;
+import com.project.tour.mapper.tour.operation.AssignmentProductMapper;
 import com.project.tour.model.AssignmentProduct;
 import com.project.tour.repository.tour.AssignmentProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -30,6 +35,7 @@ public class OperationProductTourService {
                                 + ", cruiseAreaId="
                                 + event.cruiseAreaId()));
 
+        assignment.setProductTourId(event.productTourId());
         assignment.setProductId(event.productId());
         assignment.setProductName(event.name());
         assignment.setProductDescription(event.description());
@@ -38,8 +44,17 @@ public class OperationProductTourService {
         assignment.setImageUrl(event.imageUrl());
         assignment.setStatus(event.status());
 
-        assignment.setProductTourId(event.productTourId());
-
         assignmentProductRepository.save(assignment);
+    }
+
+    @Transactional(readOnly = true)
+    public List<AssignmentProductResponse> getProductToursByTourId(
+            UUID tourId) {
+
+        return assignmentProductRepository
+                .findAllByTourIdOrderByCreatedAtAsc(tourId)
+                .stream()
+                .map(AssignmentProductMapper::toResponse)
+                .toList();
     }
 }
