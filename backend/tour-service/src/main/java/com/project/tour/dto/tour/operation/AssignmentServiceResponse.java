@@ -1,20 +1,22 @@
-package com.project.common.event;
+package com.project.tour.dto.tour.operation;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record ServiceTourConfiguredEvent(
-        UUID serviceTourId,
+public record AssignmentServiceResponse(
+        UUID id,
         UUID tourId,
         UUID cruiseAreaId,
+        UUID serviceTourId,
         UUID serviceId,
-        String name,
-        String description,
+        String serviceName,
+        String serviceDescription,
         BigDecimal price,
         Integer maxPassengers,
         Integer durationMinutes,
         String imageUrl,
         String status,
-        LocalDateTime configuredAt) {
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt) {
 }
