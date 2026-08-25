@@ -1,8 +1,10 @@
 package com.project.activityvisit.config;
 
 import com.project.common.event.TourApprovedEvent;
+
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,7 +35,7 @@ public class KafkaConsumerConfig {
 
                 props.put(
                                 ConsumerConfig.GROUP_ID_CONFIG,
-                                "convenience-group-v2");
+                                "activity-visit-group-v1");
 
                 props.put(
                                 ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
@@ -47,7 +49,7 @@ public class KafkaConsumerConfig {
         // =========================================================
 
         @Bean
-        public ConsumerFactory<String, TourApprovedEvent> tourApprovedConsumerFactory() {
+        public ConsumerFactory<String, TourApprovedEvent> activityVisitConsumerFactory() {
 
                 JsonDeserializer<TourApprovedEvent> jsonDeserializer = new JsonDeserializer<>(TourApprovedEvent.class);
 
@@ -71,16 +73,16 @@ public class KafkaConsumerConfig {
         }
 
         // =========================================================
-        // Product listener
+        // Activity Visit listener
         // =========================================================
 
         @Bean
-        public ConcurrentKafkaListenerContainerFactory<String, TourApprovedEvent> kafkaListenerContainerFactory() {
+        public ConcurrentKafkaListenerContainerFactory<String, TourApprovedEvent> activityVisitKafkaListenerContainerFactory() {
 
                 ConcurrentKafkaListenerContainerFactory<String, TourApprovedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
                 factory.setConsumerFactory(
-                                tourApprovedConsumerFactory());
+                                activityVisitConsumerFactory());
 
                 return factory;
         }
