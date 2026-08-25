@@ -57,7 +57,7 @@ import ActivityCruise from "./modules/onboard/pages/ActivityCruise";
 import ShoreLayout from "./layouts/ShoreLayout";
 import ShoreDashboard from "./modules/shore/pages/Dashboard";
 import ShoreManagerTour from "./modules/shore/pages/ShoreManagerTour";
-import VisitTourConfiguration from "./modules/shore/pages/VisitTourConfiguration";
+// import VisitTourConfiguration from "./modules/shore/pages/VisitTourConfiguration";
 
 import FinanceDashboard from "./modules/finance/pages/Dashboard";
 
@@ -228,10 +228,10 @@ export default function App() {
 
             <Route path="tours" element={<ShoreManagerTour />} />
 
-            <Route
+            {/* <Route
               path="visit-tour-configuration"
               element={<VisitTourConfiguration />}
-            />
+            /> */}
 
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
