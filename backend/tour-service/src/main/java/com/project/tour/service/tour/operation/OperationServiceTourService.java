@@ -53,6 +53,16 @@ public class OperationServiceTourService {
         assignmentServiceRepository.save(assignment);
     }
 
+    @Transactional(readOnly = true)
+    public List<AssignmentServiceResponse> getAll() {
+
+        return assignmentServiceRepository
+                .findAllByOrderByCreatedAtAsc()
+                .stream()
+                .map(AssignmentServiceMapper::toResponse)
+                .toList();
+    }
+
     // =========================================================
     // GET SERVICE ASSIGNMENTS BY TOUR
     // =========================================================

@@ -14,6 +14,8 @@ import java.util.UUID;
 @Repository
 public interface AssignmentProductRepository extends JpaRepository<AssignmentProduct, UUID> {
 
+    List<AssignmentProduct> findAllByOrderByCreatedAtAsc();
+
     List<AssignmentProduct> findAllByTourIdOrderByCreatedAtAsc(UUID tourId);
 
     Optional<AssignmentProduct> findByTourIdAndCruiseAreaId(UUID tourId, UUID cruiseAreaId);
@@ -22,5 +24,7 @@ public interface AssignmentProductRepository extends JpaRepository<AssignmentPro
 
     @Modifying
     @Query("DELETE FROM AssignmentProduct a WHERE a.tourId = :tourId AND a.cruiseAreaId = :cruiseAreaId")
-    void deleteByTourIdAndCruiseAreaId(@Param("tourId") UUID tourId, @Param("cruiseAreaId") UUID cruiseAreaId);
+    void deleteByTourIdAndCruiseAreaId(
+            @Param("tourId") UUID tourId,
+            @Param("cruiseAreaId") UUID cruiseAreaId);
 }

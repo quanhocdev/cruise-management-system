@@ -13,26 +13,28 @@ import java.util.UUID;
 
 @Repository
 public interface AssignmentActivityCruiseRepository
-        extends JpaRepository<AssignmentActivityCruise, UUID> {
+                extends JpaRepository<AssignmentActivityCruise, UUID> {
 
-    List<AssignmentActivityCruise> findAllByTourIdOrderByCreatedAtAsc(
-            UUID tourId);
+        List<AssignmentActivityCruise> findAllByOrderByCreatedAtAsc();
 
-    Optional<AssignmentActivityCruise> findByTourIdAndCruiseAreaId(
-            UUID tourId,
-            UUID cruiseAreaId);
+        List<AssignmentActivityCruise> findAllByTourIdOrderByCreatedAtAsc(
+                        UUID tourId);
 
-    boolean existsByTourIdAndCruiseAreaId(
-            UUID tourId,
-            UUID cruiseAreaId);
+        Optional<AssignmentActivityCruise> findByTourIdAndCruiseAreaId(
+                        UUID tourId,
+                        UUID cruiseAreaId);
 
-    @Modifying
-    @Query("""
-            DELETE FROM AssignmentActivityCruise a
-            WHERE a.tourId = :tourId
-              AND a.cruiseAreaId = :cruiseAreaId
-            """)
-    void deleteByTourIdAndCruiseAreaId(
-            @Param("tourId") UUID tourId,
-            @Param("cruiseAreaId") UUID cruiseAreaId);
+        boolean existsByTourIdAndCruiseAreaId(
+                        UUID tourId,
+                        UUID cruiseAreaId);
+
+        @Modifying
+        @Query("""
+                        DELETE FROM AssignmentActivityCruise a
+                        WHERE a.tourId = :tourId
+                          AND a.cruiseAreaId = :cruiseAreaId
+                        """)
+        void deleteByTourIdAndCruiseAreaId(
+                        @Param("tourId") UUID tourId,
+                        @Param("cruiseAreaId") UUID cruiseAreaId);
 }

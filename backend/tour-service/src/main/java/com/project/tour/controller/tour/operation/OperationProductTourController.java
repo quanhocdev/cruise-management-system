@@ -16,7 +16,15 @@ public class OperationProductTourController {
 
     public OperationProductTourController(
             OperationProductTourService operationProductTourService) {
+
         this.operationProductTourService = operationProductTourService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<AssignmentProductResponse>> getAll() {
+
+        return ResponseEntity.ok(
+                operationProductTourService.getAll());
     }
 
     @GetMapping("/tour/{tourId}")

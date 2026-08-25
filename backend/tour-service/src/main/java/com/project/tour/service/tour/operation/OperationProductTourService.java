@@ -22,6 +22,10 @@ public class OperationProductTourService {
         this.assignmentProductRepository = assignmentProductRepository;
     }
 
+    // =========================================================
+    // KAFKA - PRODUCT TOUR CONFIGURED
+    // =========================================================
+
     public void handleProductTourConfigured(
             ProductTourConfiguredEvent event) {
 
@@ -46,6 +50,24 @@ public class OperationProductTourService {
 
         assignmentProductRepository.save(assignment);
     }
+
+    // =========================================================
+    // GET ALL
+    // =========================================================
+
+    @Transactional(readOnly = true)
+    public List<AssignmentProductResponse> getAll() {
+
+        return assignmentProductRepository
+                .findAllByOrderByCreatedAtAsc()
+                .stream()
+                .map(AssignmentProductMapper::toResponse)
+                .toList();
+    }
+
+    // =========================================================
+    // GET BY TOUR
+    // =========================================================
 
     @Transactional(readOnly = true)
     public List<AssignmentProductResponse> getProductToursByTourId(
