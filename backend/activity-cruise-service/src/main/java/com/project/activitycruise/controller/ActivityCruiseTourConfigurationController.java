@@ -1,7 +1,6 @@
 package com.project.activitycruise.controller;
 
 import com.project.activitycruise.service.ActivityCruiseTourConfigurationService;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,11 +18,11 @@ public class ActivityCruiseTourConfigurationController {
         this.configurationService = configurationService;
     }
 
-    @PostMapping("/{assignmentId}/complete")
+    @PostMapping("/{tourId}/complete")
     public ResponseEntity<Void> complete(
-            @PathVariable UUID assignmentId) {
+            @PathVariable UUID tourId) {
 
-        configurationService.complete(assignmentId);
+        configurationService.complete(tourId);
 
         return ResponseEntity.ok().build();
     }

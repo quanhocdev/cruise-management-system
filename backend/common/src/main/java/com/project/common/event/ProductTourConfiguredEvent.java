@@ -5,15 +5,15 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record ProductTourConfiguredEvent(
-        UUID productTourId,
-        UUID tourId,
-        UUID cruiseAreaId,
-        UUID productId,
-        String name,
-        String description,
-        BigDecimal price,
-        Integer quantity,
-        String imageUrl,
-        String status,
-        LocalDateTime configuredAt) {
+                UUID productTourId,
+                UUID tourId,
+                UUID cruiseAreaId,
+                UUID productId,
+                String name,
+                String description,
+                BigDecimal price,
+                Integer quantity,
+                String imageUrl,
+                String status,
+                LocalDateTime configuredAt) {
 }
