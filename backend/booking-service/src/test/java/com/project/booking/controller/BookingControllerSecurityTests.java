@@ -11,6 +11,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import java.math.BigDecimal;
+import java.util.UUID;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -35,6 +36,10 @@ class BookingControllerSecurityTests {
         when(service.create(any(), eq(7L))).thenReturn(null);
         mockMvc.perform(post("/api/v1/bookings").with(jwt().jwt(j -> j.claim("userId", 7L)))
             .contentType("application/json").content(body())).andExpect(status().isCreated());
+    }
+    @Test void availableRoomsRequiresJwt() throws Exception {
+        mockMvc.perform(get("/api/v1/bookings/voyages/{id}/available-rooms", UUID.randomUUID()))
+            .andExpect(status().isUnauthorized());
     }
     @Test void internalEndpointRejectsMissingKey() throws Exception {
         mockMvc.perform(get("/internal/bookings/1/payment-context")).andExpect(status().isUnauthorized());

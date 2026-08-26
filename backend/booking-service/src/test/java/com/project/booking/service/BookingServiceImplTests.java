@@ -57,6 +57,22 @@ class BookingServiceImplTests {
         assertThrows(BookingException.class, () -> service.create(request, 7L));
     }
 
+    @Test void availableRoomsSubtractsReservedAndRegisteredPassengers() {
+        UUID voyageId = UUID.randomUUID();
+        UUID roomId = UUID.randomUUID();
+        when(tourClient.getSchedule(voyageId)).thenReturn(new TourScheduleContext(
+            voyageId, 100, java.time.LocalDate.now().plusDays(10), "OPEN"));
+        when(tourClient.getRooms(voyageId)).thenReturn(List.of(new TourRoomContext(
+            roomId, "A101", UUID.randomUUID(), 1, UUID.randomUUID(), "Deluxe", "Sea view",
+            new BigDecimal("2500000"), 3)));
+        when(passengerVoyageRepository.countByVoyageIdAndCabinIdAndPassengerStatusIn(
+            eq(voyageId), eq(roomId), any())).thenReturn(2L);
+
+        AvailableRoomResponse room = service.getAvailableRooms(voyageId).get(0);
+        assertEquals(1, room.remainingCapacity());
+        assertTrue(room.available());
+    }
+
     @Test void confirmingSamePaymentIsIdempotent() {
         Booking booking = booking(BookingStatus.CONFIRMED, 10L);
         when(repository.findById(1L)).thenReturn(Optional.of(booking));
