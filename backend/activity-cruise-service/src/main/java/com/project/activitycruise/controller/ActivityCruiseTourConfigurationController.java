@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/activity-cruise/tour-configurations")
+@RequestMapping("/api/onboard/activity-cruise-tours") // đổi từ /api/activity-cruise/tour-configurations
 public class ActivityCruiseTourConfigurationController {
 
     private final ActivityCruiseTourConfigurationService configurationService;

@@ -28,12 +28,31 @@ public class ActivityCruiseTourController {
                 this.configService = configService;
         }
 
+        // =====================================================
+        // GET ALL ASSIGNMENTS
+        // =====================================================
+
+        @GetMapping
+        public ResponseEntity<List<OnboardActivityCruiseTourResponse>> getAllAssignments() {
+
+                return ResponseEntity.ok(
+                                activityCruiseTourService.getAllAssignments());
+        }
+
+        // =====================================================
+        // GET ASSIGNMENTS ĐANG CHỜ CẤU HÌNH
+        // =====================================================
+
         @GetMapping("/pending-config")
         public ResponseEntity<List<OnboardActivityCruiseTourResponse>> getPendingConfig() {
 
                 return ResponseEntity.ok(
                                 activityCruiseTourService.getPendingConfig());
         }
+
+        // =====================================================
+        // CREATE CONFIG
+        // =====================================================
 
         @PostMapping("/{assignmentId}/config")
         public ResponseEntity<OnboardActivityCruiseTourResponse> configure(
@@ -45,6 +64,10 @@ public class ActivityCruiseTourController {
                                                 assignmentId,
                                                 request));
         }
+
+        // =====================================================
+        // UPDATE CONFIG
+        // =====================================================
 
         @PatchMapping("/{assignmentId}/config")
         public ResponseEntity<OnboardActivityCruiseTourResponse> updateConfig(

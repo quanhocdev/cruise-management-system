@@ -1,5 +1,8 @@
 package com.project.convenience.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,7 +44,17 @@ public class KafkaProducerConfig {
                                 JsonSerializer.ADD_TYPE_INFO_HEADERS,
                                 true);
 
-                return new DefaultKafkaProducerFactory<>(configProps);
+                DefaultKafkaProducerFactory<String, Object> factory = new DefaultKafkaProducerFactory<>(configProps);
+
+                // ===================================================
+                // ObjectMapper hỗ trợ LocalDateTime / LocalDate...
+                // ===================================================
+                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper.registerModule(new JavaTimeModule());
+
+                factory.setValueSerializer(new JsonSerializer<>(objectMapper));
+
+                return factory;
         }
 
         @Bean

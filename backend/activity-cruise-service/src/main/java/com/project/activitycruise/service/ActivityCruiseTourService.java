@@ -16,72 +16,82 @@ import java.util.UUID;
 @Transactional
 public class ActivityCruiseTourService {
 
-    private final ActivityCruiseTourAssignmentRepository assignmentRepository;
-    private final ActivityCruiseTourMapper activityCruiseTourMapper;
+        private final ActivityCruiseTourAssignmentRepository assignmentRepository;
+        private final ActivityCruiseTourMapper activityCruiseTourMapper;
 
-    public ActivityCruiseTourService(
-            ActivityCruiseTourAssignmentRepository assignmentRepository,
-            ActivityCruiseTourMapper activityCruiseTourMapper) {
+        public ActivityCruiseTourService(
+                        ActivityCruiseTourAssignmentRepository assignmentRepository,
+                        ActivityCruiseTourMapper activityCruiseTourMapper) {
 
-        this.assignmentRepository = assignmentRepository;
-        this.activityCruiseTourMapper = activityCruiseTourMapper;
-    }
-
-    // =====================================================
-    // Xử lý Event CREATE từ Kafka
-    // =====================================================
-
-    public void createActivityTourFromEvent(
-            UUID tourId,
-            UUID cruiseAreaId) {
-
-        boolean exists = assignmentRepository
-                .findByTourIdAndCruiseAreaId(
-                        tourId,
-                        cruiseAreaId)
-                .isPresent();
-
-        if (exists) {
-            return;
+                this.assignmentRepository = assignmentRepository;
+                this.activityCruiseTourMapper = activityCruiseTourMapper;
         }
 
-        ActivityCruiseTour activityTour = new ActivityCruiseTour();
+        // =====================================================
+        // Xử lý Event CREATE từ Kafka
+        // =====================================================
 
-        activityTour.setTourId(tourId);
-        activityTour.setCruiseAreaId(cruiseAreaId);
-        activityTour.setStatus(
-                ActivityCruiseTourStatus.WAITING_CONFIG);
+        public void createActivityTourFromEvent(
+                        UUID tourId,
+                        UUID cruiseAreaId) {
 
-        assignmentRepository.save(activityTour);
-    }
+                boolean exists = assignmentRepository
+                                .findByTourIdAndCruiseAreaId(
+                                                tourId,
+                                                cruiseAreaId)
+                                .isPresent();
 
-    // =====================================================
-    // Xử lý Event DELETE từ Kafka
-    // =====================================================
+                if (exists) {
+                        return;
+                }
 
-    public void deleteActivityTourFromEvent(
-            UUID tourId,
-            UUID cruiseAreaId) {
+                ActivityCruiseTour activityTour = new ActivityCruiseTour();
 
-        assignmentRepository
-                .findByTourIdAndCruiseAreaId(
-                        tourId,
-                        cruiseAreaId)
-                .ifPresent(assignmentRepository::delete);
-    }
+                activityTour.setTourId(tourId);
+                activityTour.setCruiseAreaId(cruiseAreaId);
+                activityTour.setStatus(
+                                ActivityCruiseTourStatus.WAITING_CONFIG);
 
-    // =====================================================
-    // GET ACTIVITIES ĐANG CHỜ CẤU HÌNH
-    // =====================================================
+                assignmentRepository.save(activityTour);
+        }
 
-    @Transactional(readOnly = true)
-    public List<OnboardActivityCruiseTourResponse> getPendingConfig() {
+        // =====================================================
+        // Xử lý Event DELETE từ Kafka
+        // =====================================================
 
-        return assignmentRepository
-                .findPendingConfig(
-                        ActivityCruiseTourStatus.WAITING_CONFIG)
-                .stream()
-                .map(activityCruiseTourMapper::toResponse)
-                .toList();
-    }
+        public void deleteActivityTourFromEvent(
+                        UUID tourId,
+                        UUID cruiseAreaId) {
+
+                assignmentRepository
+                                .findByTourIdAndCruiseAreaId(
+                                                tourId,
+                                                cruiseAreaId)
+                                .ifPresent(assignmentRepository::delete);
+        }
+
+        // =====================================================
+        // GET ACTIVITIES ĐANG CHỜ CẤU HÌNH
+        // =====================================================
+
+        @Transactional(readOnly = true)
+        public List<OnboardActivityCruiseTourResponse> getPendingConfig() {
+
+                return assignmentRepository
+                                .findPendingConfig(
+                                                ActivityCruiseTourStatus.WAITING_CONFIG)
+                                .stream()
+                                .map(activityCruiseTourMapper::toResponse)
+                                .toList();
+        }
+
+        @Transactional(readOnly = true)
+        public List<OnboardActivityCruiseTourResponse> getAllAssignments() {
+
+                return assignmentRepository
+                                .findAll()
+                                .stream()
+                                .map(activityCruiseTourMapper::toResponse)
+                                .toList();
+        }
 }

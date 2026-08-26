@@ -3,6 +3,9 @@ package com.project.tour.config;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
@@ -36,24 +39,31 @@ public class KafkaConsumerConfig {
                                 ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
                                 StringDeserializer.class);
 
-                props.put(
-                                ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-                                ErrorHandlingDeserializer.class);
+                // ĐÃ BỎ: props.put(JsonDeserializer.TRUSTED_PACKAGES, ...)
+                // ĐÃ BỎ: props.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, ...)
+                // -> cấu hình JsonDeserializer chỉ qua setter bên dưới,
+                // tránh lỗi "must be configured with property setters,
+                // or via configuration properties; not both"
 
-                props.put(
-                                ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS,
-                                JsonDeserializer.class);
+                // ===================================================
+                // ObjectMapper hỗ trợ LocalDateTime / LocalDate...
+                // (mặc định Jackson không deserialize được Java 8 time)
+                // ===================================================
+                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper.registerModule(new JavaTimeModule());
 
-                props.put(
-                                JsonDeserializer.TRUSTED_PACKAGES,
-                                "com.project.common.event");
+                JsonDeserializer<Object> jsonDeserializer = new JsonDeserializer<>(objectMapper);
+                jsonDeserializer.addTrustedPackages("com.project.common.event");
+                jsonDeserializer.setUseTypeMapperForKey(false);
+                jsonDeserializer.setUseTypeHeaders(true); // thay cho USE_TYPE_INFO_HEADERS
 
-                // Dùng type header để JsonDeserializer tự xác định Event
-                props.put(
-                                JsonDeserializer.USE_TYPE_INFO_HEADERS,
-                                true);
+                ErrorHandlingDeserializer<Object> errorHandlingDeserializer = new ErrorHandlingDeserializer<>(
+                                jsonDeserializer);
 
-                return new DefaultKafkaConsumerFactory<>(props);
+                return new DefaultKafkaConsumerFactory<>(
+                                props,
+                                new StringDeserializer(),
+                                errorHandlingDeserializer);
         }
 
         @Bean
