@@ -2,12 +2,24 @@
 
 import React from "react";
 import { CheckCircle2, Package, XCircle } from "lucide-react";
-import { formatVND } from "../../utils/tourConfigurationUtils";
+import {
+  formatVND,
+  getTourStatusMeta,
+  isTourItemConfigured,
+} from "../../utils/tourConfigurationUtils";
 
 import "../../styles/tour-configuration/ProductConfigurationTable.css";
 
 const ProductConfigurationTable = ({ products = [] }) => {
   const safeProducts = Array.isArray(products) ? products : [];
+
+  // =========================================================
+  // SỐ LƯỢNG THỰC SỰ ĐÃ CẤU HÌNH (status !== WAITING_CONFIG)
+  // =========================================================
+
+  const configuredCount = safeProducts.filter((item) =>
+    isTourItemConfigured(item.status),
+  ).length;
 
   return (
     <section className="product-configuration-table-section">
@@ -27,8 +39,9 @@ const ProductConfigurationTable = ({ products = [] }) => {
           </div>
         </div>
 
+        {/* ✅ hiển thị rõ số đã cấu hình / tổng số đã phân công */}
         <span className="product-configuration-table-count">
-          {safeProducts.length} sản phẩm
+          {configuredCount}/{safeProducts.length} đã cấu hình
         </span>
       </div>
 
@@ -64,6 +77,15 @@ const ProductConfigurationTable = ({ products = [] }) => {
                     ? Number(item.price) * Number(item.quantity)
                     : null;
 
+                // =========================================================
+                // TRẠNG THÁI THẬT LẤY TỪ ProductTourStatus
+                // (WAITING_CONFIG / CONFIGURED / NOT_STARTED /
+                //  IN_PROGRESS / OUT_OF_STOCK / COMPLETED)
+                // =========================================================
+
+                const statusMeta = getTourStatusMeta(item.status);
+                const configured = isTourItemConfigured(item.status);
+
                 return (
                   <tr key={item.id || `product-${index}`}>
                     {/* =================================================
@@ -96,9 +118,15 @@ const ProductConfigurationTable = ({ products = [] }) => {
                         STATUS
                         ================================================= */}
                     <td>
-                      <span className="product-configuration-status configured">
-                        <CheckCircle2 size={14} />
-                        Đã cấu hình
+                      <span
+                        className={`product-configuration-status ${statusMeta.className}`}
+                      >
+                        {configured ? (
+                          <CheckCircle2 size={14} />
+                        ) : (
+                          <XCircle size={14} />
+                        )}
+                        {statusMeta.label}
                       </span>
                     </td>
                   </tr>

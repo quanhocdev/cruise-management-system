@@ -3,6 +3,8 @@
 import React from "react";
 import { Activity, CheckCircle2, MapPin, Package, Wrench } from "lucide-react";
 
+import { isTourItemConfigured } from "../../utils/tourConfigurationUtils";
+
 import "../../styles/tour-configuration/TourConfigurationSummary.css";
 
 const TourConfigurationSummary = ({
@@ -14,6 +16,10 @@ const TourConfigurationSummary = ({
   activeFilter = "ALL",
   onFilterChange,
 }) => {
+  // =========================================================
+  // SAFE DATA
+  // =========================================================
+
   const safeActivityCruises = Array.isArray(activityCruises)
     ? activityCruises
     : [];
@@ -26,24 +32,55 @@ const TourConfigurationSummary = ({
 
   const safeServices = Array.isArray(services) ? services : [];
 
-  /*
-   * =========================================================
-   * CÁC API NÀY ĐÃ TRẢ VỀ DỮ LIỆU ĐÃ CẤU HÌNH
-   * =========================================================
-   *
-   * Không cần:
-   *
-   * isActivityConfigured()
-   * isProductConfigured()
-   * isServiceConfigured()
-   *
-   * Số lượng phần tử chính là số lượng đã cấu hình.
-   */
+  // =========================================================
+  // TOTAL ASSIGNMENTS
+  // =========================================================
+  //
+  // Tổng số item được phân công cho Tour.
+  //
+  // Ví dụ:
+  // 3 activity trên tàu
+  // -> total = 3
+  //
+  // =========================================================
 
-  const configuredActivityCruises = safeActivityCruises.length;
-  const configuredActivityVisits = safeActivityVisits.length;
-  const configuredProducts = safeProducts.length;
-  const configuredServices = safeServices.length;
+  const totalActivityCruises = safeActivityCruises.length;
+  const totalActivityVisits = safeActivityVisits.length;
+  const totalProducts = safeProducts.length;
+  const totalServices = safeServices.length;
+
+  // =========================================================
+  // ACTUALLY CONFIGURED
+  // =========================================================
+  //
+  // CHỈ status === "CONFIGURED" mới được tính là đã cấu hình.
+  //
+  // WAITING_CONFIG -> chưa cấu hình
+  // CONFIGURED     -> đã cấu hình
+  // NOT_STARTED    -> chưa tính là configured ở bước này
+  // IN_PROGRESS    -> chưa tính là configured ở bước này
+  // COMPLETED      -> không dùng để xác định trạng thái cấu hình
+  // =========================================================
+
+  const configuredActivityCruises = safeActivityCruises.filter((item) =>
+    isTourItemConfigured(item.status),
+  ).length;
+
+  const configuredActivityVisits = safeActivityVisits.filter((item) =>
+    isTourItemConfigured(item.status),
+  ).length;
+
+  const configuredProducts = safeProducts.filter((item) =>
+    isTourItemConfigured(item.status),
+  ).length;
+
+  const configuredServices = safeServices.filter((item) =>
+    isTourItemConfigured(item.status),
+  ).length;
+
+  // =========================================================
+  // SUMMARY CARDS
+  // =========================================================
 
   const cards = [
     {
@@ -51,30 +88,34 @@ const TourConfigurationSummary = ({
       label: "Hoạt động trên tàu",
       icon: Activity,
       configured: configuredActivityCruises,
-      total: configuredActivityCruises,
+      total: totalActivityCruises,
     },
     {
       key: "activityVisit",
       label: "Hoạt động trên bờ",
       icon: MapPin,
       configured: configuredActivityVisits,
-      total: configuredActivityVisits,
+      total: totalActivityVisits,
     },
     {
       key: "product",
       label: "Sản phẩm",
       icon: Package,
       configured: configuredProducts,
-      total: configuredProducts,
+      total: totalProducts,
     },
     {
       key: "service",
       label: "Dịch vụ",
       icon: Wrench,
       configured: configuredServices,
-      total: configuredServices,
+      total: totalServices,
     },
   ];
+
+  // =========================================================
+  // FILTER
+  // =========================================================
 
   const handleCardClick = (key) => {
     if (!onFilterChange) return;
@@ -84,11 +125,16 @@ const TourConfigurationSummary = ({
     onFilterChange(nextFilter);
   };
 
+  // =========================================================
+  // RENDER
+  // =========================================================
+
   return (
     <section className="tour-configuration-summary">
       {/* =========================================================
           HEADER
           ========================================================= */}
+
       <div className="tour-configuration-summary-header">
         <div>
           <h2>Tổng quan cấu hình</h2>
@@ -114,10 +160,18 @@ const TourConfigurationSummary = ({
       {/* =========================================================
           SUMMARY CARDS
           ========================================================= */}
+
       <div className="tour-configuration-summary-grid">
         {cards.map((card) => {
           const Icon = card.icon;
+
           const isActive = activeFilter === card.key;
+
+          // Có item và tất cả item đều đã CONFIGURED
+          const isComplete = card.total > 0 && card.configured === card.total;
+
+          // Có ít nhất một item đã CONFIGURED
+          const hasConfigured = card.configured > 0;
 
           return (
             <div
@@ -135,12 +189,18 @@ const TourConfigurationSummary = ({
                 }
               }}
             >
-              {/* ICON */}
+              {/* =================================================
+                  ICON
+                  ================================================= */}
+
               <div className="tour-configuration-summary-card-icon">
                 <Icon size={22} />
               </div>
 
-              {/* CONTENT */}
+              {/* =================================================
+                  CONTENT
+                  ================================================= */}
+
               <div className="tour-configuration-summary-card-content">
                 <span>{card.label}</span>
 
@@ -149,7 +209,15 @@ const TourConfigurationSummary = ({
                   <small> / {card.total}</small>
                 </strong>
 
-                <p>{card.total === 0 ? "Chưa có cấu hình" : "Đã cấu hình"}</p>
+                <p>
+                  {card.total === 0
+                    ? "Chưa có phân công"
+                    : isComplete
+                      ? "Đã cấu hình đầy đủ"
+                      : hasConfigured
+                        ? "Đang cấu hình"
+                        : "Chưa cấu hình"}
+                </p>
               </div>
             </div>
           );

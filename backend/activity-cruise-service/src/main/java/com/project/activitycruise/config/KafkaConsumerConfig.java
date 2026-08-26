@@ -22,68 +22,49 @@ import java.util.Map;
 @Configuration
 public class KafkaConsumerConfig {
 
-    @Value("${spring.kafka.bootstrap-servers:localhost:9092}")
-    private String bootstrapServers;
+        @Value("${spring.kafka.bootstrap-servers:localhost:9092}")
+        private String bootstrapServers;
 
-    private Map<String, Object> baseConsumerProps() {
+        @Bean
+        public ConsumerFactory<String, TourApprovedEvent> consumerFactory() {
 
-        Map<String, Object> props = new HashMap<>();
+                Map<String, Object> props = new HashMap<>();
 
-        props.put(
-                ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
-                bootstrapServers);
+                props.put(
+                                ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
+                                bootstrapServers);
 
-        props.put(
-                ConsumerConfig.GROUP_ID_CONFIG,
-                "activity-cruise-group-v1");
+                props.put(
+                                ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
+                                StringDeserializer.class);
 
-        props.put(
-                ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
-                StringDeserializer.class);
+                props.put(
+                                ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+                                ErrorHandlingDeserializer.class);
 
-        return props;
-    }
+                props.put(
+                                ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS,
+                                JsonDeserializer.class);
 
-    // =========================================================
-    // ConsumerFactory cho TourApprovedEvent
-    // =========================================================
+                props.put(
+                                JsonDeserializer.TRUSTED_PACKAGES,
+                                "com.project.common.event");
 
-    @Bean
-    public ConsumerFactory<String, TourApprovedEvent> activityConsumerFactory() {
+                // Đọc type Event từ Kafka header
+                props.put(
+                                JsonDeserializer.USE_TYPE_INFO_HEADERS,
+                                true);
 
-        JsonDeserializer<TourApprovedEvent> jsonDeserializer = new JsonDeserializer<>(TourApprovedEvent.class);
+                return new DefaultKafkaConsumerFactory<>(props);
+        }
 
-        jsonDeserializer.addTrustedPackages("*");
-        jsonDeserializer.setUseTypeHeaders(false);
-        jsonDeserializer.setRemoveTypeHeaders(true);
+        @Bean
+        public ConcurrentKafkaListenerContainerFactory<String, TourApprovedEvent> kafkaListenerContainerFactory() {
 
-        ErrorHandlingDeserializer<TourApprovedEvent> errorHandlingDeserializer = new ErrorHandlingDeserializer<>(
-                jsonDeserializer);
+                ConcurrentKafkaListenerContainerFactory<String, TourApprovedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
-        Map<String, Object> props = baseConsumerProps();
+                factory.setConsumerFactory(consumerFactory());
 
-        props.put(
-                ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-                errorHandlingDeserializer);
-
-        return new DefaultKafkaConsumerFactory<>(
-                props,
-                new StringDeserializer(),
-                errorHandlingDeserializer);
-    }
-
-    // =========================================================
-    // Activity Cruise Listener
-    // =========================================================
-
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, TourApprovedEvent> activityKafkaListenerContainerFactory() {
-
-        ConcurrentKafkaListenerContainerFactory<String, TourApprovedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
-
-        factory.setConsumerFactory(
-                activityConsumerFactory());
-
-        return factory;
-    }
+                return factory;
+        }
 }

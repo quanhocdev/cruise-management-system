@@ -3,12 +3,25 @@
 import React from "react";
 import { Activity, CheckCircle2, Clock3, MapPin, XCircle } from "lucide-react";
 
-import { formatVND } from "../../utils/tourConfigurationUtils";
+import {
+  formatVND,
+  getTourStatusMeta,
+  isTourItemConfigured,
+} from "../../utils/tourConfigurationUtils";
 
 import "../../styles/tour-configuration/ActivityConfigurationTable.css";
 
 const ActivityCruiseConfigurationTable = ({ activities = [] }) => {
   const safeActivities = Array.isArray(activities) ? activities : [];
+
+  // =========================================================
+  // SỐ LƯỢNG THỰC SỰ ĐÃ CẤU HÌNH
+  // status !== WAITING_CONFIG
+  // =========================================================
+
+  const configuredCount = safeActivities.filter((item) =>
+    isTourItemConfigured(item.status),
+  ).length;
 
   return (
     <section className="activity-configuration-table-section">
@@ -24,28 +37,34 @@ const ActivityCruiseConfigurationTable = ({ activities = [] }) => {
           <div>
             <h2>Hoạt động trên tàu</h2>
 
-            <p>Các hoạt động trên tàu đã được cấu hình cho Tour.</p>
+            <p>Các hoạt động trên tàu được phân công cho Tour.</p>
           </div>
         </div>
 
+        {/* =========================================================
+            CONFIGURED COUNT / TOTAL ASSIGNMENTS
+            ========================================================= */}
+
         <span className="activity-configuration-table-count">
-          {safeActivities.length} hoạt động
+          {configuredCount}/{safeActivities.length} đã cấu hình
         </span>
       </div>
 
       {/* =========================================================
           EMPTY
           ========================================================= */}
+
       {safeActivities.length === 0 ? (
         <div className="activity-configuration-table-empty">
           <XCircle size={24} />
 
-          <span>Tour chưa có hoạt động trên tàu được cấu hình.</span>
+          <span>Tour chưa có hoạt động trên tàu được phân công.</span>
         </div>
       ) : (
         /* =======================================================
            TABLE
            ======================================================= */
+
         <div className="activity-configuration-table-wrapper">
           <table className="activity-configuration-table">
             <thead>
@@ -60,85 +79,103 @@ const ActivityCruiseConfigurationTable = ({ activities = [] }) => {
             </thead>
 
             <tbody>
-              {safeActivities.map((item, index) => (
-                <tr key={item.id || `activity-cruise-${index}`}>
-                  {/* =================================================
-                      ACTIVITY
-                      ================================================= */}
-                  <td>
-                    <div className="activity-configuration-name">
-                      <strong>
-                        {item.activityCruiseName ||
-                          item.activityName ||
-                          "Chưa xác định"}
-                      </strong>
+              {safeActivities.map((item, index) => {
+                // =========================================================
+                // STATUS
+                // =========================================================
 
-                      {item.activityCruiseId && (
-                        <span>{item.activityCruiseId}</span>
-                      )}
-                    </div>
-                  </td>
+                const statusMeta = getTourStatusMeta(item.status);
 
-                  {/* =================================================
-                      CRUISE AREA
-                      ================================================= */}
-                  <td>
-                    <div className="activity-configuration-area">
-                      <MapPin size={15} />
+                const configured = isTourItemConfigured(item.status);
 
-                      <div>
-                        <strong>{item.cruiseAreaName || "—"}</strong>
+                return (
+                  <tr key={item.id || `activity-cruise-${index}`}>
+                    {/* =================================================
+                        ACTIVITY
+                        ================================================= */}
 
-                        {item.deckNumber != null && (
-                          <span>Tầng {item.deckNumber}</span>
+                    <td>
+                      <div className="activity-configuration-name">
+                        <strong>
+                          {item.activityCruiseName ||
+                            item.activityName ||
+                            "Chưa xác định"}
+                        </strong>
+
+                        {item.activityCruiseId && (
+                          <span>{item.activityCruiseId}</span>
                         )}
                       </div>
-                    </div>
-                  </td>
+                    </td>
 
-                  {/* =================================================
-                      TIME
-                      ================================================= */}
-                  <td>
-                    <div className="activity-configuration-time">
-                      <Clock3 size={15} />
+                    {/* =================================================
+                        CRUISE AREA
+                        ================================================= */}
 
-                      <div>
-                        <span>{item.startTime || "—"}</span>
+                    <td>
+                      <div className="activity-configuration-area">
+                        <MapPin size={15} />
 
-                        <span>{item.endTime || "—"}</span>
+                        <div>
+                          <strong>{item.cruiseAreaName || "—"}</strong>
+
+                          {item.deckNumber != null && (
+                            <span>Tầng {item.deckNumber}</span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </td>
+                    </td>
 
-                  {/* =================================================
-                      MAX PASSENGERS
-                      ================================================= */}
-                  <td>
-                    {item.maxPassengers != null ? item.maxPassengers : "—"}
-                  </td>
+                    {/* =================================================
+                        TIME
+                        ================================================= */}
 
-                  {/* =================================================
-                      PRICE
-                      ================================================= */}
-                  <td>{formatVND(item.price)}</td>
+                    <td>
+                      <div className="activity-configuration-time">
+                        <Clock3 size={15} />
 
-                  {/* =================================================
-                      STATUS
-                      ================================================= */}
-                  <td>
-                    <span
-                      className="
-                        activity-configuration-status
-                        configured
-                      "
-                    >
-                      <CheckCircle2 size={14} />
-                      Đã cấu hình
-                    </span>
-                  </td>
-                </tr>
-              ))}
+                        <div>
+                          <span>{item.startTime || "—"}</span>
+
+                          <span>{item.endTime || "—"}</span>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* =================================================
+                        MAX PASSENGERS
+                        ================================================= */}
+
+                    <td>
+                      {item.maxPassengers != null ? item.maxPassengers : "—"}
+                    </td>
+
+                    {/* =================================================
+                        PRICE
+                        ================================================= */}
+
+                    <td>{formatVND(item.price)}</td>
+
+                    {/* =================================================
+                        STATUS
+                        ================================================= */}
+
+                    <td>
+                      <span
+                        className={`activity-configuration-status ${statusMeta.className}`}
+                      >
+                        {configured ? (
+                          <CheckCircle2 size={14} />
+                        ) : (
+                          <XCircle size={14} />
+                        )}
+
+                        {statusMeta.label}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

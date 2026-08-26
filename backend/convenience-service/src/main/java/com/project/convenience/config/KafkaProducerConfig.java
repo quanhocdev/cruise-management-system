@@ -16,34 +16,37 @@ import java.util.Map;
 @Configuration
 public class KafkaProducerConfig {
 
-    @Value("${spring.kafka.bootstrap-servers:localhost:9092}")
-    private String bootstrapServers;
+        @Value("${spring.kafka.bootstrap-servers:localhost:9092}")
+        private String bootstrapServers;
 
-    @Bean
-    public ProducerFactory<String, Object> producerFactory() {
-        Map<String, Object> configProps = new HashMap<>();
+        @Bean
+        public ProducerFactory<String, Object> producerFactory() {
 
-        configProps.put(
-                ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
-                bootstrapServers);
+                Map<String, Object> configProps = new HashMap<>();
 
-        configProps.put(
-                ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
-                StringSerializer.class);
+                configProps.put(
+                                ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
+                                bootstrapServers);
 
-        configProps.put(
-                ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-                JsonSerializer.class);
+                configProps.put(
+                                ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
+                                StringSerializer.class);
 
-        configProps.put(
-                JsonSerializer.ADD_TYPE_INFO_HEADERS,
-                false);
+                configProps.put(
+                                ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
+                                JsonSerializer.class);
 
-        return new DefaultKafkaProducerFactory<>(configProps);
-    }
+                // Gửi type của Event trong Kafka header
+                configProps.put(
+                                JsonSerializer.ADD_TYPE_INFO_HEADERS,
+                                true);
 
-    @Bean
-    public KafkaTemplate<String, Object> kafkaTemplate() {
-        return new KafkaTemplate<>(producerFactory());
-    }
+                return new DefaultKafkaProducerFactory<>(configProps);
+        }
+
+        @Bean
+        public KafkaTemplate<String, Object> kafkaTemplate() {
+
+                return new KafkaTemplate<>(producerFactory());
+        }
 }

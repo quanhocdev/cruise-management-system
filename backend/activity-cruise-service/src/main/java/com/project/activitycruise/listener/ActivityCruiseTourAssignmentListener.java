@@ -26,11 +26,7 @@ public class ActivityCruiseTourAssignmentListener {
                 this.activityCruiseTourService = activityCruiseTourService;
         }
 
-        // =========================================================
-        // LISTEN TOUR APPROVED
-        // =========================================================
-
-        @KafkaListener(topics = "tour-approved-topic", groupId = "activity-cruise-group-v1", containerFactory = "activityKafkaListenerContainerFactory")
+        @KafkaListener(topics = "tour-approved-topic", groupId = "activity-cruise-group-v1")
         public void onTourApproved(
                         TourApprovedEvent event,
                         @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
@@ -44,10 +40,6 @@ public class ActivityCruiseTourAssignmentListener {
                                 offset,
                                 event.tourId());
 
-                // =====================================================
-                // KIỂM TRA ASSIGNMENT
-                // =====================================================
-
                 if (event.assignments() == null ||
                                 event.assignments().isEmpty()) {
 
@@ -58,15 +50,7 @@ public class ActivityCruiseTourAssignmentListener {
                         return;
                 }
 
-                // =====================================================
-                // DUYỆT CÁC ASSIGNMENT
-                // =====================================================
-
                 for (TourAssignmentEvent assignment : event.assignments()) {
-
-                        // =================================================
-                        // CHỈ ACTIVITY CRUISE XỬ LÝ
-                        // =================================================
 
                         if (assignment.type() != TourAssignmentType.ACTIVITY_CRUISE) {
                                 continue;
@@ -78,10 +62,6 @@ public class ActivityCruiseTourAssignmentListener {
                                         assignment.tourId(),
                                         assignment.targetId(),
                                         assignment.type());
-
-                        // =================================================
-                        // TẠO ACTIVITY CRUISE TOUR
-                        // =================================================
 
                         try {
 

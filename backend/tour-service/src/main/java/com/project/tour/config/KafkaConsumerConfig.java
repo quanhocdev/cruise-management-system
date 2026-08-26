@@ -1,7 +1,7 @@
 package com.project.tour.config;
 
-import com.project.common.event.ProductTourConfiguredEvent;
-import com.project.common.event.ServiceTourConfiguredEvent;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -16,108 +16,53 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @EnableKafka
 @Configuration
 public class KafkaConsumerConfig {
 
-    @Value("${spring.kafka.bootstrap-servers:localhost:9092}")
-    private String bootstrapServers;
+        @Value("${spring.kafka.bootstrap-servers:localhost:9092}")
+        private String bootstrapServers;
 
-    private Map<String, Object> baseConsumerProps() {
+        @Bean
+        public ConsumerFactory<String, Object> consumerFactory() {
 
-        Map<String, Object> props = new HashMap<>();
+                Map<String, Object> props = new HashMap<>();
 
-        props.put(
-                ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
-                bootstrapServers);
+                props.put(
+                                ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
+                                bootstrapServers);
 
-        props.put(
-                ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
-                StringDeserializer.class);
+                props.put(
+                                ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
+                                StringDeserializer.class);
 
-        return props;
-    }
+                props.put(
+                                ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+                                ErrorHandlingDeserializer.class);
 
-    // =========================================================
-    // PRODUCT TOUR CONFIGURED
-    // =========================================================
+                props.put(
+                                ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS,
+                                JsonDeserializer.class);
 
-    @Bean
-    public ConsumerFactory<String, ProductTourConfiguredEvent> productTourConfiguredConsumerFactory() {
+                props.put(
+                                JsonDeserializer.TRUSTED_PACKAGES,
+                                "com.project.common.event");
 
-        JsonDeserializer<ProductTourConfiguredEvent> jsonDeserializer = new JsonDeserializer<>(
-                ProductTourConfiguredEvent.class);
+                // Dùng type header để JsonDeserializer tự xác định Event
+                props.put(
+                                JsonDeserializer.USE_TYPE_INFO_HEADERS,
+                                true);
 
-        jsonDeserializer.addTrustedPackages("*");
-        jsonDeserializer.setUseTypeHeaders(false);
-        jsonDeserializer.setRemoveTypeHeaders(true);
+                return new DefaultKafkaConsumerFactory<>(props);
+        }
 
-        ErrorHandlingDeserializer<ProductTourConfiguredEvent> errorHandlingDeserializer = new ErrorHandlingDeserializer<>(
-                jsonDeserializer);
+        @Bean
+        public ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory() {
 
-        Map<String, Object> props = baseConsumerProps();
+                ConcurrentKafkaListenerContainerFactory<String, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
-        props.put(
-                ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-                errorHandlingDeserializer);
+                factory.setConsumerFactory(consumerFactory());
 
-        return new DefaultKafkaConsumerFactory<>(
-                props,
-                new StringDeserializer(),
-                errorHandlingDeserializer);
-    }
-
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, ProductTourConfiguredEvent> productTourConfiguredKafkaListenerContainerFactory() {
-
-        ConcurrentKafkaListenerContainerFactory<String, ProductTourConfiguredEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
-
-        factory.setConsumerFactory(
-                productTourConfiguredConsumerFactory());
-
-        return factory;
-    }
-
-    // =========================================================
-    // SERVICE TOUR CONFIGURED
-    // =========================================================
-
-    @Bean
-    public ConsumerFactory<String, ServiceTourConfiguredEvent> serviceTourConfiguredConsumerFactory() {
-
-        JsonDeserializer<ServiceTourConfiguredEvent> jsonDeserializer = new JsonDeserializer<>(
-                ServiceTourConfiguredEvent.class);
-
-        jsonDeserializer.addTrustedPackages("*");
-        jsonDeserializer.setUseTypeHeaders(false);
-        jsonDeserializer.setRemoveTypeHeaders(true);
-
-        ErrorHandlingDeserializer<ServiceTourConfiguredEvent> errorHandlingDeserializer = new ErrorHandlingDeserializer<>(
-                jsonDeserializer);
-
-        Map<String, Object> props = baseConsumerProps();
-
-        props.put(
-                ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-                errorHandlingDeserializer);
-
-        return new DefaultKafkaConsumerFactory<>(
-                props,
-                new StringDeserializer(),
-                errorHandlingDeserializer);
-    }
-
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, ServiceTourConfiguredEvent> serviceTourConfiguredKafkaListenerContainerFactory() {
-
-        ConcurrentKafkaListenerContainerFactory<String, ServiceTourConfiguredEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
-
-        factory.setConsumerFactory(
-                serviceTourConfiguredConsumerFactory());
-
-        return factory;
-    }
+                return factory;
+        }
 }

@@ -29,7 +29,7 @@ public class ServiceTourAssignmentListener {
         // LISTEN TOUR APPROVED
         // =========================================================
 
-        @KafkaListener(topics = "tour-approved-topic", groupId = "service-cruise-group-v1", containerFactory = "serviceKafkaListenerContainerFactory")
+        @KafkaListener(topics = "tour-approved-topic", groupId = "service-cruise-group-v1")
         public void onTourApproved(
                         TourApprovedEvent event,
                         @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,

@@ -31,7 +31,7 @@ public class ActivityVisitTourAssignmentListener {
         // LISTEN TOUR APPROVED
         // =========================================================
 
-        @KafkaListener(topics = "tour-approved-topic", groupId = "activity-visit-group-v1", containerFactory = "activityVisitKafkaListenerContainerFactory")
+        @KafkaListener(topics = "tour-approved-topic", groupId = "activity-visit-group-v1")
         public void onTourApproved(
                         TourApprovedEvent event,
                         @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,

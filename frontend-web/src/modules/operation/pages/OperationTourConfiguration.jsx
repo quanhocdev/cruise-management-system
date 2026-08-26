@@ -27,6 +27,12 @@ import ProductConfigurationTable from "../components/tour-configuration/ProductC
 
 import ServiceConfigurationTable from "../components/tour-configuration/ServiceConfigurationTable";
 
+// =========================================================
+// UTILS
+// =========================================================
+
+import { isTourItemConfigured } from "../utils/tourConfigurationUtils";
+
 import "../styles/OperationTourConfiguration.css";
 
 const OperationTourConfiguration = () => {
@@ -100,15 +106,6 @@ const OperationTourConfiguration = () => {
 
   // =========================================================
   // TOUR INFO
-  // =========================================================
-  //
-  // 4 API configured hiện tại chỉ trả các configuration item.
-  // Chúng không phải nguồn chính để lấy tourCode/tourName.
-  //
-  // Vì vậy ở đây lấy tourId trực tiếp từ URL.
-  //
-  // Nếu sau này cần tourCode/tourName chính xác,
-  // có thể lấy từ useOperationTours hoặc API Tour riêng.
   // =========================================================
 
   const configurationTourId = tourId;
@@ -215,6 +212,11 @@ const OperationTourConfiguration = () => {
   // =========================================================
   // INITIAL LOADING
   // =========================================================
+  //
+  // hasAnyData chỉ dùng để biết API đã trả về dữ liệu hay chưa.
+  //
+  // KHÔNG dùng biến này để xác định "đã cấu hình".
+  // =========================================================
 
   const hasAnyData =
     configuredActivities.length > 0 ||
@@ -264,32 +266,81 @@ const OperationTourConfiguration = () => {
   }
 
   // =========================================================
+  // ALL ASSIGNMENTS
+  // =========================================================
+  //
+  // 4 API trả về TOÀN BỘ assignment:
+  //
+  // - Activity Cruise
+  // - Activity Visit
+  // - Product
+  // - Service
+  //
+  // Vì vậy length = tổng số được phân công,
+  // không phải tổng số đã cấu hình.
+  // =========================================================
+
+  const allAssignments = [
+    ...configuredActivities,
+    ...configuredActivityVisits,
+    ...configuredProducts,
+    ...configuredServices,
+  ];
+
+  // =========================================================
+  // TOTAL ASSIGNMENTS
+  // =========================================================
+
+  const totalAssignments = allAssignments.length;
+
+  // =========================================================
+  // CONFIGURED ASSIGNMENTS
+  // =========================================================
+  //
+  // WAITING_CONFIG = chưa cấu hình
+  //
+  // CONFIGURED
+  // NOT_STARTED
+  // IN_PROGRESS
+  // COMPLETED
+  // OUT_OF_STOCK
+  // DELAYED
+  // CANCELLED
+  //
+  // => đều đã vượt qua bước cấu hình.
+  // =========================================================
+
+  const configuredAssignments = allAssignments.filter((item) =>
+    isTourItemConfigured(item.status),
+  );
+
+  const configuredCount = configuredAssignments.length;
+
+  // =========================================================
   // CONFIGURATION COMPLETE
   // =========================================================
   //
-  // Vì 4 API hiện tại chỉ trả dữ liệu đã cấu hình,
-  // ta xác định "có cấu hình" dựa trên việc có dữ liệu.
+  // Chỉ hoàn tất khi:
   //
-  // Tuy nhiên:
+  // 1. Tour có ít nhất một assignment
+  // 2. TẤT CẢ assignment đều đã cấu hình
   //
-  // configured !== "đã cấu hình đầy đủ toàn bộ yêu cầu"
+  // Ví dụ:
   //
-  // Muốn xác định đầy đủ tuyệt đối cần biết tổng số
-  // assignment ban đầu.
+  // 5 assignment
+  // 3 CONFIGURED
+  // 2 WAITING_CONFIG
   //
-  // Tạm thời:
-  // - Có ít nhất một cấu hình => có dữ liệu cấu hình
-  // - Không có gì => chưa có cấu hình
+  // => false
   //
+  // 5 assignment
+  // 5 CONFIGURED
+  //
+  // => true
   // =========================================================
 
-  const totalConfigured =
-    configuredActivities.length +
-    configuredActivityVisits.length +
-    configuredProducts.length +
-    configuredServices.length;
-
-  const configurationComplete = totalConfigured > 0;
+  const configurationComplete =
+    totalAssignments > 0 && configuredCount === totalAssignments;
 
   // =========================================================
   // RENDER

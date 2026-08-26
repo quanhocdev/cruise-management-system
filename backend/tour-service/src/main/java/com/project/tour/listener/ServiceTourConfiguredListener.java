@@ -17,7 +17,7 @@ public class ServiceTourConfiguredListener {
         this.serviceTourService = serviceTourService;
     }
 
-    @KafkaListener(topics = "service-tour-configured-topic", groupId = "tour-service-service-tour-group", containerFactory = "serviceTourConfiguredKafkaListenerContainerFactory")
+    @KafkaListener(topics = "service-tour-configured-topic", groupId = "tour-service-service-tour-group")
     public void handle(ServiceTourConfiguredEvent event) {
 
         serviceTourService.handleServiceTourConfigured(event);

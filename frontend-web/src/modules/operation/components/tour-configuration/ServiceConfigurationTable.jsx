@@ -2,11 +2,23 @@
 
 import React from "react";
 import { CheckCircle2, Wrench, XCircle } from "lucide-react";
+import {
+  getTourStatusMeta,
+  isTourItemConfigured,
+} from "../../utils/tourConfigurationUtils";
 
 import "../../styles/tour-configuration/ServiceConfigurationTable.css";
 
 const ServiceConfigurationTable = ({ services = [] }) => {
   const safeServices = Array.isArray(services) ? services : [];
+
+  // =========================================================
+  // SỐ LƯỢNG THỰC SỰ ĐÃ CẤU HÌNH (status !== WAITING_CONFIG)
+  // =========================================================
+
+  const configuredCount = safeServices.filter((item) =>
+    isTourItemConfigured(item.status),
+  ).length;
 
   return (
     <section className="service-configuration-table-section">
@@ -26,8 +38,9 @@ const ServiceConfigurationTable = ({ services = [] }) => {
           </div>
         </div>
 
+        {/* ✅ hiển thị rõ số đã cấu hình / tổng số đã phân công */}
         <span className="service-configuration-table-count">
-          {safeServices.length} dịch vụ
+          {configuredCount}/{safeServices.length} đã cấu hình
         </span>
       </div>
 
@@ -56,44 +69,61 @@ const ServiceConfigurationTable = ({ services = [] }) => {
             </thead>
 
             <tbody>
-              {safeServices.map((item, index) => (
-                <tr key={item.id || `service-${index}`}>
-                  {/* =================================================
-                      SERVICE
-                      ================================================= */}
-                  <td>
-                    <div className="service-configuration-name">
-                      <strong>{item.serviceName || "Chưa xác định"}</strong>
+              {safeServices.map((item, index) => {
+                // =========================================================
+                // TRẠNG THÁI THẬT LẤY TỪ ServiceTourStatus
+                // (WAITING_CONFIG / CONFIGURED / NOT_STARTED /
+                //  IN_PROGRESS / COMPLETED)
+                // =========================================================
 
-                      {item.serviceId && <span>{item.serviceId}</span>}
-                    </div>
-                  </td>
+                const statusMeta = getTourStatusMeta(item.status);
+                const configured = isTourItemConfigured(item.status);
 
-                  {/* =================================================
-                      DESCRIPTION
-                      ================================================= */}
-                  <td className="service-configuration-description">
-                    {item.description || "—"}
-                  </td>
+                return (
+                  <tr key={item.id || `service-${index}`}>
+                    {/* =================================================
+                        SERVICE
+                        ================================================= */}
+                    <td>
+                      <div className="service-configuration-name">
+                        <strong>{item.serviceName || "Chưa xác định"}</strong>
 
-                  {/* =================================================
-                      MAX PASSENGERS
-                      ================================================= */}
-                  <td>
-                    {item.maxPassengers != null ? item.maxPassengers : "—"}
-                  </td>
+                        {item.serviceId && <span>{item.serviceId}</span>}
+                      </div>
+                    </td>
 
-                  {/* =================================================
-                      STATUS
-                      ================================================= */}
-                  <td>
-                    <span className="service-configuration-status configured">
-                      <CheckCircle2 size={14} />
-                      Đã cấu hình
-                    </span>
-                  </td>
-                </tr>
-              ))}
+                    {/* =================================================
+                        DESCRIPTION
+                        ================================================= */}
+                    <td className="service-configuration-description">
+                      {item.description || "—"}
+                    </td>
+
+                    {/* =================================================
+                        MAX PASSENGERS
+                        ================================================= */}
+                    <td>
+                      {item.maxPassengers != null ? item.maxPassengers : "—"}
+                    </td>
+
+                    {/* =================================================
+                        STATUS
+                        ================================================= */}
+                    <td>
+                      <span
+                        className={`service-configuration-status ${statusMeta.className}`}
+                      >
+                        {configured ? (
+                          <CheckCircle2 size={14} />
+                        ) : (
+                          <XCircle size={14} />
+                        )}
+                        {statusMeta.label}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

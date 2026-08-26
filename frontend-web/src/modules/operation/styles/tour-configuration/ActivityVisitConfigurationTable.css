@@ -1,8 +1,7 @@
 /* ===========================================================
-   ActivityConfigurationTable.css
-   Dùng chung cho ActivityCruiseConfigurationTable VÀ
-   ActivityVisitConfigurationTable (cả hai cùng import file này).
-   Cùng token với OperationTourConfiguration.css (biến --otc-*).
+   ActivityVisitConfigurationTable.css
+   Bảng cấu hình Hoạt động trên bờ — dùng chung token với
+   OperationTourConfiguration.css (biến --otc-*).
    Component được render bên trong
    ".operation-tour-configuration-section" (đã có nền/viền/shadow
    riêng), nên phần section ở đây KHÔNG lặp lại khung ngoài.
@@ -23,12 +22,12 @@
   --otc-font-body: "Inter", "Segoe UI", Roboto, sans-serif;
 }
 
-.activity-configuration-table-section {
+.activity-visit-configuration-table-section {
   font-family: var(--otc-font-body);
   color: var(--otc-ink);
 }
 
-.activity-configuration-table-section * {
+.activity-visit-configuration-table-section * {
   box-sizing: border-box;
 }
 
@@ -36,7 +35,7 @@
    HEADER
    =========================================================== */
 
-.activity-configuration-table-header {
+.activity-visit-configuration-table-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -45,14 +44,14 @@
   margin-bottom: 16px;
 }
 
-.activity-configuration-table-title {
+.activity-visit-configuration-table-title {
   display: flex;
   align-items: center;
   gap: 12px;
   min-width: 0;
 }
 
-.activity-configuration-table-icon {
+.activity-visit-configuration-table-icon {
   flex-shrink: 0;
   width: 38px;
   height: 38px;
@@ -64,7 +63,7 @@
   justify-content: center;
 }
 
-.activity-configuration-table-title h2 {
+.activity-visit-configuration-table-title h2 {
   margin: 0;
   font-family: var(--otc-font-display);
   font-size: 16px;
@@ -72,13 +71,13 @@
   color: var(--otc-navy);
 }
 
-.activity-configuration-table-title p {
+.activity-visit-configuration-table-title p {
   margin: 2px 0 0;
   font-size: 12.5px;
   color: var(--otc-ink-soft);
 }
 
-.activity-configuration-table-count {
+.activity-visit-configuration-table-count {
   flex-shrink: 0;
   background: var(--otc-bg);
   border: 1px solid var(--otc-border);
@@ -94,7 +93,7 @@
    EMPTY STATE
    =========================================================== */
 
-.activity-configuration-table-empty {
+.activity-visit-configuration-table-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -108,11 +107,11 @@
   background: var(--otc-bg);
 }
 
-.activity-configuration-table-empty svg {
+.activity-visit-configuration-table-empty svg {
   color: #c3ccd8;
 }
 
-.activity-configuration-table-empty span {
+.activity-visit-configuration-table-empty span {
   font-size: 13.5px;
 }
 
@@ -120,21 +119,21 @@
    TABLE WRAPPER (scroll on small screens)
    =========================================================== */
 
-.activity-configuration-table-wrapper {
+.activity-visit-configuration-table-wrapper {
   overflow-x: auto;
   border: 1px solid var(--otc-border);
   border-radius: var(--otc-radius-md);
   -webkit-overflow-scrolling: touch;
 }
 
-.activity-configuration-table {
+.activity-visit-configuration-table {
   width: 100%;
   border-collapse: collapse;
   min-width: 720px;
   font-size: 13.5px;
 }
 
-.activity-configuration-table thead th {
+.activity-visit-configuration-table thead th {
   text-align: left;
   font-size: 12px;
   font-weight: 700;
@@ -147,18 +146,18 @@
   white-space: nowrap;
 }
 
-.activity-configuration-table tbody td {
+.activity-visit-configuration-table tbody td {
   padding: 13px 16px;
   border-bottom: 1px solid var(--otc-border);
   color: var(--otc-ink);
   vertical-align: middle;
 }
 
-.activity-configuration-table tbody tr:last-child td {
+.activity-visit-configuration-table tbody tr:last-child td {
   border-bottom: none;
 }
 
-.activity-configuration-table tbody tr:hover td {
+.activity-visit-configuration-table tbody tr:hover td {
   background: #f9fafb;
 }
 
@@ -166,82 +165,84 @@
    ACTIVITY NAME CELL
    =========================================================== */
 
-.activity-configuration-name {
+.activity-visit-configuration-name {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.activity-configuration-name strong {
+.activity-visit-configuration-name strong {
   font-weight: 600;
   color: var(--otc-ink);
 }
 
-.activity-configuration-name span {
+.activity-visit-configuration-name span {
   font-size: 11.5px;
   color: var(--otc-ink-soft);
 }
 
 /* ===========================================================
-   AREA / LOCATION CELL (icon + name + sub-label)
-   used by both cruise area and visit destination
+   VISIT LOCATION CELL (icon + name + address)
    =========================================================== */
 
-.activity-configuration-area {
+.activity-visit-configuration-area {
   display: flex;
   align-items: flex-start;
   gap: 8px;
 }
 
-.activity-configuration-area svg {
+.activity-visit-configuration-area svg {
   flex-shrink: 0;
   margin-top: 2px;
   color: var(--otc-teal-dark);
 }
 
-.activity-configuration-area strong {
+.activity-visit-configuration-area strong {
   display: block;
   font-weight: 600;
   color: var(--otc-ink);
   font-size: 13.5px;
 }
 
-.activity-configuration-area span {
+.activity-visit-configuration-area span {
   display: block;
   font-size: 11.5px;
   color: var(--otc-ink-soft);
   margin-top: 1px;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ===========================================================
-   TIME CELL (icon + start/end stacked)
+   TIME CELL (icon + start → end on one line)
    =========================================================== */
 
-.activity-configuration-time {
+.activity-visit-configuration-time {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.activity-configuration-time svg {
+.activity-visit-configuration-time svg {
   flex-shrink: 0;
   color: var(--otc-ink-soft);
 }
 
-.activity-configuration-time > div {
+.activity-visit-configuration-time > div {
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
-  gap: 0;
 }
 
-.activity-configuration-time span {
+.activity-visit-configuration-time span {
   font-size: 12.5px;
   color: var(--otc-ink);
   white-space: nowrap;
 }
 
-.activity-configuration-time span:first-child::after {
+.activity-visit-configuration-time span:first-child::after {
   content: " → ";
   color: var(--otc-ink-soft);
 }
@@ -250,7 +251,7 @@
    STATUS BADGE
    =========================================================== */
 
-.activity-configuration-status {
+.activity-visit-configuration-status {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -261,7 +262,7 @@
   white-space: nowrap;
 }
 
-.activity-configuration-status.configured {
+.activity-visit-configuration-status.configured {
   background: #e8f6f3;
   color: var(--otc-teal-dark);
 }
@@ -271,29 +272,37 @@
    =========================================================== */
 
 @media (max-width: 768px) {
-  .activity-configuration-table-header {
+  .activity-visit-configuration-table-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
   }
 
-  .activity-configuration-table-count {
+  .activity-visit-configuration-table-count {
     align-self: flex-start;
+  }
+
+  .activity-visit-configuration-area span {
+    max-width: 160px;
   }
 }
 
 @media (max-width: 480px) {
-  .activity-configuration-table-icon {
+  .activity-visit-configuration-table-icon {
     width: 34px;
     height: 34px;
   }
 
-  .activity-configuration-table-title h2 {
+  .activity-visit-configuration-table-title h2 {
     font-size: 15px;
   }
 
-  .activity-configuration-table thead th,
-  .activity-configuration-table tbody td {
+  .activity-visit-configuration-table thead th,
+  .activity-visit-configuration-table tbody td {
     padding: 10px 12px;
+  }
+
+  .activity-visit-configuration-area span {
+    max-width: 120px;
   }
 }

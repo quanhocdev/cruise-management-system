@@ -1,6 +1,7 @@
 package com.project.convenience.config;
 
-import com.project.common.event.TourApprovedEvent;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -15,9 +16,6 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @EnableKafka
 @Configuration
 public class KafkaConsumerConfig {
@@ -25,7 +23,8 @@ public class KafkaConsumerConfig {
         @Value("${spring.kafka.bootstrap-servers:localhost:9092}")
         private String bootstrapServers;
 
-        private Map<String, Object> baseConsumerProps() {
+        @Bean
+        public ConsumerFactory<String, Object> consumerFactory() {
 
                 Map<String, Object> props = new HashMap<>();
 
@@ -37,63 +36,32 @@ public class KafkaConsumerConfig {
                                 ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
                                 StringDeserializer.class);
 
-                return props;
-        }
-
-        // =========================================================
-        // ConsumerFactory cho TourApprovedEvent
-        // =========================================================
-
-        @Bean
-        public ConsumerFactory<String, TourApprovedEvent> tourApprovedConsumerFactory() {
-
-                JsonDeserializer<TourApprovedEvent> jsonDeserializer = new JsonDeserializer<>(TourApprovedEvent.class);
-
-                jsonDeserializer.addTrustedPackages("*");
-                jsonDeserializer.setUseTypeHeaders(false);
-                jsonDeserializer.setRemoveTypeHeaders(true);
-
-                ErrorHandlingDeserializer<TourApprovedEvent> errorHandlingDeserializer = new ErrorHandlingDeserializer<>(
-                                jsonDeserializer);
-
-                Map<String, Object> props = baseConsumerProps();
-
                 props.put(
                                 ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-                                errorHandlingDeserializer);
+                                ErrorHandlingDeserializer.class);
 
-                return new DefaultKafkaConsumerFactory<>(
-                                props,
-                                new StringDeserializer(),
-                                errorHandlingDeserializer);
+                props.put(
+                                ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS,
+                                JsonDeserializer.class);
+
+                props.put(
+                                JsonDeserializer.TRUSTED_PACKAGES,
+                                "com.project.common.event");
+
+                // Đọc type Event từ Kafka header
+                props.put(
+                                JsonDeserializer.USE_TYPE_INFO_HEADERS,
+                                true);
+
+                return new DefaultKafkaConsumerFactory<>(props);
         }
 
-        // =========================================================
-        // PRODUCT
-        // =========================================================
-
         @Bean
-        public ConcurrentKafkaListenerContainerFactory<String, TourApprovedEvent> productKafkaListenerContainerFactory() {
+        public ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory() {
 
-                ConcurrentKafkaListenerContainerFactory<String, TourApprovedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+                ConcurrentKafkaListenerContainerFactory<String, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
-                factory.setConsumerFactory(
-                                tourApprovedConsumerFactory());
-
-                return factory;
-        }
-
-        // =========================================================
-        // SERVICE
-        // =========================================================
-
-        @Bean
-        public ConcurrentKafkaListenerContainerFactory<String, TourApprovedEvent> serviceKafkaListenerContainerFactory() {
-
-                ConcurrentKafkaListenerContainerFactory<String, TourApprovedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
-
-                factory.setConsumerFactory(
-                                tourApprovedConsumerFactory());
+                factory.setConsumerFactory(consumerFactory());
 
                 return factory;
         }
