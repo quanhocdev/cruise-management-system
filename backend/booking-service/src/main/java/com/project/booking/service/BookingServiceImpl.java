@@ -130,6 +130,23 @@ public class BookingServiceImpl implements BookingService {
         return sent;
     }
 
+    @Override @Transactional(readOnly = true)
+    public List<AvailableRoomResponse> getAvailableRooms(UUID voyageId) {
+        TourScheduleContext voyage = tourClient.getSchedule(voyageId);
+        if (!"OPEN".equals(voyage.status()))
+            throw new BookingException(HttpStatus.CONFLICT, "Voyage is not open for booking");
+        List<PassengerStatus> occupiedStatuses = List.of(PassengerStatus.RESERVED, PassengerStatus.REGISTERED);
+        return tourClient.getRooms(voyageId).stream().map(room -> {
+            long occupied = passengerVoyageRepository.countByVoyageIdAndCabinIdAndPassengerStatusIn(
+                voyageId, room.roomId(), occupiedStatuses);
+            long remaining = Math.max(0, (long) room.capacity() - occupied);
+            return new AvailableRoomResponse(
+                room.roomId(), room.roomCode(), room.deckId(), room.deckNumber(),
+                room.roomTypeId(), room.roomTypeName(), room.roomTypeDescription(),
+                room.price(), room.capacity(), occupied, remaining, remaining > 0);
+        }).toList();
+    }
+
     private Booking find(Long id) {
         return repository.findById(id)
             .orElseThrow(() -> new BookingException(HttpStatus.NOT_FOUND, "Booking not found: " + id));
