@@ -28,6 +28,7 @@ import ManagerPolicy from "./modules/admin/pages/ManagerPolicy";
 
 // Passenger imports
 import PassengerDashboard from "./modules/passenger/pages/Dashboard";
+import PassengerTourDetail from "./modules/passenger/pages/TourDetail";
 
 // Scheduler imports
 import SchedulerLayout from "./layouts/SchedulerLayout";
@@ -124,6 +125,7 @@ export default function App() {
               <ProtectedRoute allowedRoles={["PASSENGER"]}>
                 <Routes>
                   <Route path="dashboard" element={<PassengerDashboard />} />
+                  <Route path="tours/:tourId" element={<PassengerTourDetail />} />
                   <Route
                     path=""
                     element={<Navigate to="dashboard" replace />}
