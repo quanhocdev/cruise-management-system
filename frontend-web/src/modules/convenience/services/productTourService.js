@@ -38,6 +38,49 @@ export const productTourService = {
 
     return response.data;
   },
+  // =====================================================
+  // GET ALL
+  // =====================================================
+
+  // GET /api/convenience/product-tours
+  getAll: async () => {
+    const response = await api.get(API_URL);
+
+    return response.data;
+  },
+
+  // =====================================================
+  // GET CONFIGURATION HISTORY
+  // =====================================================
+
+  // GET /api/convenience/product-tours/configuration-history
+  getConfigurationHistory: async () => {
+    const response = await api.get(`${API_URL}/configuration-history`);
+
+    return response.data;
+  },
+
+  // =====================================================
+  // GET CONFIGURATION HISTORY DETAIL
+  // =====================================================
+
+  // GET /api/convenience/product-tours/tour/{tourId}
+  getConfigurationHistoryDetail: async (tourId) => {
+    const response = await api.get(`${API_URL}/tour/${tourId}`);
+
+    return response.data;
+  },
+
+  // =====================================================
+  // COMPLETE CONFIGURATION
+  // =====================================================
+
+  // POST /api/convenience/product-tours/{tourId}/complete
+  completeConfiguration: async (tourId) => {
+    const response = await api.post(`${API_URL}/${tourId}/complete`);
+
+    return response.data;
+  },
 };
 
 export default productTourService;

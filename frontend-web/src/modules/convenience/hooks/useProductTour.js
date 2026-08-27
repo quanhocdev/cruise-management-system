@@ -1,5 +1,4 @@
 // src/modules/convenience/hooks/useProductTour.js
-// src/modules/convenience/hooks/useProductTour.js
 
 import { useCallback, useEffect, useState } from "react";
 
@@ -16,8 +15,12 @@ const useProductTour = () => {
 
   const [error, setError] = useState(null);
 
+  const [completing, setCompleting] = useState(false);
+
+  const [completeError, setCompleteError] = useState(null);
+
   // =====================================================
-  // LOAD
+  // LOAD ALL
   // =====================================================
 
   const loadProductTours = useCallback(async () => {
@@ -25,7 +28,7 @@ const useProductTour = () => {
       setLoading(true);
       setError(null);
 
-      const data = await productTourService.getPendingConfig();
+      const data = await productTourService.getAll();
 
       setProductTours(data || []);
     } catch (err) {
@@ -105,6 +108,37 @@ const useProductTour = () => {
   }, []);
 
   // =====================================================
+  // COMPLETE TOUR CONFIGURATION
+  // =====================================================
+
+  const completeTourConfiguration = useCallback(
+    async (tourId) => {
+      try {
+        setCompleting(true);
+        setCompleteError(null);
+
+        const result = await productTourService.completeConfiguration(tourId);
+
+        await loadProductTours();
+
+        return result;
+      } catch (err) {
+        console.error("COMPLETE PRODUCT TOUR ERROR:", err);
+
+        const message =
+          err.response?.data?.message || "Không thể hoàn thành cấu hình Tour";
+
+        setCompleteError(message);
+
+        throw err;
+      } finally {
+        setCompleting(false);
+      }
+    },
+    [loadProductTours],
+  );
+
+  // =====================================================
   // INITIAL LOAD
   // =====================================================
 
@@ -122,10 +156,14 @@ const useProductTour = () => {
     loading,
     error,
 
+    completing,
+    completeError,
+
     loadProductTours,
 
     configureProduct,
     updateProduct,
+    completeTourConfiguration,
   };
 };
 

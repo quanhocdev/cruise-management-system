@@ -47,6 +47,7 @@ import ConvenienceDashboard from "./modules/convenience/pages/Dashboard";
 import ConvenienceProducts from "./modules/convenience/pages/ConvenienceProducts";
 import ConvenienceServices from "./modules/convenience/pages/ConvenienceServices";
 import ConvenienceTourConfigPage from "./modules/convenience/pages/ConvenienceTourConfigPage";
+import ConvenienceTourHistory from "./modules/convenience/pages/ConvenienceTourHistory";
 
 // Onboard imports
 import OnboardLayout from "./layouts/OnboardLayout";
@@ -55,11 +56,13 @@ import OnboardActivityCruiseTour from "./modules/onboard/pages/ActivityCruiseTou
 import ActivityCruise from "./modules/onboard/pages/ActivityCruise";
 import ActivityCruiseTourHistory from "./modules/onboard/pages/ActivityCruiseTourHistory";
 
+// Shore imports
 import ShoreLayout from "./layouts/ShoreLayout";
 import ShoreDashboard from "./modules/shore/pages/Dashboard";
 import ActivityVisitTour from "./modules/shore/pages/ActivityVisitTour";
 import ActivityVisitTourHistory from "./modules/shore/pages/ActivityVisitTourHistory";
 
+// Finance imports
 import FinanceDashboard from "./modules/finance/pages/Dashboard";
 
 export default function App() {
@@ -67,14 +70,20 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          {/* Public Routes */}
+          {/* =====================================================
+              PUBLIC ROUTES
+              ===================================================== */}
+
           <Route path="/" element={<HomePage />} />
           <Route path="/activate" element={<ActivatePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/verify-email" element={<VerifyOtpPage />} />
 
-          {/* ADMIN ROUTES */}
+          {/* =====================================================
+              ADMIN ROUTES
+              ===================================================== */}
+
           <Route
             path="/admin/*"
             element={
@@ -85,26 +94,35 @@ export default function App() {
                     <Route path="accounts" element={<ManagerAccount />} />
                     <Route path="ports" element={<ManagerPort />} />
                     <Route path="cruises" element={<ManagerCruise />} />
+
                     <Route
                       path="cruises/:cruiseId/decks"
                       element={<CruiseDeck />}
                     />
+
                     <Route
                       path="decks/:deckId"
                       element={<CruiseDeckDetail />}
                     />
+
                     <Route
                       path="decks/:deckId/areas"
                       element={<CruiseArea />}
                     />
-                    <Route path="room-types" element={<ManagerRoomType />} />
+
                     <Route
                       path="decks/:deckId/rooms"
                       element={<CruiseRoom />}
                     />
+
+                    <Route path="room-types" element={<ManagerRoomType />} />
+
                     <Route path="products" element={<ManagerProduct />} />
+
                     <Route path="services" element={<ManagerService />} />
+
                     <Route path="policies" element={<ManagerPolicy />} />
+
                     <Route
                       path=""
                       element={<Navigate to="dashboard" replace />}
@@ -115,13 +133,17 @@ export default function App() {
             }
           />
 
-          {/* PASSENGER ROUTES */}
+          {/* =====================================================
+              PASSENGER ROUTES
+              ===================================================== */}
+
           <Route
             path="/passenger/*"
             element={
               <ProtectedRoute allowedRoles={["PASSENGER"]}>
                 <Routes>
                   <Route path="dashboard" element={<PassengerDashboard />} />
+
                   <Route
                     path=""
                     element={<Navigate to="dashboard" replace />}
@@ -131,7 +153,10 @@ export default function App() {
             }
           />
 
-          {/* SCHEDULER ROUTES */}
+          {/* =====================================================
+              SCHEDULER ROUTES
+              ===================================================== */}
+
           <Route
             path="/scheduler/*"
             element={
@@ -139,15 +164,19 @@ export default function App() {
                 <SchedulerLayout>
                   <Routes>
                     <Route path="dashboard" element={<SchedulerDashboard />} />
+
                     <Route path="tours" element={<ManagerTour />} />
+
                     <Route
                       path="tours/:tourId/schedules"
                       element={<ManagerSchedule />}
                     />
+
                     <Route
                       path="tours/:tourId/schedules/:scheduleId/stops"
                       element={<ManagerScheduleStops />}
                     />
+
                     <Route
                       path=""
                       element={<Navigate to="dashboard" replace />}
@@ -158,7 +187,10 @@ export default function App() {
             }
           />
 
-          {/* OPERATION ROUTES */}
+          {/* =====================================================
+              OPERATION ROUTES
+              ===================================================== */}
+
           <Route
             path="/operation"
             element={
@@ -168,15 +200,21 @@ export default function App() {
             }
           >
             <Route path="dashboard" element={<OperationDashboard />} />
+
             <Route path="tours" element={<OperationManagerTour />} />
+
             <Route
               path="tour-configuration"
               element={<OperationTourConfiguration />}
             />
+
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
 
-          {/* ONBOARD ROUTES */}
+          {/* =====================================================
+              ONBOARD ROUTES
+              ===================================================== */}
+
           <Route
             path="/onboard"
             element={
@@ -188,12 +226,14 @@ export default function App() {
             <Route path="dashboard" element={<OnboardDashboard />} />
 
             <Route path="activities-catalog" element={<ActivityCruise />} />
+
             <Route
               path="activity-cruise"
               element={<OnboardActivityCruiseTour />}
             />
+
             <Route
-              path="/onboard/activity-cruise-history"
+              path="activity-cruise-history"
               element={<ActivityCruiseTourHistory />}
             />
 
@@ -220,7 +260,10 @@ export default function App() {
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
 
-          {/* SHORE ROUTES */}
+          {/* =====================================================
+              SHORE ROUTES
+              ===================================================== */}
+
           <Route
             path="/shore"
             element={
@@ -238,7 +281,10 @@ export default function App() {
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
 
-          {/* CONVENIENCE ROUTES */}
+          {/* =====================================================
+              CONVENIENCE ROUTES
+              ===================================================== */}
+
           <Route
             path="/convenience"
             element={
@@ -253,19 +299,24 @@ export default function App() {
 
             <Route path="services" element={<ConvenienceServices />} />
 
-            {/* CẤU HÌNH TOUR */}
             <Route path="tour-config" element={<ConvenienceTourConfigPage />} />
+
+            <Route path="tour-history" element={<ConvenienceTourHistory />} />
 
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
 
-          {/* FINANCE ROUTES */}
+          {/* =====================================================
+              FINANCE ROUTES
+              ===================================================== */}
+
           <Route
             path="/finance/*"
             element={
               <ProtectedRoute allowedRoles={["FINANCE"]}>
                 <Routes>
                   <Route path="dashboard" element={<FinanceDashboard />} />
+
                   <Route
                     path=""
                     element={<Navigate to="dashboard" replace />}
@@ -275,7 +326,10 @@ export default function App() {
             }
           />
 
-          {/* FALLBACK 404 */}
+          {/* =====================================================
+              FALLBACK 404
+              ===================================================== */}
+
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>

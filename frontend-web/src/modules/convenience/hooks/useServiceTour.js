@@ -1,5 +1,4 @@
 // src/modules/convenience/hooks/useServiceTour.js
-// src/modules/convenience/hooks/useServiceTour.js
 
 import { useCallback, useEffect, useState } from "react";
 
@@ -16,8 +15,12 @@ const useServiceTour = () => {
 
   const [error, setError] = useState(null);
 
+  const [completing, setCompleting] = useState(false);
+
+  const [completeError, setCompleteError] = useState(null);
+
   // =====================================================
-  // LOAD
+  // LOAD ALL
   // =====================================================
 
   const loadServiceTours = useCallback(async () => {
@@ -25,7 +28,7 @@ const useServiceTour = () => {
       setLoading(true);
       setError(null);
 
-      const data = await serviceTourService.getPendingConfig();
+      const data = await serviceTourService.getAll();
 
       setServiceTours(data || []);
     } catch (err) {
@@ -105,6 +108,37 @@ const useServiceTour = () => {
   }, []);
 
   // =====================================================
+  // COMPLETE TOUR CONFIGURATION
+  // =====================================================
+
+  const completeTourConfiguration = useCallback(
+    async (tourId) => {
+      try {
+        setCompleting(true);
+        setCompleteError(null);
+
+        const result = await serviceTourService.completeConfiguration(tourId);
+
+        await loadServiceTours();
+
+        return result;
+      } catch (err) {
+        console.error("COMPLETE SERVICE TOUR ERROR:", err);
+
+        const message =
+          err.response?.data?.message || "Không thể hoàn thành cấu hình Tour";
+
+        setCompleteError(message);
+
+        throw err;
+      } finally {
+        setCompleting(false);
+      }
+    },
+    [loadServiceTours],
+  );
+
+  // =====================================================
   // INITIAL LOAD
   // =====================================================
 
@@ -122,10 +156,14 @@ const useServiceTour = () => {
     loading,
     error,
 
+    completing,
+    completeError,
+
     loadServiceTours,
 
     configureService,
     updateService,
+    completeTourConfiguration,
   };
 };
 
