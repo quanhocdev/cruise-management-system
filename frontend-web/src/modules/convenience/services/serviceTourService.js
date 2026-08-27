@@ -1,5 +1,4 @@
 // src/modules/convenience/services/serviceTourService.js
-// src/modules/convenience/services/serviceTourService.js
 
 import api from "../../../api/axios";
 

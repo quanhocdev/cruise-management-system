@@ -3,8 +3,10 @@ package com.project.activitycruise.service;
 import com.project.activitycruise.dto.OnboardActivityCruiseTourResponse;
 import com.project.activitycruise.mapper.ActivityCruiseTourMapper;
 import com.project.activitycruise.model.ActivityCruiseTour;
+import com.project.activitycruise.model.HistoryActivityCruiseTour;
 import com.project.activitycruise.model.enums.ActivityCruiseTourStatus;
 import com.project.activitycruise.repository.ActivityCruiseTourAssignmentRepository;
+import com.project.activitycruise.repository.HistoryActivityCruiseTourRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,13 +20,16 @@ public class ActivityCruiseTourService {
 
         private final ActivityCruiseTourAssignmentRepository assignmentRepository;
         private final ActivityCruiseTourMapper activityCruiseTourMapper;
+        private final HistoryActivityCruiseTourRepository historyRepository;
 
         public ActivityCruiseTourService(
                         ActivityCruiseTourAssignmentRepository assignmentRepository,
-                        ActivityCruiseTourMapper activityCruiseTourMapper) {
+                        ActivityCruiseTourMapper activityCruiseTourMapper,
+                        HistoryActivityCruiseTourRepository historyRepository) {
 
                 this.assignmentRepository = assignmentRepository;
                 this.activityCruiseTourMapper = activityCruiseTourMapper;
+                this.historyRepository = historyRepository;
         }
 
         // =====================================================
@@ -93,5 +98,11 @@ public class ActivityCruiseTourService {
                                 .stream()
                                 .map(activityCruiseTourMapper::toResponse)
                                 .toList();
+        }
+
+        @Transactional(readOnly = true)
+        public List<HistoryActivityCruiseTour> getConfigurationHistory() {
+
+                return historyRepository.findAllByOrderByCompletedAtDesc();
         }
 }

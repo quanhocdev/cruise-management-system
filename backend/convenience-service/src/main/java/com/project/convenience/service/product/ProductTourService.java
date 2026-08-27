@@ -16,74 +16,68 @@ import java.util.UUID;
 @Transactional
 public class ProductTourService {
 
-    private final ProductTourRepository productTourRepository;
-    private final ProductTourMapper mapper;
+        private final ProductTourRepository productTourRepository;
+        private final ProductTourMapper mapper;
 
-    public ProductTourService(
-            ProductTourRepository productTourRepository,
-            ProductTourMapper mapper) {
+        public ProductTourService(
+                        ProductTourRepository productTourRepository,
+                        ProductTourMapper mapper) {
 
-        this.productTourRepository = productTourRepository;
-        this.mapper = mapper;
-    }
-
-    // =========================================================
-    // TẠO PRODUCT TOUR TỪ TOUR APPROVED EVENT
-    // =========================================================
-
-    /**
-     * Tạo ProductTour khi Operation đã duyệt Tour
-     * và assignment có areaType = PRODUCT.
-     *
-     * Trạng thái ban đầu:
-     *
-     * WAITING_CONFIG
-     *
-     * Nếu Kafka gửi lại event thì không tạo duplicate.
-     */
-    public void createProductTourFromEvent(
-            UUID tourId,
-            UUID cruiseAreaId) {
-
-        boolean exists = productTourRepository
-                .findByTourIdAndCruiseAreaId(
-                        tourId,
-                        cruiseAreaId)
-                .isPresent();
-
-        // Kafka có thể retry event -> chống duplicate
-        if (exists) {
-            return;
+                this.productTourRepository = productTourRepository;
+                this.mapper = mapper;
         }
 
-        ProductTour productTour = new ProductTour();
+        public void createProductTourFromEvent(
+                        UUID tourId,
+                        UUID cruiseAreaId) {
 
-        productTour.setTourId(tourId);
-        productTour.setCruiseAreaId(cruiseAreaId);
-        productTour.setStatus(
-                ProductTourStatus.WAITING_CONFIG);
+                boolean exists = productTourRepository
+                                .findByTourIdAndCruiseAreaId(
+                                                tourId,
+                                                cruiseAreaId)
+                                .isPresent();
 
-        productTourRepository.save(productTour);
-    }
+                if (exists) {
+                        return;
+                }
 
-    // =========================================================
-    // GET PRODUCT TOUR CẦN CẤU HÌNH
-    // =========================================================
+                ProductTour productTour = new ProductTour();
 
-    /**
-     *
-     * WAITING_CONFIG:
-     * Chưa cấu hình lần đầu.
-     */
-    @Transactional(readOnly = true)
-    public List<ProductTourResponse> getPendingConfig() {
+                productTour.setTourId(tourId);
+                productTour.setCruiseAreaId(cruiseAreaId);
+                productTour.setStatus(
+                                ProductTourStatus.WAITING_CONFIG);
 
-        return productTourRepository
-                .findConfigurable(
-                        List.of(
-                                ProductTourStatus.WAITING_CONFIG))
-                .stream()
-                .map(mapper::toProductTourResponse)
-                .toList();
-    }
+                productTourRepository.save(productTour);
+        }
+
+        // =========================================================
+        // GET ALL PRODUCT TOURS
+        // =========================================================
+
+        @Transactional(readOnly = true)
+        public List<ProductTourResponse> getAllAssignments() {
+
+                return productTourRepository
+                                .findAll()
+                                .stream()
+                                .map(mapper::toProductTourResponse)
+                                .toList();
+        }
+
+        // =========================================================
+        // GET PRODUCT TOUR CẦN CẤU HÌNH
+        // =========================================================
+
+        @Transactional(readOnly = true)
+        public List<ProductTourResponse> getPendingConfig() {
+
+                return productTourRepository
+                                .findConfigurable(
+                                                List.of(
+                                                                ProductTourStatus.WAITING_CONFIG))
+                                .stream()
+                                .map(mapper::toProductTourResponse)
+                                .toList();
+        }
 }

@@ -2,6 +2,7 @@ package com.project.activitycruise.controller;
 
 import com.project.activitycruise.dto.ActivityCruiseTourConfigRequest;
 import com.project.activitycruise.dto.OnboardActivityCruiseTourResponse;
+import com.project.activitycruise.model.HistoryActivityCruiseTour;
 import com.project.activitycruise.service.ActivityCruiseTourConfigService;
 import com.project.activitycruise.service.ActivityCruiseTourService;
 
@@ -48,6 +49,17 @@ public class ActivityCruiseTourController {
 
                 return ResponseEntity.ok(
                                 activityCruiseTourService.getPendingConfig());
+        }
+
+        // =====================================================
+        // GET CONFIGURATION HISTORY
+        // =====================================================
+
+        @GetMapping("/configuration-history")
+        public ResponseEntity<List<HistoryActivityCruiseTour>> getConfigurationHistory() {
+
+                return ResponseEntity.ok(
+                                activityCruiseTourService.getConfigurationHistory());
         }
 
         // =====================================================

@@ -79,6 +79,7 @@ const ActivityCruiseTour = () => {
 
   const canComplete =
     !!selectedTourSummary &&
+    !selectedTourSummary.completed &&
     selectedTourSummary.total > 0 &&
     selectedTourSummary.configuredCount === selectedTourSummary.total;
 
@@ -160,9 +161,14 @@ const ActivityCruiseTour = () => {
           >
             <option value="">— Chọn Tour —</option>
             {tourSummaries.map((tour) => (
-              <option key={tour.tourId} value={tour.tourId}>
+              <option
+                key={tour.tourId}
+                value={tour.tourId}
+                disabled={tour.completed}
+              >
                 {tour.tourCode || formatShortId(tour.tourId)} (
                 {tour.configuredCount}/{tour.total} đã cấu hình)
+                {tour.completed ? " - Đã hoàn thành" : ""}
               </option>
             ))}
           </select>
@@ -178,11 +184,14 @@ const ActivityCruiseTour = () => {
           </button>
         </div>
 
-        {selectedTourIdToComplete && !canComplete && (
-          <span className="activity-cruise-tour-page__complete-hint">
-            Tour này còn hoạt động chưa được cấu hình xong.
-          </span>
-        )}
+        {selectedTourIdToComplete &&
+          selectedTourSummary &&
+          !selectedTourSummary.completed &&
+          !canComplete && (
+            <span className="activity-cruise-tour-page__complete-hint">
+              Tour này còn hoạt động chưa được cấu hình xong.
+            </span>
+          )}
 
         {completeError && (
           <span className="activity-cruise-tour-page__complete-error">

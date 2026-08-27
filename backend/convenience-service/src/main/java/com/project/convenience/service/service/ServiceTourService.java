@@ -27,40 +27,43 @@ public class ServiceTourService {
                 this.serviceTourMapper = serviceTourMapper;
         }
 
-        // =====================================================
-        // Xử lý Event CREATE từ Kafka
-        // =====================================================
         public void createServiceTourFromEvent(UUID tourId, UUID cruiseAreaId) {
-                // 1. Kiểm tra cặp (tourId, cruiseAreaId) đã tồn tại chưa
                 boolean exists = serviceTourRepository.findByTourIdAndCruiseAreaId(tourId, cruiseAreaId).isPresent();
                 if (exists) {
-                        return; // Bỏ qua nếu đã tồn tại (chống duplicate khi Kafka retry)
+                        return;
                 }
 
-                // 2. Khởi tạo Entity ServiceTour mới ở trạng thái WAITING_CONFIG
                 ServiceTour serviceTour = new ServiceTour();
                 serviceTour.setTourId(tourId);
                 serviceTour.setCruiseAreaId(cruiseAreaId);
                 serviceTour.setStatus(ServiceTourStatus.WAITING_CONFIG);
 
-                // 3. Lưu DB
                 serviceTourRepository.save(serviceTour);
         }
 
-        // =====================================================
-        // Xử lý Event DELETE từ Kafka
-        // =====================================================
         public void deleteServiceTourFromEvent(UUID tourId, UUID cruiseAreaId) {
                 serviceTourRepository.findByTourIdAndCruiseAreaId(tourId, cruiseAreaId)
                                 .ifPresent(serviceTourRepository::delete);
         }
 
         // =====================================================
+        // GET ALL SERVICE TOURS
+        // =====================================================
+
+        @Transactional(readOnly = true)
+        public List<ServiceTourResponse> getAllAssignments() {
+
+                return serviceTourRepository
+                                .findAll()
+                                .stream()
+                                .map(serviceTourMapper::toResponse)
+                                .toList();
+        }
+
+        // =====================================================
         // GET CONFIGURABLE SERVICES
         // =====================================================
-        /**
-         * Lấy danh sách các ServiceTour đang chờ cấu hình
-         */
+
         @Transactional(readOnly = true)
         public List<ServiceTourResponse> getPendingConfig() {
 

@@ -46,6 +46,13 @@ public class ServiceTourController {
                                 serviceTourService.getPendingConfig());
         }
 
+        @GetMapping
+        public ResponseEntity<List<ServiceTourResponse>> getAllAssignments() {
+
+                return ResponseEntity.ok(
+                                serviceTourService.getAllAssignments());
+        }
+
         // =====================================================
         // POST CONFIG
         // =====================================================
