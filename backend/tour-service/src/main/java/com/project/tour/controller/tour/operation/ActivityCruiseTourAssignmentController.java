@@ -1,6 +1,7 @@
 package com.project.tour.controller.tour.operation;
 
 import com.project.tour.dto.tour.operation.ActivityCruiseTourAssignmentRequest;
+import com.project.tour.dto.tour.operation.ActivityCruiseTourAssignmentResponse;
 import com.project.tour.service.tour.operation.ActivityCruiseTourAssignmentService;
 
 import jakarta.validation.Valid;
@@ -8,7 +9,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -21,6 +22,14 @@ public class ActivityCruiseTourAssignmentController {
             ActivityCruiseTourAssignmentService assignmentService) {
 
         this.assignmentService = assignmentService;
+    }
+
+    @GetMapping("/tour/{tourId}")
+    public ResponseEntity<List<ActivityCruiseTourAssignmentResponse>> getByTour(
+            @PathVariable UUID tourId) {
+
+        return ResponseEntity.ok(
+                assignmentService.getByTour(tourId));
     }
 
     /**

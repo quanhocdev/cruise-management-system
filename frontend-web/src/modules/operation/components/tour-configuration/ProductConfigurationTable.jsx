@@ -3,32 +3,29 @@
 import React from "react";
 import { CheckCircle2, Package, XCircle } from "lucide-react";
 import {
-  isProductConfigured,
   formatVND,
+  getTourStatusMeta,
+  isTourItemConfigured,
 } from "../../utils/tourConfigurationUtils";
 
 import "../../styles/tour-configuration/ProductConfigurationTable.css";
 
 const ProductConfigurationTable = ({ products = [] }) => {
-  const safeProducts = products || [];
+  const safeProducts = Array.isArray(products) ? products : [];
 
-  const getStatusLabel = (status) => {
-    switch (status) {
-      case "WAITING_CONFIG":
-        return "Chờ cấu hình";
-      case "NOT_STARTED":
-        return "Đã cấu hình";
-      case "IN_PROGRESS":
-        return "Đang hoạt động";
-      case "COMPLETED":
-        return "Đã kết thúc";
-      default:
-        return status || "Không xác định";
-    }
-  };
+  // =========================================================
+  // SỐ LƯỢNG THỰC SỰ ĐÃ CẤU HÌNH (status !== WAITING_CONFIG)
+  // =========================================================
+
+  const configuredCount = safeProducts.filter((item) =>
+    isTourItemConfigured(item.status),
+  ).length;
 
   return (
     <section className="product-configuration-table-section">
+      {/* =========================================================
+          HEADER
+          ========================================================= */}
       <div className="product-configuration-table-header">
         <div className="product-configuration-table-title">
           <div className="product-configuration-table-icon">
@@ -37,21 +34,30 @@ const ProductConfigurationTable = ({ products = [] }) => {
 
           <div>
             <h2>Sản phẩm</h2>
-            <p>Các sản phẩm được Operation phân công cho tour.</p>
+
+            <p>Các sản phẩm đã được cấu hình cho Tour.</p>
           </div>
         </div>
 
+        {/* ✅ hiển thị rõ số đã cấu hình / tổng số đã phân công */}
         <span className="product-configuration-table-count">
-          {safeProducts.length} phân công
+          {configuredCount}/{safeProducts.length} đã cấu hình
         </span>
       </div>
 
+      {/* =========================================================
+          EMPTY
+          ========================================================= */}
       {safeProducts.length === 0 ? (
         <div className="product-configuration-table-empty">
           <XCircle size={24} />
-          <span>Tour chưa được phân công sản phẩm.</span>
+
+          <span>Tour chưa có sản phẩm được cấu hình.</span>
         </div>
       ) : (
+        /* =======================================================
+           TABLE
+           ======================================================= */
         <div className="product-configuration-table-wrapper">
           <table className="product-configuration-table">
             <thead>
@@ -66,45 +72,61 @@ const ProductConfigurationTable = ({ products = [] }) => {
 
             <tbody>
               {safeProducts.map((item, index) => {
-                const configured = isProductConfigured(item);
                 const totalPrice =
                   item.price != null && item.quantity != null
-                    ? item.price * item.quantity
+                    ? Number(item.price) * Number(item.quantity)
                     : null;
+
+                // =========================================================
+                // TRẠNG THÁI THẬT LẤY TỪ ProductTourStatus
+                // (WAITING_CONFIG / CONFIGURED / NOT_STARTED /
+                //  IN_PROGRESS / OUT_OF_STOCK / COMPLETED)
+                // =========================================================
+
+                const statusMeta = getTourStatusMeta(item.status);
+                const configured = isTourItemConfigured(item.status);
 
                 return (
                   <tr key={item.id || `product-${index}`}>
+                    {/* =================================================
+                        PRODUCT
+                        ================================================= */}
                     <td>
                       <div className="product-configuration-name">
-                        <strong>
-                          {item.productName || "Chưa chọn sản phẩm"}
-                        </strong>
+                        <strong>{item.productName || "Chưa xác định"}</strong>
 
                         {item.productId && <span>{item.productId}</span>}
                       </div>
                     </td>
 
+                    {/* =================================================
+                        QUANTITY
+                        ================================================= */}
                     <td>{item.quantity != null ? item.quantity : "—"}</td>
 
+                    {/* =================================================
+                        UNIT PRICE
+                        ================================================= */}
                     <td>{formatVND(item.price)}</td>
 
+                    {/* =================================================
+                        TOTAL
+                        ================================================= */}
                     <td>{formatVND(totalPrice)}</td>
 
+                    {/* =================================================
+                        STATUS
+                        ================================================= */}
                     <td>
                       <span
-                        className={`product-configuration-status ${
-                          configured ? "configured" : "waiting"
-                        }`}
+                        className={`product-configuration-status ${statusMeta.className}`}
                       >
                         {configured ? (
                           <CheckCircle2 size={14} />
                         ) : (
                           <XCircle size={14} />
                         )}
-
-                        {configured
-                          ? "Đã cấu hình"
-                          : getStatusLabel(item.status)}
+                        {statusMeta.label}
                       </span>
                     </td>
                   </tr>

@@ -1,11 +1,12 @@
 // src/modules/convenience/tour-config/ServiceTourConfigTable.jsx
 
 import React, { useMemo, useState } from "react";
-import { AlertCircle, Edit3, Plus, RefreshCw, Wrench } from "lucide-react";
+import { AlertCircle, Edit3, Eye, Plus, RefreshCw, Wrench } from "lucide-react";
 
 import useServiceTour from "../../hooks/useServiceTour";
 import "../../styles/tour-config/ServiceTourConfigTable.css";
 import ServiceTourConfigModal from "./ServiceTourConfigModal";
+import ServiceTourDetailModal from "./ServiceTourDetailModal"; // Modal chi tiết khi click con mắt
 
 const ServiceTourConfigTable = () => {
   const {
@@ -18,6 +19,13 @@ const ServiceTourConfigTable = () => {
   } = useServiceTour();
 
   const [selectedAssignment, setSelectedAssignment] = useState(null);
+  const [viewDetailAssignment, setViewDetailAssignment] = useState(null); // State xem chi tiết
+
+  const formatShortId = (str, maxLength = 8) => {
+    if (!str) return "—";
+    if (str.length <= maxLength) return str;
+    return `${str.substring(0, maxLength)}...`;
+  };
 
   // =====================================================
   // CONFIGURABLE DATA
@@ -168,6 +176,7 @@ const ServiceTourConfigTable = () => {
           <table className="service-tour-config-table">
             <thead>
               <tr>
+                <th>STT</th>
                 <th>Tour</th>
                 <th>Khu vực</th>
                 <th>Dịch vụ</th>
@@ -179,125 +188,180 @@ const ServiceTourConfigTable = () => {
             </thead>
 
             <tbody>
-              {configurableTours.map((assignment) => (
-                <tr key={assignment.id}>
-                  {/* =================================================
-                      TOUR
-                      ================================================= */}
+              {configurableTours.map((assignment, index) => {
+                const tourIdValue = assignment.tourId || assignment.id;
+                const fullTourCode =
+                  assignment.tourCode ||
+                  (tourIdValue ? `TOUR-${tourIdValue}` : "");
+                const fullAreaId =
+                  assignment.cruiseAreaName || assignment.cruiseAreaId || "";
 
-                  <td>
-                    <div className="service-tour-config-tour">
-                      <strong>{assignment.tourCode || "—"}</strong>
+                return (
+                  <tr key={assignment.id}>
+                    {/* =================================================
+                        STT
+                        ================================================= */}
 
-                      <span>{assignment.tourName || "—"}</span>
-                    </div>
-                  </td>
+                    <td>{index + 1}</td>
 
-                  {/* =================================================
-                      AREA
-                      ================================================= */}
+                    {/* =================================================
+                        TOUR
+                        ================================================= */}
 
-                  <td>
-                    <div className="service-tour-config-area">
-                      <strong>{assignment.cruiseAreaName || "—"}</strong>
-
-                      {assignment.deckNumber != null && (
-                        <span>Tầng {assignment.deckNumber}</span>
-                      )}
-                    </div>
-                  </td>
-
-                  {/* =================================================
-                      SERVICE
-                      ================================================= */}
-
-                  <td>
-                    {assignment.serviceName ? (
-                      <div className="service-tour-config-service">
-                        <strong>{assignment.serviceName}</strong>
-
-                        {assignment.serviceDescription && (
-                          <span>{assignment.serviceDescription}</span>
+                    <td>
+                      <div
+                        className="service-tour-config-tour"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                        }}
+                      >
+                        <strong className="font-mono" title={fullTourCode}>
+                          {assignment.tourCode ||
+                            (tourIdValue
+                              ? `TOUR-${formatShortId(tourIdValue, 6, 4)}`
+                              : "—")}
+                        </strong>
+                        <button
+                          type="button"
+                          className="service-tour-config-action service-tour-config-action--view"
+                          onClick={() => setViewDetailAssignment(assignment)}
+                          title="Xem chi tiết Tour"
+                          style={{ padding: "2px 4px" }}
+                        >
+                          <Eye size={14} />
+                        </button>
+                        {assignment.tourName && (
+                          <span>{assignment.tourName}</span>
                         )}
                       </div>
-                    ) : (
-                      <span className="service-tour-config-muted">
-                        Chưa chọn dịch vụ
-                      </span>
-                    )}
-                  </td>
+                    </td>
 
-                  {/* =================================================
-                      MAX PASSENGERS
-                      ================================================= */}
+                    {/* =================================================
+                        AREA
+                        ================================================= */}
 
-                  <td>
-                    {assignment.maxPassengers != null ? (
-                      <span>{assignment.maxPassengers}</span>
-                    ) : (
-                      <span className="service-tour-config-muted">—</span>
-                    )}
-                  </td>
-
-                  {/* =================================================
-                      DURATION
-                      ================================================= */}
-
-                  <td>
-                    {assignment.durationMinutes != null ? (
-                      <span>{assignment.durationMinutes} phút</span>
-                    ) : (
-                      <span className="service-tour-config-unlimited">
-                        Không giới hạn
-                      </span>
-                    )}
-                  </td>
-
-                  {/* =================================================
-                      STATUS
-                      ================================================= */}
-
-                  <td>
-                    <span
-                      className={`service-tour-config-status ${String(
-                        assignment.status || "",
-                      ).toLowerCase()}`}
-                    >
-                      {getStatusLabel(assignment.status)}
-                    </span>
-                  </td>
-
-                  {/* =================================================
-                      ACTION
-                      ================================================= */}
-
-                  <td>
-                    {assignment.status === "WAITING_CONFIG" && (
-                      <button
-                        type="button"
-                        className="service-tour-config-action"
-                        onClick={() => handleOpenConfig(assignment)}
+                    <td>
+                      <div
+                        className="service-tour-config-area"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                        }}
                       >
-                        <Plus size={16} />
+                        <strong className="font-mono" title={fullAreaId}>
+                          {assignment.cruiseAreaName ||
+                            formatShortId(assignment.cruiseAreaId, 6, 4)}
+                        </strong>
+                        <button
+                          type="button"
+                          className="service-tour-config-action service-tour-config-action--view"
+                          onClick={() => setViewDetailAssignment(assignment)}
+                          title="Xem chi tiết Khu vực"
+                          style={{ padding: "2px 4px" }}
+                        >
+                          <Eye size={14} />
+                        </button>
+                        {assignment.deckNumber != null && (
+                          <span>Tầng {assignment.deckNumber}</span>
+                        )}
+                      </div>
+                    </td>
 
-                        <span>Cấu hình</span>
-                      </button>
-                    )}
+                    {/* =================================================
+                        SERVICE
+                        ================================================= */}
 
-                    {assignment.status === "NOT_STARTED" && (
-                      <button
-                        type="button"
-                        className="service-tour-config-action"
-                        onClick={() => handleOpenConfig(assignment)}
+                    <td>
+                      {assignment.serviceName ? (
+                        <div className="service-tour-config-service">
+                          <strong>{assignment.serviceName}</strong>
+
+                          {assignment.serviceDescription && (
+                            <span>{assignment.serviceDescription}</span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="service-tour-config-muted">
+                          Chưa chọn dịch vụ
+                        </span>
+                      )}
+                    </td>
+
+                    {/* =================================================
+                        MAX PASSENGERS
+                        ================================================= */}
+
+                    <td>
+                      {assignment.maxPassengers != null ? (
+                        <span>{assignment.maxPassengers}</span>
+                      ) : (
+                        <span className="service-tour-config-muted">—</span>
+                      )}
+                    </td>
+
+                    {/* =================================================
+                        DURATION
+                        ================================================= */}
+
+                    <td>
+                      {assignment.durationMinutes != null ? (
+                        <span>{assignment.durationMinutes} phút</span>
+                      ) : (
+                        <span className="service-tour-config-unlimited">
+                          Không giới hạn
+                        </span>
+                      )}
+                    </td>
+
+                    {/* =================================================
+                        STATUS
+                        ================================================= */}
+
+                    <td>
+                      <span
+                        className={`service-tour-config-status ${String(
+                          assignment.status || "",
+                        ).toLowerCase()}`}
                       >
-                        <Edit3 size={16} />
+                        {getStatusLabel(assignment.status)}
+                      </span>
+                    </td>
 
-                        <span>Chỉnh sửa</span>
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
+                    {/* =================================================
+                        ACTION
+                        ================================================= */}
+
+                    <td>
+                      {assignment.status === "WAITING_CONFIG" && (
+                        <button
+                          type="button"
+                          className="service-tour-config-action"
+                          onClick={() => handleOpenConfig(assignment)}
+                        >
+                          <Plus size={16} />
+
+                          <span>Cấu hình</span>
+                        </button>
+                      )}
+
+                      {assignment.status === "NOT_STARTED" && (
+                        <button
+                          type="button"
+                          className="service-tour-config-action"
+                          onClick={() => handleOpenConfig(assignment)}
+                        >
+                          <Edit3 size={16} />
+
+                          <span>Chỉnh sửa</span>
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -313,6 +377,17 @@ const ServiceTourConfigTable = () => {
           onClose={handleCloseModal}
           onSubmit={handleSubmit}
           submitting={loading}
+        />
+      )}
+
+      {/* =====================================================
+          MODAL XEM CHI TIẾT (EYE ICON)
+          ===================================================== */}
+
+      {viewDetailAssignment && (
+        <ServiceTourDetailModal
+          assignmentId={viewDetailAssignment.id}
+          onClose={() => setViewDetailAssignment(null)}
         />
       )}
     </>

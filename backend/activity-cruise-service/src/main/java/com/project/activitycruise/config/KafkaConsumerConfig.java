@@ -1,8 +1,10 @@
 package com.project.activitycruise.config;
 
-import com.project.common.event.TourAssignedEvent;
+import com.project.common.event.TourApprovedEvent;
+
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,41 +22,49 @@ import java.util.Map;
 @Configuration
 public class KafkaConsumerConfig {
 
-    @Value("${spring.kafka.bootstrap-servers:localhost:9092}")
-    private String bootstrapServers;
+        @Value("${spring.kafka.bootstrap-servers:localhost:9092}")
+        private String bootstrapServers;
 
-    private Map<String, Object> baseConsumerProps() {
-        Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "activity-cruise-group-v1");
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        return props;
-    }
+        @Bean
+        public ConsumerFactory<String, TourApprovedEvent> consumerFactory() {
 
-    // =========================================================================
-    // Consumer Config cho ACTIVITY Event (dùng TourAssignedEvent)
-    // =========================================================================
-    @Bean
-    public ConsumerFactory<String, TourAssignedEvent> activityConsumerFactory() {
-        JsonDeserializer<TourAssignedEvent> jsonDeserializer = new JsonDeserializer<>(
-                TourAssignedEvent.class);
-        jsonDeserializer.addTrustedPackages("*");
-        jsonDeserializer.setUseTypeHeaders(false);
-        jsonDeserializer.setRemoveTypeHeaders(true);
+                Map<String, Object> props = new HashMap<>();
 
-        ErrorHandlingDeserializer<TourAssignedEvent> errorHandlingDeserializer = new ErrorHandlingDeserializer<>(
-                jsonDeserializer);
+                props.put(
+                                ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
+                                bootstrapServers);
 
-        Map<String, Object> props = baseConsumerProps();
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, errorHandlingDeserializer);
+                props.put(
+                                ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
+                                StringDeserializer.class);
 
-        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), errorHandlingDeserializer);
-    }
+                props.put(
+                                ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+                                ErrorHandlingDeserializer.class);
 
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, TourAssignedEvent> activityKafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, TourAssignedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(activityConsumerFactory());
-        return factory;
-    }
+                props.put(
+                                ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS,
+                                JsonDeserializer.class);
+
+                props.put(
+                                JsonDeserializer.TRUSTED_PACKAGES,
+                                "com.project.common.event");
+
+                // Đọc type Event từ Kafka header
+                props.put(
+                                JsonDeserializer.USE_TYPE_INFO_HEADERS,
+                                true);
+
+                return new DefaultKafkaConsumerFactory<>(props);
+        }
+
+        @Bean
+        public ConcurrentKafkaListenerContainerFactory<String, TourApprovedEvent> kafkaListenerContainerFactory() {
+
+                ConcurrentKafkaListenerContainerFactory<String, TourApprovedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+
+                factory.setConsumerFactory(consumerFactory());
+
+                return factory;
+        }
 }

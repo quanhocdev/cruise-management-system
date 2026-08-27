@@ -1,69 +1,145 @@
 // src/modules/operation/components/tour-configuration/TourConfigurationSummary.jsx
 
 import React from "react";
-import { Activity, CheckCircle2, Package, Wrench } from "lucide-react";
-import {
-  isActivityConfigured,
-  isProductConfigured,
-  isServiceConfigured,
-} from "../../utils/tourConfigurationUtils";
+import { Activity, CheckCircle2, MapPin, Package, Wrench } from "lucide-react";
+
+import { isTourItemConfigured } from "../../utils/tourConfigurationUtils";
 
 import "../../styles/tour-configuration/TourConfigurationSummary.css";
 
 const TourConfigurationSummary = ({
-  activities = [],
+  activityCruises = [],
+  activityVisits = [],
   products = [],
   services = [],
   configurationComplete = false,
-  activeFilter = "ALL", // Filter hiện tại ("ALL", "activity", "product", "service")
-  onFilterChange, // Callback truyền filter được chọn ra ngoài
+  activeFilter = "ALL",
+  onFilterChange,
 }) => {
-  const safeActivities = activities || [];
-  const safeProducts = products || [];
-  const safeServices = services || [];
+  // =========================================================
+  // SAFE DATA
+  // =========================================================
 
-  const configuredActivities =
-    safeActivities.filter(isActivityConfigured).length;
-  const configuredProducts = safeProducts.filter(isProductConfigured).length;
-  const configuredServices = safeServices.filter(isServiceConfigured).length;
+  const safeActivityCruises = Array.isArray(activityCruises)
+    ? activityCruises
+    : [];
+
+  const safeActivityVisits = Array.isArray(activityVisits)
+    ? activityVisits
+    : [];
+
+  const safeProducts = Array.isArray(products) ? products : [];
+
+  const safeServices = Array.isArray(services) ? services : [];
+
+  // =========================================================
+  // TOTAL ASSIGNMENTS
+  // =========================================================
+  //
+  // Tổng số item được phân công cho Tour.
+  //
+  // Ví dụ:
+  // 3 activity trên tàu
+  // -> total = 3
+  //
+  // =========================================================
+
+  const totalActivityCruises = safeActivityCruises.length;
+  const totalActivityVisits = safeActivityVisits.length;
+  const totalProducts = safeProducts.length;
+  const totalServices = safeServices.length;
+
+  // =========================================================
+  // ACTUALLY CONFIGURED
+  // =========================================================
+  //
+  // CHỈ status === "CONFIGURED" mới được tính là đã cấu hình.
+  //
+  // WAITING_CONFIG -> chưa cấu hình
+  // CONFIGURED     -> đã cấu hình
+  // NOT_STARTED    -> chưa tính là configured ở bước này
+  // IN_PROGRESS    -> chưa tính là configured ở bước này
+  // COMPLETED      -> không dùng để xác định trạng thái cấu hình
+  // =========================================================
+
+  const configuredActivityCruises = safeActivityCruises.filter((item) =>
+    isTourItemConfigured(item.status),
+  ).length;
+
+  const configuredActivityVisits = safeActivityVisits.filter((item) =>
+    isTourItemConfigured(item.status),
+  ).length;
+
+  const configuredProducts = safeProducts.filter((item) =>
+    isTourItemConfigured(item.status),
+  ).length;
+
+  const configuredServices = safeServices.filter((item) =>
+    isTourItemConfigured(item.status),
+  ).length;
+
+  // =========================================================
+  // SUMMARY CARDS
+  // =========================================================
 
   const cards = [
     {
-      key: "activity",
-      label: "Hoạt động",
+      key: "activityCruise",
+      label: "Hoạt động trên tàu",
       icon: Activity,
-      configured: configuredActivities,
-      total: safeActivities.length,
+      configured: configuredActivityCruises,
+      total: totalActivityCruises,
+    },
+    {
+      key: "activityVisit",
+      label: "Hoạt động trên bờ",
+      icon: MapPin,
+      configured: configuredActivityVisits,
+      total: totalActivityVisits,
     },
     {
       key: "product",
       label: "Sản phẩm",
       icon: Package,
       configured: configuredProducts,
-      total: safeProducts.length,
+      total: totalProducts,
     },
     {
       key: "service",
       label: "Dịch vụ",
       icon: Wrench,
       configured: configuredServices,
-      total: safeServices.length,
+      total: totalServices,
     },
   ];
 
+  // =========================================================
+  // FILTER
+  // =========================================================
+
   const handleCardClick = (key) => {
     if (!onFilterChange) return;
-    // Bấm lại ô đang chọn thì reset về xem tất cả ("ALL"), ngược lại thì lọc theo key
+
     const nextFilter = activeFilter === key ? "ALL" : key;
+
     onFilterChange(nextFilter);
   };
 
+  // =========================================================
+  // RENDER
+  // =========================================================
+
   return (
     <section className="tour-configuration-summary">
+      {/* =========================================================
+          HEADER
+          ========================================================= */}
+
       <div className="tour-configuration-summary-header">
         <div>
           <h2>Tổng quan cấu hình</h2>
-          <p>Tình trạng cấu hình các thành phần được phân công cho tour.</p>
+
+          <p>Tình trạng cấu hình các thành phần của Tour.</p>
         </div>
 
         <div
@@ -72,6 +148,7 @@ const TourConfigurationSummary = ({
           }`}
         >
           <CheckCircle2 size={18} />
+
           <span>
             {configurationComplete
               ? "Đã hoàn tất cấu hình"
@@ -80,10 +157,21 @@ const TourConfigurationSummary = ({
         </div>
       </div>
 
+      {/* =========================================================
+          SUMMARY CARDS
+          ========================================================= */}
+
       <div className="tour-configuration-summary-grid">
         {cards.map((card) => {
           const Icon = card.icon;
+
           const isActive = activeFilter === card.key;
+
+          // Có item và tất cả item đều đã CONFIGURED
+          const isComplete = card.total > 0 && card.configured === card.total;
+
+          // Có ít nhất một item đã CONFIGURED
+          const hasConfigured = card.configured > 0;
 
           return (
             <div
@@ -94,10 +182,24 @@ const TourConfigurationSummary = ({
               onClick={() => handleCardClick(card.key)}
               role="button"
               tabIndex={0}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  handleCardClick(card.key);
+                }
+              }}
             >
+              {/* =================================================
+                  ICON
+                  ================================================= */}
+
               <div className="tour-configuration-summary-card-icon">
                 <Icon size={22} />
               </div>
+
+              {/* =================================================
+                  CONTENT
+                  ================================================= */}
 
               <div className="tour-configuration-summary-card-content">
                 <span>{card.label}</span>
@@ -109,10 +211,12 @@ const TourConfigurationSummary = ({
 
                 <p>
                   {card.total === 0
-                    ? "Không có phân công"
-                    : card.configured === card.total
+                    ? "Chưa có phân công"
+                    : isComplete
                       ? "Đã cấu hình đầy đủ"
-                      : `${card.total - card.configured} mục chưa cấu hình`}
+                      : hasConfigured
+                        ? "Đang cấu hình"
+                        : "Chưa cấu hình"}
                 </p>
               </div>
             </div>

@@ -1,6 +1,6 @@
 package com.project.activitycruise.service;
 
-import com.project.activitycruise.dto.OnboardActivityCruiseTourResponse;
+import com.project.activitycruise.dto.ActivityCruiseTourResponse;
 import com.project.activitycruise.dto.ActivityCruiseTourConfigRequest;
 import com.project.activitycruise.exception.AppException;
 import com.project.activitycruise.mapper.ActivityCruiseTourMapper;
@@ -36,7 +36,7 @@ public class ActivityCruiseTourConfigService {
                 this.activityCruiseTourMapper = activityCruiseTourMapper;
         }
 
-        public OnboardActivityCruiseTourResponse configure(
+        public ActivityCruiseTourResponse configure(
                         UUID assignmentId,
                         ActivityCruiseTourConfigRequest request) {
 
@@ -81,7 +81,7 @@ public class ActivityCruiseTourConfigService {
                 return activityCruiseTourMapper.toResponse(saved);
         }
 
-        public OnboardActivityCruiseTourResponse updateConfig(
+        public ActivityCruiseTourResponse updateConfig(
                         UUID assignmentId,
                         ActivityCruiseTourConfigRequest request) {
 

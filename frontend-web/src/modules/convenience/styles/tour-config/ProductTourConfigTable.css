@@ -1,23 +1,18 @@
 /* =========================================================
-   PRODUCT TOUR CONFIG TABLE
+   PRODUCT TOUR CONFIG TABLE - OPTIMIZED
    ========================================================= */
 
+/* LOADING & ANIMATION */
 .product-tour-config-loading {
   width: 100%;
   min-height: 260px;
-
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-
   color: #64748b;
   font-size: 14px;
 }
-
-/* =========================================================
-   SPINNER
-   ========================================================= */
 
 .product-tour-config-loading .spin,
 .product-tour-config-refresh .spin {
@@ -25,45 +20,29 @@
 }
 
 @keyframes product-tour-config-spin {
-  from {
-    transform: rotate(0deg);
-  }
-
   to {
     transform: rotate(360deg);
   }
 }
 
-/* =========================================================
-   TOOLBAR
-   ========================================================= */
-
+/* TOOLBAR */
 .product-tour-config-toolbar {
   width: 100%;
-
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-
   margin-bottom: 20px;
-}
-
-.product-tour-config-toolbar > div {
-  min-width: 0;
 }
 
 .product-tour-config-toolbar h2 {
   margin: 0;
-
   display: flex;
   align-items: center;
   gap: 9px;
-
   color: #172033;
   font-size: 20px;
   font-weight: 700;
-  line-height: 1.35;
 }
 
 .product-tour-config-toolbar h2 svg {
@@ -73,44 +52,27 @@
 
 .product-tour-config-toolbar p {
   margin: 6px 0 0;
-
   color: #64748b;
   font-size: 13px;
-  line-height: 1.5;
 }
 
-/* =========================================================
-   REFRESH BUTTON
-   ========================================================= */
-
+/* REFRESH BUTTON */
 .product-tour-config-refresh {
   flex-shrink: 0;
-
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
-
   min-height: 38px;
   padding: 0 14px;
-
   border: 1px solid #dbe3ef;
   border-radius: 9px;
-
   background: #ffffff;
   color: #334155;
-
   font-size: 13px;
   font-weight: 600;
-
   cursor: pointer;
-
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease,
-    box-shadow 0.2s ease,
-    transform 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .product-tour-config-refresh:hover:not(:disabled) {
@@ -120,166 +82,92 @@
   box-shadow: 0 3px 10px rgba(15, 23, 42, 0.06);
 }
 
-.product-tour-config-refresh:active:not(:disabled) {
-  transform: translateY(1px);
-}
-
 .product-tour-config-refresh:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-/* =========================================================
-   ERROR
-   ========================================================= */
-
+/* ERROR & EMPTY STATES */
 .product-tour-config-error {
-  width: 100%;
-  box-sizing: border-box;
-
   display: flex;
   align-items: flex-start;
   gap: 10px;
-
   margin-bottom: 16px;
   padding: 12px 14px;
-
   border: 1px solid #fecaca;
   border-radius: 10px;
-
   background: #fef2f2;
   color: #b91c1c;
-
   font-size: 13px;
-  line-height: 1.5;
 }
-
-.product-tour-config-error svg {
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-
-/* =========================================================
-   EMPTY STATE
-   ========================================================= */
 
 .product-tour-config-empty {
   width: 100%;
-  min-height: 280px;
-  box-sizing: border-box;
-
+  min-height: 240px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
-  padding: 40px 24px;
-
+  padding: 32px 20px;
   border: 1px dashed #d8e0eb;
   border-radius: 14px;
-
   background: #ffffff;
-
   text-align: center;
 }
 
 .product-tour-config-empty > svg {
   margin-bottom: 12px;
-
   color: #94a3b8;
 }
 
 .product-tour-config-empty h3 {
   margin: 0;
-
   color: #334155;
   font-size: 16px;
   font-weight: 700;
 }
 
 .product-tour-config-empty p {
-  max-width: 420px;
-
   margin: 7px 0 0;
-
   color: #64748b;
   font-size: 13px;
-  line-height: 1.5;
 }
 
-/* =========================================================
-   TABLE WRAPPER
-   ========================================================= */
-
+/* TABLE LAYOUT */
 .product-tour-config-table-wrapper {
   width: 100%;
-
   overflow-x: auto;
-  overflow-y: hidden;
-
   border: 1px solid #e2e8f0;
   border-radius: 14px;
-
   background: #ffffff;
-
-  -webkit-overflow-scrolling: touch;
 }
-
-/* =========================================================
-   TABLE
-   ========================================================= */
 
 .product-tour-config-table {
   width: 100%;
-  min-width: 900px;
-
+  min-width: 850px;
   border-collapse: separate;
   border-spacing: 0;
-
   font-size: 13px;
 }
 
-/* =========================================================
-   TABLE HEADER
-   ========================================================= */
-
 .product-tour-config-table thead th {
-  height: 46px;
-  padding: 0 16px;
-
+  height: 44px;
+  padding: 0 14px;
   border-bottom: 1px solid #e2e8f0;
-
   background: #f8fafc;
   color: #64748b;
-
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-align: left;
   text-transform: uppercase;
-
   white-space: nowrap;
 }
 
-.product-tour-config-table thead th:first-child {
-  border-top-left-radius: 13px;
-}
-
-.product-tour-config-table thead th:last-child {
-  border-top-right-radius: 13px;
-}
-
-/* =========================================================
-   TABLE BODY
-   ========================================================= */
-
 .product-tour-config-table tbody td {
-  padding: 14px 16px;
-
+  padding: 12px 14px;
   border-bottom: 1px solid #edf1f6;
-
   color: #334155;
-
   vertical-align: middle;
 }
 
@@ -287,37 +175,40 @@
   border-bottom: none;
 }
 
-.product-tour-config-table tbody tr {
-  transition: background-color 0.18s ease;
-}
-
 .product-tour-config-table tbody tr:hover {
   background: #f8fbff;
 }
 
 /* =========================================================
-   TOUR
+   CELL CONTENT STYLING
    ========================================================= */
 
-.product-tour-config-tour {
-  min-width: 130px;
-
+/* TOUR / AREA — mã hoặc tên + nút mắt nằm trên MỘT HÀNG NGANG.
+   (Trước đây các cell này bị đặt flex-direction: column trong khi
+   JSX lại render inline-flex hàng ngang => mã, nút mắt, tên bị
+   xếp chồng dọc và canh giữa, nhìn lệch/"kì". Sửa lại đúng hàng.) */
+.product-tour-config-tour,
+.product-tour-config-area {
   display: flex;
-  flex-direction: column;
-  gap: 3px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+
+  min-width: 150px;
 }
 
-.product-tour-config-tour strong {
+.product-tour-config-tour strong,
+.product-tour-config-area strong {
   color: #1e293b;
-
   font-size: 13px;
   font-weight: 700;
   white-space: nowrap;
 }
 
-.product-tour-config-tour span {
+.product-tour-config-tour span,
+.product-tour-config-area span {
   max-width: 190px;
-
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -326,98 +217,45 @@
   font-size: 12px;
 }
 
-/* =========================================================
-   AREA
-   ========================================================= */
-
-.product-tour-config-area {
-  min-width: 105px;
-
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.product-tour-config-area strong {
-  color: #334155;
-
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.product-tour-config-area span {
-  color: #94a3b8;
-  font-size: 12px;
-}
-
-/* =========================================================
-   PRODUCT
-   ========================================================= */
-
+/* PRODUCT — giữ dạng 2 dòng (mã ở trên, tên ở dưới), không có nút mắt */
 .product-tour-config-product {
-  min-width: 150px;
-  max-width: 240px;
-
   display: flex;
   flex-direction: column;
   gap: 3px;
+
+  min-width: 170px;
+  max-width: 250px;
 }
 
 .product-tour-config-product strong {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-  color: #334155;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.product-tour-config-product span {
-  display: -webkit-box;
-
-  overflow: hidden;
-
-  color: #64748b;
-  font-size: 12px;
-  line-height: 1.45;
-
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-}
-
-/* =========================================================
-   QUANTITY
-   ========================================================= */
-
-.product-tour-config-table tbody td:nth-child(4) {
   color: #1e293b;
+  font-size: 13px;
   font-weight: 700;
   white-space: nowrap;
 }
 
-/* =========================================================
-   STATUS
-   ========================================================= */
+.product-tour-config-product span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 
+  color: #64748b;
+  font-size: 12px;
+}
+
+/* STATUS BADGES */
 .product-tour-config-status {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
-  min-height: 28px;
+  min-height: 26px;
   padding: 0 9px;
-
   border: 1px solid transparent;
   border-radius: 999px;
-
   font-size: 11px;
   font-weight: 700;
-
   white-space: nowrap;
 }
-
-/* WAITING CONFIG */
 
 .product-tour-config-status.waiting_config {
   border-color: #fed7aa;
@@ -425,15 +263,11 @@
   color: #c2410c;
 }
 
-/* NOT STARTED */
-
 .product-tour-config-status.not_started {
   border-color: #bfdbfe;
   background: #eff6ff;
   color: #2563eb;
 }
-
-/* IN PROGRESS */
 
 .product-tour-config-status.in_progress {
   border-color: #a7f3d0;
@@ -441,15 +275,11 @@
   color: #047857;
 }
 
-/* OUT OF STOCK */
-
 .product-tour-config-status.out_of_stock {
   border-color: #fecaca;
   background: #fef2f2;
   color: #dc2626;
 }
-
-/* COMPLETED */
 
 .product-tour-config-status.completed {
   border-color: #e2e8f0;
@@ -457,249 +287,61 @@
   color: #64748b;
 }
 
-/* =========================================================
-   ACTION
-   ========================================================= */
-
+/* ACTION BUTTONS */
 .product-tour-config-action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-
-  min-height: 34px;
-  padding: 0 11px;
-
+  gap: 5px;
+  min-height: 32px;
+  padding: 0 10px;
   border: 1px solid #bfdbfe;
-  border-radius: 8px;
-
+  border-radius: 7px;
   background: #eff6ff;
   color: #2563eb;
-
   font-size: 12px;
-  font-weight: 700;
-
+  font-weight: 600;
   white-space: nowrap;
-
   cursor: pointer;
-
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease,
-    box-shadow 0.2s ease,
-    transform 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .product-tour-config-action:hover {
   border-color: #93c5fd;
   background: #dbeafe;
   color: #1d4ed8;
-
-  box-shadow: 0 3px 8px rgba(37, 99, 235, 0.12);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.12);
 }
 
-.product-tour-config-action:active {
-  transform: translateY(1px);
+/* Nút Xem con mắt (Gọn nhẹ trong bảng) */
+.product-tour-config-action--view {
+  min-width: 26px;
+  height: 26px;
+  padding: 0;
+  border-color: #e2e8f0;
+  background: #f8fafc;
+  color: #64748b;
 }
 
-/* =========================================================
-   LARGE TABLET
-   ========================================================= */
-
-@media (max-width: 1100px) {
-  .product-tour-config-toolbar {
-    gap: 16px;
-  }
-
-  .product-tour-config-toolbar h2 {
-    font-size: 18px;
-  }
-
-  .product-tour-config-toolbar p {
-    font-size: 12px;
-  }
-
-  .product-tour-config-table {
-    min-width: 850px;
-  }
-
-  .product-tour-config-table thead th,
-  .product-tour-config-table tbody td {
-    padding-left: 13px;
-    padding-right: 13px;
-  }
+.product-tour-config-action--view:hover {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+  color: #0f172a;
 }
 
-/* =========================================================
-   TABLET
-   ========================================================= */
-
+/* RESPONSIVE */
 @media (max-width: 768px) {
   .product-tour-config-toolbar {
-    align-items: flex-start;
     flex-direction: column;
+    align-items: flex-start;
     gap: 12px;
-  }
-
-  .product-tour-config-toolbar h2 {
-    font-size: 17px;
-  }
-
-  .product-tour-config-toolbar p {
-    max-width: 600px;
-    margin-top: 5px;
   }
 
   .product-tour-config-refresh {
     width: 100%;
   }
 
-  .product-tour-config-error {
-    margin-bottom: 14px;
-  }
-
-  .product-tour-config-table-wrapper {
-    border-radius: 11px;
-  }
-
-  .product-tour-config-table {
-    min-width: 820px;
-  }
-
-  .product-tour-config-table thead th {
-    height: 43px;
-    padding: 0 12px;
-
-    font-size: 10px;
-  }
-
-  .product-tour-config-table tbody td {
-    padding: 12px;
-  }
-
-  .product-tour-config-empty {
-    min-height: 240px;
-    padding: 32px 20px;
-  }
-}
-
-/* =========================================================
-   MOBILE
-   ========================================================= */
-
-@media (max-width: 576px) {
-  .product-tour-config-toolbar {
-    margin-bottom: 14px;
-  }
-
-  .product-tour-config-toolbar h2 {
-    font-size: 16px;
-  }
-
-  .product-tour-config-toolbar h2 svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  .product-tour-config-toolbar p {
-    font-size: 12px;
-    line-height: 1.45;
-  }
-
-  .product-tour-config-refresh {
-    min-height: 36px;
-    font-size: 12px;
-  }
-
-  .product-tour-config-error {
-    padding: 10px 11px;
-    border-radius: 9px;
-
-    font-size: 12px;
-  }
-
-  .product-tour-config-empty {
-    min-height: 220px;
-    padding: 28px 16px;
-
-    border-radius: 11px;
-  }
-
-  .product-tour-config-empty > svg {
-    width: 28px;
-    height: 28px;
-  }
-
-  .product-tour-config-empty h3 {
-    font-size: 14px;
-  }
-
-  .product-tour-config-empty p {
-    font-size: 12px;
-  }
-
-  .product-tour-config-table-wrapper {
-    margin-right: 0;
-    border-radius: 10px;
-  }
-
   .product-tour-config-table {
     min-width: 780px;
-  }
-
-  .product-tour-config-table thead th {
-    height: 40px;
-    padding: 0 10px;
-  }
-
-  .product-tour-config-table tbody td {
-    padding: 10px;
-  }
-
-  .product-tour-config-action {
-    min-height: 32px;
-    padding: 0 9px;
-
-    font-size: 11px;
-  }
-}
-
-/* =========================================================
-   VERY SMALL MOBILE
-   ========================================================= */
-
-@media (max-width: 400px) {
-  .product-tour-config-toolbar h2 {
-    font-size: 15px;
-  }
-
-  .product-tour-config-toolbar p {
-    font-size: 11px;
-  }
-
-  .product-tour-config-table {
-    min-width: 750px;
-  }
-
-  .product-tour-config-empty {
-    min-height: 200px;
-  }
-}
-
-/* =========================================================
-   REDUCED MOTION
-   ========================================================= */
-
-@media (prefers-reduced-motion: reduce) {
-  .product-tour-config-loading .spin,
-  .product-tour-config-refresh .spin {
-    animation: none;
-  }
-
-  .product-tour-config-table tbody tr,
-  .product-tour-config-refresh,
-  .product-tour-config-action {
-    transition: none;
   }
 }

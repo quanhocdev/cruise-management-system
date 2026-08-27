@@ -19,3 +19,6 @@ public record TourApprovedEvent(
                 Instant.now().toString());
     }
 }
+
+// docker compose build --no-cache
+// mvn clean install -DskipTests

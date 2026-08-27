@@ -83,16 +83,45 @@
 }
 
 /* =========================================================
-   TOUR CODE
+   ID & FLEX CELL HELPERS
+   ========================================================= */
+
+.activity-cruise-tour-id {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 600;
+  color: #475569;
+}
+
+.flex-cell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  max-width: 220px;
+}
+
+.id-text-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0; /* Quan trọng để flex con rút gọn được */
+  cursor: pointer;
+}
+
+.truncate-id {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* =========================================================
+   TOUR CODE / ID
    ========================================================= */
 
 .activity-cruise-tour-code {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-
   color: #0f172a;
-  font-weight: 700;
+  font-weight: 600;
   white-space: nowrap;
 }
 
@@ -102,29 +131,10 @@
 }
 
 /* =========================================================
-   TOUR NAME
-   ========================================================= */
-
-.activity-cruise-tour-name {
-  max-width: 260px;
-
-  color: #334155;
-  font-weight: 500;
-
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* =========================================================
    CRUISE AREA
    ========================================================= */
 
 .activity-cruise-tour-area {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-
   color: #475569;
   white-space: nowrap;
 }
@@ -132,6 +142,43 @@
 .activity-cruise-tour-area svg {
   flex-shrink: 0;
   color: #64748b;
+}
+
+/* =========================================================
+   INLINE BUTTON (XEM CHI TIẾT TRONG Ô ID)
+   ========================================================= */
+
+.activity-cruise-tour-inline-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 28px;
+  height: 28px;
+  padding: 0;
+
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  color: #475569;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.activity-cruise-tour-inline-btn:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #2563eb;
+}
+
+.activity-cruise-tour-inline-btn:active {
+  transform: translateY(1px);
 }
 
 /* =========================================================
@@ -183,10 +230,9 @@
 }
 
 /* =========================================================
-   DETAIL BUTTON
+   CONFIG BUTTON
    ========================================================= */
 
-.activity-cruise-tour-detail-button,
 .activity-cruise-tour-config-button {
   display: inline-flex;
   align-items: center;
@@ -202,6 +248,10 @@
   font-size: 13px;
   font-weight: 600;
 
+  color: #ffffff;
+  background: #2563eb;
+  border: 1px solid #2563eb;
+
   cursor: pointer;
 
   transition:
@@ -211,38 +261,13 @@
     transform 0.1s ease;
 }
 
-.activity-cruise-tour-detail-button:active,
-.activity-cruise-tour-config-button:active {
-  transform: translateY(1px);
-}
-
-/* DETAIL */
-
-.activity-cruise-tour-detail-button {
-  color: #475569;
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
-}
-
-.activity-cruise-tour-detail-button:hover {
-  background: #f8fafc;
-  border-color: #94a3b8;
-  color: #0f172a;
-}
-
-/* =========================================================
-   CONFIG BUTTON
-   ========================================================= */
-
-.activity-cruise-tour-config-button {
-  color: #ffffff;
-  background: #2563eb;
-  border: 1px solid #2563eb;
-}
-
 .activity-cruise-tour-config-button:hover {
   background: #1d4ed8;
   border-color: #1d4ed8;
+}
+
+.activity-cruise-tour-config-button:active {
+  transform: translateY(1px);
 }
 
 /* =========================================================
@@ -304,7 +329,7 @@
 }
 
 /* =========================================================
-   TABLET
+   RESPONSIVE
    ========================================================= */
 
 @media (max-width: 1024px) {
@@ -317,25 +342,16 @@
     min-width: 760px;
   }
 
-  .activity-cruise-tour-name {
-    max-width: 200px;
+  .flex-cell {
+    max-width: 170px;
   }
 
-  .activity-cruise-tour-actions {
-    gap: 6px;
-  }
-
-  .activity-cruise-tour-detail-button,
   .activity-cruise-tour-config-button {
     min-height: 32px;
     padding: 6px 9px;
     font-size: 12px;
   }
 }
-
-/* =========================================================
-   MOBILE / SMALL TABLET
-   ========================================================= */
 
 @media (max-width: 768px) {
   .activity-cruise-tour-table-wrapper {
@@ -356,12 +372,8 @@
     font-size: 13px;
   }
 
-  .activity-cruise-tour-code {
-    gap: 6px;
-  }
-
-  .activity-cruise-tour-area {
-    gap: 6px;
+  .flex-cell {
+    max-width: 140px;
   }
 
   .activity-cruise-tour-status {
@@ -370,11 +382,6 @@
     font-size: 11px;
   }
 
-  .activity-cruise-tour-actions {
-    flex-wrap: nowrap;
-  }
-
-  .activity-cruise-tour-detail-button,
   .activity-cruise-tour-config-button {
     min-height: 32px;
     padding: 6px 8px;
@@ -386,10 +393,6 @@
     padding: 32px 20px;
   }
 }
-
-/* =========================================================
-   SMALL MOBILE
-   ========================================================= */
 
 @media (max-width: 480px) {
   .activity-cruise-tour-table {
@@ -404,11 +407,6 @@
     padding: 12px 9px;
   }
 
-  .activity-cruise-tour-name {
-    max-width: 150px;
-  }
-
-  .activity-cruise-tour-detail-button,
   .activity-cruise-tour-config-button {
     min-height: 31px;
     padding: 5px 7px;
@@ -439,8 +437,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .activity-cruise-tour-table tbody tr,
-  .activity-cruise-tour-detail-button,
-  .activity-cruise-tour-config-button {
+  .activity-cruise-tour-config-button,
+  .activity-cruise-tour-inline-btn {
     transition: none;
   }
 }

@@ -45,6 +45,13 @@ public class ProductTourController {
                                 productTourService.getPendingConfig());
         }
 
+        @GetMapping
+        public ResponseEntity<List<ProductTourResponse>> getAllAssignments() {
+
+                return ResponseEntity.ok(
+                                productTourService.getAllAssignments());
+        }
+
         // =====================================================
         // POST CONFIG
         // =====================================================

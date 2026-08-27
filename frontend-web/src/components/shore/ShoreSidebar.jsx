@@ -5,11 +5,11 @@ import { NavLink, useLocation } from "react-router-dom"; // Import thêm useLoca
 import {
   LayoutDashboard,
   ClipboardList,
+  History,
   Ship,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-
 import "../../styles/shore/ShoreSidebar.css";
 
 const MENU_SECTIONS = [
@@ -26,8 +26,12 @@ const MENU_SECTIONS = [
         label: "Danh sách Tour",
         icon: ClipboardList,
         path: "/shore/tours",
-        // Thêm các sub-paths liên quan để duy trì trạng thái active
         extraPaths: ["/shore/visit-tour-configuration"],
+      },
+      {
+        label: "Lịch sử",
+        icon: History,
+        path: "/shore/history",
       },
     ],
   },

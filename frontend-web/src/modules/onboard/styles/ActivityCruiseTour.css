@@ -298,6 +298,9 @@
   .activity-cruise-tour-page__section-header {
     padding: 15px 18px;
   }
+  .activity-cruise-tour-page__filters {
+    padding: 13px 18px;
+  }
 }
 
 /* =========================================================
@@ -355,6 +358,15 @@
     width: 100%;
     max-height: calc(100vh - 24px);
     border-radius: 14px 14px 10px 10px;
+  }
+  .activity-cruise-tour-page__filters {
+    padding: 12px 16px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .activity-cruise-tour-page__filter-btn {
+    flex-shrink: 0;
   }
 }
 
@@ -424,6 +436,16 @@
   .activity-cruise-tour-page__detail-modal {
     max-height: calc(100vh - 16px);
   }
+  .activity-cruise-tour-page__filters {
+    padding: 10px 13px;
+    gap: 6px;
+  }
+
+  .activity-cruise-tour-page__filter-btn {
+    min-height: 30px;
+    padding: 0 11px;
+    font-size: 12px;
+  }
 }
 
 /* =========================================================
@@ -439,4 +461,165 @@
   .activity-cruise-tour-page__detail-modal {
     animation: none;
   }
+}
+/* =========================================================
+   STATUS FILTER TABS
+   ========================================================= */
+
+.activity-cruise-tour-page__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+
+  padding: 14px 20px;
+
+  border-bottom: 1px solid #e9edf2;
+  background: #ffffff;
+}
+
+.activity-cruise-tour-page__filter-btn {
+  min-height: 34px;
+  padding: 0 14px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #d9e0ea;
+  border-radius: 8px;
+
+  background: #ffffff;
+  color: #6b7280;
+
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.activity-cruise-tour-page__filter-btn:hover:not(
+    .activity-cruise-tour-page__filter-btn--active
+  ) {
+  background: #f8fafc;
+  border-color: #b8c2d1;
+  color: #374151;
+}
+
+.activity-cruise-tour-page__filter-btn:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.15);
+  outline-offset: 2px;
+}
+
+.activity-cruise-tour-page__filter-btn--active {
+  border-color: #2563eb;
+  background: #eff6ff;
+  color: #2563eb;
+}
+/* =========================================================
+   COMPLETE TOUR CONFIGURATION BOX
+   ========================================================= */
+
+.activity-cruise-tour-page__complete-box {
+  width: 100%;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  margin-bottom: 20px;
+  padding: 16px 20px;
+
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+  background: #f5f9ff;
+}
+
+.activity-cruise-tour-page__complete-info strong {
+  display: block;
+  font-size: 14px;
+  color: #172033;
+  margin-bottom: 3px;
+}
+
+.activity-cruise-tour-page__complete-info p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #6b7280;
+  max-width: 480px;
+}
+
+.activity-cruise-tour-page__complete-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.activity-cruise-tour-page__complete-select {
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid #d9e0ea;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 13px;
+  min-width: 260px;
+}
+
+.activity-cruise-tour-page__complete-button {
+  min-height: 38px;
+  padding: 0 16px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: #2563eb;
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.activity-cruise-tour-page__complete-button:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.activity-cruise-tour-page__complete-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.activity-cruise-tour-page__complete-hint {
+  width: 100%;
+  font-size: 12.5px;
+  color: #b45309;
+}
+
+.activity-cruise-tour-page__complete-error {
+  width: 100%;
+  font-size: 12.5px;
+  color: #b91c1c;
+}
+
+.activity-cruise-tour-page__complete-success {
+  width: 100%;
+  font-size: 12.5px;
+  color: #15803d;
 }

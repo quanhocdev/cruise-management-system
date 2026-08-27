@@ -3,7 +3,7 @@ package com.project.tour.controller.tour.operation;
 import com.project.tour.dto.cruise.CruiseAvailabilityResponse;
 import com.project.tour.dto.tour.TourResponse;
 import com.project.tour.dto.tour.operation.OperationCruiseLayoutResponse;
-import com.project.tour.service.tour.operation.TourApprovalService;
+import com.project.tour.service.tour.operation.OperationTourService;
 import com.project.tour.service.tour.operation.TourCruiseAssignmentService;
 import com.project.tour.service.tour.operation.TourLayoutService;
 
@@ -17,15 +17,16 @@ import java.util.UUID;
 @RequestMapping("/api/operation/tours")
 public class OperationTourController {
 
-        private final TourApprovalService tourApprovalService;
+        private final OperationTourService operationTourService;
         private final TourCruiseAssignmentService tourCruiseAssignmentService;
         private final TourLayoutService tourLayoutService;
 
         public OperationTourController(
-                        TourApprovalService tourApprovalService,
+                        OperationTourService operationTourService,
                         TourCruiseAssignmentService tourCruiseAssignmentService,
                         TourLayoutService tourLayoutService) {
-                this.tourApprovalService = tourApprovalService;
+
+                this.operationTourService = operationTourService;
                 this.tourCruiseAssignmentService = tourCruiseAssignmentService;
                 this.tourLayoutService = tourLayoutService;
         }
@@ -35,7 +36,7 @@ public class OperationTourController {
         // =====================================================
         @GetMapping("/pending")
         public ResponseEntity<List<TourResponse>> getPendingTours() {
-                return ResponseEntity.ok(tourApprovalService.getPendingTours());
+                return ResponseEntity.ok(operationTourService.getPendingTours());
         }
 
         // =====================================================
@@ -72,7 +73,9 @@ public class OperationTourController {
         @PostMapping("/{id}/approve")
         public ResponseEntity<TourResponse> approveTour(
                         @PathVariable UUID id) {
-                return ResponseEntity.ok(tourApprovalService.approveTour(id));
+
+                return ResponseEntity.ok(
+                                operationTourService.approveTour(id));
         }
 
         // =====================================================
@@ -80,6 +83,6 @@ public class OperationTourController {
         // =====================================================
         @GetMapping("/approved")
         public ResponseEntity<List<TourResponse>> getApprovedTours() {
-                return ResponseEntity.ok(tourApprovalService.getApprovedTours());
+                return ResponseEntity.ok(operationTourService.getApprovedTours());
         }
 }

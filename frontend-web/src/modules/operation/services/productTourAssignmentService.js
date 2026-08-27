@@ -1,37 +1,78 @@
 // src/modules/operation/services/productTourAssignmentService.js
+
 import api from "../../../api/axios";
 
-const BASE_URL = "/operation/product-tour-assignment";
+const ASSIGNMENT_BASE_URL = "/operation/product-tour-assignment";
+const CONFIGURED_BASE_URL = "/operation/product-tours";
 
 const productTourAssignmentService = {
+  // =========================================================
+  // CONFIGURED PRODUCT TOURS
+  // =========================================================
+
+  /**
+   * GET /api/operation/product-tours
+   *
+   * Lấy tất cả ProductTour đã được tour-service nhận
+   * từ product-service qua Kafka.
+   */
+  getAllConfigured: async () => {
+    const response = await api.get(CONFIGURED_BASE_URL);
+
+    return response.data?.data ?? response.data;
+  },
+
+  /**
+   * GET /api/operation/product-tours/tour/{tourId}
+   *
+   * Lấy các ProductTour đã cấu hình của một Tour.
+   */
+  getConfiguredByTour: async (tourId) => {
+    const response = await api.get(`${CONFIGURED_BASE_URL}/tour/${tourId}`);
+
+    return response.data?.data ?? response.data;
+  },
+
+  // =========================================================
+  // PRODUCT ASSIGNMENT
+  // =========================================================
+
   /**
    * GET /api/operation/product-tour-assignment/tour/{tourId}
-   * Lấy danh sách phân công tiện ích/sản phẩm của Tour
+   *
+   * Lấy danh sách khu vực đã phân công Product cho Tour.
    */
   getByTour: async (tourId) => {
-    const response = await api.get(`${BASE_URL}/tour/${tourId}`);
-    return response.data;
+    const response = await api.get(`${ASSIGNMENT_BASE_URL}/tour/${tourId}`);
+
+    return response.data?.data ?? response.data;
   },
 
   /**
    * POST /api/operation/product-tour-assignment
-   * Phân công tiện ích/sản phẩm cho Tour
+   *
+   * Phân công Product cho Tour.
    */
   assign: async (payload) => {
-    const response = await api.post(BASE_URL, payload, {
-      headers: { "Content-Type": "application/json" },
+    const response = await api.post(ASSIGNMENT_BASE_URL, payload, {
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
+
     return response.data;
   },
 
   /**
    * DELETE /api/operation/product-tour-assignment/tour/{tourId}/area/{cruiseAreaId}
-   * Xóa phân công tiện ích theo tourId và cruiseAreaId (Chuẩn hóa với Activity)
+   *
+   * Hủy phân công Product.
    */
   delete: async (tourId, cruiseAreaId) => {
     const response = await api.delete(
-      `${BASE_URL}/tour/${tourId}/area/${cruiseAreaId}`,
+      `${ASSIGNMENT_BASE_URL}/tour/${tourId}/area/${cruiseAreaId}`,
     );
+
     return response.data;
   },
 };

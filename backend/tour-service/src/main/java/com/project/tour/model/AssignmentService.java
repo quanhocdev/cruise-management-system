@@ -1,6 +1,8 @@
 package com.project.tour.model;
 
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -14,17 +16,38 @@ public class AssignmentService {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    /**
-     * ID của Tour thuộc tour-service.
-     */
     @Column(name = "tour_id", nullable = false)
     private UUID tourId;
 
-    /**
-     * ID của CruiseArea thuộc tour-service.
-     */
     @Column(name = "cruise_area_id", nullable = false)
     private UUID cruiseAreaId;
+
+    @Column(name = "service_tour_id")
+    private UUID serviceTourId;
+
+    @Column(name = "service_id")
+    private UUID serviceId;
+
+    @Column(name = "service_name", length = 150)
+    private String serviceName;
+
+    @Column(name = "service_description", columnDefinition = "TEXT")
+    private String serviceDescription;
+
+    @Column(name = "price", precision = 12, scale = 2)
+    private BigDecimal price;
+
+    @Column(name = "max_passengers")
+    private Integer maxPassengers;
+
+    @Column(name = "duration_minutes")
+    private Integer durationMinutes;
+
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
+
+    @Column(name = "status", length = 30)
+    private String status;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -32,11 +55,9 @@ public class AssignmentService {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    // Default constructor cho JPA
     public AssignmentService() {
     }
 
-    // Custom constructor giúp tạo object nhanh trong Service
     public AssignmentService(UUID tourId, UUID cruiseAreaId) {
         this.tourId = tourId;
         this.cruiseAreaId = cruiseAreaId;
@@ -53,10 +74,6 @@ public class AssignmentService {
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
-
-    // =====================================================
-    // GETTER / SETTER
-    // =====================================================
 
     public UUID getId() {
         return id;
@@ -80,6 +97,78 @@ public class AssignmentService {
 
     public void setCruiseAreaId(UUID cruiseAreaId) {
         this.cruiseAreaId = cruiseAreaId;
+    }
+
+    public UUID getServiceTourId() {
+        return serviceTourId;
+    }
+
+    public void setServiceTourId(UUID serviceTourId) {
+        this.serviceTourId = serviceTourId;
+    }
+
+    public UUID getServiceId() {
+        return serviceId;
+    }
+
+    public void setServiceId(UUID serviceId) {
+        this.serviceId = serviceId;
+    }
+
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
+    }
+
+    public String getServiceDescription() {
+        return serviceDescription;
+    }
+
+    public void setServiceDescription(String serviceDescription) {
+        this.serviceDescription = serviceDescription;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
+    public Integer getMaxPassengers() {
+        return maxPassengers;
+    }
+
+    public void setMaxPassengers(Integer maxPassengers) {
+        this.maxPassengers = maxPassengers;
+    }
+
+    public Integer getDurationMinutes() {
+        return durationMinutes;
+    }
+
+    public void setDurationMinutes(Integer durationMinutes) {
+        this.durationMinutes = durationMinutes;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public LocalDateTime getCreatedAt() {

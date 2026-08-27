@@ -1,0 +1,342 @@
+/* =========================================================
+   SERVICE TOUR DETAIL MODAL
+   ========================================================= */
+
+.service-tour-detail-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(15, 23, 42, 0.5);
+
+  animation: service-tour-detail-fade-in 0.15s ease;
+}
+
+@keyframes service-tour-detail-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.service-tour-detail-modal {
+  width: 100%;
+  max-width: 480px;
+  max-height: 88vh;
+
+  display: flex;
+  flex-direction: column;
+
+  border-radius: 14px;
+
+  background: #ffffff;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.22);
+
+  overflow: hidden;
+
+  animation: service-tour-detail-scale-in 0.18s ease;
+}
+
+@keyframes service-tour-detail-scale-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.service-tour-detail-header {
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding: 16px 18px;
+
+  border-bottom: 1px solid #eef2f7;
+}
+
+.service-tour-detail-header h3 {
+  margin: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  color: #0f172a;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.service-tour-detail-header h3 svg {
+  flex-shrink: 0;
+  color: #2563eb;
+}
+
+.service-tour-detail-close {
+  flex-shrink: 0;
+
+  width: 32px;
+  height: 32px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid transparent;
+  border-radius: 8px;
+
+  background: transparent;
+  color: #64748b;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.service-tour-detail-close:hover {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+/* =========================================================
+   BODY
+   ========================================================= */
+
+.service-tour-detail-body {
+  flex: 1;
+
+  overflow-y: auto;
+
+  padding: 16px 18px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.service-tour-detail-section h4 {
+  margin: 0 0 10px;
+
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  color: #334155;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.service-tour-detail-section h4 svg {
+  flex-shrink: 0;
+  color: #94a3b8;
+}
+
+.service-tour-detail-section + .service-tour-detail-section {
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.service-tour-detail-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+
+  padding: 6px 0;
+
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.service-tour-detail-label {
+  flex-shrink: 0;
+
+  min-width: 110px;
+
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.service-tour-detail-value {
+  flex: 1;
+
+  text-align: right;
+
+  color: #0f172a;
+  font-weight: 600;
+
+  word-break: break-word;
+}
+
+.service-tour-detail-value.font-mono {
+  font-family:
+    "SFMono-Regular", ui-monospace, "Roboto Mono", Menlo, Consolas, monospace;
+  font-size: 12.5px;
+}
+
+/* =========================================================
+   STATUS BADGE (inside modal)
+   ========================================================= */
+
+.service-tour-detail-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 25px;
+  padding: 0 10px;
+
+  border-radius: 999px;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+.service-tour-detail-status.waiting_config {
+  border: 1px solid #fde68a;
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.service-tour-detail-status.not_started {
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.service-tour-detail-status.in_progress {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.service-tour-detail-status.completed {
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #64748b;
+}
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.service-tour-detail-empty {
+  padding: 32px 18px;
+
+  text-align: center;
+
+  color: #64748b;
+  font-size: 13px;
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.service-tour-detail-footer {
+  flex-shrink: 0;
+
+  display: flex;
+  justify-content: flex-end;
+
+  padding: 14px 18px;
+
+  border-top: 1px solid #eef2f7;
+}
+
+.service-tour-detail-close-btn {
+  min-height: 36px;
+  padding: 0 16px;
+
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+
+  background: #ffffff;
+  color: #334155;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.service-tour-detail-close-btn:hover {
+  background: #f8fafc;
+  border-color: #bfdbfe;
+  color: #2563eb;
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 480px) {
+  .service-tour-detail-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .service-tour-detail-modal {
+    max-width: 100%;
+    max-height: 90vh;
+
+    border-radius: 16px 16px 0 0;
+  }
+
+  .service-tour-detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+  }
+
+  .service-tour-detail-value {
+    text-align: left;
+  }
+}
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .service-tour-detail-overlay,
+  .service-tour-detail-modal,
+  .service-tour-detail-close,
+  .service-tour-detail-close-btn {
+    animation: none;
+    transition: none;
+  }
+}
