@@ -1,8 +1,8 @@
 package com.project.activitycruise.controller;
 
 import com.project.activitycruise.dto.ActivityCruiseTourConfigRequest;
-import com.project.activitycruise.dto.OnboardActivityCruiseTourResponse;
-import com.project.activitycruise.model.HistoryActivityCruiseTour;
+import com.project.activitycruise.dto.ActivityCruiseTourResponse;
+import com.project.activitycruise.dto.HistoryActivityCruiseTourResponse;
 import com.project.activitycruise.service.ActivityCruiseTourConfigService;
 import com.project.activitycruise.service.ActivityCruiseTourService;
 
@@ -34,7 +34,7 @@ public class ActivityCruiseTourController {
         // =====================================================
 
         @GetMapping
-        public ResponseEntity<List<OnboardActivityCruiseTourResponse>> getAllAssignments() {
+        public ResponseEntity<List<ActivityCruiseTourResponse>> getAllAssignments() {
 
                 return ResponseEntity.ok(
                                 activityCruiseTourService.getAllAssignments());
@@ -45,21 +45,29 @@ public class ActivityCruiseTourController {
         // =====================================================
 
         @GetMapping("/pending-config")
-        public ResponseEntity<List<OnboardActivityCruiseTourResponse>> getPendingConfig() {
+        public ResponseEntity<List<ActivityCruiseTourResponse>> getPendingConfig() {
 
                 return ResponseEntity.ok(
                                 activityCruiseTourService.getPendingConfig());
         }
 
-        // =====================================================
-        // GET CONFIGURATION HISTORY
-        // =====================================================
-
         @GetMapping("/configuration-history")
-        public ResponseEntity<List<HistoryActivityCruiseTour>> getConfigurationHistory() {
+        public ResponseEntity<List<HistoryActivityCruiseTourResponse>> getConfigurationHistory() {
 
                 return ResponseEntity.ok(
                                 activityCruiseTourService.getConfigurationHistory());
+        }
+
+        // =====================================================
+        // GET CONFIGURATION DETAIL BY TOUR
+        // =====================================================
+
+        @GetMapping("/tour/{tourId}")
+        public ResponseEntity<List<ActivityCruiseTourResponse>> getConfigurationDetail(
+                        @PathVariable UUID tourId) {
+
+                return ResponseEntity.ok(
+                                activityCruiseTourService.getConfigurationDetail(tourId));
         }
 
         // =====================================================
@@ -67,7 +75,7 @@ public class ActivityCruiseTourController {
         // =====================================================
 
         @PostMapping("/{assignmentId}/config")
-        public ResponseEntity<OnboardActivityCruiseTourResponse> configure(
+        public ResponseEntity<ActivityCruiseTourResponse> configure(
                         @PathVariable UUID assignmentId,
                         @Valid @RequestBody ActivityCruiseTourConfigRequest request) {
 
@@ -82,7 +90,7 @@ public class ActivityCruiseTourController {
         // =====================================================
 
         @PatchMapping("/{assignmentId}/config")
-        public ResponseEntity<OnboardActivityCruiseTourResponse> updateConfig(
+        public ResponseEntity<ActivityCruiseTourResponse> updateConfig(
                         @PathVariable UUID assignmentId,
                         @Valid @RequestBody ActivityCruiseTourConfigRequest request) {
 

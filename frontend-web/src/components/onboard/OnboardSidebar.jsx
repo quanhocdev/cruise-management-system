@@ -11,6 +11,7 @@ import {
   X,
   Activity,
   ListChecks,
+  History,
 } from "lucide-react";
 
 import "../../styles/onboard/OnboardSidebar.css";
@@ -31,6 +32,11 @@ const menuItems = [
     label: "Cấu hình hoạt động",
     icon: Activity,
     path: "/onboard/activity-cruise",
+  },
+  {
+    label: "Lịch sử cấu hình",
+    icon: History,
+    path: "/onboard/activity-cruise-history",
   },
   {
     label: "Lịch trình",

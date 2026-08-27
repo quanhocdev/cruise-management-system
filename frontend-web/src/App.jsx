@@ -53,6 +53,7 @@ import OnboardLayout from "./layouts/OnboardLayout";
 import OnboardDashboard from "./modules/onboard/pages/Dashboard";
 import OnboardActivityCruiseTour from "./modules/onboard/pages/ActivityCruiseTour";
 import ActivityCruise from "./modules/onboard/pages/ActivityCruise";
+import ActivityCruiseTourHistory from "./modules/onboard/pages/ActivityCruiseTourHistory";
 
 import ShoreLayout from "./layouts/ShoreLayout";
 import ShoreDashboard from "./modules/shore/pages/Dashboard";
@@ -190,6 +191,10 @@ export default function App() {
             <Route
               path="activity-cruise"
               element={<OnboardActivityCruiseTour />}
+            />
+            <Route
+              path="/onboard/activity-cruise-history"
+              element={<ActivityCruiseTourHistory />}
             />
 
             <Route

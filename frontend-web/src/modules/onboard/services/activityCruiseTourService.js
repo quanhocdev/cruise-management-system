@@ -34,4 +34,9 @@ export const activityCruiseTourService = {
     const response = await api.get(`${API_URL}/configuration-history`);
     return response.data;
   },
+  // GET /api/onboard/activity-cruise-tours/tour/{tourId}
+  getConfigurationDetail: async (tourId) => {
+    const response = await api.get(`${API_URL}/tour/${tourId}`);
+    return response.data;
+  },
 };

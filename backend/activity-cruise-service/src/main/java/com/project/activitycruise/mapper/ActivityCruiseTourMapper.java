@@ -1,7 +1,7 @@
 package com.project.activitycruise.mapper;
 
 import com.project.activitycruise.dto.ActivityCruiseTourConfigRequest;
-import com.project.activitycruise.dto.OnboardActivityCruiseTourResponse;
+import com.project.activitycruise.dto.ActivityCruiseTourResponse;
 import com.project.activitycruise.model.ActivityCruise;
 import com.project.activitycruise.model.ActivityCruiseTour;
 import org.springframework.stereotype.Component;
@@ -9,14 +9,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class ActivityCruiseTourMapper {
 
-    public OnboardActivityCruiseTourResponse toResponse(ActivityCruiseTour assignment) {
+    public ActivityCruiseTourResponse toResponse(ActivityCruiseTour assignment) {
         if (assignment == null) {
             return null;
         }
 
         ActivityCruise activity = assignment.getActivityCruise();
 
-        return new OnboardActivityCruiseTourResponse(
+        return new ActivityCruiseTourResponse(
                 assignment.getId(),
 
                 // Tour info

@@ -1,7 +1,9 @@
 package com.project.activitycruise.service;
 
-import com.project.activitycruise.dto.OnboardActivityCruiseTourResponse;
+import com.project.activitycruise.dto.ActivityCruiseTourResponse;
+import com.project.activitycruise.dto.HistoryActivityCruiseTourResponse;
 import com.project.activitycruise.mapper.ActivityCruiseTourMapper;
+import com.project.activitycruise.mapper.HistoryActivityCruiseTourMapper;
 import com.project.activitycruise.model.ActivityCruiseTour;
 import com.project.activitycruise.model.HistoryActivityCruiseTour;
 import com.project.activitycruise.model.enums.ActivityCruiseTourStatus;
@@ -21,15 +23,18 @@ public class ActivityCruiseTourService {
         private final ActivityCruiseTourAssignmentRepository assignmentRepository;
         private final ActivityCruiseTourMapper activityCruiseTourMapper;
         private final HistoryActivityCruiseTourRepository historyRepository;
+        private final HistoryActivityCruiseTourMapper historyMapper;
 
         public ActivityCruiseTourService(
                         ActivityCruiseTourAssignmentRepository assignmentRepository,
                         ActivityCruiseTourMapper activityCruiseTourMapper,
-                        HistoryActivityCruiseTourRepository historyRepository) {
+                        HistoryActivityCruiseTourRepository historyRepository,
+                        HistoryActivityCruiseTourMapper historyMapper) {
 
                 this.assignmentRepository = assignmentRepository;
                 this.activityCruiseTourMapper = activityCruiseTourMapper;
                 this.historyRepository = historyRepository;
+                this.historyMapper = historyMapper;
         }
 
         // =====================================================
@@ -80,7 +85,7 @@ public class ActivityCruiseTourService {
         // =====================================================
 
         @Transactional(readOnly = true)
-        public List<OnboardActivityCruiseTourResponse> getPendingConfig() {
+        public List<ActivityCruiseTourResponse> getPendingConfig() {
 
                 return assignmentRepository
                                 .findPendingConfig(
@@ -91,7 +96,7 @@ public class ActivityCruiseTourService {
         }
 
         @Transactional(readOnly = true)
-        public List<OnboardActivityCruiseTourResponse> getAllAssignments() {
+        public List<ActivityCruiseTourResponse> getAllAssignments() {
 
                 return assignmentRepository
                                 .findAll()
@@ -101,8 +106,22 @@ public class ActivityCruiseTourService {
         }
 
         @Transactional(readOnly = true)
-        public List<HistoryActivityCruiseTour> getConfigurationHistory() {
+        public List<HistoryActivityCruiseTourResponse> getConfigurationHistory() {
 
-                return historyRepository.findAllByOrderByCompletedAtDesc();
+                return historyRepository
+                                .findAllByOrderByCompletedAtDesc()
+                                .stream()
+                                .map(historyMapper::toResponse)
+                                .toList();
+        }
+
+        @Transactional(readOnly = true)
+        public List<ActivityCruiseTourResponse> getConfigurationDetail(UUID tourId) {
+
+                return assignmentRepository
+                                .findAllByTourIdOrderByCreatedAtAsc(tourId)
+                                .stream()
+                                .map(activityCruiseTourMapper::toResponse)
+                                .toList();
         }
 }

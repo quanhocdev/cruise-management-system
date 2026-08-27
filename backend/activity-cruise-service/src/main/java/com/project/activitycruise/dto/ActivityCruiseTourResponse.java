@@ -6,10 +6,9 @@ import java.util.UUID;
 
 import com.project.activitycruise.model.enums.ActivityCruiseTourStatus;
 
-public record OnboardActivityCruiseTourResponse(
+public record ActivityCruiseTourResponse(
                 UUID id,
 
-                // Tour info (Thuộc Tour Service - populate qua Feign sau)
                 UUID tourId,
                 String tourCode,
                 String tourName,
