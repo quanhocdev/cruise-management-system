@@ -22,6 +22,11 @@ const passengerCatalogService = {
     );
     return response.data;
   },
+
+  async createBooking(payload) {
+    const response = await api.post("/v1/bookings", payload);
+    return response.data;
+  },
 };
 
 export default passengerCatalogService;

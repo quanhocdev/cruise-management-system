@@ -76,6 +76,7 @@ export default function TourDetail() {
   }
 
   const departure = departures[0];
+  const selectedRoom = rooms.find((room) => room.roomId === selectedRoomId);
 
   return (
     <main className="passenger-page detail-page">
@@ -150,10 +151,17 @@ export default function TourDetail() {
           <div className="summary-row"><CalendarDays size={18} /> {formatDate(departure?.departureDate)}</div>
           <div className="summary-divider" />
           <p>{selectedRoomId ? "Phòng đã được chọn. Bạn có thể sang bước tạo booking." : "Vui lòng chọn một phòng còn trống."}</p>
-          <button className="booking-button" disabled={!selectedRoomId} type="button">
-            Tiếp tục đặt tour
-          </button>
-          <small>Nút tạo booking sẽ được nối ở bước tiếp theo.</small>
+          {selectedRoom && departure ? (
+            <Link
+              className="booking-button"
+              to={`/passenger/bookings/new?tourId=${tour.id}&voyageId=${departure.voyageId}&roomId=${selectedRoom.roomId}`}
+            >
+              Tiếp tục đặt tour
+            </Link>
+          ) : (
+            <button className="booking-button" disabled type="button">Tiếp tục đặt tour</button>
+          )}
+          <small>Thông tin và giá phòng sẽ được xác nhận lại trước khi tạo booking.</small>
         </aside>
       </section>
     </main>

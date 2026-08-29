@@ -29,6 +29,7 @@ import ManagerPolicy from "./modules/admin/pages/ManagerPolicy";
 // Passenger imports
 import PassengerDashboard from "./modules/passenger/pages/Dashboard";
 import PassengerTourDetail from "./modules/passenger/pages/TourDetail";
+import CreatePassengerBooking from "./modules/passenger/pages/CreateBooking";
 
 // Scheduler imports
 import SchedulerLayout from "./layouts/SchedulerLayout";
@@ -126,6 +127,7 @@ export default function App() {
                 <Routes>
                   <Route path="dashboard" element={<PassengerDashboard />} />
                   <Route path="tours/:tourId" element={<PassengerTourDetail />} />
+                  <Route path="bookings/new" element={<CreatePassengerBooking />} />
                   <Route
                     path=""
                     element={<Navigate to="dashboard" replace />}

@@ -188,9 +188,85 @@
 .booking-button:disabled { background: #aebcba; cursor: not-allowed; }
 .booking-summary > small { display: block; margin-top: 11px; color: #8a9a9f; text-align: center; }
 
+.create-booking-page { padding-bottom: 80px; }
+.booking-form-header {
+  padding: 42px max(24px, calc((100vw - 1192px) / 2));
+  color: white;
+  background: linear-gradient(115deg, #062d3e, #0e6875);
+}
+.booking-form-header h1, .booking-result-card h1 {
+  margin: 0;
+  font-family: "Playfair Display", serif;
+  font-size: 40px;
+}
+.static-back { position: static; width: max-content; margin-bottom: 34px; }
+.booking-form-layout {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 38px 24px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 350px;
+  gap: 28px;
+  align-items: start;
+}
+.booking-form-main { display: grid; gap: 24px; }
+.form-section h2 { font-size: 27px; }
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 22px; }
+.form-grid.three-columns { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.form-grid label { display: grid; gap: 8px; color: #3e5962; font-size: 13px; font-weight: 600; }
+.form-grid input, .form-grid select {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  color: var(--navy);
+  background: white;
+  border: 1px solid #cbdad8;
+  border-radius: 9px;
+  outline: none;
+  font: inherit;
+}
+.form-grid input:focus, .form-grid select:focus { border-color: var(--aqua); box-shadow: 0 0 0 3px rgba(56,168,161,.12); }
+.form-section-title { display: flex; justify-content: space-between; gap: 20px; align-items: start; }
+.form-section-title p { margin: 7px 0 0; color: #71858b; font-size: 14px; }
+.add-passenger {
+  padding: 10px 13px;
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  color: var(--ocean);
+  background: #edf8f6;
+  border: 1px solid #b9ded9;
+  border-radius: 9px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.add-passenger:disabled { color: #91a09f; background: #f3f5f5; border-color: #dfe6e5; cursor: not-allowed; }
+.passenger-fields { position: relative; margin: 24px 0 0; padding: 22px; border: 1px solid #dce8e6; border-radius: 13px; }
+.passenger-fields legend { padding: 0 8px; color: var(--ocean); font-size: 14px; font-weight: 700; }
+.remove-passenger { position: absolute; right: 16px; top: 13px; color: #bb5447; background: transparent; border: 0; cursor: pointer; }
+.booking-form-summary { top: 20px; }
+.selected-room-summary { padding: 15px; display: flex; gap: 12px; color: var(--ocean); background: #edf8f6; border-radius: 11px; }
+.selected-room-summary span { display: grid; gap: 4px; color: var(--navy); }
+.selected-room-summary small { color: #6c8187; }
+.summary-count, .summary-total { display: flex; justify-content: space-between; gap: 16px; margin-top: 18px; }
+.summary-count { color: #667b82; }
+.summary-total { padding-top: 18px; border-top: 1px solid #e0e9e7; }
+.summary-total strong { color: var(--coral); font-size: 22px; }
+.booking-result-page { min-height: 100vh; padding: 70px 24px; display: grid; place-items: center; background: linear-gradient(145deg, #e8f6f3, #f9f5ed); }
+.booking-result-card { width: min(560px, 100%); padding: 48px; color: var(--navy); background: white; border-radius: 22px; box-shadow: 0 22px 60px rgba(5,45,60,.14); text-align: center; }
+.booking-result-card > svg { margin-bottom: 18px; color: var(--aqua); }
+.booking-result-card p { color: #60767d; }
+.result-total { margin: 28px 0; padding: 20px; display: grid; gap: 6px; background: #eef8f6; border-radius: 13px; }
+.result-total small { color: #6c8187; }
+.result-total strong { color: var(--coral); font-size: 30px; }
+.result-actions { display: grid; gap: 16px; }
+.result-actions a { color: var(--ocean); }
+.booking-result-card > small { display: block; margin-top: 20px; color: #91a09f; }
+
 @media (max-width: 900px) {
   .tour-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .detail-content { grid-template-columns: 1fr; }
+  .booking-form-layout { grid-template-columns: 1fr; }
   .booking-summary { position: static; }
   .hero-stat { display: none; }
 }
@@ -202,6 +278,8 @@
   .catalog-heading { align-items: stretch; flex-direction: column; gap: 20px; }
   .tour-grid { grid-template-columns: 1fr; }
   .detail-facts { grid-template-columns: 1fr; }
+  .form-grid, .form-grid.three-columns { grid-template-columns: 1fr; }
+  .form-section-title { flex-direction: column; }
   .room-option { grid-template-columns: 42px 1fr; }
   .room-price { grid-column: 2; }
 }
