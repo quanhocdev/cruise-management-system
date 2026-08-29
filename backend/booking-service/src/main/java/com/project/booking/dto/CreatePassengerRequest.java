@@ -11,5 +11,5 @@ public record CreatePassengerRequest(
     @NotBlank @Size(max = 20) String gender,
     @Size(max = 30) String phoneNumber,
     @Email @Size(max = 255) String email,
-    UUID cabinId
+    @NotNull UUID cabinId
 ) {}

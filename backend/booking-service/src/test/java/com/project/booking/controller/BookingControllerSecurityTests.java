@@ -53,7 +53,8 @@ class BookingControllerSecurityTests {
     private String body() {
         return "{\"voyageId\":\"11111111-1111-1111-1111-111111111111\","
             + "\"primaryContactName\":\"Nguyen Van A\",\"primaryContactPhone\":\"0900000000\","
-            + "\"totalAmount\":1000000,\"passengers\":[{\"fullName\":\"Nguyen Van A\","
-            + "\"dateOfBirth\":\"1990-01-01\",\"gender\":\"MALE\"}]}";
+            + "\"passengers\":[{\"fullName\":\"Nguyen Van A\","
+            + "\"dateOfBirth\":\"1990-01-01\",\"gender\":\"MALE\","
+            + "\"cabinId\":\"22222222-2222-2222-2222-222222222222\"}]}";
     }
 }

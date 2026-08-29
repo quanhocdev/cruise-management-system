@@ -12,9 +12,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class BookingServiceImpl implements BookingService {
@@ -34,13 +38,14 @@ public class BookingServiceImpl implements BookingService {
     @Override @Transactional
     public synchronized BookingResponse create(CreateBookingRequest request, Long userId) {
         TourScheduleContext voyage = tourClient.getSchedule(request.voyageId());
-        validateAvailability(request, voyage);
+        Map<UUID, TourRoomContext> roomsById = validateAvailability(request, voyage);
+        BigDecimal totalAmount = calculateTotalAmount(request, roomsById);
         Instant now = Instant.now();
         Booking booking = new Booking();
         booking.setCreatedByUserId(userId); booking.setVoyageId(request.voyageId());
         booking.setPrimaryContactName(request.primaryContactName().trim());
         booking.setPrimaryContactPhone(request.primaryContactPhone().trim());
-        booking.setTotalAmount(request.totalAmount());
+        booking.setTotalAmount(totalAmount);
         booking.setVoyageStartDate(voyage.startDate());
         booking.setStatus(BookingStatus.PENDING_PAYMENT); booking.setCreatedAt(now); booking.setUpdatedAt(now);
         Booking saved = repository.save(booking);
@@ -175,7 +180,7 @@ public class BookingServiceImpl implements BookingService {
         }
         throw new BookingException(HttpStatus.INTERNAL_SERVER_ERROR, "Cannot generate a unique booking code");
     }
-    private void validateAvailability(CreateBookingRequest request, TourScheduleContext voyage) {
+    private Map<UUID, TourRoomContext> validateAvailability(CreateBookingRequest request, TourScheduleContext voyage) {
         if (!request.voyageId().equals(voyage.voyageId()))
             throw new BookingException(HttpStatus.BAD_REQUEST, "Voyage reference does not match");
         if (!"OPEN".equals(voyage.status()))
@@ -186,5 +191,33 @@ public class BookingServiceImpl implements BookingService {
             request.voyageId(), List.of(PassengerStatus.RESERVED, PassengerStatus.REGISTERED));
         if (occupied + request.passengers().size() > voyage.capacity())
             throw new BookingException(HttpStatus.CONFLICT, "Voyage does not have enough available capacity");
+
+        Map<UUID, TourRoomContext> roomsById = tourClient.getRooms(request.voyageId()).stream()
+            .collect(Collectors.toMap(TourRoomContext::roomId, room -> room));
+        Map<UUID, Long> requestedByRoom = request.passengers().stream()
+            .collect(Collectors.groupingBy(CreatePassengerRequest::cabinId, Collectors.counting()));
+
+        requestedByRoom.forEach((roomId, requestedSeats) -> {
+            TourRoomContext room = roomsById.get(roomId);
+            if (room == null)
+                throw new BookingException(HttpStatus.BAD_REQUEST, "Selected room does not belong to this voyage");
+            long roomOccupied = passengerVoyageRepository
+                .countByVoyageIdAndCabinIdAndPassengerStatusIn(
+                    request.voyageId(), roomId,
+                    List.of(PassengerStatus.RESERVED, PassengerStatus.REGISTERED));
+            if (roomOccupied + requestedSeats > room.capacity())
+                throw new BookingException(HttpStatus.CONFLICT, "Selected room does not have enough available capacity");
+        });
+        return roomsById;
+    }
+
+    private BigDecimal calculateTotalAmount(CreateBookingRequest request, Map<UUID, TourRoomContext> roomsById) {
+        Set<UUID> selectedRoomIds = request.passengers().stream()
+            .map(CreatePassengerRequest::cabinId).collect(Collectors.toSet());
+        return selectedRoomIds.stream()
+            .map(roomsById::get)
+            .filter(Objects::nonNull)
+            .map(TourRoomContext::price)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }
