@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ArrowLeft, BedDouble, CalendarDays, CheckCircle2, Ship, UserPlus } from "lucide-react";
 import passengerCatalogService from "../services/passengerCatalogService";
+import paymentService from "../../payment/services/paymentService";
 import "../styles/PassengerCatalog.css";
 
 const emptyPassenger = () => ({
@@ -37,6 +38,7 @@ export default function CreateBooking() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [booking, setBooking] = useState(null);
+  const [paymentLoading, setPaymentLoading] = useState(false);
 
   useEffect(() => {
     const loadSelection = async () => {
@@ -107,6 +109,23 @@ export default function CreateBooking() {
     }
   };
 
+  const startVnPayPayment = async () => {
+    setError("");
+    setPaymentLoading(true);
+    try {
+      const payment = await paymentService.createVnPayPayment(booking);
+      if (!payment.paymentUrl) throw new Error("PAYMENT_URL_MISSING");
+      window.location.assign(payment.paymentUrl);
+    } catch (requestError) {
+      setError(
+        requestError.message === "PAYMENT_URL_MISSING"
+          ? "VNPay không trả về đường dẫn thanh toán."
+          : getErrorMessage(requestError),
+      );
+      setPaymentLoading(false);
+    }
+  };
+
   if (loading) return <div className="catalog-state full-page">Đang kiểm tra phòng đã chọn...</div>;
   if (error && !room) {
     return <div className="catalog-state full-page error-state"><p>{error}</p><Link to={`/passenger/tours/${tourId || ""}`}>Chọn lại phòng</Link></div>;
@@ -122,10 +141,18 @@ export default function CreateBooking() {
           <p>Booking <strong>#{booking.id}</strong> đang chờ thanh toán.</p>
           <div className="result-total"><small>Tổng thanh toán</small><strong>{formatMoney(booking.totalAmount)}</strong></div>
           <div className="result-actions">
-            <button type="button" className="booking-button">Thanh toán VNPay</button>
+            <button
+              type="button"
+              className="booking-button"
+              disabled={paymentLoading}
+              onClick={startVnPayPayment}
+            >
+              {paymentLoading ? "Đang chuyển đến VNPay..." : "Thanh toán VNPay"}
+            </button>
             <Link to="/passenger/dashboard">Về danh sách tour</Link>
           </div>
-          <small>Nút VNPay sẽ được nối ở bước tiếp theo.</small>
+          {error && <p className="payment-error">{error}</p>}
+          <small>Giao dịch sử dụng môi trường VNPay Sandbox, không trừ tiền thật.</small>
         </section>
       </main>
     );

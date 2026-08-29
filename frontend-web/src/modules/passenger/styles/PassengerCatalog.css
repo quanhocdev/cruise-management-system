@@ -262,6 +262,7 @@
 .result-actions { display: grid; gap: 16px; }
 .result-actions a { color: var(--ocean); }
 .booking-result-card > small { display: block; margin-top: 20px; color: #91a09f; }
+.payment-error { margin: 18px 0 0; color: #b5473a !important; font-size: 14px; }
 
 @media (max-width: 900px) {
   .tour-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }

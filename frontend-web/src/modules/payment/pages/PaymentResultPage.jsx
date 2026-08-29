@@ -1,11 +1,29 @@
-import { CheckCircle, CircleX } from "lucide-react";
+import { useEffect, useState } from "react";
+import { CheckCircle, CircleX, LoaderCircle } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
+import paymentService from "../services/paymentService";
 
 export default function PaymentResultPage() {
   const [searchParams] = useSearchParams();
   const paymentId = searchParams.get("paymentId");
   const status = searchParams.get("status");
   const successful = status === "SUCCESS";
+  const [payment, setPayment] = useState(null);
+  const [loading, setLoading] = useState(Boolean(paymentId));
+
+  useEffect(() => {
+    if (!paymentId) return;
+    paymentService.getPayment(paymentId)
+      .then(setPayment)
+      .catch(() => setPayment(null))
+      .finally(() => setLoading(false));
+  }, [paymentId]);
+
+  const formatMoney = (value) => new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+    maximumFractionDigits: 0,
+  }).format(value || 0);
 
   return (
     <main style={styles.page}>
@@ -23,8 +41,17 @@ export default function PaymentResultPage() {
             ? "Đặt chỗ của bạn đã được xác nhận."
             : "Giao dịch chưa hoàn tất. Bạn có thể quay lại và thử thanh toán lần nữa."}
         </p>
-        {paymentId && <p style={styles.reference}>Mã thanh toán: #{paymentId}</p>}
-        <Link to="/" style={styles.link}>Về trang chủ</Link>
+        {loading ? (
+          <LoaderCircle size={26} style={styles.spinner} aria-label="Đang tải chi tiết thanh toán" />
+        ) : (
+          <div style={styles.details}>
+            {paymentId && <p><span>Mã thanh toán</span><strong>#{paymentId}</strong></p>}
+            {payment?.referenceId && <p><span>Mã booking</span><strong>#{payment.referenceId}</strong></p>}
+            {payment?.amount != null && <p><span>Số tiền</span><strong>{formatMoney(payment.amount)}</strong></p>}
+            {payment?.transactionCode && <p><span>Mã giao dịch</span><strong>{payment.transactionCode}</strong></p>}
+          </div>
+        )}
+        <Link to="/passenger/dashboard" style={styles.link}>Về danh sách tour</Link>
       </section>
     </main>
   );
@@ -48,7 +75,8 @@ const styles = {
   },
   title: { margin: "20px 0 8px", color: "#0f172a" },
   message: { margin: 0, color: "#475569", lineHeight: 1.6 },
-  reference: { margin: "16px 0 24px", color: "#334155", fontWeight: 600 },
+  details: { margin: "24px 0", padding: "14px 20px", borderRadius: "12px", background: "#f8fafc" },
+  spinner: { margin: "24px", color: "#0f766e", animation: "spin 1s linear infinite" },
   link: {
     display: "inline-block",
     padding: "11px 22px",
