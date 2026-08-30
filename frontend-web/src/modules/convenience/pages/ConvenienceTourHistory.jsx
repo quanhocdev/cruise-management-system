@@ -3,10 +3,10 @@
 import React, { useState } from "react";
 import { Package, Wrench } from "lucide-react";
 
-import ConvenienceProductTourDetail from "../components/tour-config/ConvenienceProductTourDetail";
-import ConvenienceServiceTourDetail from "../components/tour-config/ConvenienceServiceTourDetail";
+import ConvenienceProductTourDetail from "../components/history/ConvenienceProductTourDetail";
+import ConvenienceServiceTourDetail from "../components/history/ConvenienceServiceTourDetail";
 
-import "../styles/tour-config/ConvenienceTourHistory.css";
+import "../styles/history/ConvenienceTourHistory.css";
 
 const ConvenienceTourHistory = () => {
   const [activeTab, setActiveTab] = useState("product");

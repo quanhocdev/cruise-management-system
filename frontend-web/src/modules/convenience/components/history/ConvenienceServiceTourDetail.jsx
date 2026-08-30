@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AlertCircle, Eye, RefreshCw, Wrench } from "lucide-react";
-import "../../styles/tour-config/ConvenienceServiceTourDetail.css";
+import "../../styles/history/ConvenienceServiceTourDetail.css";
 import serviceTourService from "../../services/serviceTourService";
 import ServiceTourDetailModal from "./ServiceTourDetailModal";
 

@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AlertCircle, Eye, Package, RefreshCw } from "lucide-react";
-import "../../styles/tour-config/ConvenienceProductTourDetail.css";
+import "../../styles/history/ConvenienceProductTourDetail.css";
 import productTourService from "../../services/productTourService";
 import ProductTourDetailModal from "./ProductTourDetailModal";
 
