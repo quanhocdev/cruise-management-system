@@ -91,6 +91,15 @@ spring:
               predicates:
                 - Path=/api/shore/**
 
+            # ==========================
+            # TOUR SERVICE - PASSENGER
+            # ==========================
+
+            - id: tour-passenger-service
+              uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
+              predicates:
+                - Path=/api/passenger/**
+
           # ==========================
           # CORS
           # ==========================

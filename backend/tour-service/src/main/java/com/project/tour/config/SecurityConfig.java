@@ -64,6 +64,9 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/shore/**")
                                                 .hasRole("SHORE")
 
+                                                .requestMatchers("/api/passenger/**")
+                                                .hasRole("PASSENGER")
+
                                                 // Everything else
                                                 .anyRequest()
                                                 .authenticated())
