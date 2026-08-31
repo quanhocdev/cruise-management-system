@@ -1,4 +1,4 @@
-package com.project.tour.service.tour.operation;
+package com.project.tour.service.tour.operation.assignment;
 
 import com.project.tour.dto.tour.operation.ServiceTourAssignmentRequest;
 import com.project.tour.dto.tour.operation.ServiceTourAssignmentResponse;
@@ -39,14 +39,6 @@ public class ServiceTourAssignmentService {
                 this.assignmentMapper = assignmentMapper;
         }
 
-        /**
-         * Operation phân công một khu vực dịch vụ cho Tour.
-         *
-         * Chỉ lưu assignment vào DB của tour-service.
-         *
-         * Chưa bắn Kafka.
-         * Kafka chỉ được bắn khi Tour được APPROVED.
-         */
         public ServiceTourAssignmentResponse assign(
                         ServiceTourAssignmentRequest request) {
 

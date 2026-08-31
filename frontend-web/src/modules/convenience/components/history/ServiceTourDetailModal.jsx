@@ -3,7 +3,7 @@ import React, { useMemo } from "react";
 import { Layers, MapPin, Ship, X } from "lucide-react";
 
 import useServiceTour from "../../hooks/useServiceTour";
-import "../../styles/tour-config/ServiceTourDetailModal.css";
+import "../../styles/history/ServiceTourDetailModal.css";
 
 const ServiceTourDetailModal = ({ assignmentId, onClose }) => {
   const { serviceTours } = useServiceTour();

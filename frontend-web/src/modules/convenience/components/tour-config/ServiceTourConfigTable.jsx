@@ -1,42 +1,71 @@
 // src/modules/convenience/tour-config/ServiceTourConfigTable.jsx
 
 import React, { useMemo, useState } from "react";
-import { AlertCircle, Edit3, Eye, Plus, RefreshCw, Wrench } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Edit3,
+  Eye,
+  Plus,
+  RefreshCw,
+  Wrench,
+} from "lucide-react";
 
 import useServiceTour from "../../hooks/useServiceTour";
 import "../../styles/tour-config/ServiceTourConfigTable.css";
 import ServiceTourConfigModal from "./ServiceTourConfigModal";
-import ServiceTourDetailModal from "./ServiceTourDetailModal"; // Modal chi tiết khi click con mắt
+import ServiceTourDetailModal from "../history/ServiceTourDetailModal"; // Modal chi tiết khi click con mắt
+
+// =========================================================
+// STATUS TABS — khớp đúng ServiceTourStatus (Java enum)
+// (không có OUT_OF_STOCK như Product)
+// =========================================================
+
+const STATUS_TABS = [
+  { value: "ALL", label: "Tất cả" },
+  { value: "WAITING_CONFIG", label: "Chờ cấu hình" },
+  { value: "CONFIGURED", label: "Đã cấu hình" },
+  { value: "NOT_STARTED", label: "Chưa bắt đầu" },
+  { value: "IN_PROGRESS", label: "Đang phục vụ" },
+  { value: "COMPLETED", label: "Đã kết thúc" },
+];
+
+const formatShortId = (str, maxLength = 8) => {
+  if (!str) return "—";
+  if (str.length <= maxLength) return str;
+  return `${str.substring(0, maxLength)}...`;
+};
 
 const ServiceTourConfigTable = () => {
   const {
     serviceTours,
+    tourSummaries,
     loading,
     error,
+    completing,
+    completeError,
     loadServiceTours,
     configureService,
     updateService,
+    completeTourConfiguration,
   } = useServiceTour();
 
+  const [statusFilter, setStatusFilter] = useState("ALL");
   const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [viewDetailAssignment, setViewDetailAssignment] = useState(null); // State xem chi tiết
 
-  const formatShortId = (str, maxLength = 8) => {
-    if (!str) return "—";
-    if (str.length <= maxLength) return str;
-    return `${str.substring(0, maxLength)}...`;
-  };
+  // Tour đang được chọn để "Hoàn thành cấu hình"
+  const [selectedTourIdToComplete, setSelectedTourIdToComplete] = useState("");
+  const [completeSuccess, setCompleteSuccess] = useState(false);
 
   // =====================================================
-  // CONFIGURABLE DATA
+  // FILTER THEO TAB TRẠNG THÁI (không chỉ WAITING_CONFIG nữa)
   // =====================================================
 
-  const configurableTours = useMemo(() => {
-    return (serviceTours || []).filter(
-      (item) =>
-        item.status === "WAITING_CONFIG" || item.status === "NOT_STARTED",
-    );
-  }, [serviceTours]);
+  const filteredTours = useMemo(() => {
+    if (statusFilter === "ALL") return serviceTours || [];
+    return (serviceTours || []).filter((item) => item.status === statusFilter);
+  }, [serviceTours, statusFilter]);
 
   // =====================================================
   // OPEN MODAL
@@ -61,6 +90,12 @@ const ServiceTourConfigTable = () => {
   // =====================================================
   // SUBMIT CONFIG
   // =====================================================
+  //
+  // ✅ Backend chỉ cho:
+  //   - configure()   khi status === WAITING_CONFIG
+  //   - updateConfig() khi status === CONFIGURED (không phải NOT_STARTED)
+  //
+  // =====================================================
 
   const handleSubmit = async (assignmentId, payload) => {
     const assignment = serviceTours.find((item) => item.id === assignmentId);
@@ -71,7 +106,7 @@ const ServiceTourConfigTable = () => {
 
     if (assignment.status === "WAITING_CONFIG") {
       await configureService(assignmentId, payload);
-    } else if (assignment.status === "NOT_STARTED") {
+    } else if (assignment.status === "CONFIGURED") {
       await updateService(assignmentId, payload);
     }
 
@@ -79,7 +114,7 @@ const ServiceTourConfigTable = () => {
   };
 
   // =====================================================
-  // STATUS LABEL
+  // STATUS LABEL — khớp đúng ý nghĩa thật của từng status
   // =====================================================
 
   const getStatusLabel = (status) => {
@@ -87,8 +122,11 @@ const ServiceTourConfigTable = () => {
       case "WAITING_CONFIG":
         return "Chờ cấu hình";
 
-      case "NOT_STARTED":
+      case "CONFIGURED":
         return "Đã cấu hình";
+
+      case "NOT_STARTED":
+        return "Chưa bắt đầu";
 
       case "IN_PROGRESS":
         return "Đang phục vụ";
@@ -102,10 +140,40 @@ const ServiceTourConfigTable = () => {
   };
 
   // =====================================================
+  // HOÀN THÀNH CẤU HÌNH TOUR
+  // =====================================================
+
+  const selectedTourSummary = useMemo(
+    () =>
+      tourSummaries.find((tour) => tour.tourId === selectedTourIdToComplete),
+    [tourSummaries, selectedTourIdToComplete],
+  );
+
+  const canComplete =
+    !!selectedTourSummary &&
+    !selectedTourSummary.completed &&
+    selectedTourSummary.total > 0 &&
+    selectedTourSummary.configuredCount === selectedTourSummary.total;
+
+  const handleCompleteTour = async () => {
+    if (!selectedTourIdToComplete || !canComplete) return;
+
+    try {
+      setCompleteSuccess(false);
+      await completeTourConfiguration(selectedTourIdToComplete);
+      setCompleteSuccess(true);
+      setSelectedTourIdToComplete("");
+    } catch (err) {
+      console.error("COMPLETE SERVICE TOUR ERROR:", err);
+      // completeError đã được hook set, hiển thị bên dưới
+    }
+  };
+
+  // =====================================================
   // LOADING
   // =====================================================
 
-  if (loading && configurableTours.length === 0) {
+  if (loading && filteredTours.length === 0) {
     return (
       <div className="service-tour-config-loading">
         <RefreshCw size={20} className="spin" />
@@ -155,17 +223,106 @@ const ServiceTourConfigTable = () => {
         </div>
       )}
 
+      {/* ============ HOÀN THÀNH CẤU HÌNH TOUR ============ */}
+      <div className="service-tour-config-complete-box">
+        <div className="service-tour-config-complete-info">
+          <strong>Hoàn thành cấu hình Tour</strong>
+          <p>
+            Chọn Tour và bấm Hoàn thành khi tất cả dịch vụ của Tour đó đã được
+            cấu hình xong. Hệ thống sẽ gửi thông tin sang Tour service.
+          </p>
+        </div>
+
+        <div className="service-tour-config-complete-controls">
+          <select
+            className="service-tour-config-complete-select"
+            value={selectedTourIdToComplete}
+            onChange={(e) => {
+              setSelectedTourIdToComplete(e.target.value);
+              setCompleteSuccess(false);
+            }}
+            disabled={completing}
+          >
+            <option value="">— Chọn Tour —</option>
+            {tourSummaries.map((tour) => (
+              <option key={tour.tourId} value={tour.tourId}>
+                {formatShortId(tour.tourId, 8)} ({tour.configuredCount}/
+                {tour.total} đã cấu hình)
+                {tour.completed ? " — Đã hoàn thành" : ""}
+              </option>
+            ))}
+          </select>
+
+          <button
+            type="button"
+            className="service-tour-config-complete-button"
+            onClick={handleCompleteTour}
+            disabled={!canComplete || completing}
+          >
+            <CheckCircle2 size={16} />
+            {completing ? "Đang xử lý..." : "Hoàn thành cấu hình"}
+          </button>
+        </div>
+
+        {selectedTourIdToComplete && selectedTourSummary?.completed && (
+          <span className="service-tour-config-complete-hint">
+            Tour này đã được hoàn thành cấu hình trước đó.
+          </span>
+        )}
+
+        {selectedTourIdToComplete &&
+          !selectedTourSummary?.completed &&
+          !canComplete && (
+            <span className="service-tour-config-complete-hint">
+              Tour này còn dịch vụ chưa được cấu hình xong.
+            </span>
+          )}
+
+        {completeError && (
+          <span className="service-tour-config-complete-error">
+            {completeError}
+          </span>
+        )}
+
+        {completeSuccess && (
+          <span className="service-tour-config-complete-success">
+            Đã hoàn thành cấu hình Tour thành công.
+          </span>
+        )}
+      </div>
+
+      {/* =====================================================
+          STATUS TABS
+          ===================================================== */}
+
+      <div className="service-tour-config-filters">
+        {STATUS_TABS.map((tab) => (
+          <button
+            key={tab.value}
+            type="button"
+            className={`service-tour-config-filter-btn ${
+              statusFilter === tab.value
+                ? "service-tour-config-filter-btn--active"
+                : ""
+            }`}
+            onClick={() => setStatusFilter(tab.value)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       {/* =====================================================
           EMPTY
           ===================================================== */}
 
-      {configurableTours.length === 0 && !error ? (
+      {filteredTours.length === 0 && !error ? (
         <div className="service-tour-config-empty">
           <Wrench size={32} />
 
-          <h3>Chưa có dịch vụ cần cấu hình</h3>
+          <h3>Không có dịch vụ nào</h3>
 
-          <p>Hiện tại không có dịch vụ nào đang chờ hoặc đã cấu hình.</p>
+          <p>Không có dịch vụ nào khớp với bộ lọc hiện tại.</p>
         </div>
       ) : (
         /* =====================================================
@@ -188,7 +345,7 @@ const ServiceTourConfigTable = () => {
             </thead>
 
             <tbody>
-              {configurableTours.map((assignment, index) => {
+              {filteredTours.map((assignment, index) => {
                 const tourIdValue = assignment.tourId || assignment.id;
                 const fullTourCode =
                   assignment.tourCode ||
@@ -335,6 +492,7 @@ const ServiceTourConfigTable = () => {
                         ================================================= */}
 
                     <td>
+                      {/* ✅ Cấu hình lần đầu: chỉ khi WAITING_CONFIG */}
                       {assignment.status === "WAITING_CONFIG" && (
                         <button
                           type="button"
@@ -347,7 +505,8 @@ const ServiceTourConfigTable = () => {
                         </button>
                       )}
 
-                      {assignment.status === "NOT_STARTED" && (
+                      {/* ✅ Chỉnh sửa: chỉ khi CONFIGURED (khớp backend updateConfig) */}
+                      {assignment.status === "CONFIGURED" && (
                         <button
                           type="button"
                           className="service-tour-config-action"

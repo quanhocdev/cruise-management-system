@@ -2,6 +2,7 @@
 import React, { useMemo, useState } from "react";
 import {
   AlertCircle,
+  CheckCircle2,
   Edit3,
   Eye,
   Package,
@@ -13,37 +14,58 @@ import useProductTour from "../../hooks/useProductTour";
 import "../../styles/tour-config/ProductTourConfigTable.css";
 
 import ProductTourConfigModal from "./ProductTourConfigModal";
-import ProductTourDetailModal from "./ProductTourDetailModal"; // Modal chi tiết khi click con mắt
+import ProductTourDetailModal from "../history/ProductTourDetailModal"; // Modal chi tiết khi click con mắt
+
+// =========================================================
+// STATUS TABS — khớp đúng ProductTourStatus (Java enum)
+// =========================================================
+
+const STATUS_TABS = [
+  { value: "ALL", label: "Tất cả" },
+  { value: "WAITING_CONFIG", label: "Chờ cấu hình" },
+  { value: "CONFIGURED", label: "Đã cấu hình" },
+  { value: "NOT_STARTED", label: "Chưa bắt đầu" },
+  { value: "IN_PROGRESS", label: "Đang phục vụ" },
+  { value: "OUT_OF_STOCK", label: "Hết hàng" },
+  { value: "COMPLETED", label: "Đã kết thúc" },
+];
+
+const formatShortId = (str, maxLength = 8) => {
+  if (!str) return "—";
+  if (str.length <= maxLength) return str;
+  return `${str.substring(0, maxLength)}...`;
+};
 
 const ProductTourConfigTable = () => {
   const {
     productTours,
+    tourSummaries,
     loading,
     error,
+    completing,
+    completeError,
     loadProductTours,
     configureProduct,
     updateProduct,
+    completeTourConfiguration,
   } = useProductTour();
 
+  const [statusFilter, setStatusFilter] = useState("ALL");
   const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [viewDetailAssignment, setViewDetailAssignment] = useState(null); // State xem chi tiết
 
-  const formatShortId = (str, maxLength = 8) => {
-    if (!str) return "—";
-    if (str.length <= maxLength) return str;
-    return `${str.substring(0, maxLength)}...`;
-  };
+  // Tour đang được chọn để "Hoàn thành cấu hình"
+  const [selectedTourIdToComplete, setSelectedTourIdToComplete] = useState("");
+  const [completeSuccess, setCompleteSuccess] = useState(false);
 
   // =====================================================
-  // CONFIGURABLE DATA
+  // FILTER THEO TAB TRẠNG THÁI (không chỉ WAITING_CONFIG nữa)
   // =====================================================
 
-  const configurableTours = useMemo(() => {
-    return (productTours || []).filter(
-      (item) =>
-        item.status === "WAITING_CONFIG" || item.status === "NOT_STARTED",
-    );
-  }, [productTours]);
+  const filteredTours = useMemo(() => {
+    if (statusFilter === "ALL") return productTours || [];
+    return (productTours || []).filter((item) => item.status === statusFilter);
+  }, [productTours, statusFilter]);
 
   // =====================================================
   // OPEN/CLOSE CONFIG MODAL
@@ -61,6 +83,12 @@ const ProductTourConfigTable = () => {
   // =====================================================
   // SUBMIT
   // =====================================================
+  //
+  // ✅ Backend chỉ cho:
+  //   - configure()   khi status === WAITING_CONFIG
+  //   - updateConfig() khi status === CONFIGURED (không phải NOT_STARTED)
+  //
+  // =====================================================
 
   const handleSubmit = async (assignmentId, payload) => {
     const assignment = productTours.find((item) => item.id === assignmentId);
@@ -69,7 +97,7 @@ const ProductTourConfigTable = () => {
 
     if (assignment.status === "WAITING_CONFIG") {
       await configureProduct(assignmentId, payload);
-    } else if (assignment.status === "NOT_STARTED") {
+    } else if (assignment.status === "CONFIGURED") {
       await updateProduct(assignmentId, payload);
     }
 
@@ -77,15 +105,17 @@ const ProductTourConfigTable = () => {
   };
 
   // =====================================================
-  // FORMAT STATUS
+  // FORMAT STATUS — khớp đúng ý nghĩa thật của từng status
   // =====================================================
 
   const getStatusLabel = (status) => {
     switch (status) {
       case "WAITING_CONFIG":
         return "Chờ cấu hình";
-      case "NOT_STARTED":
+      case "CONFIGURED":
         return "Đã cấu hình";
+      case "NOT_STARTED":
+        return "Chưa bắt đầu";
       case "IN_PROGRESS":
         return "Đang phục vụ";
       case "OUT_OF_STOCK":
@@ -98,10 +128,40 @@ const ProductTourConfigTable = () => {
   };
 
   // =====================================================
+  // HOÀN THÀNH CẤU HÌNH TOUR
+  // =====================================================
+
+  const selectedTourSummary = useMemo(
+    () =>
+      tourSummaries.find((tour) => tour.tourId === selectedTourIdToComplete),
+    [tourSummaries, selectedTourIdToComplete],
+  );
+
+  const canComplete =
+    !!selectedTourSummary &&
+    !selectedTourSummary.completed &&
+    selectedTourSummary.total > 0 &&
+    selectedTourSummary.configuredCount === selectedTourSummary.total;
+
+  const handleCompleteTour = async () => {
+    if (!selectedTourIdToComplete || !canComplete) return;
+
+    try {
+      setCompleteSuccess(false);
+      await completeTourConfiguration(selectedTourIdToComplete);
+      setCompleteSuccess(true);
+      setSelectedTourIdToComplete("");
+    } catch (err) {
+      console.error("COMPLETE PRODUCT TOUR ERROR:", err);
+      // completeError đã được hook set, hiển thị bên dưới
+    }
+  };
+
+  // =====================================================
   // LOADING
   // =====================================================
 
-  if (loading && configurableTours.length === 0) {
+  if (loading && filteredTours.length === 0) {
     return (
       <div className="product-tour-config-loading">
         <RefreshCw size={20} className="spin" />
@@ -141,12 +201,98 @@ const ProductTourConfigTable = () => {
         </div>
       )}
 
+      {/* ============ HOÀN THÀNH CẤU HÌNH TOUR ============ */}
+      <div className="product-tour-config-complete-box">
+        <div className="product-tour-config-complete-info">
+          <strong>Hoàn thành cấu hình Tour</strong>
+          <p>
+            Chọn Tour và bấm Hoàn thành khi tất cả sản phẩm của Tour đó đã được
+            cấu hình xong. Hệ thống sẽ gửi thông tin sang Tour service.
+          </p>
+        </div>
+
+        <div className="product-tour-config-complete-controls">
+          <select
+            className="product-tour-config-complete-select"
+            value={selectedTourIdToComplete}
+            onChange={(e) => {
+              setSelectedTourIdToComplete(e.target.value);
+              setCompleteSuccess(false);
+            }}
+            disabled={completing}
+          >
+            <option value="">— Chọn Tour —</option>
+            {tourSummaries.map((tour) => (
+              <option key={tour.tourId} value={tour.tourId}>
+                {formatShortId(tour.tourId, 8)} ({tour.configuredCount}/
+                {tour.total} đã cấu hình)
+                {tour.completed ? " — Đã hoàn thành" : ""}
+              </option>
+            ))}
+          </select>
+
+          <button
+            type="button"
+            className="product-tour-config-complete-button"
+            onClick={handleCompleteTour}
+            disabled={!canComplete || completing}
+          >
+            <CheckCircle2 size={16} />
+            {completing ? "Đang xử lý..." : "Hoàn thành cấu hình"}
+          </button>
+        </div>
+
+        {selectedTourIdToComplete && selectedTourSummary?.completed && (
+          <span className="product-tour-config-complete-hint">
+            Tour này đã được hoàn thành cấu hình trước đó.
+          </span>
+        )}
+
+        {selectedTourIdToComplete &&
+          !selectedTourSummary?.completed &&
+          !canComplete && (
+            <span className="product-tour-config-complete-hint">
+              Tour này còn sản phẩm chưa được cấu hình xong.
+            </span>
+          )}
+
+        {completeError && (
+          <span className="product-tour-config-complete-error">
+            {completeError}
+          </span>
+        )}
+
+        {completeSuccess && (
+          <span className="product-tour-config-complete-success">
+            Đã hoàn thành cấu hình Tour thành công.
+          </span>
+        )}
+      </div>
+
+      {/* STATUS TABS */}
+      <div className="product-tour-config-filters">
+        {STATUS_TABS.map((tab) => (
+          <button
+            key={tab.value}
+            type="button"
+            className={`product-tour-config-filter-btn ${
+              statusFilter === tab.value
+                ? "product-tour-config-filter-btn--active"
+                : ""
+            }`}
+            onClick={() => setStatusFilter(tab.value)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       {/* EMPTY */}
-      {configurableTours.length === 0 && !error ? (
+      {filteredTours.length === 0 && !error ? (
         <div className="product-tour-config-empty">
           <Package size={32} />
-          <h3>Chưa có sản phẩm cần cấu hình</h3>
-          <p>Hiện tại không có sản phẩm nào đang chờ hoặc đã cấu hình.</p>
+          <h3>Không có sản phẩm nào</h3>
+          <p>Không có sản phẩm nào khớp với bộ lọc hiện tại.</p>
         </div>
       ) : (
         /* TABLE */
@@ -165,7 +311,7 @@ const ProductTourConfigTable = () => {
             </thead>
 
             <tbody>
-              {configurableTours.map((assignment, index) => {
+              {filteredTours.map((assignment, index) => {
                 const tourIdValue = assignment.tourId || assignment.id;
                 const fullTourCode =
                   assignment.tourCode ||
@@ -265,7 +411,7 @@ const ProductTourConfigTable = () => {
                           justifyContent: "center",
                         }}
                       >
-                        {/* NÚT CẤU HÌNH / CHỈNH SỬA */}
+                        {/* ✅ Cấu hình lần đầu: chỉ khi WAITING_CONFIG */}
                         {assignment.status === "WAITING_CONFIG" && (
                           <button
                             type="button"
@@ -278,7 +424,8 @@ const ProductTourConfigTable = () => {
                           </button>
                         )}
 
-                        {assignment.status === "NOT_STARTED" && (
+                        {/* ✅ Chỉnh sửa: chỉ khi CONFIGURED (khớp backend updateConfig) */}
+                        {assignment.status === "CONFIGURED" && (
                           <button
                             type="button"
                             className="product-tour-config-action"

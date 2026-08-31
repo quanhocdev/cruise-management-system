@@ -1,3 +1,4 @@
+// src/modules/shore/components/visit-tour/VisitTourFormModal.jsx
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import "../../styles/VisitTourFormModal.css";

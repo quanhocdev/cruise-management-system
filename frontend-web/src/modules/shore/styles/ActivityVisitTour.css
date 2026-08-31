@@ -1,0 +1,748 @@
+/* =========================================================
+   SHORE MANAGER TOUR
+   ========================================================= */
+
+.shore-manager-tour {
+  width: 100%;
+  /* Bỏ max-width hoặc tăng nếu cần, và đảm bảo padding đáy đủ thoáng */
+  margin: 0 auto;
+  padding: 28px 24px 64px; /* Tăng padding-bottom để nội dung cuối không sát chân footer */
+  color: #1e293b;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.shore-manager-tour-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 24px;
+
+  margin-bottom: 22px;
+  padding-bottom: 22px;
+
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.shore-manager-tour-header h1 {
+  margin: 0;
+
+  color: #0f172a;
+
+  font-size: 24px;
+  font-weight: 800;
+
+  letter-spacing: -0.02em;
+}
+
+.shore-manager-tour-header p {
+  margin: 7px 0 0;
+
+  max-width: 560px;
+
+  color: #64748b;
+
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+/* =========================================================
+   HEADER ACTIONS
+   ========================================================= */
+
+.shore-manager-tour-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  flex-shrink: 0;
+}
+
+.shore-manager-tour-refresh,
+.shore-manager-tour-history {
+  min-height: 40px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  padding: 0 15px;
+
+  border-radius: 9px;
+
+  font-size: 13.5px;
+  font-weight: 650;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.shore-manager-tour-refresh {
+  border: 1px solid #dbe3ef;
+
+  background: #ffffff;
+
+  color: #334155;
+}
+
+.shore-manager-tour-refresh:hover:not(:disabled) {
+  border-color: #93c5fd;
+
+  background: #eff6ff;
+
+  color: #1d4ed8;
+
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+}
+
+.shore-manager-tour-history {
+  border: 1px solid #dbe3ef;
+
+  background: #ffffff;
+
+  color: #475569;
+}
+
+.shore-manager-tour-history:hover {
+  border-color: #c4b5fd;
+
+  background: #f5f3ff;
+
+  color: #6d28d9;
+
+  box-shadow: 0 4px 12px rgba(109, 40, 217, 0.1);
+}
+
+.shore-manager-tour-refresh:active:not(:disabled),
+.shore-manager-tour-history:active {
+  transform: translateY(1px);
+}
+
+.shore-manager-tour-refresh:disabled {
+  opacity: 0.55;
+
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   LOADING
+   ========================================================= */
+
+.shore-manager-tour-loading {
+  width: 100%;
+  min-height: 360px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+
+  color: #64748b;
+
+  font-size: 14px;
+}
+
+.shore-manager-tour-spinner {
+  color: #2563eb;
+
+  animation: shore-manager-tour-spin 0.85s linear infinite;
+}
+
+@keyframes shore-manager-tour-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================================================
+   ERROR / SUCCESS
+   ========================================================= */
+
+.shore-manager-tour-error,
+.shore-manager-tour-complete-error,
+.shore-manager-tour-success {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  margin-bottom: 18px;
+
+  padding: 13px 16px;
+
+  border-radius: 10px;
+
+  font-size: 13.5px;
+}
+
+.shore-manager-tour-error {
+  border: 1px solid #fecaca;
+
+  background: #fef2f2;
+
+  color: #b91c1c;
+}
+
+.shore-manager-tour-complete-error {
+  border: 1px solid #fed7aa;
+
+  background: #fff7ed;
+
+  color: #c2410c;
+}
+
+.shore-manager-tour-success {
+  border: 1px solid #bbf7d0;
+
+  background: #f0fdf4;
+
+  color: #15803d;
+}
+
+.shore-manager-tour-error span,
+.shore-manager-tour-complete-error span,
+.shore-manager-tour-success span {
+  flex: 1;
+}
+
+.shore-manager-tour-error button,
+.shore-manager-tour-complete-error button,
+.shore-manager-tour-success button {
+  flex-shrink: 0;
+
+  border: 0;
+
+  background: transparent;
+
+  color: inherit;
+
+  font-size: 12.5px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.shore-manager-tour-error button:hover,
+.shore-manager-tour-complete-error button:hover,
+.shore-manager-tour-success button:hover {
+  text-decoration: underline;
+}
+
+/* =========================================================
+   SUMMARY
+   ========================================================= */
+
+.shore-manager-tour-summary {
+  display: grid;
+
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+
+  gap: 12px;
+
+  margin-bottom: 18px;
+}
+
+.shore-manager-tour-summary-item {
+  position: relative;
+
+  overflow: hidden;
+
+  min-height: 104px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  gap: 7px;
+
+  padding: 16px 18px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+
+  background: #ffffff;
+
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.shore-manager-tour-summary-item::after {
+  content: "";
+
+  position: absolute;
+
+  right: -28px;
+  bottom: -38px;
+
+  width: 90px;
+  height: 90px;
+
+  border-radius: 50%;
+
+  background: #2563eb;
+
+  opacity: 0.045;
+}
+
+.shore-manager-tour-summary-item span {
+  color: #64748b;
+
+  font-size: 11.5px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.035em;
+}
+
+.shore-manager-tour-summary-item strong {
+  color: #0f172a;
+
+  font-size: 28px;
+  font-weight: 800;
+
+  line-height: 1;
+
+  font-variant-numeric: tabular-nums;
+}
+
+/* =========================================================
+   SUMMARY STATES
+   ========================================================= */
+
+.shore-manager-tour-summary-item.waiting {
+  border-left: 3px solid #f59e0b;
+}
+
+.shore-manager-tour-summary-item.configured {
+  border-left: 3px solid #2563eb;
+}
+
+.shore-manager-tour-summary-item.progress {
+  border-left: 3px solid #8b5cf6;
+}
+
+.shore-manager-tour-summary-item.completed {
+  border-left: 3px solid #16a34a;
+}
+
+/* =========================================================
+   FILTER TOOLBAR
+   ========================================================= */
+
+.shore-manager-tour-toolbar {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 16px;
+
+  margin-bottom: 18px;
+
+  padding: 13px 15px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 11px;
+
+  background: #ffffff;
+}
+
+.shore-manager-tour-filter {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+.shore-manager-tour-filter-label {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 7px;
+
+  color: #475569;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.shore-manager-tour-filter-label svg {
+  color: #64748b;
+}
+
+.shore-manager-tour-filter select {
+  min-width: 190px;
+
+  height: 36px;
+
+  padding: 0 34px 0 11px;
+
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+
+  background: #ffffff;
+
+  color: #334155;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  outline: none;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.shore-manager-tour-filter select:hover {
+  border-color: #93c5fd;
+}
+
+.shore-manager-tour-filter select:focus {
+  border-color: #60a5fa;
+
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.shore-manager-tour-result-count {
+  color: #64748b;
+
+  font-size: 13px;
+}
+
+.shore-manager-tour-result-count strong {
+  color: #0f172a;
+
+  font-weight: 800;
+}
+
+/* =========================================================
+   COMPLETION LIST
+   ========================================================= */
+
+.shore-manager-tour-completion-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+
+  margin-bottom: 20px;
+}
+
+.shore-manager-tour-completion-card {
+  display: grid;
+
+  grid-template-columns:
+    minmax(280px, 1fr)
+    auto
+    auto;
+
+  align-items: center;
+
+  gap: 18px;
+
+  min-height: 72px;
+
+  padding: 12px 15px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 11px;
+
+  background: #ffffff;
+}
+
+.shore-manager-tour-completion-card.ready {
+  border-color: #bfdbfe;
+
+  background: linear-gradient(90deg, #f8fbff 0%, #ffffff 70%);
+}
+
+.shore-manager-tour-completion-info {
+  display: flex;
+  align-items: center;
+
+  gap: 11px;
+
+  min-width: 0;
+}
+
+.shore-manager-tour-completion-icon {
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 9px;
+
+  background: #eff6ff;
+
+  color: #2563eb;
+}
+
+.shore-manager-tour-completion-info > div:last-child {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.shore-manager-tour-completion-info span {
+  color: #94a3b8;
+
+  font-size: 10.5px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+}
+
+.shore-manager-tour-completion-info strong {
+  overflow: hidden;
+
+  color: #1e293b;
+
+  font-size: 13px;
+  font-weight: 750;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shore-manager-tour-completion-info small {
+  color: #64748b;
+
+  font-size: 11.5px;
+}
+
+.shore-manager-tour-completion-status {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 7px;
+
+  color: #64748b;
+
+  font-size: 12.5px;
+  font-weight: 650;
+
+  white-space: nowrap;
+}
+
+.shore-manager-tour-completion-card.ready
+  .shore-manager-tour-completion-status {
+  color: #15803d;
+}
+
+.shore-manager-tour-complete-button {
+  min-height: 36px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  padding: 0 13px;
+
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+
+  background: #f0fdf4;
+
+  color: #15803d;
+
+  font-size: 12.5px;
+  font-weight: 750;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.shore-manager-tour-complete-button:hover:not(:disabled) {
+  border-color: #86efac;
+
+  background: #dcfce7;
+
+  color: #166534;
+
+  box-shadow: 0 4px 10px rgba(22, 163, 74, 0.12);
+}
+
+.shore-manager-tour-complete-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.shore-manager-tour-complete-button:disabled {
+  border-color: #e2e8f0;
+
+  background: #f8fafc;
+
+  color: #94a3b8;
+
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1050px) {
+  .shore-manager-tour-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .shore-manager-tour-completion-card {
+    grid-template-columns:
+      minmax(240px, 1fr)
+      auto;
+  }
+
+  .shore-manager-tour-complete-button {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .shore-manager-tour {
+    padding: 20px 16px 36px;
+  }
+
+  .shore-manager-tour-header {
+    flex-direction: column;
+
+    align-items: stretch;
+
+    gap: 15px;
+
+    margin-bottom: 18px;
+    padding-bottom: 18px;
+  }
+
+  .shore-manager-tour-header h1 {
+    font-size: 21px;
+  }
+
+  .shore-manager-tour-header-actions {
+    width: 100%;
+  }
+
+  .shore-manager-tour-refresh,
+  .shore-manager-tour-history {
+    flex: 1;
+  }
+
+  .shore-manager-tour-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .shore-manager-tour-toolbar {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+  .shore-manager-tour-filter {
+    justify-content: space-between;
+  }
+
+  .shore-manager-tour-filter select {
+    flex: 1;
+
+    min-width: 0;
+  }
+
+  .shore-manager-tour-result-count {
+    text-align: right;
+  }
+
+  .shore-manager-tour-completion-card {
+    grid-template-columns: 1fr;
+
+    gap: 12px;
+  }
+
+  .shore-manager-tour-complete-button {
+    grid-column: auto;
+    grid-row: auto;
+
+    width: 100%;
+  }
+
+  .shore-manager-tour-completion-status {
+    padding-left: 47px;
+  }
+}
+
+@media (max-width: 480px) {
+  .shore-manager-tour-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .shore-manager-tour-header-actions {
+    flex-direction: column;
+  }
+
+  .shore-manager-tour-refresh,
+  .shore-manager-tour-history {
+    width: 100%;
+  }
+
+  .shore-manager-tour-filter {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+  .shore-manager-tour-filter select {
+    width: 100%;
+  }
+
+  .shore-manager-tour-result-count {
+    text-align: left;
+  }
+}
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .shore-manager-tour-refresh,
+  .shore-manager-tour-history,
+  .shore-manager-tour-complete-button {
+    transition: none;
+  }
+
+  .shore-manager-tour-spinner {
+    animation: none;
+  }
+}

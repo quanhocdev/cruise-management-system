@@ -155,7 +155,7 @@ const ActivityCruiseTourHistory = () => {
           </div>
 
           <span className="activity-cruise-tour-history-page__count">
-            {histories.length}
+            {history.length}
           </span>
         </div>
 

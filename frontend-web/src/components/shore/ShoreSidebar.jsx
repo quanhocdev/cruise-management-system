@@ -29,14 +29,14 @@ const MENU_SECTIONS = [
         extraPaths: ["/shore/visit-tour-configuration"],
       },
       {
-        label: "Lịch sử",
+        label: "Lịch sử cấu hình",
         icon: History,
         path: "/shore/history",
+        extraPaths: ["/shore/history/"],
       },
     ],
   },
 ];
-
 function ShoreSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation(); // Lấy pathname hiện tại

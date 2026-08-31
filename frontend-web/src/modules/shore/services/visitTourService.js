@@ -93,6 +93,45 @@ const visitTourService = {
 
     return response.data;
   },
+
+  /**
+   * GET /api/shore/visit-tour-configurations/configuration-history
+   *
+   * Lấy lịch sử các Tour đã hoàn thành cấu hình Visit Tour.
+   */
+  getConfigurationHistory: async () => {
+    const response = await api.get(
+      "/shore/visit-tour-configurations/configuration-history",
+    );
+
+    return response.data;
+  },
+
+  /**
+   * GET /api/shore/visit-tour-configurations/configuration-history/{tourId}
+   *
+   * Lấy chi tiết cấu hình của một Tour trong lịch sử.
+   */
+  getConfigurationHistoryDetail: async (tourId) => {
+    const response = await api.get(
+      `/shore/visit-tour-configurations/configuration-history/${tourId}`,
+    );
+
+    return response.data;
+  },
+
+  /**
+   * POST /api/shore/visit-tour-configurations/{tourId}/complete
+   *
+   * Hoàn thành cấu hình Visit Tour của một Tour.
+   */
+  completeTourConfiguration: async (tourId) => {
+    const response = await api.post(
+      `/shore/visit-tour-configurations/${tourId}/complete`,
+    );
+
+    return response.data;
+  },
 };
 
 export default visitTourService;
