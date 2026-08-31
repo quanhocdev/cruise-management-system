@@ -4,13 +4,10 @@
 
 .shore-manager-tour {
   width: 100%;
-  max-width: 1280px;
-
+  /* Bỏ max-width hoặc tăng nếu cần, và đảm bảo padding đáy đủ thoáng */
   margin: 0 auto;
-  padding: 28px 24px 48px;
-
+  padding: 28px 24px 64px; /* Tăng padding-bottom để nội dung cuối không sát chân footer */
   color: #1e293b;
-
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
 }
