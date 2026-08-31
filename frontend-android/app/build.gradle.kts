@@ -31,6 +31,16 @@ android {
             "BASE_IP",
             "\"${localProperties.getProperty("BASE_IP") ?: "192.168.1.3"}\""
         )
+        buildConfigField(
+            "String",
+            "POS_TERMINAL_CODE",
+            "\"${localProperties.getProperty("POS_TERMINAL_CODE") ?: "POS-DEMO-001"}\""
+        )
+        buildConfigField(
+            "String",
+            "POS_API_KEY",
+            "\"${localProperties.getProperty("POS_API_KEY") ?: ""}\""
+        )
     }
 
     buildTypes {
