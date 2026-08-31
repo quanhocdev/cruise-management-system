@@ -1,7 +1,7 @@
 // passenger/pages/Dashboard.jsx
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { CalendarDays, LogOut, Search, Ship, Users } from "lucide-react";
+import { CalendarDays, ClipboardList, LogOut, Search, Ship, Users } from "lucide-react";
 import { useAuth } from "../../../context/AuthContext";
 import passengerCatalogService from "../services/passengerCatalogService";
 import "../styles/PassengerCatalog.css";
@@ -50,6 +50,9 @@ export default function PassengerDashboard() {
           <span>Blue Horizon</span>
         </Link>
         <div className="passenger-account">
+          <Link to="/passenger/bookings" className="ghost-button account-link">
+            <ClipboardList size={17} /> Booking của tôi
+          </Link>
           <span>Xin chào, <strong>{user?.username}</strong></span>
           <button type="button" onClick={logout} className="ghost-button">
             <LogOut size={17} /> Đăng xuất

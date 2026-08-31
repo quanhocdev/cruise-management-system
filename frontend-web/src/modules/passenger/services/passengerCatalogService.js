@@ -27,6 +27,21 @@ const passengerCatalogService = {
     const response = await api.post("/v1/bookings", payload);
     return response.data;
   },
+
+  async getMyBookings() {
+    const response = await api.get("/v1/bookings/me");
+    return response.data;
+  },
+
+  async getBooking(bookingId) {
+    const response = await api.get(`/v1/bookings/${bookingId}`);
+    return response.data;
+  },
+
+  async cancelBooking(bookingId) {
+    const response = await api.patch(`/v1/bookings/${bookingId}/cancel`);
+    return response.data;
+  },
 };
 
 export default passengerCatalogService;
