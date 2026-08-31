@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -36,7 +37,8 @@ import com.project.cruise.android.data.repository.PosTransactionQueue
 fun PosDashboardScreen(
     onBackClick: () -> Unit,
     onQrClick: () -> Unit,
-    onNfcClick: () -> Unit
+    onNfcClick: () -> Unit,
+    onHistoryClick: () -> Unit
 ) {
     val context = LocalContext.current
     val queue = remember { PosTransactionQueue(context) }
@@ -102,6 +104,14 @@ fun PosDashboardScreen(
             symbol = "NFC",
             onClick = onNfcClick
         )
+
+        OutlinedButton(
+            onClick = onHistoryClick,
+            modifier = Modifier.fillMaxWidth().padding(top = 18.dp),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text("Xem lịch sử giao dịch offline")
+        }
 
         Spacer(Modifier.weight(1f))
         Box(
