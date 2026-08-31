@@ -19,6 +19,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.project.cruise.android.BuildConfig
+import com.project.cruise.android.data.repository.PosTransactionQueue
 
 @Composable
 fun PosDashboardScreen(
@@ -33,6 +38,10 @@ fun PosDashboardScreen(
     onQrClick: () -> Unit,
     onNfcClick: () -> Unit
 ) {
+    val context = LocalContext.current
+    val queue = remember { PosTransactionQueue(context) }
+    val pendingCount by queue.observePendingCount().collectAsState(initial = 0)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -65,6 +74,14 @@ fun PosDashboardScreen(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 5.dp)
         )
+        if (pendingCount > 0) {
+            Text(
+                text = "$pendingCount giao dịch đang chờ đồng bộ",
+                modifier = Modifier.padding(top = 10.dp),
+                color = Color(0xFF9A650E),
+                style = MaterialTheme.typography.labelLarge
+            )
+        }
         Text(
             "Chọn phương thức nhận diện hành khách",
             modifier = Modifier.padding(top = 28.dp, bottom = 14.dp),

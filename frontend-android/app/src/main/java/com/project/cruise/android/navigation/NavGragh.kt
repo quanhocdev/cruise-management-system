@@ -24,6 +24,7 @@ import com.project.cruise.android.ui.screens.auth.OtpScreen
 import com.project.cruise.android.ui.screens.auth.RegisterScreen
 import com.project.cruise.android.ui.screens.passenger.Dashboard
 import com.project.cruise.android.ui.screens.pos.PosDashboardScreen
+import com.project.cruise.android.ui.screens.pos.QrScanScreen
 
 import com.project.cruise.android.viewmodel.auth.AuthViewModel
 import com.project.cruise.android.viewmodel.auth.AuthViewModelFactory
@@ -39,6 +40,7 @@ object Routes {
     const val OTP = "otp/{userId}"
     const val PASSENGER_DASHBOARD = "passenger_dashboard"
     const val POS_DASHBOARD = "pos_dashboard"
+    const val POS_QR_SCAN = "pos_qr_scan"
 }
 
 @Composable
@@ -109,8 +111,15 @@ fun NavGraph() {
         composable(Routes.POS_DASHBOARD) {
             PosDashboardScreen(
                 onBackClick = { navController.popBackStack() },
-                onQrClick = { },
+                onQrClick = { navController.navigate(Routes.POS_QR_SCAN) },
                 onNfcClick = { }
+            )
+        }
+
+        composable(Routes.POS_QR_SCAN) {
+            QrScanScreen(
+                onBackClick = { navController.popBackStack() },
+                onSaved = { navController.popBackStack() }
             )
         }
 
