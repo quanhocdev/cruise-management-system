@@ -62,4 +62,6 @@ public interface VisitTourRepository
         boolean existsByTourIdAndScheduleStopId(
                         UUID tourId,
                         UUID scheduleStopId);
+
+        Optional<VisitTour> findByScheduleStopId(UUID scheduleStopId);
 }

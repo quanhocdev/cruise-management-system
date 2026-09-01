@@ -6,6 +6,7 @@ import com.project.activityvisit.dto.VisitTourResponse;
 import com.project.activityvisit.exception.AppException;
 import com.project.activityvisit.mapper.VisitTourMapper;
 import com.project.activityvisit.model.VisitTour;
+import com.project.activityvisit.model.enums.VisitTourStatus;
 import com.project.activityvisit.repository.VisitTourRepository;
 
 import org.springframework.http.HttpStatus;
@@ -91,7 +92,7 @@ public class VisitTourServiceImpl implements VisitTourService {
         }
 
         // =====================================================
-        // CREATE
+        // CREATE / CONFIGURE VISIT TOUR
         // =====================================================
 
         @Override
@@ -102,27 +103,30 @@ public class VisitTourServiceImpl implements VisitTourService {
 
                 validator.validateCreate(request);
 
-                VisitTour visitTour = VisitTourMapper.toEntity(request);
+                // 1. Tìm bản ghi VisitTour đã được sinh sẵn từ sự kiện Kafka dựa vào
+                // scheduleStopId
+                VisitTour visitTour = visitTourRepository.findByScheduleStopId(scheduleStopId)
+                                .orElseThrow(() -> new AppException(
+                                                "Visit tour not found for this schedule stop. Please check Kafka event.",
+                                                HttpStatus.NOT_FOUND));
 
-                /*
-                 * scheduleStopId được nhận từ Kafka / request.
-                 *
-                 * Các thông tin:
-                 * - tourId
-                 * - scheduleId
-                 * - portId
-                 * - arriveAt
-                 * - leaveAt
-                 *
-                 * không được lấy từ VisitTour nữa.
-                 */
-                visitTour.setScheduleStopId(scheduleStopId);
+                // 2. Cập nhật các thông tin cấu hình từ form Frontend gửi lên
+                visitTour.setName(request.name());
+                visitTour.setDescription(request.description());
+                visitTour.setStartTime(request.startTime());
+                visitTour.setEndTime(request.endTime());
+                visitTour.setMaxPassengers(request.maxPassengers());
+                visitTour.setPrice(request.price());
 
+                // Chuyển trạng thái sang đã cấu hình (hoặc tùy theo logic của bạn)
+                visitTour.setStatus(VisitTourStatus.CONFIGURED);
+
+                // 3. Lưu lại bản ghi (tourId đã có sẵn từ bản ghi do Kafka tạo, không bị null
+                // nữa)
                 VisitTour saved = visitTourRepository.save(visitTour);
 
                 return VisitTourMapper.toResponse(saved);
         }
-
         // =====================================================
         // UPDATE - PATCH
         // =====================================================
