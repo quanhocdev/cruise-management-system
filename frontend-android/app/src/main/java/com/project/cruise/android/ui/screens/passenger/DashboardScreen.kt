@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,6 +27,10 @@ fun Dashboard(
     onLogout: () -> Unit // 🟢 Thêm callback này để điều hướng về Login
 ) {
     val meState by viewModel.meState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.getCurrentUser()
+    }
 
     Column(
         modifier = Modifier
@@ -42,26 +47,9 @@ fun Dashboard(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Button(
-            onClick = {
-                viewModel.getCurrentUser()
-            },
-            enabled = meState !is MeState.Loading
-        ) {
-            Text(
-                text = if (meState is MeState.Loading) {
-                    "Đang kiểm tra..."
-                } else {
-                    "Kiểm tra đăng nhập"
-                }
-            )
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
         when (val state = meState) {
             is MeState.Idle -> {
-                Text("Chưa gọi API")
+                Text("Đang chuẩn bị thông tin tài khoản...")
             }
 
             is MeState.Loading -> {

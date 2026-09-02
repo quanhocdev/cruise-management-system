@@ -6,6 +6,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -32,10 +37,12 @@ import com.project.cruise.android.viewmodel.auth.AuthViewModel
 import com.project.cruise.android.viewmodel.auth.AuthViewModelFactory
 import com.project.cruise.android.viewmodel.auth.LoginState
 import com.project.cruise.android.viewmodel.auth.RegisterState
+import com.project.cruise.android.viewmodel.auth.SessionState
 import com.project.cruise.android.viewmodel.auth.VerifyOtpState
 
 object Routes {
 
+    const val SPLASH = "splash"
     const val GUEST = "guest"
     const val LOGIN = "login"
     const val REGISTER = "register"
@@ -81,10 +88,29 @@ fun NavGraph() {
         factory = AuthViewModelFactory(repository)
     )
 
+    val sessionState by viewModel.sessionState.collectAsState()
+
     NavHost(
         navController = navController,
-        startDestination = Routes.GUEST
+        startDestination = Routes.SPLASH
     ) {
+
+        composable(Routes.SPLASH) {
+            LaunchedEffect(sessionState) {
+                when (sessionState) {
+                    is SessionState.Authenticated -> navController.navigate(Routes.PASSENGER_DASHBOARD) {
+                        popUpTo(Routes.SPLASH) { inclusive = true }
+                    }
+                    SessionState.Unauthenticated -> navController.navigate(Routes.GUEST) {
+                        popUpTo(Routes.SPLASH) { inclusive = true }
+                    }
+                    SessionState.Checking -> Unit
+                }
+            }
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        }
 
         // =================================================
         // GUEST

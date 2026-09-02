@@ -83,6 +83,12 @@ sealed class MeState {
     ) : MeState()
 }
 
+sealed class SessionState {
+    object Checking : SessionState()
+    data class Authenticated(val username: String, val role: String) : SessionState()
+    object Unauthenticated : SessionState()
+}
+
 // =====================================================
 // AUTH VIEW MODEL
 // =====================================================
@@ -90,6 +96,36 @@ sealed class MeState {
 class AuthViewModel(
     private val repository: AuthRepository
 ) : ViewModel() {
+
+    private val _sessionState = MutableStateFlow<SessionState>(SessionState.Checking)
+    val sessionState: StateFlow<SessionState> = _sessionState
+
+    init {
+        restoreSession()
+    }
+
+    private fun restoreSession() {
+        if (!repository.hasStoredSession()) {
+            _sessionState.value = SessionState.Unauthenticated
+            return
+        }
+
+        viewModelScope.launch {
+            runCatching { repository.getCurrentUser() }
+                .onSuccess { user ->
+                    if (user.role.isPassengerRole()) {
+                        _sessionState.value = SessionState.Authenticated(user.username, user.role)
+                    } else {
+                        repository.logout()
+                        _sessionState.value = SessionState.Unauthenticated
+                    }
+                }
+                .onFailure {
+                    repository.logout()
+                    _sessionState.value = SessionState.Unauthenticated
+                }
+        }
+    }
 
     // =====================================================
     // LOGIN
@@ -130,8 +166,13 @@ class AuthViewModel(
                         password = password
                     )
 
-                _loginState.value =
-                    LoginState.Success(response)
+                if (!response.role.isPassengerRole()) {
+                    repository.logout()
+                    _loginState.value = LoginState.Error("Ứng dụng này chỉ dành cho hành khách")
+                } else {
+                    _sessionState.value = SessionState.Authenticated(response.username, response.role)
+                    _loginState.value = LoginState.Success(response)
+                }
 
             } catch (e: Exception) {
 
@@ -326,6 +367,8 @@ class AuthViewModel(
             // 1. Xóa token lưu trong SharedPreferences / DataStore
             repository.logout()
 
+            _sessionState.value = SessionState.Unauthenticated
+
             // 2. Reset toàn bộ các StateAuth về Idle
             resetLoginState()
             resetRegisterState()
@@ -337,3 +380,6 @@ class AuthViewModel(
         }
     }
 }
+
+private fun String.isPassengerRole(): Boolean =
+    removePrefix("ROLE_").equals("PASSENGER", ignoreCase = true)
