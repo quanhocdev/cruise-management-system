@@ -22,12 +22,16 @@ import com.project.cruise.android.data.auth.TokenManager
 import com.project.cruise.android.data.network.ApiService
 import com.project.cruise.android.data.network.RetrofitClient
 import com.project.cruise.android.data.repository.AuthRepository
+import com.project.cruise.android.data.repository.PassengerCatalogRepository
 
 import com.project.cruise.android.ui.screens.GuestScreen
 import com.project.cruise.android.ui.screens.auth.LoginScreen
 import com.project.cruise.android.ui.screens.auth.OtpScreen
 import com.project.cruise.android.ui.screens.auth.RegisterScreen
 import com.project.cruise.android.ui.screens.passenger.Dashboard
+import com.project.cruise.android.ui.screens.passenger.AvailableRoomsScreen
+import com.project.cruise.android.ui.screens.passenger.TourDetailScreen
+import com.project.cruise.android.ui.screens.passenger.TourListScreen
 import com.project.cruise.android.ui.screens.pos.PosDashboardScreen
 import com.project.cruise.android.ui.screens.pos.QrScanScreen
 import com.project.cruise.android.ui.screens.pos.NfcScanScreen
@@ -39,6 +43,8 @@ import com.project.cruise.android.viewmodel.auth.LoginState
 import com.project.cruise.android.viewmodel.auth.RegisterState
 import com.project.cruise.android.viewmodel.auth.SessionState
 import com.project.cruise.android.viewmodel.auth.VerifyOtpState
+import com.project.cruise.android.viewmodel.passenger.PassengerCatalogViewModel
+import com.project.cruise.android.viewmodel.passenger.PassengerCatalogViewModelFactory
 
 object Routes {
 
@@ -48,6 +54,9 @@ object Routes {
     const val REGISTER = "register"
     const val OTP = "otp/{userId}"
     const val PASSENGER_DASHBOARD = "passenger_dashboard"
+    const val PASSENGER_TOURS = "passenger_tours"
+    const val PASSENGER_TOUR_DETAIL = "passenger_tours/{tourId}"
+    const val PASSENGER_ROOMS = "passenger_rooms/{voyageId}"
     const val POS_DASHBOARD = "pos_dashboard"
     const val POS_QR_SCAN = "pos_qr_scan"
     const val POS_NFC_SCAN = "pos_nfc_scan"
@@ -86,6 +95,10 @@ fun NavGraph() {
 
     val viewModel: AuthViewModel = viewModel(
         factory = AuthViewModelFactory(repository)
+    )
+
+    val catalogViewModel: PassengerCatalogViewModel = viewModel(
+        factory = PassengerCatalogViewModelFactory(remember(apiService) { PassengerCatalogRepository(apiService) })
     )
 
     val sessionState by viewModel.sessionState.collectAsState()
@@ -355,6 +368,7 @@ fun NavGraph() {
         ) {
             Dashboard(
                 viewModel = viewModel,
+                onBrowseTours = { navController.navigate(Routes.PASSENGER_TOURS) },
                 onLogout = {
                     // 🟢 Điều hướng về màn hình Login và xóa sạch lịch sử Navigation (Backstack)
                     navController.navigate(Routes.LOGIN) {
@@ -362,6 +376,37 @@ fun NavGraph() {
                         launchSingleTop = true
                     }
                 }
+            )
+        }
+
+        composable(Routes.PASSENGER_TOURS) {
+            TourListScreen(
+                viewModel = catalogViewModel,
+                onBack = { navController.popBackStack() },
+                onTourClick = { navController.navigate("passenger_tours/$it") }
+            )
+        }
+
+        composable(
+            Routes.PASSENGER_TOUR_DETAIL,
+            arguments = listOf(navArgument("tourId") { type = NavType.StringType })
+        ) { entry ->
+            TourDetailScreen(
+                tourId = entry.arguments?.getString("tourId").orEmpty(),
+                viewModel = catalogViewModel,
+                onBack = { navController.popBackStack() },
+                onDepartureClick = { navController.navigate("passenger_rooms/$it") }
+            )
+        }
+
+        composable(
+            Routes.PASSENGER_ROOMS,
+            arguments = listOf(navArgument("voyageId") { type = NavType.StringType })
+        ) { entry ->
+            AvailableRoomsScreen(
+                voyageId = entry.arguments?.getString("voyageId").orEmpty(),
+                viewModel = catalogViewModel,
+                onBack = { navController.popBackStack() }
             )
         }
     }

@@ -24,6 +24,7 @@ import com.project.cruise.android.viewmodel.auth.MeState
 @Composable
 fun Dashboard(
     viewModel: AuthViewModel,
+    onBrowseTours: () -> Unit,
     onLogout: () -> Unit // 🟢 Thêm callback này để điều hướng về Login
 ) {
     val meState by viewModel.meState.collectAsState()
@@ -70,6 +71,12 @@ fun Dashboard(
         }
 
         Spacer(modifier = Modifier.height(40.dp))
+
+        Button(onClick = onBrowseTours) {
+            Text("Khám phá tour đang mở bán")
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
 
         // 🔴 NÚT ĐĂNG XUẤT
         Button(
