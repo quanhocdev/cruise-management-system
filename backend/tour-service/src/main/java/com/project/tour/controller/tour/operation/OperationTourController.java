@@ -3,9 +3,9 @@ package com.project.tour.controller.tour.operation;
 import com.project.tour.dto.cruise.CruiseAvailabilityResponse;
 import com.project.tour.dto.tour.TourResponse;
 import com.project.tour.dto.tour.operation.OperationCruiseLayoutResponse;
-import com.project.tour.service.tour.operation.OperationTourService;
-import com.project.tour.service.tour.operation.TourCruiseAssignmentService;
-import com.project.tour.service.tour.operation.TourLayoutService;
+import com.project.tour.service.tour.operation.ApprovalTourService;
+import com.project.tour.service.tour.operation.assignment.TourCruiseAssignmentService;
+import com.project.tour.service.tour.operation.assignment.TourLayoutService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,12 +17,12 @@ import java.util.UUID;
 @RequestMapping("/api/operation/tours")
 public class OperationTourController {
 
-        private final OperationTourService operationTourService;
+        private final ApprovalTourService operationTourService;
         private final TourCruiseAssignmentService tourCruiseAssignmentService;
         private final TourLayoutService tourLayoutService;
 
         public OperationTourController(
-                        OperationTourService operationTourService,
+                        ApprovalTourService operationTourService,
                         TourCruiseAssignmentService tourCruiseAssignmentService,
                         TourLayoutService tourLayoutService) {
 

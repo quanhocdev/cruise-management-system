@@ -59,8 +59,6 @@ public class OperationTourConfigurationService {
                                 .orElseThrow(() -> new AppException("Tour not found", HttpStatus.NOT_FOUND));
 
                 // 2. ACTIVITY
-                // Vì Activity chuyển sang activity-cruise-service qua Event, tour-service tạm
-                // trả list rỗng
                 List<ActivityCruiseTourAssignmentResponse> activities = Collections.emptyList();
 
                 // 3. PRODUCT (Giữ nguyên logic query từ DB tour-service)

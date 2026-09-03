@@ -46,19 +46,6 @@ public class OperationCruiseAssignmentService {
                 this.scheduleStopRepository = scheduleStopRepository;
         }
 
-        /**
-         * Lấy toàn bộ assignment của một Tour.
-         *
-         * PRODUCT / SERVICE / ACTIVITY_CRUISE:
-         * - Lấy từ các bảng assignment tương ứng.
-         *
-         * ACTIVITY_VISIT:
-         * - Không có bảng assignment.
-         * - Mỗi ScheduleStop của Tour được xem là một target
-         * để Activity Visit cấu hình.
-         *
-         * Không gửi Kafka ở đây.
-         */
         public List<TourAssignmentEvent> getAssignments(UUID tourId) {
 
                 List<TourAssignmentEvent> assignments = new ArrayList<>();

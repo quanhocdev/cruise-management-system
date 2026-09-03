@@ -16,90 +16,90 @@ import java.util.UUID;
 @Transactional
 public class OperationActivityCruiseTourService {
 
-    private final AssignmentActivityCruiseRepository assignmentRepository;
+        private final AssignmentActivityCruiseRepository assignmentRepository;
 
-    public OperationActivityCruiseTourService(
-            AssignmentActivityCruiseRepository assignmentRepository) {
+        public OperationActivityCruiseTourService(
+                        AssignmentActivityCruiseRepository assignmentRepository) {
 
-        this.assignmentRepository = assignmentRepository;
-    }
+                this.assignmentRepository = assignmentRepository;
+        }
 
-    // =========================================================
-    // KAFKA - ACTIVITY CRUISE TOUR CONFIGURED
-    // =========================================================
+        // =========================================================
+        // KAFKA - ACTIVITY CRUISE TOUR CONFIGURED
+        // =========================================================
 
-    public void handleActivityCruiseTourConfigured(
-            ActivityCruiseTourConfiguredEvent event) {
+        public void handleActivityCruiseTourConfigured(
+                        ActivityCruiseTourConfiguredEvent event) {
 
-        AssignmentActivityCruise assignment = assignmentRepository
-                .findByTourIdAndCruiseAreaId(
-                        event.tourId(),
-                        event.cruiseAreaId())
-                .orElseThrow(() -> new IllegalStateException(
-                        "AssignmentActivityCruise not found for tourId="
-                                + event.tourId()
-                                + ", cruiseAreaId="
-                                + event.cruiseAreaId()));
+                AssignmentActivityCruise assignment = assignmentRepository
+                                .findByTourIdAndCruiseAreaId(
+                                                event.tourId(),
+                                                event.cruiseAreaId())
+                                .orElseThrow(() -> new IllegalStateException(
+                                                "AssignmentActivityCruise not found for tourId="
+                                                                + event.tourId()
+                                                                + ", cruiseAreaId="
+                                                                + event.cruiseAreaId()));
 
-        assignment.setActivityCruiseTourId(
-                event.activityCruiseTourId());
+                assignment.setActivityCruiseTourId(
+                                event.activityCruiseTourId());
 
-        assignment.setActivityCruiseId(
-                event.activityCruiseId());
+                assignment.setActivityCruiseId(
+                                event.activityCruiseId());
 
-        assignment.setActivityName(
-                event.name());
+                assignment.setActivityName(
+                                event.name());
 
-        assignment.setActivityDescription(
-                event.description());
+                assignment.setActivityDescription(
+                                event.description());
 
-        assignment.setStartTime(
-                event.startTime());
+                assignment.setStartTime(
+                                event.startTime());
 
-        assignment.setEndTime(
-                event.endTime());
+                assignment.setEndTime(
+                                event.endTime());
 
-        assignment.setMaxPassengers(
-                event.maxPassengers());
+                assignment.setMaxPassengers(
+                                event.maxPassengers());
 
-        assignment.setPrice(
-                event.price());
+                assignment.setPrice(
+                                event.price());
 
-        assignment.setImageUrl(
-                event.imageUrl());
+                assignment.setImageUrl(
+                                event.imageUrl());
 
-        assignment.setStatus(
-                event.status());
+                assignment.setStatus(
+                                event.status());
 
-        assignmentRepository.save(assignment);
-    }
+                assignmentRepository.save(assignment);
+        }
 
-    // =========================================================
-    // GET ALL
-    // =========================================================
+        // =========================================================
+        // GET ALL
+        // =========================================================
 
-    @Transactional(readOnly = true)
-    public List<AssignmentActivityCruiseResponse> getAll() {
+        @Transactional(readOnly = true)
+        public List<AssignmentActivityCruiseResponse> getAll() {
 
-        return assignmentRepository
-                .findAllByOrderByCreatedAtAsc()
-                .stream()
-                .map(AssignmentActivityCruiseMapper::toResponse)
-                .toList();
-    }
+                return assignmentRepository
+                                .findAllByOrderByCreatedAtAsc()
+                                .stream()
+                                .map(AssignmentActivityCruiseMapper::toResponse)
+                                .toList();
+        }
 
-    // =========================================================
-    // GET BY TOUR
-    // =========================================================
+        // =========================================================
+        // GET BY TOUR
+        // =========================================================
 
-    @Transactional(readOnly = true)
-    public List<AssignmentActivityCruiseResponse> getByTourId(
-            UUID tourId) {
+        @Transactional(readOnly = true)
+        public List<AssignmentActivityCruiseResponse> getByTourId(
+                        UUID tourId) {
 
-        return assignmentRepository
-                .findAllByTourIdOrderByCreatedAtAsc(tourId)
-                .stream()
-                .map(AssignmentActivityCruiseMapper::toResponse)
-                .toList();
-    }
+                return assignmentRepository
+                                .findAllByTourIdOrderByCreatedAtAsc(tourId)
+                                .stream()
+                                .map(AssignmentActivityCruiseMapper::toResponse)
+                                .toList();
+        }
 }

@@ -1,7 +1,8 @@
 package com.project.convenience.controller.product.convenience;
 
-import com.project.convenience.dto.product.convenience.ProductTourConfigRequest; // Sửa package DTO
-import com.project.convenience.dto.product.convenience.ProductTourResponse; // Sửa package DTO
+import com.project.convenience.dto.product.convenience.ProductTourConfigRequest;
+import com.project.convenience.dto.product.convenience.ProductTourResponse;
+import com.project.convenience.dto.product.convenience.HistoryProductTourResponse;
 import com.project.convenience.service.product.ProductTourConfigService;
 import com.project.convenience.service.product.ProductTourService;
 
@@ -29,21 +30,8 @@ public class ProductTourController {
         }
 
         // =====================================================
-        // GET PENDING CONFIG
+        // GET ALL
         // =====================================================
-
-        /**
-         * Lấy các ProductTour đang chờ cấu hình.
-         *
-         * Điều kiện:
-         * - ProductTour = WAITING_CONFIG
-         */
-        @GetMapping("/pending-config")
-        public ResponseEntity<List<ProductTourResponse>> getPendingConfig() {
-
-                return ResponseEntity.ok(
-                                productTourService.getPendingConfig());
-        }
 
         @GetMapping
         public ResponseEntity<List<ProductTourResponse>> getAllAssignments() {
@@ -53,14 +41,42 @@ public class ProductTourController {
         }
 
         // =====================================================
+        // GET PENDING CONFIG
+        // =====================================================
+
+        @GetMapping("/pending-config")
+        public ResponseEntity<List<ProductTourResponse>> getPendingConfig() {
+
+                return ResponseEntity.ok(
+                                productTourService.getPendingConfig());
+        }
+
+        // =====================================================
+        // GET CONFIGURATION HISTORY
+        // =====================================================
+
+        @GetMapping("/configuration-history")
+        public ResponseEntity<List<HistoryProductTourResponse>> getConfigurationHistory() {
+
+                return ResponseEntity.ok(
+                                productTourService.getConfigurationHistory());
+        }
+
+        // =====================================================
+        // GET CONFIGURATION DETAIL BY TOUR
+        // =====================================================
+
+        @GetMapping("/tour/{tourId}")
+        public ResponseEntity<List<ProductTourResponse>> getConfigurationDetail(
+                        @PathVariable UUID tourId) {
+
+                return ResponseEntity.ok(
+                                productTourService.getConfigurationHistoryDetail(tourId));
+        }
+        // =====================================================
         // POST CONFIG
         // =====================================================
 
-        /**
-         * Cấu hình ProductTour lần đầu.
-         *
-         * WAITING_CONFIG -> NOT_STARTED
-         */
         @PostMapping("/{assignmentId}/config")
         public ResponseEntity<ProductTourResponse> configure(
                         @PathVariable UUID assignmentId,
@@ -76,12 +92,6 @@ public class ProductTourController {
         // PATCH CONFIG
         // =====================================================
 
-        /**
-         * Cập nhật cấu hình ProductTour.
-         *
-         * Chỉ cho phép khi:
-         * NOT_STARTED
-         */
         @PatchMapping("/{assignmentId}/config")
         public ResponseEntity<ProductTourResponse> updateConfig(
                         @PathVariable UUID assignmentId,
