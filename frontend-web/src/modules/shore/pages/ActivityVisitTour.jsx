@@ -468,27 +468,49 @@ function ShoreManagerTour() {
                     )}
                   </div>
 
-                  <button
-                    type="button"
-                    className="shore-manager-tour-complete-button"
-                    disabled={!canComplete || completeLoading === tourId}
-                    onClick={() => handleCompleteConfiguration(tourId)}
-                  >
-                    {completeLoading === tourId ? (
-                      <>
-                        <RefreshCw
-                          size={16}
-                          className="shore-manager-tour-spinner"
-                        />
-                        <span>Đang xử lý...</span>
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle2 size={16} />
-                        <span>Hoàn thành</span>
-                      </>
-                    )}
-                  </button>
+                  {canComplete ? (
+                    <div
+                      className="shore-manager-tour-completed-badge"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        padding: "8px 14px",
+                        backgroundColor: "#ecfdf5",
+                        color: "#059669",
+                        border: "1px solid #10b981",
+                        borderRadius: "8px",
+                        fontSize: "0.85rem",
+                        fontWeight: "600",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      <CheckCircle2 size={16} />
+                      <span>Đã hoàn thành</span>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className="shore-manager-tour-complete-button"
+                      disabled={completeLoading === tourId}
+                      onClick={() => handleCompleteConfiguration(tourId)}
+                    >
+                      {completeLoading === tourId ? (
+                        <>
+                          <RefreshCw
+                            size={16}
+                            className="shore-manager-tour-spinner"
+                          />
+                          <span>Đang xử lý...</span>
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 size={16} />
+                          <span>Hoàn thành</span>
+                        </>
+                      )}
+                    </button>
+                  )}
                 </div>
               );
             })}

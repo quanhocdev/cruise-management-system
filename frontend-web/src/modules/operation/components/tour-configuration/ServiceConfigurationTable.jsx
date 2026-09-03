@@ -3,6 +3,7 @@
 import React from "react";
 import { CheckCircle2, Wrench, XCircle } from "lucide-react";
 import {
+  formatVND,
   getTourStatusMeta,
   isTourItemConfigured,
 } from "../../utils/tourConfigurationUtils";
@@ -64,29 +65,36 @@ const ServiceConfigurationTable = ({ services = [] }) => {
                 <th>Dịch vụ</th>
                 <th>Mô tả</th>
                 <th>Khách tối đa</th>
+                <th>Giá</th>
                 <th>Trạng thái</th>
               </tr>
             </thead>
 
             <tbody>
               {safeServices.map((item, index) => {
-                // =========================================================
-                // TRẠNG THÁI THẬT LẤY TỪ ServiceTourStatus
-                // (WAITING_CONFIG / CONFIGURED / NOT_STARTED /
-                //  IN_PROGRESS / COMPLETED)
-                // =========================================================
+                // 🔍 Log kiểm tra cấu trúc dữ liệu trả về thực tế từ Backend
+                console.log("Service item data:", item);
 
                 const statusMeta = getTourStatusMeta(item.status);
                 const configured = isTourItemConfigured(item.status);
 
+                // Fallback linh hoạt tên trường
+                const displayName =
+                  item.serviceName || item.name || "Chưa xác định";
+
+                const displayDescription =
+                  item.description || item.serviceDescription || "—";
+
+                const displayPrice = item.price;
+
                 return (
-                  <tr key={item.id || `service-${index}`}>
+                  <tr key={item.id || item.serviceId || `service-${index}`}>
                     {/* =================================================
                         SERVICE
                         ================================================= */}
                     <td>
                       <div className="service-configuration-name">
-                        <strong>{item.serviceName || "Chưa xác định"}</strong>
+                        <strong>{displayName}</strong>
 
                         {item.serviceId && <span>{item.serviceId}</span>}
                       </div>
@@ -96,7 +104,7 @@ const ServiceConfigurationTable = ({ services = [] }) => {
                         DESCRIPTION
                         ================================================= */}
                     <td className="service-configuration-description">
-                      {item.description || "—"}
+                      {displayDescription}
                     </td>
 
                     {/* =================================================
@@ -105,6 +113,11 @@ const ServiceConfigurationTable = ({ services = [] }) => {
                     <td>
                       {item.maxPassengers != null ? item.maxPassengers : "—"}
                     </td>
+
+                    {/* =================================================
+                        PRICE (ĐÃ BỔ SUNG CỘT GIÁ)
+                        ================================================= */}
+                    <td>{formatVND(displayPrice)}</td>
 
                     {/* =================================================
                         STATUS

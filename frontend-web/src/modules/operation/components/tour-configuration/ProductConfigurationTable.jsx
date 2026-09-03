@@ -65,18 +65,12 @@ const ProductConfigurationTable = ({ products = [] }) => {
                 <th>Sản phẩm</th>
                 <th>Số lượng</th>
                 <th>Đơn giá</th>
-                <th>Tổng tiền</th>
                 <th>Trạng thái</th>
               </tr>
             </thead>
 
             <tbody>
               {safeProducts.map((item, index) => {
-                const totalPrice =
-                  item.price != null && item.quantity != null
-                    ? Number(item.price) * Number(item.quantity)
-                    : null;
-
                 // =========================================================
                 // TRẠNG THÁI THẬT LẤY TỪ ProductTourStatus
                 // (WAITING_CONFIG / CONFIGURED / NOT_STARTED /
@@ -108,11 +102,6 @@ const ProductConfigurationTable = ({ products = [] }) => {
                         UNIT PRICE
                         ================================================= */}
                     <td>{formatVND(item.price)}</td>
-
-                    {/* =================================================
-                        TOTAL
-                        ================================================= */}
-                    <td>{formatVND(totalPrice)}</td>
 
                     {/* =================================================
                         STATUS

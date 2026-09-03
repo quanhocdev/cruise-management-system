@@ -2,8 +2,43 @@
 import { Clock, MapPin, Ship, Tag, X, Calendar, Compass } from "lucide-react";
 import "../styles/ShoreTourDetailModal.css";
 
+// Hàm format ngày giờ hiển thị gọn gàng, dễ đọc
+function formatDisplayDateTime(dateTimeStr) {
+  if (!dateTimeStr) return "—";
+  try {
+    const [datePart, timePart] = dateTimeStr.split("T");
+    if (!datePart || !timePart) return dateTimeStr;
+    const [year, month, day] = datePart.split("-");
+    const timeOnly = timePart.substring(0, 5);
+    return `${day}/${month}/${year} lúc ${timeOnly}`;
+  } catch (e) {
+    return dateTimeStr;
+  }
+}
+
 const ShoreTourDetailModal = ({ visitTour, masterTour, onClose }) => {
   if (!visitTour) return null;
+
+  // Trích xuất thông tin portName, arriveAt, leaveAt từ masterTour dựa trên scheduleStopId của visitTour
+  let targetStop = null;
+  let targetScheduleDate = "";
+
+  if (masterTour && masterTour.schedules) {
+    for (const schedule of masterTour.schedules) {
+      if (schedule.stops) {
+        const found = schedule.stops.find(
+          (stop) =>
+            stop.id === visitTour.scheduleStopId ||
+            stop.scheduleStopId === visitTour.scheduleStopId,
+        );
+        if (found) {
+          targetStop = found;
+          targetScheduleDate = schedule.scheduleDate || "";
+          break;
+        }
+      }
+    }
+  }
 
   const getStatusLabel = (status) => {
     switch (status) {
@@ -116,12 +151,42 @@ const ShoreTourDetailModal = ({ visitTour, masterTour, onClose }) => {
             </div>
           </section>
 
-          {/* SCHEDULE STOP */}
+          {/* SCHEDULE STOP & PORT INFO */}
           <section className="shore-tour-detail-section">
             <h4>
               <MapPin size={15} />
-              Điểm dừng
+              Thông tin Điểm dừng & Cập cảng
             </h4>
+
+            <div className="shore-tour-detail-row">
+              <span className="shore-tour-detail-label">
+                Tên cảng / Điểm dừng
+              </span>
+              <span className="shore-tour-detail-value font-medium">
+                {targetStop?.portName || visitTour.portName || "—"}
+              </span>
+            </div>
+
+            {targetScheduleDate && (
+              <div className="shore-tour-detail-row">
+                <span className="shore-tour-detail-label">Ngày lịch trình</span>
+                <span className="shore-tour-detail-value">
+                  {targetScheduleDate}
+                </span>
+              </div>
+            )}
+
+            {(targetStop?.arriveAt || targetStop?.leaveAt) && (
+              <div className="shore-tour-detail-row">
+                <span className="shore-tour-detail-label">
+                  Khung giờ cập cảng
+                </span>
+                <span className="shore-tour-detail-value">
+                  {formatDisplayDateTime(targetStop?.arriveAt)} →{" "}
+                  {formatDisplayDateTime(targetStop?.leaveAt)}
+                </span>
+              </div>
+            )}
 
             <div className="shore-tour-detail-row">
               <span className="shore-tour-detail-label">Schedule Stop ID</span>
@@ -135,7 +200,7 @@ const ShoreTourDetailModal = ({ visitTour, masterTour, onClose }) => {
           <section className="shore-tour-detail-section">
             <h4>
               <Clock size={15} />
-              Thời gian & Giá
+              Thời gian & Giá thực tế
             </h4>
 
             <div className="shore-tour-detail-row">
@@ -144,7 +209,7 @@ const ShoreTourDetailModal = ({ visitTour, masterTour, onClose }) => {
               </span>
               <span className="shore-tour-detail-value">
                 {visitTour.startTime && visitTour.endTime
-                  ? `${visitTour.startTime} → ${visitTour.endTime}`
+                  ? `${formatDisplayDateTime(visitTour.startTime)} → ${formatDisplayDateTime(visitTour.endTime)}`
                   : "—"}
               </span>
             </div>
