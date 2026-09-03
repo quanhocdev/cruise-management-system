@@ -107,6 +107,22 @@ const ActivityVisitConfigurationTable = ({ activities = [] }) => {
                     <td>
                       <div className="activity-visit-configuration-name">
                         <strong>{displayName}</strong>
+
+                        {/* Hiển thị ID điểm dừng nhỏ gọn khi chưa có tên hoạt động chính thức */}
+                        {item.scheduleStopId && (
+                          <span
+                            style={{
+                              fontSize: "0.75rem",
+                              color: "#94a3b8",
+                              display: "block",
+                              fontFamily: "monospace",
+                              marginTop: "2px",
+                            }}
+                            title={item.scheduleStopId}
+                          >
+                            Điểm dừng: {item.scheduleStopId.substring(0, 8)}...
+                          </span>
+                        )}
                       </div>
                     </td>
 
