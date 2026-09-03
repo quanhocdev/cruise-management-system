@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PosTransactionDao {
+    @Query("SELECT * FROM pos_transactions WHERE localId = :localId LIMIT 1")
+    suspend fun findByLocalId(localId: String): PosTransactionEntity?
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(transaction: PosTransactionEntity)
 

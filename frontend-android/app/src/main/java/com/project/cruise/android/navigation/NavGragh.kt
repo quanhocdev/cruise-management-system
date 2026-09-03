@@ -22,6 +22,10 @@ import com.project.cruise.android.data.auth.TokenManager
 import com.project.cruise.android.data.network.ApiService
 import com.project.cruise.android.data.network.RetrofitClient
 import com.project.cruise.android.data.repository.AuthRepository
+import com.project.cruise.android.data.repository.PosIdentityRepository
+import com.project.cruise.android.viewmodel.pos.PosIdentityViewModel
+import com.project.cruise.android.viewmodel.pos.PosIdentityViewModelFactory
+import com.project.cruise.android.ui.screens.pos.PosIdentityScreen
 import com.project.cruise.android.data.repository.PassengerCatalogRepository
 import com.project.cruise.android.data.repository.PassengerBookingRepository
 import com.project.cruise.android.ui.screens.passenger.CreateBookingScreen
@@ -66,6 +70,7 @@ object Routes {
     const val POS_QR_SCAN = "pos_qr_scan"
     const val POS_NFC_SCAN = "pos_nfc_scan"
     const val POS_HISTORY = "pos_history"
+    const val POS_IDENTITY = "pos_identity/{localId}"
 }
 
 @Composable
@@ -168,19 +173,37 @@ fun NavGraph() {
         composable(Routes.POS_QR_SCAN) {
             QrScanScreen(
                 onBackClick = { navController.popBackStack() },
-                onSaved = { navController.popBackStack() }
+                onSaved = { id ->
+                    navController.navigate("pos_identity/$id") {
+                        popUpTo(Routes.POS_QR_SCAN) { inclusive = true }
+                    }
+                }
             )
         }
 
         composable(Routes.POS_NFC_SCAN) {
             NfcScanScreen(
                 onBackClick = { navController.popBackStack() },
-                onSaved = { navController.popBackStack() }
+                onSaved = { id ->
+                    navController.navigate("pos_identity/$id") {
+                        popUpTo(Routes.POS_NFC_SCAN) { inclusive = true }
+                    }
+                }
             )
         }
 
         composable(Routes.POS_HISTORY) {
-            PosHistoryScreen(onBackClick = { navController.popBackStack() })
+            PosHistoryScreen(onBackClick = { navController.popBackStack() },
+                onIdentify = { navController.navigate("pos_identity/$it") })
+        }
+
+        composable(Routes.POS_IDENTITY, arguments = listOf(navArgument("localId") { type = NavType.StringType })) { entry ->
+            val identityViewModel: PosIdentityViewModel = viewModel(
+                viewModelStoreOwner = entry,
+                factory = PosIdentityViewModelFactory(PosIdentityRepository(context), entry.arguments?.getString("localId").orEmpty())
+            )
+            val identityState by identityViewModel.state.collectAsState()
+            PosIdentityScreen(identityState, onRetry = identityViewModel::verify, onBack = { navController.popBackStack() })
         }
 
         // =================================================
