@@ -1,6 +1,6 @@
 // src/modules/shore/components/visit-tour/VisitTourFormModal.jsx
 import { useEffect, useState } from "react";
-import { X, AlertCircle, Clock } from "lucide-react";
+import { X, AlertCircle, Clock, Calendar, Info } from "lucide-react";
 import "../../styles/VisitTourFormModal.css";
 
 const EMPTY_FORM = {
@@ -17,6 +17,20 @@ function toInputDateTime(value) {
   return value.slice(0, 16);
 }
 
+// Hàm format hiển thị ngày giờ đẹp mắt (VD: 10/10/2026 08:00)
+function formatDisplayDateTime(dateTimeStr) {
+  if (!dateTimeStr) return "—";
+  try {
+    const [datePart, timePart] = dateTimeStr.split("T");
+    if (!datePart || !timePart) return dateTimeStr;
+    const [year, month, day] = datePart.split("-");
+    const timeOnly = timePart.substring(0, 5);
+    return `${day}/${month}/${year} lúc ${timeOnly}`;
+  } catch (e) {
+    return dateTimeStr;
+  }
+}
+
 function VisitTourFormModal({
   visitTour,
   scheduleStop,
@@ -29,10 +43,11 @@ function VisitTourFormModal({
 
   const isEdit = Boolean(visitTour);
 
-  // Lấy thông tin thời gian cập cảng từ scheduleStop hoặc bản ghi visitTour hiện có
   const arriveAt = scheduleStop?.arriveAt || visitTour?.arriveAt || "";
   const leaveAt = scheduleStop?.leaveAt || visitTour?.leaveAt || "";
   const stopName = scheduleStop?.portName || visitTour?.portName || "";
+  const scheduleDate =
+    scheduleStop?.scheduleDate || visitTour?.scheduleDate || "";
 
   useEffect(() => {
     if (visitTour) {
@@ -47,7 +62,7 @@ function VisitTourFormModal({
       return;
     }
 
-    // Nếu tạo mới, tự động gợi ý điền sẵn thời gian bắt đầu bằng thời gian tàu cập bến (nếu có)
+    // Trạng thái gán đủ ban đầu theo giờ cập cảng chuẩn
     setForm({
       ...EMPTY_FORM,
       startTime: toInputDateTime(arriveAt),
@@ -82,17 +97,17 @@ function VisitTourFormModal({
       return;
     }
 
-    // Kiểm tra ràng buộc không được lệch khỏi khung giờ cập cảng của tàu
+    // Kiểm tra ràng buộc bắt buộc nằm trong khoảng giờ tàu cập bến
     if (arriveAt && form.startTime + ":00" < arriveAt) {
       setError(
-        `Thời gian bắt đầu không được sớm hơn giờ tàu cập bến (${arriveAt}).`,
+        `Thời gian bắt đầu không được sớm hơn giờ tàu cập bến (${formatDisplayDateTime(arriveAt)}).`,
       );
       return;
     }
 
     if (leaveAt && form.endTime + ":00" > leaveAt) {
       setError(
-        `Thời gian kết thúc không được muộn hơn giờ tàu rời cảng (${leaveAt}).`,
+        `Thời gian kết thúc không được muộn hơn giờ tàu rời cảng (${formatDisplayDateTime(leaveAt)}).`,
       );
       return;
     }
@@ -154,34 +169,43 @@ function VisitTourFormModal({
           </button>
         </div>
 
-        {/* HIỂN THỊ KHUNG GIỜ TÀU CẬP CẢNG ĐỂ NGƯỜI DÙNG DỄ THEO DÕI */}
-        {arriveAt && leaveAt && (
-          <div
-            className="visit-tour-modal-stop-time"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              background: "var(--bg-accent, #f0f4f8)",
-              padding: "10px 14px",
-              borderRadius: "6px",
-              margin: "12px 0",
-              fontSize: "0.875rem",
-            }}
-          >
-            <Clock size={16} color="var(--primary-color)" />
-            <span>Khung giờ cập cảng cho phép:</span>
-            <strong>{arriveAt}</strong>
-            <span>→</span>
-            <strong>{leaveAt}</strong>
+        {/* KHU VỰC THÔNG TIN CẬP CẢNG KÈM DÒNG CHÚ THÍCH CÓ THỂ ĐIỀU CHỈNH */}
+        <div className="visit-tour-modal-notice-box">
+          {scheduleDate && (
+            <div className="notice-row">
+              <Calendar size={15} className="notice-icon" />
+              <span>Ngày lịch trình:</span>
+              <strong>{scheduleDate}</strong>
+            </div>
+          )}
+
+          {arriveAt && leaveAt && (
+            <div className="notice-row">
+              <Clock size={15} className="notice-icon" />
+              <span>Khung giờ cập cảng cho phép:</span>
+              <div className="time-badge-group">
+                <span className="time-badge">
+                  {formatDisplayDateTime(arriveAt)}
+                </span>
+                <span className="separator">→</span>
+                <span className="time-badge">
+                  {formatDisplayDateTime(leaveAt)}
+                </span>
+              </div>
+            </div>
+          )}
+
+          <div className="notice-hint">
+            <Info size={13} />
+            <span>
+              Hệ thống tự động điền theo khung giờ cập cảng, bạn có thể tự điều
+              chỉnh lại thời gian bên dưới cho phù hợp.
+            </span>
           </div>
-        )}
+        </div>
 
         {error && (
-          <div
-            className="visit-tour-modal-error"
-            style={{ display: "flex", alignItems: "center", gap: "6px" }}
-          >
+          <div className="visit-tour-modal-error">
             <AlertCircle size={16} />
             <span>{error}</span>
           </div>
@@ -210,14 +234,16 @@ function VisitTourFormModal({
               value={form.description}
               onChange={handleChange}
               placeholder="Nhập mô tả hoạt động..."
-              rows={3}
+              rows={2}
               disabled={loading}
             />
           </div>
 
           <div className="visit-tour-form-row">
             <div className="visit-tour-form-field">
-              <label htmlFor="visit-tour-start-time">Thời gian bắt đầu</label>
+              <label htmlFor="visit-tour-start-time">
+                Thời gian bắt đầu tham quan
+              </label>
               <input
                 id="visit-tour-start-time"
                 name="startTime"
@@ -231,7 +257,9 @@ function VisitTourFormModal({
             </div>
 
             <div className="visit-tour-form-field">
-              <label htmlFor="visit-tour-end-time">Thời gian kết thúc</label>
+              <label htmlFor="visit-tour-end-time">
+                Thời gian kết thúc tham quan
+              </label>
               <input
                 id="visit-tour-end-time"
                 name="endTime"

@@ -59,12 +59,15 @@ function ShoreManagerTour() {
     setError(null);
 
     try {
-      // 1. Lấy danh sách visit tours cấu hình
       const visitData = await visitTourService.getAll();
       setVisitTours(visitData || []);
+    } catch (err) {
+      console.error("🔥 LOAD VISIT TOURS ERROR:", err);
+    }
 
-      // 2. Lấy danh sách master tours phân cấp từ Kafka sync
+    try {
       const masterData = await visitTourService.getAllMasterTours();
+      console.log("🔍 [DEBUG] Fetched masterData:", masterData);
       const map = new Map();
       if (masterData) {
         masterData.forEach((tour) => {
@@ -73,11 +76,7 @@ function ShoreManagerTour() {
       }
       setMasterToursMap(map);
     } catch (err) {
-      console.error("🔥 LOAD DATA ERROR:", err);
-      setError(
-        err.response?.data?.message || "Không thể tải dữ liệu quản lý Tour bờ.",
-      );
-      setVisitTours([]);
+      console.error("🔥 LOAD MASTER TOURS ERROR:", err);
     } finally {
       setLoading(false);
     }
@@ -175,22 +174,67 @@ function ShoreManagerTour() {
   };
 
   // =====================================================
-  // CONFIGURATION
+  // CONFIGURATION (LẤY ĐÚNG THÔNG TIN TỪ MASTER TOUR MAP)
+  // =====================================================
+
+  // =====================================================
+  // CONFIGURATION (CÓ THÊM LOG KIỂM TRA DỮ LIỆU)
   // =====================================================
 
   const handleConfiguration = (tourId, scheduleStopId) => {
-    const targetTour = visitTours.find(
+    console.log(
+      "🔍 [DEBUG] Click Configure - tourId:",
+      tourId,
+      "scheduleStopId:",
+      scheduleStopId,
+    );
+    console.log("🔍 [DEBUG] masterToursMap current size:", masterToursMap.size);
+
+    const masterTour = masterToursMap.get(tourId);
+    console.log("🔍 [DEBUG] Found masterTour:", masterTour);
+
+    let targetStop = null;
+    let targetScheduleDate = "";
+
+    if (masterTour && masterTour.schedules) {
+      for (const schedule of masterTour.schedules) {
+        if (schedule.stops) {
+          const foundStop = schedule.stops.find(
+            (stop) =>
+              stop.id === scheduleStopId ||
+              stop.scheduleStopId === scheduleStopId,
+          );
+          if (foundStop) {
+            targetStop = foundStop;
+            targetScheduleDate = schedule.scheduleDate || "";
+            break;
+          }
+        }
+      }
+    }
+
+    console.log("🔍 [DEBUG] Found targetStop from Master:", targetStop);
+    console.log("🔍 [DEBUG] Found targetScheduleDate:", targetScheduleDate);
+
+    const targetVisitTour = visitTours.find(
       (item) => item.scheduleStopId === scheduleStopId,
     );
 
-    setSelectedScheduleStop({
+    const finalScheduleStopData = {
       scheduleStopId: scheduleStopId,
-      arriveAt: targetTour?.arriveAt || "",
-      leaveAt: targetTour?.leaveAt || "",
-      portName: targetTour?.portName || "",
-    });
+      portName: targetStop?.portName || targetVisitTour?.portName || "",
+      arriveAt: targetStop?.arriveAt || targetVisitTour?.arriveAt || "",
+      leaveAt: targetStop?.leaveAt || targetVisitTour?.leaveAt || "",
+      scheduleDate: targetScheduleDate || targetVisitTour?.scheduleDate || "",
+    };
 
-    setEditingVisitTour(targetTour?.name ? targetTour : null);
+    console.log(
+      "🔍 [DEBUG] Final selectedScheduleStop passed to Modal:",
+      finalScheduleStopData,
+    );
+
+    setSelectedScheduleStop(finalScheduleStopData);
+    setEditingVisitTour(targetVisitTour?.name ? targetVisitTour : null);
     setIsModalOpen(true);
   };
 
@@ -452,6 +496,7 @@ function ShoreManagerTour() {
 
           <ShoreTourTable
             visitTours={filteredVisitTours}
+            masterToursMap={masterToursMap}
             onConfigure={handleConfiguration}
           />
         </>

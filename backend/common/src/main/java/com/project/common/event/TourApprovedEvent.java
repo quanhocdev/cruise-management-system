@@ -20,5 +20,5 @@ public record TourApprovedEvent(
     }
 }
 
-// docker compose build --no-cache
+// docker compose up -d --build <tên_service_cần_sửa>
 // mvn clean install -DskipTests
