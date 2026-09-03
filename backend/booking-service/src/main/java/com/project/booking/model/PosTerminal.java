@@ -18,6 +18,11 @@ public class PosTerminal {
     private boolean active;
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
+    @Column(name = "assigned_voyage_id")
+    private java.util.UUID assignedVoyageId;
+
+    public java.util.UUID getAssignedVoyageId() { return assignedVoyageId; }
+    public void setAssignedVoyageId(java.util.UUID value) { assignedVoyageId = value; }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
