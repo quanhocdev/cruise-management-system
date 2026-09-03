@@ -1,8 +1,8 @@
-// src/modules/components/ShoreTourDetailModal.jsx
-import { Clock, MapPin, Ship, Tag, X } from "lucide-react";
+// src/modules/shore/components/ShoreTourDetailModal.jsx
+import { Clock, MapPin, Ship, Tag, X, Calendar, Compass } from "lucide-react";
 import "../styles/ShoreTourDetailModal.css";
 
-const ShoreTourDetailModal = ({ visitTour, onClose }) => {
+const ShoreTourDetailModal = ({ visitTour, masterTour, onClose }) => {
   if (!visitTour) return null;
 
   const getStatusLabel = (status) => {
@@ -56,24 +56,62 @@ const ShoreTourDetailModal = ({ visitTour, onClose }) => {
 
         {/* BODY */}
         <div className="shore-tour-detail-body">
-          {/* TOUR */}
+          {/* TOUR MASTER INFO */}
           <section className="shore-tour-detail-section">
             <h4>
-              <Ship size={15} />
-              Thông tin Tour
+              <Compass size={15} />
+              Thông tin Master Tour
             </h4>
 
             <div className="shore-tour-detail-row">
-              <span className="shore-tour-detail-label">Tour ID</span>
-              <span className="shore-tour-detail-value font-mono">
-                {visitTour.tourId || "—"}
+              <span className="shore-tour-detail-label">Mã Tour (Code)</span>
+              <span className="shore-tour-detail-value">
+                {masterTour?.code || "—"}
               </span>
             </div>
+
+            <div className="shore-tour-detail-row">
+              <span className="shore-tour-detail-label">Tên Tour</span>
+              <span className="shore-tour-detail-value font-medium">
+                {masterTour?.name || "—"}
+              </span>
+            </div>
+
+            <div className="shore-tour-detail-row">
+              <span className="shore-tour-detail-label">Thời gian Tour</span>
+              <span className="shore-tour-detail-value">
+                {masterTour?.startDate && masterTour?.endDate
+                  ? `${masterTour.startDate} → ${masterTour.endDate}`
+                  : "—"}
+              </span>
+            </div>
+
+            <div className="shore-tour-detail-row">
+              <span className="shore-tour-detail-label">Trạng thái chuyến</span>
+              <span className="shore-tour-detail-value">
+                {masterTour?.statusTrip || "—"}
+              </span>
+            </div>
+          </section>
+
+          {/* VISIT TOUR CONFIGURATION */}
+          <section className="shore-tour-detail-section">
+            <h4>
+              <Ship size={15} />
+              Cấu hình Visit Tour
+            </h4>
 
             <div className="shore-tour-detail-row">
               <span className="shore-tour-detail-label">Tên Visit Tour</span>
               <span className="shore-tour-detail-value">
                 {visitTour.name || "Chưa cấu hình"}
+              </span>
+            </div>
+
+            <div className="shore-tour-detail-row">
+              <span className="shore-tour-detail-label">Mô tả</span>
+              <span className="shore-tour-detail-value">
+                {visitTour.description || "—"}
               </span>
             </div>
           </section>
@@ -101,10 +139,21 @@ const ShoreTourDetailModal = ({ visitTour, onClose }) => {
             </h4>
 
             <div className="shore-tour-detail-row">
-              <span className="shore-tour-detail-label">Thời gian</span>
+              <span className="shore-tour-detail-label">
+                Thời gian hoạt động
+              </span>
               <span className="shore-tour-detail-value">
                 {visitTour.startTime && visitTour.endTime
                   ? `${visitTour.startTime} → ${visitTour.endTime}`
+                  : "—"}
+              </span>
+            </div>
+
+            <div className="shore-tour-detail-row">
+              <span className="shore-tour-detail-label">Số khách tối đa</span>
+              <span className="shore-tour-detail-value">
+                {visitTour.maxPassengers != null
+                  ? visitTour.maxPassengers
                   : "—"}
               </span>
             </div>
@@ -121,7 +170,7 @@ const ShoreTourDetailModal = ({ visitTour, onClose }) => {
             <div className="shore-tour-detail-row">
               <span className="shore-tour-detail-label">
                 <Tag size={13} style={{ marginRight: 4 }} />
-                Trạng thái
+                Trạng thái cấu hình
               </span>
               <span
                 className={`shore-tour-detail-status ${getStatusClass(

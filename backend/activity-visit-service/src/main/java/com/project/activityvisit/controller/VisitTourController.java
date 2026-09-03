@@ -1,6 +1,7 @@
 package com.project.activityvisit.controller;
 
 import com.project.activityvisit.dto.CreateVisitTourRequest;
+import com.project.activityvisit.dto.TourVisitSyncResponse;
 import com.project.activityvisit.dto.UpdateVisitTourRequest;
 import com.project.activityvisit.dto.VisitTourResponse;
 import com.project.activityvisit.service.VisitTourService;
@@ -117,5 +118,22 @@ public class VisitTourController {
                 return ResponseEntity
                                 .noContent()
                                 .build();
+        }
+        // =====================================================
+        // GET MASTER TOUR SYNCHRONIZED DATA
+        // =====================================================
+
+        @GetMapping("/master/{tourId}")
+        public ResponseEntity<TourVisitSyncResponse> getMasterTourById(
+                        @PathVariable UUID tourId) {
+
+                return ResponseEntity.ok(
+                                visitTourService.getMasterTourById(tourId));
+        }
+
+        @GetMapping("/masters")
+        public ResponseEntity<List<TourVisitSyncResponse>> getAllMasterTours() {
+                return ResponseEntity.ok(
+                                visitTourService.getAllMasterTours());
         }
 }

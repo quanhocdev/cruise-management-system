@@ -25,33 +25,12 @@ public class ActivityVisitMasterSyncListener {
             @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
             @Header(KafkaHeaders.OFFSET) long offset) {
 
-        log.info("==> [Kafka Consumer] Nhận TourMasterSyncEvent cho Visit - Tour ID: {}", event.tourId());
-
-        if (event.schedules() == null || event.schedules().isEmpty()) {
-            log.info("==> [Activity Visit] Tour {} không có schedules nào", event.tourId());
-            return;
-        }
+        log.info("==> [Kafka Consumer] Nhận TourMasterSyncEvent cho Visit - Tour ID: {}, Partition: {}, Offset: {}",
+                event.tourId(), partition, offset);
 
         try {
-            // Duyệt qua các schedule và schedule stops để lấy thời gian cập cảng, tên cảng
-            // lưu vào DB của activity-visit-service
-            for (TourMasterSyncEvent.ScheduleDetail schedule : event.schedules()) {
-                if (schedule.stops() != null) {
-                    for (TourMasterSyncEvent.ScheduleStopDetail stop : schedule.stops()) {
-
-                        log.info("--> [Activity Visit Sync] Tour: {}, Stop ID: {}, Port: {}, Arrive: {}, Leave: {}",
-                                event.tourId(), stop.scheduleStopId(), stop.portName(), stop.arriveAt(),
-                                stop.leaveAt());
-
-                        // Gọi service để lưu hoặc cập nhật thông tin điểm dừng / thời gian vào DB của
-                        // service này
-                        // visitTourService.syncScheduleStop(event.tourId(), schedule, stop);
-                    }
-                }
-            }
-
+            visitTourService.syncTourMasterData(event);
             log.info("==> [Activity Visit] Đồng bộ Master Data thành công cho Tour ID: {}", event.tourId());
-
         } catch (Exception e) {
             log.error("==> [Activity Visit] Lỗi xử lý TourMasterSyncEvent cho Tour ID: {}", event.tourId(), e);
             throw e;

@@ -1,4 +1,4 @@
-// frontend-web/src/modules/shore/pages/ActivityVisitTour.jsx
+// src/modules/shore/pages/ActivityVisitTour.jsx
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -8,6 +8,8 @@ import {
   AlertCircle,
   MapPin,
   History,
+  Calendar,
+  Compass,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -32,8 +34,9 @@ function ShoreManagerTour() {
   const navigate = useNavigate();
 
   const [visitTours, setVisitTours] = useState([]);
+  const [masterToursMap, setMasterToursMap] = useState(new Map()); // Lưu thông tin Master Tour theo tourId
   const [loading, setLoading] = useState(false);
-  const [visitTourLoading, setVisitTourLoading] = useState(false); // Đã đưa vào đúng vị trí trong component
+  const [visitTourLoading, setVisitTourLoading] = useState(false);
 
   const [completeLoading, setCompleteLoading] = useState(null);
 
@@ -48,20 +51,31 @@ function ShoreManagerTour() {
   const [selectedScheduleStop, setSelectedScheduleStop] = useState(null);
 
   // =====================================================
-  // LOAD
+  // LOAD DATA & MASTER TOURS
   // =====================================================
 
-  const loadVisitTours = useCallback(async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const data = await visitTourService.getAll();
-      setVisitTours(data || []);
+      // 1. Lấy danh sách visit tours cấu hình
+      const visitData = await visitTourService.getAll();
+      setVisitTours(visitData || []);
+
+      // 2. Lấy danh sách master tours phân cấp từ Kafka sync
+      const masterData = await visitTourService.getAllMasterTours();
+      const map = new Map();
+      if (masterData) {
+        masterData.forEach((tour) => {
+          map.set(tour.id, tour);
+        });
+      }
+      setMasterToursMap(map);
     } catch (err) {
-      console.error("🔥 LOAD VISIT TOURS ERROR:", err);
+      console.error("🔥 LOAD DATA ERROR:", err);
       setError(
-        err.response?.data?.message || "Không thể tải danh sách Visit Tour.",
+        err.response?.data?.message || "Không thể tải dữ liệu quản lý Tour bờ.",
       );
       setVisitTours([]);
     } finally {
@@ -70,8 +84,8 @@ function ShoreManagerTour() {
   }, []);
 
   useEffect(() => {
-    loadVisitTours();
-  }, [loadVisitTours]);
+    loadData();
+  }, [loadData]);
 
   // =====================================================
   // FILTER
@@ -148,7 +162,7 @@ function ShoreManagerTour() {
     try {
       await visitTourService.completeTourConfiguration(tourId);
       setSuccessMessage("Đã hoàn thành cấu hình Visit Tour thành công.");
-      await loadVisitTours();
+      await loadData();
     } catch (err) {
       console.error("🔥 COMPLETE VISIT TOUR CONFIGURATION ERROR:", err);
       setCompleteError(
@@ -165,7 +179,6 @@ function ShoreManagerTour() {
   // =====================================================
 
   const handleConfiguration = (tourId, scheduleStopId) => {
-    // Tìm đúng record VisitTour trong danh sách để lấy thông tin điểm dừng nếu có
     const targetTour = visitTours.find(
       (item) => item.scheduleStopId === scheduleStopId,
     );
@@ -216,7 +229,7 @@ function ShoreManagerTour() {
       <div className="shore-manager-tour">
         <div className="shore-manager-tour-loading">
           <RefreshCw size={22} className="shore-manager-tour-spinner" />
-          <span>Đang tải danh sách Visit Tour...</span>
+          <span>Đang tải danh sách Tour bờ...</span>
         </div>
       </div>
     );
@@ -247,7 +260,7 @@ function ShoreManagerTour() {
           <button
             type="button"
             className="shore-manager-tour-refresh"
-            onClick={loadVisitTours}
+            onClick={loadData}
             disabled={loading}
           >
             <RefreshCw size={17} />
@@ -259,7 +272,7 @@ function ShoreManagerTour() {
       {error && (
         <div className="shore-manager-tour-error">
           <span>{error}</span>
-          <button type="button" onClick={loadVisitTours}>
+          <button type="button" onClick={loadData}>
             Thử lại
           </button>
         </div>
@@ -339,9 +352,11 @@ function ShoreManagerTour() {
             </div>
           </div>
 
+          {/* HIỂN THỊ THÔNG TIN CHI TIẾT MASTER TOUR KÈM SỐ LƯỢNG NGÀY / LỊCH TRÌNH */}
           <div className="shore-manager-tour-completion-list">
             {[...tourConfigurationStatus.entries()].map(([tourId, tours]) => {
               const canComplete = canCompleteTour(tourId);
+              const masterTourInfo = masterToursMap.get(tourId);
 
               return (
                 <div
@@ -352,15 +367,45 @@ function ShoreManagerTour() {
                 >
                   <div className="shore-manager-tour-completion-info">
                     <div className="shore-manager-tour-completion-icon">
-                      <MapPin size={18} />
+                      <Compass size={18} />
                     </div>
 
                     <div>
-                      <span>Tour</span>
-                      <strong>{tourId}</strong>
-                      <small>
-                        {tours.length} Visit Tour
-                        {tours.length > 1 ? "s" : ""}
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "8px",
+                          alignItems: "center",
+                        }}
+                      >
+                        <strong>
+                          {masterTourInfo?.name || `Tour ID: ${tourId}`}
+                        </strong>
+                        {masterTourInfo?.code && (
+                          <span
+                            style={{
+                              fontSize: "0.75rem",
+                              background: "#e2e8f0",
+                              padding: "2px 6px",
+                              borderRadius: "4px",
+                            }}
+                          >
+                            {masterTourInfo.code}
+                          </span>
+                        )}
+                      </div>
+                      <small
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          marginTop: "2px",
+                        }}
+                      >
+                        <Calendar size={13} />
+                        {masterTourInfo?.startDate && masterTourInfo?.endDate
+                          ? `${masterTourInfo.startDate} → ${masterTourInfo.endDate}`
+                          : `Đồng bộ: ${tours.length} điểm dừng`}
                       </small>
                     </div>
                   </div>
@@ -437,7 +482,7 @@ function ShoreManagerTour() {
               setIsModalOpen(false);
               setEditingVisitTour(null);
               setSelectedScheduleStop(null);
-              await loadVisitTours();
+              await loadData();
             } catch (err) {
               console.error("SAVE VISIT TOUR ERROR:", err);
               throw err;

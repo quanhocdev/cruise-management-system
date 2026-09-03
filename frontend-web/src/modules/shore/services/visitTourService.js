@@ -132,6 +132,23 @@ const visitTourService = {
 
     return response.data;
   },
+
+  /**
+   * GET /api/shore/visit-tours/master/{tourId}
+   *
+   * Lấy cấu trúc cây phân cấp (Tour - Schedule - Stop) đã đồng bộ từ Kafka.
+   */
+
+  getMasterTour: async (tourId) => {
+    const response = await api.get(`${BASE_URL}/master/${tourId}`);
+
+    return response.data;
+  },
+  getAllMasterTours: async () => {
+    const response = await api.get(`${BASE_URL}/masters`);
+
+    return response.data;
+  },
 };
 
 export default visitTourService;

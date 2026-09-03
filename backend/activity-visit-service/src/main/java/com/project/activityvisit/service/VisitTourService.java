@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.UUID;
 
 import com.project.activityvisit.dto.CreateVisitTourRequest;
+import com.project.activityvisit.dto.TourVisitSyncResponse;
 import com.project.activityvisit.dto.UpdateVisitTourRequest;
 import com.project.activityvisit.dto.VisitTourResponse;
+import com.project.common.event.TourMasterSyncEvent;
 
 public interface VisitTourService {
 
@@ -30,6 +32,12 @@ public interface VisitTourService {
         VisitTourResponse createVisitTourFromEvent(
                         UUID tourId,
                         UUID scheduleStopId);
+
+        void syncTourMasterData(TourMasterSyncEvent event);
+
+        List<TourVisitSyncResponse> getAllMasterTours();
+
+        TourVisitSyncResponse getMasterTourById(UUID tourId);
 
         void delete(UUID id);
 
