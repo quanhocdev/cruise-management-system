@@ -24,7 +24,8 @@ object RetrofitClient {
         retrofit.create(PosApiService::class.java)
 
     fun createApiService(
-        tokenManager: TokenManager
+        tokenManager: TokenManager,
+        retryOnConnectionFailure: Boolean = true
     ): ApiService {
 
         val authenticator =
@@ -35,6 +36,7 @@ object RetrofitClient {
 
         val client =
             OkHttpClient.Builder()
+                .retryOnConnectionFailure(retryOnConnectionFailure)
                 .addInterceptor(
                     AuthInterceptor(tokenManager)
                 )

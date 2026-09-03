@@ -19,6 +19,11 @@ import retrofit2.http.POST
 
 interface ApiService {
 
+    @POST("api/v1/bookings")
+    suspend fun createPassengerBooking(
+        @Body request: com.project.cruise.android.data.dto.passenger.CreateBookingRequest
+    ): com.project.cruise.android.data.dto.passenger.PassengerBookingResponse
+
     @GET("api/passenger/tours")
     suspend fun getOpenTours(): List<TourSummary>
 
