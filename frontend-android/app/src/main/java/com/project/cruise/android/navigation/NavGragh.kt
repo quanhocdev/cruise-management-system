@@ -23,6 +23,10 @@ import com.project.cruise.android.data.network.ApiService
 import com.project.cruise.android.data.network.RetrofitClient
 import com.project.cruise.android.data.repository.AuthRepository
 import com.project.cruise.android.data.repository.PassengerCatalogRepository
+import com.project.cruise.android.data.repository.PassengerBookingRepository
+import com.project.cruise.android.ui.screens.passenger.CreateBookingScreen
+import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModel
+import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModelFactory
 
 import com.project.cruise.android.ui.screens.GuestScreen
 import com.project.cruise.android.ui.screens.auth.LoginScreen
@@ -57,6 +61,7 @@ object Routes {
     const val PASSENGER_TOURS = "passenger_tours"
     const val PASSENGER_TOUR_DETAIL = "passenger_tours/{tourId}"
     const val PASSENGER_ROOMS = "passenger_rooms/{voyageId}"
+    const val PASSENGER_CREATE_BOOKING = "passenger_booking/{voyageId}/{roomId}"
     const val POS_DASHBOARD = "pos_dashboard"
     const val POS_QR_SCAN = "pos_qr_scan"
     const val POS_NFC_SCAN = "pos_nfc_scan"
@@ -406,7 +411,44 @@ fun NavGraph() {
             AvailableRoomsScreen(
                 voyageId = entry.arguments?.getString("voyageId").orEmpty(),
                 viewModel = catalogViewModel,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onSelectRoom = { roomId ->
+                    val voyageId = entry.arguments?.getString("voyageId").orEmpty()
+                    navController.navigate("passenger_booking/$voyageId/$roomId") { launchSingleTop = true }
+                }
+            )
+        }
+
+        composable(
+            Routes.PASSENGER_CREATE_BOOKING,
+            arguments = listOf(
+                navArgument("voyageId") { type = NavType.StringType },
+                navArgument("roomId") { type = NavType.StringType }
+            )
+        ) { entry ->
+            val bookingViewModel: PassengerBookingViewModel = viewModel(
+                viewModelStoreOwner = entry,
+                factory = PassengerBookingViewModelFactory(
+                    PassengerBookingRepository(remember(tokenManager) {
+                        RetrofitClient.createApiService(tokenManager, retryOnConnectionFailure = false)
+                    }),
+                    entry.arguments?.getString("voyageId").orEmpty(),
+                    entry.arguments?.getString("roomId").orEmpty()
+                )
+            )
+            val bookingState by bookingViewModel.state.collectAsState()
+            CreateBookingScreen(
+                state = bookingState,
+                onDraftChange = bookingViewModel::edit,
+                onSubmit = bookingViewModel::submit,
+                onRetry = bookingViewModel::refreshRoom,
+                onBack = { navController.popBackStack() },
+                onDone = {
+                    navController.navigate(Routes.PASSENGER_DASHBOARD) {
+                        popUpTo(Routes.PASSENGER_DASHBOARD) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
             )
         }
     }

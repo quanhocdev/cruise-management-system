@@ -13,7 +13,7 @@ import java.text.NumberFormat
 import java.util.Locale
 
 @Composable
-fun AvailableRoomsScreen(voyageId: String, viewModel: PassengerCatalogViewModel, onBack: () -> Unit) {
+fun AvailableRoomsScreen(voyageId: String, viewModel: PassengerCatalogViewModel, onBack: () -> Unit, onSelectRoom: (String) -> Unit) {
     val state by viewModel.state.collectAsState()
     val currency = remember { NumberFormat.getCurrencyInstance(Locale.forLanguageTag("vi-VN")) }
     LaunchedEffect(voyageId) { viewModel.loadRooms(voyageId) }
@@ -33,6 +33,9 @@ fun AvailableRoomsScreen(voyageId: String, viewModel: PassengerCatalogViewModel,
                         Text("Còn ${room.remainingCapacity}/${room.capacity} chỗ", modifier = Modifier.padding(top = 6.dp))
                         Text(currency.format(room.price), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 8.dp))
                         room.roomTypeDescription?.let { Text(it, modifier = Modifier.padding(top = 6.dp)) }
+                        Button(onClick = { onSelectRoom(room.roomId) }, enabled = !state.loading && room.available && room.remainingCapacity > 0) {
+                            Text("Chọn phòng")
+                        }
                     }
                 }
             }
