@@ -1,4 +1,4 @@
-// frontend-web/src/modules/shore/pages/ActivityVisitTour.jsx
+// src/modules/shore/pages/ActivityVisitTour.jsx
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -8,6 +8,8 @@ import {
   AlertCircle,
   MapPin,
   History,
+  Calendar,
+  Compass,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -15,6 +17,7 @@ import "../styles/ActivityVisitTour.css";
 
 import visitTourService from "../services/visitTourService";
 import ShoreTourTable from "../components/ShoreTourTable";
+import VisitTourFormModal from "../components/visit-tour/VisitTourFormModal";
 
 const STATUS_OPTIONS = [
   { value: "ALL", label: "Tất cả" },
@@ -31,7 +34,9 @@ function ShoreManagerTour() {
   const navigate = useNavigate();
 
   const [visitTours, setVisitTours] = useState([]);
+  const [masterToursMap, setMasterToursMap] = useState(new Map()); // Lưu thông tin Master Tour theo tourId
   const [loading, setLoading] = useState(false);
+  const [visitTourLoading, setVisitTourLoading] = useState(false);
 
   const [completeLoading, setCompleteLoading] = useState(null);
 
@@ -41,34 +46,45 @@ function ShoreManagerTour() {
 
   const [statusFilter, setStatusFilter] = useState("ALL");
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingVisitTour, setEditingVisitTour] = useState(null);
+  const [selectedScheduleStop, setSelectedScheduleStop] = useState(null);
+
   // =====================================================
-  // LOAD
+  // LOAD DATA & MASTER TOURS
   // =====================================================
 
-  const loadVisitTours = useCallback(async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const data = await visitTourService.getAll();
-
-      setVisitTours(data || []);
+      const visitData = await visitTourService.getAll();
+      setVisitTours(visitData || []);
     } catch (err) {
       console.error("🔥 LOAD VISIT TOURS ERROR:", err);
+    }
 
-      setError(
-        err.response?.data?.message || "Không thể tải danh sách Visit Tour.",
-      );
-
-      setVisitTours([]);
+    try {
+      const masterData = await visitTourService.getAllMasterTours();
+      console.log("🔍 [DEBUG] Fetched masterData:", masterData);
+      const map = new Map();
+      if (masterData) {
+        masterData.forEach((tour) => {
+          map.set(tour.id, tour);
+        });
+      }
+      setMasterToursMap(map);
+    } catch (err) {
+      console.error("🔥 LOAD MASTER TOURS ERROR:", err);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadVisitTours();
-  }, [loadVisitTours]);
+    loadData();
+  }, [loadData]);
 
   // =====================================================
   // FILTER
@@ -78,7 +94,6 @@ function ShoreManagerTour() {
     if (statusFilter === "ALL") {
       return visitTours;
     }
-
     return visitTours.filter((item) => item.status === statusFilter);
   }, [visitTours, statusFilter]);
 
@@ -130,7 +145,6 @@ function ShoreManagerTour() {
       setCompleteError(
         "Tất cả Visit Tour của Tour phải ở trạng thái Đã cấu hình trước khi hoàn thành.",
       );
-
       return;
     }
 
@@ -146,13 +160,10 @@ function ShoreManagerTour() {
 
     try {
       await visitTourService.completeTourConfiguration(tourId);
-
       setSuccessMessage("Đã hoàn thành cấu hình Visit Tour thành công.");
-
-      await loadVisitTours();
+      await loadData();
     } catch (err) {
       console.error("🔥 COMPLETE VISIT TOUR CONFIGURATION ERROR:", err);
-
       setCompleteError(
         err.response?.data?.message ||
           "Không thể hoàn thành cấu hình Visit Tour.",
@@ -163,13 +174,68 @@ function ShoreManagerTour() {
   };
 
   // =====================================================
-  // CONFIGURATION
+  // CONFIGURATION (LẤY ĐÚNG THÔNG TIN TỪ MASTER TOUR MAP)
+  // =====================================================
+
+  // =====================================================
+  // CONFIGURATION (CÓ THÊM LOG KIỂM TRA DỮ LIỆU)
   // =====================================================
 
   const handleConfiguration = (tourId, scheduleStopId) => {
-    navigate(
-      `/shore/visit-tour-configuration?tourId=${tourId}&scheduleStopId=${scheduleStopId}`,
+    console.log(
+      "🔍 [DEBUG] Click Configure - tourId:",
+      tourId,
+      "scheduleStopId:",
+      scheduleStopId,
     );
+    console.log("🔍 [DEBUG] masterToursMap current size:", masterToursMap.size);
+
+    const masterTour = masterToursMap.get(tourId);
+    console.log("🔍 [DEBUG] Found masterTour:", masterTour);
+
+    let targetStop = null;
+    let targetScheduleDate = "";
+
+    if (masterTour && masterTour.schedules) {
+      for (const schedule of masterTour.schedules) {
+        if (schedule.stops) {
+          const foundStop = schedule.stops.find(
+            (stop) =>
+              stop.id === scheduleStopId ||
+              stop.scheduleStopId === scheduleStopId,
+          );
+          if (foundStop) {
+            targetStop = foundStop;
+            targetScheduleDate = schedule.scheduleDate || "";
+            break;
+          }
+        }
+      }
+    }
+
+    console.log("🔍 [DEBUG] Found targetStop from Master:", targetStop);
+    console.log("🔍 [DEBUG] Found targetScheduleDate:", targetScheduleDate);
+
+    const targetVisitTour = visitTours.find(
+      (item) => item.scheduleStopId === scheduleStopId,
+    );
+
+    const finalScheduleStopData = {
+      scheduleStopId: scheduleStopId,
+      portName: targetStop?.portName || targetVisitTour?.portName || "",
+      arriveAt: targetStop?.arriveAt || targetVisitTour?.arriveAt || "",
+      leaveAt: targetStop?.leaveAt || targetVisitTour?.leaveAt || "",
+      scheduleDate: targetScheduleDate || targetVisitTour?.scheduleDate || "",
+    };
+
+    console.log(
+      "🔍 [DEBUG] Final selectedScheduleStop passed to Modal:",
+      finalScheduleStopData,
+    );
+
+    setSelectedScheduleStop(finalScheduleStopData);
+    setEditingVisitTour(targetVisitTour?.name ? targetVisitTour : null);
+    setIsModalOpen(true);
   };
 
   // =====================================================
@@ -187,16 +253,12 @@ function ShoreManagerTour() {
   const summary = useMemo(() => {
     return {
       total: visitTours.length,
-
       waiting: visitTours.filter((item) => item.status === "WAITING_CONFIG")
         .length,
-
       configured: visitTours.filter((item) => item.status === "CONFIGURED")
         .length,
-
       inProgress: visitTours.filter((item) => item.status === "IN_PROGRESS")
         .length,
-
       completed: visitTours.filter((item) => item.status === "COMPLETED")
         .length,
     };
@@ -211,8 +273,7 @@ function ShoreManagerTour() {
       <div className="shore-manager-tour">
         <div className="shore-manager-tour-loading">
           <RefreshCw size={22} className="shore-manager-tour-spinner" />
-
-          <span>Đang tải danh sách Visit Tour...</span>
+          <span>Đang tải danh sách Tour bờ...</span>
         </div>
       </div>
     );
@@ -224,14 +285,9 @@ function ShoreManagerTour() {
 
   return (
     <div className="shore-manager-tour">
-      {/* =================================================
-          HEADER
-          ================================================= */}
-
       <div className="shore-manager-tour-header">
         <div>
           <h1>Quản lý Tour bờ</h1>
-
           <p>Danh sách Visit Tour và cấu hình hoạt động tham quan trên bờ.</p>
         </div>
 
@@ -248,7 +304,7 @@ function ShoreManagerTour() {
           <button
             type="button"
             className="shore-manager-tour-refresh"
-            onClick={loadVisitTours}
+            onClick={loadData}
             disabled={loading}
           >
             <RefreshCw size={17} />
@@ -257,46 +313,29 @@ function ShoreManagerTour() {
         </div>
       </div>
 
-      {/* =================================================
-          ERROR
-          ================================================= */}
-
       {error && (
         <div className="shore-manager-tour-error">
           <span>{error}</span>
-
-          <button type="button" onClick={loadVisitTours}>
+          <button type="button" onClick={loadData}>
             Thử lại
           </button>
         </div>
       )}
 
-      {/* =================================================
-          COMPLETE ERROR
-          ================================================= */}
-
       {completeError && (
         <div className="shore-manager-tour-complete-error">
           <AlertCircle size={17} />
-
           <span>{completeError}</span>
-
           <button type="button" onClick={() => setCompleteError(null)}>
             Đóng
           </button>
         </div>
       )}
 
-      {/* =================================================
-          SUCCESS
-          ================================================= */}
-
       {successMessage && (
         <div className="shore-manager-tour-success">
           <CheckCircle2 size={17} />
-
           <span>{successMessage}</span>
-
           <button type="button" onClick={() => setSuccessMessage(null)}>
             Đóng
           </button>
@@ -305,10 +344,6 @@ function ShoreManagerTour() {
 
       {!error && (
         <>
-          {/* =================================================
-              SUMMARY
-              ================================================= */}
-
           <div className="shore-manager-tour-summary">
             <div className="shore-manager-tour-summary-item">
               <span>Tổng Visit Tour</span>
@@ -336,15 +371,10 @@ function ShoreManagerTour() {
             </div>
           </div>
 
-          {/* =================================================
-              FILTER
-              ================================================= */}
-
           <div className="shore-manager-tour-toolbar">
             <div className="shore-manager-tour-filter">
               <div className="shore-manager-tour-filter-label">
                 <Clock3 size={16} />
-
                 <span>Trạng thái</span>
               </div>
 
@@ -366,13 +396,11 @@ function ShoreManagerTour() {
             </div>
           </div>
 
-          {/* =================================================
-              TOUR STATUS / COMPLETE
-              ================================================= */}
-
+          {/* HIỂN THỊ THÔNG TIN CHI TIẾT MASTER TOUR KÈM SỐ LƯỢNG NGÀY / LỊCH TRÌNH */}
           <div className="shore-manager-tour-completion-list">
             {[...tourConfigurationStatus.entries()].map(([tourId, tours]) => {
               const canComplete = canCompleteTour(tourId);
+              const masterTourInfo = masterToursMap.get(tourId);
 
               return (
                 <div
@@ -383,17 +411,45 @@ function ShoreManagerTour() {
                 >
                   <div className="shore-manager-tour-completion-info">
                     <div className="shore-manager-tour-completion-icon">
-                      <MapPin size={18} />
+                      <Compass size={18} />
                     </div>
 
                     <div>
-                      <span>Tour</span>
-
-                      <strong>{tourId}</strong>
-
-                      <small>
-                        {tours.length} Visit Tour
-                        {tours.length > 1 ? "s" : ""}
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "8px",
+                          alignItems: "center",
+                        }}
+                      >
+                        <strong>
+                          {masterTourInfo?.name || `Tour ID: ${tourId}`}
+                        </strong>
+                        {masterTourInfo?.code && (
+                          <span
+                            style={{
+                              fontSize: "0.75rem",
+                              background: "#e2e8f0",
+                              padding: "2px 6px",
+                              borderRadius: "4px",
+                            }}
+                          >
+                            {masterTourInfo.code}
+                          </span>
+                        )}
+                      </div>
+                      <small
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          marginTop: "2px",
+                        }}
+                      >
+                        <Calendar size={13} />
+                        {masterTourInfo?.startDate && masterTourInfo?.endDate
+                          ? `${masterTourInfo.startDate} → ${masterTourInfo.endDate}`
+                          : `Đồng bộ: ${tours.length} điểm dừng`}
                       </small>
                     </div>
                   </div>
@@ -402,55 +458,106 @@ function ShoreManagerTour() {
                     {canComplete ? (
                       <>
                         <CheckCircle2 size={17} />
-
                         <span>Đã cấu hình đầy đủ</span>
                       </>
                     ) : (
                       <>
                         <Clock3 size={17} />
-
                         <span>Chưa đủ điều kiện hoàn thành</span>
                       </>
                     )}
                   </div>
 
-                  <button
-                    type="button"
-                    className="shore-manager-tour-complete-button"
-                    disabled={!canComplete || completeLoading === tourId}
-                    onClick={() => handleCompleteConfiguration(tourId)}
-                  >
-                    {completeLoading === tourId ? (
-                      <>
-                        <RefreshCw
-                          size={16}
-                          className="shore-manager-tour-spinner"
-                        />
-
-                        <span>Đang xử lý...</span>
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle2 size={16} />
-
-                        <span>Hoàn thành</span>
-                      </>
-                    )}
-                  </button>
+                  {canComplete ? (
+                    <div
+                      className="shore-manager-tour-completed-badge"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        padding: "8px 14px",
+                        backgroundColor: "#ecfdf5",
+                        color: "#059669",
+                        border: "1px solid #10b981",
+                        borderRadius: "8px",
+                        fontSize: "0.85rem",
+                        fontWeight: "600",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      <CheckCircle2 size={16} />
+                      <span>Đã hoàn thành</span>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className="shore-manager-tour-complete-button"
+                      disabled={completeLoading === tourId}
+                      onClick={() => handleCompleteConfiguration(tourId)}
+                    >
+                      {completeLoading === tourId ? (
+                        <>
+                          <RefreshCw
+                            size={16}
+                            className="shore-manager-tour-spinner"
+                          />
+                          <span>Đang xử lý...</span>
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 size={16} />
+                          <span>Hoàn thành</span>
+                        </>
+                      )}
+                    </button>
+                  )}
                 </div>
               );
             })}
           </div>
 
-          {/* =================================================
-              TABLE
-              ================================================= */}
-
           <ShoreTourTable
             visitTours={filteredVisitTours}
+            masterToursMap={masterToursMap}
             onConfigure={handleConfiguration}
           />
         </>
+      )}
+
+      {isModalOpen && (
+        <VisitTourFormModal
+          visitTour={editingVisitTour}
+          scheduleStop={selectedScheduleStop}
+          loading={visitTourLoading}
+          onClose={() => {
+            setIsModalOpen(false);
+            setEditingVisitTour(null);
+            setSelectedScheduleStop(null);
+          }}
+          onSubmit={async (formData) => {
+            setVisitTourLoading(true);
+            try {
+              if (editingVisitTour) {
+                await visitTourService.update(editingVisitTour.id, formData);
+              } else {
+                await visitTourService.create(
+                  selectedScheduleStop.scheduleStopId,
+                  formData,
+                );
+              }
+
+              setIsModalOpen(false);
+              setEditingVisitTour(null);
+              setSelectedScheduleStop(null);
+              await loadData();
+            } catch (err) {
+              console.error("SAVE VISIT TOUR ERROR:", err);
+              throw err;
+            } finally {
+              setVisitTourLoading(false);
+            }
+          }}
+        />
       )}
     </div>
   );

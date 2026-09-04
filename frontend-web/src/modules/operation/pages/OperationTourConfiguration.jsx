@@ -478,6 +478,7 @@ const OperationTourConfiguration = () => {
           type="button"
           disabled={!configurationComplete}
           className="operation-tour-configuration-create-package"
+          onClick={() => navigate(`/operation/tour-packages?tourId=${tourId}`)}
         >
           Tạo gói Tour
         </button>

@@ -1,0 +1,88 @@
+/* src/modules/operation/styles/packages/PackageBenefitDetailModal.css */
+
+.benefit-detail-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.benefit-detail-item {
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  transition: background 0.2s;
+}
+
+.benefit-detail-item:hover {
+  background: #f1f5f9;
+}
+
+.benefit-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.benefit-type-tag {
+  color: #2563eb;
+  background: #eff6ff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.benefit-ref-id {
+  color: #4b5563;
+  font-size: 13px;
+}
+
+.benefit-metrics {
+  display: flex;
+  gap: 10px;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.metric-badge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.metric-badge.quantity {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.metric-badge.discount {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.no-benefit-text {
+  text-align: center;
+  color: #6b7280;
+  padding: 20px 0;
+  margin: 0;
+}
+
+@media screen and (max-width: 640px) {
+  .benefit-detail-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .benefit-metrics {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

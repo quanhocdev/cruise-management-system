@@ -84,6 +84,7 @@ const ActivityCruiseConfigurationTable = ({ activities = [] }) => {
                 // STATUS
                 // =========================================================
 
+                console.log("Cruise item data:", item);
                 const statusMeta = getTourStatusMeta(item.status);
 
                 const configured = isTourItemConfigured(item.status);
@@ -108,19 +109,46 @@ const ActivityCruiseConfigurationTable = ({ activities = [] }) => {
                       </div>
                     </td>
 
-                    {/* =================================================
-                        CRUISE AREA
-                        ================================================= */}
-
+                    {/* CRUISE AREA */}
                     <td>
                       <div className="activity-configuration-area">
                         <MapPin size={15} />
 
                         <div>
-                          <strong>{item.cruiseAreaName || "—"}</strong>
+                          {/* Tên hiển thị chính (hoặc nhãn chung nếu chưa join được tên) */}
+                          <strong>
+                            {item.cruiseAreaName ||
+                              item.areaName ||
+                              "Khu vực sự kiện"}
+                          </strong>
 
-                          {item.deckNumber != null && (
-                            <span>Tầng {item.deckNumber}</span>
+                          {/* ID hiển thị nhỏ gọn ở dòng dưới */}
+                          {item.cruiseAreaId && (
+                            <span
+                              style={{
+                                fontSize: "0.75rem",
+                                color: "#94a3b8",
+                                display: "block",
+                                fontFamily: "monospace",
+                                marginTop: "2px",
+                              }}
+                              title={item.cruiseAreaId}
+                            >
+                              ID: {item.cruiseAreaId.substring(0, 8)}...
+                            </span>
+                          )}
+
+                          {/* Số tầng nếu có */}
+                          {(item.deckNumber != null || item.deck != null) && (
+                            <span
+                              style={{
+                                fontSize: "0.8rem",
+                                color: "#64748b",
+                                display: "block",
+                              }}
+                            >
+                              Tầng {item.deckNumber ?? item.deck}
+                            </span>
                           )}
                         </div>
                       </div>

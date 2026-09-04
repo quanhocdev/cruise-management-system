@@ -1,11 +1,16 @@
+// src/modules/shore/components/ShoreTourTable.jsx
 import { useState } from "react";
 import { ClipboardList, Eye, Settings } from "lucide-react";
 import "../styles/ShoreTourTable.css";
 
-import ShoreTourDetailModal from "./ShoreTourDetailModal"; // Modal chi tiết khi click con mắt
+import ShoreTourDetailModal from "./ShoreTourDetailModal";
 
-function ShoreTourTable({ visitTours, onConfigure }) {
-  const [viewDetail, setViewDetail] = useState(null); // State xem chi tiết
+function ShoreTourTable({
+  visitTours,
+  masterToursMap = new Map(),
+  onConfigure,
+}) {
+  const [viewDetail, setViewDetail] = useState(null);
 
   const formatShortId = (str, maxLength = 10) => {
     if (!str) return "—";
@@ -18,9 +23,7 @@ function ShoreTourTable({ visitTours, onConfigure }) {
     return (
       <div className="shore-manager-tour-empty">
         <ClipboardList size={42} />
-
         <h2>Chưa có Visit Tour</h2>
-
         <p>Hiện tại chưa có Visit Tour nào trong hệ thống.</p>
       </div>
     );
@@ -30,10 +33,8 @@ function ShoreTourTable({ visitTours, onConfigure }) {
     switch (status) {
       case "WAITING_CONFIG":
         return "Chờ cấu hình";
-
       case "CONFIGURED":
         return "Đã cấu hình";
-
       default:
         return status || "Không xác định";
     }
@@ -43,10 +44,8 @@ function ShoreTourTable({ visitTours, onConfigure }) {
     switch (status) {
       case "WAITING_CONFIG":
         return "waiting";
-
       case "CONFIGURED":
         return "configured";
-
       default:
         return "";
     }
@@ -57,7 +56,7 @@ function ShoreTourTable({ visitTours, onConfigure }) {
       <table className="shore-tour-table">
         <thead>
           <tr>
-            <th>Tour ID</th>
+            <th>Tour</th>
             <th>Schedule Stop ID</th>
             <th>Tên Visit Tour</th>
             <th>Trạng thái</th>
@@ -68,86 +67,103 @@ function ShoreTourTable({ visitTours, onConfigure }) {
         </thead>
 
         <tbody>
-          {visitTours.map((visitTour) => (
-            <tr key={visitTour.id}>
-              {/* TOUR ID */}
-              <td>
-                <div className="shore-tour-table-id-cell">
-                  <strong className="font-mono" title={visitTour.tourId || ""}>
-                    {formatShortId(visitTour.tourId)}
-                  </strong>
-                  <button
-                    type="button"
-                    className="shore-tour-table-view-btn"
-                    onClick={() => setViewDetail(visitTour)}
-                    title="Xem chi tiết"
-                  >
-                    <Eye size={14} />
-                  </button>
-                </div>
-              </td>
+          {visitTours.map((visitTour) => {
+            const masterTour = masterToursMap.get(visitTour.tourId);
+            const displayTourName =
+              masterTour?.name || formatShortId(visitTour.tourId);
 
-              {/* SCHEDULE STOP ID */}
-              <td>
-                <div className="shore-tour-table-id-cell">
+            return (
+              <tr key={visitTour.id}>
+                {/* TOUR NAME / ID */}
+                <td>
+                  <div className="shore-tour-table-id-cell">
+                    <strong
+                      className="font-mono"
+                      title={
+                        masterTour?.name
+                          ? `${masterTour.name} (${visitTour.tourId})`
+                          : visitTour.tourId
+                      }
+                    >
+                      {displayTourName}
+                    </strong>
+                    <button
+                      type="button"
+                      className="shore-tour-table-view-btn"
+                      onClick={() =>
+                        setViewDetail({ ...visitTour, masterTour })
+                      }
+                      title="Xem chi tiết"
+                    >
+                      <Eye size={14} />
+                    </button>
+                  </div>
+                </td>
+
+                {/* SCHEDULE STOP ID */}
+                <td>
+                  <div className="shore-tour-table-id-cell">
+                    <span
+                      className="shore-tour-table-id"
+                      title={visitTour.scheduleStopId || ""}
+                    >
+                      {formatShortId(visitTour.scheduleStopId)}
+                    </span>
+                    <button
+                      type="button"
+                      className="shore-tour-table-view-btn"
+                      onClick={() =>
+                        setViewDetail({ ...visitTour, masterTour })
+                      }
+                      title="Xem chi tiết"
+                    >
+                      <Eye size={14} />
+                    </button>
+                  </div>
+                </td>
+
+                <td>
+                  <span>{visitTour.name || "Chưa cấu hình"}</span>
+                </td>
+
+                <td>
                   <span
-                    className="shore-tour-table-id"
-                    title={visitTour.scheduleStopId || ""}
+                    className={`shore-tour-table-status ${getStatusClass(
+                      visitTour.status,
+                    )}`}
                   >
-                    {formatShortId(visitTour.scheduleStopId)}
+                    {getStatusLabel(visitTour.status)}
                   </span>
+                </td>
+
+                <td>
+                  {visitTour.startTime && visitTour.endTime
+                    ? `${visitTour.startTime} → ${visitTour.endTime}`
+                    : "—"}
+                </td>
+
+                <td>
+                  {visitTour.price != null
+                    ? `${Number(visitTour.price).toLocaleString("vi-VN")} ₫`
+                    : "—"}
+                </td>
+
+                <td>
                   <button
                     type="button"
-                    className="shore-tour-table-view-btn"
-                    onClick={() => setViewDetail(visitTour)}
-                    title="Xem chi tiết"
+                    className="shore-tour-table-action"
+                    onClick={() =>
+                      onConfigure(visitTour.tourId, visitTour.scheduleStopId)
+                    }
+                    title="Xem / cấu hình Visit Tour"
                   >
-                    <Eye size={14} />
+                    <Settings size={17} />
+                    <span>Cấu hình</span>
                   </button>
-                </div>
-              </td>
-
-              <td>
-                <span>{visitTour.name || "Chưa cấu hình"}</span>
-              </td>
-
-              <td>
-                <span
-                  className={`shore-tour-table-status ${getStatusClass(
-                    visitTour.status,
-                  )}`}
-                >
-                  {getStatusLabel(visitTour.status)}
-                </span>
-              </td>
-
-              <td>
-                {visitTour.startTime && visitTour.endTime
-                  ? `${visitTour.startTime} → ${visitTour.endTime}`
-                  : "—"}
-              </td>
-
-              <td>
-                {visitTour.price != null
-                  ? `${Number(visitTour.price).toLocaleString("vi-VN")} ₫`
-                  : "—"}
-              </td>
-
-              <td>
-                <button
-                  type="button"
-                  className="shore-tour-table-action"
-                  onClick={() =>
-                    onConfigure(visitTour.tourId, visitTour.scheduleStopId)
-                  }
-                  title="Xem / cấu hình Visit Tour"
-                >
-                  <Settings size={17} />
-                  <span>Cấu hình</span>
-                </button>
-              </td>
-            </tr>
-          ))}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
 
@@ -155,6 +171,7 @@ function ShoreTourTable({ visitTours, onConfigure }) {
       {viewDetail && (
         <ShoreTourDetailModal
           visitTour={viewDetail}
+          masterTour={viewDetail.masterTour}
           onClose={() => setViewDetail(null)}
         />
       )}

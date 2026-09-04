@@ -1,7 +1,13 @@
 // src/modules/operation/components/tour-configuration/ActivityVisitConfigurationTable.jsx
 
 import React from "react";
-import { Activity, CheckCircle2, Clock3, MapPin, XCircle } from "lucide-react";
+import {
+  Activity,
+  CheckCircle2,
+  Clock3,
+  XCircle,
+  FileText,
+} from "lucide-react";
 
 import {
   formatVND,
@@ -11,13 +17,21 @@ import {
 
 import "../../styles/tour-configuration/ActivityVisitConfigurationTable.css";
 
+function formatDisplayDateTime(dateTimeStr) {
+  if (!dateTimeStr) return "";
+  try {
+    const [datePart, timePart] = dateTimeStr.split("T");
+    if (!datePart || !timePart) return dateTimeStr;
+    const [year, month, day] = datePart.split("-");
+    const timeOnly = timePart.substring(0, 5);
+    return `${day}/${month}/${year} lúc ${timeOnly}`;
+  } catch (e) {
+    return dateTimeStr;
+  }
+}
+
 const ActivityVisitConfigurationTable = ({ activities = [] }) => {
   const safeActivities = Array.isArray(activities) ? activities : [];
-
-  // =========================================================
-  // SỐ LƯỢNG THỰC SỰ ĐÃ CẤU HÌNH
-  // status !== WAITING_CONFIG
-  // =========================================================
 
   const configuredCount = safeActivities.filter((item) =>
     isTourItemConfigured(item.status),
@@ -25,10 +39,6 @@ const ActivityVisitConfigurationTable = ({ activities = [] }) => {
 
   return (
     <section className="activity-visit-configuration-table-section">
-      {/* =========================================================
-          HEADER
-          ========================================================= */}
-
       <div className="activity-visit-configuration-table-header">
         <div className="activity-visit-configuration-table-title">
           <div className="activity-visit-configuration-table-icon">
@@ -37,41 +47,27 @@ const ActivityVisitConfigurationTable = ({ activities = [] }) => {
 
           <div>
             <h2>Hoạt động trên bờ</h2>
-
             <p>Các hoạt động tham quan trên bờ được phân công cho Tour.</p>
           </div>
         </div>
-
-        {/* =========================================================
-            CONFIGURED COUNT / TOTAL ASSIGNMENTS
-            ========================================================= */}
 
         <span className="activity-visit-configuration-table-count">
           {configuredCount}/{safeActivities.length} đã cấu hình
         </span>
       </div>
 
-      {/* =========================================================
-          EMPTY
-          ========================================================= */}
-
       {safeActivities.length === 0 ? (
         <div className="activity-visit-configuration-table-empty">
           <XCircle size={24} />
-
           <span>Tour chưa có hoạt động trên bờ được phân công.</span>
         </div>
       ) : (
-        /* =======================================================
-           TABLE
-           ======================================================= */
-
         <div className="activity-visit-configuration-table-wrapper">
           <table className="activity-visit-configuration-table">
             <thead>
               <tr>
                 <th>Hoạt động</th>
-                <th>Điểm tham quan</th>
+                <th>Mô tả</th>
                 <th>Thời gian</th>
                 <th>Khách tối đa</th>
                 <th>Giá</th>
@@ -81,91 +77,93 @@ const ActivityVisitConfigurationTable = ({ activities = [] }) => {
 
             <tbody>
               {safeActivities.map((item, index) => {
-                // =========================================================
-                // STATUS
-                // =========================================================
-
                 const statusMeta = getTourStatusMeta(item.status);
-
                 const configured = isTourItemConfigured(item.status);
 
-                return (
-                  <tr key={item.id || `activity-visit-${index}`}>
-                    {/* =================================================
-                        ACTIVITY
-                        ================================================= */}
+                const displayName =
+                  item.visitName ||
+                  item.name ||
+                  item.activityVisitName ||
+                  item.activityName ||
+                  "Chưa cấu hình";
 
+                const displayDescription =
+                  item.visitDescription || item.description || "—";
+
+                const startTimeFormatted = formatDisplayDateTime(
+                  item.startTime,
+                );
+                const endTimeFormatted = formatDisplayDateTime(item.endTime);
+
+                return (
+                  <tr
+                    key={
+                      item.id ||
+                      item.activityVisitId ||
+                      `activity-visit-${index}`
+                    }
+                  >
+                    {/* HOẠT ĐỘNG */}
                     <td>
                       <div className="activity-visit-configuration-name">
-                        <strong>
-                          {item.activityVisitName ||
-                            item.activityName ||
-                            "Chưa xác định"}
-                        </strong>
+                        <strong>{displayName}</strong>
 
-                        {item.activityVisitId && (
-                          <span>{item.activityVisitId}</span>
+                        {/* Hiển thị ID điểm dừng nhỏ gọn khi chưa có tên hoạt động chính thức */}
+                        {item.scheduleStopId && (
+                          <span
+                            style={{
+                              fontSize: "0.75rem",
+                              color: "#94a3b8",
+                              display: "block",
+                              fontFamily: "monospace",
+                              marginTop: "2px",
+                            }}
+                            title={item.scheduleStopId}
+                          >
+                            Điểm dừng: {item.scheduleStopId.substring(0, 8)}...
+                          </span>
                         )}
                       </div>
                     </td>
 
-                    {/* =================================================
-                        VISIT LOCATION
-                        ================================================= */}
-
+                    {/* MÔ TẢ */}
                     <td>
-                      <div className="activity-visit-configuration-area">
-                        <MapPin size={15} />
-
-                        <div>
-                          <strong>
-                            {item.locationName ||
-                              item.visitLocationName ||
-                              item.cruiseAreaName ||
-                              "—"}
-                          </strong>
-
-                          {item.locationAddress && (
-                            <span>{item.locationAddress}</span>
-                          )}
-                        </div>
+                      <div
+                        className="activity-visit-configuration-desc"
+                        style={{
+                          color:
+                            displayDescription === "—" ? "#94a3b8" : "#475569",
+                          maxWidth: "250px",
+                          fontSize: "0.85rem",
+                          lineHeight: "1.4",
+                        }}
+                      >
+                        {displayDescription}
                       </div>
                     </td>
 
-                    {/* =================================================
-                        TIME
-                        ================================================= */}
-
+                    {/* THỜI GIAN */}
                     <td>
                       <div className="activity-visit-configuration-time">
                         <Clock3 size={15} />
-
                         <div>
-                          <span>{item.startTime || "—"}</span>
-
-                          <span>{item.endTime || "—"}</span>
+                          <span>
+                            {startTimeFormatted || item.startTime || "—"}
+                          </span>
+                          <span>{endTimeFormatted || item.endTime || "—"}</span>
                         </div>
                       </div>
                     </td>
 
-                    {/* =================================================
-                        MAX PASSENGERS
-                        ================================================= */}
-
+                    {/* KHÁCH TỐI ĐA */}
                     <td>
                       {item.maxPassengers != null ? item.maxPassengers : "—"}
                     </td>
 
-                    {/* =================================================
-                        PRICE
-                        ================================================= */}
-
+                    {/* GIÁ */}
                     <td>{formatVND(item.price)}</td>
 
-                    {/* =================================================
-                        STATUS
-                        ================================================= */}
-
+                    {/* TRẠNG THÁI */}
                     <td>
                       <span
                         className={`activity-visit-configuration-status ${statusMeta.className}`}
@@ -175,7 +173,6 @@ const ActivityVisitConfigurationTable = ({ activities = [] }) => {
                         ) : (
                           <XCircle size={14} />
                         )}
-
                         {statusMeta.label}
                       </span>
                     </td>
