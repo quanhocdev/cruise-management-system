@@ -1,0 +1,253 @@
+/* src/modules/convenience/styles/tour-config/ConvenienceServiceTourDetail.css */
+
+.convenience-service-tour-detail-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.convenience-service-tour-detail-toolbar h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 5px;
+  font-size: 20px;
+  color: #1f2937;
+}
+
+.convenience-service-tour-detail-toolbar p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.convenience-service-tour-detail-refresh {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  color: #374151;
+  cursor: pointer;
+}
+
+.convenience-service-tour-detail-refresh:hover {
+  background: #f9fafb;
+}
+
+.convenience-service-tour-detail-refresh:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* FILTER */
+
+.convenience-service-tour-detail-filters {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+}
+
+.convenience-service-tour-detail-filter {
+  padding: 8px 13px;
+  border: 1px solid #e5e7eb;
+  border-radius: 7px;
+  background: #fff;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.convenience-service-tour-detail-filter:hover {
+  background: #f9fafb;
+}
+
+.convenience-service-tour-detail-filter.active {
+  border-color: #374151;
+  background: #374151;
+  color: #fff;
+}
+
+/* ERROR */
+
+.convenience-service-tour-detail-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 11px 13px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 13px;
+}
+
+/* TABLE */
+
+.convenience-service-tour-detail-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 9px;
+  background: #fff;
+}
+
+.convenience-service-tour-detail-table {
+  width: 100%;
+  min-width: 950px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.convenience-service-tour-detail-table th {
+  padding: 12px 14px;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.convenience-service-tour-detail-table td {
+  padding: 13px 14px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #374151;
+  vertical-align: middle;
+}
+
+.convenience-service-tour-detail-table tbody tr:hover {
+  background: #fafafa;
+}
+
+.convenience-service-tour-detail-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.convenience-service-tour-detail-table .font-mono {
+  font-family: monospace;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.convenience-service-tour-detail-table td:nth-child(4) div,
+.convenience-service-tour-detail-table td:nth-child(5) div {
+  margin-top: 3px;
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+/* STATUS */
+
+.convenience-service-tour-detail-status {
+  display: inline-flex;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.convenience-service-tour-detail-status.waiting_config {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.convenience-service-tour-detail-status.not_started {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.convenience-service-tour-detail-status.in_progress {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.convenience-service-tour-detail-status.completed {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+/* VIEW */
+
+.convenience-service-tour-detail-view {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 9px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  color: #374151;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.convenience-service-tour-detail-view:hover {
+  background: #f3f4f6;
+}
+
+/* EMPTY / LOADING */
+
+.convenience-service-tour-detail-empty,
+.convenience-service-tour-detail-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  color: #9ca3af;
+  text-align: center;
+}
+
+.convenience-service-tour-detail-empty h3 {
+  margin: 10px 0 5px;
+  color: #374151;
+  font-size: 15px;
+}
+
+.convenience-service-tour-detail-empty p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.spin {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* MOBILE */
+
+@media (max-width: 768px) {
+  .convenience-service-tour-detail-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .convenience-service-tour-detail-refresh {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .convenience-service-tour-detail-filters {
+    padding-bottom: 3px;
+  }
+
+  .convenience-service-tour-detail-table {
+    min-width: 900px;
+  }
+}

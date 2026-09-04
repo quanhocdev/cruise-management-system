@@ -1,0 +1,108 @@
+/* ==========================================================================
+   SCHEDULE CONTAINER
+   ========================================================================== */
+.visit-tour-schedule {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* ==========================================================================
+   SCHEDULE HEADER
+   ========================================================================== */
+.visit-tour-schedule-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 0.875rem;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.visit-tour-schedule-day {
+  background-color: #2563eb;
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.4rem 0.875rem;
+  border-radius: 8px;
+  white-space: nowrap;
+  letter-spacing: 0.025em;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.visit-tour-schedule-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.visit-tour-schedule-info h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.visit-tour-schedule-info span {
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   STOPS LIST
+   ========================================================================== */
+.visit-tour-schedule-stops {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.visit-tour-schedule-empty {
+  padding: 1.5rem 1rem;
+  text-align: center;
+  background-color: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  color: #94a3b8;
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+@media (min-width: 640px) {
+  .visit-tour-schedule {
+    padding: 1.5rem;
+  }
+
+  .visit-tour-schedule-header {
+    gap: 1.25rem;
+  }
+
+  .visit-tour-schedule-day {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .visit-tour-schedule-info {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+
+  .visit-tour-schedule-info h2 {
+    font-size: 1.25rem;
+  }
+}

@@ -20,6 +20,9 @@ object RetrofitClient {
     val refreshApiService: ApiService =
         retrofit.create(ApiService::class.java)
 
+    val posApiService: PosApiService =
+        retrofit.create(PosApiService::class.java)
+
     fun createApiService(
         tokenManager: TokenManager
     ): ApiService {

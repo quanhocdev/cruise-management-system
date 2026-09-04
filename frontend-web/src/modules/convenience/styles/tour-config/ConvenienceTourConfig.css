@@ -69,7 +69,7 @@
 }
 
 /* =========================================================
-   TABS
+   TABS - TỐI ƯU HIỆU ỨNG TƯƠNG PHẢN & ACTIVE STATE
    ========================================================= */
 
 .convenience-tour-config-tabs {
@@ -80,7 +80,7 @@
   align-items: center;
   gap: 6px;
 
-  padding: 5px;
+  padding: 6px;
 
   box-sizing: border-box;
 
@@ -100,10 +100,10 @@
   justify-content: center;
   gap: 8px;
 
-  padding: 0 18px;
+  padding: 0 20px;
 
   border: 1px solid transparent;
-  border-radius: 9px;
+  border-radius: 8px;
 
   background: transparent;
 
@@ -115,32 +115,36 @@
 
   cursor: pointer;
 
-  transition:
-    background-color 0.18s ease,
-    color 0.18s ease,
-    border-color 0.18s ease,
-    box-shadow 0.18s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.convenience-tour-config-tab:hover {
-  color: #334155;
-  background: #ffffff;
+.convenience-tour-config-tab:hover:not(.active) {
+  color: #1e293b;
+  background: rgba(255, 255, 255, 0.6);
 }
 
+/* Tab đang chọn: Nổi bật hoàn toàn với nền xanh primary & chữ trắng */
 .convenience-tour-config-tab.active {
-  color: #0f172a;
-  background: #ffffff;
-  border-color: #e2e8f0;
+  color: #ffffff;
+  background: #2563eb; /* Blue primary */
+  border-color: #2563eb;
 
   box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.04),
-    0 2px 6px rgba(15, 23, 42, 0.04);
+    0 2px 8px rgba(37, 99, 235, 0.25),
+    0 1px 2px rgba(37, 99, 235, 0.15);
+
+  font-weight: 700;
 }
 
 .convenience-tour-config-tab svg {
   flex: 0 0 auto;
+  transition: transform 0.2s ease;
 }
 
+.convenience-tour-config-tab.active svg {
+  color: #ffffff;
+  transform: scale(1.05);
+}
 /* =========================================================
    CONTENT
    ========================================================= */

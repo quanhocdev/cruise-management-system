@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import java.util.UUID;
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 public class TourClient {
@@ -17,11 +19,21 @@ public class TourClient {
     }
     public TourScheduleContext getSchedule(UUID voyageId) {
         try {
-            TourScheduleContext result = client.get().uri("/internal/schedules/{id}/booking-context", voyageId)
+            TourScheduleContext result = client.get().uri("/internal/voyages/{id}/booking-context", voyageId)
                 .header("X-Internal-Api-Key", apiKey).retrieve().body(TourScheduleContext.class);
             if (result == null) throw new BookingException(HttpStatus.BAD_GATEWAY, "Tour service returned an empty response");
             return result;
         } catch (BookingException ex) { throw ex; }
         catch (Exception ex) { throw new BookingException(HttpStatus.BAD_GATEWAY, "Cannot validate voyage: " + ex.getMessage()); }
+    }
+
+    public List<TourRoomContext> getRooms(UUID voyageId) {
+        try {
+            TourRoomContext[] result = client.get().uri("/internal/voyages/{id}/rooms", voyageId)
+                .header("X-Internal-Api-Key", apiKey).retrieve().body(TourRoomContext[].class);
+            return result == null ? List.of() : Arrays.asList(result);
+        } catch (Exception ex) {
+            throw new BookingException(HttpStatus.BAD_GATEWAY, "Cannot load voyage rooms: " + ex.getMessage());
+        }
     }
 }

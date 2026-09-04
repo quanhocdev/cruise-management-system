@@ -18,9 +18,15 @@ public class SecurityConfig {
             .authorizeHttpRequests(a -> a
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/actuator/health", "/actuator/info", "/internal/**").permitAll()
+                .requestMatchers("/api/v1/check-in/**").hasAnyRole("ADMIN", "SCHEDULE")
+                .requestMatchers(HttpMethod.POST, "/api/v1/pos/transactions/sync").permitAll()
+                .requestMatchers("/api/admin/pos-terminals/**").hasRole("ADMIN")
                 .anyRequest().authenticated())
             .oauth2ResourceServer(o -> o.bearerTokenResolver(resolver).jwt(j -> j.jwtAuthenticationConverter(converter)))
             .build();
+    }
+    @Bean org.springframework.security.crypto.password.PasswordEncoder passwordEncoder() {
+        return new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
     }
     @Bean BearerTokenResolver bearerTokenResolver() {
         DefaultBearerTokenResolver header = new DefaultBearerTokenResolver();

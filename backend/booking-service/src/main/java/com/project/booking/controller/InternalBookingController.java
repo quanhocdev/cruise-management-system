@@ -27,6 +27,11 @@ public class InternalBookingController {
                             @RequestHeader(value = "X-Internal-Api-Key", required = false) String key) {
         authorize(key); return service.confirmPayment(id, request.paymentId());
     }
+    @GetMapping("/{id}/feedback-eligibility")
+    FeedbackEligibilityResponse feedbackEligibility(@PathVariable Long id, @RequestParam Long userId,
+            @RequestHeader(value = "X-Internal-Api-Key", required = false) String key) {
+        authorize(key); return service.getFeedbackEligibility(id, userId);
+    }
     private void authorize(String key) {
         byte[] actual = key == null ? new byte[0] : key.getBytes(StandardCharsets.UTF_8);
         if (!MessageDigest.isEqual(expectedKey, actual))

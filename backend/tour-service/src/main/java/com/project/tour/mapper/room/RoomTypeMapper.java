@@ -13,6 +13,8 @@ public class RoomTypeMapper {
 
         roomType.setName(request.getName());
         roomType.setDescription(request.getDescription());
+        if (request.getPrice() != null) roomType.setPrice(request.getPrice());
+        if (request.getCapacity() != null) roomType.setCapacity(request.getCapacity());
 
         return roomType;
     }
@@ -23,6 +25,8 @@ public class RoomTypeMapper {
 
         roomType.setName(request.getName());
         roomType.setDescription(request.getDescription());
+        if (request.getPrice() != null) roomType.setPrice(request.getPrice());
+        if (request.getCapacity() != null) roomType.setCapacity(request.getCapacity());
     }
 
     public static RoomTypeResponse toResponse(RoomType roomType) {
@@ -32,6 +36,8 @@ public class RoomTypeMapper {
         response.setId(roomType.getId());
         response.setName(roomType.getName());
         response.setDescription(roomType.getDescription());
+        response.setPrice(roomType.getPrice());
+        response.setCapacity(roomType.getCapacity());
 
         return response;
     }

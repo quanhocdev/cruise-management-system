@@ -12,9 +12,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class BookingServiceImpl implements BookingService {
@@ -34,13 +38,14 @@ public class BookingServiceImpl implements BookingService {
     @Override @Transactional
     public synchronized BookingResponse create(CreateBookingRequest request, Long userId) {
         TourScheduleContext voyage = tourClient.getSchedule(request.voyageId());
-        validateAvailability(request, voyage);
+        Map<UUID, TourRoomContext> roomsById = validateAvailability(request, voyage);
+        BigDecimal totalAmount = calculateTotalAmount(request, roomsById);
         Instant now = Instant.now();
         Booking booking = new Booking();
         booking.setCreatedByUserId(userId); booking.setVoyageId(request.voyageId());
         booking.setPrimaryContactName(request.primaryContactName().trim());
         booking.setPrimaryContactPhone(request.primaryContactPhone().trim());
-        booking.setTotalAmount(request.totalAmount());
+        booking.setTotalAmount(totalAmount);
         booking.setVoyageStartDate(voyage.startDate());
         booking.setStatus(BookingStatus.PENDING_PAYMENT); booking.setCreatedAt(now); booking.setUpdatedAt(now);
         Booking saved = repository.save(booking);
@@ -114,6 +119,58 @@ public class BookingServiceImpl implements BookingService {
         return toResponse(saved);
     }
 
+    @Override @Transactional(readOnly = true)
+    public BookingResponse getByCode(String bookingCode, Long requesterId, boolean privileged) {
+        Booking booking = findByCode(bookingCode);
+        if (!privileged && !Objects.equals(booking.getCreatedByUserId(), requesterId))
+            throw new BookingException(HttpStatus.FORBIDDEN, "You cannot access this booking");
+        return toResponse(booking);
+    }
+
+    @Override @Transactional
+    public PassengerVoyageResponse checkIn(String bookingCode, Long passengerVoyageId, String nfcTagId) {
+        Booking booking = findByCode(bookingCode);
+        if (booking.getStatus() != BookingStatus.CONFIRMED)
+            throw new BookingException(HttpStatus.CONFLICT, "Only a confirmed booking can be checked in");
+        PassengerVoyage link = findPassengerVoyage(passengerVoyageId);
+        if (!Objects.equals(link.getBooking().getId(), booking.getId()))
+            throw new BookingException(HttpStatus.BAD_REQUEST, "Passenger does not belong to this booking");
+        if (link.getPassengerStatus() != PassengerStatus.REGISTERED)
+            throw new BookingException(HttpStatus.CONFLICT, "Passenger is not registered for this voyage");
+        if (link.getEmbarkationStatus() != EmbarkationStatus.NOT_CHECKED_IN)
+            throw new BookingException(HttpStatus.CONFLICT, "Passenger has already been checked in");
+        String normalizedTag = normalizeTag(nfcTagId);
+        if (passengerVoyageRepository.existsByNfcTagIdIgnoreCase(normalizedTag))
+            throw new BookingException(HttpStatus.CONFLICT, "NFC tag is already assigned");
+        link.setNfcTagId(normalizedTag);
+        link.setEmbarkationStatus(EmbarkationStatus.CHECKED_IN);
+        link.setCheckedInAt(Instant.now());
+        PassengerVoyage saved = passengerVoyageRepository.save(link);
+        notificationClient.send(booking.getCreatedByUserId(), saved.getPassenger().getEmail(), "CHECK_IN_SUCCESS",
+            "Check-in successful", saved.getPassenger().getFullName() + " has checked in successfully.", booking.getId());
+        return toPassengerResponse(saved);
+    }
+
+    @Override @Transactional
+    public PassengerVoyageResponse board(String nfcTagId) {
+        PassengerVoyage link = findByNfc(nfcTagId);
+        if (link.getEmbarkationStatus() != EmbarkationStatus.CHECKED_IN)
+            throw new BookingException(HttpStatus.CONFLICT, "Passenger must be checked in before boarding");
+        link.setEmbarkationStatus(EmbarkationStatus.BOARDED);
+        link.setBoardedAt(Instant.now());
+        return toPassengerResponse(passengerVoyageRepository.save(link));
+    }
+
+    @Override @Transactional
+    public PassengerVoyageResponse disembark(String nfcTagId) {
+        PassengerVoyage link = findByNfc(nfcTagId);
+        if (link.getEmbarkationStatus() != EmbarkationStatus.BOARDED)
+            throw new BookingException(HttpStatus.CONFLICT, "Passenger must be on board before disembarking");
+        link.setEmbarkationStatus(EmbarkationStatus.DISEMBARKED);
+        link.setDisembarkedAt(Instant.now());
+        return toPassengerResponse(passengerVoyageRepository.save(link));
+    }
+
     @Override @Transactional
     public int sendDepartureReminders(java.time.LocalDate departureDate) {
         int sent = 0;
@@ -130,9 +187,58 @@ public class BookingServiceImpl implements BookingService {
         return sent;
     }
 
+    @Override @Transactional(readOnly = true)
+    public FeedbackEligibilityResponse getFeedbackEligibility(Long bookingId, Long userId) {
+        Booking booking = find(bookingId);
+        PassengerVoyage passengerVoyage = passengerVoyageRepository
+            .findFirstByBooking_IdAndPassenger_UserId(bookingId, userId).orElse(null);
+        if (passengerVoyage == null)
+            return new FeedbackEligibilityResponse(booking.getId(), booking.getVoyageId(), null, false);
+        boolean participated = booking.getStatus() == BookingStatus.CONFIRMED
+            && passengerVoyage.getPassengerStatus() == PassengerStatus.REGISTERED
+            && passengerVoyage.getEmbarkationStatus() == EmbarkationStatus.DISEMBARKED;
+        return new FeedbackEligibilityResponse(booking.getId(), booking.getVoyageId(),
+            passengerVoyage.getId(), participated);
+    }
+
+    @Override @Transactional(readOnly = true)
+    public List<AvailableRoomResponse> getAvailableRooms(UUID voyageId) {
+        TourScheduleContext voyage = tourClient.getSchedule(voyageId);
+        if (!"OPEN".equals(voyage.status()))
+            throw new BookingException(HttpStatus.CONFLICT, "Voyage is not open for booking");
+        List<PassengerStatus> occupiedStatuses = List.of(PassengerStatus.RESERVED, PassengerStatus.REGISTERED);
+        return tourClient.getRooms(voyageId).stream().map(room -> {
+            long occupied = passengerVoyageRepository.countByVoyageIdAndCabinIdAndPassengerStatusIn(
+                voyageId, room.roomId(), occupiedStatuses);
+            long remaining = Math.max(0, (long) room.capacity() - occupied);
+            return new AvailableRoomResponse(
+                room.roomId(), room.roomCode(), room.deckId(), room.deckNumber(),
+                room.roomTypeId(), room.roomTypeName(), room.roomTypeDescription(),
+                room.price(), room.capacity(), occupied, remaining, remaining > 0);
+        }).toList();
+    }
+
     private Booking find(Long id) {
         return repository.findById(id)
             .orElseThrow(() -> new BookingException(HttpStatus.NOT_FOUND, "Booking not found: " + id));
+    }
+    private Booking findByCode(String bookingCode) {
+        String normalized = bookingCode == null ? "" : bookingCode.trim();
+        return repository.findByBookingCodeIgnoreCase(normalized)
+            .orElseThrow(() -> new BookingException(HttpStatus.NOT_FOUND, "Booking code not found"));
+    }
+    private PassengerVoyage findPassengerVoyage(Long id) {
+        return passengerVoyageRepository.findById(id)
+            .orElseThrow(() -> new BookingException(HttpStatus.NOT_FOUND, "Passenger voyage not found: " + id));
+    }
+    private PassengerVoyage findByNfc(String nfcTagId) {
+        return passengerVoyageRepository.findByNfcTagIdIgnoreCase(normalizeTag(nfcTagId))
+            .orElseThrow(() -> new BookingException(HttpStatus.NOT_FOUND, "NFC tag is not assigned"));
+    }
+    private String normalizeTag(String nfcTagId) {
+        if (nfcTagId == null || nfcTagId.isBlank())
+            throw new BookingException(HttpStatus.BAD_REQUEST, "NFC tag ID is required");
+        return nfcTagId.trim().toUpperCase(java.util.Locale.ROOT);
     }
     private String firstEmail(Booking booking) {
         return passengerVoyageRepository.findAllByBooking_IdOrderByIdAsc(booking.getId()).stream()
@@ -142,14 +248,18 @@ public class BookingServiceImpl implements BookingService {
     private BookingResponse toResponse(Booking b) {
         List<PassengerVoyageResponse> passengers = passengerVoyageRepository
             .findAllByBooking_IdOrderByIdAsc(b.getId()).stream().map(link -> {
-                Passenger p = link.getPassenger();
-                return new PassengerVoyageResponse(link.getId(), p.getId(), p.getUserId(), p.getFullName(),
-                    p.getDateOfBirth(), p.getGender(), p.getPhoneNumber(), p.getEmail(), link.getCabinId(),
-                    link.getPassengerStatus(), link.getEmbarkationStatus());
+                return toPassengerResponse(link);
             }).toList();
         return new BookingResponse(b.getId(), b.getVoyageId(), b.getBookingCode(), b.getCreatedByUserId(),
             b.getPrimaryContactName(), b.getPrimaryContactPhone(), b.getTotalAmount(), b.getStatus(), b.getPaymentId(),
             b.getCreatedAt(), b.getUpdatedAt(), passengers);
+    }
+    private PassengerVoyageResponse toPassengerResponse(PassengerVoyage link) {
+        Passenger p = link.getPassenger();
+        return new PassengerVoyageResponse(link.getId(), p.getId(), p.getUserId(), p.getFullName(),
+            p.getDateOfBirth(), p.getGender(), p.getPhoneNumber(), p.getEmail(), link.getCabinId(),
+            link.getPassengerStatus(), link.getEmbarkationStatus(), link.getNfcTagId(),
+            link.getCheckedInAt(), link.getBoardedAt(), link.getDisembarkedAt());
     }
     private String generateBookingCode(Long bookingId) {
         for (int attempt = 0; attempt < 10; attempt++) {
@@ -158,7 +268,7 @@ public class BookingServiceImpl implements BookingService {
         }
         throw new BookingException(HttpStatus.INTERNAL_SERVER_ERROR, "Cannot generate a unique booking code");
     }
-    private void validateAvailability(CreateBookingRequest request, TourScheduleContext voyage) {
+    private Map<UUID, TourRoomContext> validateAvailability(CreateBookingRequest request, TourScheduleContext voyage) {
         if (!request.voyageId().equals(voyage.voyageId()))
             throw new BookingException(HttpStatus.BAD_REQUEST, "Voyage reference does not match");
         if (!"OPEN".equals(voyage.status()))
@@ -169,5 +279,33 @@ public class BookingServiceImpl implements BookingService {
             request.voyageId(), List.of(PassengerStatus.RESERVED, PassengerStatus.REGISTERED));
         if (occupied + request.passengers().size() > voyage.capacity())
             throw new BookingException(HttpStatus.CONFLICT, "Voyage does not have enough available capacity");
+
+        Map<UUID, TourRoomContext> roomsById = tourClient.getRooms(request.voyageId()).stream()
+            .collect(Collectors.toMap(TourRoomContext::roomId, room -> room));
+        Map<UUID, Long> requestedByRoom = request.passengers().stream()
+            .collect(Collectors.groupingBy(CreatePassengerRequest::cabinId, Collectors.counting()));
+
+        requestedByRoom.forEach((roomId, requestedSeats) -> {
+            TourRoomContext room = roomsById.get(roomId);
+            if (room == null)
+                throw new BookingException(HttpStatus.BAD_REQUEST, "Selected room does not belong to this voyage");
+            long roomOccupied = passengerVoyageRepository
+                .countByVoyageIdAndCabinIdAndPassengerStatusIn(
+                    request.voyageId(), roomId,
+                    List.of(PassengerStatus.RESERVED, PassengerStatus.REGISTERED));
+            if (roomOccupied + requestedSeats > room.capacity())
+                throw new BookingException(HttpStatus.CONFLICT, "Selected room does not have enough available capacity");
+        });
+        return roomsById;
+    }
+
+    private BigDecimal calculateTotalAmount(CreateBookingRequest request, Map<UUID, TourRoomContext> roomsById) {
+        Set<UUID> selectedRoomIds = request.passengers().stream()
+            .map(CreatePassengerRequest::cabinId).collect(Collectors.toSet());
+        return selectedRoomIds.stream()
+            .map(roomsById::get)
+            .filter(Objects::nonNull)
+            .map(TourRoomContext::price)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

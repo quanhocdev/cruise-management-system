@@ -23,6 +23,10 @@ import com.project.cruise.android.ui.screens.auth.LoginScreen
 import com.project.cruise.android.ui.screens.auth.OtpScreen
 import com.project.cruise.android.ui.screens.auth.RegisterScreen
 import com.project.cruise.android.ui.screens.passenger.Dashboard
+import com.project.cruise.android.ui.screens.pos.PosDashboardScreen
+import com.project.cruise.android.ui.screens.pos.QrScanScreen
+import com.project.cruise.android.ui.screens.pos.NfcScanScreen
+import com.project.cruise.android.ui.screens.pos.PosHistoryScreen
 
 import com.project.cruise.android.viewmodel.auth.AuthViewModel
 import com.project.cruise.android.viewmodel.auth.AuthViewModelFactory
@@ -37,6 +41,10 @@ object Routes {
     const val REGISTER = "register"
     const val OTP = "otp/{userId}"
     const val PASSENGER_DASHBOARD = "passenger_dashboard"
+    const val POS_DASHBOARD = "pos_dashboard"
+    const val POS_QR_SCAN = "pos_qr_scan"
+    const val POS_NFC_SCAN = "pos_nfc_scan"
+    const val POS_HISTORY = "pos_history"
 }
 
 @Composable
@@ -96,8 +104,39 @@ fun NavGraph() {
                     navController.navigate(
                         Routes.REGISTER
                     )
+                },
+
+                onPosClick = {
+                    navController.navigate(Routes.POS_DASHBOARD)
                 }
             )
+        }
+
+        composable(Routes.POS_DASHBOARD) {
+            PosDashboardScreen(
+                onBackClick = { navController.popBackStack() },
+                onQrClick = { navController.navigate(Routes.POS_QR_SCAN) },
+                onNfcClick = { navController.navigate(Routes.POS_NFC_SCAN) },
+                onHistoryClick = { navController.navigate(Routes.POS_HISTORY) }
+            )
+        }
+
+        composable(Routes.POS_QR_SCAN) {
+            QrScanScreen(
+                onBackClick = { navController.popBackStack() },
+                onSaved = { navController.popBackStack() }
+            )
+        }
+
+        composable(Routes.POS_NFC_SCAN) {
+            NfcScanScreen(
+                onBackClick = { navController.popBackStack() },
+                onSaved = { navController.popBackStack() }
+            )
+        }
+
+        composable(Routes.POS_HISTORY) {
+            PosHistoryScreen(onBackClick = { navController.popBackStack() })
         }
 
         // =================================================

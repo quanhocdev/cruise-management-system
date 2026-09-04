@@ -1,113 +1,156 @@
-/* src/styles/tour-configuration/ActivityConfigurationTable.css */
+/* ===========================================================
+   ActivityConfigurationTable.css
+   Dùng chung cho ActivityCruiseConfigurationTable VÀ
+   ActivityVisitConfigurationTable (cả hai cùng import file này).
+   Cùng token với OperationTourConfiguration.css (biến --otc-*).
+   Component được render bên trong
+   ".operation-tour-configuration-section" (đã có nền/viền/shadow
+   riêng), nên phần section ở đây KHÔNG lặp lại khung ngoài.
+   =========================================================== */
 
-/* =====================================================
-   SECTION BASE & HEADER
-   ===================================================== */
-.activity-configuration-table-section {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  width: 100%;
+:root {
+  --otc-bg: #f6f7f9;
+  --otc-surface: #ffffff;
+  --otc-border: #e3e6ec;
+  --otc-ink: #10203a;
+  --otc-ink-soft: #5b6b82;
+  --otc-navy: #12233d;
+  --otc-teal: #0d9488;
+  --otc-teal-dark: #0b7d73;
+  --otc-radius-sm: 8px;
+  --otc-radius-md: 12px;
+  --otc-font-display: "Sora", "Manrope", "Segoe UI", sans-serif;
+  --otc-font-body: "Inter", "Segoe UI", Roboto, sans-serif;
 }
+
+.activity-configuration-table-section {
+  font-family: var(--otc-font-body);
+  color: var(--otc-ink);
+}
+
+.activity-configuration-table-section * {
+  box-sizing: border-box;
+}
+
+/* ===========================================================
+   HEADER
+   =========================================================== */
 
 .activity-configuration-table-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
 }
 
 .activity-configuration-table-title {
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
 }
 
 .activity-configuration-table-icon {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--otc-radius-sm);
+  background: var(--otc-navy);
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background-color: #eff6ff;
-  color: #2563eb;
-  flex-shrink: 0;
 }
 
 .activity-configuration-table-title h2 {
-  font-size: 18px;
-  font-weight: 700;
-  color: #0f172a;
   margin: 0;
+  font-family: var(--otc-font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--otc-navy);
 }
 
 .activity-configuration-table-title p {
-  font-size: 13px;
-  color: #64748b;
-  margin: 2px 0 0 0;
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  color: var(--otc-ink-soft);
 }
 
 .activity-configuration-table-count {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 12px;
-  border-radius: 20px;
-  background-color: #f1f5f9;
-  color: #475569;
-  font-size: 13px;
+  flex-shrink: 0;
+  background: var(--otc-bg);
+  border: 1px solid var(--otc-border);
+  color: var(--otc-ink-soft);
+  font-size: 12.5px;
   font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 999px;
   white-space: nowrap;
 }
 
-/* =====================================================
+/* ===========================================================
    EMPTY STATE
-   ===================================================== */
+   =========================================================== */
+
 .activity-configuration-table-empty {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 32px;
-  background-color: #f8fafc;
-  border: 1px dashed #cbd5e1;
-  border-radius: 10px;
-  color: #64748b;
-  font-size: 14px;
-  font-weight: 500;
+  text-align: center;
+  padding: 40px 20px;
+  border: 1px dashed var(--otc-border);
+  border-radius: var(--otc-radius-md);
+  color: var(--otc-ink-soft);
+  background: var(--otc-bg);
 }
 
-/* =====================================================
-   TABLE & CONTENT WRAPPER
-   ===================================================== */
+.activity-configuration-table-empty svg {
+  color: #c3ccd8;
+}
+
+.activity-configuration-table-empty span {
+  font-size: 13.5px;
+}
+
+/* ===========================================================
+   TABLE WRAPPER (scroll on small screens)
+   =========================================================== */
+
 .activity-configuration-table-wrapper {
-  width: 100%;
   overflow-x: auto;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  background-color: #ffffff;
+  border: 1px solid var(--otc-border);
+  border-radius: var(--otc-radius-md);
+  -webkit-overflow-scrolling: touch;
 }
 
 .activity-configuration-table {
   width: 100%;
   border-collapse: collapse;
-  text-align: left;
-  font-size: 14px;
+  min-width: 720px;
+  font-size: 13.5px;
 }
 
-.activity-configuration-table th {
-  background-color: #f8fafc;
-  color: #475569;
-  font-weight: 600;
+.activity-configuration-table thead th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--otc-ink-soft);
+  background: var(--otc-bg);
   padding: 12px 16px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--otc-border);
   white-space: nowrap;
 }
 
-.activity-configuration-table td {
-  padding: 14px 16px;
-  border-bottom: 1px solid #f1f5f9;
-  color: #1e293b;
+.activity-configuration-table tbody td {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--otc-border);
+  color: var(--otc-ink);
   vertical-align: middle;
 }
 
@@ -115,15 +158,14 @@
   border-bottom: none;
 }
 
-.activity-configuration-table tbody tr:hover {
-  background-color: #f8fafc;
+.activity-configuration-table tbody tr:hover td {
+  background: #f9fafb;
 }
 
-/* =====================================================
-   COLUMN SPECIFIC STYLES
-   ===================================================== */
+/* ===========================================================
+   ACTIVITY NAME CELL
+   =========================================================== */
 
-/* Activity Name Column */
 .activity-configuration-name {
   display: flex;
   flex-direction: column;
@@ -131,130 +173,127 @@
 }
 
 .activity-configuration-name strong {
-  color: #0f172a;
   font-weight: 600;
+  color: var(--otc-ink);
 }
 
 .activity-configuration-name span {
-  font-size: 12px;
-  color: #94a3b8;
+  font-size: 11.5px;
+  color: var(--otc-ink-soft);
 }
 
-/* Area Column */
+/* ===========================================================
+   AREA / LOCATION CELL (icon + name + sub-label)
+   used by both cruise area and visit destination
+   =========================================================== */
+
 .activity-configuration-area {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  color: #64748b;
 }
 
 .activity-configuration-area svg {
-  color: #ef4444;
-  margin-top: 2px;
   flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--otc-teal-dark);
 }
 
 .activity-configuration-area strong {
   display: block;
-  color: #334155;
-  font-size: 13px;
   font-weight: 600;
+  color: var(--otc-ink);
+  font-size: 13.5px;
 }
 
 .activity-configuration-area span {
   display: block;
-  font-size: 12px;
-  color: #64748b;
+  font-size: 11.5px;
+  color: var(--otc-ink-soft);
+  margin-top: 1px;
 }
 
-/* Time Column */
+/* ===========================================================
+   TIME CELL (icon + start/end stacked)
+   =========================================================== */
+
 .activity-configuration-time {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #64748b;
 }
 
 .activity-configuration-time svg {
-  color: #3b82f6;
   flex-shrink: 0;
+  color: var(--otc-ink-soft);
 }
 
-.activity-configuration-time div {
+.activity-configuration-time > div {
   display: flex;
-  align-items: center;
-  gap: 4px;
-  font-weight: 500;
-  color: #334155;
-  font-size: 13px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0;
+}
+
+.activity-configuration-time span {
+  font-size: 12.5px;
+  color: var(--otc-ink);
+  white-space: nowrap;
 }
 
 .activity-configuration-time span:first-child::after {
-  content: " -";
-  color: #94a3b8;
+  content: " → ";
+  color: var(--otc-ink-soft);
 }
 
-/* Status Badge */
+/* ===========================================================
+   STATUS BADGE
+   =========================================================== */
+
 .activity-configuration-status {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
-  border-radius: 20px;
   font-size: 12px;
   font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 999px;
   white-space: nowrap;
 }
 
-/* Configured State */
 .activity-configuration-status.configured {
-  background-color: #f0fdf4;
-  color: #16a34a;
-  border: 1px solid #bbf7d0;
+  background: #e8f6f3;
+  color: var(--otc-teal-dark);
 }
 
-/* Waiting / Unconfigured State */
-.activity-configuration-status.waiting {
-  background-color: #fffbeb;
-  color: #d97706;
-  border: 1px solid #fef3c7;
-}
+/* ===========================================================
+   RESPONSIVE
+   =========================================================== */
 
-/* =====================================================
-   RESPONSIVE MEDIA QUERIES
-   ===================================================== */
-
-/* Tablet (<= 768px) */
 @media (max-width: 768px) {
   .activity-configuration-table-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
+    gap: 10px;
   }
 
   .activity-configuration-table-count {
     align-self: flex-start;
   }
-
-  .activity-configuration-table th,
-  .activity-configuration-table td {
-    padding: 10px 12px;
-  }
 }
 
-/* Mobile (<= 480px) */
 @media (max-width: 480px) {
-  .activity-configuration-table-title h2 {
-    font-size: 16px;
-  }
-
   .activity-configuration-table-icon {
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
   }
 
-  .activity-configuration-table-empty {
-    padding: 20px 16px;
-    font-size: 13px;
+  .activity-configuration-table-title h2 {
+    font-size: 15px;
+  }
+
+  .activity-configuration-table thead th,
+  .activity-configuration-table tbody td {
+    padding: 10px 12px;
   }
 }

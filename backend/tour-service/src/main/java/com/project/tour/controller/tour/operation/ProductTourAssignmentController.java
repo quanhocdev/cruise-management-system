@@ -1,8 +1,8 @@
 package com.project.tour.controller.tour.operation;
 
 import com.project.tour.dto.tour.operation.ProductTourAssignmentRequest;
-import com.project.tour.dto.tour.operation.ProductTourAssignmentResponse;
-import com.project.tour.service.tour.operation.ProductTourAssignmentService;
+import com.project.tour.dto.tour.operation.ProductTourAssignmentResponse; // Fix import DTO
+import com.project.tour.service.tour.operation.assignment.ProductTourAssignmentService;
 
 import jakarta.validation.Valid;
 
@@ -46,8 +46,7 @@ public class ProductTourAssignmentController {
     }
 
     /**
-     * Xóa phân công tiện ích theo tourId và cruiseAreaId (Chuẩn đồng bộ với
-     * Activity)
+     * Xóa phân công tiện ích theo tourId và cruiseAreaId
      * URL: DELETE
      * /api/operation/product-tour-assignment/tour/{tourId}/area/{cruiseAreaId}
      */

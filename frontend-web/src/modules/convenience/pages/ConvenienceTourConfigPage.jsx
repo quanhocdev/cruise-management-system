@@ -3,7 +3,6 @@
 import React from "react";
 
 import ConvenienceTourConfig from "../components/tour-config/ConvenienceTourConfig";
-import "../styles/tour-config/ConvenienceTourConfigPage.css";
 
 const ConvenienceTourConfigPage = () => {
   return (

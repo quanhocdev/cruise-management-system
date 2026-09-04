@@ -1,90 +1,157 @@
-/* src/modules/operation/styles/OperationTourConfiguration.css */
+/* ===========================================================
+   OperationTourConfiguration.css
+   Trang cấu hình Tour (Operation) — Activity / Product / Service
+   =========================================================== */
+
+:root {
+  --otc-bg: #f6f7f9;
+  --otc-surface: #ffffff;
+  --otc-border: #e3e6ec;
+  --otc-ink: #10203a;
+  --otc-ink-soft: #5b6b82;
+  --otc-navy: #12233d;
+  --otc-teal: #0d9488;
+  --otc-teal-dark: #0b7d73;
+  --otc-amber: #e8a33d;
+  --otc-danger: #c0362c;
+  --otc-danger-bg: #fdf0ef;
+  --otc-radius-sm: 8px;
+  --otc-radius-md: 12px;
+  --otc-radius-lg: 16px;
+  --otc-shadow:
+    0 1px 2px rgba(16, 32, 58, 0.04), 0 6px 20px rgba(16, 32, 58, 0.06);
+  --otc-font-display: "Sora", "Manrope", "Segoe UI", sans-serif;
+  --otc-font-body: "Inter", "Segoe UI", Roboto, sans-serif;
+}
+
+/* ===========================================================
+   PAGE SHELL
+   =========================================================== */
 
 .operation-tour-configuration-page {
-  padding: 24px;
-  background-color: #f8fafc;
-  min-height: 100vh;
+  height: 100%;
+  overflow-y: auto;
+  background: var(--otc-bg);
+  font-family: var(--otc-font-body);
+  color: var(--otc-ink);
+  padding: 28px 32px 64px;
   display: flex;
   flex-direction: column;
   gap: 24px;
   box-sizing: border-box;
 }
 
-/* =====================================================
-   HEADER & ACTIONS
-   ===================================================== */
+.operation-tour-configuration-page *,
+.operation-tour-configuration-page *::before,
+.operation-tour-configuration-page *::after {
+  box-sizing: border-box;
+}
+
+/* ===========================================================
+   HEADER
+   =========================================================== */
+
 .operation-tour-configuration-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  background-color: #ffffff;
-  padding: 16px 24px;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  flex-wrap: wrap;
 }
 
 .operation-tour-configuration-header-left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 18px;
+  min-width: 0;
 }
 
 .operation-tour-configuration-back {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  background-color: #f1f5f9;
-  color: #475569;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
+  gap: 6px;
+  border: 1px solid var(--otc-border);
+  background: var(--otc-surface);
+  color: var(--otc-ink-soft);
+  font-family: var(--otc-font-body);
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 9px 14px;
+  border-radius: var(--otc-radius-sm);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease,
+    background 0.15s ease;
+  white-space: nowrap;
 }
 
 .operation-tour-configuration-back:hover {
-  background-color: #e2e8f0;
-  color: #0f172a;
+  border-color: var(--otc-teal);
+  color: var(--otc-teal-dark);
+  background: #f0faf9;
 }
 
-.operation-tour-title span {
-  font-size: 12px;
-  text-transform: uppercase;
-  color: #64748b;
+.operation-tour-configuration-back:focus-visible {
+  outline: 2px solid var(--otc-teal);
+  outline-offset: 2px;
+}
+
+.operation-tour-configuration-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.operation-tour-configuration-title span {
+  font-size: 12.5px;
   font-weight: 600;
-  letter-spacing: 0.5px;
-  display: block;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--otc-ink-soft);
 }
 
-.operation-tour-title h1 {
-  font-size: 20px;
+.operation-tour-configuration-title h1 {
+  margin: 0;
+  font-family: var(--otc-font-display);
+  font-size: 24px;
   font-weight: 700;
-  color: #0f172a;
-  margin: 2px 0 0 0;
+  color: var(--otc-navy);
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 60vw;
 }
 
 .operation-tour-configuration-refresh {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 9px 16px;
-  background-color: #ffffff;
-  color: #2563eb;
-  border: 1px solid #bfdbfe;
-  border-radius: 8px;
-  font-size: 14px;
+  border: none;
+  background: var(--otc-navy);
+  color: #ffffff;
+  font-family: var(--otc-font-body);
+  font-size: 13.5px;
   font-weight: 600;
+  padding: 10px 18px;
+  border-radius: var(--otc-radius-sm);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    background 0.15s ease,
+    transform 0.1s ease,
+    box-shadow 0.15s ease;
+  box-shadow: var(--otc-shadow);
+  white-space: nowrap;
 }
 
 .operation-tour-configuration-refresh:hover:not(:disabled) {
-  background-color: #eff6ff;
-  border-color: #93c5fd;
+  background: #0a1729;
+}
+
+.operation-tour-configuration-refresh:active:not(:disabled) {
+  transform: translateY(1px);
 }
 
 .operation-tour-configuration-refresh:disabled {
@@ -92,112 +159,16 @@
   cursor: not-allowed;
 }
 
-/* =====================================================
-   SECTIONS & TABLES WRAPPER
-   ===================================================== */
-.operation-tour-configuration-section {
-  background-color: #ffffff;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  padding: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-/* =====================================================
-   BOTTOM ACTION (CREATE PACKAGE)
-   ===================================================== */
-.operation-tour-configuration-package {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 20px 24px;
-  gap: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.operation-tour-configuration-package strong {
-  font-size: 16px;
-  color: #0f172a;
-  display: block;
-  margin-bottom: 4px;
-}
-
-.operation-tour-configuration-package p {
-  font-size: 14px;
-  color: #64748b;
-  margin: 0;
-}
-
-.operation-tour-configuration-create-package {
-  padding: 10px 20px;
-  background-color: #2563eb;
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s ease;
-}
-
-.operation-tour-configuration-create-package:hover:not(:disabled) {
-  background-color: #1d4ed8;
-}
-
-.operation-tour-configuration-create-package:disabled {
-  background-color: #94a3b8;
-  cursor: not-allowed;
-}
-
-/* =====================================================
-   STATES (LOADING & ERROR)
-   ===================================================== */
-.operation-tour-configuration-loading,
-.operation-tour-configuration-error {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 40px;
-  background-color: #ffffff;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  margin: 24px;
-}
-
-.operation-tour-configuration-loading span {
-  font-size: 15px;
-  color: #475569;
-  font-weight: 500;
-}
-
-.operation-tour-configuration-error {
-  background-color: #fef2f2;
-  border-color: #fecaca;
-  color: #dc2626;
-  justify-content: flex-start;
-}
-
-.operation-tour-configuration-error strong {
-  display: block;
-  font-size: 16px;
-}
-
-.operation-tour-configuration-error p {
-  margin: 2px 0 0 0;
-  font-size: 14px;
-  color: #991b1b;
+.operation-tour-configuration-refresh:focus-visible {
+  outline: 2px solid var(--otc-teal);
+  outline-offset: 2px;
 }
 
 .operation-tour-configuration-spin {
-  animation: spin 1s linear infinite;
+  animation: otc-spin 0.9s linear infinite;
 }
 
-@keyframes spin {
+@keyframes otc-spin {
   from {
     transform: rotate(0deg);
   }
@@ -206,91 +177,258 @@
   }
 }
 
-/* =====================================================
-   RESPONSIVE MEDIA QUERIES
-   ===================================================== */
+/* ===========================================================
+   LOADING STATE
+   =========================================================== */
 
-/* Tablet & Màn hình nhỏ (<= 1024px) */
-@media (max-width: 1024px) {
-  .operation-tour-configuration-page {
-    padding: 16px;
-    gap: 16px;
-  }
-
-  .operation-tour-title h1 {
-    font-size: 18px;
-  }
-}
-
-/* Tablet dọc & Phân giải Mobile rộng (<= 768px) */
-@media (max-width: 768px) {
-  .operation-tour-configuration-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 16px;
-  }
-
-  .operation-tour-configuration-header-left {
-    width: 100%;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .operation-tour-configuration-refresh {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .operation-tour-configuration-package {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 16px;
-  }
-
-  .operation-tour-configuration-create-package {
-    width: 100%;
-    text-align: center;
-  }
-
-  .operation-tour-configuration-section {
-    padding: 12px;
-    overflow-x: auto; /* Cho phép cuộn ngang bảng nếu vượt khung */
-  }
-}
-
-/* Mobile nhỏ (<= 480px) */
-@media (max-width: 480px) {
-  .operation-tour-configuration-page {
-    padding: 12px;
-  }
-
-  .operation-tour-title h1 {
-    font-size: 16px;
-  }
-
-  .operation-tour-configuration-back {
-    padding: 6px 10px;
-    font-size: 13px;
-  }
-}
-/* src/styles/OperationTourConfiguration.css */
-
-.operation-tour-configuration-page {
+.operation-tour-configuration-loading {
+  min-height: 60vh;
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  width: 100%;
-  padding: 24px;
-  /* Đảm bảo khung ngoài cho phép cuộn mượt */
-  overflow-y: auto;
-  max-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--otc-ink-soft);
+  font-family: var(--otc-font-body);
+  font-size: 14px;
 }
+
+.operation-tour-configuration-loading svg {
+  color: var(--otc-teal);
+}
+
+/* ===========================================================
+   ERROR STATE
+   =========================================================== */
+
+.operation-tour-configuration-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: var(--otc-danger-bg);
+  border: 1px solid #f3c9c5;
+  color: var(--otc-danger);
+  border-radius: var(--otc-radius-md);
+  padding: 18px 20px;
+}
+
+.operation-tour-configuration-error svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.operation-tour-configuration-error strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.operation-tour-configuration-error p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #9c4a41;
+}
+
+/* ===========================================================
+   TABLES CONTAINER
+   =========================================================== */
 
 .operation-tour-configuration-tables {
   display: flex;
   flex-direction: column;
+  gap: 20px;
+}
+
+.operation-tour-configuration-section {
+  background: var(--otc-surface);
+  border: 1px solid var(--otc-border);
+  border-radius: var(--otc-radius-lg);
+  box-shadow: var(--otc-shadow);
+  padding: 20px;
+  scroll-margin-top: 24px;
+  overflow-x: auto;
+}
+
+/* ===========================================================
+   CREATE PACKAGE FOOTER
+   =========================================================== */
+
+.operation-tour-configuration-package {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 24px;
-  width: 100%;
+  background: var(--otc-navy);
+  background-image: linear-gradient(135deg, #12233d 0%, #16304f 100%);
+  color: #ffffff;
+  border-radius: var(--otc-radius-lg);
+  padding: 22px 28px;
+  flex-wrap: wrap;
+}
+
+.operation-tour-configuration-package strong {
+  display: block;
+  font-family: var(--otc-font-display);
+  font-size: 16.5px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.operation-tour-configuration-package p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.72);
+  max-width: 520px;
+}
+
+.operation-tour-configuration-create-package {
+  flex-shrink: 0;
+  border: none;
+  background: var(--otc-amber);
+  color: #2b1a02;
+  font-family: var(--otc-font-body);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 12px 24px;
+  border-radius: var(--otc-radius-sm);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    transform 0.1s ease,
+    opacity 0.15s ease;
+  white-space: nowrap;
+}
+
+.operation-tour-configuration-create-package:hover:not(:disabled) {
+  background: #edb15a;
+}
+
+.operation-tour-configuration-create-package:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.operation-tour-configuration-create-package:disabled {
+  background: rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.5);
+  cursor: not-allowed;
+}
+
+.operation-tour-configuration-create-package:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* ===========================================================
+   REDUCED MOTION
+   =========================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .operation-tour-configuration-spin {
+    animation: none;
+  }
+  .operation-tour-configuration-back,
+  .operation-tour-configuration-refresh,
+  .operation-tour-configuration-create-package {
+    transition: none;
+  }
+}
+
+/* ===========================================================
+   RESPONSIVE — TABLET (≤ 1024px)
+   =========================================================== */
+
+@media (max-width: 1024px) {
+  .operation-tour-configuration-page {
+    padding: 24px 20px 56px;
+  }
+
+  .operation-tour-configuration-title h1 {
+    max-width: 50vw;
+  }
+}
+
+/* ===========================================================
+   RESPONSIVE — SMALL TABLET / LARGE MOBILE (≤ 768px)
+   =========================================================== */
+
+@media (max-width: 768px) {
+  .operation-tour-configuration-page {
+    padding: 18px 16px 48px;
+    gap: 18px;
+  }
+
+  .operation-tour-configuration-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .operation-tour-configuration-header-left {
+    justify-content: space-between;
+  }
+
+  .operation-tour-configuration-title h1 {
+    font-size: 20px;
+    max-width: 100%;
+  }
+
+  .operation-tour-configuration-refresh {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .operation-tour-configuration-section {
+    padding: 16px;
+    border-radius: var(--otc-radius-md);
+  }
+
+  .operation-tour-configuration-package {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: left;
+    padding: 18px;
+  }
+
+  .operation-tour-configuration-package p {
+    max-width: 100%;
+  }
+
+  .operation-tour-configuration-create-package {
+    width: 100%;
+  }
+}
+
+/* ===========================================================
+   RESPONSIVE — MOBILE (≤ 480px)
+   =========================================================== */
+
+@media (max-width: 480px) {
+  .operation-tour-configuration-page {
+    padding: 14px 12px 40px;
+  }
+
+  .operation-tour-configuration-header-left {
+    gap: 10px;
+  }
+
+  .operation-tour-configuration-back {
+    padding: 8px 10px;
+    font-size: 12.5px;
+  }
+
+  .operation-tour-configuration-title span {
+    font-size: 11px;
+  }
+
+  .operation-tour-configuration-title h1 {
+    font-size: 18px;
+  }
+
+  .operation-tour-configuration-error,
+  .operation-tour-configuration-loading {
+    padding: 14px;
+    font-size: 13px;
+  }
 }

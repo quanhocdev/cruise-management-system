@@ -1,0 +1,138 @@
+/* =========================================================
+   CONVENIENCE TOUR HISTORY
+   ========================================================= */
+
+.convenience-tour-history {
+  width: 100%;
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.convenience-tour-history-header {
+  margin-bottom: 22px;
+}
+
+.convenience-tour-history-eyebrow {
+  display: block;
+  margin-bottom: 6px;
+  color: #9ca3af;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.convenience-tour-history-header h1 {
+  margin: 0 0 6px;
+  color: #1f2937;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.convenience-tour-history-header p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* =========================================================
+   TABS
+   ========================================================= */
+
+.convenience-tour-history-tabs {
+  display: flex;
+  gap: 4px;
+  width: fit-content;
+  margin-bottom: 20px;
+  padding: 4px;
+  border: 1px solid #e5e7eb;
+  border-radius: 9px;
+  background: #f9fafb;
+}
+
+.convenience-tour-history-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  min-width: 125px;
+  padding: 9px 16px;
+
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.convenience-tour-history-tab:hover {
+  color: #374151;
+  background: #fff;
+}
+
+.convenience-tour-history-tab.active {
+  background: #fff;
+  color: #1f2937;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 8%);
+}
+
+.convenience-tour-history-tab svg {
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   CONTENT
+   ========================================================= */
+
+.convenience-tour-history-content {
+  width: 100%;
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .convenience-tour-history-header h1 {
+    font-size: 21px;
+  }
+
+  .convenience-tour-history-header p {
+    line-height: 1.5;
+  }
+
+  .convenience-tour-history-tabs {
+    width: 100%;
+  }
+
+  .convenience-tour-history-tab {
+    flex: 1;
+    min-width: 0;
+    padding: 9px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .convenience-tour-history-header {
+    margin-bottom: 16px;
+  }
+
+  .convenience-tour-history-header h1 {
+    font-size: 19px;
+  }
+
+  .convenience-tour-history-tab {
+    font-size: 12px;
+  }
+}
