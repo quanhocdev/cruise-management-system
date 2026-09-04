@@ -2,6 +2,7 @@ package com.project.convenience.controller.service.convenience;
 
 import com.project.convenience.dto.service.convenience.ServiceTourConfigRequest;
 import com.project.convenience.dto.service.convenience.ServiceTourResponse;
+import com.project.convenience.dto.service.convenience.HistoryServiceTourResponse;
 import com.project.convenience.service.service.ServiceTourConfigService;
 import com.project.convenience.service.service.ServiceTourService;
 
@@ -28,24 +29,6 @@ public class ServiceTourController {
                 this.configService = configService;
         }
 
-        // =====================================================
-        // GET PENDING CONFIG
-        // =====================================================
-
-        /**
-         * Lấy các ServiceTour đang chờ Convenience cấu hình.
-         *
-         * Điều kiện:
-         * - Tour = APPROVED
-         * - ServiceTour = WAITING_CONFIG
-         */
-        @GetMapping("/pending-config")
-        public ResponseEntity<List<ServiceTourResponse>> getPendingConfig() {
-
-                return ResponseEntity.ok(
-                                serviceTourService.getPendingConfig());
-        }
-
         @GetMapping
         public ResponseEntity<List<ServiceTourResponse>> getAllAssignments() {
 
@@ -53,15 +36,28 @@ public class ServiceTourController {
                                 serviceTourService.getAllAssignments());
         }
 
-        // =====================================================
-        // POST CONFIG
-        // =====================================================
+        @GetMapping("/pending-config")
+        public ResponseEntity<List<ServiceTourResponse>> getPendingConfig() {
 
-        /**
-         * Cấu hình ServiceTour lần đầu.
-         *
-         * WAITING_CONFIG -> NOT_STARTED
-         */
+                return ResponseEntity.ok(
+                                serviceTourService.getPendingConfig());
+        }
+
+        @GetMapping("/configuration-history")
+        public ResponseEntity<List<HistoryServiceTourResponse>> getConfigurationHistory() {
+
+                return ResponseEntity.ok(
+                                serviceTourService.getConfigurationHistory());
+        }
+
+        @GetMapping("/tour/{tourId}")
+        public ResponseEntity<List<ServiceTourResponse>> getConfigurationHistoryDetail(
+                        @PathVariable UUID tourId) {
+
+                return ResponseEntity.ok(
+                                serviceTourService.getConfigurationHistoryDetail(tourId));
+        }
+
         @PostMapping("/{assignmentId}/config")
         public ResponseEntity<ServiceTourResponse> configure(
                         @PathVariable UUID assignmentId,
@@ -73,16 +69,6 @@ public class ServiceTourController {
                                                 request));
         }
 
-        // =====================================================
-        // PATCH CONFIG
-        // =====================================================
-
-        /**
-         * Cập nhật cấu hình ServiceTour.
-         *
-         * Chỉ cho phép khi:
-         * NOT_STARTED
-         */
         @PatchMapping("/{assignmentId}/config")
         public ResponseEntity<ServiceTourResponse> updateConfig(
                         @PathVariable UUID assignmentId,

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { AlertCircle, MapPin, Package, RefreshCw, Ship, X } from "lucide-react";
 
 import useProductTour from "../../hooks/useProductTour";
-import "../../styles/tour-config/ProductTourDetailModal.css";
+import "../../styles/history/ProductTourDetailModal.css";
 
 const ProductTourDetailModal = ({ assignmentId, onClose }) => {
   const { getProductTourById } = useProductTour();

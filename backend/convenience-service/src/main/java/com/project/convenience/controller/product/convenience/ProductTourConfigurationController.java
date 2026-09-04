@@ -15,10 +15,11 @@ public class ProductTourConfigurationController {
 
     public ProductTourConfigurationController(
             ProductTourConfigurationService configurationService) {
+
         this.configurationService = configurationService;
     }
 
-    @PostMapping("/{tourId}/complete-configuration")
+    @PostMapping("/{tourId}/complete")
     public ResponseEntity<Void> completeConfiguration(
             @PathVariable UUID tourId) {
 

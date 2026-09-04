@@ -2,7 +2,7 @@ package com.project.tour.controller.tour.operation;
 
 import com.project.tour.dto.tour.operation.ProductTourAssignmentRequest;
 import com.project.tour.dto.tour.operation.ProductTourAssignmentResponse; // Fix import DTO
-import com.project.tour.service.tour.operation.ProductTourAssignmentService; // Fix import Service
+import com.project.tour.service.tour.operation.assignment.ProductTourAssignmentService;
 
 import jakarta.validation.Valid;
 
