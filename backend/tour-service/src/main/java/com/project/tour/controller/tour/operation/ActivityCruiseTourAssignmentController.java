@@ -2,14 +2,13 @@ package com.project.tour.controller.tour.operation;
 
 import com.project.tour.dto.tour.operation.ActivityCruiseTourAssignmentRequest;
 import com.project.tour.dto.tour.operation.ActivityCruiseTourAssignmentResponse;
-import com.project.tour.service.tour.operation.ActivityCruiseTourAssignmentService;
+import com.project.tour.service.tour.operation.assignment.ActivityCruiseTourAssignmentService;
 
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.UUID;
 
@@ -25,21 +24,6 @@ public class ActivityCruiseTourAssignmentController {
         this.assignmentService = assignmentService;
     }
 
-    /**
-     * Operation phân công khu vực cho Tour.
-     */
-    @PostMapping
-    public ResponseEntity<ActivityCruiseTourAssignmentResponse> assign(
-            @Valid @RequestBody ActivityCruiseTourAssignmentRequest request) {
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(assignmentService.assign(request));
-    }
-
-    /**
-     * Lấy danh sách phân công của một Tour.
-     */
     @GetMapping("/tour/{tourId}")
     public ResponseEntity<List<ActivityCruiseTourAssignmentResponse>> getByTour(
             @PathVariable UUID tourId) {
@@ -49,15 +33,27 @@ public class ActivityCruiseTourAssignmentController {
     }
 
     /**
-     * Xóa phân công khi vẫn đang WAITING_CONFIG.
+     * Operation phân công khu vực Activity cho Tour.
+     * Validate tại tour-service -> Bắn Event Kafka xử lý bất đồng bộ.
+     */
+    @PostMapping
+    public ResponseEntity<Void> assign(
+            @Valid @RequestBody ActivityCruiseTourAssignmentRequest request) {
+
+        assignmentService.assign(request);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    }
+
+    /**
+     * Xóa phân công Activity theo tourId và cruiseAreaId.
+     * Bắn Event Kafka với action "DELETE".
      */
     @DeleteMapping("/tour/{tourId}/area/{cruiseAreaId}")
-    public ResponseEntity<Void> deleteByTourAndArea(
+    public ResponseEntity<Void> deleteAssignment(
             @PathVariable UUID tourId,
             @PathVariable UUID cruiseAreaId) {
 
-        assignmentService.deleteByTourAndArea(tourId, cruiseAreaId);
-
+        assignmentService.deleteAssignment(tourId, cruiseAreaId);
         return ResponseEntity.noContent().build();
     }
 }

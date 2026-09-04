@@ -1,0 +1,26 @@
+FROM maven:3.9.11-eclipse-temurin-17
+
+WORKDIR /app
+
+# ==========================
+# 1. Build & Install Module Common
+# ==========================
+COPY common/pom.xml ./common/pom.xml
+COPY common/src ./common/src
+
+# Cài đặt common vào repository nội bộ của Maven container
+RUN mvn -f common/pom.xml clean install -DskipTests
+
+# ==========================
+# 2. Prepare Convenience Service
+# ==========================
+COPY convenience-service/pom.xml ./convenience-service/pom.xml
+COPY convenience-service/src ./convenience-service/src
+
+WORKDIR /app/convenience-service
+
+# Tải dependency
+RUN mvn -B dependency:go-offline
+
+# Chạy app
+CMD ["mvn", "spring-boot:run"]

@@ -5,6 +5,7 @@ import {
   ConciergeBell,
   Package,
   ClipboardList,
+  History,
   ChevronLeft,
   ChevronRight,
   Sparkles,
@@ -33,6 +34,11 @@ const menuItems = [
     icon: ClipboardList,
     path: "/convenience/tour-config",
   },
+  {
+    label: "Lịch sử cấu hình",
+    icon: History,
+    path: "/convenience/tour-history",
+  },
 ];
 
 function ConvenienceSidebar() {
@@ -42,7 +48,7 @@ function ConvenienceSidebar() {
     <aside className={`convenience-sidebar ${collapsed ? "collapsed" : ""}`}>
       {/* =====================================================
           TOP
-         ===================================================== */}
+          ===================================================== */}
 
       <div className="convenience-sidebar-top">
         <div className="convenience-sidebar-brand">
@@ -63,7 +69,7 @@ function ConvenienceSidebar() {
 
       {/* =====================================================
           MENU
-         ===================================================== */}
+          ===================================================== */}
 
       <nav className="convenience-sidebar-menu">
         {menuItems.map((item) => {
@@ -88,7 +94,7 @@ function ConvenienceSidebar() {
 
       {/* =====================================================
           BOTTOM
-         ===================================================== */}
+          ===================================================== */}
 
       {!collapsed && (
         <div className="convenience-sidebar-bottom">

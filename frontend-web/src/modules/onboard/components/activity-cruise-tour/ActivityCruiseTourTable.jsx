@@ -1,6 +1,6 @@
 // src/modules/onboard/components/activity-cruise-tour/ActivityCruiseTourTable.jsx
 import React from "react";
-import { CalendarDays, MapPin, Settings, Ship } from "lucide-react";
+import { CalendarDays, MapPin, Settings, Ship, Eye } from "lucide-react";
 
 import "../../styles/activity-cruise-tour/ActivityCruiseTourTable.css";
 
@@ -10,6 +10,12 @@ const ActivityCruiseTourTable = ({
   onConfigure,
   onViewDetail,
 }) => {
+  // Hàm bổ trợ cắt ngắn UUID nếu cần
+  const formatShortId = (id) => {
+    if (!id) return "—";
+    return id.length > 8 ? `${id.substring(0, 8)}...` : id;
+  };
+
   if (loading) {
     return (
       <div className="activity-cruise-tour-table-wrapper">
@@ -25,9 +31,7 @@ const ActivityCruiseTourTable = ({
       <div className="activity-cruise-tour-table-wrapper">
         <div className="activity-cruise-tour-table-empty">
           <CalendarDays size={40} />
-
           <h3>Không có hoạt động cần cấu hình</h3>
-
           <p>Hiện tại không có hoạt động nào đang chờ ONBOARD cấu hình.</p>
         </div>
       </div>
@@ -40,37 +44,74 @@ const ActivityCruiseTourTable = ({
         <table className="activity-cruise-tour-table">
           <thead>
             <tr>
-              <th>Tour</th>
-              <th>Tên tour</th>
-              <th>Khu vực</th>
+              <th>ID Phân công</th>
+              <th>Mã Tour (ID)</th>
+              <th>Mã Tàu / Khu vực (ID)</th>
               <th>Trạng thái</th>
-              <th>Thao tác</th>
+              <th style={{ textAlign: "center" }}>Thao tác</th>
             </tr>
           </thead>
 
           <tbody>
             {activities.map((item) => (
               <tr key={item.id}>
-                {/* TOUR CODE */}
+                {/* ASSIGNMENT ID */}
                 <td>
-                  <div className="activity-cruise-tour-code">
-                    <Ship size={16} />
-                    <span>{item.tourCode || "—"}</span>
+                  <span
+                    className="activity-cruise-tour-id"
+                    title={item.id} // Di chuột vào để xem đầy đủ UUID
+                  >
+                    #{formatShortId(item.id)}
+                  </span>
+                </td>
+
+                {/* TOUR ID + NÚT XEM DETAIL */}
+                <td>
+                  <div className="activity-cruise-tour-code flex-cell">
+                    <div
+                      className="id-text-wrapper"
+                      title={item.tourId} // Di chuột vào xem full tourId
+                    >
+                      <Ship size={16} />
+                      <span className="truncate-id">{item.tourId || "—"}</span>
+                    </div>
+
+                    {item.tourId && (
+                      <button
+                        type="button"
+                        className="activity-cruise-tour-inline-btn"
+                        title="Xem chi tiết Tour"
+                        onClick={() => onViewDetail?.(item, "TOUR")}
+                      >
+                        <Eye size={14} />
+                      </button>
+                    )}
                   </div>
                 </td>
 
-                {/* TOUR NAME */}
+                {/* CRUISE AREA ID + NÚT XEM DETAIL */}
                 <td>
-                  <div className="activity-cruise-tour-name">
-                    {item.tourName || "—"}
-                  </div>
-                </td>
+                  <div className="activity-cruise-tour-area flex-cell">
+                    <div
+                      className="id-text-wrapper"
+                      title={item.cruiseAreaId} // Di chuột vào xem full cruiseAreaId
+                    >
+                      <MapPin size={16} />
+                      <span className="truncate-id">
+                        {item.cruiseAreaId || "—"}
+                      </span>
+                    </div>
 
-                {/* CRUISE AREA */}
-                <td>
-                  <div className="activity-cruise-tour-area">
-                    <MapPin size={16} />
-                    <span>{item.cruiseAreaName || "—"}</span>
+                    {item.cruiseAreaId && (
+                      <button
+                        type="button"
+                        className="activity-cruise-tour-inline-btn"
+                        title="Xem chi tiết Tàu / Khu vực"
+                        onClick={() => onViewDetail?.(item, "CRUISE_AREA")}
+                      >
+                        <Eye size={14} />
+                      </button>
+                    )}
                   </div>
                 </td>
 
@@ -88,16 +129,11 @@ const ActivityCruiseTourTable = ({
                 </td>
 
                 {/* ACTIONS */}
-                <td>
-                  <div className="activity-cruise-tour-actions">
-                    <button
-                      type="button"
-                      className="activity-cruise-tour-detail-button"
-                      onClick={() => onViewDetail?.(item)}
-                    >
-                      Chi tiết
-                    </button>
-
+                <td style={{ textAlign: "center" }}>
+                  <div
+                    className="activity-cruise-tour-actions"
+                    style={{ justifyContent: "center" }}
+                  >
                     {item.status === "WAITING_CONFIG" && (
                       <button
                         type="button"

@@ -59,11 +59,83 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     ports:
-      - "5434:5432"
+      - "5437:5432"
     volumes:
       - postgres_operations_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres} -d cruise_operations_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==========================
+  # PostgreSQL cho Convenience Service
+  # ==========================
+  postgres-convenience:
+    image: postgres:15-alpine
+    container_name: cruise_postgres_convenience
+    restart: always
+    environment:
+      POSTGRES_DB: convenience_service_db
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5434:5432" # Map cổng 5434 ra máy thật
+    volumes:
+      - postgres_convenience_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER:-postgres} -d convenience_service_db",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-activity-cruise:
+    image: postgres:15-alpine
+    container_name: postgres_activity_cruise
+    restart: always
+    environment:
+      POSTGRES_DB: activity_cruise_service_db
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_activity_cruise_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER:-postgres} -d activity_cruise_service_db",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==========================
+  # PostgreSQL cho Activity Visit Service
+  # ==========================
+  postgres-activity-visit:
+    image: postgres:15-alpine
+    container_name: postgres_activity_visit
+    restart: always
+    environment:
+      POSTGRES_DB: activity_visit_service_db
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5436:5432"
+    volumes:
+      - postgres_activity_visit_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER:-postgres} -d activity_visit_service_db",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -84,6 +156,60 @@ services:
       retries: 5
 
   # ==========================
+  # Zookeeper (Bắt buộc cho Kafka)
+  # ==========================
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: cruise_zookeeper
+    restart: always
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  # ==========================
+  # Apache Kafka
+  # ==========================
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: cruise_kafka
+    restart: always
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS: 1
+      KAFKA_LOG4J_ROOT_LOGLEVEL: "WARN"
+      KAFKA_LOG4J_LOGGERS: "kafka=WARN,kafka.controller=WARN,kafka.cluster=WARN,state.change.logger=WARN"
+      KAFKA_LOG_RETENTION_MS: 3600000
+      KAFKA_LOG_RETENTION_BYTES: 1073741824
+      KAFKA_LOG_SEGMENT_BYTES: 104857600
+      KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 300000
+    depends_on:
+      - zookeeper
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: cruise_kafka_ui
+    restart: always
+    ports:
+      - "8090:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local-cluster
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+    depends_on:
+      - kafka
+
+  # ==========================
   # pgAdmin
   # ==========================
   pgadmin:
@@ -97,11 +223,16 @@ services:
       - "5050:80"
     logging:
       driver: "none"
-      # driver: "json-file"
     depends_on:
       postgres-auth:
         condition: service_healthy
       postgres-tour:
+        condition: service_healthy
+      postgres-convenience:
+        condition: service_healthy
+      postgres-activity-cruise:
+        condition: service_healthy
+      postgres-activity-visit:
         condition: service_healthy
 
   # ==========================
@@ -122,16 +253,20 @@ services:
     environment:
       AUTH_SERVICE_URL: http://auth-service:8081
       BOOKING_SERVICE_URL: http://booking-service:8082
-      ACTIVITY_SERVICE_URL: http://activity-service:8083
+      ACTIVITY_SERVICE_URL: http://activity-cruise-service:8083
       CONVENIENCE_SERVICE_URL: http://convenience-service:8084
       PAYMENT_SERVICE_URL: http://payment-service:8085
       NOTIFICATION_SERVICE_URL: http://notification-service:8086
-      FEEDBACK_SERVICE_URL: http://feedback-service:8087
+      ACTIVITY_VISIT_SERVICE_URL: http://activity-visit-service:8087
       TOUR_SERVICE_URL: http://tour-service:8088
+      FEEDBACK_SERVICE_URL: http://feedback-service:8089
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
     depends_on:
       - auth-service
       - tour-service
+      - convenience-service
+      - activity-cruise-service
+      - activity-visit-service
       - booking-service
       - payment-service
       - notification-service
@@ -190,9 +325,100 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-tour:5432/${TOUR_DB_NAME:-tour_service_db}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      NOMINATIM_URL: ${NOMINATIM_URL:-https://nominatim.openstreetmap.org}
     depends_on:
       postgres-tour:
         condition: service_healthy
+      kafka:
+        condition: service_started
+
+  # ==========================
+  # Convenience Service
+  # ==========================
+  convenience-service:
+    build:
+      context: ./backend
+      dockerfile: convenience-service/Dockerfile.dev
+    container_name: convenience-service
+    restart: always
+    ports:
+      - "8084:8084"
+    working_dir: /app/convenience-service
+    volumes:
+      - ./backend/convenience-service/src:/app/convenience-service/src
+      - ./backend/common/src:/app/common/src
+      - /app/convenience-service/target
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-convenience:5432/${CONVENIENCE_DB_NAME:-convenience_service_db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    depends_on:
+      postgres-convenience:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
+  # ==========================
+  # Activity Cruise Service
+  # ==========================
+  activity-cruise-service:
+    build:
+      context: ./backend
+      dockerfile: activity-cruise-service/Dockerfile.dev
+    container_name: activity-cruise-service
+    restart: always
+    ports:
+      - "8083:8083"
+    working_dir: /app/activity-cruise-service
+    volumes:
+      - ./backend/activity-cruise-service/src:/app/activity-cruise-service/src
+      - ./backend/common/src:/app/common/src
+      - /app/activity-cruise-service/target
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-activity-cruise:5432/${ACTIVITY_CRUISE_DB_NAME:-activity_cruise_service_db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    depends_on:
+      postgres-activity-cruise:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
+  # ==========================
+  # Activity Visit Service
+  # ==========================
+  activity-visit-service:
+    build:
+      context: ./backend
+      dockerfile: activity-visit-service/Dockerfile.dev
+    container_name: activity-visit-service
+    restart: always
+    ports:
+      - "8087:8087"
+    working_dir: /app/activity-visit-service
+    volumes:
+      - ./backend/activity-visit-service/src:/app/activity-visit-service/src
+      - ./backend/common/src:/app/common/src
+      - /app/activity-visit-service/target
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-activity-visit:5432/${ACTIVITY_VISIT_DB_NAME:-activity_visit_service_db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    depends_on:
+      postgres-activity-visit:
+        condition: service_healthy
+      kafka:
+        condition: service_started
 
   booking-service:
     build:
@@ -312,4 +538,8 @@ services:
 volumes:
   postgres_auth_data:
   postgres_tour_data:
+  postgres_convenience_data:
+  postgres_activity_cruise_data:
+  postgres_activity_visit_data:
+  kafka_data:
   postgres_operations_data:

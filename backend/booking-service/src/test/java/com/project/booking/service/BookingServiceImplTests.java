@@ -39,13 +39,18 @@ class BookingServiceImplTests {
         when(repository.save(any())).thenAnswer(i -> { Booking b = i.getArgument(0); b.setId(1L); return b; });
         when(tourClient.getSchedule(any())).thenAnswer(i -> new TourScheduleContext(
             i.getArgument(0), 100, java.time.LocalDate.now().plusDays(10), "OPEN"));
+        CreateBookingRequest request = request();
+        UUID roomId = request.passengers().get(0).cabinId();
+        when(tourClient.getRooms(request.voyageId())).thenReturn(List.of(room(roomId, 2)));
         when(passengerVoyageRepository.countByVoyageIdAndPassengerStatusIn(any(), any())).thenReturn(0L);
+        when(passengerVoyageRepository.countByVoyageIdAndCabinIdAndPassengerStatusIn(any(), any(), any())).thenReturn(0L);
         when(passengerRepository.save(any())).thenAnswer(i -> { com.project.booking.model.Passenger p = i.getArgument(0); p.setId(2L); return p; });
         when(passengerVoyageRepository.save(any())).thenAnswer(i -> { com.project.booking.model.PassengerVoyage p = i.getArgument(0); p.setId(3L); return p; });
         when(passengerVoyageRepository.findAllByBooking_IdOrderByIdAsc(1L)).thenReturn(List.of());
-        BookingResponse result = service.create(request(), 7L);
+        BookingResponse result = service.create(request, 7L);
         assertEquals(7L, result.createdByUserId());
         assertEquals(BookingStatus.PENDING_PAYMENT, result.status());
+        assertEquals(new BigDecimal("2500000"), result.totalAmount());
     }
 
     @Test void ownerCheckRejectsAnotherUser() {
@@ -58,6 +63,34 @@ class BookingServiceImplTests {
         when(tourClient.getSchedule(request.voyageId())).thenReturn(new TourScheduleContext(
             request.voyageId(), 1, java.time.LocalDate.now().plusDays(10), "OPEN"));
         when(passengerVoyageRepository.countByVoyageIdAndPassengerStatusIn(any(), any())).thenReturn(1L);
+        assertThrows(BookingException.class, () -> service.create(request, 7L));
+    }
+
+    @Test void availableRoomsSubtractsReservedAndRegisteredPassengers() {
+        UUID voyageId = UUID.randomUUID();
+        UUID roomId = UUID.randomUUID();
+        when(tourClient.getSchedule(voyageId)).thenReturn(new TourScheduleContext(
+            voyageId, 100, java.time.LocalDate.now().plusDays(10), "OPEN"));
+        when(tourClient.getRooms(voyageId)).thenReturn(List.of(new TourRoomContext(
+            roomId, "A101", UUID.randomUUID(), 1, UUID.randomUUID(), "Deluxe", "Sea view",
+            new BigDecimal("2500000"), 3)));
+        when(passengerVoyageRepository.countByVoyageIdAndCabinIdAndPassengerStatusIn(
+            eq(voyageId), eq(roomId), any())).thenReturn(2L);
+
+        AvailableRoomResponse room = service.getAvailableRooms(voyageId).get(0);
+        assertEquals(1, room.remainingCapacity());
+        assertTrue(room.available());
+    }
+
+    @Test void createRejectsRoomWithoutEnoughCapacity() {
+        CreateBookingRequest request = request();
+        UUID roomId = request.passengers().get(0).cabinId();
+        when(tourClient.getSchedule(request.voyageId())).thenReturn(new TourScheduleContext(
+            request.voyageId(), 100, java.time.LocalDate.now().plusDays(10), "OPEN"));
+        when(tourClient.getRooms(request.voyageId())).thenReturn(List.of(room(roomId, 1)));
+        when(passengerVoyageRepository.countByVoyageIdAndCabinIdAndPassengerStatusIn(
+            eq(request.voyageId()), eq(roomId), any())).thenReturn(1L);
+
         assertThrows(BookingException.class, () -> service.create(request, 7L));
     }
 
@@ -78,6 +111,8 @@ class BookingServiceImplTests {
         BookingResponse result = service.confirmPayment(1L, 10L);
         assertEquals(BookingStatus.CONFIRMED, result.status());
         assertNotNull(result.bookingCode());
+        verify(notificationClient).send(eq(7L), isNull(), eq("PAYMENT_SUCCESS"),
+            anyString(), contains(result.bookingCode()), eq(1L));
     }
 
     @Test void cancelledBookingCannotBePaid() {
@@ -140,8 +175,12 @@ class BookingServiceImplTests {
 
     private CreateBookingRequest request() {
         return new CreateBookingRequest(UUID.randomUUID(), "Nguyen Van A", "0900000000",
-            new BigDecimal("1000000"), List.of(new CreatePassengerRequest(null, "Nguyen Van A",
-            java.time.LocalDate.of(1990, 1, 1), "MALE", "0900000000", "a@example.com", null)));
+            List.of(new CreatePassengerRequest(null, "Nguyen Van A",
+            java.time.LocalDate.of(1990, 1, 1), "MALE", "0900000000", "a@example.com", UUID.randomUUID())));
+    }
+    private TourRoomContext room(UUID roomId, int capacity) {
+        return new TourRoomContext(roomId, "A101", UUID.randomUUID(), 1, UUID.randomUUID(),
+            "Deluxe", "Sea view", new BigDecimal("2500000"), capacity);
     }
     private Booking booking(BookingStatus status, Long paymentId) {
         Booking b = new Booking(); b.setId(1L); b.setCreatedByUserId(7L); b.setVoyageId(UUID.randomUUID());

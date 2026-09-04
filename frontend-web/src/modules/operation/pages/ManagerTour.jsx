@@ -8,7 +8,7 @@ import { CheckCircle, AlertCircle } from "lucide-react";
 // Import các hook
 import useOperationTours from "../hooks/useOperationTours";
 import useTourCruiseAssignments from "../hooks/useTourCruiseAssignments";
-import useActivityTourAssignments from "../hooks/useActivityTourAssignments";
+import useActivityCruiseTourAssignments from "../hooks/useActivityCruiseTourAssignments";
 import useProductTourAssignments from "../hooks/useProductTourAssignments";
 import useServiceTourAssignments from "../hooks/useServiceTourAssignments";
 
@@ -74,7 +74,7 @@ function ManagerTour() {
     deleteActivityAssignment,
     clearActivityAssignments,
     clearMessages: clearActivityMessages,
-  } = useActivityTourAssignments();
+  } = useActivityCruiseTourAssignments();
 
   // 4. Hook quản lý Phân công Sản phẩm
   const {

@@ -10,6 +10,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/bookings")
@@ -26,6 +27,10 @@ public class BookingController {
     }
     @GetMapping("/me")
     List<BookingResponse> mine(@AuthenticationPrincipal Jwt jwt) { return service.getMine(userId(jwt)); }
+    @GetMapping("/voyages/{voyageId}/available-rooms")
+    List<AvailableRoomResponse> availableRooms(@PathVariable UUID voyageId) {
+        return service.getAvailableRooms(voyageId);
+    }
     @GetMapping("/{id}")
     BookingResponse get(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt, Authentication authentication) {
         boolean privileged = authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));

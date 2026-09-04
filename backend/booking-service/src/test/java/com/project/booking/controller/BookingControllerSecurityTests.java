@@ -13,6 +13,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.math.BigDecimal;
+import java.util.UUID;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -38,6 +39,10 @@ class BookingControllerSecurityTests {
         when(service.create(any(), eq(7L))).thenReturn(null);
         mockMvc.perform(post("/api/v1/bookings").with(jwt().jwt(j -> j.claim("userId", 7L)))
             .contentType("application/json").content(body())).andExpect(status().isCreated());
+    }
+    @Test void availableRoomsRequiresJwt() throws Exception {
+        mockMvc.perform(get("/api/v1/bookings/voyages/{id}/available-rooms", UUID.randomUUID()))
+            .andExpect(status().isUnauthorized());
     }
     @Test void internalEndpointRejectsMissingKey() throws Exception {
         mockMvc.perform(get("/internal/bookings/1/payment-context")).andExpect(status().isUnauthorized());
@@ -65,7 +70,8 @@ class BookingControllerSecurityTests {
     private String body() {
         return "{\"voyageId\":\"11111111-1111-1111-1111-111111111111\","
             + "\"primaryContactName\":\"Nguyen Van A\",\"primaryContactPhone\":\"0900000000\","
-            + "\"totalAmount\":1000000,\"passengers\":[{\"fullName\":\"Nguyen Van A\","
-            + "\"dateOfBirth\":\"1990-01-01\",\"gender\":\"MALE\"}]}";
+            + "\"passengers\":[{\"fullName\":\"Nguyen Van A\","
+            + "\"dateOfBirth\":\"1990-01-01\",\"gender\":\"MALE\","
+            + "\"cabinId\":\"22222222-2222-2222-2222-222222222222\"}]}";
     }
 }

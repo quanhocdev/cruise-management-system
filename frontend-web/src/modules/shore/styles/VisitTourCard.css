@@ -1,0 +1,241 @@
+/* ==========================================================================
+   CARD BASE STYLES
+   ========================================================================== */
+.visit-tour-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #94a3b8; /* Default indicator */
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.visit-tour-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   STATUS INDICATORS (LEFT BORDER & BADGES)
+   ========================================================================== */
+/* NOT_STARTED */
+.visit-tour-card.status-not_started {
+  border-left-color: #64748b;
+}
+
+.visit-tour-status.status-not_started {
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+/* IN_PROGRESS */
+.visit-tour-card.status-in_progress {
+  border-left-color: #2563eb;
+}
+
+.visit-tour-status.status-in_progress {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+/* COMPLETED */
+.visit-tour-card.status-completed {
+  border-left-color: #10b981;
+}
+
+.visit-tour-status.status-completed {
+  background-color: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+/* DELAYED */
+.visit-tour-card.status-delayed {
+  border-left-color: #f59e0b;
+}
+
+.visit-tour-status.status-delayed {
+  background-color: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+/* CANCELLED */
+.visit-tour-card.status-cancelled {
+  border-left-color: #ef4444;
+}
+
+.visit-tour-status.status-cancelled {
+  background-color: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+
+/* ==========================================================================
+   HEADER & ACTIONS
+   ========================================================================== */
+.visit-tour-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.visit-tour-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+}
+
+.visit-tour-card-title h4 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.visit-tour-status {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+  line-height: 1.2;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.visit-tour-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.visit-tour-card-actions button {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0.375rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.visit-tour-card-actions button:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.visit-tour-card-actions button[title="Xóa"]:hover {
+  background-color: #fef2f2;
+  color: #ef4444;
+}
+
+/* ==========================================================================
+   DESCRIPTION
+   ========================================================================== */
+.visit-tour-card-description {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #475569;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   INFO GRID (TIME, USERS, PRICE)
+   ========================================================================== */
+.visit-tour-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.visit-tour-card-info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.visit-tour-card-info-item svg {
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.visit-tour-card-price {
+  margin-top: 0.25rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2563eb;
+}
+
+/* ==========================================================================
+   STATUS CHANGE SELECT
+   ========================================================================== */
+.visit-tour-card-status-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.visit-tour-card-status-actions label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.visit-tour-card-status-actions select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #334155;
+  background-color: #f8fafc;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.visit-tour-card-status-actions select:focus {
+  border-color: #2563eb;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+/* ==========================================================================
+   RESPONSIVE (SM desktop view inside grids)
+   ========================================================================== */
+@media (min-width: 640px) {
+  .visit-tour-card-info {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .visit-tour-card-price {
+    margin-top: 0;
+    margin-left: auto;
+  }
+}
