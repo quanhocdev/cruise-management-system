@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
 }
 
 val localProperties = Properties()
@@ -19,7 +20,7 @@ android {
 
     defaultConfig {
         applicationId = "com.project.cruise.android"
-        minSdk = 31
+        minSdk = 30
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -30,6 +31,16 @@ android {
             "String",
             "BASE_IP",
             "\"${localProperties.getProperty("BASE_IP") ?: "192.168.1.3"}\""
+        )
+        buildConfigField(
+            "String",
+            "POS_TERMINAL_CODE",
+            "\"${localProperties.getProperty("POS_TERMINAL_CODE") ?: "POS-DEMO-001"}\""
+        )
+        buildConfigField(
+            "String",
+            "POS_API_KEY",
+            "\"${localProperties.getProperty("POS_API_KEY") ?: ""}\""
         )
     }
 
@@ -70,6 +81,14 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation("androidx.navigation:navigation-compose:2.8.5")
+    implementation("androidx.room:room-runtime:2.7.2")
+    implementation("androidx.room:room-ktx:2.7.2")
+    ksp("androidx.room:room-compiler:2.7.2")
+    implementation("androidx.work:work-runtime-ktx:2.10.2")
+    implementation("androidx.camera:camera-camera2:1.4.2")
+    implementation("androidx.camera:camera-lifecycle:1.4.2")
+    implementation("androidx.camera:camera-view:1.4.2")
+    implementation("com.google.mlkit:barcode-scanning:17.3.0")
     testImplementation(libs.junit)
 
     androidTestImplementation(libs.androidx.junit)

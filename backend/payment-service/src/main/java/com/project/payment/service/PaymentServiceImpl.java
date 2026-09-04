@@ -3,6 +3,7 @@ package com.project.payment.service;
 import com.project.payment.dto.*;
 import com.project.payment.client.BookingClient;
 import com.project.payment.client.BookingPaymentContext;
+import com.project.payment.client.NotificationClient;
 import com.project.payment.exception.PaymentException;
 import com.project.payment.mapper.PaymentMapper;
 import com.project.payment.model.Payment;
@@ -23,12 +24,15 @@ public class PaymentServiceImpl implements PaymentService {
     private final Map<PaymentMethod, PaymentProvider> providers;
     private final long timeoutMinutes;
     private final BookingClient bookingClient;
+    private final NotificationClient notificationClient;
 
     public PaymentServiceImpl(PaymentRepository repository, PaymentMapper mapper,
                               List<PaymentProvider> paymentProviders,
                               BookingClient bookingClient,
+                              NotificationClient notificationClient,
                               @Value("${vnpay.payment-timeout-minutes:15}") long timeoutMinutes) {
         this.repository = repository; this.mapper = mapper; this.bookingClient = bookingClient;
+        this.notificationClient = notificationClient;
         this.timeoutMinutes = timeoutMinutes;
         providers = new EnumMap<>(PaymentMethod.class);
         paymentProviders.forEach(provider -> providers.put(provider.getPaymentMethod(), provider));
@@ -95,6 +99,7 @@ public class PaymentServiceImpl implements PaymentService {
         boolean success = "00".equals(params.get("vnp_ResponseCode"))
             && "00".equals(params.getOrDefault("vnp_TransactionStatus", "00"));
         if (payment.getStatus() != PaymentStatus.SUCCESS) {
+            PaymentStatus previousStatus = payment.getStatus();
             payment.setStatus(success ? PaymentStatus.SUCCESS : PaymentStatus.FAILED);
             if (success) payment.setPaidAt(Instant.now());
             payment.setTransactionCode(provider().getTransactionCode(params));
@@ -103,6 +108,8 @@ public class PaymentServiceImpl implements PaymentService {
             Payment saved = repository.save(payment);
             if (success && saved.getReferenceType() == PaymentReferenceType.BOOKING)
                 bookingClient.confirmPayment(saved.getReferenceId(), saved.getId());
+            if (!success && previousStatus != PaymentStatus.FAILED)
+                notificationClient.paymentFailed(saved.getPayerId(), saved.getId(), saved.getReferenceId());
             return saved;
         }
         return payment;

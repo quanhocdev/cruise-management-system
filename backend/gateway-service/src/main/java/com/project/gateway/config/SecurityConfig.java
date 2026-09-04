@@ -37,6 +37,9 @@ public class SecurityConfig {
                         "/api/v1/payments/vnpay/return",
                         "/api/v1/payments/vnpay/ipn",
 
+                        // Registered POS devices authenticate using terminal headers
+                        "/api/v1/pos/transactions/sync",
+
                         // Staff activation
                         "/api/auth/activate/verify",
                         "/api/auth/activate/set-password",
