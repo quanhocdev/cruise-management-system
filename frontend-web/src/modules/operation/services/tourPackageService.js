@@ -46,6 +46,16 @@ const tourPackageService = {
     );
     return response.data;
   },
+  /**
+   * GET /api/operation/tour-packages/tour/{tourId}/room-types
+   * Lấy danh sách hạng phòng theo Tour ID để hiển thị dropdown chọn phòng
+   */
+  getRoomTypesByTourId: async (tourId) => {
+    const response = await api.get(
+      `${OPERATION_PACKAGE_BASE_URL}/tour/${tourId}/room-types`,
+    );
+    return response.data;
+  },
 };
 
 export default tourPackageService;

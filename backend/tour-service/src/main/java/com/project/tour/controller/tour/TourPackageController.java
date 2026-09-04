@@ -7,7 +7,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import com.project.tour.dto.roomtype.RoomTypeResponse;
 import java.util.List;
 import java.util.UUID;
 
@@ -47,5 +47,13 @@ public class TourPackageController {
     public ResponseEntity<Void> deletePackage(@PathVariable UUID packageId) {
         tourPackageService.deletePackage(packageId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/tour/{tourId}/room-types")
+    public ResponseEntity<List<RoomTypeResponse>> getRoomTypesByTourId(
+            @PathVariable UUID tourId) {
+        List<RoomTypeResponse> roomTypes = tourPackageService
+                .getRoomTypesByTourId(tourId);
+        return ResponseEntity.ok(roomTypes);
     }
 }

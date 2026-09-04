@@ -1,22 +1,29 @@
 // src/modules/operation/components/packages/TourPackageModal.jsx
 
 import React, { useState, useEffect } from "react";
-import { X, Check, ShieldCheck } from "lucide-react";
+import { X, ShieldCheck } from "lucide-react";
 import useActivityCruiseTourAssignments from "../../hooks/useActivityCruiseTourAssignments";
 import useActivityVisitTourAssignments from "../../hooks/useActivityVisitTourAssignments";
 import useProductTourAssignments from "../../hooks/useProductTourAssignments";
 import useServiceTourAssignments from "../../hooks/useServiceTourAssignments";
 import "../../styles/packages/TourPackageModal.css";
 
-const TourPackageModal = ({ tourId, initialData, onClose, onSave }) => {
+const TourPackageModal = ({
+  tourId,
+  roomTypes = [],
+  initialData,
+  onClose,
+  onSave,
+}) => {
   const [name, setName] = useState("");
+  const [roomTypeId, setRoomTypeId] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [maxPassengers, setMaxPassengers] = useState("");
   const [status, setStatus] = useState("ACTIVE");
   const [selectedBenefits, setSelectedBenefits] = useState({}); // key: referenceId, value: benefit object
 
-  // Gọi hook lấy sẵn các item đã cấu hình của tour để cho phép gom quyền lợi
+  // Gọi hook lấy sẵn các item đã cấu hình của tour
   const { configuredActivities } = useActivityCruiseTourAssignments();
   const { configuredActivityVisits } = useActivityVisitTourAssignments();
   const { configuredProducts } = useProductTourAssignments();
@@ -25,6 +32,7 @@ const TourPackageModal = ({ tourId, initialData, onClose, onSave }) => {
   useEffect(() => {
     if (initialData) {
       setName(initialData.name || "");
+      setRoomTypeId(initialData.roomTypeId || "");
       setDescription(initialData.description || "");
       setPrice(initialData.price || "");
       setMaxPassengers(initialData.maxPassengers || "");
@@ -36,8 +44,8 @@ const TourPackageModal = ({ tourId, initialData, onClose, onSave }) => {
           map[b.referenceId] = {
             type: b.type,
             referenceId: b.referenceId,
-            freeQuantity: b.freeQuantity || 1,
-            discountPercent: b.discountPercent || 0,
+            freeQuantity: b.freeQuantity ?? 1,
+            discountPercent: b.discountPercent ?? 0,
           };
         });
         setSelectedBenefits(map);
@@ -76,6 +84,7 @@ const TourPackageModal = ({ tourId, initialData, onClose, onSave }) => {
     e.preventDefault();
     const payload = {
       tourId,
+      roomTypeId: roomTypeId ? roomTypeId : null,
       name,
       description,
       price: price ? Number(price) : 0,
@@ -88,7 +97,7 @@ const TourPackageModal = ({ tourId, initialData, onClose, onSave }) => {
 
   return (
     <div className="tour-package-modal-overlay">
-      <div className="tour-package-modal-container">
+      <div className="tour-package-modal-container large">
         <div className="tour-package-modal-header">
           <h2>{initialData ? "Chỉnh sửa Gói Tour" : "Tạo mới Gói Tour"}</h2>
           <button type="button" className="close-btn" onClick={onClose}>
@@ -109,6 +118,22 @@ const TourPackageModal = ({ tourId, initialData, onClose, onSave }) => {
               />
             </div>
 
+            <div className="form-group">
+              <label>Hạng phòng phân phối (Room Type)</label>
+              <select
+                value={roomTypeId}
+                onChange={(e) => setRoomTypeId(e.target.value)}
+              >
+                <option value="">
+                  -- Chọn hạng phòng (Áp dụng toàn tour) --
+                </option>
+                {roomTypes.map((rt) => (
+                  <option key={rt.id} value={rt.id}>
+                    {rt.name}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div className="form-group">
               <label>Giá gói (VND) *</label>
               <input
@@ -146,7 +171,7 @@ const TourPackageModal = ({ tourId, initialData, onClose, onSave }) => {
             <div className="form-group full-width">
               <label>Mô tả chi tiết</label>
               <textarea
-                rows={3}
+                rows={2}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Nhập mô tả các quyền lợi tổng quan..."
@@ -156,7 +181,7 @@ const TourPackageModal = ({ tourId, initialData, onClose, onSave }) => {
 
           <div className="benefits-section-title">
             <ShieldCheck size={18} />
-            <h3>Chọn Quyền lợi đi kèm (Services, Products, Activities)</h3>
+            <h3>Cấu hình Quyền lợi & Ưu đãi đi kèm</h3>
           </div>
 
           <div className="benefits-selection-list">
@@ -175,22 +200,41 @@ const TourPackageModal = ({ tourId, initialData, onClose, onSave }) => {
                         checked={!!selectedBenefits[s.id]}
                         onChange={() => toggleBenefit(s.id, "SERVICE")}
                       />
-                      <span>{s.serviceName}</span>
+                      <span>{s.serviceName || s.name}</span>
                     </label>
                     {selectedBenefits[s.id] && (
-                      <div className="benefit-inputs">
-                        <input
-                          type="number"
-                          placeholder="Số lượng"
-                          value={selectedBenefits[s.id].freeQuantity}
-                          onChange={(e) =>
-                            handleBenefitChange(
-                              s.id,
-                              "freeQuantity",
-                              e.target.value,
-                            )
-                          }
-                        />
+                      <div className="benefit-inputs-group">
+                        <div className="input-with-label">
+                          <span>SL miễn phí:</span>
+                          <input
+                            type="number"
+                            min="0"
+                            value={selectedBenefits[s.id].freeQuantity}
+                            onChange={(e) =>
+                              handleBenefitChange(
+                                s.id,
+                                "freeQuantity",
+                                e.target.value,
+                              )
+                            }
+                          />
+                        </div>
+                        <div className="input-with-label">
+                          <span>Giảm (%):</span>
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={selectedBenefits[s.id].discountPercent}
+                            onChange={(e) =>
+                              handleBenefitChange(
+                                s.id,
+                                "discountPercent",
+                                e.target.value,
+                              )
+                            }
+                          />
+                        </div>
                       </div>
                     )}
                   </div>
@@ -213,22 +257,41 @@ const TourPackageModal = ({ tourId, initialData, onClose, onSave }) => {
                         checked={!!selectedBenefits[p.id]}
                         onChange={() => toggleBenefit(p.id, "PRODUCT")}
                       />
-                      <span>{p.productName}</span>
+                      <span>{p.productName || p.name}</span>
                     </label>
                     {selectedBenefits[p.id] && (
-                      <div className="benefit-inputs">
-                        <input
-                          type="number"
-                          placeholder="Số lượng"
-                          value={selectedBenefits[p.id].freeQuantity}
-                          onChange={(e) =>
-                            handleBenefitChange(
-                              p.id,
-                              "freeQuantity",
-                              e.target.value,
-                            )
-                          }
-                        />
+                      <div className="benefit-inputs-group">
+                        <div className="input-with-label">
+                          <span>SL miễn phí:</span>
+                          <input
+                            type="number"
+                            min="0"
+                            value={selectedBenefits[p.id].freeQuantity}
+                            onChange={(e) =>
+                              handleBenefitChange(
+                                p.id,
+                                "freeQuantity",
+                                e.target.value,
+                              )
+                            }
+                          />
+                        </div>
+                        <div className="input-with-label">
+                          <span>Giảm (%):</span>
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={selectedBenefits[p.id].discountPercent}
+                            onChange={(e) =>
+                              handleBenefitChange(
+                                p.id,
+                                "discountPercent",
+                                e.target.value,
+                              )
+                            }
+                          />
+                        </div>
                       </div>
                     )}
                   </div>
@@ -251,8 +314,28 @@ const TourPackageModal = ({ tourId, initialData, onClose, onSave }) => {
                         checked={!!selectedBenefits[a.id]}
                         onChange={() => toggleBenefit(a.id, "ACTIVITY_CRUISE")}
                       />
-                      <span>{a.activityName}</span>
+                      <span>{a.activityName || a.name}</span>
                     </label>
+                    {selectedBenefits[a.id] && (
+                      <div className="benefit-inputs-group">
+                        <div className="input-with-label">
+                          <span>Giảm (%):</span>
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={selectedBenefits[a.id].discountPercent}
+                            onChange={(e) =>
+                              handleBenefitChange(
+                                a.id,
+                                "discountPercent",
+                                e.target.value,
+                              )
+                            }
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -273,8 +356,28 @@ const TourPackageModal = ({ tourId, initialData, onClose, onSave }) => {
                         checked={!!selectedBenefits[v.id]}
                         onChange={() => toggleBenefit(v.id, "ACTIVITY_VISIT")}
                       />
-                      <span>{v.visitName || "Điểm dừng tham quan"}</span>
+                      <span>{v.visitName || v.name || "Điểm tham quan"}</span>
                     </label>
+                    {selectedBenefits[v.id] && (
+                      <div className="benefit-inputs-group">
+                        <div className="input-with-label">
+                          <span>Giảm (%):</span>
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={selectedBenefits[v.id].discountPercent}
+                            onChange={(e) =>
+                              handleBenefitChange(
+                                v.id,
+                                "discountPercent",
+                                e.target.value,
+                              )
+                            }
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

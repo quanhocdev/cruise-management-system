@@ -1,9 +1,10 @@
 // src/modules/operation/hooks/useTourPackages.js
 import { useState, useEffect, useCallback } from "react";
-import { tourPackageService } from "../services/tourPackageService";
+import tourPackageService from "../services/tourPackageService";
 
 export const useTourPackages = (tourId) => {
   const [packages, setPackages] = useState([]);
+  const [roomTypes, setRoomTypes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -24,9 +25,21 @@ export const useTourPackages = (tourId) => {
     }
   }, [tourId]);
 
+  // Lấy danh sách hạng phòng theo tour
+  const fetchRoomTypes = useCallback(async () => {
+    if (!tourId) return;
+    try {
+      const data = await tourPackageService.getRoomTypesByTourId(tourId);
+      setRoomTypes(data);
+    } catch (err) {
+      console.error("Không thể tải danh sách hạng phòng:", err);
+    }
+  }, [tourId]);
+
   useEffect(() => {
     fetchPackages();
-  }, [fetchPackages]);
+    fetchRoomTypes();
+  }, [fetchPackages, fetchRoomTypes]);
 
   // Tạo mới gói tour
   const createPackage = async (packageData) => {
@@ -72,9 +85,11 @@ export const useTourPackages = (tourId) => {
 
   return {
     packages,
+    roomTypes,
     loading,
     error,
     refreshPackages: fetchPackages,
+    refreshRoomTypes: fetchRoomTypes,
     createPackage,
     patchPackage,
     deletePackage,

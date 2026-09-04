@@ -7,12 +7,16 @@ import com.project.tour.exception.AppException;
 import com.project.tour.mapper.tour.TourPackageMapper;
 import com.project.tour.model.PackageBenefit;
 import com.project.tour.model.TourPackage;
+import com.project.tour.model.Tour;
+import com.project.tour.model.RoomType;
+import com.project.tour.dto.roomtype.RoomTypeResponse;
 import com.project.tour.repository.tour.PackageBenefitRepository;
 import com.project.tour.repository.tour.TourPackageRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import com.project.tour.repository.tour.TourRepository;
+import com.project.tour.repository.room.RoomTypeRepository;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,12 +26,18 @@ public class TourPackageService {
 
     private final TourPackageRepository tourPackageRepository;
     private final PackageBenefitRepository packageBenefitRepository;
+    private final TourRepository tourRepository;
+    private final RoomTypeRepository roomTypeRepository;
 
     public TourPackageService(
             TourPackageRepository tourPackageRepository,
-            PackageBenefitRepository packageBenefitRepository) {
+            PackageBenefitRepository packageBenefitRepository,
+            TourRepository tourRepository,
+            RoomTypeRepository roomTypeRepository) {
         this.tourPackageRepository = tourPackageRepository;
         this.packageBenefitRepository = packageBenefitRepository;
+        this.tourRepository = tourRepository;
+        this.roomTypeRepository = roomTypeRepository;
     }
 
     // =========================================================
@@ -149,5 +159,30 @@ public class TourPackageService {
 
         // Xóa gói tour
         tourPackageRepository.delete(pkg);
+    }
+
+    @Transactional(readOnly = true)
+    public List<RoomTypeResponse> getRoomTypesByTourId(UUID tourId) {
+        // 1. Tìm Tour để lấy thông tin Cruise được gán
+        Tour tour = tourRepository.findById(tourId)
+                .orElseThrow(() -> new AppException("Tour not found", HttpStatus.NOT_FOUND));
+
+        if (tour.getCruise() == null) {
+            throw new AppException("This tour does not have an assigned cruise yet", HttpStatus.BAD_REQUEST);
+        }
+
+        UUID cruiseId = tour.getCruise().getId();
+
+        // 2. Lấy danh sách các RoomType thuộc con tàu này
+        List<RoomType> roomTypes = roomTypeRepository.findRoomTypesByCruiseId(cruiseId);
+
+        // 3. Map sang RoomTypeResponse DTO
+        return roomTypes.stream().map(rt -> {
+            com.project.tour.dto.roomtype.RoomTypeResponse dto = new com.project.tour.dto.roomtype.RoomTypeResponse();
+            dto.setId(rt.getId());
+            dto.setName(rt.getName());
+            dto.setDescription(rt.getDescription());
+            return dto;
+        }).toList();
     }
 }

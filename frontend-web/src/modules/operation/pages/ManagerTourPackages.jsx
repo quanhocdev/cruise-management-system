@@ -15,6 +15,7 @@ const ManagerTourPackages = () => {
 
   const {
     packages,
+    roomTypes,
     loading,
     error,
     refreshPackages,
@@ -27,7 +28,7 @@ const ManagerTourPackages = () => {
   const [editingPackage, setEditingPackage] = useState(null);
 
   const handleBack = () => {
-    navigate(`/operation/tours/configuration?tourId=${tourId}`);
+    navigate(`/operation/tour-configuration?tourId=${tourId}`);
   };
 
   const handleOpenCreate = () => {
@@ -132,6 +133,7 @@ const ManagerTourPackages = () => {
       {isModalOpen && (
         <TourPackageModal
           tourId={tourId}
+          roomTypes={roomTypes}
           initialData={editingPackage}
           onClose={() => setIsModalOpen(false)}
           onSave={handleSavePackage}
