@@ -1,0 +1,11 @@
+.manager-pos-page { color: #10243e; }
+.pos-heading { align-items: center; display: flex; justify-content: space-between; margin-bottom: 1.5rem; }
+.pos-heading h2 { font-weight: 700; margin-bottom: .35rem; }
+.pos-heading p { color: #64748b; margin: 0; }
+.pos-grid { display: grid; gap: 1.25rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.pos-grid .card, .manager-pos-page > .card { border: 1px solid #dde5ee; border-radius: 14px; box-shadow: 0 8px 24px rgba(15, 35, 60, .06); }
+.pos-device-note { margin-top: 1rem; }
+.secret-box { background: #f1f5f9; border-radius: 8px; font-family: monospace; margin: .75rem 0; overflow-wrap: anywhere; padding: .8rem; user-select: all; }
+.issued-qr { display: block; margin: 0 auto 1rem; max-width: 280px; width: 100%; }
+@media (max-width: 800px) { .pos-grid { grid-template-columns: 1fr; } .pos-heading { align-items: flex-start; gap: 1rem; } }
+@media print { body * { visibility: hidden; } .modal-content, .modal-content * { visibility: visible; } .modal-content { left: 50%; position: fixed; top: 50%; transform: translate(-50%, -50%); } }
