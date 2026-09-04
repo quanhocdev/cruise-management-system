@@ -1,4 +1,5 @@
 package com.project.notification.model;
+
 public enum NotificationType {
     BOOKING_CONFIRMED,
     BOOKING_CANCELLED,
