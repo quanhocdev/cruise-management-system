@@ -124,6 +124,7 @@ const ManagerTourPackages = () => {
       <div className="manager-tour-packages-content">
         <TourPackageTable
           packages={packages}
+          roomTypes={roomTypes}
           loading={loading}
           onEdit={handleOpenEdit}
           onDelete={handleDelete}

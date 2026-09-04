@@ -65,13 +65,14 @@
   color: #0f172a;
 }
 
-.room-tag {
+.room-tag-cell {
   font-size: 0.75rem;
   color: #2563eb;
   background: #eff6ff;
-  padding: 2px 6px;
+  padding: 3px 8px;
   border-radius: 4px;
   width: fit-content;
+  font-weight: 500;
 }
 
 .package-desc {
@@ -88,16 +89,25 @@
   color: #059669;
 }
 
-.benefit-badge {
+.benefit-badge-btn {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   background: #f0fdf4;
   color: #16a34a;
-  padding: 4px 8px;
+  border: 1px solid #bbf7d0;
+  padding: 4px 10px;
   border-radius: 6px;
   font-size: 0.8rem;
   font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.benefit-badge-btn:hover {
+  background: #dcfce7;
+  border-color: #86efac;
+  color: #15803d;
 }
 
 .package-status-badge {
@@ -114,6 +124,11 @@
 .package-status-badge.active {
   background: #dcfce7;
   color: #15803d;
+}
+
+.package-status-badge.inactive {
+  background: #fef2f2;
+  color: #b91c1c;
 }
 
 .actions-col {
@@ -135,6 +150,9 @@
   cursor: pointer;
   color: #64748b;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-action.edit:hover {

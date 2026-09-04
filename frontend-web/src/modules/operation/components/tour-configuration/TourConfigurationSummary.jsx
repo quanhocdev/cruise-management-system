@@ -32,35 +32,10 @@ const TourConfigurationSummary = ({
 
   const safeServices = Array.isArray(services) ? services : [];
 
-  // =========================================================
-  // TOTAL ASSIGNMENTS
-  // =========================================================
-  //
-  // Tổng số item được phân công cho Tour.
-  //
-  // Ví dụ:
-  // 3 activity trên tàu
-  // -> total = 3
-  //
-  // =========================================================
-
   const totalActivityCruises = safeActivityCruises.length;
   const totalActivityVisits = safeActivityVisits.length;
   const totalProducts = safeProducts.length;
   const totalServices = safeServices.length;
-
-  // =========================================================
-  // ACTUALLY CONFIGURED
-  // =========================================================
-  //
-  // CHỈ status === "CONFIGURED" mới được tính là đã cấu hình.
-  //
-  // WAITING_CONFIG -> chưa cấu hình
-  // CONFIGURED     -> đã cấu hình
-  // NOT_STARTED    -> chưa tính là configured ở bước này
-  // IN_PROGRESS    -> chưa tính là configured ở bước này
-  // COMPLETED      -> không dùng để xác định trạng thái cấu hình
-  // =========================================================
 
   const configuredActivityCruises = safeActivityCruises.filter((item) =>
     isTourItemConfigured(item.status),
