@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import { X, ShieldCheck } from "lucide-react";
-import useActivityCruiseTourAssignments from "../../hooks/useActivityCruiseTourAssignments";
-import useActivityVisitTourAssignments from "../../hooks/useActivityVisitTourAssignments";
-import useProductTourAssignments from "../../hooks/useProductTourAssignments";
-import useServiceTourAssignments from "../../hooks/useServiceTourAssignments";
 import "../../styles/packages/TourPackageModal.css";
+import activityCruiseTourAssignmentService from "../../services/activityCruiseTourAssignmentService";
+import activityVisitTourAssignmentService from "../../services/activityVisitTourAssignmentService";
+import productTourAssignmentService from "../../services/productTourAssignmentService";
+import serviceTourAssignmentService from "../../services/serviceTourAssignmentService";
 
 const TourPackageModal = ({
   tourId,
@@ -23,11 +23,56 @@ const TourPackageModal = ({
   const [status, setStatus] = useState("ACTIVE");
   const [selectedBenefits, setSelectedBenefits] = useState({}); // key: referenceId, value: benefit object
 
-  // Gọi hook lấy sẵn các item đã cấu hình của tour
-  const { configuredActivities } = useActivityCruiseTourAssignments();
-  const { configuredActivityVisits } = useActivityVisitTourAssignments();
-  const { configuredProducts } = useProductTourAssignments();
-  const { configuredServices } = useServiceTourAssignments();
+  // Khai báo state lưu quyền lợi trong Modal
+  const [configuredActivities, setConfiguredActivities] = useState([]);
+  const [configuredActivityVisits, setConfiguredActivityVisits] = useState([]);
+  const [configuredProducts, setConfiguredProducts] = useState([]);
+  const [configuredServices, setConfiguredServices] = useState([]);
+
+  // Gọi API lấy dữ liệu cấu hình khi modal mở và có tourId
+  useEffect(() => {
+    if (!tourId) {
+      console.log("❌ TourPackageModal: Không có tourId được truyền vào!");
+      return;
+    }
+
+    const fetchAllConfigurations = async () => {
+      try {
+        const [acts, visits, prods, srvs] = await Promise.all([
+          activityCruiseTourAssignmentService
+            .getConfiguredByTour(tourId)
+            .catch(() => []),
+          activityVisitTourAssignmentService
+            .getConfiguredByTour(tourId)
+            .catch(() => []),
+          productTourAssignmentService
+            .getConfiguredByTour(tourId)
+            .catch(() => []),
+          serviceTourAssignmentService
+            .getConfiguredByTour(tourId)
+            .catch(() => []),
+        ]);
+
+        setConfiguredActivities(
+          Array.isArray(acts) ? acts : acts?.content || [],
+        );
+        setConfiguredActivityVisits(
+          Array.isArray(visits) ? visits : visits?.content || [],
+        );
+        setConfiguredProducts(
+          Array.isArray(prods) ? prods : prods?.content || [],
+        );
+        setConfiguredServices(Array.isArray(srvs) ? srvs : srvs?.content || []);
+      } catch (err) {
+        console.error(
+          "Lỗi tổng thể khi tải danh sách quyền lợi cấu hình:",
+          err,
+        );
+      }
+    };
+
+    fetchAllConfigurations();
+  }, [tourId]);
 
   useEffect(() => {
     if (initialData) {
@@ -44,7 +89,7 @@ const TourPackageModal = ({
           map[b.referenceId] = {
             type: b.type,
             referenceId: b.referenceId,
-            freeQuantity: b.freeQuantity ?? 1,
+            quantity: b.quantity ?? 1, // Đã đổi từ freeQuantity sang quantity
             discountPercent: b.discountPercent ?? 0,
           };
         });
@@ -62,7 +107,7 @@ const TourPackageModal = ({
         copy[refId] = {
           type,
           referenceId: refId,
-          freeQuantity: 1,
+          quantity: 1, // Đã đổi từ freeQuantity sang quantity
           discountPercent: 0,
         };
       }
@@ -134,6 +179,7 @@ const TourPackageModal = ({
                 ))}
               </select>
             </div>
+
             <div className="form-group">
               <label>Giá gói (VND) *</label>
               <input
@@ -205,15 +251,15 @@ const TourPackageModal = ({
                     {selectedBenefits[s.id] && (
                       <div className="benefit-inputs-group">
                         <div className="input-with-label">
-                          <span>SL miễn phí:</span>
+                          <span>Số lượng:</span>
                           <input
                             type="number"
                             min="0"
-                            value={selectedBenefits[s.id].freeQuantity}
+                            value={selectedBenefits[s.id].quantity}
                             onChange={(e) =>
                               handleBenefitChange(
                                 s.id,
-                                "freeQuantity",
+                                "quantity",
                                 e.target.value,
                               )
                             }
@@ -262,15 +308,15 @@ const TourPackageModal = ({
                     {selectedBenefits[p.id] && (
                       <div className="benefit-inputs-group">
                         <div className="input-with-label">
-                          <span>SL miễn phí:</span>
+                          <span>Số lượng:</span>
                           <input
                             type="number"
                             min="0"
-                            value={selectedBenefits[p.id].freeQuantity}
+                            value={selectedBenefits[p.id].quantity}
                             onChange={(e) =>
                               handleBenefitChange(
                                 p.id,
-                                "freeQuantity",
+                                "quantity",
                                 e.target.value,
                               )
                             }
@@ -319,6 +365,21 @@ const TourPackageModal = ({
                     {selectedBenefits[a.id] && (
                       <div className="benefit-inputs-group">
                         <div className="input-with-label">
+                          <span>Số lượng:</span>
+                          <input
+                            type="number"
+                            min="0"
+                            value={selectedBenefits[a.id].quantity}
+                            onChange={(e) =>
+                              handleBenefitChange(
+                                a.id,
+                                "quantity",
+                                e.target.value,
+                              )
+                            }
+                          />
+                        </div>
+                        <div className="input-with-label">
                           <span>Giảm (%):</span>
                           <input
                             type="number"
@@ -342,46 +403,72 @@ const TourPackageModal = ({
             )}
 
             {/* ACTIVITIES VISIT */}
-            {configuredActivityVisits.length > 0 && (
-              <div className="benefit-group">
-                <h4>Hoạt động trên bờ (Activity Visit)</h4>
-                {configuredActivityVisits.map((v) => (
-                  <div
-                    key={v.id}
-                    className={`benefit-item ${selectedBenefits[v.id] ? "selected" : ""}`}
-                  >
-                    <label className="benefit-checkbox-label">
-                      <input
-                        type="checkbox"
-                        checked={!!selectedBenefits[v.id]}
-                        onChange={() => toggleBenefit(v.id, "ACTIVITY_VISIT")}
-                      />
-                      <span>{v.visitName || v.name || "Điểm tham quan"}</span>
-                    </label>
-                    {selectedBenefits[v.id] && (
-                      <div className="benefit-inputs-group">
-                        <div className="input-with-label">
-                          <span>Giảm (%):</span>
-                          <input
-                            type="number"
-                            min="0"
-                            max="100"
-                            value={selectedBenefits[v.id].discountPercent}
-                            onChange={(e) =>
-                              handleBenefitChange(
-                                v.id,
-                                "discountPercent",
-                                e.target.value,
-                              )
-                            }
-                          />
+            <div className="benefit-group">
+              <h4>Hoạt động trên bờ (Activity Visit)</h4>
+              {configuredActivityVisits.length === 0 ? (
+                <p className="no-benefit-text">
+                  Chưa có hoạt động trên bờ nào được cấu hình.
+                </p>
+              ) : (
+                configuredActivityVisits.map((v) => {
+                  const benefitId = v.visitTourId || v.id;
+                  return (
+                    <div
+                      key={benefitId}
+                      className={`benefit-item ${selectedBenefits[benefitId] ? "selected" : ""}`}
+                    >
+                      <label className="benefit-checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={!!selectedBenefits[benefitId]}
+                          onChange={() =>
+                            toggleBenefit(benefitId, "ACTIVITY_VISIT")
+                          }
+                        />
+                        <span>{v.visitName || v.name || "Điểm tham quan"}</span>
+                      </label>
+                      {selectedBenefits[benefitId] && (
+                        <div className="benefit-inputs-group">
+                          <div className="input-with-label">
+                            <span>Số lượng:</span>
+                            <input
+                              type="number"
+                              min="0"
+                              value={selectedBenefits[benefitId].quantity}
+                              onChange={(e) =>
+                                handleBenefitChange(
+                                  benefitId,
+                                  "quantity",
+                                  e.target.value,
+                                )
+                              }
+                            />
+                          </div>
+                          <div className="input-with-label">
+                            <span>Giảm (%):</span>
+                            <input
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={
+                                selectedBenefits[benefitId].discountPercent
+                              }
+                              onChange={(e) =>
+                                handleBenefitChange(
+                                  benefitId,
+                                  "discountPercent",
+                                  e.target.value,
+                                )
+                              }
+                            />
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
           </div>
 
           <div className="tour-package-modal-footer">

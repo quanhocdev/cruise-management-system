@@ -21,13 +21,13 @@ public class PackageBenefit {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
-    private BenefitType type; // SERVICE, PRODUCT, ACTIVITY_CRUISE, ACTIVITY_VISIT
+    private BenefitType type;
 
     @Column(name = "reference_id", nullable = false)
     private UUID referenceId; // ID từ bảng assignment tương ứng
 
-    @Column(name = "free_quantity")
-    private Integer freeQuantity;
+    @Column(name = "quantity")
+    private Integer quantity;
 
     @Column(name = "discount_percent", precision = 5, scale = 2)
     private BigDecimal discountPercent;
@@ -89,12 +89,12 @@ public class PackageBenefit {
         this.referenceId = referenceId;
     }
 
-    public Integer getFreeQuantity() {
-        return freeQuantity;
+    public Integer getQuantity() {
+        return quantity;
     }
 
-    public void setFreeQuantity(Integer freeQuantity) {
-        this.freeQuantity = freeQuantity;
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
     }
 
     public BigDecimal getDiscountPercent() {

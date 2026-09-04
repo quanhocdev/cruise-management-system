@@ -6,8 +6,8 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 public record PackageBenefitRequest(
-        @NotNull BenefitType type,
-        @NotNull UUID referenceId,
-        Integer freeQuantity,
-        BigDecimal discountPercent) {
+                @NotNull BenefitType type,
+                @NotNull UUID referenceId,
+                Integer quantity,
+                BigDecimal discountPercent) {
 }

@@ -5,10 +5,10 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 public record PackageBenefitResponse(
-        UUID id,
-        UUID tourPackageId,
-        BenefitType type,
-        UUID referenceId,
-        Integer freeQuantity,
-        BigDecimal discountPercent) {
+                UUID id,
+                UUID tourPackageId,
+                BenefitType type,
+                UUID referenceId,
+                Integer quantity,
+                BigDecimal discountPercent) {
 }

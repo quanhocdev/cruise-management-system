@@ -70,7 +70,7 @@ public class TourPackageService {
                 benefit.setTourPackageId(savedPackage.getId());
                 benefit.setType(dto.type());
                 benefit.setReferenceId(dto.referenceId());
-                benefit.setFreeQuantity(dto.freeQuantity());
+                benefit.setQuantity(dto.quantity());
                 benefit.setDiscountPercent(dto.discountPercent());
                 return benefit;
             }).toList();
@@ -122,7 +122,7 @@ public class TourPackageService {
                 benefit.setTourPackageId(updatedPackage.getId());
                 benefit.setType(dto.type());
                 benefit.setReferenceId(dto.referenceId());
-                benefit.setFreeQuantity(dto.freeQuantity());
+                benefit.setQuantity(dto.quantity());
                 benefit.setDiscountPercent(dto.discountPercent());
                 return benefit;
             }).toList();

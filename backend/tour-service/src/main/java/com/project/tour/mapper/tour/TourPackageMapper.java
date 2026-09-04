@@ -18,7 +18,7 @@ public class TourPackageMapper {
                 benefit.getTourPackageId(),
                 benefit.getType(),
                 benefit.getReferenceId(),
-                benefit.getFreeQuantity(),
+                benefit.getQuantity(),
                 benefit.getDiscountPercent());
     }
 

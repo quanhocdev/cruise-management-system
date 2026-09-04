@@ -22,8 +22,9 @@
   flex-direction: column;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  /* Đảm bảo toàn bộ container modal cho phép cuộn nội dung bên trong */
+  overflow-y: auto;
 }
-
 .tour-package-modal-header {
   display: flex;
   justify-content: space-between;
@@ -56,12 +57,10 @@
 
 .tour-package-modal-form {
   padding: 24px;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
-
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -121,11 +120,9 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  max-height: 250px;
-  overflow-y: auto;
-  padding-right: 4px;
+  min-height: 120px;
+  padding-bottom: 10px;
 }
-
 .benefit-group h4 {
   font-size: 0.85rem;
   font-weight: 600;
