@@ -108,4 +108,18 @@ class PosIdentityServiceTests {
         when(credentials.findById(3L)).thenReturn(Optional.of(credential));
         service.revoke(3L); assertFalse(credential.isActive()); verify(credentials).save(credential);
     }
+
+    @Test void adminListsOnlySafeTerminalAndPassengerInformation() {
+        terminal.setId(2L); terminal.setName("Quay le tan"); terminal.setCreatedAt(java.time.Instant.now());
+        when(terminals.findAllByOrderByCodeAsc()).thenReturn(List.of(terminal));
+        when(passengers.findAllByVoyageIdOrderByIdAsc(voyage)).thenReturn(List.of(link));
+        when(credentials.findAllByPassengerVoyage_VoyageIdOrderByCreatedAtDesc(voyage))
+            .thenReturn(List.of(credential));
+
+        var terminalResult = service.listTerminals().get(0);
+        assertEquals("POS-TEST", terminalResult.code());
+        assertEquals(voyage, terminalResult.assignedVoyageId());
+        assertEquals("Test passenger", service.listPassengers(voyage).get(0).fullName());
+        assertEquals("NFC", service.listCredentials(voyage).get(0).scanType());
+    }
 }

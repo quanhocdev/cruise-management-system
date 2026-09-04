@@ -27,6 +27,33 @@ public class PosIdentityService {
         this.passengers = passengers; this.credentials = credentials;
     }
 
+    @Transactional(readOnly = true)
+    public List<TerminalSummary> listTerminals() {
+        return terminals.findAllByOrderByCodeAsc().stream()
+            .map(item -> new TerminalSummary(item.getId(), item.getCode(), item.getName(),
+                item.isActive(), item.getAssignedVoyageId(), item.getCreatedAt()))
+            .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PassengerSummary> listPassengers(UUID voyageId) {
+        return passengers.findAllByVoyageIdOrderByIdAsc(voyageId).stream()
+            .map(item -> new PassengerSummary(item.getId(), item.getPassenger().getFullName(),
+                item.getBooking().getBookingCode(), item.getVoyageId(), item.getCabinId(),
+                item.getPassengerStatus().name(), item.getBooking().getStatus().name()))
+            .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<CredentialSummary> listCredentials(UUID voyageId) {
+        return credentials.findAllByPassengerVoyage_VoyageIdOrderByCreatedAtDesc(voyageId).stream()
+            .map(item -> new CredentialSummary(item.getId(), item.getPassengerVoyage().getId(),
+                item.getPassengerVoyage().getPassenger().getFullName(),
+                item.getPassengerVoyage().getBooking().getBookingCode(), item.getScanType(),
+                item.isActive(), item.getCreatedAt()))
+            .toList();
+    }
+
     @Transactional
     public void assignVoyage(String code, UUID voyageId) {
         var terminal = terminals.findByCodeIgnoreCase(code.trim())

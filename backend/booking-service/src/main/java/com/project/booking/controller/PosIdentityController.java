@@ -5,11 +5,25 @@ import com.project.booking.service.PosIdentityService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import java.util.*;
 
 @RestController
 public class PosIdentityController {
     private final PosIdentityService service;
     public PosIdentityController(PosIdentityService service) { this.service = service; }
+
+    @GetMapping("/api/admin/pos-terminals")
+    public List<TerminalSummary> terminals() { return service.listTerminals(); }
+
+    @GetMapping("/api/admin/pos-terminals/voyages/{voyageId}/passengers")
+    public List<PassengerSummary> passengers(@PathVariable UUID voyageId) {
+        return service.listPassengers(voyageId);
+    }
+
+    @GetMapping("/api/admin/pos-terminals/credentials")
+    public List<CredentialSummary> credentials(@RequestParam UUID voyageId) {
+        return service.listCredentials(voyageId);
+    }
 
     @PutMapping("/api/admin/pos-terminals/{code}/voyage")
     @ResponseStatus(HttpStatus.NO_CONTENT)
