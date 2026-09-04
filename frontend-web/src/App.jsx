@@ -45,6 +45,7 @@ import OperationLayout from "./layouts/OperationLayout";
 import OperationDashboard from "./modules/operation/pages/Dashboard";
 import OperationManagerTour from "./modules/operation/pages/ManagerTour";
 import OperationTourConfiguration from "./modules/operation/pages/OperationTourConfiguration";
+import ManagerTourPackages from "./modules/operation/pages/ManagerTourPackages";
 
 // Convenience imports
 import ConvenienceLayout from "./layouts/ConvenienceLayout";
@@ -144,10 +145,6 @@ export default function App() {
               PASSENGER ROUTES
               ===================================================== */}
 
-          {/* =====================================================
-              PASSENGER ROUTES
-              ===================================================== */}
-
           <Route
             path="/passenger/*"
             element={
@@ -167,6 +164,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
           {/* =====================================================
               SCHEDULER ROUTES
               ===================================================== */}
@@ -221,7 +219,7 @@ export default function App() {
               path="tour-configuration"
               element={<OperationTourConfiguration />}
             />
-
+            <Route path="tour-packages" element={<ManagerTourPackages />} />
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
 

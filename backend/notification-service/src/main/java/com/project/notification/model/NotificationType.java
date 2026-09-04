@@ -8,5 +8,5 @@ public enum NotificationType {
     CHECK_IN_SUCCESS,
     DEPARTURE_REMINDER,
     ITINERARY_CHANGED,
-    FEEDBACK_REQUEST
+    FEED_BACK_REQUEST
 }

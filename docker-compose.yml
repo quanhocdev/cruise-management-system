@@ -420,6 +420,9 @@ services:
       kafka:
         condition: service_started
 
+  # ==========================
+  # Booking Service
+  # ==========================
   booking-service:
     build:
       context: ./backend/booking-service
@@ -444,6 +447,9 @@ services:
       notification-service:
         condition: service_started
 
+  # ==========================
+  # Payment Service
+  # ==========================
   payment-service:
     build:
       context: ./backend/payment-service
@@ -468,6 +474,9 @@ services:
       notification-service:
         condition: service_started
 
+  # ==========================
+  # Notification Service
+  # ==========================
   notification-service:
     build:
       context: ./backend/notification-service
@@ -489,6 +498,9 @@ services:
       postgres-operations:
         condition: service_healthy
 
+  # ==========================
+  # Feedback Service
+  # ==========================
   feedback-service:
     build:
       context: ./backend/feedback-service
