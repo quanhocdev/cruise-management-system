@@ -1,0 +1,149 @@
+/* src/modules/operation/styles/packages/ManagerTourPackages.css */
+
+.manager-tour-packages-page {
+  padding: 24px;
+  background-color: #f8fafc;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.manager-tour-packages-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  padding: 20px 24px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+}
+
+.manager-tour-packages-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.manager-tour-packages-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+  width: fit-content;
+}
+
+.manager-tour-packages-back:hover {
+  color: #0f172a;
+}
+
+.manager-tour-packages-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #0f172a;
+}
+
+.manager-tour-packages-title h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.manager-tour-packages-title p {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 2px 0 0 0;
+}
+
+.manager-tour-packages-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.manager-tour-packages-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.manager-tour-packages-refresh:hover:not(:disabled) {
+  background: #e2e8f0;
+}
+
+.manager-tour-packages-refresh:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.manager-tour-packages-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #2563eb;
+  border: none;
+  color: #ffffff;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.manager-tour-packages-add:hover {
+  background: #1d4ed8;
+}
+
+.manager-tour-packages-alert-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .manager-tour-packages-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .manager-tour-packages-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
