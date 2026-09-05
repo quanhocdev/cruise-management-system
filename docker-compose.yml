@@ -187,18 +187,13 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-
       KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS: 1
-
-      # 2. Tắt các log TRACE/DEBUG chi tiết, đẩy log level lên ERROR hoặc WARN
       KAFKA_LOG4J_ROOT_LOGLEVEL: "WARN"
       KAFKA_LOG4J_LOGGERS: "kafka=WARN,kafka.controller=WARN,kafka.cluster=WARN,state.change.logger=WARN"
-
-      # Cấu hình tự động dọn dẹp log local
-      KAFKA_LOG_RETENTION_MS: 3600000 # Xóa message sau 1 giờ
-      KAFKA_LOG_RETENTION_BYTES: 1073741824 # Giới hạn dung lượng tối đa 1 GB
-      KAFKA_LOG_SEGMENT_BYTES: 104857600 # Mỗi file segment tối đa 100 MB
-      KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 300000 # Quét dọn dẹp mỗi 5 phút
+      KAFKA_LOG_RETENTION_MS: 3600000
+      KAFKA_LOG_RETENTION_BYTES: 1073741824
+      KAFKA_LOG_SEGMENT_BYTES: 104857600
+      KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 300000
     depends_on:
       - zookeeper
 
@@ -213,6 +208,7 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
     depends_on:
       - kafka
+
   # ==========================
   # pgAdmin
   # ==========================
@@ -274,6 +270,7 @@ services:
       - booking-service
       - payment-service
       - notification-service
+      - feedback-service
 
   # ==========================
   # Auth Service
@@ -365,7 +362,7 @@ services:
       kafka:
         condition: service_started
 
-    # ==========================
+  # ==========================
   # Activity Cruise Service
   # ==========================
   activity-cruise-service:
@@ -394,7 +391,7 @@ services:
       kafka:
         condition: service_started
 
-    # ==========================
+  # ==========================
   # Activity Visit Service
   # ==========================
   activity-visit-service:
@@ -423,6 +420,9 @@ services:
       kafka:
         condition: service_started
 
+  # ==========================
+  # Booking Service
+  # ==========================
   booking-service:
     build:
       context: ./backend/booking-service
@@ -447,6 +447,9 @@ services:
       notification-service:
         condition: service_started
 
+  # ==========================
+  # Payment Service
+  # ==========================
   payment-service:
     build:
       context: ./backend/payment-service
@@ -471,6 +474,9 @@ services:
       notification-service:
         condition: service_started
 
+  # ==========================
+  # Notification Service
+  # ==========================
   notification-service:
     build:
       context: ./backend/notification-service
@@ -491,6 +497,33 @@ services:
     depends_on:
       postgres-operations:
         condition: service_healthy
+
+  # ==========================
+  # Feedback Service
+  # ==========================
+  feedback-service:
+    build:
+      context: ./backend/feedback-service
+      dockerfile: Dockerfile.dev
+    container_name: feedback-service
+    restart: always
+    ports:
+      - "8087:8087"
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-operations:5432/cruise_operations_db
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      BOOKING_SERVICE_URL: http://booking-service:8082
+      TOUR_SERVICE_URL: http://tour-service:8088
+    depends_on:
+      postgres-operations:
+        condition: service_healthy
+      booking-service:
+        condition: service_started
+      tour-service:
+        condition: service_started
 
   # ==========================
   # React Frontend

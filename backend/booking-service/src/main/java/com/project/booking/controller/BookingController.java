@@ -16,7 +16,10 @@ import java.util.UUID;
 @RequestMapping("/api/v1/bookings")
 public class BookingController {
     private final BookingService service;
-    public BookingController(BookingService service) { this.service = service; }
+    private final com.project.booking.service.QrCodeService qrCodeService;
+    public BookingController(BookingService service, com.project.booking.service.QrCodeService qrCodeService) {
+        this.service = service; this.qrCodeService = qrCodeService;
+    }
 
     @PostMapping
     ResponseEntity<BookingResponse> create(@Valid @RequestBody CreateBookingRequest request, @AuthenticationPrincipal Jwt jwt) {
@@ -36,6 +39,25 @@ public class BookingController {
     @PatchMapping("/{id}/cancel")
     BookingResponse cancel(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
         return service.cancel(id, userId(jwt));
+    }
+    @GetMapping("/code/{bookingCode}")
+    BookingResponse getByCode(@PathVariable String bookingCode, @AuthenticationPrincipal Jwt jwt,
+                              Authentication authentication) {
+        return service.getByCode(bookingCode, userId(jwt), privileged(authentication));
+    }
+    @GetMapping(value = "/{id}/qr", produces = MediaType.IMAGE_PNG_VALUE)
+    ResponseEntity<byte[]> qr(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt,
+                              Authentication authentication) {
+        BookingResponse booking = service.get(id, userId(jwt), privileged(authentication));
+        if (booking.bookingCode() == null)
+            throw new BookingException(HttpStatus.CONFLICT, "QR code is available after successful payment");
+        return ResponseEntity.ok()
+            .cacheControl(CacheControl.noStore())
+            .body(qrCodeService.png(booking.bookingCode()));
+    }
+    private boolean privileged(Authentication authentication) {
+        return authentication.getAuthorities().stream().anyMatch(a ->
+            a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_SCHEDULE"));
     }
     private Long userId(Jwt jwt) {
         Object claim = jwt.getClaim("userId");

@@ -8,29 +8,29 @@ import java.util.UUID;
 
 public record VisitTourResponse(
 
-        UUID id,
+                UUID id,
 
-        UUID tourId,
+                UUID tourId,
 
-        UUID scheduleStopId,
+                UUID scheduleStopId,
 
-        String name,
+                String name,
 
-        String description,
+                String description,
 
-        LocalDateTime startTime,
+                LocalDateTime startTime,
 
-        LocalDateTime endTime,
+                LocalDateTime endTime,
 
-        Integer maxPassengers,
+                Integer maxPassengers,
 
-        BigDecimal price,
+                BigDecimal price,
 
-        VisitTourStatus status,
+                VisitTourStatus status,
 
-        LocalDateTime createdAt,
+                LocalDateTime createdAt,
 
-        LocalDateTime updatedAt
+                LocalDateTime updatedAt
 
 ) {
 }
