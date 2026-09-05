@@ -3,7 +3,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
-import HomePage from "./modules/guest/pages/HomePage";
+import GuestLayout from "./layouts/GuestLayout";
+import TourPublic from "./modules/guest/pages/TourPublic";
+import TourPublicDetail from "./modules/guest/pages/TourPublicDetail";
 
 import RegisterPage from "./modules/auth/pages/RegisterPage";
 import LoginPage from "./modules/auth/pages/LoginPage";
@@ -78,10 +80,16 @@ export default function App() {
       <AuthProvider>
         <Routes>
           {/* =====================================================
-              PUBLIC ROUTES
+              PUBLIC STOREFRONT ROUTES (WITH HEADER & FOOTER)
               ===================================================== */}
 
-          <Route path="/" element={<HomePage />} />
+          <Route element={<GuestLayout />}>
+            <Route path="/" element={<TourPublic />} />
+            <Route path="/tours" element={<TourPublic />} />
+            <Route path="/tours/:id" element={<TourPublicDetail />} />
+          </Route>
+
+          {/* STANDALONE PUBLIC AUTH & SYSTEM PAGES */}
           <Route path="/activate" element={<ActivatePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />

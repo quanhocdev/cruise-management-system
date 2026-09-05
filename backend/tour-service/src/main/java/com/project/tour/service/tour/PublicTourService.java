@@ -55,61 +55,74 @@ public class PublicTourService {
     }
 
     // 1. Lấy danh sách tour tóm tắt cho trang chủ
-    public List<PublicTourSummaryResponse> getPublicTourSummaries() {
-        List<Tour> tours = tourRepository.findByStatusTripIn(
-                List.of(TourStatusTrip.READY, TourStatusTrip.APPROVED));
+public List<PublicTourSummaryResponse> getPublicTourSummaries() {
+    // Chỉ lấy 3 trạng thái công khai: READY, IN_PROGRESS, COMPLETED
+    List<TourStatusTrip> allowedStatuses = List.of(
+            TourStatusTrip.READY, 
+            TourStatusTrip.IN_PROGRESS, 
+            TourStatusTrip.COMPLETED
+    );
 
-        return tours.stream().map(tour -> {
-            BigDecimal startingPrice = tourPackageRepository.findLowestPriceByTourId(tour.getId());
-            return TourPublicMapper.toSummaryResponse(tour, startingPrice);
-        }).toList();
-    }
+    List<Tour> tours = tourRepository.findAllByStatusTripInOrderByStartDateAsc(allowedStatuses);
 
-    // 2. Lấy chi tiết đầy đủ của một tour
-    public PublicTourDetailResponse getPublicTourDetail(UUID tourId) {
-        Tour tour = tourRepository.findById(tourId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy Tour"));
+    return tours.stream().map(tour -> {
+        BigDecimal startingPrice = tourPackageRepository.findLowestPriceByTourId(tour.getId());
+        return TourPublicMapper.toSummaryResponse(tour, startingPrice);
+    }).toList();
+}
 
-        // Lấy danh sách lịch trình
-        List<Schedule> schedules = scheduleRepository.findAllByTour_IdOrderByDayNumberAsc(tourId);
+// 2. Lấy chi tiết đầy đủ của một tour
+public PublicTourDetailResponse getPublicTourDetail(UUID tourId) {
+    // Chỉ cho phép xem chi tiết nếu tour nằm trong 3 trạng thái công khai
+    List<TourStatusTrip> allowedStatuses = List.of(
+            TourStatusTrip.READY, 
+            TourStatusTrip.IN_PROGRESS, 
+            TourStatusTrip.COMPLETED
+    );
 
-        // Map Schedule ID sang danh sách ScheduleStop
-        Map<UUID, List<ScheduleStop>> scheduleIdToStopsMap = schedules.stream()
-                .collect(Collectors.toMap(
-                        Schedule::getId,
-                        s -> scheduleStopRepository.findAllBySchedule_IdOrderByStopOrderAsc(s.getId())));
+    Tour tour = tourRepository.findByIdAndStatusTripIn(tourId, allowedStatuses)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy Tour hoặc tour chưa được mở công khai"));
 
-        // Map ScheduleStop ID sang AssignmentActivityVisit
-        Map<UUID, AssignmentActivityVisit> stopIdToVisitMap = assignmentActivityVisitRepository
-                .findAllByTourIdOrderByCreatedAtAsc(tourId)
-                .stream()
-                .collect(Collectors.toMap(
-                        AssignmentActivityVisit::getScheduleStopId,
-                        v -> v,
-                        (v1, v2) -> v1));
+    // Lấy danh sách lịch trình
+    List<Schedule> schedules = scheduleRepository.findAllByTour_IdOrderByDayNumberAsc(tourId);
 
-        // Lấy danh sách gói tour & benefits
-        List<TourPackage> packages = tourPackageRepository.findAllByTourId(tourId);
-        Map<UUID, List<PackageBenefit>> packageIdToBenefitsMap = packages.stream()
-                .collect(Collectors.toMap(
-                        TourPackage::getId,
-                        pkg -> packageBenefitRepository.findAllByTourPackageId(pkg.getId())));
+    // Map Schedule ID sang danh sách ScheduleStop
+    Map<UUID, List<ScheduleStop>> scheduleIdToStopsMap = schedules.stream()
+            .collect(Collectors.toMap(
+                    Schedule::getId,
+                    s -> scheduleStopRepository.findAllBySchedule_IdOrderByStopOrderAsc(s.getId())));
 
-        // Lấy các assignment khác trên tàu
-        List<AssignmentActivityCruise> onboardActivities = assignmentActivityCruiseRepository.findAllByTourId(tourId);
-        List<AssignmentProduct> products = assignmentProductRepository.findAllByTourIdOrderByCreatedAtAsc(tourId);
-        List<AssignmentService> services = assignmentServiceRepository.findAllByTourIdOrderByCreatedAtAsc(tourId);
+    // Map ScheduleStop ID sang AssignmentActivityVisit
+    Map<UUID, AssignmentActivityVisit> stopIdToVisitMap = assignmentActivityVisitRepository
+            .findAllByTourIdOrderByCreatedAtAsc(tourId)
+            .stream()
+            .collect(Collectors.toMap(
+                    AssignmentActivityVisit::getScheduleStopId,
+                    v -> v,
+                    (v1, v2) -> v1));
 
-        // Ủy quyền toàn bộ việc lắp ráp dữ liệu sang Mapper
-        return TourPublicMapper.toDetailResponse(
-                tour,
-                schedules,
-                scheduleIdToStopsMap,
-                stopIdToVisitMap,
-                packages,
-                packageIdToBenefitsMap,
-                onboardActivities,
-                products,
-                services);
-    }
+    // Lấy danh sách gói tour & benefits
+    List<TourPackage> packages = tourPackageRepository.findAllByTourId(tourId);
+    Map<UUID, List<PackageBenefit>> packageIdToBenefitsMap = packages.stream()
+            .collect(Collectors.toMap(
+                    TourPackage::getId,
+                    pkg -> packageBenefitRepository.findAllByTourPackageId(pkg.getId())));
+
+    // Lấy các assignment khác trên tàu
+    List<AssignmentActivityCruise> onboardActivities = assignmentActivityCruiseRepository.findAllByTourId(tourId);
+    List<AssignmentProduct> products = assignmentProductRepository.findAllByTourIdOrderByCreatedAtAsc(tourId);
+    List<AssignmentService> services = assignmentServiceRepository.findAllByTourIdOrderByCreatedAtAsc(tourId);
+
+    // Ủy quyền toàn bộ việc lắp ráp dữ liệu sang Mapper
+    return TourPublicMapper.toDetailResponse(
+            tour,
+            schedules,
+            scheduleIdToStopsMap,
+            stopIdToVisitMap,
+            packages,
+            packageIdToBenefitsMap,
+            onboardActivities,
+            products,
+            services);
+}
 }
