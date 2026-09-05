@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.dp
 import com.project.cruise.android.viewmodel.pos.PosIdentityState
 
 @Composable
-fun PosIdentityScreen(state: PosIdentityState, onRetry: () -> Unit, onBack: () -> Unit) {
+fun PosIdentityScreen(state: PosIdentityState, onRetry: () -> Unit, onCheckIn: () -> Unit, onBack: () -> Unit) {
     Column(Modifier.fillMaxSize().safeDrawingPadding().verticalScroll(rememberScrollState()).padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)) {
         TextButton(onClick = onBack) { Text("← Quay lại POS") }
@@ -33,6 +33,28 @@ fun PosIdentityScreen(state: PosIdentityState, onRetry: () -> Unit, onBack: () -
                     "BOARDED" -> "Đã lên tàu"
                     else -> "Chưa xác định"
                 })
+                val checkIn = state.checkInResult
+                if (checkIn == null && result.embarkationStatus == "NOT_CHECKED_IN") {
+                    Button(onClick = onCheckIn, enabled = !state.checkingIn) {
+                        if (state.checkingIn) {
+                            CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                            Spacer(Modifier.width(8.dp))
+                        }
+                        Text("Xác nhận check-in")
+                    }
+                }
+                checkIn?.let {
+                    val successful = it.status == "CHECKED_IN" || it.status == "ALREADY_CHECKED_IN"
+                    Text(when (it.status) {
+                        "CHECKED_IN" -> "Check-in thành công"
+                        "ALREADY_CHECKED_IN" -> "Hành khách đã check-in trước đó"
+                        "ALREADY_BOARDED" -> "Hành khách đã lên tàu"
+                        else -> "Không thể check-in: ${it.reason ?: "dữ liệu không hợp lệ"}"
+                    }, color = if (successful) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.titleMedium)
+                    it.checkedInAt?.let { time -> Text("Thời gian máy chủ: $time") }
+                    it.terminalCode?.let { terminal -> Text("Thiết bị: $terminal") }
+                }
             } else {
                 Text("Không xác minh được", color = MaterialTheme.colorScheme.error)
                 Text(when (result.reason) {
@@ -46,7 +68,7 @@ fun PosIdentityScreen(state: PosIdentityState, onRetry: () -> Unit, onBack: () -
                 })
             }
         }
-        Text("Đây chỉ là kết quả nhận diện tại thời điểm kiểm tra. Chưa check-in, chưa thanh toán và chưa cấp quyền mua dịch vụ.",
+        Text("Quét mã chỉ nhận diện. Check-in chỉ được thực hiện sau khi nhân viên bấm xác nhận; thao tác này không thanh toán và không cấp quyền mua dịch vụ.",
             style = MaterialTheme.typography.bodySmall)
         OutlinedButton(onClick = onRetry, enabled = !state.loading) { Text("Xác minh lại") }
     }

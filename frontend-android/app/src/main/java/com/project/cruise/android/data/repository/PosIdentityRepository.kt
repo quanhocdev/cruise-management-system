@@ -17,4 +17,14 @@ class PosIdentityRepository(context: Context) {
             PosIdentityRequest(scan.scanType, scan.scannedValue)
         )
     }
+
+    suspend fun checkIn(localId: String): com.project.cruise.android.data.network.PosCheckInResponse {
+        check(BuildConfig.POS_API_KEY.isNotBlank()) { "Chưa cấu hình key thiết bị POS" }
+        val scan = checkNotNull(dao.findByLocalId(localId)) { "Không tìm thấy bản ghi quét" }
+        check(scan.terminalCode == BuildConfig.POS_TERMINAL_CODE) { "Bản ghi thuộc thiết bị POS khác" }
+        return RetrofitClient.posApiService.checkIn(
+            BuildConfig.POS_TERMINAL_CODE, BuildConfig.POS_API_KEY,
+            PosIdentityRequest(scan.scanType, scan.scannedValue)
+        )
+    }
 }

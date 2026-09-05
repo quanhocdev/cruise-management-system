@@ -203,7 +203,8 @@ fun NavGraph() {
                 factory = PosIdentityViewModelFactory(PosIdentityRepository(context), entry.arguments?.getString("localId").orEmpty())
             )
             val identityState by identityViewModel.state.collectAsState()
-            PosIdentityScreen(identityState, onRetry = identityViewModel::verify, onBack = { navController.popBackStack() })
+            PosIdentityScreen(identityState, onRetry = identityViewModel::verify,
+                onCheckIn = identityViewModel::checkIn, onBack = { navController.popBackStack() })
         }
 
         // =================================================
