@@ -48,4 +48,10 @@ class PosIdentityControllerSecurityTests {
             .andExpect(status().isBadRequest());
         verifyNoInteractions(service);
     }
+    @Test void checkInNeedsDeviceHeaders() throws Exception {
+        mvc.perform(post("/api/v1/pos/check-in").contentType("application/json")
+            .content("{\"scanType\":\"NFC\",\"scannedValue\":\"04A1B2C3\"}"))
+            .andExpect(status().isUnauthorized());
+        verifyNoInteractions(service);
+    }
 }

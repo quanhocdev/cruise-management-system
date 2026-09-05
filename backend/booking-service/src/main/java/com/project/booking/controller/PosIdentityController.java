@@ -46,4 +46,12 @@ public class PosIdentityController {
             throw new com.project.booking.exception.BookingException(HttpStatus.UNAUTHORIZED, "POS credentials are required");
         return service.identify(code, key, request);
     }
+
+    @PostMapping("/api/v1/pos/check-in")
+    public CheckInResult checkIn(@RequestHeader(value = "X-Terminal-Code", required = false) String code,
+            @RequestHeader(value = "X-POS-Key", required = false) String key, @Valid @RequestBody Lookup request) {
+        if (code == null || code.isBlank() || key == null || key.isBlank())
+            throw new com.project.booking.exception.BookingException(HttpStatus.UNAUTHORIZED, "POS credentials are required");
+        return service.checkIn(code, key, request);
+    }
 }

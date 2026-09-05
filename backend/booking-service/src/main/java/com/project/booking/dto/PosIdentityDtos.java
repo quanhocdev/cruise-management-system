@@ -25,4 +25,11 @@ public final class PosIdentityDtos {
             return new Identity("REJECTED", reason, null, null, null, null, null, null);
         }
     }
+    public record CheckInResult(String status, String reason, Long passengerVoyageId,
+        String fullName, String bookingCode, UUID voyageId, UUID cabinId,
+        String embarkationStatus, Instant checkedInAt, String terminalCode) {
+        public static CheckInResult rejected(String reason) {
+            return new CheckInResult("REJECTED", reason, null, null, null, null, null, null, null, null);
+        }
+    }
 }

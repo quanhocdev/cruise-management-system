@@ -122,4 +122,32 @@ class PosIdentityServiceTests {
         assertEquals("Test passenger", service.listPassengers(voyage).get(0).fullName());
         assertEquals("NFC", service.listCredentials(voyage).get(0).scanType());
     }
+
+    @Test void validCredentialChecksPassengerInAndRecordsTerminal() {
+        when(passengers.findByIdForUpdate(7L)).thenReturn(Optional.of(link));
+        var result = service.checkIn("POS-TEST", "device-test-key", new Lookup("NFC", "04A1B2C3"));
+        assertEquals("CHECKED_IN", result.status());
+        assertEquals(EmbarkationStatus.CHECKED_IN, link.getEmbarkationStatus());
+        assertEquals("POS-TEST", link.getCheckedInTerminalCode());
+        assertNotNull(link.getCheckedInAt());
+        verify(passengers).save(link);
+    }
+
+    @Test void repeatedCheckInIsIdempotent() {
+        link.setEmbarkationStatus(EmbarkationStatus.CHECKED_IN);
+        link.setCheckedInAt(java.time.Instant.now());
+        link.setCheckedInTerminalCode("POS-FIRST");
+        when(passengers.findByIdForUpdate(7L)).thenReturn(Optional.of(link));
+        var result = service.checkIn("POS-TEST", "device-test-key", new Lookup("NFC", "04A1B2C3"));
+        assertEquals("ALREADY_CHECKED_IN", result.status());
+        assertEquals("POS-FIRST", result.terminalCode());
+        verify(passengers, never()).save(any());
+    }
+
+    @Test void rejectedIdentityCannotCheckIn() {
+        var result = service.checkIn("POS-TEST", "device-test-key", new Lookup("NFC", "12345678"));
+        assertEquals("REJECTED", result.status());
+        assertEquals("UNKNOWN_CREDENTIAL", result.reason());
+        verify(passengers, never()).findByIdForUpdate(anyLong());
+    }
 }

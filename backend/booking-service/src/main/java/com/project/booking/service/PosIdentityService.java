@@ -121,6 +121,37 @@ public class PosIdentityService {
             link.getEmbarkationStatus() == null ? null : link.getEmbarkationStatus().name());
     }
 
+    @Transactional
+    public CheckInResult checkIn(String code, String key, Lookup request) {
+        Identity identity = identify(code, key, request);
+        if (!"IDENTIFIED".equals(identity.status())) return CheckInResult.rejected(identity.reason());
+
+        var terminal = authentication.authenticate(code, key);
+        var link = passengers.findByIdForUpdate(identity.passengerVoyageId())
+            .orElseThrow(() -> new BookingException(HttpStatus.NOT_FOUND, "Passenger voyage not found"));
+        if (!Objects.equals(terminal.getAssignedVoyageId(), link.getVoyageId()))
+            return CheckInResult.rejected("WRONG_VOYAGE");
+        if (link.getBooking().getStatus() != BookingStatus.CONFIRMED ||
+            link.getPassengerStatus() != PassengerStatus.REGISTERED)
+            return CheckInResult.rejected("BOOKING_NOT_CONFIRMED");
+        if (link.getEmbarkationStatus() == EmbarkationStatus.BOARDED)
+            return checkInResult("ALREADY_BOARDED", link, terminal.getCode());
+        if (link.getEmbarkationStatus() == EmbarkationStatus.CHECKED_IN)
+            return checkInResult("ALREADY_CHECKED_IN", link, link.getCheckedInTerminalCode());
+
+        link.setEmbarkationStatus(EmbarkationStatus.CHECKED_IN);
+        link.setCheckedInAt(Instant.now());
+        link.setCheckedInTerminalCode(terminal.getCode());
+        passengers.save(link);
+        return checkInResult("CHECKED_IN", link, terminal.getCode());
+    }
+
+    private CheckInResult checkInResult(String status, PassengerVoyage link, String terminalCode) {
+        return new CheckInResult(status, null, link.getId(), link.getPassenger().getFullName(),
+            link.getBooking().getBookingCode(), link.getVoyageId(), link.getCabinId(),
+            link.getEmbarkationStatus().name(), link.getCheckedInAt(), terminalCode);
+    }
+
     static String normalizeNfc(String input) {
         if (input == null) return null;
         String uid = input.trim().replace(":", "").replace(" ", "").toUpperCase(Locale.ROOT);
