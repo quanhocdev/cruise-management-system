@@ -50,3 +50,19 @@ data class PassengerVoyageBookingResponse(
     val boardedAt: String? = null,
     val disembarkedAt: String? = null
 )
+
+data class CreateVnPayPaymentRequest(
+    val referenceId: Long,
+    val referenceType: String = "BOOKING",
+    val amount: BigDecimal,
+    val method: String = "VNPAY"
+)
+
+data class PassengerPaymentResponse(
+    val id: Long,
+    val referenceId: Long,
+    val amount: BigDecimal,
+    val method: String,
+    val status: String,
+    val paymentUrl: String?
+)

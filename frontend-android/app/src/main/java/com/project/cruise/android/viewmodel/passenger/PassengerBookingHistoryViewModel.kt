@@ -16,6 +16,9 @@ data class BookingHistoryState(
     val bookings: List<PassengerBookingResponse> = emptyList(),
     val detail: PassengerBookingResponse? = null,
     val qrBytes: ByteArray? = null,
+    val creatingPayment: Boolean = false,
+    val paymentUrl: String? = null,
+    val awaitingPaymentReturn: Boolean = false,
     val error: String? = null
 )
 
@@ -33,6 +36,37 @@ class PassengerBookingHistoryViewModel(private val repository: PassengerBookingR
                 _state.value = _state.value.copy(qrBytes = bytes)
             }
         }
+    }
+
+    fun startVnPay() {
+        val booking = _state.value.detail ?: return
+        if (booking.status != "PENDING_PAYMENT" || _state.value.creatingPayment) return
+        _state.value = _state.value.copy(creatingPayment = true, error = null)
+        viewModelScope.launch {
+            try {
+                val payment = repository.createVnPayPayment(booking)
+                val url = payment.paymentUrl?.takeIf { it.startsWith("https://sandbox.vnpayment.vn/") }
+                    ?: error("Máy chủ không trả về URL VNPay Sandbox hợp lệ")
+                _state.value = _state.value.copy(creatingPayment = false, paymentUrl = url,
+                    awaitingPaymentReturn = true)
+            } catch (error: CancellationException) { throw error }
+            catch (error: HttpException) {
+                _state.value = _state.value.copy(creatingPayment = false,
+                    error = if (error.code() == 409) "Booking không còn ở trạng thái chờ thanh toán."
+                    else "Không tạo được giao dịch VNPay. Vui lòng thử lại.")
+            } catch (error: Exception) {
+                _state.value = _state.value.copy(creatingPayment = false,
+                    error = "Không mở được VNPay Sandbox. Kiểm tra kết nối rồi thử lại.")
+            }
+        }
+    }
+
+    fun paymentUrlOpened() { _state.value = _state.value.copy(paymentUrl = null) }
+
+    fun refreshAfterPaymentReturn(id: Long) {
+        if (!_state.value.awaitingPaymentReturn || _state.value.loading) return
+        _state.value = _state.value.copy(awaitingPaymentReturn = false)
+        loadDetail(id)
     }
 
     private fun execute(block: suspend () -> Unit) {

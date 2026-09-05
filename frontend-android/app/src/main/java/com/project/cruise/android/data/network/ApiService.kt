@@ -35,6 +35,11 @@ interface ApiService {
     @GET("api/v1/bookings/{id}/qr")
     suspend fun getBookingQr(@Path("id") id: Long): ResponseBody
 
+    @POST("api/v1/payments")
+    suspend fun createVnPayPayment(
+        @Body request: com.project.cruise.android.data.dto.passenger.CreateVnPayPaymentRequest
+    ): com.project.cruise.android.data.dto.passenger.PassengerPaymentResponse
+
     @GET("api/passenger/tours")
     suspend fun getOpenTours(): List<TourSummary>
 
