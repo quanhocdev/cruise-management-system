@@ -63,7 +63,11 @@ services:
     volumes:
       - postgres_operations_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres} -d cruise_operations_db"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER:-postgres} -d cruise_operations_db",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -446,6 +450,8 @@ services:
         condition: service_started
       notification-service:
         condition: service_started
+      kafka:
+        condition: service_started
 
   # ==========================
   # Payment Service
@@ -473,6 +479,8 @@ services:
         condition: service_started
       notification-service:
         condition: service_started
+      kafka:
+        condition: service_started
 
   # ==========================
   # Notification Service
@@ -497,6 +505,8 @@ services:
     depends_on:
       postgres-operations:
         condition: service_healthy
+      kafka:
+        condition: service_started
 
   # ==========================
   # Feedback Service
@@ -508,7 +518,7 @@ services:
     container_name: feedback-service
     restart: always
     ports:
-      - "8087:8087"
+      - "8089:8089"
     env_file:
       - .env
     environment:
@@ -523,6 +533,8 @@ services:
       booking-service:
         condition: service_started
       tour-service:
+        condition: service_started
+      kafka:
         condition: service_started
 
   # ==========================
