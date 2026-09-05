@@ -33,6 +33,8 @@ import ServiceConfigurationTable from "../components/tour-configuration/ServiceC
 
 import { isTourItemConfigured } from "../utils/tourConfigurationUtils";
 
+import useTourBooking from "../hooks/useTourBooking";
+
 import "../styles/OperationTourConfiguration.css";
 
 const OperationTourConfiguration = () => {
@@ -131,14 +133,24 @@ const OperationTourConfiguration = () => {
     loadConfiguredServicesByTour,
   ]);
 
+  const loadBookingConfig = useCallback(async () => {
+    if (!tourId) return;
+    try {
+      const data = await getBookingConfig(tourId);
+      setBookingConfig(data);
+    } catch (err) {
+      setBookingConfig(null);
+    }
+  }, [tourId, getBookingConfig]);
+
   // =========================================================
   // INITIAL LOAD
   // =========================================================
 
   useEffect(() => {
     loadConfigurations();
-  }, [loadConfigurations]);
-
+    loadBookingConfig();
+  }, [loadConfigurations, loadBookingConfig]);
   // =========================================================
   // BACK
   // =========================================================
@@ -146,13 +158,12 @@ const OperationTourConfiguration = () => {
   const handleBack = () => {
     navigate("/operation/tours");
   };
-
   // =========================================================
   // REFRESH
   // =========================================================
-
   const handleRefresh = () => {
     loadConfigurations();
+    loadBookingConfig();
   };
 
   // =========================================================
@@ -461,27 +472,59 @@ const OperationTourConfiguration = () => {
       </div>
 
       {/* =======================================================
-          CREATE PACKAGE
+          CREATE PACKAGE & OPEN BOOKING
           ======================================================= */}
 
       <section className="operation-tour-configuration-package">
         <div>
-          <strong>Sẵn sàng tạo gói Tour?</strong>
+          <strong>Sẵn sàng tạo gói Tour & Mở bán vé?</strong>
 
           <p>
             Khi toàn bộ Activity, Product và Service đã được cấu hình đầy đủ,
-            Operation có thể tạo các gói Tour để chuẩn bị public Tour.
+            Operation có thể tạo các gói Tour hoặc tiến hành cấu hình thời gian
+            mở bán vé cho tour này.
           </p>
         </div>
 
-        <button
-          type="button"
-          disabled={!configurationComplete}
-          className="operation-tour-configuration-create-package"
-          onClick={() => navigate(`/operation/tour-packages?tourId=${tourId}`)}
-        >
-          Tạo gói Tour
-        </button>
+        <div style={{ display: "flex", gap: "12px" }}>
+          <button
+            type="button"
+            disabled={!configurationComplete}
+            className="operation-tour-configuration-create-package"
+            onClick={() =>
+              navigate(`/operation/tour-packages?tourId=${tourId}`)
+            }
+          >
+            Tạo gói Tour
+          </button>
+
+          {/* Nút bấm tự động đổi trạng thái dựa vào việc đã có cấu hình booking hay chưa */}
+          <button
+            type="button"
+            className="operation-tour-configuration-open-booking"
+            style={{
+              backgroundColor:
+                bookingConfig?.statusBooking &&
+                bookingConfig.statusBooking !== "NOT_OPEN"
+                  ? "#0d9488"
+                  : "#2563eb",
+              color: "#fff",
+              border: "none",
+              padding: "10px 16px",
+              borderRadius: "6px",
+              cursor: "pointer",
+              fontWeight: 500,
+            }}
+            onClick={() =>
+              navigate(`/operation/tour-booking-open?tourId=${tourId}`)
+            }
+          >
+            {bookingConfig?.statusBooking &&
+            bookingConfig.statusBooking !== "NOT_OPEN"
+              ? "Xem / Sửa cấu hình mở bán"
+              : "Mở bán vé"}
+          </button>
+        </div>
       </section>
     </div>
   );

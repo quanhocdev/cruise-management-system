@@ -1,4 +1,4 @@
-package com.project.tour.controller.tour;
+package com.project.tour.controller.packages;
 
 import com.project.tour.dto.tour.packages.TourPackageRequest;
 import com.project.tour.dto.tour.packages.TourPackageResponse;
