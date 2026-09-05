@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -25,6 +26,7 @@ import com.project.cruise.android.viewmodel.auth.MeState
 fun Dashboard(
     viewModel: AuthViewModel,
     onBrowseTours: () -> Unit,
+    onMyBookings: () -> Unit,
     onLogout: () -> Unit // 🟢 Thêm callback này để điều hướng về Login
 ) {
     val meState by viewModel.meState.collectAsState()
@@ -74,6 +76,12 @@ fun Dashboard(
 
         Button(onClick = onBrowseTours) {
             Text("Khám phá tour đang mở bán")
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        OutlinedButton(onClick = onMyBookings) {
+            Text("Booking của tôi")
         }
 
         Spacer(modifier = Modifier.height(20.dp))

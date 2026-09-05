@@ -31,6 +31,10 @@ import com.project.cruise.android.data.repository.PassengerBookingRepository
 import com.project.cruise.android.ui.screens.passenger.CreateBookingScreen
 import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModel
 import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModelFactory
+import com.project.cruise.android.viewmodel.passenger.PassengerBookingHistoryViewModel
+import com.project.cruise.android.viewmodel.passenger.PassengerBookingHistoryViewModelFactory
+import com.project.cruise.android.ui.screens.passenger.MyBookingsScreen
+import com.project.cruise.android.ui.screens.passenger.BookingDetailScreen
 
 import com.project.cruise.android.ui.screens.GuestScreen
 import com.project.cruise.android.ui.screens.auth.LoginScreen
@@ -66,6 +70,8 @@ object Routes {
     const val PASSENGER_TOUR_DETAIL = "passenger_tours/{tourId}"
     const val PASSENGER_ROOMS = "passenger_rooms/{voyageId}"
     const val PASSENGER_CREATE_BOOKING = "passenger_booking/{voyageId}/{roomId}"
+    const val PASSENGER_BOOKINGS = "passenger_bookings"
+    const val PASSENGER_BOOKING_DETAIL = "passenger_bookings/{bookingId}"
     const val POS_DASHBOARD = "pos_dashboard"
     const val POS_QR_SCAN = "pos_qr_scan"
     const val POS_NFC_SCAN = "pos_nfc_scan"
@@ -109,6 +115,12 @@ fun NavGraph() {
 
     val catalogViewModel: PassengerCatalogViewModel = viewModel(
         factory = PassengerCatalogViewModelFactory(remember(apiService) { PassengerCatalogRepository(apiService) })
+    )
+
+    val bookingHistoryViewModel: PassengerBookingHistoryViewModel = viewModel(
+        factory = PassengerBookingHistoryViewModelFactory(
+            remember(apiService) { PassengerBookingRepository(apiService) }
+        )
     )
 
     val sessionState by viewModel.sessionState.collectAsState()
@@ -398,6 +410,7 @@ fun NavGraph() {
             Dashboard(
                 viewModel = viewModel,
                 onBrowseTours = { navController.navigate(Routes.PASSENGER_TOURS) },
+                onMyBookings = { navController.navigate(Routes.PASSENGER_BOOKINGS) },
                 onLogout = {
                     // 🟢 Điều hướng về màn hình Login và xóa sạch lịch sử Navigation (Backstack)
                     navController.navigate(Routes.LOGIN) {
@@ -406,6 +419,23 @@ fun NavGraph() {
                     }
                 }
             )
+        }
+
+        composable(Routes.PASSENGER_BOOKINGS) {
+            val historyState by bookingHistoryViewModel.state.collectAsState()
+            LaunchedEffect(Unit) { bookingHistoryViewModel.loadMine() }
+            MyBookingsScreen(historyState, onRefresh = bookingHistoryViewModel::loadMine,
+                onBookingClick = { navController.navigate("passenger_bookings/$it") },
+                onBack = { navController.popBackStack() })
+        }
+
+        composable(Routes.PASSENGER_BOOKING_DETAIL,
+            arguments = listOf(navArgument("bookingId") { type = NavType.LongType })) { entry ->
+            val bookingId = entry.arguments?.getLong("bookingId") ?: return@composable
+            val historyState by bookingHistoryViewModel.state.collectAsState()
+            LaunchedEffect(bookingId) { bookingHistoryViewModel.loadDetail(bookingId) }
+            BookingDetailScreen(historyState, onRetry = { bookingHistoryViewModel.loadDetail(bookingId) },
+                onBack = { navController.popBackStack() })
         }
 
         composable(Routes.PASSENGER_TOURS) {
