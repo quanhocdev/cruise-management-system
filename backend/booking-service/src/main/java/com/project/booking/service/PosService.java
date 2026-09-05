@@ -57,14 +57,17 @@ public class PosService {
                 transaction.setLocalId(request.localId());
                 transaction.setTerminalCode(terminal.getCode());
                 transaction.setScanType(request.scanType());
-                transaction.setScannedValue(request.scannedValue().trim());
+                String scannedValue = request.scannedValue().trim();
+                // Never retain reusable identity QR tokens in the server's scan log.
+                transaction.setScannedValue(scannedValue.startsWith("POS:")
+                    ? "SHA256:" + PosIdentityService.fingerprint(request.scanType(), scannedValue) : scannedValue);
                 transaction.setDeviceCreatedAt(request.createdAt());
                 transaction.setReceivedAt(Instant.now());
                 return response(transactionRepository.save(transaction), false);
             });
     }
 
-    private PosTerminal authenticate(String terminalCode, String posKey) {
+    public PosTerminal authenticate(String terminalCode, String posKey) {
         if (terminalCode == null || terminalCode.isBlank() || posKey == null || posKey.isBlank())
             throw new BookingException(HttpStatus.UNAUTHORIZED, "POS credentials are required");
         PosTerminal terminal = terminalRepository.findByCodeIgnoreCase(terminalCode.trim())

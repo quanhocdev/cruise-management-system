@@ -21,6 +21,7 @@ public class PassengerVoyage {
     @Column(name = "checked_in_at") private Instant checkedInAt;
     @Column(name = "boarded_at") private Instant boardedAt;
     @Column(name = "disembarked_at") private Instant disembarkedAt;
+    @Column(name = "checked_in_terminal_code", length = 60) private String checkedInTerminalCode;
     public Long getId() { return id; } public void setId(Long v) { id = v; }
     public Passenger getPassenger() { return passenger; } public void setPassenger(Passenger v) { passenger = v; }
     public Booking getBooking() { return booking; } public void setBooking(Booking v) { booking = v; }
@@ -32,4 +33,5 @@ public class PassengerVoyage {
     public Instant getCheckedInAt() { return checkedInAt; } public void setCheckedInAt(Instant v) { checkedInAt = v; }
     public Instant getBoardedAt() { return boardedAt; } public void setBoardedAt(Instant v) { boardedAt = v; }
     public Instant getDisembarkedAt() { return disembarkedAt; } public void setDisembarkedAt(Instant v) { disembarkedAt = v; }
+    public String getCheckedInTerminalCode() { return checkedInTerminalCode; } public void setCheckedInTerminalCode(String v) { checkedInTerminalCode = v; }
 }

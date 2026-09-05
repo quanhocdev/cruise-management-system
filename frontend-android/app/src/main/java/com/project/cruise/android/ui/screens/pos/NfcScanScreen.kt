@@ -23,7 +23,7 @@ import com.project.cruise.android.data.repository.PosTransactionQueue
 import kotlinx.coroutines.launch
 
 @Composable
-fun NfcScanScreen(onBackClick: () -> Unit, onSaved: () -> Unit) {
+fun NfcScanScreen(onBackClick: () -> Unit, onSaved: (String) -> Unit) {
     val context = LocalContext.current
     val activity = remember(context) { context.findActivity() }
     val adapter = remember(context) { NfcAdapter.getDefaultAdapter(context) }
@@ -42,7 +42,7 @@ fun NfcScanScreen(onBackClick: () -> Unit, onSaved: () -> Unit) {
                         isSaving = true
                         scope.launch {
                             runCatching { queue.enqueue(PosScanType.NFC, uid) }
-                                .onSuccess { onSaved() }
+                                .onSuccess { onSaved(it) }
                                 .onFailure {
                                     error = "Không thể lưu giao dịch trên thiết bị"
                                     isSaving = false

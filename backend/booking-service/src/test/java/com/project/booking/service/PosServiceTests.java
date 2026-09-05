@@ -64,6 +64,15 @@ class PosServiceTests {
         verify(transactionRepository, never()).save(any());
     }
 
+    @Test
+    void identityQrIsNotStoredInPlaintextScanLog() {
+        when(terminalRepository.findByCodeIgnoreCase("POS-001")).thenReturn(Optional.of(terminal("POS-001", "device-secret")));
+        when(transactionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        String token = "POS:" + "A".repeat(43);
+        service.sync("POS-001", "device-secret", new PosSyncRequest(UUID.randomUUID().toString(), "QR", token, Instant.now()));
+        verify(transactionRepository).save(argThat(t -> t.getScannedValue().startsWith("SHA256:") && !t.getScannedValue().contains(token)));
+    }
+
     private PosTerminal terminal(String code, String secret) {
         PosTerminal terminal = new PosTerminal();
         terminal.setCode(code);

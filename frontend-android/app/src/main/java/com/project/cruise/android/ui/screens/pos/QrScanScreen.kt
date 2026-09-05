@@ -33,7 +33,7 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.Executors
 
 @Composable
-fun QrScanScreen(onBackClick: () -> Unit, onSaved: () -> Unit) {
+fun QrScanScreen(onBackClick: () -> Unit, onSaved: (String) -> Unit) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val queue = remember { PosTransactionQueue(context) }
@@ -101,7 +101,7 @@ fun QrScanScreen(onBackClick: () -> Unit, onSaved: () -> Unit) {
                                                     isSaving = true
                                                     scope.launch {
                                                         runCatching { queue.enqueue(PosScanType.QR, value) }
-                                                            .onSuccess { onSaved() }
+                                                            .onSuccess { onSaved(it) }
                                                             .onFailure {
                                                                 error = "Không thể lưu giao dịch trên thiết bị"
                                                                 isSaving = false
