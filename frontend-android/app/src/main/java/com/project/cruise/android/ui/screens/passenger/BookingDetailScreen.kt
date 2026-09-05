@@ -7,16 +7,46 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import com.project.cruise.android.viewmodel.passenger.BookingHistoryState
 import java.text.NumberFormat
 import java.util.Locale
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 
 @Composable
-fun BookingDetailScreen(state: BookingHistoryState, onRetry: () -> Unit, onBack: () -> Unit) {
+fun BookingDetailScreen(
+    state: BookingHistoryState,
+    onRetry: () -> Unit,
+    onStartPayment: () -> Unit,
+    onPaymentUrlOpened: () -> Unit,
+    onPaymentReturn: () -> Unit,
+    onBack: () -> Unit
+) {
+    val uriHandler = LocalUriHandler.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    LaunchedEffect(state.paymentUrl) {
+        state.paymentUrl?.let { url ->
+            uriHandler.openUri(url)
+            onPaymentUrlOpened()
+        }
+    }
+    DisposableEffect(lifecycleOwner, state.awaitingPaymentReturn) {
+        var leftApp = false
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP && state.awaitingPaymentReturn) leftApp = true
+            if (event == Lifecycle.Event.ON_RESUME && leftApp) onPaymentReturn()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
     Column(Modifier.fillMaxSize().safeDrawingPadding().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
         TextButton(onClick = onBack) { Text("← Danh sách booking") }
@@ -30,6 +60,21 @@ fun BookingDetailScreen(state: BookingHistoryState, onRetry: () -> Unit, onBack:
             Text("Liên hệ: ${booking.primaryContactName} — ${booking.primaryContactPhone}")
             Text("Tổng tiền: ${NumberFormat.getCurrencyInstance(Locale.forLanguageTag("vi-VN")).format(booking.totalAmount)}")
             Text(if (booking.paymentId != null) "Mã thanh toán: ${booking.paymentId}" else "Chưa có giao dịch thanh toán thành công")
+
+            if (booking.status == "PENDING_PAYMENT") {
+                Button(onClick = onStartPayment, enabled = !state.creatingPayment) {
+                    if (state.creatingPayment) {
+                        CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                        Spacer(Modifier.width(8.dp))
+                    }
+                    Text("Thanh toán VNPay Sandbox")
+                }
+                if (state.awaitingPaymentReturn) {
+                    Text("Sau khi thanh toán, quay lại ứng dụng để hệ thống tự kiểm tra kết quả.",
+                        style = MaterialTheme.typography.bodySmall)
+                    OutlinedButton(onClick = onPaymentReturn) { Text("Kiểm tra kết quả ngay") }
+                }
+            }
 
             if (booking.status == "CONFIRMED") {
                 Text("QR booking", style = MaterialTheme.typography.titleMedium)

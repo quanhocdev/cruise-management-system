@@ -17,6 +17,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 
 import com.project.cruise.android.data.auth.TokenManager
 import com.project.cruise.android.data.network.ApiService
@@ -35,6 +36,7 @@ import com.project.cruise.android.viewmodel.passenger.PassengerBookingHistoryVie
 import com.project.cruise.android.viewmodel.passenger.PassengerBookingHistoryViewModelFactory
 import com.project.cruise.android.ui.screens.passenger.MyBookingsScreen
 import com.project.cruise.android.ui.screens.passenger.BookingDetailScreen
+import com.project.cruise.android.ui.screens.passenger.PaymentReturnScreen
 
 import com.project.cruise.android.ui.screens.GuestScreen
 import com.project.cruise.android.ui.screens.auth.LoginScreen
@@ -72,6 +74,7 @@ object Routes {
     const val PASSENGER_CREATE_BOOKING = "passenger_booking/{voyageId}/{roomId}"
     const val PASSENGER_BOOKINGS = "passenger_bookings"
     const val PASSENGER_BOOKING_DETAIL = "passenger_bookings/{bookingId}"
+    const val PASSENGER_PAYMENT_RESULT = "passenger_payment_result?paymentId={paymentId}&status={status}"
     const val POS_DASHBOARD = "pos_dashboard"
     const val POS_QR_SCAN = "pos_qr_scan"
     const val POS_NFC_SCAN = "pos_nfc_scan"
@@ -435,7 +438,31 @@ fun NavGraph() {
             val historyState by bookingHistoryViewModel.state.collectAsState()
             LaunchedEffect(bookingId) { bookingHistoryViewModel.loadDetail(bookingId) }
             BookingDetailScreen(historyState, onRetry = { bookingHistoryViewModel.loadDetail(bookingId) },
+                onStartPayment = bookingHistoryViewModel::startVnPay,
+                onPaymentUrlOpened = bookingHistoryViewModel::paymentUrlOpened,
+                onPaymentReturn = { bookingHistoryViewModel.refreshAfterPaymentReturn(bookingId) },
                 onBack = { navController.popBackStack() })
+        }
+
+        composable(
+            route = Routes.PASSENGER_PAYMENT_RESULT,
+            arguments = listOf(
+                navArgument("paymentId") { type = NavType.LongType; defaultValue = -1L },
+                navArgument("status") { type = NavType.StringType; defaultValue = "FAILED" }
+            ),
+            deepLinks = listOf(navDeepLink {
+                uriPattern = "cruiseapp://payment/result?paymentId={paymentId}&status={status}"
+            })
+        ) { entry ->
+            val paymentId = entry.arguments?.getLong("paymentId")?.takeIf { it > 0 }
+            val status = entry.arguments?.getString("status")
+            PaymentReturnScreen(status, paymentId) {
+                bookingHistoryViewModel.loadMine()
+                navController.navigate(Routes.PASSENGER_BOOKINGS) {
+                    popUpTo(Routes.PASSENGER_PAYMENT_RESULT) { inclusive = true }
+                    launchSingleTop = true
+                }
+            }
         }
 
         composable(Routes.PASSENGER_TOURS) {
