@@ -85,4 +85,9 @@ public class OperationTourController {
         public ResponseEntity<List<TourResponse>> getApprovedTours() {
                 return ResponseEntity.ok(operationTourService.getApprovedTours());
         }
+
+        @GetMapping("/ready")
+        public ResponseEntity<List<TourResponse>> getReadyTours() {
+                return ResponseEntity.ok(operationTourService.getReadyTours());
+        }
 }
