@@ -24,9 +24,17 @@ public class TourBookingService {
         this.tourRepository = tourRepository;
     }
 
+    @Transactional(readOnly = true)
     public TourResponse getBookingConfig(UUID tourId) {
         Tour tour = tourRepository.findById(tourId)
                 .orElseThrow(() -> new AppException("Không tìm thấy tour với ID: " + tourId, HttpStatus.NOT_FOUND));
+
+        // Nếu tour chưa cấu hình booking, gán mặc định statusBooking là NOT_OPEN để
+        // không lỗi
+        if (tour.getStatusBooking() == null) {
+            tour.setStatusBooking(TourBookingStatus.NOT_OPEN);
+        }
+
         return TourMapper.toResponse(tour);
     }
 

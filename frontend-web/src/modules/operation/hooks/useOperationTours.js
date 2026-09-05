@@ -1,40 +1,28 @@
+// src/modules/operation/hooks/useOperationTours.js
+
 import { useCallback, useState } from "react";
 import operationTourService from "../services/operationTourService";
 
 export default function useOperationTours() {
-  // =====================================================
-  // TOURS STATES
-  // =====================================================
   const [pendingTours, setPendingTours] = useState([]);
   const [approvedTours, setApprovedTours] = useState([]);
+  const [readyTours, setReadyTours] = useState([]);
 
-  // =====================================================
-  // LOADING STATES
-  // =====================================================
   const [loading, setLoading] = useState(false);
   const [approving, setApproving] = useState(false);
-
-  // =====================================================
-  // MESSAGES
-  // =====================================================
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // =====================================================
-  // TOURS API
-  // =====================================================
   const loadPendingTours = useCallback(async () => {
     setLoading(true);
     setError("");
-
     try {
       const data = await operationTourService.getPendingTours();
-      const tourList = Array.isArray(data)
+      const list = Array.isArray(data)
         ? data
         : data?.content || data?.data || [];
-      setPendingTours(tourList);
+      setPendingTours(list);
     } catch (err) {
-      console.error("LOAD OPERATION PENDING TOURS ERROR:", err);
       setError(
         err.response?.data?.message ||
           "Không thể tải danh sách Tour chờ duyệt.",
@@ -47,27 +35,37 @@ export default function useOperationTours() {
   const loadApprovedTours = useCallback(async () => {
     setLoading(true);
     setError("");
-
     try {
       const data = await operationTourService.getApprovedTours();
-      const tourList = Array.isArray(data)
+      const list = Array.isArray(data)
         ? data
         : data?.content || data?.data || [];
-      setApprovedTours(tourList);
+      setApprovedTours(list);
     } catch (err) {
-      console.error("LOAD OPERATION APPROVED TOURS ERROR:", err);
       setError(
-        err.response?.data?.message ||
-          "Không thể tải danh sách Tour đã được duyệt.",
+        err.response?.data?.message || "Không thể tải danh sách Tour đã duyệt.",
       );
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // =====================================================
-  // APPROVE TOUR
-  // =====================================================
+  const loadReadyTours = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await operationTourService.getReadyTours();
+      const list = Array.isArray(data)
+        ? data
+        : data?.content || data?.data || [];
+      setReadyTours(list);
+    } catch (err) {
+      setReadyTours([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const approveTour = useCallback(async (tourId, payload = null) => {
     setApproving(true);
     setError("");
@@ -75,16 +73,9 @@ export default function useOperationTours() {
 
     try {
       const updated = await operationTourService.approveTour(tourId, payload);
-
-      setPendingTours((prev) => prev.filter((tour) => tour.id !== tourId));
-      if (updated) {
-        setApprovedTours((prev) => [...prev, updated]);
-      }
-
       setSuccess("Duyệt Tour thành công.");
       return updated;
     } catch (err) {
-      console.error("APPROVE TOUR ERROR:", err);
       setError(err.response?.data?.message || "Không thể duyệt Tour.");
       throw err;
     } finally {
@@ -92,9 +83,6 @@ export default function useOperationTours() {
     }
   }, []);
 
-  // =====================================================
-  // CLEAR HELPERS
-  // =====================================================
   const clearMessages = useCallback(() => {
     setError("");
     setSuccess("");
@@ -103,6 +91,7 @@ export default function useOperationTours() {
   return {
     pendingTours,
     approvedTours,
+    readyTours,
     loading,
     approving,
     error,
@@ -110,6 +99,7 @@ export default function useOperationTours() {
 
     loadPendingTours,
     loadApprovedTours,
+    loadReadyTours,
     approveTour,
     clearMessages,
   };

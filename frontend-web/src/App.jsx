@@ -46,6 +46,7 @@ import OperationDashboard from "./modules/operation/pages/Dashboard";
 import OperationManagerTour from "./modules/operation/pages/ManagerTour";
 import OperationTourConfiguration from "./modules/operation/pages/OperationTourConfiguration";
 import ManagerTourPackages from "./modules/operation/pages/ManagerTourPackages";
+import OperationTourOpenBooking from "./modules/operation/pages/OperationTourOpenBooking";
 
 // Convenience imports
 import ConvenienceLayout from "./layouts/ConvenienceLayout";
@@ -150,10 +151,19 @@ export default function App() {
               <ProtectedRoute allowedRoles={["PASSENGER"]}>
                 <Routes>
                   <Route path="dashboard" element={<PassengerDashboard />} />
-                  <Route path="tours/:tourId" element={<PassengerTourDetail />} />
-                  <Route path="bookings/new" element={<CreatePassengerBooking />} />
+                  <Route
+                    path="tours/:tourId"
+                    element={<PassengerTourDetail />}
+                  />
+                  <Route
+                    path="bookings/new"
+                    element={<CreatePassengerBooking />}
+                  />
                   <Route path="bookings" element={<PassengerBookings />} />
-                  <Route path="bookings/:bookingId" element={<PassengerBookingDetail />} />
+                  <Route
+                    path="bookings/:bookingId"
+                    element={<PassengerBookingDetail />}
+                  />
 
                   <Route
                     path=""
@@ -219,6 +229,10 @@ export default function App() {
               element={<OperationTourConfiguration />}
             />
             <Route path="tour-packages" element={<ManagerTourPackages />} />
+            <Route
+              path="tour-booking-open"
+              element={<OperationTourOpenBooking />}
+            />
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
 
