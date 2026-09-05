@@ -8,4 +8,7 @@ class PassengerBookingRepository(private val api: ApiService) {
         api.getAvailableRooms(voyageId).firstOrNull { it.roomId == roomId }
 
     suspend fun create(request: CreateBookingRequest) = api.createPassengerBooking(request)
+    suspend fun getMine() = api.getMyBookings()
+    suspend fun get(id: Long) = api.getPassengerBooking(id)
+    suspend fun getQr(id: Long) = api.getBookingQr(id).bytes()
 }

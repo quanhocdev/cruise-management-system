@@ -21,10 +21,32 @@ data class CreatePassengerRequest(
 data class PassengerBookingResponse(
     val id: Long,
     val voyageId: String,
-    val bookingCode: String,
+    val bookingCode: String?,
+    val createdByUserId: Long? = null,
     val primaryContactName: String,
     val primaryContactPhone: String,
     val totalAmount: BigDecimal,
     val status: String,
-    val createdAt: String
+    val paymentId: Long? = null,
+    val createdAt: String,
+    val updatedAt: String? = null,
+    val passengers: List<PassengerVoyageBookingResponse> = emptyList()
+)
+
+data class PassengerVoyageBookingResponse(
+    val passengerVoyageId: Long,
+    val passengerId: Long,
+    val userId: Long? = null,
+    val fullName: String,
+    val dateOfBirth: String,
+    val gender: String,
+    val phoneNumber: String? = null,
+    val email: String? = null,
+    val cabinId: String? = null,
+    val passengerStatus: String,
+    val embarkationStatus: String,
+    val nfcTagId: String? = null,
+    val checkedInAt: String? = null,
+    val boardedAt: String? = null,
+    val disembarkedAt: String? = null
 )

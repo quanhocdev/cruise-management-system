@@ -16,6 +16,8 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.Path
+import okhttp3.ResponseBody
 
 interface ApiService {
 
@@ -23,6 +25,15 @@ interface ApiService {
     suspend fun createPassengerBooking(
         @Body request: com.project.cruise.android.data.dto.passenger.CreateBookingRequest
     ): com.project.cruise.android.data.dto.passenger.PassengerBookingResponse
+
+    @GET("api/v1/bookings/me")
+    suspend fun getMyBookings(): List<com.project.cruise.android.data.dto.passenger.PassengerBookingResponse>
+
+    @GET("api/v1/bookings/{id}")
+    suspend fun getPassengerBooking(@Path("id") id: Long): com.project.cruise.android.data.dto.passenger.PassengerBookingResponse
+
+    @GET("api/v1/bookings/{id}/qr")
+    suspend fun getBookingQr(@Path("id") id: Long): ResponseBody
 
     @GET("api/passenger/tours")
     suspend fun getOpenTours(): List<TourSummary>
