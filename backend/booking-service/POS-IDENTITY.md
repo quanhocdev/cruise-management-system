@@ -1,7 +1,7 @@
 # POS: nhận diện hành khách (mô phỏng)
 
-Phạm vi: nhận diện QR/NFC theo hành khách của một chuyến. Không thu tiền,
-không đổi trạng thái check-in, không tự cấp quyền sử dụng dịch vụ.
+Phạm vi: nhận diện và xác nhận check-in QR/NFC theo hành khách của một chuyến.
+Không thu tiền và không tự cấp quyền sử dụng dịch vụ.
 `SYNCED` của hàng đợi vẫn chỉ có nghĩa máy chủ đã nhận bản ghi quét.
 
 ## Chuẩn bị
@@ -39,7 +39,7 @@ Thay `7` bằng passengerVoyageId thực tế. Response HTTP 201 có `id`,
 để tạo hình QR bằng công cụ offline. QR bắt đầu bằng `POS:` và có mã ngẫu nhiên;
 backend chỉ lưu fingerprint SHA-256, không lưu chuỗi QR gốc.
 Không dùng `BOOKING:CR...` hoặc số booking để thay thế.
-Chưa có màn Admin cấp mã/in QR ở giai đoạn này.
+Trang Admin **Quản lý máy POS** hỗ trợ cấp và in QR ngay sau khi tạo.
 
 ### 3. Gắn thẻ NFC
 
@@ -79,6 +79,19 @@ Headers: `X-Terminal-Code`, `X-POS-Key` của máy.
   Khi có mạng, mở lịch sử → Xác minh hành khách hoặc bấm Xác minh lại.
   WorkManager gửi bản ghi tự động, còn xác minh hiện do người dùng yêu cầu.
 
+## Check-in sau khi nhận diện
+
+Nhân viên phải kiểm tra thông tin rồi bấm **Xác nhận check-in**; việc quét không
+tự đổi trạng thái. Android gọi `POST /api/v1/pos/check-in` với cùng headers và body
+của API nhận diện.
+
+- Lần đầu hợp lệ: `CHECKED_IN`, lưu thời gian máy chủ và mã terminal.
+- Quét/bấm lại: `ALREADY_CHECKED_IN`, không cập nhật đè thời gian ban đầu.
+- Hành khách đã lên tàu: `ALREADY_BOARDED`.
+- Credential sai, bị khóa, sai chuyến hoặc booking không hợp lệ: `REJECTED`.
+- Backend khóa bản ghi hành khách trong giao dịch để tránh hai POS check-in trùng.
+- Mất mạng không được coi là check-in thành công; kết nối lại rồi bấm thử lại.
+
 ## Dữ liệu mới và giới hạn
 
 - Bảng `pos_passenger_credentials`: fingerprint duy nhất, loại quét,
@@ -86,7 +99,7 @@ Headers: `X-Terminal-Code`, `X-POS-Key` của máy.
 - Cột nullable `pos_terminals.assigned_voyage_id`; máy cũ phải được gán chuyến.
 - Môi trường dev hiện dùng Hibernate `ddl-auto=update`: bổ sung bảng/cột,
   không yêu cầu xóa database hay volume. Production cần migration được rà riêng.
-- Đây là bước nhận diện; chưa có giỏ hàng, thu tiền, check-in, hoàn/hủy giao dịch,
+- Chưa có giỏ hàng, thu tiền POS, hoàn/hủy giao dịch,
   chứng thực thẻ chống sao chép, quản lý ca hay xác minh danh tính offline.
 - Chưa hỗ trợ thu hồi/cấp lại key máy POS và tái sử dụng thẻ cho chuyến mới.
 
