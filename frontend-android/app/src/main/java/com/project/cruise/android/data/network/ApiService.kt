@@ -21,6 +21,9 @@ import okhttp3.ResponseBody
 
 interface ApiService {
 
+    @GET("api/v1/bookings/{id}/trip-details")
+    suspend fun getBookingTripDetails(@Path("id") id: Long): com.project.cruise.android.data.dto.passenger.BookingTripDetails
+
     @POST("api/v1/bookings")
     suspend fun createPassengerBooking(
         @Body request: com.project.cruise.android.data.dto.passenger.CreateBookingRequest

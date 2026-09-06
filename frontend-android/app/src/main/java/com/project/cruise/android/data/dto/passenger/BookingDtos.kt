@@ -2,6 +2,22 @@ package com.project.cruise.android.data.dto.passenger
 
 import java.math.BigDecimal
 
+data class BookingTripDetails(
+    val voyageId: String,
+    val tourName: String?,
+    val cruiseName: String?,
+    val startDate: String?,
+    val endDate: String?,
+    val rooms: List<BookedRoomDetails> = emptyList()
+)
+
+data class BookedRoomDetails(
+    val roomId: String,
+    val roomCode: String?,
+    val deckNumber: Int?,
+    val roomTypeName: String?
+)
+
 data class CreateBookingRequest(
     val voyageId: String,
     val primaryContactName: String,

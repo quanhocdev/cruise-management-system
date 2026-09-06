@@ -15,6 +15,8 @@ data class BookingHistoryState(
     val loading: Boolean = false,
     val bookings: List<PassengerBookingResponse> = emptyList(),
     val detail: PassengerBookingResponse? = null,
+    val trip: com.project.cruise.android.data.dto.passenger.BookingTripDetails? = null,
+    val tripError: String? = null,
     val qrBytes: ByteArray? = null,
     val creatingPayment: Boolean = false,
     val paymentUrl: String? = null,
@@ -29,12 +31,21 @@ class PassengerBookingHistoryViewModel(private val repository: PassengerBookingR
     fun loadMine() = execute { _state.value = _state.value.copy(bookings = repository.getMine()) }
 
     fun loadDetail(id: Long) = execute {
+        _state.value = _state.value.copy(detail = null, qrBytes = null, trip = null, tripError = null)
         val booking = repository.get(id)
         _state.value = _state.value.copy(detail = booking, qrBytes = null)
         if (booking.status == "CONFIRMED") {
             runCatching { repository.getQr(id) }.onSuccess { bytes ->
                 _state.value = _state.value.copy(qrBytes = bytes)
             }
+        }
+        try {
+            val trip = repository.getTripDetails(id)
+            check(trip.voyageId == booking.voyageId)
+            _state.value = _state.value.copy(trip = trip)
+        } catch (error: CancellationException) { throw error }
+        catch (error: Exception) {
+            _state.value = _state.value.copy(tripError = "Chưa tải được thông tin chuyến/phòng. Bạn vẫn có thể xem booking, thanh toán và QR.")
         }
     }
 

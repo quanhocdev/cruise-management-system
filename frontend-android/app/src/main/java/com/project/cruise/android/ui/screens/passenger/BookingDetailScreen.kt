@@ -56,7 +56,17 @@ fun BookingDetailScreen(
         state.detail?.let { booking ->
             Text(booking.bookingCode ?: "Booking #${booking.id}", style = MaterialTheme.typography.titleLarge)
             Text("Trạng thái: ${bookingStatus(booking.status)}")
-            Text("Chuyến: ${booking.voyageId}")
+            Card(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Chuyến đi của tôi", style = MaterialTheme.typography.titleMedium)
+                    Text(state.trip?.tourName ?: "Thông tin tour đang cập nhật")
+                    Text("Du thuyền: ${state.trip?.cruiseName ?: "Đang cập nhật"}")
+                    Text("Ngày đi: ${tripDate(state.trip?.startDate)}")
+                    Text("Ngày về: ${tripDate(state.trip?.endDate)}")
+                    state.tripError?.let { Text(it, color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall) }
+                }
+            }
             Text("Liên hệ: ${booking.primaryContactName} — ${booking.primaryContactPhone}")
             Text("Tổng tiền: ${NumberFormat.getCurrencyInstance(Locale.forLanguageTag("vi-VN")).format(booking.totalAmount)}")
             Text(if (booking.paymentId != null) "Mã thanh toán: ${booking.paymentId}" else "Chưa có giao dịch thanh toán thành công")
@@ -90,7 +100,10 @@ fun BookingDetailScreen(
             booking.passengers.forEach { passenger ->
                 Card(Modifier.fillMaxWidth()) { Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(passenger.fullName, style = MaterialTheme.typography.titleSmall)
-                    Text("Phòng: ${passenger.cabinId ?: "Chưa gán"}")
+                    val room = state.trip?.rooms?.firstOrNull { it.roomId == passenger.cabinId }
+                    Text("Phòng: ${if (passenger.cabinId == null) "Chưa gán" else room?.roomCode ?: "Đang cập nhật"}")
+                    room?.roomTypeName?.let { Text("Loại phòng: $it") }
+                    room?.deckNumber?.let { Text("Tầng: $it") }
                     Text("Đặt chỗ: ${passenger.passengerStatus}")
                     Text("Lên tàu: ${passenger.embarkationStatus}")
                     passenger.checkedInAt?.let { Text("Check-in: $it") }
