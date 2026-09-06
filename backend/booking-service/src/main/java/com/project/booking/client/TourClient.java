@@ -27,6 +27,18 @@ public class TourClient {
         catch (Exception ex) { throw new BookingException(HttpStatus.BAD_GATEWAY, "Cannot validate voyage: " + ex.getMessage()); }
     }
 
+    public com.project.booking.dto.BookingTripDetails getTripDetails(UUID voyageId) {
+        try {
+            var result = client.get().uri("/internal/voyages/{id}/trip-details", voyageId)
+                .header("X-Internal-Api-Key", apiKey).retrieve()
+                .body(com.project.booking.dto.BookingTripDetails.class);
+            if (result == null || !voyageId.equals(result.voyageId()))
+                throw new BookingException(HttpStatus.BAD_GATEWAY, "Invalid trip details response");
+            return result;
+        } catch (BookingException ex) { throw ex; }
+        catch (Exception ex) { throw new BookingException(HttpStatus.BAD_GATEWAY, "Cannot load trip details"); }
+    }
+
     public List<TourRoomContext> getRooms(UUID voyageId) {
         try {
             TourRoomContext[] result = client.get().uri("/internal/voyages/{id}/rooms", voyageId)
