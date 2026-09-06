@@ -1,7 +1,14 @@
 // passenger/pages/Dashboard.jsx
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { CalendarDays, ClipboardList, LogOut, Search, Ship, Users } from "lucide-react";
+import {
+  CalendarDays,
+  ClipboardList,
+  LogOut,
+  Search,
+  Ship,
+  Users,
+} from "lucide-react";
 import { useAuth } from "../../../context/AuthContext";
 import passengerCatalogService from "../services/passengerCatalogService";
 import "../styles/PassengerCatalog.css";
@@ -46,14 +53,18 @@ export default function PassengerDashboard() {
     <main className="passenger-page">
       <header className="passenger-header">
         <Link className="passenger-brand" to="/passenger/dashboard">
-          <span className="brand-mark"><Ship size={25} /></span>
+          <span className="brand-mark">
+            <Ship size={25} />
+          </span>
           <span>Blue Horizon</span>
         </Link>
         <div className="passenger-account">
           <Link to="/passenger/bookings" className="ghost-button account-link">
             <ClipboardList size={17} /> Booking của tôi
           </Link>
-          <span>Xin chào, <strong>{user?.username}</strong></span>
+          <span>
+            Xin chào, <strong>{user?.username}</strong>
+          </span>
           <button type="button" onClick={logout} className="ghost-button">
             <LogOut size={17} /> Đăng xuất
           </button>
@@ -63,8 +74,15 @@ export default function PassengerDashboard() {
       <section className="catalog-hero">
         <div>
           <span className="eyebrow">HÀNH TRÌNH ĐÁNG NHỚ</span>
-          <h1>Khám phá đại dương<br />theo cách của bạn</h1>
-          <p>Chọn chuyến đi, căn phòng phù hợp và sẵn sàng tận hưởng kỳ nghỉ trên biển.</p>
+          <h1>
+            Khám phá đại dương
+            <br />
+            theo cách của bạn
+          </h1>
+          <p>
+            Chọn chuyến đi, căn phòng phù hợp và sẵn sàng tận hưởng kỳ nghỉ trên
+            biển.
+          </p>
         </div>
         <div className="hero-stat">
           <Users size={28} />
@@ -89,7 +107,9 @@ export default function PassengerDashboard() {
           </label>
         </div>
 
-        {loading && <div className="catalog-state">Đang tải các hành trình...</div>}
+        {loading && (
+          <div className="catalog-state">Đang tải các hành trình...</div>
+        )}
         {error && <div className="catalog-state error-state">{error}</div>}
         {!loading && !error && visibleTours.length === 0 && (
           <div className="catalog-state">Chưa tìm thấy tour phù hợp.</div>
@@ -102,22 +122,38 @@ export default function PassengerDashboard() {
                 {tour.cruiseImageUrl ? (
                   <img src={tour.cruiseImageUrl} alt={tour.cruiseName} />
                 ) : (
-                  <div className="tour-image-placeholder"><Ship size={52} /></div>
+                  <div className="tour-image-placeholder">
+                    <Ship size={52} />
+                  </div>
                 )}
                 <span className="tour-code">{tour.code}</span>
               </div>
               <div className="tour-card-body">
-                <p className="cruise-name"><Ship size={16} /> {tour.cruiseName}</p>
+                <p className="cruise-name">
+                  <Ship size={16} /> {tour.cruiseName}
+                </p>
                 <h3>{tour.name}</h3>
                 <p className="tour-description">
-                  {tour.description || "Một hành trình nghỉ dưỡng đáng nhớ đang chờ bạn."}
+                  {tour.description ||
+                    "Một hành trình nghỉ dưỡng đáng nhớ đang chờ bạn."}
                 </p>
                 <div className="tour-dates">
                   <CalendarDays size={18} />
-                  <span>{formatDate(tour.startDate)} — {formatDate(tour.endDate)}</span>
+                  <span>
+                    {formatDate(tour.startDate)} — {formatDate(tour.endDate)}
+                  </span>
                 </div>
-                <Link className="primary-link" to={`/passenger/tours/${tour.id}`}>
+                <Link
+                  className="primary-link"
+                  to={`/passenger/tours/${tour.id}`}
+                >
                   Xem hành trình
+                </Link>
+                <Link
+                  className="primary-link flex-grow-1 text-center"
+                  to={`/passenger/bookings/new?tourId=${tour.id}`}
+                >
+                  Đặt vé ngay
                 </Link>
               </div>
             </article>

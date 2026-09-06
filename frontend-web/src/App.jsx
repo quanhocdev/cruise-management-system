@@ -34,7 +34,7 @@ import PassengerTourDetail from "./modules/passenger/pages/TourDetail";
 import CreatePassengerBooking from "./modules/passenger/pages/CreateBooking";
 import PassengerBookings from "./modules/passenger/pages/MyBookings";
 import PassengerBookingDetail from "./modules/passenger/pages/BookingDetail";
-
+import PassengerBooking from "./modules/passenger/pages/PassengerBooking";
 // Scheduler imports
 import SchedulerLayout from "./layouts/SchedulerLayout";
 import SchedulerDashboard from "./modules/scheduler/pages/Dashboard";
@@ -157,30 +157,20 @@ export default function App() {
             path="/passenger/*"
             element={
               <ProtectedRoute allowedRoles={["PASSENGER"]}>
-                <Routes>
-                  <Route path="dashboard" element={<PassengerDashboard />} />
-                  <Route
-                    path="tours/:tourId"
-                    element={<PassengerTourDetail />}
-                  />
-                  <Route
-                    path="bookings/new"
-                    element={<CreatePassengerBooking />}
-                  />
-                  <Route path="bookings" element={<PassengerBookings />} />
-                  <Route
-                    path="bookings/:bookingId"
-                    element={<PassengerBookingDetail />}
-                  />
-
-                  <Route
-                    path=""
-                    element={<Navigate to="dashboard" replace />}
-                  />
-                </Routes>
+                <GuestLayout />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route path="dashboard" element={<PassengerDashboard />} />
+            <Route path="tours/:tourId" element={<PassengerTourDetail />} />
+            <Route path="bookings/new" element={<PassengerBooking />} />
+            <Route path="bookings" element={<PassengerBookings />} />
+            <Route
+              path="bookings/:bookingId"
+              element={<PassengerBookingDetail />}
+            />
+            <Route path="" element={<Navigate to="dashboard" replace />} />
+          </Route>
 
           {/* =====================================================
               SCHEDULER ROUTES
