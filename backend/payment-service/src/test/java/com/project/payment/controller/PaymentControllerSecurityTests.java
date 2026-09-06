@@ -4,6 +4,8 @@ import com.project.payment.config.*;
 import com.project.payment.dto.*;
 import com.project.payment.service.PaymentService;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -50,6 +52,27 @@ class PaymentControllerSecurityTests {
                 + "\"amount\":1000.50,\"method\":\"VNPAY\"}"))
             .andExpect(status().isBadRequest());
     }
+    @ParameterizedTest
+    @ValueSource(strings = {"3500000.00", "3500000.0", "3500000", "10000000000000000.00"})
+    void createPaymentAcceptsWholeVndWithDatabaseScale(String amount) throws Exception {
+        when(service.createPayment(any(), eq(7L), anyString())).thenReturn(new PaymentResponse());
+        mockMvc.perform(post("/api/v1/payments")
+            .with(jwt().jwt(j -> j.claim("userId", 7L)).authorities(new SimpleGrantedAuthority("ROLE_PASSENGER")))
+            .contentType("application/json")
+            .content(validBody().replace("1000000", amount)))
+            .andExpect(status().isCreated());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"null", "0.00", "-1.00", "3500000.01", "100000000000000000.00"})
+    void createPaymentStillRejectsInvalidAmounts(String amount) throws Exception {
+        mockMvc.perform(post("/api/v1/payments")
+            .with(jwt().jwt(j -> j.claim("userId", 7L)).authorities(new SimpleGrantedAuthority("ROLE_PASSENGER")))
+            .contentType("application/json")
+            .content(validBody().replace("1000000", amount)))
+            .andExpect(status().isBadRequest());
+    }
+
     private String validBody() {
         return "{\"referenceId\":100,\"referenceType\":\"BOOKING\","
             + "\"amount\":1000000,\"method\":\"VNPAY\"}";
