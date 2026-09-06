@@ -1,18 +1,15 @@
 // src/modules/operation/pages/ManagerTour.jsx
 
 import { useNavigate } from "react-router-dom";
-
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CheckCircle, AlertCircle } from "lucide-react";
 
-// Import các hook
 import useOperationTours from "../hooks/useOperationTours";
 import useTourCruiseAssignments from "../hooks/useTourCruiseAssignments";
 import useActivityCruiseTourAssignments from "../hooks/useActivityCruiseTourAssignments";
 import useProductTourAssignments from "../hooks/useProductTourAssignments";
 import useServiceTourAssignments from "../hooks/useServiceTourAssignments";
 
-// Import Components
 import OperationTourHeaderToolbar from "../components/OperationTourHeaderToolbar";
 import OperationTourTable from "../components/OperationTourTable";
 import CruiseSelectModal from "../components/CruiseSelectModal";
@@ -21,32 +18,28 @@ import CruiseAreaAssignmentModal from "../components/CruiseAreaAssignmentModal";
 import "../styles/ManagerTour.css";
 
 function ManagerTour() {
-  const navigate = useNavigate(); // Khai báo hook chuyển trang
+  const navigate = useNavigate();
 
-  // Hàm xử lý khi bấm Xem chi tiết
-  // Kiểm tra dữ liệu tour xem thuộc tính ID chính xác là gì (id, tripId, hay tourId)
   const handleViewTour = (tour) => {
-    // 1. Nếu trang Cấu hình cần tour.id
     const targetId = tour.id || tour.tourId || tour.tripId;
-
-    // Hoặc truyền đầy đủ param nếu trang cấu hình nhận cả 2
     navigate(`/operation/tour-configuration?tourId=${targetId}`);
   };
-  // 1. Hook quản lý Tour
+
   const {
     pendingTours,
     approvedTours,
+    readyTours,
     loading: toursLoading,
     approving,
     error: tourError,
     success: tourSuccess,
     loadPendingTours,
     loadApprovedTours,
+    loadReadyTours,
     approveTour,
     clearMessages: clearTourMessages,
   } = useOperationTours();
 
-  // 2. Hook quản lý Du thuyền
   const {
     availableCruises,
     cruiseLayout,
@@ -63,7 +56,6 @@ function ManagerTour() {
     clearMessages: clearCruiseMessages,
   } = useTourCruiseAssignments();
 
-  // 3. Hook quản lý Phân công Hoạt động
   const {
     activityAssignments,
     activityLoading,
@@ -76,7 +68,6 @@ function ManagerTour() {
     clearMessages: clearActivityMessages,
   } = useActivityCruiseTourAssignments();
 
-  // 4. Hook quản lý Phân công Sản phẩm
   const {
     productAssignments,
     productLoading,
@@ -89,7 +80,6 @@ function ManagerTour() {
     clearMessages: clearProductMessages,
   } = useProductTourAssignments();
 
-  // 5. Hook quản lý Phân công Dịch vụ
   const {
     serviceAssignments,
     serviceLoading,
@@ -102,7 +92,6 @@ function ManagerTour() {
     clearMessages: clearServiceMessages,
   } = useServiceTourAssignments();
 
-  // Gom các thông báo Lỗi & Thành công
   const error =
     tourError || cruiseError || activityError || productError || serviceError;
 
@@ -121,38 +110,39 @@ function ManagerTour() {
     clearServiceMessages();
   };
 
-  // State
   const [tourMode, setTourMode] = useState("APPROVAL_PENDING");
   const [keyword, setKeyword] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  // Modal State
   const [selectedTour, setSelectedTour] = useState(null);
   const [selectedCruiseId, setSelectedCruiseId] = useState(null);
   const [showCruiseModal, setShowCruiseModal] = useState(false);
   const [showAreaModal, setShowAreaModal] = useState(false);
   const [areaTour, setAreaTour] = useState(null);
 
-  // Initial Load
+  // Gọi tải dữ liệu đầy đủ các tab quan trọng khi vừa vào trang
   useEffect(() => {
     loadPendingTours();
     loadApprovedTours();
-  }, [loadPendingTours, loadApprovedTours]);
+    loadReadyTours();
+  }, [loadPendingTours, loadApprovedTours, loadReadyTours]);
 
-  // Gom tất cả tour đang có trong client
+  // Gom toàn bộ tour vào client state
   const allTours = useMemo(() => {
-    return [...(pendingTours || []), ...(approvedTours || [])];
-  }, [pendingTours, approvedTours]);
+    return [
+      ...(pendingTours || []), 
+      ...(approvedTours || []),
+      ...(readyTours || [])
+    ];
+  }, [pendingTours, approvedTours, readyTours]);
 
-  // Current Tours
   const currentTours = useMemo(() => {
     return allTours.filter(
       (tour) => (tour.statusTrip || tour.status) === tourMode,
     );
   }, [allTours, tourMode]);
 
-  // Đếm số lượng tour động theo từng Enum
   const statusCounts = useMemo(() => {
     return allTours.reduce((acc, tour) => {
       const status = tour.statusTrip || tour.status;
@@ -163,7 +153,6 @@ function ManagerTour() {
     }, {});
   }, [allTours]);
 
-  // Filtered Tours
   const filteredTours = useMemo(() => {
     const normalizedKeyword = keyword.trim().toLowerCase();
 
@@ -206,7 +195,6 @@ function ManagerTour() {
     });
   }, [currentTours, keyword, startDate, endDate]);
 
-  // Handlers
   const handleClearFilter = () => {
     setKeyword("");
     setStartDate("");
@@ -333,7 +321,7 @@ function ManagerTour() {
       };
 
       await approveTour(tour.id, payload);
-      await Promise.all([loadPendingTours(), loadApprovedTours()]);
+      await Promise.all([loadPendingTours(), loadApprovedTours(), loadReadyTours()]);
     } catch (err) {
       console.error("APPROVE TOUR ERROR:", err);
     }
@@ -349,7 +337,6 @@ function ManagerTour() {
     if (!confirmed) return;
 
     try {
-      console.log("Từ chối tour:", tour.id);
       await loadPendingTours();
     } catch (err) {
       console.error("REJECT TOUR ERROR:", err);
@@ -371,7 +358,6 @@ function ManagerTour() {
 
   return (
     <div className="operation-tour-page">
-      {/* TOOLBAR & FILTER CONTAINER */}
       <OperationTourHeaderToolbar
         tourMode={tourMode}
         statusCounts={statusCounts}
@@ -385,7 +371,6 @@ function ManagerTour() {
         onClearFilter={handleClearFilter}
       />
 
-      {/* ALERT MESSAGES */}
       {success && (
         <div className="operation-tour-success">
           <CheckCircle size={18} />
@@ -400,7 +385,6 @@ function ManagerTour() {
         </div>
       )}
 
-      {/* TABLE HEADER */}
       <div className="operation-tour-list-header">
         <div>
           <h2>Danh sách Tour ({tourMode})</h2>
@@ -410,7 +394,6 @@ function ManagerTour() {
         </div>
       </div>
 
-      {/* TABLE CONTENT */}
       <div className="operation-tour-content">
         <OperationTourTable
           tours={filteredTours}
@@ -424,7 +407,6 @@ function ManagerTour() {
         />
       </div>
 
-      {/* MODALS */}
       <CruiseSelectModal
         open={showCruiseModal}
         tour={selectedTour}

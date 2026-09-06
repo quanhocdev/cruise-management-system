@@ -33,9 +33,14 @@ import ServiceConfigurationTable from "../components/tour-configuration/ServiceC
 
 import { isTourItemConfigured } from "../utils/tourConfigurationUtils";
 
+import useTourBooking from "../hooks/useTourBooking";
+
 import "../styles/OperationTourConfiguration.css";
 
 const OperationTourConfiguration = () => {
+  const { getBookingConfig } = useTourBooking();
+  const [bookingConfig, setBookingConfig] = useState(null);
+
   const [searchParams] = useSearchParams();
 
   const tourId = searchParams.get("tourId");
@@ -46,13 +51,6 @@ const OperationTourConfiguration = () => {
   // FILTER
   // =========================================================
 
-  /**
-   * ALL
-   * activityCruise
-   * activityVisit
-   * product
-   * service
-   */
   const [activeFilter, setActiveFilter] = useState("ALL");
 
   // =========================================================
@@ -111,7 +109,7 @@ const OperationTourConfiguration = () => {
   const configurationTourId = tourId;
 
   // =========================================================
-  // LOAD 4 CONFIGURATIONS
+  // LOAD CONFIGURATIONS
   // =========================================================
 
   const loadConfigurations = useCallback(async () => {
@@ -131,13 +129,24 @@ const OperationTourConfiguration = () => {
     loadConfiguredServicesByTour,
   ]);
 
+  const loadBookingConfig = useCallback(async () => {
+    if (!tourId) return;
+    try {
+      const data = await getBookingConfig(tourId);
+      setBookingConfig(data);
+    } catch (err) {
+      setBookingConfig(null);
+    }
+  }, [tourId]); // Loại bỏ getBookingConfig để chống tạo vòng lặp render
+
   // =========================================================
   // INITIAL LOAD
   // =========================================================
 
   useEffect(() => {
     loadConfigurations();
-  }, [loadConfigurations]);
+    loadBookingConfig();
+  }, [tourId]); // Chỉ chạy khi tourId thay đổi, ngăn chặn lặp vô hạn
 
   // =========================================================
   // BACK
@@ -153,6 +162,7 @@ const OperationTourConfiguration = () => {
 
   const handleRefresh = () => {
     loadConfigurations();
+    loadBookingConfig();
   };
 
   // =========================================================
@@ -209,15 +219,6 @@ const OperationTourConfiguration = () => {
     );
   }
 
-  // =========================================================
-  // INITIAL LOADING
-  // =========================================================
-  //
-  // hasAnyData chỉ dùng để biết API đã trả về dữ liệu hay chưa.
-  //
-  // KHÔNG dùng biến này để xác định "đã cấu hình".
-  // =========================================================
-
   const hasAnyData =
     configuredActivities.length > 0 ||
     configuredActivityVisits.length > 0 ||
@@ -233,10 +234,6 @@ const OperationTourConfiguration = () => {
       </div>
     );
   }
-
-  // =========================================================
-  // ERROR
-  // =========================================================
 
   if (error && !hasAnyData) {
     return (
@@ -265,21 +262,6 @@ const OperationTourConfiguration = () => {
     );
   }
 
-  // =========================================================
-  // ALL ASSIGNMENTS
-  // =========================================================
-  //
-  // 4 API trả về TOÀN BỘ assignment:
-  //
-  // - Activity Cruise
-  // - Activity Visit
-  // - Product
-  // - Service
-  //
-  // Vì vậy length = tổng số được phân công,
-  // không phải tổng số đã cấu hình.
-  // =========================================================
-
   const allAssignments = [
     ...configuredActivities,
     ...configuredActivityVisits,
@@ -287,57 +269,13 @@ const OperationTourConfiguration = () => {
     ...configuredServices,
   ];
 
-  // =========================================================
-  // TOTAL ASSIGNMENTS
-  // =========================================================
-
   const totalAssignments = allAssignments.length;
-
-  // =========================================================
-  // CONFIGURED ASSIGNMENTS
-  // =========================================================
-  //
-  // WAITING_CONFIG = chưa cấu hình
-  //
-  // CONFIGURED
-  // NOT_STARTED
-  // IN_PROGRESS
-  // COMPLETED
-  // OUT_OF_STOCK
-  // DELAYED
-  // CANCELLED
-  //
-  // => đều đã vượt qua bước cấu hình.
-  // =========================================================
 
   const configuredAssignments = allAssignments.filter((item) =>
     isTourItemConfigured(item.status),
   );
 
   const configuredCount = configuredAssignments.length;
-
-  // =========================================================
-  // CONFIGURATION COMPLETE
-  // =========================================================
-  //
-  // Chỉ hoàn tất khi:
-  //
-  // 1. Tour có ít nhất một assignment
-  // 2. TẤT CẢ assignment đều đã cấu hình
-  //
-  // Ví dụ:
-  //
-  // 5 assignment
-  // 3 CONFIGURED
-  // 2 WAITING_CONFIG
-  //
-  // => false
-  //
-  // 5 assignment
-  // 5 CONFIGURED
-  //
-  // => true
-  // =========================================================
 
   const configurationComplete =
     totalAssignments > 0 && configuredCount === totalAssignments;
@@ -348,10 +286,6 @@ const OperationTourConfiguration = () => {
 
   return (
     <div className="operation-tour-configuration-page">
-      {/* =======================================================
-          HEADER
-          ======================================================= */}
-
       <div className="operation-tour-configuration-header">
         <div className="operation-tour-configuration-header-left">
           <button
@@ -384,10 +318,6 @@ const OperationTourConfiguration = () => {
         </button>
       </div>
 
-      {/* =======================================================
-          SUMMARY
-          ======================================================= */}
-
       <TourConfigurationSummary
         activityCruises={configuredActivities}
         activityVisits={configuredActivityVisits}
@@ -398,15 +328,7 @@ const OperationTourConfiguration = () => {
         onFilterChange={handleFilterChange}
       />
 
-      {/* =======================================================
-          TABLES
-          ======================================================= */}
-
       <div className="operation-tour-configuration-tables">
-        {/* =====================================================
-            ACTIVITY CRUISE
-            ===================================================== */}
-
         {(activeFilter === "ALL" || activeFilter === "activityCruise") && (
           <section
             id="activityCruise-section"
@@ -417,10 +339,6 @@ const OperationTourConfiguration = () => {
             />
           </section>
         )}
-
-        {/* =====================================================
-            ACTIVITY VISIT
-            ===================================================== */}
 
         {(activeFilter === "ALL" || activeFilter === "activityVisit") && (
           <section
@@ -433,10 +351,6 @@ const OperationTourConfiguration = () => {
           </section>
         )}
 
-        {/* =====================================================
-            PRODUCT
-            ===================================================== */}
-
         {(activeFilter === "ALL" || activeFilter === "product") && (
           <section
             id="product-section"
@@ -445,10 +359,6 @@ const OperationTourConfiguration = () => {
             <ProductConfigurationTable products={configuredProducts} />
           </section>
         )}
-
-        {/* =====================================================
-            SERVICE
-            ===================================================== */}
 
         {(activeFilter === "ALL" || activeFilter === "service") && (
           <section
@@ -460,28 +370,55 @@ const OperationTourConfiguration = () => {
         )}
       </div>
 
-      {/* =======================================================
-          CREATE PACKAGE
-          ======================================================= */}
-
       <section className="operation-tour-configuration-package">
         <div>
-          <strong>Sẵn sàng tạo gói Tour?</strong>
+          <strong>Sẵn sàng tạo gói Tour & Mở bán vé?</strong>
 
           <p>
             Khi toàn bộ Activity, Product và Service đã được cấu hình đầy đủ,
-            Operation có thể tạo các gói Tour để chuẩn bị public Tour.
+            Operation có thể tạo các gói Tour hoặc tiến hành cấu hình thời gian
+            mở bán vé cho tour này.
           </p>
         </div>
 
-        <button
-          type="button"
-          disabled={!configurationComplete}
-          className="operation-tour-configuration-create-package"
-          onClick={() => navigate(`/operation/tour-packages?tourId=${tourId}`)}
-        >
-          Tạo gói Tour
-        </button>
+        <div style={{ display: "flex", gap: "12px" }}>
+          <button
+            type="button"
+            disabled={!configurationComplete}
+            className="operation-tour-configuration-create-package"
+            onClick={() =>
+              navigate(`/operation/tour-packages?tourId=${tourId}`)
+            }
+          >
+            Tạo gói Tour
+          </button>
+
+          <button
+            type="button"
+            className="operation-tour-configuration-open-booking"
+            style={{
+              backgroundColor:
+                bookingConfig?.statusBooking &&
+                bookingConfig.statusBooking !== "NOT_OPEN"
+                  ? "#0d9488"
+                  : "#2563eb",
+              color: "#fff",
+              border: "none",
+              padding: "10px 16px",
+              borderRadius: "6px",
+              cursor: "pointer",
+              fontWeight: 500,
+            }}
+            onClick={() =>
+              navigate(`/operation/tour-booking-open?tourId=${tourId}`)
+            }
+          >
+            {bookingConfig?.statusBooking &&
+            bookingConfig.statusBooking !== "NOT_OPEN"
+              ? "Xem / Sửa cấu hình mở bán"
+              : "Mở bán vé"}
+          </button>
+        </div>
       </section>
     </div>
   );

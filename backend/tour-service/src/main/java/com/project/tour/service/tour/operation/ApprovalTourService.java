@@ -167,4 +167,15 @@ public class ApprovalTourService {
                                 .map(TourMapper::toResponse)
                                 .toList();
         }
+
+        // GET TOURS SẴN SÀNG (READY)
+        @Transactional(readOnly = true)
+        public List<TourResponse> getReadyTours() {
+                return tourRepository
+                                .findAllByStatusTripOrderByNameAsc(
+                                                TourStatusTrip.READY)
+                                .stream()
+                                .map(TourMapper::toResponse)
+                                .toList();
+        }
 }

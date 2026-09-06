@@ -48,6 +48,8 @@ api.interceptors.response.use(
     // =====================================================
 
     if (
+      url.includes("/public/") ||
+      url.includes("/auth/me") ||
       url.includes("/auth/login") ||
       url.includes("/auth/register") ||
       url.includes("/auth/activate") ||

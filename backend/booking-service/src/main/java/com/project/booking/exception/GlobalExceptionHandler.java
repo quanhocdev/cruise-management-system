@@ -1,33 +1,175 @@
 package com.project.booking.exception;
 
-import com.project.booking.dto.ApiErrorResponse;
+import com.project.booking.dto.error.ApiErrorResponse;
+
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.http.*;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.*;
-import java.time.Instant;
-import java.util.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler(BookingException.class)
-    ResponseEntity<ApiErrorResponse> booking(BookingException ex, HttpServletRequest request) {
-        return response(ex.getStatus(), ex.getMessage(), request.getRequestURI(), null);
+
+    /*
+     * =====================================================
+     * APP EXCEPTION
+     * =====================================================
+     */
+    @ExceptionHandler(AppException.class)
+    public ResponseEntity<ApiErrorResponse> handleAppException(
+            AppException exception,
+            HttpServletRequest request) {
+
+        HttpStatus status = exception.getStatus();
+
+        ApiErrorResponse response = new ApiErrorResponse();
+
+        response.setTimestamp(LocalDateTime.now());
+        response.setStatus(status.value());
+        response.setError(status.getReasonPhrase());
+        response.setMessage(exception.getMessage());
+        response.setPath(request.getRequestURI());
+        response.setValidationErrors(null);
+
+        return ResponseEntity
+                .status(status)
+                .body(response);
     }
+
+    /*
+     * =====================================================
+     * VALIDATION EXCEPTION
+     * =====================================================
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    ResponseEntity<ApiErrorResponse> validation(MethodArgumentNotValidException ex, HttpServletRequest request) {
-        Map<String, String> errors = new LinkedHashMap<>();
-        for (FieldError error : ex.getBindingResult().getFieldErrors())
-            errors.put(error.getField(), error.getDefaultMessage());
-        return response(HttpStatus.BAD_REQUEST, "Request validation failed", request.getRequestURI(), errors);
+    public ResponseEntity<ApiErrorResponse> handleValidationException(
+            MethodArgumentNotValidException exception,
+            HttpServletRequest request) {
+
+        Map<String, String> validationErrors = new LinkedHashMap<>();
+
+        for (FieldError fieldError : exception.getBindingResult().getFieldErrors()) {
+
+            validationErrors.put(
+                    fieldError.getField(),
+                    fieldError.getDefaultMessage());
+        }
+
+        ApiErrorResponse response = new ApiErrorResponse();
+
+        response.setTimestamp(LocalDateTime.now());
+        response.setStatus(HttpStatus.BAD_REQUEST.value());
+        response.setError(
+                HttpStatus.BAD_REQUEST.getReasonPhrase());
+        response.setMessage("Validation failed");
+        response.setPath(request.getRequestURI());
+        response.setValidationErrors(validationErrors);
+
+        return ResponseEntity
+                .badRequest()
+                .body(response);
     }
+
+    /*
+     * =====================================================
+     * INVALID JSON / INVALID ENUM
+     * =====================================================
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiErrorResponse> handleHttpMessageNotReadableException(
+            HttpMessageNotReadableException exception,
+            HttpServletRequest request) {
+
+        ApiErrorResponse response = new ApiErrorResponse();
+
+        response.setTimestamp(LocalDateTime.now());
+        response.setStatus(HttpStatus.BAD_REQUEST.value());
+        response.setError(
+                HttpStatus.BAD_REQUEST.getReasonPhrase());
+        response.setMessage("Invalid request body");
+        response.setPath(request.getRequestURI());
+        response.setValidationErrors(null);
+
+        return ResponseEntity
+                .badRequest()
+                .body(response);
+    }
+
+    /*
+     * =====================================================
+     * RESPONSE STATUS EXCEPTION
+     * =====================================================
+     */
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ApiErrorResponse> handleResponseStatus(
+            ResponseStatusException exception,
+            HttpServletRequest request) {
+
+        HttpStatus status = HttpStatus.valueOf(
+                exception.getStatusCode().value());
+
+        return ResponseEntity
+                .status(status)
+                .body(buildResponse(
+                        status,
+                        exception.getReason(),
+                        request.getRequestURI(),
+                        null));
+    }
+
+    /*
+     * =====================================================
+     * ALL OTHER EXCEPTIONS
+     * =====================================================
+     */
     @ExceptionHandler(Exception.class)
-    ResponseEntity<ApiErrorResponse> unexpected(Exception ex, HttpServletRequest request) {
-        return response(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred", request.getRequestURI(), null);
+    public ResponseEntity<ApiErrorResponse> handleException(
+            Exception exception,
+            HttpServletRequest request) {
+
+        exception.printStackTrace();
+
+        ApiErrorResponse response = new ApiErrorResponse();
+
+        response.setTimestamp(LocalDateTime.now());
+        response.setStatus(
+                HttpStatus.INTERNAL_SERVER_ERROR.value());
+        response.setError(
+                HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+        response.setMessage("Internal server error");
+        response.setPath(request.getRequestURI());
+        response.setValidationErrors(null);
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(response);
     }
-    private ResponseEntity<ApiErrorResponse> response(HttpStatus status, String message, String path, Map<String, String> errors) {
-        return ResponseEntity.status(status).body(new ApiErrorResponse(
-            Instant.now(), status.value(), status.getReasonPhrase(), message, path, errors));
+
+    private ApiErrorResponse buildResponse(
+            HttpStatus status,
+            String message,
+            String path,
+            Map<String, String> validationErrors) {
+
+        ApiErrorResponse response = new ApiErrorResponse();
+
+        response.setTimestamp(LocalDateTime.now());
+        response.setStatus(status.value());
+        response.setError(status.getReasonPhrase());
+        response.setMessage(message);
+        response.setPath(path);
+        response.setValidationErrors(validationErrors);
+
+        return response;
     }
 }

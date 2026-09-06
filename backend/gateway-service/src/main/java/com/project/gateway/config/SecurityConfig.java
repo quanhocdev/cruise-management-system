@@ -44,6 +44,8 @@ public class SecurityConfig {
                         "/api/auth/activate/verify",
                         "/api/auth/activate/set-password",
 
+                        "/api/public/**",
+
                         "/actuator/health",
                         "/actuator/info"
         };

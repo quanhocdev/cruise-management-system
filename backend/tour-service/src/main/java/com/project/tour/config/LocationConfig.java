@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class LocationConfig {
 
-    // Thêm Bean ObjectMapper để Spring quản lý
     @Bean
     public ObjectMapper objectMapper() {
         return new ObjectMapper();

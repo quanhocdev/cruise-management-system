@@ -1,3 +1,5 @@
+// src/modules/operation/components/OperationTourTable.jsx
+
 import {
   CheckCircle,
   Ship,
@@ -21,15 +23,15 @@ function formatDate(value) {
 function OperationTourTable({
   tours,
   loading,
-  mode = "APPROVAL_PENDING", // Mặc định khớp với key của tab
+  mode = "APPROVAL_PENDING",
   onSelectCruise,
   onApprove,
   onReject,
   onView,
   onAssignArea,
 }) {
-  // So sánh chuẩn với trạng thái APPROVAL_PENDING
   const isPending = mode === "APPROVAL_PENDING" || mode === "pending";
+  const isReady = mode === "READY";
 
   if (loading) {
     return (
@@ -44,12 +46,18 @@ function OperationTourTable({
       <div className="operation-tour-table-state empty">
         <CheckCircle size={40} />
         <h3>
-          {isPending ? "Không có Tour chờ duyệt" : "Không có dữ liệu Tour"}
+          {isPending
+            ? "Không có Tour chờ duyệt"
+            : isReady
+              ? "Không có Tour sẵn sàng"
+              : "Không có dữ liệu Tour"}
         </h3>
         <p>
           {isPending
             ? "Hiện tại không có Tour nào đang chờ Operation xử lý."
-            : "Hiện tại không có Tour nào trong danh mục này."}
+            : isReady
+              ? "Hiện tại không có Tour nào ở trạng thái sẵn sàng."
+              : "Hiện tại không có Tour nào trong danh mục này."}
         </p>
       </div>
     );
@@ -117,7 +125,6 @@ function OperationTourTable({
                         {tour.cruise?.code && <span>{tour.cruise.code}</span>}
                       </div>
 
-                      {/* Nút thay đổi tàu khi CHỜ DUYỆT, các trạng thái khác chỉ Xem chi tiết */}
                       {isPending ? (
                         <button
                           type="button"
@@ -184,7 +191,6 @@ function OperationTourTable({
                 {/* ACTION */}
                 <td>
                   <div className="operation-tour-actions">
-                    {/* Khi CHỜ DUYỆT -> Hiện Duyệt + Từ chối */}
                     {isPending ? (
                       <>
                         <button
@@ -212,7 +218,6 @@ function OperationTourTable({
                         </button>
                       </>
                     ) : (
-                      /* Các trạng thái khác -> Hiện Xem chi tiết */
                       <button
                         type="button"
                         className="operation-tour-view-button"
