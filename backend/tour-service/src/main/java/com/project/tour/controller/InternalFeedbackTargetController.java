@@ -66,7 +66,7 @@
 // private FeedbackTargetContext shore(UUID tourId, UUID targetId) {
 // VisitTour item = shoreRepository.findById(targetId).orElseThrow(() ->
 // notFound(targetId));
-// verifyTour(tourId, item.getScheduleStop().getSchedule().getTour().getId());
+// verifyTour(tourId, item.getScheduledStop().getSchedule().getTour().getId());
 // return result(tourId, "SHORE_ACTIVITY", targetId, item.getStatus() ==
 // VisitTourStatus.COMPLETED);
 // }

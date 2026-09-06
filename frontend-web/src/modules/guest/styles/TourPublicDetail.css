@@ -66,8 +66,8 @@
    ========================================================== */
 
 @media (max-width: 991.98px) {
-  .tour-detail-page h1 {
-    font-size: 1.75rem;
+  .tour-detail-page .card.shadow-sm.border-0.p-3 {
+    margin-top: 1rem;
   }
 
   .custom-tabs .nav-link {

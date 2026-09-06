@@ -1,6 +1,7 @@
 // src/modules/guest/pages/TourPublicDetail.jsx
 
-import { useParams, Link } from "react-router-dom";
+import { useState } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   Container,
   Row,
@@ -12,13 +13,47 @@ import {
   Alert,
   Tabs,
   Tab,
+  Modal,
 } from "react-bootstrap";
 import { usePublicTourDetail } from "../hooks/usePublicTours";
+import { useAuth } from "../../../context/AuthContext";
 import "../styles/TourPublicDetail.css";
 
 export default function TourPublicDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { tour, loading, error } = usePublicTourDetail(id);
+  const { user } = useAuth();
+
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
+  const handleBookingClick = () => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    if (user.role === "PASSENGER") {
+      navigate(`/passenger/bookings/new?tourId=${id}`);
+    } else {
+      alert(
+        "Tài khoản quản trị/nhân viên không sử dụng chức năng đặt tour cá nhân.",
+      );
+    }
+  };
+
+  const formatDateTime = (dateTimeStr) => {
+    if (!dateTimeStr) return "N/A";
+    const date = new Date(dateTimeStr);
+    if (isNaN(date.getTime())) return dateTimeStr;
+    return date.toLocaleString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
   if (loading) {
     return (
@@ -76,15 +111,26 @@ export default function TourPublicDetail() {
           <Col lg={4} className="text-lg-end mt-3 mt-lg-0">
             <Card className="shadow-sm border-0 p-3 bg-white rounded-4">
               <div className="text-muted small mb-1">Thời gian chuyến đi</div>
-              <div className="fw-bold text-dark mb-3">
+              <div className="fw-bold text-dark mb-2">
                 📅 {tour.startDate} đến {tour.endDate}
+              </div>
+              <div className="text-muted small mb-1 border-top pt-2">
+                Thời gian mở bán vé
+              </div>
+              <div className="small text-danger fw-semibold mb-3">
+                ⏳ {formatDateTime(tour.bookingStart)} <br />
+                đến {formatDateTime(tour.bookingEnd)}
               </div>
               <Button
                 variant="success"
                 size="lg"
                 className="w-100 rounded-pill fw-bold shadow-sm"
+                onClick={handleBookingClick}
+                disabled={tour.statusBooking !== "OPEN"}
               >
-                Đặt Tour Ngay
+                {tour.statusBooking === "OPEN"
+                  ? "Đặt Tour Ngay"
+                  : "Tạm đóng vé"}
               </Button>
             </Card>
           </Col>
@@ -140,7 +186,7 @@ export default function TourPublicDetail() {
           </Card>
         )}
 
-        {/* Các tab thông tin chi tiết: Lịch trình, Gói dịch vụ, Tiện ích tàu */}
+        {/* Các tab thông tin chi tiết */}
         <Card className="shadow-sm border-0 rounded-4 overflow-hidden">
           <Card.Body className="p-4">
             <Tabs
@@ -173,8 +219,8 @@ export default function TourPublicDetail() {
                                   , {stop.portCountry})
                                 </div>
                                 <div className="text-muted small">
-                                  Thời gian đến: {stop.arriveAt} - Rời đi:{" "}
-                                  {stop.leaveAt}
+                                  Thời gian đến: {formatDateTime(stop.arriveAt)}{" "}
+                                  - Rời đi: {formatDateTime(stop.leaveAt)}
                                 </div>
                                 {stop.portDescription && (
                                   <div className="text-muted small fst-italic">
@@ -182,7 +228,6 @@ export default function TourPublicDetail() {
                                   </div>
                                 )}
 
-                                {/* Hoạt động tham quan tại điểm dừng nếu có */}
                                 {stop.visitActivity && (
                                   <div className="mt-2 p-2 bg-white rounded border border-warning small">
                                     <span className="fw-bold text-dark">
@@ -246,7 +291,7 @@ export default function TourPublicDetail() {
                 </Row>
               </Tab>
 
-              {/* Tab Tiện ích & Hoạt động trên tàu */}
+              {/* Tab Tiện Ích & Hoạt Động Tàu */}
               <Tab eventKey="onboard" title="⚓ Tiện Ích & Hoạt Động Tàu">
                 <div className="mt-3">
                   <h6 className="fw-bold mb-3">Hoạt động giải trí trên tàu</h6>
@@ -271,10 +316,97 @@ export default function TourPublicDetail() {
                   </Row>
                 </div>
               </Tab>
+
+              {/* Tab Sản phẩm đi kèm */}
+              <Tab eventKey="products" title="🛍️ Sản Phẩm Đi Kèm">
+                <div className="mt-3">
+                  <Row xs={1} md={3} className="g-3">
+                    {tour.products && tour.products.length > 0 ? (
+                      tour.products.map((prod) => (
+                        <Col key={prod.id}>
+                          <Card className="h-100 border-0 bg-light p-3">
+                            <h6 className="fw-bold">{prod.productName}</h6>
+                            <p className="text-muted small mb-2">
+                              {prod.productDescription}
+                            </p>
+                            <span className="fw-bold text-primary small">
+                              Giá: {Number(prod.price).toLocaleString()} đ
+                            </span>
+                          </Card>
+                        </Col>
+                      ))
+                    ) : (
+                      <Col xs={12}>
+                        <p className="text-muted small mb-0">
+                          Không có sản phẩm đi kèm nào.
+                        </p>
+                      </Col>
+                    )}
+                  </Row>
+                </div>
+              </Tab>
+
+              {/* Tab Dịch vụ tiện ích */}
+              <Tab eventKey="services" title="🛎️ Dịch Vụ Tiện Ích">
+                <div className="mt-3">
+                  <Row xs={1} md={3} className="g-3">
+                    {tour.services && tour.services.length > 0 ? (
+                      tour.services.map((srv) => (
+                        <Col key={srv.id}>
+                          <Card className="h-100 border-0 bg-light p-3">
+                            <h6 className="fw-bold">{srv.serviceName}</h6>
+                            <p className="text-muted small mb-2">
+                              {srv.serviceDescription}
+                            </p>
+                            <span className="fw-bold text-primary small">
+                              Giá: {Number(srv.price).toLocaleString()} đ
+                            </span>
+                          </Card>
+                        </Col>
+                      ))
+                    ) : (
+                      <Col xs={12}>
+                        <p className="text-muted small mb-0">
+                          Không có dịch vụ tiện ích nào.
+                        </p>
+                      </Col>
+                    )}
+                  </Row>
+                </div>
+              </Tab>
             </Tabs>
           </Card.Body>
         </Card>
       </Container>
+
+      {/* Modal thông báo yêu cầu đăng nhập */}
+      <Modal
+        show={showLoginModal}
+        onHide={() => setShowLoginModal(false)}
+        centered
+      >
+        <Modal.Header closeButton className="border-0 pb-0">
+          <Modal.Title className="fw-bold">Yêu cầu đăng nhập</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="py-4">
+          Bạn cần đăng nhập để đặt vé cho hành trình này.
+        </Modal.Body>
+        <Modal.Footer className="border-0 pt-0">
+          <Button variant="light" onClick={() => setShowLoginModal(false)}>
+            Hủy
+          </Button>
+          <Button
+            variant="primary"
+            className="px-4 rounded-pill"
+            onClick={() => {
+              setShowLoginModal(false);
+              navigate("/login");
+            }}
+          >
+            Đồng ý
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }

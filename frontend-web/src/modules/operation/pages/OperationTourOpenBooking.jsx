@@ -115,8 +115,9 @@ const OperationTourOpenBooking = () => {
     try {
       setSuccessMessage(null);
       const payload = {
-        bookingStart: new Date(bookingStart).toISOString(),
-        bookingEnd: new Date(bookingEnd).toISOString(),
+        bookingStart:
+          bookingStart.length === 16 ? `${bookingStart}:00` : bookingStart,
+        bookingEnd: bookingEnd.length === 16 ? `${bookingEnd}:00` : bookingEnd,
       };
 
       if (currentStatus !== "NOT_OPEN") {

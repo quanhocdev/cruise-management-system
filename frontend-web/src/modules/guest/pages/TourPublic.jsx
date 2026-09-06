@@ -13,6 +13,8 @@ import {
   Alert,
 } from "react-bootstrap";
 import { usePublicTours } from "../hooks/usePublicTours";
+import TourStatusFilter from "../components/TourStatusFilter";
+import BookingStatusFilter from "../components/BookingStatusFilter";
 import "../styles/TourPublic.css";
 
 export default function TourPublic() {
@@ -28,6 +30,19 @@ export default function TourPublic() {
     return matchTrip && matchBooking;
   });
 
+  const formatDateTime = (dateTimeStr) => {
+    if (!dateTimeStr) return "N/A";
+    const date = new Date(dateTimeStr);
+    if (isNaN(date.getTime())) return dateTimeStr;
+    return date.toLocaleString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   return (
     <div className="tour-public-page bg-light min-vh-100 pb-5">
       {/* Banner đầu trang */}
@@ -42,106 +57,23 @@ export default function TourPublic() {
       </div>
 
       <Container>
-        {/* Bộ lọc trạng thái tour (Trạng thái chuyến đi) */}
+        {/* Bộ lọc trạng thái tour */}
         <div className="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
-          <div className="tour-filter-buttons d-flex gap-2 overflow-x-auto pb-1">
-            <Button
-              variant={filterStatus === "ALL" ? "primary" : "outline-secondary"}
-              size="sm"
-              className="rounded-pill px-3 fw-medium flex-shrink-0"
-              onClick={() => setFilterStatus("ALL")}
-            >
-              Tất cả ({tours.length})
-            </Button>
-            <Button
-              variant={
-                filterStatus === "READY" ? "success" : "outline-secondary"
-              }
-              size="sm"
-              className="rounded-pill px-3 fw-medium flex-shrink-0"
-              onClick={() => setFilterStatus("READY")}
-            >
-              Sắp diễn ra
-            </Button>
-            <Button
-              variant={
-                filterStatus === "IN_PROGRESS" ? "warning" : "outline-secondary"
-              }
-              size="sm"
-              className="rounded-pill px-3 fw-medium text-dark flex-shrink-0"
-              onClick={() => setFilterStatus("IN_PROGRESS")}
-            >
-              Đang diễn ra
-            </Button>
-            <Button
-              variant={
-                filterStatus === "COMPLETED" ? "secondary" : "outline-secondary"
-              }
-              size="sm"
-              className="rounded-pill px-3 fw-medium flex-shrink-0"
-              onClick={() => setFilterStatus("COMPLETED")}
-            >
-              Đã hoàn thành
-            </Button>
-          </div>
-
+          <TourStatusFilter
+            filterStatus={filterStatus}
+            setFilterStatus={setFilterStatus}
+            totalCount={tours.length}
+          />
           <span className="text-muted small">
             Hiển thị {filteredTours.length} tour
           </span>
         </div>
 
         {/* Bộ lọc trạng thái mở bán Booking */}
-        <div className="d-flex align-items-center gap-2 mb-4 overflow-x-auto pb-2 tour-booking-filter-wrapper">
-          <span className="text-muted small fw-semibold me-2 flex-shrink-0">
-            Trạng thái vé:
-          </span>
-          <div className="tour-booking-filter-buttons d-flex gap-2 overflow-x-auto pb-1">
-            <Button
-              variant={filterBooking === "ALL" ? "dark" : "outline-secondary"}
-              size="sm"
-              className="rounded-pill px-3 flex-shrink-0"
-              onClick={() => setFilterBooking("ALL")}
-            >
-              Tất cả vé
-            </Button>
-            <Button
-              variant={filterBooking === "OPEN" ? "success" : "outline-secondary"}
-              size="sm"
-              className="rounded-pill px-3 flex-shrink-0"
-              onClick={() => setFilterBooking("OPEN")}
-            >
-              Đang mở bán (OPEN)
-            </Button>
-            <Button
-              variant={filterBooking === "WAITING" ? "info" : "outline-secondary"}
-              size="sm"
-              className="rounded-pill px-3 text-dark flex-shrink-0"
-              onClick={() => setFilterBooking("WAITING")}
-            >
-              Sắp mở (WAITING)
-            </Button>
-            <Button
-              variant={
-                filterBooking === "NOT_OPEN" ? "warning" : "outline-secondary"
-              }
-              size="sm"
-              className="rounded-pill px-3 text-dark flex-shrink-0"
-              onClick={() => setFilterBooking("NOT_OPEN")}
-            >
-              Chưa mở (NOT_OPEN)
-            </Button>
-            <Button
-              variant={
-                filterBooking === "CLOSED" ? "secondary" : "outline-secondary"
-              }
-              size="sm"
-              className="rounded-pill px-3 flex-shrink-0"
-              onClick={() => setFilterBooking("CLOSED")}
-            >
-              Đã đóng (CLOSED)
-            </Button>
-          </div>
-        </div>
+        <BookingStatusFilter
+          filterBooking={filterBooking}
+          setFilterBooking={setFilterBooking}
+        />
 
         {/* Trạng thái tải dữ liệu */}
         {loading && (
@@ -215,7 +147,15 @@ export default function TourPublic() {
 
                   <div className="tour-info-box bg-light p-3 rounded-3 mb-3 small text-secondary">
                     <div className="mb-1">
-                      📅 <strong>Khởi hành:</strong> {tour.startDate}
+                      📅 <strong>Khởi hành:</strong> {tour.startDate} đến{" "}
+                      {tour.endDate}
+                    </div>
+                    <div className="mb-1 text-danger">
+                      ⏳ <strong>Mở đăng ký:</strong>{" "}
+                      {formatDateTime(tour.bookingStart)} <br />
+                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      <strong>Đến hạn:</strong>{" "}
+                      {formatDateTime(tour.bookingEnd)}
                     </div>
                     <div>
                       🚢 <strong>Du thuyền:</strong> {tour.cruiseName || "N/A"}

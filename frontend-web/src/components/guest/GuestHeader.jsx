@@ -1,5 +1,6 @@
 // src/components/guest/GuestHeader.jsx
-import { Link } from "react-router-dom";
+
+import { Link, useNavigate } from "react-router-dom";
 import {
   Container,
   Navbar,
@@ -7,10 +8,20 @@ import {
   Button,
   Form,
   InputGroup,
+  Dropdown,
 } from "react-bootstrap";
+import { useAuth } from "../../context/AuthContext";
+import { getRedirectPathByRole } from "../../routes/roleRoutes";
 import "../../styles/guest/GuestHeader.css";
 
 export default function GuestHeader() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
   return (
     <Navbar
       bg="white"
@@ -55,26 +66,71 @@ export default function GuestHeader() {
             </InputGroup>
           </Form>
 
-          {/* Nút hành động tài khoản */}
+          {/* Khu vực hiển thị theo trạng thái Đăng nhập */}
           <div className="d-flex align-items-center gap-2 mt-3 mt-lg-0">
-            <Button
-              as={Link}
-              to="/login"
-              variant="outline-primary"
-              size="sm"
-              className="px-3"
-            >
-              Đăng nhập
-            </Button>
-            <Button
-              as={Link}
-              to="/register"
-              variant="primary"
-              size="sm"
-              className="px-3"
-            >
-              Đăng ký
-            </Button>
+            {user ? (
+              // TRƯỜNG HỢP ĐÃ ĐĂNG NHẬP: Hiển thị tên/role và Dropdown hoặc nút Đăng xuất
+              <Dropdown align="end">
+                <Dropdown.Toggle
+                  variant="outline-primary"
+                  size="sm"
+                  className="rounded-pill px-3 fw-semibold d-flex align-items-center gap-2"
+                >
+                  <span>👤 {user.username}</span>
+                  <span className="badge bg-primary text-light small">
+                    {user.role}
+                  </span>
+                </Dropdown.Toggle>
+
+                <Dropdown.Menu className="shadow border-0 py-2 rounded-3 mt-2">
+                  {user.role === "PASSENGER" && (
+                    <Dropdown.Item
+                      as={Link}
+                      to="/passenger/bookings"
+                      className="py-2 small fw-medium"
+                    >
+                      🎫 Tour đã đặt của tôi
+                    </Dropdown.Item>
+                  )}
+                  <Dropdown.Item
+                    as={Link}
+                    to={getRedirectPathByRole(user.role)}
+                    className="py-2 small fw-medium"
+                  >
+                    📊 Trang Dashboard
+                  </Dropdown.Item>
+                  <Dropdown.Divider />
+                  <Dropdown.Item
+                    onClick={handleLogout}
+                    className="py-2 small text-danger fw-semibold"
+                  >
+                    🚪 Đăng xuất
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            ) : (
+              // TRƯỜNG HỢP CHƯA ĐĂNG NHẬP: Hiển thị nút Đăng nhập & Đăng ký
+              <>
+                <Button
+                  as={Link}
+                  to="/login"
+                  variant="outline-primary"
+                  size="sm"
+                  className="px-3"
+                >
+                  Đăng nhập
+                </Button>
+                <Button
+                  as={Link}
+                  to="/register"
+                  variant="primary"
+                  size="sm"
+                  className="px-3"
+                >
+                  Đăng ký
+                </Button>
+              </>
+            )}
           </div>
         </Navbar.Collapse>
       </Container>
