@@ -41,7 +41,11 @@ class PassengerCatalogViewModel(private val repository: PassengerCatalogReposito
             _state.value = _state.value.copy(loading = true, error = null)
             runCatching { _state.value.update() }
                 .onSuccess { _state.value = it.copy(loading = false) }
-                .onFailure { _state.value = _state.value.copy(loading = false, error = it.message ?: "Không thể tải dữ liệu") }
+                .onFailure {
+                    if (it is kotlinx.coroutines.CancellationException) throw it
+                    _state.value = _state.value.copy(loading = false,
+                        error = "Không tải được dữ liệu chuyến đi. Vui lòng thử lại.")
+                }
         }
     }
 }

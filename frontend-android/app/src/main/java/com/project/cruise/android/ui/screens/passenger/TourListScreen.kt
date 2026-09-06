@@ -35,7 +35,10 @@ fun TourListScreen(viewModel: PassengerCatalogViewModel, onBack: () -> Unit, onT
                     }
                 }
             }
-            if (!state.loading && state.tours.isEmpty()) item { Text("Hiện chưa có tour đang mở bán.") }
+            if (!state.loading && state.error == null && state.tours.isEmpty()) item { Text("Hiện chưa có tour đang mở bán.") }
+            if (state.error != null) item {
+                OutlinedButton(onClick = viewModel::loadTours, enabled = !state.loading) { Text("Thử lại") }
+            }
         }
     }
 }
