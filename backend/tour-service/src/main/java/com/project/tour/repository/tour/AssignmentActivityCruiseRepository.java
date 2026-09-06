@@ -15,6 +15,7 @@ import java.util.UUID;
 public interface AssignmentActivityCruiseRepository
                 extends JpaRepository<AssignmentActivityCruise, UUID> {
 
+        Optional<AssignmentActivityCruise> findByActivityCruiseTourId(UUID targetId);
         List<AssignmentActivityCruise> findAllByOrderByCreatedAtAsc();
 
         List<AssignmentActivityCruise> findAllByTourIdOrderByCreatedAtAsc(

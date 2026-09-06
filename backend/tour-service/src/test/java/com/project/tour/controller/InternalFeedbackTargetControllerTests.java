@@ -2,7 +2,6 @@ package com.project.tour.controller;
 
 import com.project.tour.config.*;
 import com.project.tour.model.*;
-import com.project.tour.model.enums.onboard.ActivityCruiseTourStatus;
 import com.project.tour.repository.tour.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +22,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestPropertySource(properties = {"jwt.secret=cruise-management-system-local-secret-key-2026", "internal.api-key=test-internal-key"})
 class InternalFeedbackTargetControllerTests {
     @Autowired MockMvc mockMvc;
-    @MockitoBean ActivityCruiseTourAssignmentRepository onboardRepository;
-    @MockitoBean VisitTourRepository shoreRepository;
-    @MockitoBean ProductTourAssignmentRepository productRepository;
-    @MockitoBean ServiceTourAssignmentRepository serviceRepository;
+    @MockitoBean AssignmentActivityCruiseRepository onboardRepository;
+    @MockitoBean AssignmentActivityVisitRepository shoreRepository;
+    @MockitoBean AssignmentProductRepository productRepository;
+    @MockitoBean AssignmentServiceRepository serviceRepository;
 
     private final UUID tourId = UUID.randomUUID();
     private final UUID targetId = UUID.randomUUID();
@@ -38,9 +37,9 @@ class InternalFeedbackTargetControllerTests {
 
     @Test void completedOnboardActivityInTourIsEligible() throws Exception {
         Tour tour = new Tour(); tour.setId(tourId);
-        ActivityCruiseTour activity = new ActivityCruiseTour();
-        activity.setTour(tour); activity.setStatus(ActivityCruiseTourStatus.COMPLETED);
-        when(onboardRepository.findById(targetId)).thenReturn(Optional.of(activity));
+        AssignmentActivityCruise activity = new AssignmentActivityCruise();
+        activity.setTourId(tour.getId()); activity.setStatus("COMPLETED");
+        when(onboardRepository.findByActivityCruiseTourId(targetId)).thenReturn(Optional.of(activity));
 
         mockMvc.perform(get("/internal/tours/{tourId}/feedback-targets/ONBOARD_ACTIVITY/{targetId}", tourId, targetId)
                 .header("X-Internal-Api-Key", "test-internal-key"))
@@ -51,9 +50,9 @@ class InternalFeedbackTargetControllerTests {
 
     @Test void targetFromAnotherTourIsRejected() throws Exception {
         Tour other = new Tour(); other.setId(UUID.randomUUID());
-        ActivityCruiseTour activity = new ActivityCruiseTour();
-        activity.setTour(other); activity.setStatus(ActivityCruiseTourStatus.COMPLETED);
-        when(onboardRepository.findById(targetId)).thenReturn(Optional.of(activity));
+        AssignmentActivityCruise activity = new AssignmentActivityCruise();
+        activity.setTourId(other.getId()); activity.setStatus("COMPLETED");
+        when(onboardRepository.findByActivityCruiseTourId(targetId)).thenReturn(Optional.of(activity));
 
         mockMvc.perform(get("/internal/tours/{tourId}/feedback-targets/ONBOARD_ACTIVITY/{targetId}", tourId, targetId)
                 .header("X-Internal-Api-Key", "test-internal-key"))

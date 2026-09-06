@@ -25,4 +25,4 @@ WORKDIR /app/tour-service
 RUN mvn dependency:go-offline -B
 
 # Chạy tour-service
-CMD ["mvn", "spring-boot:run"]
+CMD ["sh", "-c", "mvn -f /app/common/pom.xml install -DskipTests && mvn spring-boot:run"]

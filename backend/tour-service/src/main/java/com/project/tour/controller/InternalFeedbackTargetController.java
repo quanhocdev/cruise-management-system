@@ -3,9 +3,6 @@ package com.project.tour.controller;
 import com.project.tour.dto.tour.FeedbackTargetContext;
 import com.project.tour.exception.AppException;
 import com.project.tour.model.*;
-import com.project.tour.model.enums.convenience.*;
-import com.project.tour.model.enums.onboard.ActivityCruiseTourStatus;
-import com.project.tour.model.enums.visit.VisitTourStatus;
 import com.project.tour.repository.tour.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -18,15 +15,15 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/internal/tours/{tourId}/feedback-targets")
 public class InternalFeedbackTargetController {
-    private final ActivityCruiseTourAssignmentRepository onboardRepository;
-    private final VisitTourRepository shoreRepository;
-    private final ProductTourAssignmentRepository productRepository;
-    private final ServiceTourAssignmentRepository serviceRepository;
+    private final AssignmentActivityCruiseRepository onboardRepository;
+    private final AssignmentActivityVisitRepository shoreRepository;
+    private final AssignmentProductRepository productRepository;
+    private final AssignmentServiceRepository serviceRepository;
     private final byte[] expectedApiKey;
 
-    public InternalFeedbackTargetController(ActivityCruiseTourAssignmentRepository onboardRepository,
-            VisitTourRepository shoreRepository, ProductTourAssignmentRepository productRepository,
-            ServiceTourAssignmentRepository serviceRepository, @Value("${internal.api-key}") String apiKey) {
+    public InternalFeedbackTargetController(AssignmentActivityCruiseRepository onboardRepository,
+            AssignmentActivityVisitRepository shoreRepository, AssignmentProductRepository productRepository,
+            AssignmentServiceRepository serviceRepository, @Value("${internal.api-key}") String apiKey) {
         this.onboardRepository = onboardRepository;
         this.shoreRepository = shoreRepository;
         this.productRepository = productRepository;
@@ -49,28 +46,28 @@ public class InternalFeedbackTargetController {
     }
 
     private FeedbackTargetContext onboard(UUID tourId, UUID targetId) {
-        ActivityCruiseTour item = onboardRepository.findById(targetId)
+        AssignmentActivityCruise item = onboardRepository.findByActivityCruiseTourId(targetId)
             .orElseThrow(() -> notFound(targetId));
-        verifyTour(tourId, item.getTour().getId());
-        return result(tourId, "ONBOARD_ACTIVITY", targetId, item.getStatus() == ActivityCruiseTourStatus.COMPLETED);
+        verifyTour(tourId, item.getTourId());
+        return result(tourId, "ONBOARD_ACTIVITY", targetId, "COMPLETED".equals(item.getStatus()));
     }
 
     private FeedbackTargetContext shore(UUID tourId, UUID targetId) {
-        VisitTour item = shoreRepository.findById(targetId).orElseThrow(() -> notFound(targetId));
-        verifyTour(tourId, item.getScheduleStop().getSchedule().getTour().getId());
-        return result(tourId, "SHORE_ACTIVITY", targetId, item.getStatus() == VisitTourStatus.COMPLETED);
+        AssignmentActivityVisit item = shoreRepository.findByVisitTourId(targetId).orElseThrow(() -> notFound(targetId));
+        verifyTour(tourId, item.getTourId());
+        return result(tourId, "SHORE_ACTIVITY", targetId, "COMPLETED".equals(item.getStatus()));
     }
 
     private FeedbackTargetContext product(UUID tourId, UUID targetId) {
-        ProductTour item = productRepository.findById(targetId).orElseThrow(() -> notFound(targetId));
-        verifyTour(tourId, item.getTour().getId());
-        return result(tourId, "PRODUCT", targetId, item.getStatus() == ProductTourStatus.COMPLETED);
+        AssignmentProduct item = productRepository.findByProductTourId(targetId).orElseThrow(() -> notFound(targetId));
+        verifyTour(tourId, item.getTourId());
+        return result(tourId, "PRODUCT", targetId, "COMPLETED".equals(item.getStatus()));
     }
 
     private FeedbackTargetContext service(UUID tourId, UUID targetId) {
-        ServiceTour item = serviceRepository.findById(targetId).orElseThrow(() -> notFound(targetId));
-        verifyTour(tourId, item.getTour().getId());
-        return result(tourId, "SERVICE", targetId, item.getStatus() == ServiceTourStatus.COMPLETED);
+        AssignmentService item = serviceRepository.findByServiceTourId(targetId).orElseThrow(() -> notFound(targetId));
+        verifyTour(tourId, item.getTourId());
+        return result(tourId, "SERVICE", targetId, "COMPLETED".equals(item.getStatus()));
     }
 
     private FeedbackTargetContext result(UUID tourId, String type, UUID targetId, boolean completed) {
