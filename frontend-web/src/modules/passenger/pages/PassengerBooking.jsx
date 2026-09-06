@@ -51,7 +51,7 @@ export default function PassengerBooking() {
       idCardType: "CCCD",
       identificationNumber: "",
       documentNote: "",
-      idCardImageUrl: "",
+      idCardImage: null, // Lưu file object thực tế từ máy
     },
   ]);
 
@@ -61,7 +61,6 @@ export default function PassengerBooking() {
     }
   }, [user, loadPassengers]);
 
-  // Đặt gói mặc định nếu chỉ truyền tourId mà chưa truyền packageId
   useEffect(() => {
     if (!tourPackageId && tour?.packages && tour.packages.length > 0) {
       setTourPackageId(tour.packages[0].id);
@@ -90,7 +89,7 @@ export default function PassengerBooking() {
         idCardType: "CCCD",
         identificationNumber: "",
         documentNote: "",
-        idCardImageUrl: "",
+        idCardImage: null,
       },
     ]);
   };
@@ -113,7 +112,7 @@ export default function PassengerBooking() {
         idCardType: found.idCardType || "CCCD",
         identificationNumber: found.identificationNumber || "",
         documentNote: found.documentNote || "",
-        idCardImageUrl: found.idCardImageUrl || "",
+        idCardImage: null, // Reset file khi chọn từ danh sách đã lưu (hoặc giữ nguyên tuỳ ý)
       };
       setSelectedPassengers(updated);
     }
@@ -126,22 +125,45 @@ export default function PassengerBooking() {
       return;
     }
 
-    const payload = {
-      tourId,
-      tourPackageId,
-      primaryContactName,
-      primaryContactPhone,
-      passengers: selectedPassengers,
-    };
+    const formData = new FormData();
+    formData.append("tourId", tourId);
+    formData.append("tourPackageId", tourPackageId);
+    formData.append("primaryContactName", primaryContactName);
+    formData.append("primaryContactPhone", primaryContactPhone);
+
+    selectedPassengers.forEach((p, index) => {
+      formData.append(`passengers[${index}].fullName`, p.fullName);
+      formData.append(`passengers[${index}].dateOfBirth`, p.dateOfBirth);
+      formData.append(`passengers[${index}].gender`, p.gender);
+      if (p.phoneNumber)
+        formData.append(`passengers[${index}].phoneNumber`, p.phoneNumber);
+      if (p.email) formData.append(`passengers[${index}].email`, p.email);
+      formData.append(`passengers[${index}].idCardType`, p.idCardType);
+      formData.append(
+        `passengers[${index}].identificationNumber`,
+        p.identificationNumber,
+      );
+      if (p.documentNote)
+        formData.append(`passengers[${index}].documentNote`, p.documentNote);
+      if (p.idCardImage) {
+        formData.append(`passengers[${index}].idCardImage`, p.idCardImage);
+      }
+    });
+
+    // 👇 LOG RA CONSOLE TRÌNH DUYỆT (F12 -> Console) XEM CÓ ĐỦ DỮ LIỆU KHÔNG
+    console.log("=== CLIENT GỬI FORM DATA ===");
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
 
     try {
-      const result = await createBooking(payload, user.id);
+      const result = await createBooking(formData, user.id);
       if (result) {
         alert("Đặt vé thành công!");
         navigate(`/passenger/bookings`);
       }
     } catch (err) {
-      console.error("Lỗi khi tạo booking:", err);
+      console.error("Lỗi chi tiết từ Server trả về:", err.response || err);
     }
   };
 
@@ -439,6 +461,31 @@ export default function PassengerBooking() {
                           handlePassengerChange(index, "email", e.target.value)
                         }
                       />
+                    </Col>
+
+                    {/* Ô chọn file ảnh trực tiếp từ máy tính */}
+                    <Col md={12} className="mb-2 mt-1">
+                      <Form.Label className="small fw-semibold text-primary">
+                        📷 Tải ảnh CCCD / Giấy tờ tùy thân từ máy
+                      </Form.Label>
+
+                      <Form.Control
+                        size="sm"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            handlePassengerChange(index, "idCardImage", file);
+                          }
+                        }}
+                      />
+
+                      {p.idCardImage && (
+                        <div className="text-success small mt-1">
+                          ✓ Đã chọn file: {p.idCardImage.name}
+                        </div>
+                      )}
                     </Col>
                   </Row>
                 </div>

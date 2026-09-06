@@ -1,5 +1,7 @@
 package com.project.booking.service;
 
+import com.project.common.dto.UploadResult;
+import com.project.common.service.file.FileStorageService;
 import com.project.booking.dto.booking.*;
 import com.project.booking.dto.passenger.PassengerRequest;
 import com.project.booking.dto.AvailableRoomResponse;
@@ -23,67 +25,93 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Service
+@Transactional
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
     private final PassengerRepository passengerRepository;
     private final BookingPassengerRepository bookingPassengerRepository;
     private final BookingMapper bookingMapper;
+    private final FileStorageService fileStorageService;
 
     public BookingServiceImpl(BookingRepository bookingRepository,
             PassengerRepository passengerRepository,
             BookingPassengerRepository bookingPassengerRepository,
-            BookingMapper bookingMapper) {
+            BookingMapper bookingMapper,
+            FileStorageService fileStorageService) {
         this.bookingRepository = bookingRepository;
         this.passengerRepository = passengerRepository;
         this.bookingPassengerRepository = bookingPassengerRepository;
         this.bookingMapper = bookingMapper;
+        this.fileStorageService = fileStorageService;
     }
 
     @Override
-    @Transactional
     public synchronized BookingResponse create(CreateBookingRequest request, Long userId) {
-        BigDecimal unitPrice = BigDecimal.valueOf(1500000);
-        int passengerCount = request.passengers().size();
-        BigDecimal totalAmount = unitPrice.multiply(BigDecimal.valueOf(passengerCount));
+        try {
+            System.out.println(">>> [SERVICE] Bắt đầu xử lý create booking...");
 
-        Booking booking = new Booking();
-        booking.setCreatedByUserId(userId);
-        booking.setTourId(request.tourId());
-        booking.setTourPackageId(request.tourPackageId());
-        booking.setBookingCode(generateBookingCode());
-        booking.setNumberPassengers(passengerCount);
-        booking.setPrimaryContactName(request.primaryContactName().trim());
-        booking.setPrimaryContactPhone(request.primaryContactPhone().trim());
-        booking.setTotalAmount(totalAmount);
-        booking.setStatus(BookingStatus.PENDING_PAYMENT);
+            BigDecimal unitPrice = BigDecimal.valueOf(1500000);
+            int passengerCount = request.getPassengers().size();
+            BigDecimal totalAmount = unitPrice.multiply(BigDecimal.valueOf(passengerCount));
 
-        Booking savedBooking = bookingRepository.save(booking);
+            Booking booking = new Booking();
+            booking.setCreatedByUserId(userId);
+            booking.setTourId(UUID.fromString(request.getTourId()));
+            booking.setTourPackageId(UUID.fromString(request.getTourPackageId()));
+            booking.setBookingCode(generateBookingCode());
+            booking.setNumberPassengers(passengerCount);
+            booking.setPrimaryContactName(request.getPrimaryContactName().trim());
+            booking.setPrimaryContactPhone(request.getPrimaryContactPhone().trim());
+            booking.setTotalAmount(totalAmount);
+            booking.setStatus(BookingStatus.PENDING_PAYMENT);
 
-        for (PassengerRequest pReq : request.passengers()) {
-            Passenger passenger = new Passenger();
-            passenger.setUserId(userId);
-            passenger.setFullName(pReq.fullName().trim());
-            passenger.setDateOfBirth(pReq.dateOfBirth());
-            passenger.setGender(pReq.gender().trim());
-            passenger.setPhoneNumber(pReq.phoneNumber());
-            passenger.setEmail(pReq.email());
-            passenger.setIdCardType(pReq.idCardType());
-            passenger.setIdentificationNumber(pReq.identificationNumber().trim());
-            passenger.setDocumentNote(pReq.documentNote());
-            passenger.setIdCardImageUrl(pReq.idCardImageUrl());
+            Booking savedBooking = bookingRepository.save(booking);
+            System.out.println(">>> [SERVICE] Đã lưu xong Booking ID: " + savedBooking.getId());
 
-            Passenger savedPassenger = passengerRepository.save(passenger);
+            for (int i = 0; i < request.getPassengers().size(); i++) {
+                PassengerRequest pReq = request.getPassengers().get(i);
+                System.out.println(">>> [SERVICE] Đang xử lý hành khách thứ " + (i + 1) + ": " + pReq.getFullName());
 
-            BookingPassenger link = new BookingPassenger();
-            link.setBooking(savedBooking);
-            link.setPassenger(savedPassenger);
-            link.setCheckinStatus("PENDING");
-            bookingPassengerRepository.save(link);
+                Passenger passenger = new Passenger();
+                passenger.setUserId(userId);
+                passenger.setFullName(pReq.getFullName() != null ? pReq.getFullName().trim() : null);
+                passenger.setDateOfBirth(pReq.getDateOfBirth());
+                passenger.setGender(pReq.getGender() != null ? pReq.getGender().trim() : null);
+                passenger.setPhoneNumber(pReq.getPhoneNumber());
+                passenger.setEmail(pReq.getEmail());
+                passenger.setIdCardType(pReq.getIdCardType());
+                passenger.setIdentificationNumber(
+                        pReq.getIdentificationNumber() != null ? pReq.getIdentificationNumber().trim() : null);
+                passenger.setDocumentNote(pReq.getDocumentNote());
+
+                if (pReq.getIdCardImage() != null && !pReq.getIdCardImage().isEmpty()) {
+                    System.out.println(">>> [SERVICE] Đang upload ảnh cho hành khách " + pReq.getFullName());
+                    UploadResult uploadResult = fileStorageService.saveMultipart(
+                            pReq.getIdCardImage(),
+                            "passengers");
+                    passenger.setIdCardImageUrl(uploadResult.getUrl());
+                    passenger.setIdCardImagePublicId(uploadResult.getPublicId());
+                }
+
+                Passenger savedPassenger = passengerRepository.save(passenger);
+
+                BookingPassenger link = new BookingPassenger();
+                link.setBooking(savedBooking);
+                link.setPassenger(savedPassenger);
+                link.setCheckinStatus("PENDING");
+                bookingPassengerRepository.save(link);
+            }
+
+            List<BookingPassenger> links = bookingPassengerRepository
+                    .findAllByBooking_IdOrderByIdAsc(savedBooking.getId());
+            return bookingMapper.toResponse(savedBooking, links);
+
+        } catch (Exception e) {
+            System.err.println("❌ LỖI NGHIÊM TRỌNG BÊN TRONG BOOKING SERVICE:");
+            e.printStackTrace(); // In toàn bộ lỗi ra đây
+            throw e;
         }
-
-        List<BookingPassenger> links = bookingPassengerRepository.findAllByBooking_IdOrderByIdAsc(savedBooking.getId());
-        return bookingMapper.toResponse(savedBooking, links);
     }
 
     @Override
@@ -111,7 +139,6 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional
     public BookingResponse cancel(Long id, Long userId) {
         Booking booking = findBookingById(id);
         if (!Objects.equals(booking.getCreatedByUserId(), userId)) {
@@ -136,7 +163,6 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional
     public int sendDepartureReminders(LocalDate departureDate) {
         return 0;
     }

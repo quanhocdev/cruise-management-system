@@ -23,23 +23,11 @@ const passengerService = {
   },
 
   /**
-   * POST /api/passengers?userId=...
-   */
-  create: async (data, userId) => {
-    const response = await api.post(BASE_URL, data, {
-      params: { userId },
-      headers: { "Content-Type": "application/json" },
-    });
-    return response.data?.data ?? response.data;
-  },
-
-  /**
    * PATCH /api/passengers/{id}
    */
   update: async (id, data) => {
-    const response = await api.patch(`${BASE_URL}/${id}`, data, {
-      headers: { "Content-Type": "application/json" },
-    });
+    // Không ép Content-Type để Axios tự động xử lý boundary cho FormData (chứa ảnh CCCD)
+    const response = await api.patch(`${BASE_URL}/${id}`, data);
     return response.data?.data ?? response.data;
   },
 };

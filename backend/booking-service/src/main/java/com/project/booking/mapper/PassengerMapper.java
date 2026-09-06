@@ -13,15 +13,15 @@ public class PassengerMapper {
             return null;
         }
         Passenger passenger = new Passenger();
-        passenger.setFullName(request.fullName().trim());
-        passenger.setDateOfBirth(request.dateOfBirth());
-        passenger.setGender(request.gender().trim());
-        passenger.setPhoneNumber(request.phoneNumber());
-        passenger.setEmail(request.email());
-        passenger.setIdCardType(request.idCardType());
-        passenger.setIdentificationNumber(request.identificationNumber().trim());
-        passenger.setDocumentNote(request.documentNote());
-        passenger.setIdCardImageUrl(request.idCardImageUrl());
+        passenger.setFullName(request.getFullName() != null ? request.getFullName().trim() : null);
+        passenger.setDateOfBirth(request.getDateOfBirth());
+        passenger.setGender(request.getGender() != null ? request.getGender().trim() : null);
+        passenger.setPhoneNumber(request.getPhoneNumber());
+        passenger.setEmail(request.getEmail());
+        passenger.setIdCardType(request.getIdCardType());
+        passenger.setIdentificationNumber(
+                request.getIdentificationNumber() != null ? request.getIdentificationNumber().trim() : null);
+        passenger.setDocumentNote(request.getDocumentNote());
         return passenger;
     }
 

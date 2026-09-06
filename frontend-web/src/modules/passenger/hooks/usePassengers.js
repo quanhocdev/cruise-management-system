@@ -28,22 +28,6 @@ export default function usePassengers() {
     }
   }, []);
 
-  const createPassenger = useCallback(async (data, userId) => {
-    setSubmitting(true);
-    setError("");
-    setSuccess("");
-    try {
-      const created = await passengerService.create(data, userId);
-      setSuccess("Thêm hành khách thành công.");
-      return created;
-    } catch (err) {
-      setError(err.response?.data?.message || "Không thể thêm hành khách.");
-      throw err;
-    } finally {
-      setSubmitting(false);
-    }
-  }, []);
-
   const updatePassenger = useCallback(async (id, data) => {
     setSubmitting(true);
     setError("");
@@ -75,8 +59,7 @@ export default function usePassengers() {
     error,
     success,
     loadPassengers,
-    createPassenger,
-    updatePassenger,
+    updatePassenger, // Đã xóa createPassenger vì tạo mới được gom chung vào booking
     clearMessages,
   };
 }

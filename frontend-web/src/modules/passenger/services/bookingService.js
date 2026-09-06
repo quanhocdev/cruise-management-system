@@ -28,9 +28,9 @@ const bookingService = {
    * POST /api/passengers/bookings?userId=...
    */
   create: async (data, userId) => {
+    // QUAN TRỌNG: Xóa headers application/json để dữ liệu FormData (gồm danh sách hành khách + file ảnh) gửi lên backend được xử lý đúng chuẩn multipart
     const response = await api.post(BASE_URL, data, {
       params: { userId },
-      headers: { "Content-Type": "application/json" },
     });
     return response.data?.data ?? response.data;
   },

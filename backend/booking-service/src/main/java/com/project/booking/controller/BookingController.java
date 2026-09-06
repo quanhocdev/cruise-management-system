@@ -4,6 +4,7 @@ import com.project.booking.dto.booking.BookingResponse;
 import com.project.booking.dto.booking.CreateBookingRequest;
 import com.project.booking.service.BookingService;
 import jakarta.validation.Valid;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -29,9 +30,19 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.get(id, userId, privileged));
     }
 
-    @PostMapping
-    public ResponseEntity<BookingResponse> create(@Valid @RequestBody CreateBookingRequest request,
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> create(
+            @ModelAttribute CreateBookingRequest request,
             @RequestParam Long userId) {
+
+        System.out.println("==========================================");
+        System.out.println(">>> [CONTROLLER] ĐÃ NHẬN ĐƯỢC REQUEST ĐẶT VÉ!");
+        System.out.println(">>> User ID: " + userId);
+        System.out.println(">>> Tour ID: " + (request != null ? request.getTourId() : "NULL REQUEST"));
+        System.out.println(">>> Số lượng hành khách: "
+                + (request != null && request.getPassengers() != null ? request.getPassengers().size() : 0));
+        System.out.println("==========================================");
+
         return ResponseEntity.ok(bookingService.create(request, userId));
     }
 
