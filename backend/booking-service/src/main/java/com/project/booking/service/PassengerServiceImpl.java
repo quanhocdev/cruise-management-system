@@ -2,14 +2,16 @@ package com.project.booking.service;
 
 import com.project.booking.dto.passenger.PassengerRequest;
 import com.project.booking.dto.passenger.PassengerResponse;
-import com.project.booking.exception.BookingException;
+import com.project.booking.exception.AppException;
 import com.project.booking.mapper.PassengerMapper;
 import com.project.booking.model.Passenger;
+import com.project.booking.model.enums.BookingStatus;
 import com.project.booking.repository.BookingPassengerRepository;
 import com.project.booking.repository.PassengerRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 @Service
@@ -45,7 +47,7 @@ public class PassengerServiceImpl implements PassengerService {
     @Transactional(readOnly = true)
     public PassengerResponse getPassengerById(Long id) {
         Passenger passenger = passengerRepository.findById(id)
-                .orElseThrow(() -> new BookingException(HttpStatus.NOT_FOUND, "Passenger not found: " + id));
+                .orElseThrow(() -> new AppException("Passenger not found: " + id, HttpStatus.NOT_FOUND));
         return passengerMapper.toResponse(passenger);
     }
 
@@ -62,16 +64,15 @@ public class PassengerServiceImpl implements PassengerService {
     @Transactional
     public PassengerResponse updatePassenger(Long id, PassengerRequest request) {
         Passenger passenger = passengerRepository.findById(id)
-                .orElseThrow(() -> new BookingException(HttpStatus.NOT_FOUND, "Passenger not found: " + id));
+                .orElseThrow(() -> new AppException("Passenger not found: " + id, HttpStatus.NOT_FOUND));
 
-        // Ràng buộc: Chỉ được đổi thông tin khi hành khách thuộc đơn hàng đang ở trạng
-        // thái CONFIRMED
+        // Ràng buộc: Chỉ sửa thông tin khi hành khách thuộc đơn ở trạng thái CONFIRMED
         boolean isConfirmed = bookingPassengerRepository.existsByPassenger_IdAndBooking_Status(id,
-                com.project.booking.model.enums.BookingStatus.CONFIRMED);
+                BookingStatus.CONFIRMED);
 
         if (!isConfirmed) {
-            throw new BookingException(HttpStatus.CONFLICT,
-                    "Passenger information can only be modified when attached to a CONFIRMED booking");
+            throw new AppException("Passenger information can only be modified when attached to a CONFIRMED booking",
+                    HttpStatus.CONFLICT);
         }
 
         passenger.setFullName(request.fullName().trim());
