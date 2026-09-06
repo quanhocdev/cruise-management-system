@@ -23,11 +23,6 @@ spring:
               predicates:
                 - Path=/api/auth/**,/api/admin/staff/**
 
-            - id: booking-service
-              uri: ${BOOKING_SERVICE_URL:http://booking-service:8082}
-              predicates:
-                - Path=/api/v1/bookings/**,/api/v1/check-in/**,/api/v1/pos/**,/api/admin/pos-terminals/**
-
             - id: payment-service
               uri: ${PAYMENT_SERVICE_URL:http://payment-service:8085}
               predicates:
@@ -113,6 +108,14 @@ spring:
               uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
               predicates:
                 - Path=/api/passenger/**
+
+            # ==========================
+            # BOOKING SERVICE - PASSENGER
+            # ==========================
+            - id: booking-service
+              uri: ${BOOKING_SERVICE_URL:http://booking-service:8082}
+              predicates:
+                - Path=/api/passengers/**
 
           # ==========================
           # CORS
