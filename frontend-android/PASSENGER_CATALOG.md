@@ -4,6 +4,20 @@ Trong Android: **Booking của tôi → Chi tiết booking → Dịch vụ & s�
 Chọn nhóm, bấm một mục để xem ảnh, mô tả, giá, khu vực và thông tin dịch vụ.
 Đây là màn chỉ đọc, không tạo đơn hay giao dịch thanh toán.
 
+## Bản nháp giao diện đặt đơn
+
+Trong chi tiết dịch vụ/sản phẩm có form chọn hành khách thuộc booking, số lượng
+sản phẩm (1–99), ghi chú và xem lại tạm tính. Dịch vụ chỉ soạn 1 lượt cho một
+hành khách; chưa có khung giờ từ API nên không tự tạo lịch phục vụ.
+
+Nội dung nháp chỉ là state của giao diện, không phải đơn đã lưu. Rời màn có thể
+mất nháp. Nút gửi bị khóa vì backend hiện chưa cung cấp API đặt đơn. Không gọi
+POS sync, không gọi VNPay và không ghi nhận chi phí từ bản nháp này.
+
+Test thêm: chọn khách, nhập số lượng sai/đúng, xem lại, sửa, xóa nháp; không được
+hiện thông báo đặt thành công. Mục hết hàng/kết thúc hoặc thiếu giá không được
+chuyển tới bước xem lại hợp lệ. Tạm tính không thay thế giá xác nhận phía server.
+
 ## Nguồn dữ liệu
 
 - Dùng trường `catalog` của `GET /api/v1/bookings/{id}/trip-details`.

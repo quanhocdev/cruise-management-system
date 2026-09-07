@@ -46,6 +46,9 @@ fun BookingCatalogDialog(state: BookingHistoryState, onRetry: () -> Unit, onClos
                             item { Text("Số khách tối đa: ${detail.maxPassengers?.takeIf { it > 0 } ?: "Đang cập nhật"}") }
                         }
                         item { Text("Thông tin đồng bộ theo chuyến; chưa phản ánh tồn kho hoặc chỗ trống hiện tại.") }
+                        state.detail?.let { booking ->
+                            item { CatalogOrderDraftForm(detail, booking) }
+                        }
                     }
                     else -> {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -69,7 +72,7 @@ fun BookingCatalogDialog(state: BookingHistoryState, onRetry: () -> Unit, onClos
                         }
                     }
                 }
-                Text("Hiện chỉ xem thông tin, chưa hỗ trợ đặt mua.", style = MaterialTheme.typography.bodySmall)
+                Text("Có thể soạn bản nháp; chưa gửi đơn hoặc thanh toán.", style = MaterialTheme.typography.bodySmall)
                 OutlinedButton(onClick = onRetry, enabled = !state.loading) { Text("Tải lại danh mục") }
             }
         }
