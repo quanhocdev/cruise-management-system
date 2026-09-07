@@ -51,15 +51,14 @@ export default function PassengerBooking() {
       idCardType: "CCCD",
       identificationNumber: "",
       documentNote: "",
-      idCardImage: null, // Lưu file object thực tế từ máy
+      idCardImage: null,
     },
   ]);
 
   useEffect(() => {
-    if (user?.id) {
-      loadPassengers(user.id);
-    }
-  }, [user, loadPassengers]);
+    // Không cần truyền user.id nữa, backend tự lấy qua token
+    loadPassengers();
+  }, [loadPassengers]);
 
   useEffect(() => {
     if (!tourPackageId && tour?.packages && tour.packages.length > 0) {
@@ -112,7 +111,7 @@ export default function PassengerBooking() {
         idCardType: found.idCardType || "CCCD",
         identificationNumber: found.identificationNumber || "",
         documentNote: found.documentNote || "",
-        idCardImage: null, // Reset file khi chọn từ danh sách đã lưu (hoặc giữ nguyên tuỳ ý)
+        idCardImage: null,
       };
       setSelectedPassengers(updated);
     }
@@ -150,14 +149,9 @@ export default function PassengerBooking() {
       }
     });
 
-    // 👇 LOG RA CONSOLE TRÌNH DUYỆT (F12 -> Console) XEM CÓ ĐỦ DỮ LIỆU KHÔNG
-    console.log("=== CLIENT GỬI FORM DATA ===");
-    for (let [key, value] of formData.entries()) {
-      console.log(key, value);
-    }
-
     try {
-      const result = await createBooking(formData, user.id);
+      // ❌ Đã bỏ user.id ở đây, backend tự trích xuất qua Token
+      const result = await createBooking(formData);
       if (result) {
         alert("Đặt vé thành công!");
         navigate(`/passenger/bookings`);
@@ -220,7 +214,6 @@ export default function PassengerBooking() {
                 </Form.Select>
               </Form.Group>
 
-              {/* Phần hiển thị chi tiết thông tin gói tour đang được chọn */}
               {selectedPackageInfo && (
                 <div className="p-3 bg-light rounded-3 border mt-3">
                   <div className="d-flex justify-content-between align-items-center mb-1">
@@ -463,7 +456,6 @@ export default function PassengerBooking() {
                       />
                     </Col>
 
-                    {/* Ô chọn file ảnh trực tiếp từ máy tính */}
                     <Col md={12} className="mb-2 mt-1">
                       <Form.Label className="small fw-semibold text-primary">
                         📷 Tải ảnh CCCD / Giấy tờ tùy thân từ máy

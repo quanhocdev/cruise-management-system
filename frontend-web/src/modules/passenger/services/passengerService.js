@@ -5,12 +5,10 @@ const BASE_URL = "/passengers";
 
 const passengerService = {
   /**
-   * GET /api/passengers?userId=...
+   * GET /api/passengers
    */
-  getAll: async (userId) => {
-    const response = await api.get(BASE_URL, {
-      params: { userId },
-    });
+  getAll: async () => {
+    const response = await api.get(BASE_URL);
     return response.data?.data ?? response.data;
   },
 
@@ -26,7 +24,6 @@ const passengerService = {
    * PATCH /api/passengers/{id}
    */
   update: async (id, data) => {
-    // Không ép Content-Type để Axios tự động xử lý boundary cho FormData (chứa ảnh CCCD)
     const response = await api.patch(`${BASE_URL}/${id}`, data);
     return response.data?.data ?? response.data;
   },

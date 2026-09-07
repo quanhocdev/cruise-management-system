@@ -5,8 +5,9 @@ spring:
   application:
     name: gateway-service
 
-  codec:
-    max-in-memory-size: 10MB
+  webflux:
+    codec:
+      max-in-memory-size: 10MB
 
   # TẮT BANNER ASCII SPRING BOOT
   main:

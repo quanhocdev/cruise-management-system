@@ -14,10 +14,10 @@ RUN mvn -f common/pom.xml clean install -DskipTests
 # ==========================
 # 2. Copy và build Booking Service
 # ==========================
-COPY booking/pom.xml ./booking/pom.xml
-COPY booking/src ./booking/src
+COPY booking-service/pom.xml ./booking-service/pom.xml
+COPY booking-service/src ./booking-service/src
 
-WORKDIR /app/booking
+WORKDIR /app/booking-service
 
 # Tải dependency của booking-service
 RUN mvn dependency:go-offline -B

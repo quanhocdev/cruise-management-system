@@ -8,12 +8,11 @@ export default function usePassengers() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const loadPassengers = useCallback(async (userId) => {
-    if (!userId) return;
+  const loadPassengers = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
-      const data = await passengerService.getAll(userId);
+      const data = await passengerService.getAll();
       const list = Array.isArray(data)
         ? data
         : data?.content || data?.data || [];
@@ -59,7 +58,7 @@ export default function usePassengers() {
     error,
     success,
     loadPassengers,
-    updatePassenger, // Đã xóa createPassenger vì tạo mới được gom chung vào booking
+    updatePassenger,
     clearMessages,
   };
 }

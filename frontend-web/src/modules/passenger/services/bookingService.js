@@ -5,43 +5,37 @@ const BASE_URL = "/passengers/bookings";
 
 const bookingService = {
   /**
-   * GET /api/passengers/bookings?userId=...
+   * GET /api/passengers/bookings
    */
-  getMine: async (userId) => {
-    const response = await api.get(BASE_URL, {
-      params: { userId },
-    });
+  getMine: async () => {
+    const response = await api.get(BASE_URL);
     return response.data?.data ?? response.data;
   },
 
   /**
-   * GET /api/passengers/bookings/{id}?userId=...&privileged=...
+   * GET /api/passengers/bookings/{id}
    */
-  getById: async (id, userId, privileged = false) => {
+  getById: async (id, privileged = false) => {
     const response = await api.get(`${BASE_URL}/${id}`, {
-      params: { userId, privileged },
+      params: { privileged },
     });
     return response.data?.data ?? response.data;
   },
 
   /**
-   * POST /api/passengers/bookings?userId=...
+   * POST /api/passengers/bookings
    */
-  create: async (data, userId) => {
-    // QUAN TRỌNG: Xóa headers application/json để dữ liệu FormData (gồm danh sách hành khách + file ảnh) gửi lên backend được xử lý đúng chuẩn multipart
-    const response = await api.post(BASE_URL, data, {
-      params: { userId },
-    });
+  create: async (data) => {
+    // Không còn truyền userId qua params nữa, backend tự bóc từ token
+    const response = await api.post(BASE_URL, data);
     return response.data?.data ?? response.data;
   },
 
   /**
-   * PATCH /api/passengers/bookings/{id}/cancel?userId=...
+   * PATCH /api/passengers/bookings/{id}/cancel
    */
-  cancel: async (id, userId) => {
-    const response = await api.patch(`${BASE_URL}/${id}/cancel`, null, {
-      params: { userId },
-    });
+  cancel: async (id) => {
+    const response = await api.patch(`${BASE_URL}/${id}/cancel`);
     return response.data?.data ?? response.data;
   },
 };

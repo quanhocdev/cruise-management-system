@@ -9,12 +9,11 @@ export default function useBookings() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const loadMyBookings = useCallback(async (userId) => {
-    if (!userId) return;
+  const loadMyBookings = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
-      const data = await bookingService.getMine(userId);
+      const data = await bookingService.getMine();
       const list = Array.isArray(data)
         ? data
         : data?.content || data?.data || [];
@@ -29,34 +28,31 @@ export default function useBookings() {
     }
   }, []);
 
-  const loadBookingById = useCallback(
-    async (id, userId, privileged = false) => {
-      if (!id || !userId) return;
-      setLoading(true);
-      setError("");
-      try {
-        const data = await bookingService.getById(id, userId, privileged);
-        setCurrentBooking(data);
-        return data;
-      } catch (err) {
-        setError(
-          err.response?.data?.message ||
-            "Không thể tải thông tin chi tiết đơn hàng.",
-        );
-        setCurrentBooking(null);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [],
-  );
+  const loadBookingById = useCallback(async (id, privileged = false) => {
+    if (!id) return;
+    setLoading(true);
+    setError("");
+    try {
+      const data = await bookingService.getById(id, privileged);
+      setCurrentBooking(data);
+      return data;
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          "Không thể tải thông tin chi tiết đơn hàng.",
+      );
+      setCurrentBooking(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const createBooking = useCallback(async (data, userId) => {
+  const createBooking = useCallback(async (data) => {
     setSubmitting(true);
     setError("");
     setSuccess("");
     try {
-      const created = await bookingService.create(data, userId);
+      const created = await bookingService.create(data);
       setSuccess("Đặt tour thành công.");
       return created;
     } catch (err) {
@@ -67,12 +63,12 @@ export default function useBookings() {
     }
   }, []);
 
-  const cancelBooking = useCallback(async (id, userId) => {
+  const cancelBooking = useCallback(async (id) => {
     setSubmitting(true);
     setError("");
     setSuccess("");
     try {
-      const updated = await bookingService.cancel(id, userId);
+      const updated = await bookingService.cancel(id);
       setSuccess("Hủy đơn hàng thành công.");
       return updated;
     } catch (err) {
