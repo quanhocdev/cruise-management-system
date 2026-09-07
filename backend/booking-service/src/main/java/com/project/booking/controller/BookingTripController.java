@@ -33,6 +33,6 @@ public class BookingTripController {
             .map(p -> p.cabinId()).filter(Objects::nonNull).collect(Collectors.toSet());
         return new BookingTripDetails(trip.voyageId(), trip.tourName(), trip.cruiseName(),
             trip.startDate(), trip.endDate(), trip.rooms() == null ? java.util.List.of() : trip.rooms().stream()
-                .filter(r -> assignedRooms.contains(r.roomId())).toList());
+                .filter(r -> assignedRooms.contains(r.roomId())).toList(), trip.itinerary());
     }
 }

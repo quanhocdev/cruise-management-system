@@ -3,6 +3,9 @@ package com.project.tour.controller.passenger;
 import com.project.tour.exception.AppException;
 import com.project.tour.repository.tour.TourRepository;
 import com.project.tour.repository.room.RoomRepository;
+import com.project.tour.repository.tour.schedule.ScheduleRepository;
+import com.project.tour.model.enums.ScheduleStatus;
+import com.project.tour.dto.passenger.PassengerItineraryDayResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,11 +21,13 @@ import java.util.UUID;
 public class InternalTripDetailsController {
     private final TourRepository tours;
     private final RoomRepository rooms;
+    private final ScheduleRepository schedules;
     private final byte[] key;
 
-    public InternalTripDetailsController(TourRepository tours, RoomRepository rooms,
+    public InternalTripDetailsController(TourRepository tours, RoomRepository rooms, ScheduleRepository schedules,
             @Value("${internal.api-key}") String key) {
         this.tours = tours; this.rooms = rooms;
+        this.schedules = schedules;
         this.key = key.getBytes(StandardCharsets.UTF_8);
     }
 
@@ -40,10 +45,14 @@ public class InternalTripDetailsController {
             .stream().map(r -> new RoomDetails(r.getId(), r.getCode(),
                 r.getCruiseDeck().getDeckNumber(), r.getRoomType().getName())).toList();
         return new TripDetails(id, tour.getName(), cruise == null ? null : cruise.getName(),
-            tour.getStartDate(), tour.getEndDate(), details);
+            tour.getStartDate(), tour.getEndDate(), details,
+            schedules.findAllByTour_IdAndStatusOrderByDayNumberAsc(id, ScheduleStatus.ACTIVE).stream()
+                .map(s -> new PassengerItineraryDayResponse(s.getId(), s.getDayNumber(), s.getRealDay(),
+                    s.getName(), s.getDescription())).toList());
     }
 
     public record RoomDetails(UUID roomId, String roomCode, Integer deckNumber, String roomTypeName) {}
     public record TripDetails(UUID voyageId, String tourName, String cruiseName,
-                              LocalDate startDate, LocalDate endDate, List<RoomDetails> rooms) {}
+                              LocalDate startDate, LocalDate endDate, List<RoomDetails> rooms,
+                              List<PassengerItineraryDayResponse> itinerary) {}
 }
