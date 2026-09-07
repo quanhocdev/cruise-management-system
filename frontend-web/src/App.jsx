@@ -167,6 +167,8 @@ export default function App() {
               path="bookings/:bookingId"
               element={<PassengerBookingDetail />}
             />
+            {/* Thêm trang kết quả thanh toán nằm bên trong layout passenger nếu muốn đồng bộ giao diện */}
+            <Route path="payment/result" element={<PaymentResultPage />} />
             {/* Trỏ mặc định về danh sách bookings nếu vào /passenger */}
             <Route path="" element={<Navigate to="bookings" replace />} />
           </Route>

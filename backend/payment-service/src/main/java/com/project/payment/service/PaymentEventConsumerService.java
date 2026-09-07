@@ -17,11 +17,14 @@ import java.time.temporal.ChronoUnit;
 public class PaymentEventConsumerService {
 
     private final PaymentRepository repository;
+    private final PaymentProvider paymentProvider; // Thêm provider để gọi sinh link VNPay
     private final long timeoutMinutes;
 
     public PaymentEventConsumerService(PaymentRepository repository,
+            PaymentProvider paymentProvider,
             @Value("${vnpay.payment-timeout-minutes:15}") long timeoutMinutes) {
         this.repository = repository;
+        this.paymentProvider = paymentProvider;
         this.timeoutMinutes = timeoutMinutes;
     }
 
@@ -50,8 +53,20 @@ public class PaymentEventConsumerService {
         payment.setUpdatedAt(now);
         payment.setExpiresAt(now.plus(timeoutMinutes, ChronoUnit.MINUTES));
 
-        repository.save(payment);
+        // 1. Lưu lần đầu để có ID (vnp_TxnRef bắt buộc cần ID của payment)
+        Payment saved = repository.save(payment);
+
+        // 2. Gọi VNPay Provider để tạo link thanh toán (Truyền IP "127.0.0.1" vì đây là
+        // background process từ Kafka)
+        String paymentUrl = paymentProvider.createPaymentUrl(saved, "127.0.0.1");
+        saved.setPaymentUrl(paymentUrl);
+        saved.setUpdatedAt(Instant.now());
+
+        // 3. Lưu lại lần nữa với đầy đủ paymentUrl
+        repository.save(saved);
+
         System.out.println(
-                ">>> [PAYMENT SERVICE] Đã tự động tạo bản ghi thanh toán PENDING cho Booking ID: " + event.bookingId());
+                ">>> [PAYMENT SERVICE] Đã tạo thành công bản ghi và link VNPay cho Booking ID: " + event.bookingId());
+        System.out.println(">>> [PAYMENT URL]: " + paymentUrl);
     }
 }

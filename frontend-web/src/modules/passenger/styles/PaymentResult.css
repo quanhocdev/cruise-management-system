@@ -1,0 +1,77 @@
+/* src/modules/passenger/styles/PaymentResult.css */
+.payment-result-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: #f1f5f9;
+}
+
+.payment-result-card {
+  width: min(100%, 520px);
+  padding: 40px 32px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+  text-align: center;
+}
+
+.payment-result-title {
+  margin: 20px 0 8px;
+  color: #0f172a;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.payment-result-message {
+  margin: 0;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.payment-result-details {
+  margin: 24px 0;
+  padding: 14px 20px;
+  border-radius: 12px;
+  background: #f8fafc;
+  text-align: left;
+}
+
+.payment-result-details p {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 0;
+  color: #334155;
+}
+
+.payment-result-spinner {
+  margin: 24px auto;
+  color: #0f766e;
+  animation: paymentSpin 1s linear infinite;
+  display: block;
+}
+
+.payment-result-link {
+  display: inline-block;
+  padding: 11px 22px;
+  border-radius: 8px;
+  background: #0f766e;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.payment-result-link:hover {
+  background: #115e59;
+  color: #ffffff;
+}
+
+@keyframes paymentSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

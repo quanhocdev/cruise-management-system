@@ -15,12 +15,12 @@ import useBookings from "../hooks/useBookings";
 import usePassengers from "../hooks/usePassengers";
 import { usePublicTourDetail } from "../../guest/hooks/usePublicTours";
 import "../styles/PassengerBooking.css";
+import { usePayment } from "../hooks/usePayment";
 
 export default function PassengerBooking() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-
   const tourId = searchParams.get("tourId");
   const packageIdFromUrl = searchParams.get("packageId");
 
@@ -117,6 +117,9 @@ export default function PassengerBooking() {
     }
   };
 
+  // Bên trong component PassengerBooking:
+  const { fetchPaymentUrl } = usePayment();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!tourId || !tourPackageId) {
@@ -156,10 +159,28 @@ export default function PassengerBooking() {
 
     try {
       const result = await createBooking(formData);
-      if (result) {
-        alert("Đặt vé thành công!");
-        navigate(`/passenger/bookings`);
+      // Lấy bookingId từ kết quả trả về của API tạo booking (giả sử cấu trúc trả về có chứa id hoặc bookingId)
+      const bookingId = result?.id || result?.bookingId;
+
+      if (bookingId) {
+        // Đợi một nhịp ngắn hoặc gọi lấy link VNPay do Payment Service vừa tạo qua Kafka
+        try {
+          const paymentUrl = await fetchPaymentUrl(bookingId);
+          if (paymentUrl) {
+            window.location.href = paymentUrl; // Chuyển hướng thẳng sang trang VNPay
+            return;
+          }
+        } catch (payErr) {
+          console.warn(
+            "Chưa lấy được link VNPay ngay, chuyển về danh sách vé...",
+            payErr,
+          );
+        }
       }
+
+      // Fallback nếu không lấy được link ngay
+      alert("Đặt vé thành công!");
+      navigate(`/passenger/bookings`);
     } catch (err) {
       console.error("Lỗi chi tiết từ Server trả về:", err.response || err);
     }
