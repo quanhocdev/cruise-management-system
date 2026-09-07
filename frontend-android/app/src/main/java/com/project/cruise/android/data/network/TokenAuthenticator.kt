@@ -23,7 +23,7 @@ class TokenAuthenticator(
         )
 
         // Tránh refresh vô hạn
-        if (response.request().header("X-Auth-Retry") == "true") {
+        if (response.request.header("X-Auth-Retry") == "true") {
 
             Log.e(
                 "AUTH_DEBUG",
@@ -110,7 +110,7 @@ class TokenAuthenticator(
             )
 
             // Gửi lại request ban đầu
-            response.request()
+            response.request
                 .newBuilder()
                 .header(
                     "Authorization",

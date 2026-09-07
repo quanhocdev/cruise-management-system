@@ -36,6 +36,10 @@ fun BookingDetailScreen(
 ) {
     var showItinerary by rememberSaveable { mutableStateOf(false) }
     var showActivities by rememberSaveable { mutableStateOf(false) }
+    var showCatalog by rememberSaveable { mutableStateOf(false) }
+    if (showCatalog) {
+        BookingCatalogDialog(state, onRetry, onClose = { showCatalog = false })
+    }
     if (showActivities) {
         BookingActivitiesDialog(state, onRetry, onClose = { showActivities = false })
     }
@@ -77,6 +81,7 @@ fun BookingDetailScreen(
                     Text("Ngày về: ${tripDate(state.trip?.endDate)}")
                     OutlinedButton(onClick = { showItinerary = true }) { Text("Xem lịch trình") }
                     OutlinedButton(onClick = { showActivities = true }) { Text("Hoạt động") }
+                    OutlinedButton(onClick = { showCatalog = true }) { Text("Dịch vụ & sản phẩm") }
                     state.tripError?.let { Text(it, color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodySmall) }
                 }
