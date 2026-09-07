@@ -39,12 +39,14 @@ public class PassengerServiceImpl implements PassengerService {
     @Transactional(readOnly = true)
     public List<PassengerResponse> getAllPassengers(Long userId) {
         if (userId == null) {
-            // Không truyền userId -> không trả về dữ liệu để bảo mật
             return List.of();
         }
-        // Chỉ lấy những hành khách thuộc về tài khoản userId này
-        return passengerRepository.findAll().stream()
-                .filter(p -> userId.equals(p.getUserId()))
+
+        // Lấy danh sách hành khách thông qua các đơn đặt vé (Booking) do user này tạo
+        // (createdByUserId)
+        return bookingPassengerRepository.findByBooking_CreatedByUserId(userId).stream()
+                .map(bp -> bp.getPassenger())
+                .distinct() // Tránh trùng lặp nếu hành khách đi nhiều tour khác nhau
                 .map(passengerMapper::toResponse)
                 .toList();
     }
@@ -52,15 +54,10 @@ public class PassengerServiceImpl implements PassengerService {
     @Override
     @Transactional(readOnly = true)
     public PassengerResponse getPassengerById(Long id) {
-        // (Tùy chọn) Nếu muốn an toàn tuyệt đối, có thể truyền thêm userId vào để check
-        // xem hành khách này có đúng của user đó không
         Passenger passenger = passengerRepository.findById(id)
                 .orElseThrow(() -> new AppException("Passenger not found: " + id, HttpStatus.NOT_FOUND));
         return passengerMapper.toResponse(passenger);
     }
-
-    // Đã xóa bỏ phương thức createPassenger vì việc tạo hành khách được gom chung
-    // vào luồng Đặt vé (Booking)
 
     @Override
     public PassengerResponse updatePassenger(Long id, PassengerRequest request) {

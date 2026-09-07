@@ -74,7 +74,9 @@ public class BookingServiceImpl implements BookingService {
                 System.out.println(">>> [SERVICE] Đang xử lý hành khách thứ " + (i + 1) + ": " + pReq.getFullName());
 
                 Passenger passenger = new Passenger();
-                passenger.setUserId(userId);
+
+                passenger.setBooking(savedBooking);
+
                 passenger.setFullName(pReq.getFullName() != null ? pReq.getFullName().trim() : null);
                 passenger.setDateOfBirth(pReq.getDateOfBirth());
                 passenger.setGender(pReq.getGender() != null ? pReq.getGender().trim() : null);

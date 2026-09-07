@@ -456,6 +456,25 @@ export default function PassengerBooking() {
                       />
                     </Col>
 
+                    {/* Thêm ô nhập ghi chú giấy tờ tùy thân */}
+                    <Col md={12} className="mb-2">
+                      <Form.Label className="small">
+                        Ghi chú giấy tờ (Tùy chọn)
+                      </Form.Label>
+                      <Form.Control
+                        size="sm"
+                        type="text"
+                        placeholder="Ví dụ: Cấp tại Công an TP.HCM..."
+                        value={p.documentNote}
+                        onChange={(e) =>
+                          handlePassengerChange(
+                            index,
+                            "documentNote",
+                            e.target.value,
+                          )
+                        }
+                      />
+                    </Col>
                     <Col md={12} className="mb-2 mt-1">
                       <Form.Label className="small fw-semibold text-primary">
                         📷 Tải ảnh CCCD / Giấy tờ tùy thân từ máy
