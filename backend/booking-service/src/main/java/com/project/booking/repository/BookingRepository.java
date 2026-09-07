@@ -1,7 +1,6 @@
 package com.project.booking.repository;
 
 import com.project.booking.model.Booking;
-import com.project.booking.model.enums.BookingStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;

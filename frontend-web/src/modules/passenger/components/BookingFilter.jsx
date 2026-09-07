@@ -1,5 +1,5 @@
 import { Button } from "react-bootstrap";
-
+import "../styles/BookingFilter.css";
 export default function BookingFilter({ filterStatus, setFilterStatus }) {
   return (
     <div className="d-flex align-items-center gap-2 mb-4 overflow-x-auto pb-2">

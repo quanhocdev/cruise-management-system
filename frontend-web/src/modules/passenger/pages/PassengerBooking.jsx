@@ -127,6 +127,11 @@ export default function PassengerBooking() {
     const formData = new FormData();
     formData.append("tourId", tourId);
     formData.append("tourPackageId", tourPackageId);
+
+    if (selectedPackageInfo?.price) {
+      formData.append("unitPrice", selectedPackageInfo.price);
+    }
+
     formData.append("primaryContactName", primaryContactName);
     formData.append("primaryContactPhone", primaryContactPhone);
 

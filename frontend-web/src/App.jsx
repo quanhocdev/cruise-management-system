@@ -29,9 +29,9 @@ import ManagerService from "./modules/admin/pages/ManagerService";
 import ManagerPolicy from "./modules/admin/pages/ManagerPolicy";
 
 // Passenger imports
-import PassengerDashboard from "./modules/passenger/pages/Dashboard";
-import PassengerTourDetail from "./modules/passenger/pages/TourDetail";
-import CreatePassengerBooking from "./modules/passenger/pages/CreateBooking";
+// import PassengerDashboard from "./modules/passenger/pages/Dashboard";
+// import PassengerTourDetail from "./modules/passenger/pages/TourDetail";
+// import CreatePassengerBooking from "./modules/passenger/pages/CreateBooking";
 import PassengerBookings from "./modules/passenger/pages/MyBookings";
 import PassengerBookingDetail from "./modules/passenger/pages/BookingDetail";
 import PassengerBooking from "./modules/passenger/pages/PassengerBooking";
@@ -161,15 +161,14 @@ export default function App() {
               </ProtectedRoute>
             }
           >
-            <Route path="dashboard" element={<PassengerDashboard />} />
-            <Route path="tours/:tourId" element={<PassengerTourDetail />} />
             <Route path="bookings/new" element={<PassengerBooking />} />
             <Route path="bookings" element={<PassengerBookings />} />
             <Route
               path="bookings/:bookingId"
               element={<PassengerBookingDetail />}
             />
-            <Route path="" element={<Navigate to="dashboard" replace />} />
+            {/* Trỏ mặc định về danh sách bookings nếu vào /passenger */}
+            <Route path="" element={<Navigate to="bookings" replace />} />
           </Route>
 
           {/* =====================================================

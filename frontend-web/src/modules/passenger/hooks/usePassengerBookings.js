@@ -1,6 +1,6 @@
 // src/modules/passenger/hooks/usePassengerBookings.js
 import { useState, useCallback } from "react";
-import passengerBookingService from "../services/passengerBookingService";
+import passengerBookingService from "../services/passengerBookingService"; // 👈 Đồng bộ tên biến import
 
 export default function usePassengerBookings() {
   const [bookings, setBookings] = useState([]);
@@ -14,7 +14,7 @@ export default function usePassengerBookings() {
     setLoading(true);
     setError("");
     try {
-      const data = await passengerCatalogService.getMyBookings();
+      const data = await passengerBookingService.getMyBookings(); // 👈 Sửa thành passengerBookingService
       const list = Array.isArray(data)
         ? data
         : data?.content || data?.data || [];
@@ -35,7 +35,7 @@ export default function usePassengerBookings() {
     setLoading(true);
     setError("");
     try {
-      const data = await passengerCatalogService.getBooking(id);
+      const data = await passengerBookingService.getBooking(id); // 👈 Sửa thành passengerBookingService
       setCurrentBooking(data);
       return data;
     } catch (err) {
@@ -53,7 +53,7 @@ export default function usePassengerBookings() {
     setError("");
     setSuccess("");
     try {
-      const updated = await passengerCatalogService.cancelBooking(id);
+      const updated = await passengerBookingService.cancelBooking(id); // 👈 Sửa thành passengerBookingService
       setSuccess("Hủy đơn hàng thành công.");
       return updated;
     } catch (err) {

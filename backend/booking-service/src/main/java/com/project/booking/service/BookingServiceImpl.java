@@ -51,7 +51,10 @@ public class BookingServiceImpl implements BookingService {
         try {
             System.out.println(">>> [SERVICE] Bắt đầu xử lý create booking...");
 
-            BigDecimal unitPrice = BigDecimal.valueOf(1500000);
+            BigDecimal unitPrice = request.getUnitPrice() != null
+                    ? request.getUnitPrice()
+                    : BigDecimal.ZERO;
+
             int passengerCount = request.getPassengers().size();
             BigDecimal totalAmount = unitPrice.multiply(BigDecimal.valueOf(passengerCount));
 

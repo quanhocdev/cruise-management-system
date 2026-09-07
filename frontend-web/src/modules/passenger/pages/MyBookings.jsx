@@ -13,7 +13,7 @@ import {
 import { CalendarDays, CreditCard, Users, Ship, ArrowLeft } from "lucide-react";
 import usePassengerBookings from "../hooks/usePassengerBookings";
 import TourStatusFilter from "../../guest/components/TourStatusFilter";
-import "../styles/PassengerCatalog.css";
+import "../styles/MyBooking.css";
 
 const statusConfig = {
   PENDING_PAYMENT: { label: "Chờ thanh toán", bg: "warning", text: "dark" },
