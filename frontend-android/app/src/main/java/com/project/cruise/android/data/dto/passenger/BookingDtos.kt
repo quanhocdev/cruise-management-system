@@ -9,7 +9,14 @@ data class BookingTripDetails(
     val startDate: String?,
     val endDate: String?,
     val rooms: List<BookedRoomDetails> = emptyList(),
-    val itinerary: List<ItineraryDay>? = null
+    val itinerary: List<ItineraryDay>? = null,
+    val activities: List<TripActivity>? = null
+)
+
+data class TripActivity(
+    val id: String, val type: String, val name: String, val description: String?,
+    val startTime: String?, val endTime: String?, val location: String?,
+    val price: BigDecimal?, val maxPassengers: Int?, val status: String?
 )
 
 data class BookedRoomDetails(
