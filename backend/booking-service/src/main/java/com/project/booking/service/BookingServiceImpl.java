@@ -110,8 +110,7 @@ public class BookingServiceImpl implements BookingService {
             return bookingMapper.toResponse(savedBooking, links);
 
         } catch (Exception e) {
-            System.err.println("❌ LỖI NGHIÊM TRỌNG BÊN TRONG BOOKING SERVICE:");
-            e.printStackTrace(); // In toàn bộ lỗi ra đây
+            e.printStackTrace();
             throw e;
         }
     }

@@ -150,7 +150,6 @@ export default function PassengerBooking() {
     });
 
     try {
-      // ❌ Đã bỏ user.id ở đây, backend tự trích xuất qua Token
       const result = await createBooking(formData);
       if (result) {
         alert("Đặt vé thành công!");
