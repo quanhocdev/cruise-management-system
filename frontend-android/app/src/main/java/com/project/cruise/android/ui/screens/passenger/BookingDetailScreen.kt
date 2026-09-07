@@ -10,6 +10,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -30,6 +34,10 @@ fun BookingDetailScreen(
     onPaymentReturn: () -> Unit,
     onBack: () -> Unit
 ) {
+    var showItinerary by rememberSaveable { mutableStateOf(false) }
+    if (showItinerary) {
+        BookingItineraryDialog(state, onRetry, onClose = { showItinerary = false })
+    }
     val uriHandler = LocalUriHandler.current
     val lifecycleOwner = LocalLifecycleOwner.current
     LaunchedEffect(state.paymentUrl) {
@@ -63,6 +71,7 @@ fun BookingDetailScreen(
                     Text("Du thuyền: ${state.trip?.cruiseName ?: "Đang cập nhật"}")
                     Text("Ngày đi: ${tripDate(state.trip?.startDate)}")
                     Text("Ngày về: ${tripDate(state.trip?.endDate)}")
+                    OutlinedButton(onClick = { showItinerary = true }) { Text("Xem lịch trình") }
                     state.tripError?.let { Text(it, color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodySmall) }
                 }

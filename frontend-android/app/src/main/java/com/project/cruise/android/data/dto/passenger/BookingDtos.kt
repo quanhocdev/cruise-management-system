@@ -8,7 +8,8 @@ data class BookingTripDetails(
     val cruiseName: String?,
     val startDate: String?,
     val endDate: String?,
-    val rooms: List<BookedRoomDetails> = emptyList()
+    val rooms: List<BookedRoomDetails> = emptyList(),
+    val itinerary: List<ItineraryDay>? = null
 )
 
 data class BookedRoomDetails(
