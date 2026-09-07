@@ -16,12 +16,13 @@ class InternalTripDetailsControllerTests {
     final RoomRepository rooms = mock(RoomRepository.class);
     final com.project.tour.repository.tour.schedule.ScheduleRepository schedules = mock(com.project.tour.repository.tour.schedule.ScheduleRepository.class);
     final com.project.tour.service.passenger.PassengerTripActivities activities = mock(com.project.tour.service.passenger.PassengerTripActivities.class);
-    final InternalTripDetailsController controller = new InternalTripDetailsController(tours, rooms, schedules, activities, "test-key");
+    final com.project.tour.service.passenger.PassengerTripCatalog catalog = mock(com.project.tour.service.passenger.PassengerTripCatalog.class);
+    final InternalTripDetailsController controller = new InternalTripDetailsController(tours, rooms, schedules, activities, catalog, "test-key");
 
     @Test void rejectsMissingOrWrongKey() {
         assertThrows(AppException.class, () -> controller.get(UUID.randomUUID(), null));
         assertThrows(AppException.class, () -> controller.get(UUID.randomUUID(), "wrong"));
-        verifyNoInteractions(tours, rooms, schedules, activities);
+        verifyNoInteractions(tours, rooms, schedules, activities, catalog);
     }
     @Test void completedTourRemainsReadableWithRoomDetails() {
         UUID id = UUID.randomUUID();
@@ -42,6 +43,7 @@ class InternalTripDetailsControllerTests {
         assertEquals("A201", result.rooms().get(0).roomCode());
         assertEquals("Embarkation", result.itinerary().get(0).name());
         assertEquals(1, result.itinerary().get(0).dayNumber());
+        verify(catalog).get(id);
         verify(schedules).findAllByTour_IdAndStatusOrderByDayNumberAsc(id, com.project.tour.model.enums.ScheduleStatus.ACTIVE);
     }
     @Test void noPublishedScheduleReturnsEmptyList() {

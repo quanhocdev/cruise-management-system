@@ -24,13 +24,16 @@ public class InternalTripDetailsController {
     private final ScheduleRepository schedules;
     private final com.project.tour.service.passenger.PassengerTripActivities activities;
     private final byte[] key;
+    private final com.project.tour.service.passenger.PassengerTripCatalog catalog;
 
     public InternalTripDetailsController(TourRepository tours, RoomRepository rooms, ScheduleRepository schedules,
             com.project.tour.service.passenger.PassengerTripActivities activities,
+            com.project.tour.service.passenger.PassengerTripCatalog catalog,
             @Value("${internal.api-key}") String key) {
         this.tours = tours; this.rooms = rooms;
         this.schedules = schedules;
         this.activities = activities;
+        this.catalog = catalog;
         this.key = key.getBytes(StandardCharsets.UTF_8);
     }
 
@@ -51,12 +54,13 @@ public class InternalTripDetailsController {
             tour.getStartDate(), tour.getEndDate(), details,
             schedules.findAllByTour_IdAndStatusOrderByDayNumberAsc(id, ScheduleStatus.ACTIVE).stream()
                 .map(s -> new PassengerItineraryDayResponse(s.getId(), s.getDayNumber(), s.getRealDay(),
-                    s.getName(), s.getDescription())).toList(), activities.get(id));
+                    s.getName(), s.getDescription())).toList(), activities.get(id), catalog.get(id));
     }
 
     public record RoomDetails(UUID roomId, String roomCode, Integer deckNumber, String roomTypeName) {}
     public record TripDetails(UUID voyageId, String tourName, String cruiseName,
                               LocalDate startDate, LocalDate endDate, List<RoomDetails> rooms,
                               List<PassengerItineraryDayResponse> itinerary,
-                              List<com.project.tour.service.passenger.PassengerTripActivities.Activity> activities) {}
+                              List<com.project.tour.service.passenger.PassengerTripActivities.Activity> activities,
+                              List<com.project.tour.service.passenger.PassengerTripCatalog.Item> catalog) {}
 }

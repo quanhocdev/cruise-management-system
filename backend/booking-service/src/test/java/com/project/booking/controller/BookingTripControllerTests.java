@@ -47,13 +47,18 @@ class BookingTripControllerTests {
             null, null, List.of(new BookingTripDetails.RoomDetails(room, "A101", 1, "Deluxe"),
                 new BookingTripDetails.RoomDetails(UUID.randomUUID(), "B201", 2, "Suite")),
             List.of(new BookingTripDetails.ItineraryDay(UUID.randomUUID(), 1, java.time.LocalDate.of(2026, 11, 22), "Lên tàu", "Đón khách")),
-            List.of(new BookingTripDetails.Activity(UUID.randomUUID(), "ONBOARD", "Yoga", null, null, null, null, null, 20, "CONFIGURED"))));
+            List.of(new BookingTripDetails.Activity(UUID.randomUUID(), "ONBOARD", "Yoga", null, null, null, null, null, 20, "CONFIGURED")),
+            List.of(new BookingTripDetails.CatalogItem(UUID.randomUUID(), "SERVICE", "Spa", "Massage", null,
+                new java.math.BigDecimal("250000"), "Deck 1", 30, 5, "CONFIGURED"))));
         mvc.perform(get("/api/v1/bookings/1/trip-details").with(jwt().jwt(j -> j.claim("userId", 7L))))
             .andExpect(status().isOk()).andExpect(jsonPath("$.tourName").value("Tour name"))
             .andExpect(jsonPath("$.rooms.length()").value(1)).andExpect(jsonPath("$.rooms[0].roomCode").value("A101"))
             .andExpect(jsonPath("$.itinerary[0].dayNumber").value(1))
             .andExpect(jsonPath("$.itinerary[0].name").value("Lên tàu"))
             .andExpect(jsonPath("$.itinerary[0].date").value("2026-11-22"))
-            .andExpect(jsonPath("$.activities[0].name").value("Yoga"));
+            .andExpect(jsonPath("$.activities[0].name").value("Yoga"))
+            .andExpect(jsonPath("$.catalog[0].name").value("Spa"))
+            .andExpect(jsonPath("$.catalog[0].price").value(250000))
+            .andExpect(jsonPath("$.catalog[0].durationMinutes").value(30));
     }
 }
