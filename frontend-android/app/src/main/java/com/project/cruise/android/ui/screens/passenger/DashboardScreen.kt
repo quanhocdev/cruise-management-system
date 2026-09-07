@@ -27,6 +27,7 @@ fun Dashboard(
     viewModel: AuthViewModel,
     onBrowseTours: () -> Unit,
     onMyBookings: () -> Unit,
+    notificationButton: @Composable () -> Unit,
     onLogout: () -> Unit // 🟢 Thêm callback này để điều hướng về Login
 ) {
     val meState by viewModel.meState.collectAsState()
@@ -83,6 +84,9 @@ fun Dashboard(
         OutlinedButton(onClick = onMyBookings) {
             Text("Booking của tôi")
         }
+
+        Spacer(modifier = Modifier.height(12.dp))
+        notificationButton()
 
         Spacer(modifier = Modifier.height(20.dp))
 

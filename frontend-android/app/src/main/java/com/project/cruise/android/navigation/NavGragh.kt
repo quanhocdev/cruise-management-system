@@ -68,6 +68,7 @@ object Routes {
     const val REGISTER = "register"
     const val OTP = "otp/{userId}"
     const val PASSENGER_DASHBOARD = "passenger_dashboard"
+    const val PASSENGER_NOTIFICATIONS = "passenger_notifications"
     const val PASSENGER_TOURS = "passenger_tours"
     const val PASSENGER_TOUR_DETAIL = "passenger_tours/{tourId}"
     const val PASSENGER_ROOMS = "passenger_rooms/{voyageId}"
@@ -414,6 +415,11 @@ fun NavGraph() {
                 viewModel = viewModel,
                 onBrowseTours = { navController.navigate(Routes.PASSENGER_TOURS) },
                 onMyBookings = { navController.navigate(Routes.PASSENGER_BOOKINGS) },
+                notificationButton = {
+                    com.project.cruise.android.ui.screens.passenger.NotificationDashboardButton(apiService) {
+                        navController.navigate(Routes.PASSENGER_NOTIFICATIONS)
+                    }
+                },
                 onLogout = {
                     // 🟢 Điều hướng về màn hình Login và xóa sạch lịch sử Navigation (Backstack)
                     navController.navigate(Routes.LOGIN) {
@@ -422,6 +428,12 @@ fun NavGraph() {
                     }
                 }
             )
+        }
+
+        composable(Routes.PASSENGER_NOTIFICATIONS) {
+            com.project.cruise.android.ui.screens.passenger.NotificationsScreen(apiService,
+                onBack = { navController.popBackStack() },
+                onBooking = { navController.navigate("passenger_bookings/$it") })
         }
 
         composable(Routes.PASSENGER_BOOKINGS) {
