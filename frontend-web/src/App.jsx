@@ -11,7 +11,6 @@ import RegisterPage from "./modules/auth/pages/RegisterPage";
 import LoginPage from "./modules/auth/pages/LoginPage";
 import VerifyOtpPage from "./modules/auth/pages/VerifyOtpPage";
 import ActivatePage from "./modules/auth/pages/ActivatePage";
-import PaymentResultPage from "./modules/payment/pages/PaymentResultPage";
 
 // Admin imports
 import AdminLayout from "./layouts/AdminLayout";
@@ -35,6 +34,8 @@ import ManagerPolicy from "./modules/admin/pages/ManagerPolicy";
 import PassengerBookings from "./modules/passenger/pages/MyBookings";
 import PassengerBookingDetail from "./modules/passenger/pages/BookingDetail";
 import PassengerBooking from "./modules/passenger/pages/PassengerBooking";
+import PaymentResultPage from "./modules/passenger/pages/PaymentResultPage";
+
 // Scheduler imports
 import SchedulerLayout from "./layouts/SchedulerLayout";
 import SchedulerDashboard from "./modules/scheduler/pages/Dashboard";

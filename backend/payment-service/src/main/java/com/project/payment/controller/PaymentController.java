@@ -81,17 +81,19 @@ public class PaymentController {
         }
     }
 
-    @GetMapping("/booking/{bookingId}")
-    public ResponseEntity<PaymentResponse> getPaymentByBookingId(
-            @PathVariable Long bookingId,
-            @AuthenticationPrincipal Jwt jwt) {
-        // Tìm payment PENDING theo bookingId và kiểm tra quyền của user
-        PaymentResponse response = paymentService.getPayments(bookingId, PaymentReferenceType.BOOKING)
-                .stream()
-                .filter(p -> p.getStatus() == PaymentStatus.PENDING)
-                .findFirst()
-                .orElseThrow(() -> new PaymentException("No active payment found for this booking"));
+    // @GetMapping("/booking/{bookingId}")
+    // public ResponseEntity<PaymentResponse> getPaymentByBookingId(
+    // @PathVariable Long bookingId,
+    // @AuthenticationPrincipal Jwt jwt) {
+    // // Tìm payment PENDING theo bookingId và kiểm tra quyền của user
+    // PaymentResponse response = paymentService.getPayments(bookingId,
+    // PaymentReferenceType.BOOKING)
+    // .stream()
+    // .filter(p -> p.getStatus() == PaymentStatus.PENDING)
+    // .findFirst()
+    // .orElseThrow(() -> new PaymentException("No active payment found for this
+    // booking"));
 
-        return ResponseEntity.ok(response);
-    }
+    // return ResponseEntity.ok(response);
+    // }
 }

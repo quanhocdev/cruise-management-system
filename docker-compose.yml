@@ -537,6 +537,7 @@ services:
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       TOUR_SERVICE_URL: http://tour-service:8088
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       # NOTIFICATION_SERVICE_URL: http://notification-service:8086  # TẠM COMMENT: chưa triển khai
     depends_on:
       postgres-booking:
@@ -553,8 +554,8 @@ services:
   # ==========================
   payment-service:
     build:
-      context: ./backend/payment-service
-      dockerfile: Dockerfile.dev
+      context: ./backend
+      dockerfile: payment-service/Dockerfile.dev
     container_name: payment-service
     restart: always
     ports:
@@ -567,6 +568,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       BOOKING_SERVICE_URL: http://booking-service:8082
       # NOTIFICATION_SERVICE_URL: http://notification-service:8086  # TẠM COMMENT: chưa triển khai
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
     depends_on:
       postgres-payment:
         condition: service_healthy

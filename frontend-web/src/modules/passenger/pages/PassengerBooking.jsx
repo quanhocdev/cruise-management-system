@@ -159,30 +159,43 @@ export default function PassengerBooking() {
 
     try {
       const result = await createBooking(formData);
-      // Lấy bookingId từ kết quả trả về của API tạo booking (giả sử cấu trúc trả về có chứa id hoặc bookingId)
-      const bookingId = result?.id || result?.bookingId;
+      const responseData = result?.data || result;
+      const bookingId =
+        responseData?.id || responseData?.bookingId || responseData?.data?.id;
 
-      if (bookingId) {
-        // Đợi một nhịp ngắn hoặc gọi lấy link VNPay do Payment Service vừa tạo qua Kafka
+      if (!bookingId) {
+        throw new Error("Không lấy được mã đơn hàng từ hệ thống!");
+      }
+
+      // Giữ nguyên ở màn hình này và gọi liên tục cho đến khi lấy được link VNPay thành công
+      let paymentUrl = null;
+      let attempts = 0;
+      const maxAttempts = 15; // Thử tối đa 15 lần (khoảng 30 giây) để chờ Kafka xử lý
+
+      while (!paymentUrl && attempts < maxAttempts) {
+        attempts++;
         try {
-          const paymentUrl = await fetchPaymentUrl(bookingId);
-          if (paymentUrl) {
-            window.location.href = paymentUrl; // Chuyển hướng thẳng sang trang VNPay
-            return;
-          }
-        } catch (payErr) {
-          console.warn(
-            "Chưa lấy được link VNPay ngay, chuyển về danh sách vé...",
-            payErr,
-          );
+          paymentUrl = await fetchPaymentUrl(bookingId);
+        } catch (err) {
+          // Bỏ qua lỗi 500 tạm thời do payment-service chưa kịp lưu bản ghi, đợi vòng lặp sau thử tiếp
+          await new Promise((resolve) => setTimeout(resolve, 2000));
         }
       }
 
-      // Fallback nếu không lấy được link ngay
-      alert("Đặt vé thành công!");
-      navigate(`/passenger/bookings`);
+      if (paymentUrl) {
+        window.location.href = paymentUrl; // Chuyển hướng thẳng sang VNPay
+      } else {
+        throw new Error(
+          "Hệ thống mất quá nhiều thời gian để khởi tạo thanh toán. Vui lòng vào 'Vé của tôi' để thanh toán sau.",
+        );
+      }
     } catch (err) {
       console.error("Lỗi chi tiết từ Server trả về:", err.response || err);
+      alert(
+        err.response?.data?.message ||
+          err.message ||
+          "Đã xảy ra lỗi trong quá trình đặt vé.",
+      );
     }
   };
 
