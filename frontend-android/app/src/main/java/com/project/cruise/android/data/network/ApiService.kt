@@ -21,6 +21,18 @@ import okhttp3.ResponseBody
 
 interface ApiService {
 
+    @GET("api/v1/notifications")
+    suspend fun getNotifications(): List<com.project.cruise.android.data.dto.passenger.PassengerNotification>
+
+    @GET("api/v1/notifications/unread-count")
+    suspend fun getUnreadNotifications(): com.project.cruise.android.data.dto.passenger.UnreadNotifications
+
+    @retrofit2.http.PATCH("api/v1/notifications/{id}/read")
+    suspend fun readNotification(@Path("id") id: Long): com.project.cruise.android.data.dto.passenger.PassengerNotification
+
+    @retrofit2.http.PATCH("api/v1/notifications/read-all")
+    suspend fun readAllNotifications(): retrofit2.Response<Unit>
+
     @GET("api/v1/bookings/{id}/trip-details")
     suspend fun getBookingTripDetails(@Path("id") id: Long): com.project.cruise.android.data.dto.passenger.BookingTripDetails
 
