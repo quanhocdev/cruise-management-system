@@ -15,12 +15,13 @@ class InternalTripDetailsControllerTests {
     final TourRepository tours = mock(TourRepository.class);
     final RoomRepository rooms = mock(RoomRepository.class);
     final com.project.tour.repository.tour.schedule.ScheduleRepository schedules = mock(com.project.tour.repository.tour.schedule.ScheduleRepository.class);
-    final InternalTripDetailsController controller = new InternalTripDetailsController(tours, rooms, schedules, "test-key");
+    final com.project.tour.service.passenger.PassengerTripActivities activities = mock(com.project.tour.service.passenger.PassengerTripActivities.class);
+    final InternalTripDetailsController controller = new InternalTripDetailsController(tours, rooms, schedules, activities, "test-key");
 
     @Test void rejectsMissingOrWrongKey() {
         assertThrows(AppException.class, () -> controller.get(UUID.randomUUID(), null));
         assertThrows(AppException.class, () -> controller.get(UUID.randomUUID(), "wrong"));
-        verifyNoInteractions(tours, rooms, schedules);
+        verifyNoInteractions(tours, rooms, schedules, activities);
     }
     @Test void completedTourRemainsReadableWithRoomDetails() {
         UUID id = UUID.randomUUID();
