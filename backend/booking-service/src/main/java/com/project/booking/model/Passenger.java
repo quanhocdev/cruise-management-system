@@ -7,7 +7,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "passengers", indexes = {
-        @Index(name = "idx_passenger_doc_number", columnList = "identification_number")
+        @Index(name = "idx_passenger_doc_number", columnList = "identification_number"),
+        @Index(name = "idx_passenger_booking", columnList = "booking_id")
 })
 public class Passenger {
 
@@ -15,8 +16,10 @@ public class Passenger {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id")
-    private Long userId; // Liên kết với tài khoản user nếu có
+    // --- LIÊN KẾT VỚI ĐƠN ĐẶT VÉ (THAY CHO USER_ID) ---
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "booking_id", nullable = false)
+    private Booking booking;
 
     @Column(name = "full_name", nullable = false, length = 150)
     private String fullName;
@@ -25,7 +28,7 @@ public class Passenger {
     private LocalDate dateOfBirth;
 
     @Column(nullable = false, length = 20)
-    private String gender; // MALE, FEMALE, OTHER
+    private String gender; // Nam, Nữ, Khác
 
     @Column(name = "phone_number", length = 30)
     private String phoneNumber;
@@ -39,12 +42,12 @@ public class Passenger {
     private DocumentType idCardType;
 
     @Column(name = "identification_number", nullable = false, length = 50)
-    private String identificationNumber; // Số CCCD, số hộ chiếu hoặc số giấy khai sinh
+    private String identificationNumber;
 
     @Column(name = "document_note", length = 255)
     private String documentNote;
 
-    // --- QUẢN LÝ ẢNH CHỤP GIẤY TỜ (Cloudinary) ---
+    // --- QUẢN LÝ ẢNH CHỤP GIẤY TỜ ---
     @Column(name = "id_card_image_url", length = 500)
     private String idCardImageUrl;
 
@@ -79,12 +82,12 @@ public class Passenger {
         this.id = id;
     }
 
-    public Long getUserId() {
-        return userId;
+    public Booking getBooking() {
+        return booking;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setBooking(Booking booking) {
+        this.booking = booking;
     }
 
     public String getFullName() {

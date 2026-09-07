@@ -4,6 +4,7 @@ import com.project.booking.dto.passenger.PassengerRequest;
 import com.project.booking.dto.passenger.PassengerResponse;
 import com.project.booking.service.PassengerService;
 import jakarta.validation.Valid;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -28,15 +29,9 @@ public class PassengerController {
         return ResponseEntity.ok(passengerService.getPassengerById(id));
     }
 
-    @PostMapping
-    public ResponseEntity<PassengerResponse> create(@Valid @RequestBody PassengerRequest request,
-            @RequestParam Long userId) {
-        return ResponseEntity.ok(passengerService.createPassenger(request, userId));
-    }
-
-    @PatchMapping("/{id}")
+    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<PassengerResponse> update(@PathVariable Long id,
-            @Valid @RequestBody PassengerRequest request) {
+            @Valid @ModelAttribute PassengerRequest request) {
         return ResponseEntity.ok(passengerService.updatePassenger(id, request));
     }
 }

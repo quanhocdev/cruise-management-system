@@ -1,65 +1,200 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, CalendarDays, CreditCard, Ship, Users } from "lucide-react";
-import passengerCatalogService from "../services/passengerCatalogService";
-import "../styles/PassengerCatalog.css";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Button,
+  Badge,
+  Spinner,
+  Alert,
+} from "react-bootstrap";
+import { CalendarDays, CreditCard, Users, Ship, ArrowLeft } from "lucide-react";
+import usePassengerBookings from "../hooks/usePassengerBookings";
+import TourStatusFilter from "../../guest/components/TourStatusFilter";
+import "../styles/MyBooking.css";
 
-const labels = {
-  PENDING_PAYMENT: "Chờ thanh toán",
-  CONFIRMED: "Đã xác nhận",
-  CANCELLED: "Đã hủy",
+const statusConfig = {
+  PENDING_PAYMENT: { label: "Chờ thanh toán", bg: "warning", text: "dark" },
+  CONFIRMED: { label: "Đã xác nhận", bg: "success", text: "white" },
+  CANCELLED: { label: "Đã hủy", bg: "danger", text: "white" },
 };
 
-const formatMoney = (value) => new Intl.NumberFormat("vi-VN", {
-  style: "currency", currency: "VND", maximumFractionDigits: 0,
-}).format(value || 0);
+const formatMoney = (value) =>
+  new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+    maximumFractionDigits: 0,
+  }).format(value || 0);
 
-const formatDateTime = (value) => value
-  ? new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value))
-  : "—";
+const formatDateTime = (value) =>
+  value
+    ? new Intl.DateTimeFormat("vi-VN", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }).format(new Date(value))
+    : "—";
 
 export default function MyBookings() {
-  const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const { bookings, loading, error, loadMyBookings } = usePassengerBookings(); // 👈 Lấy từ hook
+  const [filterTripStatus, setFilterTripStatus] = useState("ALL");
 
   useEffect(() => {
-    passengerCatalogService.getMyBookings()
-      .then(setBookings)
-      .catch((requestError) => setError(requestError.response?.data?.message || "Không thể tải booking của bạn."))
-      .finally(() => setLoading(false));
-  }, []);
+    loadMyBookings(); // 👈 Gọi hàm tải danh sách từ hook
+  }, [loadMyBookings]);
+
+  // Lọc danh sách booking dựa theo trạng thái chuyến đi
+  const filteredBookings = bookings.filter((booking) => {
+    if (filterTripStatus === "ALL") return true;
+    return (
+      booking.tourStatusTrip === filterTripStatus ||
+      booking.tour?.statusTrip === filterTripStatus
+    );
+  });
 
   return (
-    <main className="passenger-page my-bookings-page">
-      <header className="booking-form-header">
-        <Link to="/passenger/dashboard" className="back-link static-back"><ArrowLeft size={18} /> Danh sách tour</Link>
-        <span className="eyebrow">HÀNH TRÌNH CỦA TÔI</span>
-        <h1>Booking của tôi</h1>
-      </header>
-      <section className="my-bookings-content">
-        {loading && <div className="catalog-state">Đang tải danh sách booking...</div>}
-        {error && <div className="catalog-state error-state">{error}</div>}
-        {!loading && !error && bookings.length === 0 && (
-          <div className="catalog-state empty-bookings"><Ship size={44} /><h2>Bạn chưa có booking nào</h2><Link className="primary-link" to="/passenger/dashboard">Khám phá tour</Link></div>
-        )}
-        <div className="booking-list">
-          {bookings.map((booking) => (
-            <article className="booking-list-card" key={booking.id}>
-              <div className="booking-card-top">
-                <div><small>MÃ BOOKING</small><strong>{booking.bookingCode || `#${booking.id}`}</strong></div>
-                <span className={`booking-status ${booking.status.toLowerCase()}`}>{labels[booking.status] || booking.status}</span>
-              </div>
-              <div className="booking-card-facts">
-                <span><CalendarDays size={18} /><span><small>Ngày tạo</small>{formatDateTime(booking.createdAt)}</span></span>
-                <span><Users size={18} /><span><small>Hành khách</small>{booking.passengers?.length || 0} người</span></span>
-                <span><CreditCard size={18} /><span><small>Tổng tiền</small>{formatMoney(booking.totalAmount)}</span></span>
-              </div>
-              <Link className="booking-detail-link" to={`/passenger/bookings/${booking.id}`}>Xem chi tiết</Link>
-            </article>
-          ))}
+    <div className="tour-public-page bg-light min-vh-100 pb-5">
+      {/* Banner đầu trang */}
+      <div className="tour-public-hero text-white py-5 mb-4 shadow-sm text-center">
+        <Container>
+          <div className="d-flex justify-content-start mb-2">
+            <Link
+              to="/passenger/dashboard"
+              className="text-white text-decoration-none small d-flex align-items-center gap-1"
+            >
+              <ArrowLeft size={16} /> Quay lại danh sách tour
+            </Link>
+          </div>
+          <h1 className="fw-bold mb-2">🎫 Hành Trình Đặt Chỗ Của Tôi</h1>
+          <p className="lead text-white-50 mb-0">
+            Quản lý các đơn đặt vé và theo dõi lịch trình chuyến đi của bạn.
+          </p>
+        </Container>
+      </div>
+
+      <Container>
+        {/* Bộ lọc trạng thái chuyến đi */}
+        <div className="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+          <TourStatusFilter
+            filterStatus={filterTripStatus}
+            setFilterStatus={setFilterTripStatus}
+            totalCount={bookings.length}
+          />
+          <span className="text-muted small">
+            Hiển thị {filteredBookings.length} đơn vé
+          </span>
         </div>
-      </section>
-    </main>
+
+        {/* Trạng thái tải dữ liệu */}
+        {loading && (
+          <div className="text-center py-5">
+            <Spinner animation="border" variant="primary" />
+            <p className="mt-2 text-muted">Đang tải danh sách booking...</p>
+          </div>
+        )}
+
+        {/* Thông báo lỗi */}
+        {error && (
+          <Alert variant="danger" className="my-3">
+            {error}
+          </Alert>
+        )}
+
+        {/* Khi không có dữ liệu */}
+        {!loading && !error && filteredBookings.length === 0 && (
+          <Alert variant="info" className="text-center py-5">
+            <Ship size={40} className="mb-2 text-muted" />
+            <h5 className="fw-bold">Bạn chưa có đơn vé nào phù hợp</h5>
+            <p className="text-muted small mb-3">
+              Hãy khám phá thêm các hành trình du thuyền mới nhé.
+            </p>
+            <Button
+              as={Link}
+              to="/passenger/dashboard"
+              variant="primary"
+              size="sm"
+              className="rounded-pill px-4"
+            >
+              Khám phá tour ngay
+            </Button>
+          </Alert>
+        )}
+
+        {/* Lưới hiển thị danh sách Booking */}
+        <Row xs={1} md={2} lg={3} className="g-4">
+          {filteredBookings.map((booking) => {
+            const currentStatus = statusConfig[booking.status] || {
+              label: booking.status,
+              bg: "secondary",
+              text: "white",
+            };
+
+            return (
+              <Col key={booking.id}>
+                <Card className="tour-card h-100 shadow-sm border-0 rounded-4 p-4 d-flex flex-column">
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <span className="text-muted small fw-semibold">
+                      MÃ:{" "}
+                      <strong>{booking.bookingCode || `#${booking.id}`}</strong>
+                    </span>
+                    <Badge
+                      bg={currentStatus.bg}
+                      text={currentStatus.text}
+                      className="px-3 py-2 rounded-pill shadow-sm"
+                    >
+                      {currentStatus.label}
+                    </Badge>
+                  </div>
+
+                  <div className="tour-info-box bg-light p-3 rounded-3 mb-3 small text-secondary flex-grow-1">
+                    <div className="mb-2 text-dark fw-bold">
+                      {booking.tourName ||
+                        booking.tour?.name ||
+                        "Hành trình du thuyền"}
+                    </div>
+                    <div className="d-flex align-items-center gap-2 mb-2">
+                      <CalendarDays size={16} className="text-primary" />
+                      <span>
+                        <strong>Ngày tạo:</strong>{" "}
+                        {formatDateTime(booking.createdAt)}
+                      </span>
+                    </div>
+                    <div className="d-flex align-items-center gap-2 mb-2">
+                      <Users size={16} className="text-primary" />
+                      <span>
+                        <strong>Hành khách:</strong>{" "}
+                        {booking.passengers?.length || 0} người
+                      </span>
+                    </div>
+                    <div className="d-flex align-items-center gap-2">
+                      <CreditCard size={16} className="text-primary" />
+                      <span>
+                        <strong>Tổng tiền:</strong>{" "}
+                        <span className="text-primary fw-bold">
+                          {formatMoney(booking.totalAmount)}
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-top text-end mt-auto">
+                    <Button
+                      as={Link}
+                      to={`/passenger/bookings/${booking.id}`}
+                      variant="outline-primary"
+                      size="sm"
+                      className="rounded-pill px-4 w-100"
+                    >
+                      Xem chi tiết & Quản lý hành khách
+                    </Button>
+                  </div>
+                </Card>
+              </Col>
+            );
+          })}
+        </Row>
+      </Container>
+    </div>
   );
 }

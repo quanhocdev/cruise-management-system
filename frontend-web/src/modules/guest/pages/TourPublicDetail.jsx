@@ -1,5 +1,3 @@
-// src/modules/guest/pages/TourPublicDetail.jsx
-
 import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
@@ -82,7 +80,7 @@ export default function TourPublicDetail() {
   return (
     <div className="tour-detail-page bg-light py-5">
       <Container>
-        {/* Điều hướng breadcrumb cơ bản */}
+        {/* Breadcrumb */}
         <div className="mb-4">
           <Link
             to="/tours"
@@ -92,7 +90,7 @@ export default function TourPublicDetail() {
           </Link>
         </div>
 
-        {/* Tiêu đề & Thông tin cơ bản */}
+        {/* Header & Nút Đặt Tour Ngay */}
         <Row className="mb-4 align-items-center">
           <Col lg={8}>
             <div className="d-flex align-items-center gap-2 mb-2">
@@ -108,6 +106,7 @@ export default function TourPublicDetail() {
             <h1 className="fw-bold text-dark mb-2">{tour.name}</h1>
             <p className="text-muted mb-0">{tour.description}</p>
           </Col>
+
           <Col lg={4} className="text-lg-end mt-3 mt-lg-0">
             <Card className="shadow-sm border-0 p-3 bg-white rounded-4">
               <div className="text-muted small mb-1">Thời gian chuyến đi</div>
@@ -186,7 +185,7 @@ export default function TourPublicDetail() {
           </Card>
         )}
 
-        {/* Các tab thông tin chi tiết */}
+        {/* Tabs Chi tiết */}
         <Card className="shadow-sm border-0 rounded-4 overflow-hidden">
           <Card.Body className="p-4">
             <Tabs
@@ -197,189 +196,98 @@ export default function TourPublicDetail() {
               {/* Tab Lịch trình */}
               <Tab eventKey="schedules" title="📅 Lịch Trình Chi Tiết">
                 <div className="schedule-timeline mt-3">
-                  {tour.schedules &&
-                    tour.schedules.map((schedule) => (
-                      <div
-                        key={schedule.id}
-                        className="schedule-day-block mb-4 p-3 bg-light rounded-3 border-start border-4 border-primary"
-                      >
-                        <h5 className="fw-bold text-primary mb-1">
-                          Ngày {schedule.dayNumber}: {schedule.name}
-                        </h5>
-                        <p className="text-muted small mb-3">
-                          {schedule.description} ({schedule.realDay})
-                        </p>
-
-                        {schedule.stops && schedule.stops.length > 0 && (
-                          <div className="stops-list ms-2 ps-3 border-start">
-                            {schedule.stops.map((stop) => (
-                              <div key={stop.id} className="stop-item mb-3">
-                                <div className="fw-semibold text-dark">
-                                  📍 Cảng dừng: {stop.portName} ({stop.portCity}
-                                  , {stop.portCountry})
-                                </div>
-                                <div className="text-muted small">
-                                  Thời gian đến: {formatDateTime(stop.arriveAt)}{" "}
-                                  - Rời đi: {formatDateTime(stop.leaveAt)}
-                                </div>
-                                {stop.portDescription && (
-                                  <div className="text-muted small fst-italic">
-                                    {stop.portDescription}
-                                  </div>
-                                )}
-
-                                {stop.visitActivity && (
-                                  <div className="mt-2 p-2 bg-white rounded border border-warning small">
-                                    <span className="fw-bold text-dark">
-                                      🎯 Hoạt động tham quan:{" "}
-                                    </span>
-                                    <span>{stop.visitActivity.visitName}</span>{" "}
-                                    -{" "}
-                                    <span className="text-danger fw-semibold">
-                                      {stop.visitActivity.price
-                                        ? Number(
-                                            stop.visitActivity.price,
-                                          ).toLocaleString() + " đ"
-                                        : "Miễn phí"}
-                                    </span>
-                                  </div>
-                                )}
+                  {tour.schedules?.map((schedule) => (
+                    <div
+                      key={schedule.id}
+                      className="schedule-day-block mb-4 p-3 bg-light rounded-3 border-start border-4 border-primary"
+                    >
+                      <h5 className="fw-bold text-primary mb-1">
+                        Ngày {schedule.dayNumber}: {schedule.name}
+                      </h5>
+                      <p className="text-muted small mb-3">
+                        {schedule.description} ({schedule.realDay})
+                      </p>
+                      {schedule.stops && schedule.stops.length > 0 && (
+                        <div className="stops-list ms-2 ps-3 border-start">
+                          {schedule.stops.map((stop) => (
+                            <div key={stop.id} className="stop-item mb-3">
+                              <div className="fw-semibold text-dark">
+                                📍 Cảng dừng: {stop.portName} ({stop.portCity},{" "}
+                                {stop.portCountry})
                               </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                              <div className="text-muted small">
+                                Thời gian đến: {formatDateTime(stop.arriveAt)} -
+                                Rời đi: {formatDateTime(stop.leaveAt)}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </Tab>
 
-              {/* Tab Gói Tour & Quyền lợi */}
+              {/* Tab Gói Tour (Chỉ hiển thị thông tin, KHÔNG có nút chọn gói) */}
               <Tab eventKey="packages" title="🎁 Các Gói Tour & Quyền Lợi">
                 <Row xs={1} md={2} className="g-4 mt-2">
-                  {tour.packages &&
-                    tour.packages.map((pkg) => (
-                      <Col key={pkg.id}>
-                        <Card className="h-100 border rounded-3 p-3 shadow-sm">
-                          <Card.Body>
-                            <h5 className="fw-bold text-dark">{pkg.name}</h5>
-                            <p className="text-muted small">
-                              {pkg.description}
-                            </p>
-                            <div className="fw-bold text-primary fs-5 mb-3">
-                              {Number(pkg.price).toLocaleString("vi-VN")} đ
-                            </div>
-
-                            <h6 className="fw-semibold small text-uppercase text-secondary">
-                              Quyền lợi bao gồm:
-                            </h6>
-                            <ul className="small text-muted ps-3 mb-0">
-                              {pkg.benefits &&
-                                pkg.benefits.map((benefit, idx) => (
-                                  <li key={idx}>
-                                    {benefit.type} (Số lượng: {benefit.quantity}{" "}
-                                    {benefit.discountPercent
-                                      ? `, Giảm: ${benefit.discountPercent}%`
-                                      : ""}
-                                    )
-                                  </li>
-                                ))}
-                            </ul>
-                          </Card.Body>
-                        </Card>
-                      </Col>
-                    ))}
+                  {tour.packages?.map((pkg) => (
+                    <Col key={pkg.id}>
+                      <Card className="h-100 border rounded-3 p-3 shadow-sm d-flex flex-column">
+                        <Card.Body className="d-flex flex-column">
+                          <h5 className="fw-bold text-dark">{pkg.name}</h5>
+                          <p className="text-muted small">{pkg.description}</p>
+                          <div className="fw-bold text-primary fs-5 mb-3">
+                            {Number(pkg.price).toLocaleString("vi-VN")} đ
+                          </div>
+                          <h6 className="fw-semibold small text-uppercase text-secondary">
+                            Quyền lợi bao gồm:
+                          </h6>
+                          <ul className="small text-muted ps-3 mb-0">
+                            {pkg.benefits?.map((benefit, idx) => (
+                              <li key={idx}>
+                                {benefit.type} (Số lượng: {benefit.quantity}
+                                {benefit.discountPercent
+                                  ? `, Giảm: ${benefit.discountPercent}%`
+                                  : ""}
+                                )
+                              </li>
+                            ))}
+                          </ul>
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                  ))}
                 </Row>
               </Tab>
 
-              {/* Tab Tiện Ích & Hoạt Động Tàu */}
+              {/* Tab Onboard Activities */}
               <Tab eventKey="onboard" title="⚓ Tiện Ích & Hoạt Động Tàu">
-                <div className="mt-3">
-                  <h6 className="fw-bold mb-3">Hoạt động giải trí trên tàu</h6>
-                  <Row xs={1} md={3} className="g-3">
-                    {tour.onboardActivities &&
-                      tour.onboardActivities.map((act) => (
-                        <Col key={act.id}>
-                          <Card className="h-100 border-0 bg-light p-3">
-                            <h6 className="fw-bold">{act.activityName}</h6>
-                            <p className="text-muted small mb-2">
-                              {act.activityDescription}
-                            </p>
-                            <span className="fw-bold text-primary small">
-                              Giá:{" "}
-                              {act.price
-                                ? Number(act.price).toLocaleString() + " đ"
-                                : "Miễn phí"}
-                            </span>
-                          </Card>
-                        </Col>
-                      ))}
-                  </Row>
-                </div>
-              </Tab>
-
-              {/* Tab Sản phẩm đi kèm */}
-              <Tab eventKey="products" title="🛍️ Sản Phẩm Đi Kèm">
-                <div className="mt-3">
-                  <Row xs={1} md={3} className="g-3">
-                    {tour.products && tour.products.length > 0 ? (
-                      tour.products.map((prod) => (
-                        <Col key={prod.id}>
-                          <Card className="h-100 border-0 bg-light p-3">
-                            <h6 className="fw-bold">{prod.productName}</h6>
-                            <p className="text-muted small mb-2">
-                              {prod.productDescription}
-                            </p>
-                            <span className="fw-bold text-primary small">
-                              Giá: {Number(prod.price).toLocaleString()} đ
-                            </span>
-                          </Card>
-                        </Col>
-                      ))
-                    ) : (
-                      <Col xs={12}>
-                        <p className="text-muted small mb-0">
-                          Không có sản phẩm đi kèm nào.
+                <Row xs={1} md={3} className="g-3 mt-2">
+                  {tour.onboardActivities?.map((act) => (
+                    <Col key={act.id}>
+                      <Card className="h-100 border-0 bg-light p-3">
+                        <h6 className="fw-bold">{act.activityName}</h6>
+                        <p className="text-muted small mb-2">
+                          {act.activityDescription}
                         </p>
-                      </Col>
-                    )}
-                  </Row>
-                </div>
-              </Tab>
-
-              {/* Tab Dịch vụ tiện ích */}
-              <Tab eventKey="services" title="🛎️ Dịch Vụ Tiện Ích">
-                <div className="mt-3">
-                  <Row xs={1} md={3} className="g-3">
-                    {tour.services && tour.services.length > 0 ? (
-                      tour.services.map((srv) => (
-                        <Col key={srv.id}>
-                          <Card className="h-100 border-0 bg-light p-3">
-                            <h6 className="fw-bold">{srv.serviceName}</h6>
-                            <p className="text-muted small mb-2">
-                              {srv.serviceDescription}
-                            </p>
-                            <span className="fw-bold text-primary small">
-                              Giá: {Number(srv.price).toLocaleString()} đ
-                            </span>
-                          </Card>
-                        </Col>
-                      ))
-                    ) : (
-                      <Col xs={12}>
-                        <p className="text-muted small mb-0">
-                          Không có dịch vụ tiện ích nào.
-                        </p>
-                      </Col>
-                    )}
-                  </Row>
-                </div>
+                        <span className="fw-bold text-primary small">
+                          Giá:{" "}
+                          {act.price
+                            ? Number(act.price).toLocaleString() + " đ"
+                            : "Miễn phí"}
+                        </span>
+                      </Card>
+                    </Col>
+                  ))}
+                </Row>
               </Tab>
             </Tabs>
           </Card.Body>
         </Card>
       </Container>
 
-      {/* Modal thông báo yêu cầu đăng nhập */}
+      {/* Modal yêu cầu đăng nhập */}
       <Modal
         show={showLoginModal}
         onHide={() => setShowLoginModal(false)}
@@ -389,7 +297,8 @@ export default function TourPublicDetail() {
           <Modal.Title className="fw-bold">Yêu cầu đăng nhập</Modal.Title>
         </Modal.Header>
         <Modal.Body className="py-4">
-          Bạn cần đăng nhập để đặt vé cho hành trình này.
+          Bạn cần đăng nhập với tài khoản hành khách (Passenger) để tiến hành
+          đặt vé cho hành trình này.
         </Modal.Body>
         <Modal.Footer className="border-0 pt-0">
           <Button variant="light" onClick={() => setShowLoginModal(false)}>
@@ -397,13 +306,20 @@ export default function TourPublicDetail() {
           </Button>
           <Button
             variant="primary"
-            className="px-4 rounded-pill"
+            className="px-4 rounded-pill fw-bold"
             onClick={() => {
               setShowLoginModal(false);
-              navigate("/login");
+              navigate("/login", {
+                state: {
+                  from: {
+                    pathname: "/passenger/bookings/new",
+                    search: `?tourId=${id}`,
+                  },
+                },
+              });
             }}
           >
-            Đồng ý
+            Đăng Nhập Ngay
           </Button>
         </Modal.Footer>
       </Modal>

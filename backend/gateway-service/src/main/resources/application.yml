@@ -5,6 +5,10 @@ spring:
   application:
     name: gateway-service
 
+  webflux:
+    codec:
+      max-in-memory-size: 10MB
+
   # TẮT BANNER ASCII SPRING BOOT
   main:
     banner-mode: "off"
@@ -22,11 +26,6 @@ spring:
               uri: ${AUTH_SERVICE_URL:http://auth-service:8081}
               predicates:
                 - Path=/api/auth/**,/api/admin/staff/**
-
-            - id: booking-service
-              uri: ${BOOKING_SERVICE_URL:http://booking-service:8082}
-              predicates:
-                - Path=/api/v1/bookings/**,/api/v1/check-in/**,/api/v1/pos/**,/api/admin/pos-terminals/**
 
             - id: payment-service
               uri: ${PAYMENT_SERVICE_URL:http://payment-service:8085}
@@ -113,6 +112,14 @@ spring:
               uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
               predicates:
                 - Path=/api/passenger/**
+
+            # ==========================
+            # BOOKING SERVICE - PASSENGER
+            # ==========================
+            - id: booking-service
+              uri: ${BOOKING_SERVICE_URL:http://booking-service:8082}
+              predicates:
+                - Path=/api/passengers/**
 
           # ==========================
           # CORS

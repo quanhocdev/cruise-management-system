@@ -11,7 +11,6 @@ import RegisterPage from "./modules/auth/pages/RegisterPage";
 import LoginPage from "./modules/auth/pages/LoginPage";
 import VerifyOtpPage from "./modules/auth/pages/VerifyOtpPage";
 import ActivatePage from "./modules/auth/pages/ActivatePage";
-import PaymentResultPage from "./modules/payment/pages/PaymentResultPage";
 
 // Admin imports
 import AdminLayout from "./layouts/AdminLayout";
@@ -29,11 +28,13 @@ import ManagerService from "./modules/admin/pages/ManagerService";
 import ManagerPolicy from "./modules/admin/pages/ManagerPolicy";
 
 // Passenger imports
-import PassengerDashboard from "./modules/passenger/pages/Dashboard";
-import PassengerTourDetail from "./modules/passenger/pages/TourDetail";
-import CreatePassengerBooking from "./modules/passenger/pages/CreateBooking";
+// import PassengerDashboard from "./modules/passenger/pages/Dashboard";
+// import PassengerTourDetail from "./modules/passenger/pages/TourDetail";
+// import CreatePassengerBooking from "./modules/passenger/pages/CreateBooking";
 import PassengerBookings from "./modules/passenger/pages/MyBookings";
 import PassengerBookingDetail from "./modules/passenger/pages/BookingDetail";
+import PassengerBooking from "./modules/passenger/pages/PassengerBooking";
+import PaymentResultPage from "./modules/passenger/pages/PaymentResultPage";
 
 // Scheduler imports
 import SchedulerLayout from "./layouts/SchedulerLayout";
@@ -157,30 +158,21 @@ export default function App() {
             path="/passenger/*"
             element={
               <ProtectedRoute allowedRoles={["PASSENGER"]}>
-                <Routes>
-                  <Route path="dashboard" element={<PassengerDashboard />} />
-                  <Route
-                    path="tours/:tourId"
-                    element={<PassengerTourDetail />}
-                  />
-                  <Route
-                    path="bookings/new"
-                    element={<CreatePassengerBooking />}
-                  />
-                  <Route path="bookings" element={<PassengerBookings />} />
-                  <Route
-                    path="bookings/:bookingId"
-                    element={<PassengerBookingDetail />}
-                  />
-
-                  <Route
-                    path=""
-                    element={<Navigate to="dashboard" replace />}
-                  />
-                </Routes>
+                <GuestLayout />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route path="bookings/new" element={<PassengerBooking />} />
+            <Route path="bookings" element={<PassengerBookings />} />
+            <Route
+              path="bookings/:bookingId"
+              element={<PassengerBookingDetail />}
+            />
+            {/* Thêm trang kết quả thanh toán nằm bên trong layout passenger nếu muốn đồng bộ giao diện */}
+            <Route path="payment/result" element={<PaymentResultPage />} />
+            {/* Trỏ mặc định về danh sách bookings nếu vào /passenger */}
+            <Route path="" element={<Navigate to="bookings" replace />} />
+          </Route>
 
           {/* =====================================================
               SCHEDULER ROUTES

@@ -9,7 +9,5 @@ public interface PassengerService {
 
     PassengerResponse getPassengerById(Long id);
 
-    PassengerResponse createPassenger(PassengerRequest request, Long userId);
-
     PassengerResponse updatePassenger(Long id, PassengerRequest request);
 }

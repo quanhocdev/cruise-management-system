@@ -1,90 +1,456 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, BedDouble, CalendarDays, CreditCard, UserRound } from "lucide-react";
-import passengerCatalogService from "../services/passengerCatalogService";
-import paymentService from "../../payment/services/paymentService";
-import "../styles/PassengerCatalog.css";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Button,
+  Badge,
+  Spinner,
+  Alert,
+  Form,
+  Modal,
+} from "react-bootstrap";
+import {
+  ArrowLeft,
+  CalendarDays,
+  CreditCard,
+  Users,
+  Edit3,
+  Ship,
+} from "lucide-react";
+import passengerBookingService from "../services/passengerBookingService";
+import passengerService from "../services/passengerService";
+import "../styles/BookingDetail.css";
 
-const labels = { PENDING_PAYMENT: "Chờ thanh toán", CONFIRMED: "Đã xác nhận", CANCELLED: "Đã hủy" };
-const formatMoney = (value) => new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", maximumFractionDigits: 0 }).format(value || 0);
-const getError = (error, fallback) => error.response?.data?.message || error.response?.data?.detail || fallback;
+const statusConfig = {
+  PENDING_PAYMENT: { label: "Chờ thanh toán", bg: "warning", text: "dark" },
+  CONFIRMED: { label: "Đã xác nhận", bg: "success", text: "white" },
+  CANCELLED: { label: "Đã hủy", bg: "danger", text: "white" },
+};
+
+const formatMoney = (value) =>
+  new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+    maximumFractionDigits: 0,
+  }).format(value || 0);
+
+const formatDateTime = (value) =>
+  value
+    ? new Intl.DateTimeFormat("vi-VN", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }).format(new Date(value))
+    : "—";
 
 export default function BookingDetail() {
   const { bookingId } = useParams();
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [action, setAction] = useState("");
+  const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-  useEffect(() => {
-    passengerCatalogService.getBooking(bookingId)
-      .then(setBooking)
-      .catch((requestError) => setError(getError(requestError, "Không thể tải chi tiết booking.")))
-      .finally(() => setLoading(false));
-  }, [bookingId]);
+  // Modal chỉnh sửa hành khách
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingPassenger, setEditingPassenger] = useState(null);
 
-  const pay = async () => {
-    setAction("pay"); setError("");
+  const fetchBookingDetail = async () => {
+    setLoading(true);
+    setError("");
     try {
-      const payment = await paymentService.createVnPayPayment(booking);
-      if (!payment.paymentUrl) throw new Error("PAYMENT_URL_MISSING");
-      window.location.assign(payment.paymentUrl);
-    } catch (requestError) {
-      setError(getError(requestError, "Không thể bắt đầu thanh toán VNPay.")); setAction("");
+      const data = await passengerBookingService.getBooking(bookingId);
+      setBooking(data);
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Không thể tải chi tiết booking.",
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
-  const cancel = async () => {
-    if (!window.confirm("Ông chắc chắn muốn hủy booking này chứ?")) return;
-    setAction("cancel"); setError("");
-    try { setBooking(await passengerCatalogService.cancelBooking(booking.id)); }
-    catch (requestError) { setError(getError(requestError, "Không thể hủy booking.")); }
-    finally { setAction(""); }
+  useEffect(() => {
+    fetchBookingDetail();
+  }, [bookingId]);
+
+  const handleCancel = async () => {
+    if (!window.confirm("Bạn có chắc chắn muốn hủy đơn hàng này không?"))
+      return;
+    setActionLoading(true);
+    setError("");
+    try {
+      const updated = await passengerBookingService.cancelBooking(booking.id);
+      setBooking(updated);
+      setSuccess("Hủy đơn hàng thành công.");
+    } catch (err) {
+      setError(err.response?.data?.message || "Không thể hủy đơn hàng.");
+    } finally {
+      setActionLoading(false);
+    }
   };
 
-  if (loading) return <div className="catalog-state full-page">Đang tải chi tiết booking...</div>;
-  if (!booking) return <div className="catalog-state full-page error-state"><p>{error}</p><Link to="/passenger/bookings">Quay lại</Link></div>;
+  const openEditPassengerModal = (passenger) => {
+    setEditingPassenger({ ...passenger });
+    setShowEditModal(true);
+  };
+
+  const handleSavePassenger = async (e) => {
+    e.preventDefault();
+    if (!editingPassenger) return;
+    setActionLoading(true);
+    setError("");
+    setSuccess("");
+    try {
+      // Gọi service cập nhật hành khách (Patch)
+      await passengerService.update(editingPassenger.id, editingPassenger);
+      setSuccess("Cập nhật thông tin hành khách thành công.");
+      setShowEditModal(false);
+      fetchBookingDetail(); // Tải lại thông tin booking mới nhất
+    } catch (err) {
+      setError(err.response?.data?.message || "Không thể cập nhật hành khách.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Container className="py-5 text-center">
+        <Spinner animation="border" variant="primary" />
+        <p className="mt-2 text-muted">Đang tải chi tiết booking...</p>
+      </Container>
+    );
+  }
+
+  if (!booking) {
+    return (
+      <Container className="py-5 text-center">
+        <Alert variant="danger">
+          {error || "Không tìm thấy thông tin đơn hàng."}
+        </Alert>
+        <Button
+          as={Link}
+          to="/passenger/bookings"
+          variant="outline-primary"
+          size="sm"
+        >
+          Quay lại danh sách
+        </Button>
+      </Container>
+    );
+  }
+
+  const currentStatus = statusConfig[booking.status] || {
+    label: booking.status,
+    bg: "secondary",
+    text: "white",
+  };
 
   return (
-    <main className="passenger-page booking-detail-page">
-      <header className="booking-form-header">
-        <Link to="/passenger/bookings" className="back-link static-back"><ArrowLeft size={18} /> Booking của tôi</Link>
-        <span className="eyebrow">CHI TIẾT BOOKING</span>
-        <h1>{booking.bookingCode || `Booking #${booking.id}`}</h1>
-      </header>
-      <section className="booking-detail-content">
-        <div className="booking-detail-main">
-          <section className="detail-panel booking-overview">
-            <div><small>Trạng thái</small><span className={`booking-status ${booking.status.toLowerCase()}`}>{labels[booking.status] || booking.status}</span></div>
-            <div><small>Tổng tiền</small><strong>{formatMoney(booking.totalAmount)}</strong></div>
-            <div><small>Người liên hệ</small><strong>{booking.primaryContactName}</strong><span>{booking.primaryContactPhone}</span></div>
-          </section>
-          <section className="detail-panel">
-            <h2>Thông tin hành khách</h2>
-            <div className="passenger-detail-list">
-              {booking.passengers?.map((passenger) => (
-                <article key={passenger.passengerVoyageId}>
-                  <span className="passenger-number"><UserRound size={20} /></span>
-                  <div><strong>{passenger.fullName}</strong><small>{passenger.gender} · {passenger.dateOfBirth}</small><small>{passenger.phoneNumber || "Chưa có SĐT"} · {passenger.email || "Chưa có email"}</small></div>
-                  <div className="passenger-room"><BedDouble size={18} /><span>Phòng</span><strong>{String(passenger.cabinId).slice(0, 8)}...</strong></div>
-                </article>
+    <div className="tour-public-page bg-light min-vh-100 pb-5">
+      <div className="tour-public-hero text-white py-4 mb-4 shadow-sm text-center">
+        <Container>
+          <div className="d-flex justify-content-start mb-2">
+            <Link
+              to="/passenger/bookings"
+              className="text-white text-decoration-none small d-flex align-items-center gap-1"
+            >
+              <ArrowLeft size={16} /> Quay lại Booking của tôi
+            </Link>
+          </div>
+          <h1 className="fw-bold fs-3 mb-1">
+            🎫 Chi Tiết Đơn: {booking.bookingCode || `#${booking.id}`}
+          </h1>
+        </Container>
+      </div>
+
+      <Container>
+        {error && <Alert variant="danger">{error}</Alert>}
+        {success && <Alert variant="success">{success}</Alert>}
+
+        <Row className="g-4">
+          {/* Thông tin chính & Danh sách hành khách */}
+          <Col lg={8}>
+            <Card className="border-0 shadow-sm rounded-4 p-4 mb-4">
+              <h5 className="fw-bold text-primary mb-3">
+                📦 Tổng quan đơn hàng
+              </h5>
+              <Row className="small text-secondary g-3">
+                <Col md={6}>
+                  <div>
+                    <strong>Trạng thái:</strong>{" "}
+                    <Badge bg={currentStatus.bg} text={currentStatus.text}>
+                      {currentStatus.label}
+                    </Badge>
+                  </div>
+                  <div className="mt-2">
+                    <strong>Ngày tạo:</strong>{" "}
+                    {formatDateTime(booking.createdAt)}
+                  </div>
+                </Col>
+                <Col md={6}>
+                  <div>
+                    <strong>Người liên hệ:</strong> {booking.primaryContactName}
+                  </div>
+                  <div className="mt-2">
+                    <strong>Số điện thoại:</strong>{" "}
+                    {booking.primaryContactPhone}
+                  </div>
+                </Col>
+              </Row>
+            </Card>
+
+            <Card className="border-0 shadow-sm rounded-4 p-4">
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <h5 className="fw-bold text-primary m-0">
+                  👥 Danh sách hành khách tham gia
+                </h5>
+              </div>
+
+              {booking.passengers?.map((p, index) => (
+                <div
+                  key={p.id || index}
+                  className="passenger-row p-3 mb-3 d-flex justify-content-between align-items-center"
+                >
+                  <div>
+                    <div className="fw-bold text-dark">
+                      {index + 1}. {p.fullName}{" "}
+                      <span className="text-muted fw-normal">
+                        ({p.gender}, {p.dateOfBirth})
+                      </span>
+                    </div>
+                    <div className="small text-secondary mt-1">
+                      {p.idCardType}: <strong>{p.identificationNumber}</strong>{" "}
+                      | SĐT: {p.phoneNumber || "—"} | Email: {p.email || "—"}
+                    </div>
+                    {p.documentNote && (
+                      <div className="small text-muted fst-italic mt-1">
+                        Ghi chú: {p.documentNote}
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <Button
+                      variant="outline-primary"
+                      size="sm"
+                      className="rounded-pill px-3 d-flex align-items-center gap-1"
+                      onClick={() => openEditPassengerModal(p)}
+                    >
+                      <Edit3 size={14} /> Sửa
+                    </Button>
+                  </div>
+                </div>
               ))}
-            </div>
-          </section>
-        </div>
-        <aside className="booking-summary booking-actions-panel">
-          <CalendarDays size={25} />
-          <h2>Booking #{booking.id}</h2>
-          <p>Mã chuyến: <strong>{String(booking.voyageId).slice(0, 13)}...</strong></p>
-          {booking.paymentId && <p><CreditCard size={16} /> Thanh toán #{booking.paymentId}</p>}
-          {booking.status === "PENDING_PAYMENT" && <>
-            <button className="booking-button" type="button" disabled={Boolean(action)} onClick={pay}>{action === "pay" ? "Đang chuyển đến VNPay..." : "Thanh toán VNPay"}</button>
-            <button className="cancel-booking-button" type="button" disabled={Boolean(action)} onClick={cancel}>{action === "cancel" ? "Đang hủy..." : "Hủy booking"}</button>
-          </>}
-          {booking.status === "CONFIRMED" && <div className="booking-confirmed-note">Booking đã được thanh toán và xác nhận.</div>}
-          {error && <p className="payment-error">{error}</p>}
-        </aside>
-      </section>
-    </main>
+            </Card>
+          </Col>
+
+          {/* Sidebar tóm tắt và hành động */}
+          <Col lg={4}>
+            <Card
+              className="border-0 shadow-sm rounded-4 p-4 sticky-top"
+              style={{ top: "20px" }}
+            >
+              <h5 className="fw-bold text-dark mb-3">Tóm tắt thanh toán</h5>
+              <p className="text-muted small mb-2">
+                Mã Tour / Chuyến:{" "}
+                <strong>{booking.tourCode || booking.tourId || "N/A"}</strong>
+              </p>
+              <hr />
+              <div className="d-flex justify-content-between mb-3">
+                <span className="text-muted">Tổng tiền:</span>
+                <span className="fw-bold text-primary fs-5">
+                  {formatMoney(booking.totalAmount)}
+                </span>
+              </div>
+
+              {booking.status === "PENDING_PAYMENT" && (
+                <div className="d-grid gap-2">
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    className="rounded-pill fw-bold"
+                    onClick={handleCancel}
+                    disabled={actionLoading}
+                  >
+                    {actionLoading ? <Spinner size="sm" /> : "Hủy đơn hàng"}
+                  </Button>
+                </div>
+              )}
+
+              {booking.status === "CONFIRMED" && (
+                <Alert
+                  variant="success"
+                  className="small text-center py-2 mb-0"
+                >
+                  Đơn hàng đã được xác nhận thành công.
+                </Alert>
+              )}
+            </Card>
+          </Col>
+        </Row>
+      </Container>
+
+      {/* Modal chỉnh sửa hành khách */}
+      <Modal
+        show={showEditModal}
+        onHide={() => setShowEditModal(false)}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title className="fw-bold fs-5 text-primary">
+            Chỉnh sửa thông tin hành khách
+          </Modal.Title>
+        </Modal.Header>
+        <Form onSubmit={handleSavePassenger}>
+          <Modal.Body>
+            {editingPassenger && (
+              <Row className="g-3">
+                <Col md={12}>
+                  <Form.Label className="small">Họ và tên</Form.Label>
+                  <Form.Control
+                    size="sm"
+                    type="text"
+                    required
+                    value={editingPassenger.fullName || ""}
+                    onChange={(e) =>
+                      setEditingPassenger({
+                        ...editingPassenger,
+                        fullName: e.target.value,
+                      })
+                    }
+                  />
+                </Col>
+                <Col md={6}>
+                  <Form.Label className="small">Ngày sinh</Form.Label>
+                  <Form.Control
+                    size="sm"
+                    type="date"
+                    required
+                    value={editingPassenger.dateOfBirth || ""}
+                    onChange={(e) =>
+                      setEditingPassenger({
+                        ...editingPassenger,
+                        dateOfBirth: e.target.value,
+                      })
+                    }
+                  />
+                </Col>
+                <Col md={6}>
+                  <Form.Label className="small">Giới tính</Form.Label>
+                  <Form.Select
+                    size="sm"
+                    value={editingPassenger.gender || "Nam"}
+                    onChange={(e) =>
+                      setEditingPassenger({
+                        ...editingPassenger,
+                        gender: e.target.value,
+                      })
+                    }
+                  >
+                    <option value="Nam">Nam</option>
+                    <option value="Nữ">Nữ</option>
+                    <option value="Khác">Khác</option>
+                  </Form.Select>
+                </Col>
+                <Col md={6}>
+                  <Form.Label className="small">Số điện thoại</Form.Label>
+                  <Form.Control
+                    size="sm"
+                    type="text"
+                    value={editingPassenger.phoneNumber || ""}
+                    onChange={(e) =>
+                      setEditingPassenger({
+                        ...editingPassenger,
+                        phoneNumber: e.target.value,
+                      })
+                    }
+                  />
+                </Col>
+                <Col md={6}>
+                  <Form.Label className="small">Email</Form.Label>
+                  <Form.Control
+                    size="sm"
+                    type="email"
+                    value={editingPassenger.email || ""}
+                    onChange={(e) =>
+                      setEditingPassenger({
+                        ...editingPassenger,
+                        email: e.target.value,
+                      })
+                    }
+                  />
+                </Col>
+                <Col md={6}>
+                  <Form.Label className="small">Loại giấy tờ</Form.Label>
+                  <Form.Select
+                    size="sm"
+                    value={editingPassenger.idCardType || "CCCD"}
+                    onChange={(e) =>
+                      setEditingPassenger({
+                        ...editingPassenger,
+                        idCardType: e.target.value,
+                      })
+                    }
+                  >
+                    <option value="CCCD">CCCD</option>
+                    <option value="CMND">CMND</option>
+                    <option value="Passport">Passport</option>
+                  </Form.Select>
+                </Col>
+                <Col md={6}>
+                  <Form.Label className="small">Số định danh / CCCD</Form.Label>
+                  <Form.Control
+                    size="sm"
+                    type="text"
+                    required
+                    value={editingPassenger.identificationNumber || ""}
+                    onChange={(e) =>
+                      setEditingPassenger({
+                        ...editingPassenger,
+                        identificationNumber: e.target.value,
+                      })
+                    }
+                  />
+                </Col>
+                <Col md={12}>
+                  <Form.Label className="small">Ghi chú giấy tờ</Form.Label>
+                  <Form.Control
+                    size="sm"
+                    type="text"
+                    value={editingPassenger.documentNote || ""}
+                    onChange={(e) =>
+                      setEditingPassenger({
+                        ...editingPassenger,
+                        documentNote: e.target.value,
+                      })
+                    }
+                  />
+                </Col>
+              </Row>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setShowEditModal(false)}
+            >
+              Đóng
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              type="submit"
+              disabled={actionLoading}
+            >
+              {actionLoading ? <Spinner size="sm" /> : "Lưu thay đổi"}
+            </Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
+    </div>
   );
 }
