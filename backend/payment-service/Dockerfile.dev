@@ -1,8 +1,24 @@
 FROM maven:3.9.11-eclipse-temurin-17
 
 WORKDIR /app
-COPY pom.xml .
-RUN mvn -B dependency:go-offline
-COPY src src
 
+# ==========================
+# 1. Copy và build thư viện Common trước (vì Payment cần dùng chung Event)
+# ==========================
+COPY common/pom.xml ./common/pom.xml
+COPY common/src ./common/src
+RUN mvn -f common/pom.xml clean install -DskipTests
+
+# ==========================
+# 2. Copy và build Payment Service
+# ==========================
+COPY payment-service/pom.xml ./payment-service/pom.xml
+COPY payment-service/src ./payment-service/src
+
+WORKDIR /app/payment-service
+
+# Tải dependency của payment-service
+RUN mvn dependency:go-offline -B
+
+# Chạy service
 CMD ["mvn", "spring-boot:run", "-Dspring-boot.run.fork=false"]

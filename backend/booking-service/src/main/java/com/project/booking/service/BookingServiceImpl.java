@@ -1,6 +1,7 @@
 package com.project.booking.service;
 
 import com.project.common.dto.UploadResult;
+import com.project.common.event.BookingCreatedEvent; // Import Event record chung của bạn
 import com.project.common.service.file.FileStorageService;
 import com.project.booking.dto.booking.*;
 import com.project.booking.dto.passenger.PassengerRequest;
@@ -14,12 +15,14 @@ import com.project.booking.model.enums.BookingStatus;
 import com.project.booking.repository.BookingRepository;
 import com.project.booking.repository.PassengerRepository;
 import com.project.booking.repository.BookingPassengerRepository;
+import org.springframework.kafka.core.KafkaTemplate; // Import KafkaTemplate
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -28,22 +31,27 @@ import java.util.UUID;
 @Transactional
 public class BookingServiceImpl implements BookingService {
 
+    private static final String BOOKING_CREATED_TOPIC = "booking-created-topic";
+
     private final BookingRepository bookingRepository;
     private final PassengerRepository passengerRepository;
     private final BookingPassengerRepository bookingPassengerRepository;
     private final BookingMapper bookingMapper;
     private final FileStorageService fileStorageService;
+    private final KafkaTemplate<String, Object> kafkaTemplate; // Khai báo KafkaTemplate
 
     public BookingServiceImpl(BookingRepository bookingRepository,
             PassengerRepository passengerRepository,
             BookingPassengerRepository bookingPassengerRepository,
             BookingMapper bookingMapper,
-            FileStorageService fileStorageService) {
+            FileStorageService fileStorageService,
+            KafkaTemplate<String, Object> kafkaTemplate) { // Inject vào Constructor
         this.bookingRepository = bookingRepository;
         this.passengerRepository = passengerRepository;
         this.bookingPassengerRepository = bookingPassengerRepository;
         this.bookingMapper = bookingMapper;
         this.fileStorageService = fileStorageService;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     @Override
@@ -77,9 +85,7 @@ public class BookingServiceImpl implements BookingService {
                 System.out.println(">>> [SERVICE] Đang xử lý hành khách thứ " + (i + 1) + ": " + pReq.getFullName());
 
                 Passenger passenger = new Passenger();
-
                 passenger.setBooking(savedBooking);
-
                 passenger.setFullName(pReq.getFullName() != null ? pReq.getFullName().trim() : null);
                 passenger.setDateOfBirth(pReq.getDateOfBirth());
                 passenger.setGender(pReq.getGender() != null ? pReq.getGender().trim() : null);
@@ -107,6 +113,23 @@ public class BookingServiceImpl implements BookingService {
                 link.setCheckinStatus("PENDING");
                 bookingPassengerRepository.save(link);
             }
+
+            // =========================================================
+            // BẮN KAFKA EVENT SAU KHI LƯU XONG ĐƠN HÀNG VÀ HÀNH KHÁCH
+            // =========================================================
+            BookingCreatedEvent event = new BookingCreatedEvent(
+                    savedBooking.getId(),
+                    userId,
+                    savedBooking.getTourId(),
+                    savedBooking.getTourPackageId(),
+                    passengerCount,
+                    savedBooking.getTotalAmount(),
+                    LocalDateTime.now());
+
+            // Gửi đi với key là bookingId dạng String để phân vùng (partition) rõ ràng
+            kafkaTemplate.send(BOOKING_CREATED_TOPIC, savedBooking.getId().toString(), event);
+            System.out.println(
+                    ">>> [KAFKA PRODUCER] Đã bắn event PENDING_PAYMENT cho Booking ID: " + savedBooking.getId());
 
             List<BookingPassenger> links = bookingPassengerRepository
                     .findAllByBooking_IdOrderByIdAsc(savedBooking.getId());

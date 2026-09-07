@@ -1,58 +1,108 @@
 package com.project.payment.config;
 
-import jakarta.servlet.http.*;
-import org.springframework.context.annotation.*;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.oauth2.server.resource.authentication.*;
-import org.springframework.security.oauth2.server.resource.web.*;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
+import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.web.SecurityFilterChain;
+
 import java.util.Arrays;
 
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
+
     @Bean
     public SecurityFilterChain securityFilterChain(
-        org.springframework.security.config.annotation.web.builders.HttpSecurity http,
-        BearerTokenResolver tokenResolver,
-        JwtAuthenticationConverter authenticationConverter
-    ) throws Exception {
-        return http.csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                .requestMatchers(HttpMethod.GET,
-                    "/api/v1/payments/vnpay/return",
-                    "/api/v1/payments/vnpay/ipn").permitAll()
-                .anyRequest().authenticated())
-            .oauth2ResourceServer(resource -> resource
-                .bearerTokenResolver(tokenResolver)
-                .jwt(jwt -> jwt.jwtAuthenticationConverter(authenticationConverter)))
-            .build();
+            org.springframework.security.config.annotation.web.builders.HttpSecurity http,
+            BearerTokenResolver bearerTokenResolver,
+            JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
+        return http
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(authorize -> authorize
+                        // CORS preflight
+                        .requestMatchers(HttpMethod.OPTIONS, "/**")
+                        .permitAll()
+
+                        // Public endpoints & VNPay callbacks
+                        .requestMatchers(
+                                "/actuator/health",
+                                "/actuator/info",
+                                "/internal/**",
+                                "/api/public/**",
+                                "/api/v1/payments/vnpay/return",
+                                "/api/v1/payments/vnpay/ipn")
+                        .permitAll()
+
+                        // Role-based rules matching booking service standard
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/scheduler/**").hasRole("SCHEDULER")
+                        .requestMatchers("/api/convenience/**").hasRole("CONVENIENCE")
+                        .requestMatchers("/api/operation/**").hasRole("OPERATION")
+                        .requestMatchers("/api/onboard/**").hasRole("ONBOARD")
+                        .requestMatchers("/api/shore/**").hasRole("SHORE")
+                        .requestMatchers("/api/passenger/**").hasRole("PASSENGER")
+
+                        // Everything else
+                        .anyRequest()
+                        .authenticated())
+                .oauth2ResourceServer(resourceServer -> resourceServer
+                        .bearerTokenResolver(bearerTokenResolver)
+                        .jwt(jwt -> jwt
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter)))
+                .build();
     }
 
     @Bean
     public BearerTokenResolver bearerTokenResolver() {
-        DefaultBearerTokenResolver header = new DefaultBearerTokenResolver();
+        DefaultBearerTokenResolver headerResolver = new DefaultBearerTokenResolver();
+
         return request -> {
-            Cookie[] cookies = request.getCookies();
-            if (cookies != null) {
-                String token = Arrays.stream(cookies).filter(c -> "accessToken".equals(c.getName()))
-                    .map(Cookie::getValue).filter(v -> !v.isBlank()).findFirst().orElse(null);
-                if (token != null) return token;
+            String cookieToken = findAccessTokenCookie(request);
+
+            if (cookieToken != null) {
+                return cookieToken;
             }
-            return header.resolve(request);
+
+            return headerResolver.resolve(request);
         };
     }
 
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter roles = new JwtGrantedAuthoritiesConverter();
-        roles.setAuthoritiesClaimName("scope"); roles.setAuthorityPrefix("ROLE_");
-        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-        converter.setJwtGrantedAuthoritiesConverter(roles); return converter;
+        JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
+
+        authoritiesConverter.setAuthoritiesClaimName("scope");
+        authoritiesConverter.setAuthorityPrefix("ROLE_");
+
+        JwtAuthenticationConverter authenticationConverter = new JwtAuthenticationConverter();
+
+        authenticationConverter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
+
+        return authenticationConverter;
+    }
+
+    private String findAccessTokenCookie(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies == null) {
+            return null;
+        }
+
+        return Arrays.stream(cookies)
+                .filter(cookie -> "accessToken".equals(cookie.getName()))
+                .map(Cookie::getValue)
+                .filter(value -> !value.isBlank())
+                .findFirst()
+                .orElse(null);
     }
 }
