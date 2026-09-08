@@ -28,7 +28,13 @@ internal fun notificationTime(value: String?): String = runCatching {
 
 @Composable
 fun NotificationsScreen(api: ApiService, onBack: () -> Unit, onBooking: (Long) -> Unit) {
-    val inbox = remember(api) { NotificationInbox(NotificationRepository(api)) }
+    val inbox = remember(api) {
+        NotificationInbox(NotificationRepository(api), onFailure = { error ->
+            // Log only error category/status; never tokens, message bodies or personal data.
+            val status = (error as? retrofit2.HttpException)?.code()?.let { " HTTP $it" }.orEmpty()
+            android.util.Log.w("NotificationInbox", "Request failed: ${error.javaClass.simpleName}$status")
+        })
+    }
     val state by inbox.state.collectAsState()
     val scope = rememberCoroutineScope()
     var selected by rememberSaveable { mutableStateOf<Long?>(null) }
@@ -47,8 +53,12 @@ fun NotificationsScreen(api: ApiService, onBack: () -> Unit, onBooking: (Long) -
 
     Surface(Modifier.fillMaxSize(), color = OceanMist) {
     Column(Modifier.fillMaxSize().safeDrawingPadding().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        TextButton(onClick = { if (selected != null) selected = null else onBack() }) {
-            Text(if (selected == null) "← Dashboard" else "← Danh sách thông báo")
+        FilledTonalButton(
+            onClick = { if (selected != null) selected = null else onBack() },
+            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Text(if (selected == null) "← Quay lại Dashboard" else "← Quay lại danh sách", style = MaterialTheme.typography.titleMedium)
         }
         Text(if (detail == null) "Thông báo" else "Chi tiết thông báo", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         if (state.loaded) Text("${state.unreadCount} chưa đọc", color = OceanTeal, style = MaterialTheme.typography.labelLarge)
@@ -100,7 +110,8 @@ fun NotificationsScreen(api: ApiService, onBack: () -> Unit, onBooking: (Long) -
             }
             OutlinedButton(onClick = { confirmAll = true }, enabled = !state.busy && state.unreadCount > 0) { Text("Đánh dấu tất cả đã đọc") }
         }
-        OutlinedButton(onClick = { scope.launch { inbox.refresh() } }, enabled = !state.busy) { Text("Tải lại") }
+        OutlinedButton(onClick = { scope.launch { inbox.refresh() } }, enabled = !state.busy,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) { Text("Tải lại") }
     }
     }
     }

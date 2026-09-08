@@ -5,10 +5,41 @@ import com.project.cruise.android.data.repository.NotificationSource
 import com.project.cruise.android.viewmodel.passenger.NotificationInbox
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.awaitCancellation
 import org.junit.Test
 import org.junit.Assert.*
 
 class NotificationInboxTest {
+    @Test fun hangingRequestTimesOutAndCanRetryWithoutLosingUnreadItems() = runBlocking {
+        var hang = false
+        val source = object : NotificationSource {
+            override suspend fun list(): List<PassengerNotification> {
+                if (hang) awaitCancellation()
+                return listOf(entry())
+            }
+            override suspend fun read(id: Long): PassengerNotification = awaitCancellation()
+            override suspend fun readAll(): Unit = awaitCancellation()
+        }
+        val failures = mutableListOf<Exception>()
+        val inbox = NotificationInbox(source, timeoutMillis = 50, onFailure = { failures.add(it) })
+        hang = true
+        inbox.refresh()
+        assertFalse(inbox.state.value.busy)
+        assertFalse(inbox.state.value.loaded)
+        assertNotNull(inbox.state.value.error)
+        hang = false
+        inbox.refresh()
+        assertTrue(inbox.state.value.loaded)
+        assertNull(inbox.state.value.error)
+        hang = true
+        inbox.refresh()
+        inbox.read(1)
+        inbox.readAll()
+        assertEquals(1, inbox.state.value.unreadCount)
+        assertFalse(inbox.state.value.busy)
+        assertEquals(4, failures.size)
+        assertTrue(failures.all { it is java.util.concurrent.TimeoutException })
+    }
     private fun entry(id: Long = 1) = PassengerNotification(id, "BOOKING_CONFIRMED", "Title", "Body", "BOOKING", 12, null, "2026-09-07T00:00:00Z")
     private class Fake(var items: List<PassengerNotification>) : NotificationSource {
         var fail = false

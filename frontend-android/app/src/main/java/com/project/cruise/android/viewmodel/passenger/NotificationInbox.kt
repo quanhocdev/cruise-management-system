@@ -5,6 +5,8 @@ import com.project.cruise.android.data.repository.NotificationSource
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.withTimeoutOrNull
+import java.util.concurrent.TimeoutException
 
 data class NotificationInboxState(
     val items: List<PassengerNotification> = emptyList(),
@@ -16,7 +18,11 @@ data class NotificationInboxState(
 }
 
 /** Screen-owned state: no disk cache or shared inbox across signed-in accounts. */
-class NotificationInbox(private val source: NotificationSource) {
+class NotificationInbox(
+    private val source: NotificationSource,
+    private val timeoutMillis: Long = 15_000,
+    private val onFailure: (Exception) -> Unit = {}
+) {
     private val mutable = MutableStateFlow(NotificationInboxState())
     val state = mutable.asStateFlow()
 
@@ -42,9 +48,21 @@ class NotificationInbox(private val source: NotificationSource) {
     private suspend fun operation(message: String, block: suspend () -> Unit) {
         if (mutable.value.busy) return
         mutable.value = mutable.value.copy(busy = true, error = null)
-        try { block() }
+        try {
+            // Bound the entire operation, including authentication and any follow-up fetch.
+            val completed = withTimeoutOrNull(timeoutMillis) { block(); true }
+            if (completed == null) {
+                mutable.value = mutable.value.copy(
+                    error = "Máy chủ phản hồi quá lâu. Chưa xác nhận được kết quả. Bấm Tải lại để kiểm tra."
+                )
+                onFailure(TimeoutException())
+            }
+        }
         catch (cancel: CancellationException) { throw cancel }
-        catch (_: Exception) { mutable.value = mutable.value.copy(error = message) }
+        catch (error: Exception) {
+            mutable.value = mutable.value.copy(error = message)
+            onFailure(error)
+        }
         finally { mutable.value = mutable.value.copy(busy = false) }
     }
 }
