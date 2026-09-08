@@ -158,37 +158,11 @@ export default function PassengerBooking() {
     });
 
     try {
-      const result = await createBooking(formData);
-      const responseData = result?.data || result;
-      const bookingId =
-        responseData?.id || responseData?.bookingId || responseData?.data?.id;
+      // Gọi API tạo booking, hệ thống ngầm sẽ tự lo việc bắn Kafka sang Payment Service
+      await createBooking(formData);
 
-      if (!bookingId) {
-        throw new Error("Không lấy được mã đơn hàng từ hệ thống!");
-      }
-
-      // Giữ nguyên ở màn hình này và gọi liên tục cho đến khi lấy được link VNPay thành công
-      let paymentUrl = null;
-      let attempts = 0;
-      const maxAttempts = 15; // Thử tối đa 15 lần (khoảng 30 giây) để chờ Kafka xử lý
-
-      while (!paymentUrl && attempts < maxAttempts) {
-        attempts++;
-        try {
-          paymentUrl = await fetchPaymentUrl(bookingId);
-        } catch (err) {
-          // Bỏ qua lỗi 500 tạm thời do payment-service chưa kịp lưu bản ghi, đợi vòng lặp sau thử tiếp
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-        }
-      }
-
-      if (paymentUrl) {
-        window.location.href = paymentUrl; // Chuyển hướng thẳng sang VNPay
-      } else {
-        throw new Error(
-          "Hệ thống mất quá nhiều thời gian để khởi tạo thanh toán. Vui lòng vào 'Vé của tôi' để thanh toán sau.",
-        );
-      }
+      alert("Đặt vé thành công!");
+      navigate(`/passenger/bookings`); // Nhảy thẳng về trang danh sách vé của tôi
     } catch (err) {
       console.error("Lỗi chi tiết từ Server trả về:", err.response || err);
       alert(
@@ -198,7 +172,6 @@ export default function PassengerBooking() {
       );
     }
   };
-
   if (tourLoading) {
     return (
       <Container className="py-5 text-center">
