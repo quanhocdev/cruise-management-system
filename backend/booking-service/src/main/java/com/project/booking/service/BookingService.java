@@ -8,8 +8,8 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 public interface BookingService {
-    // 1. Tạo đơn đặt tour mới
-    BookingResponse create(CreateBookingRequest request, Long userId);
+    // 1. Tạo đơn đặt tour mới (đã bao gồm email trích xuất từ JWT)
+    BookingResponse create(CreateBookingRequest request, Long userId, String email);
 
     // 2. Lấy thông tin chi tiết đơn hàng
     BookingResponse get(Long id, Long requesterId, boolean privileged);

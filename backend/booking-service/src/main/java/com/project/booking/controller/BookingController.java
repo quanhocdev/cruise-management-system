@@ -51,22 +51,32 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.get(id, userId, privileged));
     }
 
+    // Thêm hàm trích xuất email từ Token
+    private String extractEmail(Principal principal) {
+        if (principal instanceof JwtAuthenticationToken jwtAuth) {
+            Object emailClaim = jwtAuth.getTokenAttributes().get("email");
+            if (emailClaim != null) {
+                return emailClaim.toString();
+            }
+        }
+        throw new RuntimeException("Không thể xác định email từ token xác thực.");
+    }
+
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> create(
             @ModelAttribute CreateBookingRequest request,
             Principal principal) {
 
         Long userId = extractUserId(principal);
+        String email = extractEmail(principal); // <-- Bốc email từ token
 
         System.out.println("==========================================");
         System.out.println(">>> [CONTROLLER] ĐÃ NHẬN ĐƯỢC REQUEST ĐẶT VÉ!");
         System.out.println(">>> User ID từ Token: " + userId);
-        System.out.println(">>> Tour ID: " + (request != null ? request.getTourId() : "NULL REQUEST"));
-        System.out.println(">>> Số lượng hành khách: "
-                + (request != null && request.getPassengers() != null ? request.getPassengers().size() : 0));
+        System.out.println(">>> Email từ Token: " + email);
         System.out.println("==========================================");
 
-        return ResponseEntity.ok(bookingService.create(request, userId));
+        return ResponseEntity.ok(bookingService.create(request, userId, email)); // Truyền email xuống service
     }
 
     @PatchMapping("/{id}/cancel")

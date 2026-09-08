@@ -12,7 +12,8 @@ import {
 } from "react-bootstrap";
 import { CalendarDays, CreditCard, Users, Ship, ArrowLeft } from "lucide-react";
 import usePassengerBookings from "../hooks/usePassengerBookings";
-import TourStatusFilter from "../../guest/components/TourStatusFilter";
+import BookingStatusFilter from "../components/BookingStatusFilter";
+import TourStatusFilter from "../components/TourStatusFilter";
 import "../styles/MyBooking.css";
 
 const statusConfig = {
@@ -37,20 +38,29 @@ const formatDateTime = (value) =>
     : "—";
 
 export default function MyBookings() {
-  const { bookings, loading, error, loadMyBookings } = usePassengerBookings(); // 👈 Lấy từ hook
+  const { bookings, loading, error, loadMyBookings } = usePassengerBookings();
+
+  // Khai báo state cho 2 loại bộ lọc
+  const [filterBookingStatus, setFilterBookingStatus] = useState("ALL");
   const [filterTripStatus, setFilterTripStatus] = useState("ALL");
 
   useEffect(() => {
-    loadMyBookings(); // 👈 Gọi hàm tải danh sách từ hook
+    loadMyBookings();
   }, [loadMyBookings]);
-
-  // Lọc danh sách booking dựa theo trạng thái chuyến đi
+  console.log("Dữ liệu booking:", bookings);
+  // Lọc danh sách booking theo cả 2 tiêu chí cùng lúc
   const filteredBookings = bookings.filter((booking) => {
-    if (filterTripStatus === "ALL") return true;
-    return (
+    // 1. Lọc theo trạng thái đơn
+    const matchBookingStatus =
+      filterBookingStatus === "ALL" || booking.status === filterBookingStatus;
+
+    // 2. Lọc theo trạng thái chuyến đi
+    const matchTripStatus =
+      filterTripStatus === "ALL" ||
       booking.tourStatusTrip === filterTripStatus ||
-      booking.tour?.statusTrip === filterTripStatus
-    );
+      booking.tour?.statusTrip === filterTripStatus;
+
+    return matchBookingStatus && matchTripStatus;
   });
 
   return (
@@ -74,7 +84,14 @@ export default function MyBookings() {
       </div>
 
       <Container>
-        {/* Bộ lọc trạng thái chuyến đi */}
+        {/* Bộ lọc 1: Trạng thái đơn vé */}
+        <BookingStatusFilter
+          filterStatus={filterBookingStatus}
+          setFilterStatus={setFilterBookingStatus}
+          totalCount={bookings.length}
+        />
+
+        {/* Bộ lọc 2: Trạng thái chuyến đi */}
         <div className="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
           <TourStatusFilter
             filterStatus={filterTripStatus}

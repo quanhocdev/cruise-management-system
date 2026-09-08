@@ -581,30 +581,37 @@ services:
 
   # ==========================
   # Notification Service
-  # TẠM COMMENT: chưa code xong, khi nào làm tới thì bỏ comment
   # ==========================
-  # notification-service:
-  #   build:
-  #     context: ./backend/notification-service
-  #     dockerfile: Dockerfile.dev
-  #   container_name: notification-service
-  #   restart: always
-  #   ports:
-  #     - "8086:8086"
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-notification:5432/notification_service_db
-  #     SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
-  #     SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-  #     NOTIFICATION_EMAIL_ENABLED: ${NOTIFICATION_EMAIL_ENABLED:-false}
-  #     MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
-  #     MAIL_PORT: ${MAIL_PORT:-587}
-  #   depends_on:
-  #     postgres-notification:
-  #       condition: service_healthy
-  #     kafka:
-  #       condition: service_started
+  notification-service:
+    build:
+      context: ./backend
+      dockerfile: notification-service/Dockerfile.dev
+    container_name: notification-service
+    restart: always
+    ports:
+      - "8086:8086"
+    working_dir: /app/notification-service
+    volumes:
+      - ./backend/notification-service/src:/app/notification-service/src
+      - ./backend/common/src:/app/common/src
+      - /app/notification-service/target
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-notification:5432/notification_service_db
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      NOTIFICATION_EMAIL_ENABLED: ${NOTIFICATION_EMAIL_ENABLED:-true}
+      SPRING_MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      SPRING_MAIL_PORT: ${MAIL_PORT:-587}
+      SPRING_MAIL_USERNAME: ${MAIL_USERNAME}
+      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    depends_on:
+      postgres-notification:
+        condition: service_healthy
+      kafka:
+        condition: service_started
 
   # ==========================
   # Feedback Service

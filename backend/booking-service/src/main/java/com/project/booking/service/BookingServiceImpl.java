@@ -1,7 +1,7 @@
 package com.project.booking.service;
 
 import com.project.common.dto.UploadResult;
-import com.project.common.event.BookingCreatedEvent; // Import Event record chung của bạn
+import com.project.common.event.BookingCreatedEvent;
 import com.project.common.service.file.FileStorageService;
 import com.project.booking.dto.booking.*;
 import com.project.booking.dto.passenger.PassengerRequest;
@@ -55,7 +55,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public synchronized BookingResponse create(CreateBookingRequest request, Long userId) {
+    public synchronized BookingResponse create(CreateBookingRequest request, Long userId, String email) {
         try {
             System.out.println(">>> [SERVICE] Bắt đầu xử lý create booking...");
 
@@ -68,6 +68,7 @@ public class BookingServiceImpl implements BookingService {
 
             Booking booking = new Booking();
             booking.setCreatedByUserId(userId);
+            booking.setPrimaryContactEmail(email);
             booking.setTourId(UUID.fromString(request.getTourId()));
             booking.setTourPackageId(UUID.fromString(request.getTourPackageId()));
             booking.setBookingCode(generateBookingCode());

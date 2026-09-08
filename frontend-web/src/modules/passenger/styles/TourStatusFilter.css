@@ -1,0 +1,24 @@
+/* Styling cho các thanh lọc trạng thái (Booking Status & Tour Status Filter) */
+.overflow-x-auto {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+  height: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Đảm bảo các nút lọc không bị bóp méo trên màn hình nhỏ */
+.flex-shrink-0 {
+  flex-shrink: 0 !important;
+}
