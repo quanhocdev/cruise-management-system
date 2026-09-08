@@ -28,7 +28,7 @@ internal fun notificationTime(value: String?): String = runCatching {
 
 @Composable
 fun NotificationsScreen(api: ApiService, onBack: () -> Unit, onBooking: (Long) -> Unit) {
-    val inbox = remember(api) {
+    val inbox = remember(NotificationApiKey(api)) {
         NotificationInbox(NotificationRepository(api), onFailure = { error ->
             // Log only error category/status; never tokens, message bodies or personal data.
             val status = (error as? retrofit2.HttpException)?.code()?.let { " HTTP $it" }.orEmpty()

@@ -15,7 +15,7 @@ fun NotificationDashboardButton(api: ApiService, onClick: () -> Unit) {
     var count by remember { mutableStateOf<Long?>(null) }
     val owner = LocalLifecycleOwner.current
     val scope = rememberCoroutineScope()
-    DisposableEffect(owner, api) {
+    DisposableEffect(owner, NotificationApiKey(api)) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) scope.launch {
                 count = null
