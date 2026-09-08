@@ -24,6 +24,8 @@ import java.util.Locale
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.project.cruise.android.ui.theme.*
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun BookingDetailScreen(
@@ -63,16 +65,15 @@ fun BookingDetailScreen(
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
-    Column(Modifier.fillMaxSize().safeDrawingPadding().verticalScroll(rememberScrollState()).padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        TextButton(onClick = onBack) { Text("← Danh sách booking") }
-        Text("Chi tiết booking", style = MaterialTheme.typography.headlineMedium)
+    OceanPage {
+        FilledTonalButton(onClick = onBack, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) { Text("← Danh sách booking") }
+        OceanBanner("HÀNH TRÌNH CỦA BẠN", "Chi tiết booking")
         if (state.loading) LinearProgressIndicator(Modifier.fillMaxWidth())
-        state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        state.error?.let { OceanNotice(it, true) }
         state.detail?.let { booking ->
             Text(booking.bookingCode ?: "Booking #${booking.id}", style = MaterialTheme.typography.titleLarge)
-            Text("Trạng thái: ${bookingStatus(booking.status)}")
-            Card(Modifier.fillMaxWidth()) {
+            OceanNotice("Trạng thái: ${bookingStatus(booking.status)}")
+            Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White)) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Chuyến đi của tôi", style = MaterialTheme.typography.titleMedium)
                     Text(state.trip?.tourName ?: "Thông tin tour đang cập nhật")
@@ -87,11 +88,13 @@ fun BookingDetailScreen(
                 }
             }
             Text("Liên hệ: ${booking.primaryContactName} — ${booking.primaryContactPhone}")
-            Text("Tổng tiền: ${NumberFormat.getCurrencyInstance(Locale.forLanguageTag("vi-VN")).format(booking.totalAmount)}")
+            Text("Tổng tiền: ${NumberFormat.getCurrencyInstance(Locale.forLanguageTag("vi-VN")).format(booking.totalAmount)}",
+                style = MaterialTheme.typography.titleLarge, color = OceanTeal)
             Text(if (booking.paymentId != null) "Mã thanh toán: ${booking.paymentId}" else "Chưa có giao dịch thanh toán thành công")
 
             if (booking.status == "PENDING_PAYMENT") {
-                Button(onClick = onStartPayment, enabled = !state.creatingPayment) {
+                Button(onClick = onStartPayment, enabled = !state.creatingPayment,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
                     if (state.creatingPayment) {
                         CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
                         Spacer(Modifier.width(8.dp))
@@ -108,7 +111,11 @@ fun BookingDetailScreen(
             if (booking.status == "CONFIRMED") {
                 Text("QR booking", style = MaterialTheme.typography.titleMedium)
                 val bitmap = remember(state.qrBytes) { state.qrBytes?.let { BitmapFactory.decodeByteArray(it, 0, it.size) } }
-                if (bitmap != null) Image(bitmap.asImageBitmap(), "QR booking", Modifier.size(240.dp))
+                if (bitmap != null) Surface(color = Color.White, modifier = Modifier.fillMaxWidth()) {
+                    Box(Modifier.padding(16.dp), contentAlignment = androidx.compose.ui.Alignment.Center) {
+                        Image(bitmap.asImageBitmap(), "QR booking", Modifier.size(240.dp))
+                    }
+                }
                 else if (!state.loading) Text("Chưa tải được QR. Bấm thử lại.")
                 Text("Đưa QR này cho nhân viên để tra booking. Nhân viên vẫn phải chọn đúng hành khách khi check-in.", style = MaterialTheme.typography.bodySmall)
             } else {
@@ -117,7 +124,7 @@ fun BookingDetailScreen(
 
             Text("Hành khách", style = MaterialTheme.typography.titleMedium)
             booking.passengers.forEach { passenger ->
-                Card(Modifier.fillMaxWidth()) { Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White)) { Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(passenger.fullName, style = MaterialTheme.typography.titleSmall)
                     val room = state.trip?.rooms?.firstOrNull { it.roomId == passenger.cabinId }
                     Text("Phòng: ${if (passenger.cabinId == null) "Chưa gán" else room?.roomCode ?: "Đang cập nhật"}")
@@ -129,6 +136,6 @@ fun BookingDetailScreen(
                 } }
             }
         }
-        OutlinedButton(onClick = onRetry, enabled = !state.loading) { Text("Thử lại") }
+        OutlinedButton(onClick = onRetry, enabled = !state.loading, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) { Text("Thử lại") }
     }
 }

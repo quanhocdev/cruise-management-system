@@ -19,6 +19,8 @@ import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Locale
+import com.project.cruise.android.ui.theme.*
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun CreateBookingScreen(
@@ -37,18 +39,22 @@ fun CreateBookingScreen(
     val draft = state.draft
     val editable = !state.submitting && !state.outcomeUnknown
     val room = state.room
+    OceanTheme {
+    Surface(color = OceanMist) {
     LazyColumn(
         modifier = Modifier.fillMaxSize().safeDrawingPadding().imePadding(),
         contentPadding = PaddingValues(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item {
-            TextButton(onClick = onBack, enabled = !state.submitting) { Text("← Chọn phòng khác") }
-            Text("Thông tin đặt phòng", style = MaterialTheme.typography.headlineMedium)
+            FilledTonalButton(onClick = onBack, enabled = !state.submitting,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) { Text("← Chọn phòng khác") }
+            Spacer(Modifier.height(16.dp))
+            OceanBanner("BƯỚC 1 · GIỮ CHỖ", "Thông tin đặt phòng", "Điền thông tin liên hệ và hành khách.")
         }
         if (state.loading) item { LinearProgressIndicator(Modifier.fillMaxWidth()) }
         if (room != null) item {
-            Card(Modifier.fillMaxWidth()) {
+            Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White)) {
                 Column(Modifier.padding(16.dp)) {
                     Text("${room.roomTypeName} · ${room.roomCode}", style = MaterialTheme.typography.titleLarge)
                     Text("Tầng ${room.deckNumber} · Còn ${room.remainingCapacity} chỗ")
@@ -65,7 +71,7 @@ fun CreateBookingScreen(
             }
         }
         itemsIndexed(draft.passengers) { index, passenger ->
-            Card(Modifier.fillMaxWidth()) {
+            Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White)) {
                 Column(Modifier.padding(16.dp)) {
                     Text("Hành khách ${index + 1}", style = MaterialTheme.typography.titleMedium)
                     PassengerFields(passenger, editable) { updated ->
@@ -86,7 +92,7 @@ fun CreateBookingScreen(
                 modifier = Modifier.fillMaxWidth()
             ) { Text("Thêm hành khách") }
         }
-        state.error?.let { message -> item { Text(message, color = MaterialTheme.colorScheme.error) } }
+        state.error?.let { message -> item { OceanNotice(message, true) } }
         if (room == null && !state.loading && !state.outcomeUnknown) item {
             OutlinedButton(onClick = onRetry, enabled = editable) { Text("Tải lại phòng") }
         }
@@ -94,10 +100,12 @@ fun CreateBookingScreen(
             Button(
                 onClick = onSubmit,
                 enabled = editable && !state.loading && room?.available == true && room.remainingCapacity > 0,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)
             ) { Text(if (state.submitting) "Đang giữ chỗ…" else "Xác nhận giữ chỗ") }
             Text("Bước này tạo booking, chưa thanh toán hoặc trừ tiền.", style = MaterialTheme.typography.bodySmall)
         }
+    }
+    }
     }
 }
 

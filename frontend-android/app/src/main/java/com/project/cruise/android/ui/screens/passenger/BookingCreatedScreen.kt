@@ -9,13 +9,14 @@ import androidx.compose.ui.unit.dp
 import com.project.cruise.android.data.dto.passenger.PassengerBookingResponse
 import java.text.NumberFormat
 import java.util.Locale
+import com.project.cruise.android.ui.theme.*
 
 @Composable
 fun BookingCreatedScreen(booking: PassengerBookingResponse, onDone: () -> Unit) {
     BackHandler(onBack = onDone)
-    Column(Modifier.fillMaxSize().safeDrawingPadding().padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Text("Đã tạo booking", style = MaterialTheme.typography.headlineMedium)
-        Text("Mã booking: ${booking.bookingCode}", style = MaterialTheme.typography.titleLarge)
+    OceanPage {
+        OceanBanner("GIỮ CHỖ THÀNH CÔNG", "Đã tạo booking", "Thông tin đặt chỗ đã được ghi nhận.")
+        Text("Mã booking: ${booking.bookingCode ?: "#${booking.id}"}", style = MaterialTheme.typography.titleLarge)
         Text("Người liên hệ: ${booking.primaryContactName}")
         Text("Điện thoại: ${booking.primaryContactPhone}")
         Text("Tổng tiền: ${NumberFormat.getCurrencyInstance(Locale.forLanguageTag("vi-VN")).format(booking.totalAmount)}")
@@ -25,7 +26,7 @@ fun BookingCreatedScreen(booking: PassengerBookingResponse, onDone: () -> Unit) 
             "CANCELLED" -> "Đã hủy"
             else -> booking.status
         })
-        Text("Chưa thực hiện thanh toán trên Android. Bạn có thể xem booking này trong mục Booking của tôi trên web.")
-        Button(onClick = onDone) { Text("Về Dashboard") }
+        OceanNotice("Vào Booking của tôi trên ứng dụng để xem chi tiết và thanh toán nếu booking đang chờ thanh toán.")
+        Button(onClick = onDone, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) { Text("Về Dashboard") }
     }
 }

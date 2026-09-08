@@ -11,6 +11,8 @@ import androidx.compose.ui.unit.dp
 import com.project.cruise.android.viewmodel.passenger.BookingHistoryState
 import java.text.NumberFormat
 import java.util.Locale
+import com.project.cruise.android.ui.theme.*
+import androidx.compose.ui.graphics.Color
 
 fun bookingStatus(value: String) = when (value) {
     "PENDING_PAYMENT" -> "Chờ thanh toán"
@@ -22,27 +24,26 @@ fun bookingStatus(value: String) = when (value) {
 
 @Composable
 fun MyBookingsScreen(state: BookingHistoryState, onRefresh: () -> Unit, onBookingClick: (Long) -> Unit, onBack: () -> Unit) {
-    Column(Modifier.fillMaxSize().safeDrawingPadding().padding(16.dp)) {
-        TextButton(onClick = onBack) { Text("← Trang chủ") }
-        Text("Booking của tôi", style = MaterialTheme.typography.headlineMedium)
-        Spacer(Modifier.height(12.dp))
-        if (state.loading) LinearProgressIndicator(Modifier.fillMaxWidth())
-        state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        if (!state.loading && state.bookings.isEmpty()) {
-            Text("Bạn chưa có booking nào.", modifier = Modifier.padding(vertical = 24.dp))
+    TourPage("Trang chủ", onBack) {
+        item { OceanBanner("CHUYẾN ĐI CỦA BẠN", "Booking của tôi", "Quản lý đặt chỗ, thanh toán và vé lên tàu.") }
+        if (state.loading) item { LinearProgressIndicator(Modifier.fillMaxWidth()) }
+        state.error?.let { message -> item { OceanNotice(message, true) } }
+        if (!state.loading && state.error == null && state.bookings.isEmpty()) item {
+            OceanNotice("Bạn chưa có booking nào.")
         }
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp), contentPadding = PaddingValues(vertical = 12.dp)) {
             items(state.bookings, key = { it.id }) { booking ->
-                Card(Modifier.fillMaxWidth().clickable { onBookingClick(booking.id) }) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Card(onClick = { onBookingClick(booking.id) }, modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = Color.White)) {
+                    Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text(booking.bookingCode ?: "Booking #${booking.id}", style = MaterialTheme.typography.titleMedium)
                         Text("Trạng thái: ${bookingStatus(booking.status)}")
                         Text("Tổng tiền: ${NumberFormat.getCurrencyInstance(Locale.forLanguageTag("vi-VN")).format(booking.totalAmount)}")
                         Text("${booking.passengers.size} hành khách")
+                        Text("Xem chi tiết →", color = OceanTeal, style = MaterialTheme.typography.labelLarge)
                     }
                 }
             }
-        }
-        OutlinedButton(onClick = onRefresh, enabled = !state.loading) { Text("Tải lại") }
+        item { OutlinedButton(onClick = onRefresh, enabled = !state.loading,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) { Text("Tải lại") } }
     }
 }
