@@ -1,6 +1,7 @@
 package com.project.booking.service;
 
 import com.project.common.dto.UploadResult;
+import com.project.common.event.BookingConfirmedEvent;
 import com.project.common.event.BookingCreatedEvent;
 import com.project.common.service.file.FileStorageService;
 import com.project.booking.dto.booking.*;
@@ -15,7 +16,7 @@ import com.project.booking.model.enums.BookingStatus;
 import com.project.booking.repository.BookingRepository;
 import com.project.booking.repository.PassengerRepository;
 import com.project.booking.repository.BookingPassengerRepository;
-import org.springframework.kafka.core.KafkaTemplate; // Import KafkaTemplate
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -208,5 +209,38 @@ public class BookingServiceImpl implements BookingService {
             }
         }
         throw new AppException("Cannot generate a unique booking code", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Override
+    @Transactional
+    public void processPaymentSuccess(Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId).orElse(null);
+
+        if (booking == null) {
+            System.out.println(">>> [SERVICE] Không tìm thấy Booking ID: " + bookingId);
+            return;
+        }
+
+        if (booking.getStatus() == BookingStatus.PENDING_PAYMENT) {
+            booking.setStatus(BookingStatus.CONFIRMED);
+            Booking savedBooking = bookingRepository.save(booking);
+
+            System.out.println(">>> [SERVICE] Đã cập nhật đơn hàng #" + bookingId + " thành CONFIRMED.");
+
+            // Bắn Kafka Event sang notification-service
+            BookingConfirmedEvent confirmedEvent = new BookingConfirmedEvent(
+                    savedBooking.getCreatedByUserId(),
+                    savedBooking.getPrimaryContactEmail(),
+                    savedBooking.getPrimaryContactName(),
+                    savedBooking.getBookingCode(),
+                    savedBooking.getNumberPassengers(),
+                    savedBooking.getTotalAmount());
+
+            kafkaTemplate.send("booking-confirmed-topic", savedBooking.getBookingCode(), confirmedEvent);
+            System.out.println(
+                    ">>> [KAFKA PRODUCER] Đã bắn event BookingConfirmedEvent cho mã: " + savedBooking.getBookingCode());
+        } else {
+            System.out.println(">>> [SERVICE] Đơn hàng #" + bookingId + " đã ở trạng thái: " + booking.getStatus());
+        }
     }
 }

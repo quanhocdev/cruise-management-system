@@ -25,4 +25,6 @@ public interface BookingService {
 
     // 6. Gửi nhắc nhở khởi hành tự động
     int sendDepartureReminders(LocalDate departureDate);
+
+    void processPaymentSuccess(Long bookingId);
 }

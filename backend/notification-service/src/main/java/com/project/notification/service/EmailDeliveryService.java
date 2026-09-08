@@ -52,7 +52,8 @@ public class EmailDeliveryService {
         repository.save(notification);
     }
 
-    // 2. THÊM HÀM MỚI: Chuyên gửi email HTML đính kèm mã QR cho Booking
+    // 2. Hàm chuyên gửi email HTML đính kèm mã QR cho Booking (Đã có sẵn logic
+    // chuẩn)
     public void deliverBookingQrEmail(Notification notification, String bookingCode) {
         if (notification.getRecipientEmail() == null || notification.getRecipientEmail().isBlank())
             return;
@@ -70,15 +71,20 @@ public class EmailDeliveryService {
             helper.setTo(notification.getRecipientEmail());
             helper.setSubject(notification.getTitle());
 
-            // Nội dung HTML hiển thị thông tin và chèn ảnh QR thông qua Content-ID
-            // (cid:qrCode)
-            String htmlContent = "<div style='font-family: Arial, sans-serif; padding: 20px;'>"
-                    + "<h2 style='color: #0d6efd;'>Xác Nhận Đặt Tour Thành Công</h2>"
+            String htmlContent = "<div style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>"
+                    + "<h2 style='color: #0d6efd;'>Xác Nhận Đặt Tour Thành Công!</h2>"
+                    + "<p>Xin chào <b>" + notification.getRecipientName() + "</b>,</p>"
                     + "<p>" + notification.getMessage() + "</p>"
-                    + "<p>Mã đặt chỗ của bạn: <strong style='font-size: 16px; color: #d63384;'>" + bookingCode
-                    + "</strong></p>"
-                    + "<p>Vui lòng xuất trình mã QR dưới đây khi check-in tại quầy:</p>"
-                    + "<div style='margin: 20px 0;'><img src='cid:qrCode' style='width: 200px; height: 200px;'/></div>"
+                    + "<div style='background: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;'>"
+                    + "<p><b>Mã đặt tour:</b> <span style='color: #007bff; font-weight: bold;'>" + bookingCode
+                    + "</span></p>"
+                    + "</div>"
+                    + "<p>Vui lòng xuất trình mã QR đính kèm khi check-in.</p>"
+                    // Thêm text-align: center để căn giữa ảnh QR
+                    + "<div style='text-align: center; margin: 25px 0;'><img src='cid:qrCode' style='width: 200px; height: 200px; display: inline-block;'/></div>"
+                    + "<p style='margin-top: 30px; font-size: 14px; color: #666;'>"
+                    + "Bạn có thể xem chi tiết hoặc quản lý các đơn đặt tour của mình tại phần <b>My Booking</b> của hệ thống."
+                    + "</p>"
                     + "<p>Trân trọng,<br><b>Cruise System Team</b></p>"
                     + "</div>";
 
@@ -91,7 +97,24 @@ public class EmailDeliveryService {
             notification.setEmailStatus(EmailStatus.SENT);
         } catch (MessagingException | RuntimeException ex) {
             notification.setEmailStatus(EmailStatus.FAILED);
+            ex.printStackTrace();
         }
         repository.save(notification);
+    }
+
+    // 3. Hàm nhận Event từ Kafka, đóng gói vào Notification và gọi hàm
+    // deliverBookingQrEmail
+    public void sendBookingConfirmationEmail(com.project.common.event.BookingConfirmedEvent event) {
+        Notification notification = new Notification();
+        notification.setRecipientUserId(event.recipientUserId());
+        notification.setRecipientEmail(event.recipientEmail());
+        notification.setRecipientName(event.recipientName());
+        notification.setTitle("Xác nhận đặt tour thành công - " + event.bookingCode());
+        notification.setMessage(String.format(
+                "Đơn đặt tour của bạn đã được xác nhận thanh toán thành công với tổng số tiền %.2f VND cho %d hành khách.",
+                event.totalAmount(), event.numberPassengers()));
+
+        // Tận dụng hoàn toàn logic gửi QR và lưu log DB có sẵn
+        deliverBookingQrEmail(notification, event.bookingCode());
     }
 }
