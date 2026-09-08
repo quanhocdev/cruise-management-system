@@ -176,29 +176,28 @@ services:
 
   # ==========================
   # PostgreSQL cho Notification Service
-  # TẠM COMMENT: notification-service chưa code xong
   # ==========================
-  # postgres-notification:
-  #   image: postgres:15-alpine
-  #   container_name: cruise_postgres_notification
-  #   restart: always
-  #   environment:
-  #     POSTGRES_DB: notification_service_db
-  #     POSTGRES_USER: ${POSTGRES_USER:-postgres}
-  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-  #   ports:
-  #     - "5439:5432"
-  #   volumes:
-  #     - postgres_notification_data:/var/lib/postgresql/data
-  #   healthcheck:
-  #     test:
-  #       [
-  #         "CMD-SHELL",
-  #         "pg_isready -U $${POSTGRES_USER:-postgres} -d notification_service_db",
-  #       ]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
+  postgres-notification:
+    image: postgres:15-alpine
+    container_name: cruise_postgres_notification
+    restart: always
+    environment:
+      POSTGRES_DB: notification_service_db
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5439:5432"
+    volumes:
+      - postgres_notification_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER:-postgres} -d notification_service_db",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # ==========================
   # PostgreSQL cho Feedback Service
@@ -324,8 +323,8 @@ services:
         condition: service_healthy
       postgres-payment:
         condition: service_healthy
-      # postgres-notification:   # TẠM COMMENT: chưa triển khai
-      #   condition: service_healthy
+      postgres-notification:
+        condition: service_healthy
       # postgres-feedback:       # TẠM COMMENT: chưa triển khai
       #   condition: service_healthy
 
@@ -350,10 +349,10 @@ services:
       ACTIVITY_SERVICE_URL: http://activity-cruise-service:8083
       CONVENIENCE_SERVICE_URL: http://convenience-service:8084
       PAYMENT_SERVICE_URL: http://payment-service:8085
-      # NOTIFICATION_SERVICE_URL: http://notification-service:8086  # TẠM COMMENT: chưa triển khai
+      NOTIFICATION_SERVICE_URL: http://notification-service:8086
       ACTIVITY_VISIT_SERVICE_URL: http://activity-visit-service:8087
       TOUR_SERVICE_URL: http://tour-service:8088
-      # FEEDBACK_SERVICE_URL: http://feedback-service:8089          # TẠM COMMENT: chưa triển khai
+      # FEEDBACK_SERVICE_URL: http://feedback-service:8089
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
     depends_on:
       - auth-service
@@ -567,44 +566,51 @@ services:
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       BOOKING_SERVICE_URL: http://booking-service:8082
-      # NOTIFICATION_SERVICE_URL: http://notification-service:8086  # TẠM COMMENT: chưa triển khai
+      NOTIFICATION_SERVICE_URL: http://notification-service:8086
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
     depends_on:
       postgres-payment:
         condition: service_healthy
       booking-service:
         condition: service_started
-      # notification-service:      # TẠM COMMENT: chưa triển khai
-      #   condition: service_started
+      notification-service:
+        condition: service_started
       kafka:
         condition: service_started
 
   # ==========================
   # Notification Service
-  # TẠM COMMENT: chưa code xong, khi nào làm tới thì bỏ comment
   # ==========================
-  # notification-service:
-  #   build:
-  #     context: ./backend/notification-service
-  #     dockerfile: Dockerfile.dev
-  #   container_name: notification-service
-  #   restart: always
-  #   ports:
-  #     - "8086:8086"
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-notification:5432/notification_service_db
-  #     SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
-  #     SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-  #     NOTIFICATION_EMAIL_ENABLED: ${NOTIFICATION_EMAIL_ENABLED:-false}
-  #     MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
-  #     MAIL_PORT: ${MAIL_PORT:-587}
-  #   depends_on:
-  #     postgres-notification:
-  #       condition: service_healthy
-  #     kafka:
-  #       condition: service_started
+  notification-service:
+    build:
+      context: ./backend
+      dockerfile: notification-service/Dockerfile.dev
+    container_name: notification-service
+    restart: always
+    ports:
+      - "8086:8086"
+    working_dir: /app/notification-service
+    volumes:
+      - ./backend/notification-service/src:/app/notification-service/src
+      - ./backend/common/src:/app/common/src
+      - /app/notification-service/target
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-notification:5432/notification_service_db
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      NOTIFICATION_EMAIL_ENABLED: ${NOTIFICATION_EMAIL_ENABLED:-true}
+      SPRING_MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      SPRING_MAIL_PORT: ${MAIL_PORT:-587}
+      SPRING_MAIL_USERNAME: ${MAIL_USERNAME}
+      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    depends_on:
+      postgres-notification:
+        condition: service_healthy
+      kafka:
+        condition: service_started
 
   # ==========================
   # Feedback Service
@@ -666,6 +672,6 @@ volumes:
   postgres_activity_visit_data:
   postgres_booking_data:
   postgres_payment_data:
-  # postgres_notification_data:   # TẠM COMMENT: chưa triển khai
+  postgres_notification_data:
   # postgres_feedback_data:       # TẠM COMMENT: chưa triển khai
   kafka_data:

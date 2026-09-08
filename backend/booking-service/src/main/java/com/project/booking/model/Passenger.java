@@ -16,7 +16,6 @@ public class Passenger {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // --- LIÊN KẾT VỚI ĐƠN ĐẶT VÉ (THAY CHO USER_ID) ---
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booking_id", nullable = false)
     private Booking booking;
