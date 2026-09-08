@@ -27,7 +27,6 @@ fun NotificationDashboardButton(api: ApiService, onClick: () -> Unit) {
         owner.lifecycle.addObserver(observer)
         onDispose { owner.lifecycle.removeObserver(observer) }
     }
-    OutlinedButton(onClick = onClick) {
-        Text(count?.let { "Thông báo ($it chưa đọc)" } ?: "Thông báo · chưa tải số chưa đọc")
-    }
+    com.project.cruise.android.ui.theme.OceanAction("Thông báo",
+        count?.let { "$it chưa đọc · Cập nhật hành trình" } ?: "Chưa tải được số chưa đọc", "♧", onClick)
 }

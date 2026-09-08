@@ -1,111 +1,44 @@
 package com.project.cruise.android.ui.screens.passenger
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.project.cruise.android.viewmodel.auth.AuthViewModel
 import com.project.cruise.android.viewmodel.auth.MeState
+import com.project.cruise.android.ui.theme.*
 
 @Composable
-fun Dashboard(
-    viewModel: AuthViewModel,
-    onBrowseTours: () -> Unit,
-    onMyBookings: () -> Unit,
-    notificationButton: @Composable () -> Unit,
-    onLogout: () -> Unit // 🟢 Thêm callback này để điều hướng về Login
-) {
+fun Dashboard(viewModel: AuthViewModel, onBrowseTours: () -> Unit, onMyBookings: () -> Unit,
+    notificationButton: @Composable () -> Unit, onLogout: () -> Unit) {
     val meState by viewModel.meState.collectAsState()
-
-    LaunchedEffect(Unit) {
-        viewModel.getCurrentUser()
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-
-        Text(
-            text = "Passenger Dashboard",
-            style = MaterialTheme.typography.headlineMedium
-        )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        when (val state = meState) {
-            is MeState.Idle -> {
-                Text("Đang chuẩn bị thông tin tài khoản...")
-            }
-
-            is MeState.Loading -> {
-                Text("Đang gọi /api/auth/me...")
-            }
-
-            is MeState.Success -> {
-                Text(text = "Username: ${state.username}")
-                Text(text = "Role: ${state.role}")
-            }
-
-            is MeState.Error -> {
-                Text(
-                    text = "Lỗi: ${state.message}",
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(40.dp))
-
-        Button(onClick = onBrowseTours) {
-            Text("Khám phá tour đang mở bán")
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        OutlinedButton(onClick = onMyBookings) {
-            Text("Booking của tôi")
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-        notificationButton()
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        // 🔴 NÚT ĐĂNG XUẤT
-        Button(
-            onClick = {
-                // Gọi logout trong ViewModel và điều hướng về Login khi hoàn tất
-                viewModel.logout {
-                    onLogout()
+    LaunchedEffect(Unit) { viewModel.getCurrentUser() }
+    OceanPage {
+        OceanBanner("CRUISE MANAGEMENT", "Bảng điều khiển", dark = true)
+        Card(colors = CardDefaults.cardColors(containerColor = Color.White)) {
+            Column(Modifier.fillMaxWidth().padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text("XIN CHÀO", style = MaterialTheme.typography.labelLarge, color = OceanTeal)
+                when (val state = meState) {
+                    is MeState.Success -> {
+                        Text(state.username, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                        Text(if (state.role == "PASSENGER" || state.role == "ROLE_PASSENGER") "HÀNH KHÁCH" else state.role,
+                            style = MaterialTheme.typography.labelLarge, color = OceanTeal)
+                    }
+                    is MeState.Error -> OceanNotice(state.message, true)
+                    else -> LinearProgressIndicator(Modifier.fillMaxWidth())
                 }
-            },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.error
-            )
-        ) {
-            Text(
-                text = "Đăng xuất",
-                color = Color.White
-            )
+                OceanNotice("Chào mừng bạn đến với không gian quản lý và trải nghiệm hành trình.")
+            }
         }
+        OceanAction("Khám phá tour", "Tìm hiểu những hành trình đang mở bán", "⌕", onBrowseTours)
+        OceanAction("Booking của tôi", "Quản lý vé và chuyến đi đã đặt", "▤", onMyBookings)
+        notificationButton()
+        Spacer(Modifier.height(12.dp))
+        FilledTonalButton(onClick = { viewModel.logout { onLogout() } }, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+            colors = ButtonDefaults.filledTonalButtonColors(containerColor = OceanLavender, contentColor = OceanNavy)) { Text("Đăng xuất  →") }
+        Text("Cruise Management · Hành khách", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
