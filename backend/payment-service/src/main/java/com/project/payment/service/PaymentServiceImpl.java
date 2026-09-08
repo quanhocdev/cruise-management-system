@@ -9,7 +9,9 @@ import com.project.payment.mapper.PaymentMapper;
 import com.project.payment.model.Payment;
 import com.project.payment.model.enums.*;
 import com.project.payment.repository.PaymentRepository;
+import com.project.common.event.PaymentSuccessEvent; // Import event DTO dùng chung
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate; // Import KafkaTemplate
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
@@ -25,16 +27,19 @@ public class PaymentServiceImpl implements PaymentService {
     private final long timeoutMinutes;
     private final BookingClient bookingClient;
     private final NotificationClient notificationClient;
+    private final KafkaTemplate<String, Object> kafkaTemplate; // Khai báo KafkaTemplate
 
     public PaymentServiceImpl(PaymentRepository repository, PaymentMapper mapper,
             List<PaymentProvider> paymentProviders,
             BookingClient bookingClient,
             NotificationClient notificationClient,
+            KafkaTemplate<String, Object> kafkaTemplate, // Inject vào constructor
             @Value("${vnpay.payment-timeout-minutes:15}") long timeoutMinutes) {
         this.repository = repository;
         this.mapper = mapper;
         this.bookingClient = bookingClient;
         this.notificationClient = notificationClient;
+        this.kafkaTemplate = kafkaTemplate;
         this.timeoutMinutes = timeoutMinutes;
         providers = new EnumMap<>(PaymentMethod.class);
         paymentProviders.forEach(provider -> providers.put(provider.getPaymentMethod(), provider));
@@ -128,8 +133,16 @@ public class PaymentServiceImpl implements PaymentService {
             payment.setUpdatedAt(Instant.now());
             Payment saved = repository.save(payment);
 
-            // if (success && saved.getReferenceType() == PaymentReferenceType.BOOKING)
-            // bookingClient.confirmPayment(saved.getReferenceId(), saved.getId());
+            // Gửi sự kiện sang Kafka khi thanh toán thành công đơn booking
+            if (success && saved.getReferenceType() == PaymentReferenceType.BOOKING) {
+                PaymentSuccessEvent event = new PaymentSuccessEvent(
+                        saved.getReferenceId(),
+                        saved.getId(),
+                        saved.getPayerId(),
+                        saved.getStatus().name(),
+                        saved.getPaidAt());
+                kafkaTemplate.send("payment-success-topic", event);
+            }
 
             if (!success && previousStatus != PaymentStatus.FAILED)
                 notificationClient.paymentFailed(saved.getPayerId(), saved.getId(), saved.getReferenceId());
