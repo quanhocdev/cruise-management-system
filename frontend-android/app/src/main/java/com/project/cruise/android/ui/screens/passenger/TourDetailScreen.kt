@@ -27,6 +27,7 @@ internal fun TourDetailContent(tourId: String, state: PassengerCatalogState, onB
             item { OceanBanner("HÀNH TRÌNH CỦA BẠN", tour.name, tour.cruiseName) }
             item {
                 TourCard {
+                    TourHeroImage(tour.cruiseImageUrl, tour.name)
                     Text("${tour.startDate} → ${tour.endDate}", color = OceanTeal, fontWeight = FontWeight.Bold)
                     tour.description?.takeIf { it.isNotBlank() }?.let { Text(it) }
                 }
@@ -39,18 +40,19 @@ internal fun TourDetailContent(tourId: String, state: PassengerCatalogState, onB
                     day.description?.takeIf { it.isNotBlank() }?.let { Text(it) }
                 }
             }
-            if (tour.itinerary.isEmpty()) item { OceanNotice("Lịch trình chi tiết đang được cập nhật.") }
+            if (tour.itinerary.isEmpty()) item { OceanStatePanel("Lịch trình đang cập nhật", "Thông tin chi tiết sẽ được bổ sung khi điều phối hoàn tất.", "⌁") }
             item { TourSection("Chọn chuyến khởi hành") }
             items(state.departures, key = { it.voyageId }) { departure ->
                 TourCard {
                     Text("${departure.departureDate} → ${departure.returnDate}", fontWeight = FontWeight.Bold)
                     Text(departure.cruiseName, color = OceanTeal)
                     Text("Sức chứa: ${departure.capacity} hành khách")
-                    Button(onClick = { onDepartureClick(departure.voyageId) }, enabled = !state.loading,
-                        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) { Text("Chọn chuyến · Xem phòng →") }
+                    OceanPrimaryButton("Chọn chuyến · Xem phòng", { onDepartureClick(departure.voyageId) }, enabled = !state.loading)
                 }
             }
-            if (!state.loading && state.error == null && state.departures.isEmpty()) item { OceanNotice("Chưa có chuyến khởi hành phù hợp.") }
+            if (!state.loading && state.error == null && state.departures.isEmpty()) item {
+                OceanStatePanel("Chưa có chuyến khởi hành", "Tour này hiện chưa mở lịch khởi hành phù hợp.", "⌛")
+            }
         }
     }
 }

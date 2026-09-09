@@ -17,7 +17,7 @@ fun Dashboard(viewModel: AuthViewModel, onBrowseTours: () -> Unit, onMyBookings:
     val meState by viewModel.meState.collectAsState()
     LaunchedEffect(Unit) { viewModel.getCurrentUser() }
     OceanPage {
-        OceanBanner("CRUISE MANAGEMENT", "Bảng điều khiển", dark = true)
+        OceanBanner("OCEANCRUISE", "Hành trình của bạn", "Khám phá đại dương theo cách riêng.", dark = true)
         Card(colors = CardDefaults.cardColors(containerColor = Color.White)) {
             Column(Modifier.fillMaxWidth().padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("XIN CHÀO", style = MaterialTheme.typography.labelLarge, color = OceanTeal)
@@ -30,7 +30,7 @@ fun Dashboard(viewModel: AuthViewModel, onBrowseTours: () -> Unit, onMyBookings:
                     is MeState.Error -> OceanNotice(state.message, true)
                     else -> LinearProgressIndicator(Modifier.fillMaxWidth())
                 }
-                OceanNotice("Chào mừng bạn đến với không gian quản lý và trải nghiệm hành trình.")
+                OceanNotice("Tour, booking và thông báo của bạn luôn được lấy từ dữ liệu hệ thống.")
             }
         }
         OceanAction("Khám phá tour", "Tìm hiểu những hành trình đang mở bán", "⌕", onBrowseTours)

@@ -27,17 +27,16 @@ internal fun TourListContent(state: PassengerCatalogState, onBack: () -> Unit, o
         if (state.tours.isNotEmpty()) item { TourSection("${state.tours.size} hành trình dành cho bạn") }
         items(state.tours, key = { it.id }) { tour ->
             TourCard {
+                TourHeroImage(tour.cruiseImageUrl, tour.name)
                 Text(tour.cruiseName, color = OceanTeal, style = MaterialTheme.typography.labelLarge)
                 Text(tour.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 Text("${tour.startDate} → ${tour.endDate}", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 tour.description?.takeIf { it.isNotBlank() }?.let { Text(it, maxLines = 3, overflow = TextOverflow.Ellipsis) }
-                Button(onClick = { onTourClick(tour.id) }, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) {
-                    Text("Khám phá hành trình →")
-                }
+                OceanPrimaryButton("Khám phá hành trình", { onTourClick(tour.id) })
             }
         }
         if (!state.loading && state.error == null && state.tours.isEmpty()) item {
-            OceanNotice("Hiện chưa có tour đang mở bán. Hãy quay lại sau để khám phá hành trình mới.")
+            OceanStatePanel("Chưa có tour đang mở bán", "Hãy quay lại sau để khám phá hành trình mới.", "⚓")
         }
     }
 }

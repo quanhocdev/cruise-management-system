@@ -35,11 +35,13 @@ internal fun AvailableRoomsContent(state: PassengerCatalogState, onBack: () -> U
                 HorizontalDivider(color = OceanLavender)
                 Text("Giá phòng", style = MaterialTheme.typography.labelLarge)
                 Text(currency.format(room.price), style = MaterialTheme.typography.headlineSmall, color = OceanTeal, fontWeight = FontWeight.Bold)
-                Button(onClick = { onSelectRoom(room.roomId) }, enabled = !state.loading && room.available && room.remainingCapacity > 0,
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) { Text("Chọn phòng →") }
+                OceanPrimaryButton("Chọn phòng", { onSelectRoom(room.roomId) },
+                    enabled = !state.loading && room.available && room.remainingCapacity > 0)
             }
         }
-        if (!state.loading && state.error == null && state.rooms.isEmpty()) item { OceanNotice("Chuyến này hiện không còn phòng trống.") }
+        if (!state.loading && state.error == null && state.rooms.isEmpty()) item {
+            OceanStatePanel("Chưa có phòng phù hợp", "Chuyến này hiện không còn phòng trống.", "▣")
+        }
         item { Text("Giá và chỗ trống được kiểm tra từ hệ thống đặt chỗ.", style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant) }
     }
