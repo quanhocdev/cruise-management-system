@@ -1,6 +1,6 @@
 package com.project.tour.service.tour;
 
-import com.project.tour.dto.tour.packages.PackageBenefitRequest;
+import com.project.common.event.TourPackageSyncedEvent;
 import com.project.tour.dto.tour.packages.TourPackageRequest;
 import com.project.tour.dto.tour.packages.TourPackageResponse;
 import com.project.tour.exception.AppException;
@@ -13,6 +13,7 @@ import com.project.tour.dto.roomtype.RoomTypeResponse;
 import com.project.tour.repository.tour.PackageBenefitRepository;
 import com.project.tour.repository.tour.TourPackageRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.kafka.core.KafkaTemplate; 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.project.tour.repository.tour.TourRepository;
@@ -28,29 +29,31 @@ public class TourPackageService {
     private final PackageBenefitRepository packageBenefitRepository;
     private final TourRepository tourRepository;
     private final RoomTypeRepository roomTypeRepository;
+    private final KafkaTemplate<String, TourPackageSyncedEvent> kafkaTemplate;
 
+    // 👈 Thêm kafkaTemplate vào Constructor Injection
     public TourPackageService(
             TourPackageRepository tourPackageRepository,
             PackageBenefitRepository packageBenefitRepository,
             TourRepository tourRepository,
-            RoomTypeRepository roomTypeRepository) {
+            RoomTypeRepository roomTypeRepository,
+            KafkaTemplate<String, TourPackageSyncedEvent> kafkaTemplate) {
         this.tourPackageRepository = tourPackageRepository;
         this.packageBenefitRepository = packageBenefitRepository;
         this.tourRepository = tourRepository;
         this.roomTypeRepository = roomTypeRepository;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     // =========================================================
     // TẠO MỚI GÓI TOUR
     // =========================================================
     public TourPackageResponse createPackage(TourPackageRequest request) {
-        // Kiểm tra tên gói có bị trùng trong cùng một tour hay không
         boolean exists = tourPackageRepository.existsByTourIdAndName(request.tourId(), request.name());
         if (exists) {
             throw new AppException("A package with this name already exists for this tour", HttpStatus.BAD_REQUEST);
         }
 
-        // 1. Lưu TourPackage
         TourPackage tourPackage = new TourPackage();
         tourPackage.setTourId(request.tourId());
         tourPackage.setRoomTypeId(request.roomTypeId());
@@ -62,7 +65,6 @@ public class TourPackageService {
 
         TourPackage savedPackage = tourPackageRepository.save(tourPackage);
 
-        // 2. Lưu danh sách quyền lợi (PackageBenefit) nếu có
         List<PackageBenefit> savedBenefits = List.of();
         if (request.benefits() != null && !request.benefits().isEmpty()) {
             List<PackageBenefit> benefits = request.benefits().stream().map(dto -> {
@@ -78,14 +80,27 @@ public class TourPackageService {
             savedBenefits = packageBenefitRepository.saveAll(benefits);
         }
 
+        // 1. BẮN KAFKA EVENT KHI TẠO MỚI THÀNH CÔNG
+        TourPackageSyncedEvent event = new TourPackageSyncedEvent(
+            savedPackage.getId(),
+            savedPackage.getTourId(),
+            savedPackage.getName(),
+            savedPackage.getPrice(),
+            savedPackage.getMaxPassengers(),
+            savedPackage.getStatus().name()
+        );
+        kafkaTemplate.send("tour-package-sync-topic", savedPackage.getId().toString(), event);
+
         return TourPackageMapper.toResponse(savedPackage, savedBenefits);
     }
 
+    // =========================================================
+    // CẬP NHẬT GÓI TOUR (PATCH)
+    // =========================================================
     public TourPackageResponse patchPackage(UUID packageId, TourPackageRequest request) {
         TourPackage tourPackage = tourPackageRepository.findById(packageId)
                 .orElseThrow(() -> new AppException("Tour package not found", HttpStatus.NOT_FOUND));
 
-        // Cập nhật các trường nếu có truyền lên (không null)
         if (request.roomTypeId() != null) {
             tourPackage.setRoomTypeId(request.roomTypeId());
         }
@@ -111,8 +126,6 @@ public class TourPackageService {
 
         TourPackage updatedPackage = tourPackageRepository.save(tourPackage);
 
-        // Nếu request có truyền danh sách benefits mới, tiến hành đồng bộ (xóa cũ, thêm
-        // mới)
         List<PackageBenefit> savedBenefits = packageBenefitRepository.findAllByTourPackageId(updatedPackage.getId());
         if (request.benefits() != null) {
             packageBenefitRepository.deleteAllByTourPackageId(updatedPackage.getId());
@@ -129,6 +142,17 @@ public class TourPackageService {
 
             savedBenefits = packageBenefitRepository.saveAll(newBenefits);
         }
+
+        // 2. BẮN KAFKA EVENT KHI CẬP NHẬT THÀNH CÔNG
+        TourPackageSyncedEvent event = new TourPackageSyncedEvent(
+            updatedPackage.getId(),
+            updatedPackage.getTourId(),
+            updatedPackage.getName(),
+            updatedPackage.getPrice(),
+            updatedPackage.getMaxPassengers(),
+            updatedPackage.getStatus().name()
+        );
+        kafkaTemplate.send("tour-package-sync-topic", updatedPackage.getId().toString(), event);
 
         return TourPackageMapper.toResponse(updatedPackage, savedBenefits);
     }
@@ -153,17 +177,23 @@ public class TourPackageService {
         TourPackage pkg = tourPackageRepository.findById(packageId)
                 .orElseThrow(() -> new AppException("Tour package not found", HttpStatus.NOT_FOUND));
 
-        // Xóa các quyền lợi đi kèm trước để tránh khóa ngoại (nếu DB chưa set Cascade
-        // Delete)
-        packageBenefitRepository.deleteAllByTourPackageId(pkg.getId());
+        // 3. BẮN KAFKA EVENT BÁO XÓA TRƯỚC KHI THỰC HIỆN XÓA
+        TourPackageSyncedEvent event = new TourPackageSyncedEvent(
+            pkg.getId(),
+            pkg.getTourId(),
+            pkg.getName(),
+            pkg.getPrice(),
+            pkg.getMaxPassengers(),
+            "DELETED"
+        );
+        kafkaTemplate.send("tour-package-sync-topic", pkg.getId().toString(), event);
 
-        // Xóa gói tour
+        packageBenefitRepository.deleteAllByTourPackageId(pkg.getId());
         tourPackageRepository.delete(pkg);
     }
 
     @Transactional(readOnly = true)
     public List<RoomTypeResponse> getRoomTypesByTourId(UUID tourId) {
-        // 1. Tìm Tour để lấy thông tin Cruise được gán
         Tour tour = tourRepository.findById(tourId)
                 .orElseThrow(() -> new AppException("Tour not found", HttpStatus.NOT_FOUND));
 
@@ -172,11 +202,8 @@ public class TourPackageService {
         }
 
         UUID cruiseId = tour.getCruise().getId();
-
-        // 2. Lấy danh sách các RoomType thuộc con tàu này
         List<RoomType> roomTypes = roomTypeRepository.findRoomTypesByCruiseId(cruiseId);
 
-        // 3. Map sang RoomTypeResponse DTO
         return roomTypes.stream().map(rt -> {
             com.project.tour.dto.roomtype.RoomTypeResponse dto = new com.project.tour.dto.roomtype.RoomTypeResponse();
             dto.setId(rt.getId());

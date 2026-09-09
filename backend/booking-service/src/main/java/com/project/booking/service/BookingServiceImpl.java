@@ -12,6 +12,7 @@ import com.project.booking.mapper.BookingMapper;
 import com.project.booking.model.Booking;
 import com.project.booking.model.Passenger;
 import com.project.booking.model.BookingPassenger;
+import com.project.booking.model.InfoTourPackage;
 import com.project.booking.model.enums.BookingStatus;
 import com.project.booking.repository.BookingRepository;
 import com.project.booking.repository.PassengerRepository;
@@ -21,7 +22,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import com.project.booking.repository.InfoTourPackageRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -38,6 +39,7 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final PassengerRepository passengerRepository;
     private final BookingPassengerRepository bookingPassengerRepository;
+    private final InfoTourPackageRepository infoTourPackageRepository;
     private final BookingMapper bookingMapper;
     private final FileStorageService fileStorageService;
     private final KafkaTemplate<String, Object> kafkaTemplate;
@@ -46,6 +48,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingServiceImpl(BookingRepository bookingRepository,
             PassengerRepository passengerRepository,
             BookingPassengerRepository bookingPassengerRepository,
+            InfoTourPackageRepository infoTourPackageRepository,
             BookingMapper bookingMapper,
             FileStorageService fileStorageService,
             KafkaTemplate<String, Object> kafkaTemplate,
@@ -53,6 +56,7 @@ public class BookingServiceImpl implements BookingService {
         this.bookingRepository = bookingRepository;
         this.passengerRepository = passengerRepository;
         this.bookingPassengerRepository = bookingPassengerRepository;
+        this.infoTourPackageRepository = infoTourPackageRepository;
         this.bookingMapper = bookingMapper;
         this.fileStorageService = fileStorageService;
         this.kafkaTemplate = kafkaTemplate;
@@ -72,11 +76,20 @@ public class BookingServiceImpl implements BookingService {
                 throw new AppException("Rất tiếc, tour đã hết chỗ hoặc số lượng ghế trống không đủ!",
                         HttpStatus.BAD_REQUEST);
             }
-            BigDecimal unitPrice = request.getUnitPrice() != null
-                    ? request.getUnitPrice()
-                    : BigDecimal.ZERO;
 
-            BigDecimal totalAmount = unitPrice.multiply(BigDecimal.valueOf(passengerCount));
+            // 1. Lấy thông tin gói tour từ bảng local của booking-service (đồng bộ qua
+            // Kafka)
+            InfoTourPackage pkg = infoTourPackageRepository.findById(UUID.fromString(request.getTourPackageId()))
+                    .orElseThrow(() -> new AppException("Không tìm thấy gói tour hợp lệ trong hệ thống!",
+                            HttpStatus.BAD_REQUEST));
+
+            BigDecimal packagePrice = pkg.getPrice();
+            int maxPassengers = pkg.getMaxPassengers() != null ? pkg.getMaxPassengers() : 1;
+            int numberOfPackagesNeeded = maxPassengers > 1
+                    ? (int) Math.ceil((double) passengerCount / maxPassengers)
+                    : passengerCount;
+
+            BigDecimal totalAmount = packagePrice.multiply(BigDecimal.valueOf(numberOfPackagesNeeded));
 
             Booking booking = new Booking();
             booking.setCreatedByUserId(userId);

@@ -81,14 +81,16 @@ export default function PassengerBooking() {
     const numPassengers = selectedPassengers.length;
     if (numPassengers === 0) return "0 đ";
 
-    // Lấy số người tối đa của gói (nếu backend lưu tên là maxPassengers hoặc capacity)
-    const packageCapacity = Number(
-      selectedPackageInfo.maxPassengers || selectedPackageInfo.capacity || 1,
-    );
-    const packagePrice = Number(selectedPackageInfo.price);
+    const packagePrice = Number(selectedPackageInfo.price || 0);
 
-    // Tính số lượng gói cần mua (ví dụ: gói 4 người mà có 5 khách thì phải mua 2 gói)
-    const numberOfPackagesNeeded = Math.ceil(numPassengers / packageCapacity);
+    // Lấy maxPassengers từ backend trả về, mặc định là 1 nếu null/undefined
+    const maxPassengers = Number(selectedPackageInfo.maxPassengers || 1);
+
+    // Tính số lượng gói cần thiết (Ví dụ: Gói tối đa 4 người, có 5 khách thì phải mua 2 gói)
+    const numberOfPackagesNeeded =
+      maxPassengers > 1
+        ? Math.ceil(numPassengers / maxPassengers)
+        : numPassengers;
 
     const total = numberOfPackagesNeeded * packagePrice;
     return `${total.toLocaleString("vi-VN")} đ`;
@@ -149,10 +151,18 @@ export default function PassengerBooking() {
     formData.append("tourId", tourId);
     formData.append("tourPackageId", tourPackageId);
 
-    if (selectedPackageInfo?.price) {
-      formData.append("unitPrice", selectedPackageInfo.price);
-    }
+    const numPassengers = selectedPassengers.length;
+    const packagePrice = Number(selectedPackageInfo?.price || 0);
+    const maxPassengers = Number(selectedPackageInfo?.maxPassengers || 1);
 
+    const numberOfPackagesNeeded =
+      maxPassengers > 1
+        ? Math.ceil(numPassengers / maxPassengers)
+        : numPassengers;
+
+    const finalTotalPrice = numberOfPackagesNeeded * packagePrice;
+
+    formData.append("totalPrice", finalTotalPrice);
     formData.append("primaryContactName", primaryContactName);
     formData.append("primaryContactPhone", primaryContactPhone);
 
@@ -570,9 +580,9 @@ export default function PassengerBooking() {
               <div className="d-flex justify-content-between mb-3 border-top pt-2">
                 <span className="fw-bold text-dark">Tổng tiền dự kiến:</span>
                 <span className="fw-bold text-primary fs-5">
-                  {selectedPackageInfo
-                    ? `${(Number(selectedPackageInfo.price) * selectedPassengers.length).toLocaleString()} đ`
-                    : "0 đ"}
+                  <span className="fw-bold text-primary fs-5">
+                    {calculateTotalPrice()}
+                  </span>
                 </span>
               </div>
               <Button
