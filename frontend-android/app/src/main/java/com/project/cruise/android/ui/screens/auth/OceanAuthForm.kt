@@ -22,30 +22,33 @@ internal fun OceanAuthForm(register: Boolean, onBack: () -> Unit, onSubmit: (Str
     var password by remember { mutableStateOf("") }
     var reveal by remember { mutableStateOf(false) }
     OceanPage {
-        OceanHeader(if (register) "Đăng ký tài khoản" else "Đăng nhập", onBack, !loading)
-        OceanBanner("CỔNG HÀNH KHÁCH", if (register) "Tạo tài khoản mới" else "Cruise Management",
-            if (register) "Bắt đầu hành trình của bạn" else null, dark = !register)
-        if (!register) {
-            Text("Chào mừng trở lại", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
-            Text("Đăng nhập để quản lý và trải nghiệm hành trình của bạn.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        OceanHeader(if (register) "Tạo tài khoản" else "Đăng nhập", onBack, !loading)
+        Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+            ShipEmblem(Modifier.size(64.dp))
+            Spacer(Modifier.width(14.dp))
+            Column {
+                Text(if (register) "Bắt đầu hành trình" else "Chào mừng trở lại",
+                    style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                Text("Cổng hành khách OceanCruise", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
         }
-        OceanInput(username, { username = it }, "Tên đăng nhập", !loading)
-        if (register) OceanInput(email, { email = it }, "Email cá nhân", !loading, KeyboardType.Email)
-        OutlinedTextField(password, { password = it }, modifier = Modifier.fillMaxWidth(), label = { Text("Mật khẩu") },
-            enabled = !loading, singleLine = true, shape = MaterialTheme.shapes.medium,
-            visualTransformation = if (reveal) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            trailingIcon = { TextButton(onClick = { reveal = !reveal }, enabled = !loading) { Text(if (reveal) "Ẩn" else "Hiện") } },
-            colors = OutlinedTextFieldDefaults.colors(unfocusedContainerColor = Color.White, focusedContainerColor = Color.White))
-        error?.let { OceanNotice(it, error = true) }
-        Button(onClick = { onSubmit(username, password, email) }, enabled = !loading,
-            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
-            if (loading) CircularProgressIndicator(Modifier.size(22.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.onPrimary)
-            else Text(if (register) "Đăng ký  →" else "Đăng nhập  →")
+        Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = MaterialTheme.shapes.large) {
+            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                OceanInput(username, { username = it }, "Tên đăng nhập", !loading)
+                if (register) OceanInput(email, { email = it }, "Email", !loading, KeyboardType.Email)
+                OutlinedTextField(password, { password = it }, modifier = Modifier.fillMaxWidth(), label = { Text("Mật khẩu") },
+                    enabled = !loading, singleLine = true, shape = MaterialTheme.shapes.medium,
+                    visualTransformation = if (reveal) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    trailingIcon = { TextButton(onClick = { reveal = !reveal }, enabled = !loading) { Text(if (reveal) "Ẩn" else "Hiện") } },
+                    colors = OutlinedTextFieldDefaults.colors(unfocusedContainerColor = OceanPearl, focusedContainerColor = Color.White))
+                error?.let { OceanNotice(it, error = true) }
+                OceanPrimaryButton(if (register) "Đăng ký" else "Đăng nhập", { onSubmit(username.trim(), password, email.trim()) },
+                    enabled = username.isNotBlank() && password.isNotBlank() && (!register || email.isNotBlank()), loading = loading)
+            }
         }
-        OceanNotice(if (register) "Đăng ký thành công sẽ chuyển sang xác thực OTP qua email."
-            else "Sử dụng tên đăng nhập và mật khẩu của tài khoản đã đăng ký.")
-        Spacer(Modifier.height(12.dp))
+        OceanNotice(if (register) "Sau khi đăng ký, mã OTP 6 số sẽ được gửi đến email của bạn."
+            else "Đăng nhập bằng tài khoản hành khách đã đăng ký.")
     }
 }
 
@@ -55,5 +58,5 @@ internal fun OceanInput(value: String, onChange: (String) -> Unit, label: String
     OutlinedTextField(value, onChange, modifier = Modifier.fillMaxWidth(), label = { Text(label) },
         singleLine = true, enabled = enabled, shape = MaterialTheme.shapes.medium,
         keyboardOptions = KeyboardOptions(keyboardType = keyboard),
-        colors = OutlinedTextFieldDefaults.colors(unfocusedContainerColor = Color.White, focusedContainerColor = Color.White))
+        colors = OutlinedTextFieldDefaults.colors(unfocusedContainerColor = OceanPearl, focusedContainerColor = Color.White))
 }
