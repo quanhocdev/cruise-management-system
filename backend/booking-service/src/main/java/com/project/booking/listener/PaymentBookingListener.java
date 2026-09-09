@@ -19,7 +19,6 @@ public class PaymentBookingListener {
         System.out.println(">>> [BOOKING LISTENER] Nhận event thanh toán cho Booking ID: " + event.bookingId());
 
         if ("SUCCESS".equalsIgnoreCase(event.status())) {
-            // Giao phó toàn bộ nghiệp vụ xử lý đơn hàng cho Service
             bookingService.processPaymentSuccess(event.bookingId());
         }
     }

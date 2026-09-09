@@ -29,7 +29,6 @@ public class PassengerPaymentController {
 
         List<PaymentResponse> payments = paymentService.getPayments(bookingId, PaymentReferenceType.BOOKING);
 
-        // Trả về 404 dưới dạng ResponseEntity<?>
         if (payments == null || payments.isEmpty()) {
             return ResponseEntity.status(404).body(Map.of("message", "Payment is still processing via Kafka"));
         }
