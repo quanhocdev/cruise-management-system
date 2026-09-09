@@ -10,28 +10,31 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.project.cruise.android.viewmodel.passenger.BookingHistoryState
+import com.project.cruise.android.ui.theme.*
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 fun BookingItineraryDialog(state: BookingHistoryState, onRetry: () -> Unit, onClose: () -> Unit) {
     Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        Surface(Modifier.fillMaxSize()) {
-            Column(Modifier.fillMaxSize().safeDrawingPadding().padding(16.dp),
+        TripSurface {
+            Column(Modifier.fillMaxSize().safeDrawingPadding().imePadding().padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                TextButton(onClick = onClose) { Text("← Chi tiết booking") }
-                Text("Lịch trình chuyến đi", style = MaterialTheme.typography.headlineSmall)
+                TripBackButton("← Chi tiết booking", onClose)
+                Text("Lịch trình chuyến đi", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = OceanNavy)
                 state.trip?.tourName?.let { Text(it, style = MaterialTheme.typography.titleMedium) }
                 val days = state.trip?.itinerary
                 when {
                     state.loading -> LinearProgressIndicator(Modifier.fillMaxWidth())
                     state.error != null || state.tripError != null || days == null -> {
-                        Text("Chưa tải được lịch trình. Vui lòng thử lại.", color = MaterialTheme.colorScheme.error)
+                        OceanNotice("Chưa tải được lịch trình. Vui lòng thử lại.", true)
                     }
-                    days.isEmpty() -> Text("Chưa có lịch trình được công bố cho chuyến này.")
+                    days.isEmpty() -> OceanNotice("Chưa có lịch trình được công bố cho chuyến này.")
                     else -> LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(days.sortedBy { it.dayNumber }, key = { it.id }) { day ->
-                            Card(Modifier.fillMaxWidth()) {
-                                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Text("Ngày ${day.dayNumber} · ${tripDate(day.date)}", style = MaterialTheme.typography.labelLarge)
+                            Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+                                Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Text("Ngày ${day.dayNumber} · ${tripDate(day.date)}", style = MaterialTheme.typography.labelLarge, color = OceanTeal, fontWeight = FontWeight.Bold)
                                     Text(day.name, style = MaterialTheme.typography.titleMedium)
                                     Text(day.description?.takeIf { it.isNotBlank() } ?: "Chưa có mô tả cho ngày này.")
                                 }
@@ -39,7 +42,7 @@ fun BookingItineraryDialog(state: BookingHistoryState, onRetry: () -> Unit, onCl
                         }
                     }
                 }
-                OutlinedButton(onClick = onRetry, enabled = !state.loading) { Text("Tải lại lịch trình") }
+                OutlinedButton(onClick = onRetry, enabled = !state.loading, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) { Text("Tải lại lịch trình") }
             }
         }
     }

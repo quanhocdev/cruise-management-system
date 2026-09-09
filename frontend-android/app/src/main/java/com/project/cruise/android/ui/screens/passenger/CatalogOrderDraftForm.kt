@@ -10,6 +10,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.project.cruise.android.data.dto.passenger.PassengerBookingResponse
 import com.project.cruise.android.data.dto.passenger.TripCatalogItem
+import com.project.cruise.android.ui.theme.*
+import androidx.compose.ui.graphics.Color
 
 @Composable
 internal fun CatalogOrderDraftForm(item: TripCatalogItem, booking: PassengerBookingResponse) {
@@ -20,10 +22,10 @@ internal fun CatalogOrderDraftForm(item: TripCatalogItem, booking: PassengerBook
     var attempted by rememberSaveable(booking.id, item.id, item.type) { mutableStateOf(false) }
     val error = orderDraftError(item, passengerId, booking.passengers.map { it.passengerVoyageId }.toSet(), quantity)
     val passenger = booking.passengers.firstOrNull { it.passengerVoyageId == passengerId }
-    OutlinedCard(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    OutlinedCard(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text("Soạn đơn — bản nháp", style = MaterialTheme.typography.titleMedium)
-            Text("Chưa có API đặt đơn. Thông tin chỉ nằm trên màn này, chưa gửi cho nhân viên và chưa phát sinh chi phí.")
+            OceanNotice("Chưa có API đặt đơn. Thông tin chỉ nằm trên màn này, chưa gửi cho nhân viên và chưa phát sinh chi phí.")
             if (preview && error == null) {
                 Text("Xem lại bản nháp", style = MaterialTheme.typography.titleSmall)
                 Text("Hành khách: ${passenger?.fullName}")
@@ -31,8 +33,8 @@ internal fun CatalogOrderDraftForm(item: TripCatalogItem, booking: PassengerBook
                 Text("Tạm tính: ${activityPrice(orderDraftTotal(item.price, quantity))}")
                 if (note.isNotBlank()) Text("Ghi chú: $note")
                 Text("Giá từ danh mục đồng bộ, chưa phải số tiền được máy chủ xác nhận.")
-                OutlinedButton(onClick = { preview = false }) { Text("Sửa bản nháp") }
-                Button(onClick = {}, enabled = false) { Text("Gửi đơn — chưa có API") }
+                OutlinedButton(onClick = { preview = false }, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) { Text("Sửa bản nháp") }
+                Button(onClick = {}, enabled = false, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) { Text("Gửi đơn — chưa có API") }
             } else {
                 Text("Hành khách sử dụng")
                 if (booking.passengers.isEmpty()) Text("Booking chưa có hành khách.")
@@ -58,7 +60,7 @@ internal fun CatalogOrderDraftForm(item: TripCatalogItem, booking: PassengerBook
                     modifier = Modifier.fillMaxWidth(), minLines = 2, maxLines = 4)
                 Text("Tạm tính: ${activityPrice(orderDraftTotal(item.price, quantity))}")
                 if (attempted && error != null) Text(error, color = MaterialTheme.colorScheme.error)
-                Button(onClick = { attempted = true; preview = error == null }) { Text("Xem lại bản nháp") }
+                Button(onClick = { attempted = true; preview = error == null }, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) { Text("Xem lại bản nháp") }
             }
             TextButton(onClick = { passengerId = null; quantity = "1"; note = ""; preview = false; attempted = false }) {
                 Text("Xóa nội dung nháp")

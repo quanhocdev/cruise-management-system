@@ -14,6 +14,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.SubcomposeAsyncImage
 import com.project.cruise.android.viewmodel.passenger.BookingHistoryState
+import com.project.cruise.android.ui.theme.*
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 fun BookingCatalogDialog(state: BookingHistoryState, onRetry: () -> Unit, onClose: () -> Unit) {
@@ -24,21 +27,21 @@ fun BookingCatalogDialog(state: BookingHistoryState, onRetry: () -> Unit, onClos
     val back = { if (selected != null) selected = null else onClose() }
     Dialog(onDismissRequest = back, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         BackHandler(enabled = selected != null, onBack = back)
-        Surface(Modifier.fillMaxSize()) {
-            Column(Modifier.fillMaxSize().safeDrawingPadding().padding(16.dp),
+        TripSurface {
+            Column(Modifier.fillMaxSize().safeDrawingPadding().imePadding().padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                TextButton(onClick = back) { Text(if (selected == null) "← Chi tiết booking" else "← Danh sách") }
-                Text(if (selected == null) "Dịch vụ & sản phẩm" else "Chi tiết", style = MaterialTheme.typography.headlineSmall)
+                TripBackButton(if (selected == null) "← Chi tiết booking" else "← Danh sách", back)
+                Text(if (selected == null) "Dịch vụ & sản phẩm" else "Chi tiết", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = OceanNavy)
                 when {
                     state.loading -> LinearProgressIndicator(Modifier.fillMaxWidth())
                     state.error != null || state.tripError != null || catalog == null ->
-                        Text("Chưa tải được danh mục. Vui lòng thử lại.", color = MaterialTheme.colorScheme.error)
+                        OceanNotice("Chưa tải được danh mục. Vui lòng thử lại.", true)
                     selected != null && detail == null -> Text("Mục này không còn trong danh mục của chuyến.")
                     detail != null -> LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         item { CatalogImage(detail.imageUrl, detail.name) }
                         item { Text(detail.name, style = MaterialTheme.typography.titleLarge) }
                         item { Text(detail.description?.takeIf { it.isNotBlank() } ?: "Chưa có mô tả.") }
-                        item { Text("Giá: ${activityPrice(detail.price)}") }
+                        item { Text("Giá: ${activityPrice(detail.price)}", color = OceanTeal, style = MaterialTheme.typography.titleLarge) }
                         item { Text("Trạng thái đồng bộ: ${catalogStatus(detail.status)}") }
                         item { Text("Khu vực: ${detail.location?.takeIf { it.isNotBlank() } ?: "Đang cập nhật"}") }
                         if (detail.type == "SERVICE") {
@@ -59,13 +62,13 @@ fun BookingCatalogDialog(state: BookingHistoryState, onRetry: () -> Unit, onClos
                         if (visible.isEmpty()) Text("Chưa có ${if (group == "SERVICE") "dịch vụ" else "sản phẩm"} được cấu hình cho chuyến này.")
                         LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             items(visible, key = { "${it.type}:${it.id}" }) { entry ->
-                                OutlinedCard(onClick = { selected = "${entry.type}:${entry.id}" }, modifier = Modifier.fillMaxWidth()) {
-                                    Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                OutlinedCard(onClick = { selected = "${entry.type}:${entry.id}" }, modifier = Modifier.fillMaxWidth(), colors = CardDefaults.outlinedCardColors(containerColor = Color.White)) {
+                                    Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                         CatalogImage(entry.imageUrl, entry.name)
                                         Text(entry.name, style = MaterialTheme.typography.titleMedium)
-                                        Text(activityPrice(entry.price))
+                                        Text(activityPrice(entry.price), color = OceanTeal, fontWeight = FontWeight.Bold)
                                         Text(catalogStatus(entry.status))
-                                        Text("Xem chi tiết", color = MaterialTheme.colorScheme.primary)
+                                        Text("Xem chi tiết", color = OceanTeal)
                                     }
                                 }
                             }
@@ -73,7 +76,7 @@ fun BookingCatalogDialog(state: BookingHistoryState, onRetry: () -> Unit, onClos
                     }
                 }
                 Text("Có thể soạn bản nháp; chưa gửi đơn hoặc thanh toán.", style = MaterialTheme.typography.bodySmall)
-                OutlinedButton(onClick = onRetry, enabled = !state.loading) { Text("Tải lại danh mục") }
+                OutlinedButton(onClick = onRetry, enabled = !state.loading, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) { Text("Tải lại danh mục") }
             }
         }
     }
