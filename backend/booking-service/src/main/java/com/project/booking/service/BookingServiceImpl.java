@@ -15,6 +15,7 @@ import com.project.booking.model.BookingPassenger;
 import com.project.booking.model.enums.BookingStatus;
 import com.project.booking.repository.BookingRepository;
 import com.project.booking.repository.PassengerRepository;
+import com.project.booking.service.redis.TourRedisService;
 import com.project.booking.repository.BookingPassengerRepository;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.http.HttpStatus;
@@ -39,20 +40,23 @@ public class BookingServiceImpl implements BookingService {
     private final BookingPassengerRepository bookingPassengerRepository;
     private final BookingMapper bookingMapper;
     private final FileStorageService fileStorageService;
-    private final KafkaTemplate<String, Object> kafkaTemplate; // Khai báo KafkaTemplate
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final TourRedisService tourRedisService;
 
     public BookingServiceImpl(BookingRepository bookingRepository,
             PassengerRepository passengerRepository,
             BookingPassengerRepository bookingPassengerRepository,
             BookingMapper bookingMapper,
             FileStorageService fileStorageService,
-            KafkaTemplate<String, Object> kafkaTemplate) { // Inject vào Constructor
+            KafkaTemplate<String, Object> kafkaTemplate,
+            TourRedisService tourRedisService) {
         this.bookingRepository = bookingRepository;
         this.passengerRepository = passengerRepository;
         this.bookingPassengerRepository = bookingPassengerRepository;
         this.bookingMapper = bookingMapper;
         this.fileStorageService = fileStorageService;
         this.kafkaTemplate = kafkaTemplate;
+        this.tourRedisService = tourRedisService;
     }
 
     @Override
@@ -60,11 +64,18 @@ public class BookingServiceImpl implements BookingService {
         try {
             System.out.println(">>> [SERVICE] Bắt đầu xử lý create booking...");
 
+            UUID tourId = UUID.fromString(request.getTourId());
+            int passengerCount = request.getPassengers().size();
+
+            boolean reserved = tourRedisService.tryReserveSeats(tourId, passengerCount);
+            if (!reserved) {
+                throw new AppException("Rất tiếc, tour đã hết chỗ hoặc số lượng ghế trống không đủ!",
+                        HttpStatus.BAD_REQUEST);
+            }
             BigDecimal unitPrice = request.getUnitPrice() != null
                     ? request.getUnitPrice()
                     : BigDecimal.ZERO;
 
-            int passengerCount = request.getPassengers().size();
             BigDecimal totalAmount = unitPrice.multiply(BigDecimal.valueOf(passengerCount));
 
             Booking booking = new Booking();

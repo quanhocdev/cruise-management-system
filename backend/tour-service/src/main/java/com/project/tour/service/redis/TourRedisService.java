@@ -8,7 +8,4 @@ public interface TourRedisService {
     Long getRemainingSeats(UUID tourId);
 
     void deleteRemainingSeats(UUID tourId);
-
-    boolean tryReserveSeats(UUID tourId, int requestedSeats);
-
 }

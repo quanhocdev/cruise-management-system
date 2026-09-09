@@ -1,4 +1,4 @@
-package com.project.tour.service.redis;
+package com.project.booking.service.redis;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -35,22 +35,20 @@ public class TourRedisServiceImpl implements TourRedisService {
     }
 
     @Override
-    public void saveRemainingSeats(UUID tourId, Integer maxPassengers) {
+    public boolean tryReserveSeats(UUID tourId, int requestedSeats) {
         String key = "tour:" + tourId + ":remaining";
-        redisTemplate.opsForValue().set(key, String.valueOf(maxPassengers));
-    }
 
-    @Override
-    public Long getRemainingSeats(UUID tourId) {
-        String key = "tour:" + tourId + ":remaining";
-        String value = redisTemplate.opsForValue().get(key);
-        return value != null ? Long.valueOf(value) : null;
-    }
+        // Thực thi Lua Script an toàn tuyệt đối trên Redis
+        Long result = redisTemplate.execute(
+                reserveScript,
+                Collections.singletonList(key),
+                String.valueOf(requestedSeats));
 
-    @Override
-    public void deleteRemainingSeats(UUID tourId) {
-        String key = "tour:" + tourId + ":remaining";
-        redisTemplate.delete(key);
-    }
+        // Nếu kết quả trả về >= 0 nghĩa là đã trừ thành công
+        if (result != null && result >= 0) {
+            return true;
+        }
 
+        return false;
+    }
 }
