@@ -53,17 +53,15 @@ fun NotificationsScreen(api: ApiService, onBack: () -> Unit, onBooking: (Long) -
 
     Surface(Modifier.fillMaxSize(), color = OceanMist) {
     Column(Modifier.fillMaxSize().safeDrawingPadding().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        FilledTonalButton(
-            onClick = { if (selected != null) selected = null else onBack() },
-            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
-            shape = RoundedCornerShape(16.dp)
-        ) {
-            Text(if (selected == null) "← Quay lại Dashboard" else "← Quay lại danh sách", style = MaterialTheme.typography.titleMedium)
-        }
-        Text(if (detail == null) "Thông báo" else "Chi tiết thông báo", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        OceanHeader(if (detail == null) "Thông báo" else "Chi tiết thông báo",
+            onBack = { if (selected != null) selected = null else onBack() }, enabled = !state.busy)
         if (state.loaded) Text("${state.unreadCount} chưa đọc", color = OceanTeal, style = MaterialTheme.typography.labelLarge)
-        if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
-        state.error?.let { OceanNotice(it, true) }
+        if (state.busy) {
+            LinearProgressIndicator(Modifier.fillMaxWidth())
+            if (!state.loaded) OceanStatePanel("Đang tải thông báo", "Các cập nhật mới đang được đồng bộ.", "≈")
+        }
+        state.error?.let { OceanStatePanel("Không tải được thông báo", it, "!", "Thử lại",
+            { scope.launch { inbox.refresh() } }, true) }
         if (detail != null) {
             LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 item {
@@ -87,7 +85,7 @@ fun NotificationsScreen(api: ApiService, onBack: () -> Unit, onBooking: (Long) -
                 } }
             }
         } else if (selected != null && state.loaded) {
-            Text("Thông báo không còn trong danh sách. Hãy quay lại hoặc tải lại.")
+            OceanStatePanel("Không tìm thấy thông báo", "Thông báo có thể đã được xử lý. Hãy quay lại hoặc tải lại.", "⌁")
             Spacer(Modifier.weight(1f))
         } else {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -95,7 +93,11 @@ fun NotificationsScreen(api: ApiService, onBack: () -> Unit, onBooking: (Long) -
                 FilterChip(selected = unreadOnly, onClick = { unreadOnly = true }, label = { Text("Chưa đọc") })
             }
             val visible = state.items.filter { !unreadOnly || it.readAt == null }
-            if (state.loaded && visible.isEmpty()) OceanNotice(if (unreadOnly) "Bạn đã đọc hết thông báo." else "Chưa có thông báo. Các cập nhật hành trình sẽ xuất hiện tại đây.")
+            if (state.loaded && visible.isEmpty()) OceanStatePanel(
+                if (unreadOnly) "Không còn tin chưa đọc" else "Chưa có thông báo",
+                if (unreadOnly) "Bạn đã đọc hết các cập nhật." else "Các cập nhật hành trình sẽ xuất hiện tại đây.",
+                "♧"
+            )
             LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 items(visible, key = { it.id }) { entry ->
                     Card(onClick = { selected = entry.id }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp),
