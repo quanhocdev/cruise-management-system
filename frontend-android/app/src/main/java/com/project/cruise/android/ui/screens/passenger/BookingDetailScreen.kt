@@ -66,10 +66,13 @@ fun BookingDetailScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
     OceanPage {
-        FilledTonalButton(onClick = onBack, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) { Text("← Danh sách booking") }
+        OceanHeader("Chi tiết booking", onBack, !state.loading)
         OceanBanner("HÀNH TRÌNH CỦA BẠN", "Chi tiết booking")
-        if (state.loading) LinearProgressIndicator(Modifier.fillMaxWidth())
-        state.error?.let { OceanNotice(it, true) }
+        if (state.loading) {
+            LinearProgressIndicator(Modifier.fillMaxWidth())
+            OceanStatePanel("Đang đồng bộ booking", "Thông tin thanh toán và QR đang được kiểm tra.", "≈")
+        }
+        state.error?.let { OceanStatePanel("Không tải được booking", it, "!", "Thử lại", onRetry, true) }
         state.detail?.let { booking ->
             Text(booking.bookingCode ?: "Booking #${booking.id}", style = MaterialTheme.typography.titleLarge)
             OceanNotice("Trạng thái: ${bookingStatus(booking.status)}")
@@ -93,14 +96,7 @@ fun BookingDetailScreen(
             Text(if (booking.paymentId != null) "Mã thanh toán: ${booking.paymentId}" else "Chưa có giao dịch thanh toán thành công")
 
             if (booking.status == "PENDING_PAYMENT") {
-                Button(onClick = onStartPayment, enabled = !state.creatingPayment,
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
-                    if (state.creatingPayment) {
-                        CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                        Spacer(Modifier.width(8.dp))
-                    }
-                    Text("Thanh toán VNPay Sandbox")
-                }
+                OceanPrimaryButton("Thanh toán VNPay Sandbox", onStartPayment, loading = state.creatingPayment)
                 if (state.awaitingPaymentReturn) {
                     Text("Sau khi thanh toán, quay lại ứng dụng để hệ thống tự kiểm tra kết quả.",
                         style = MaterialTheme.typography.bodySmall)
@@ -116,7 +112,7 @@ fun BookingDetailScreen(
                         Image(bitmap.asImageBitmap(), "QR booking", Modifier.size(240.dp))
                     }
                 }
-                else if (!state.loading) Text("Chưa tải được QR. Bấm thử lại.")
+                else if (!state.loading) OceanStatePanel("Chưa tải được QR", "Bấm thử lại để lấy mã booking từ máy chủ.", "▦", "Thử lại", onRetry)
                 Text("Đưa QR này cho nhân viên để tra booking. Nhân viên vẫn phải chọn đúng hành khách khi check-in.", style = MaterialTheme.typography.bodySmall)
             } else {
                 Text("QR chỉ xuất hiện sau khi booking được thanh toán và xác nhận.", style = MaterialTheme.typography.bodySmall)
@@ -136,6 +132,6 @@ fun BookingDetailScreen(
                 } }
             }
         }
-        OutlinedButton(onClick = onRetry, enabled = !state.loading, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) { Text("Thử lại") }
+        OutlinedButton(onClick = onRetry, enabled = !state.loading, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) { Text("Làm mới thông tin") }
     }
 }

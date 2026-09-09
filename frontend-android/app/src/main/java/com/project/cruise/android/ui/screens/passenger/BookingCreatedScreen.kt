@@ -27,6 +27,6 @@ fun BookingCreatedScreen(booking: PassengerBookingResponse, onDone: () -> Unit) 
             else -> booking.status
         })
         OceanNotice("Vào Booking của tôi trên ứng dụng để xem chi tiết và thanh toán nếu booking đang chờ thanh toán.")
-        Button(onClick = onDone, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) { Text("Về Dashboard") }
+        OceanPrimaryButton("Về Dashboard", onDone)
     }
 }

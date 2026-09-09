@@ -13,13 +13,14 @@ fun PaymentReturnScreen(status: String?, paymentId: Long?, onBookings: () -> Uni
     val success = status == "SUCCESS"
     OceanPage {
         OceanBanner("VNPAY SANDBOX", "Kết quả thanh toán", "Kiểm tra booking để xem trạng thái mới nhất.")
-        Text(if (success) "Thanh toán thành công" else "Thanh toán chưa thành công",
-            style = MaterialTheme.typography.headlineMedium,
-            color = if (success) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error)
-        Spacer(Modifier.height(12.dp))
-        Text(if (success) "Booking đã được xác nhận." else "Bạn có thể quay lại booking và thử thanh toán lần nữa.")
-        paymentId?.let { Text("Mã thanh toán: #$it", modifier = Modifier.padding(top = 8.dp)) }
-        Spacer(Modifier.height(24.dp))
-        Button(onClick = onBookings, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) { Text("Xem booking của tôi") }
+        OceanStatePanel(
+            title = if (success) "Thanh toán thành công" else "Thanh toán chưa thành công",
+            message = if (success) "Booking đã được xác nhận. Mở booking để xem QR."
+                else "Bạn có thể quay lại booking và thử thanh toán lần nữa.",
+            symbol = if (success) "✓" else "!",
+            error = !success
+        )
+        paymentId?.let { OceanNotice("Mã thanh toán: #$it") }
+        OceanPrimaryButton("Xem booking của tôi", onBookings)
     }
 }

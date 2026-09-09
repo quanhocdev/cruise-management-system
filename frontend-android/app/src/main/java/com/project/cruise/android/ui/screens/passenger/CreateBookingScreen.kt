@@ -47,12 +47,14 @@ fun CreateBookingScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item {
-            FilledTonalButton(onClick = onBack, enabled = !state.submitting,
-                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) { Text("← Chọn phòng khác") }
-            Spacer(Modifier.height(16.dp))
-            OceanBanner("BƯỚC 1 · GIỮ CHỖ", "Thông tin đặt phòng", "Điền thông tin liên hệ và hành khách.")
+            OceanHeader("Tạo booking", onBack, !state.submitting)
+            Spacer(Modifier.height(12.dp))
+            OceanBanner("GIỮ CHỖ", "Thông tin đặt phòng", "Điền thông tin liên hệ và hành khách.")
         }
-        if (state.loading) item { LinearProgressIndicator(Modifier.fillMaxWidth()) }
+        if (state.loading) item {
+            LinearProgressIndicator(Modifier.fillMaxWidth())
+            OceanStatePanel("Đang kiểm tra phòng", "Hệ thống đang lấy giá và số chỗ mới nhất.", "≈")
+        }
         if (room != null) item {
             Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White)) {
                 Column(Modifier.padding(16.dp)) {
@@ -64,10 +66,14 @@ fun CreateBookingScreen(
             }
         }
         item {
-            Text("Người liên hệ", style = MaterialTheme.typography.titleLarge)
-            BookingField("Họ tên *", draft.contactName, editable) { onDraftChange(draft.copy(contactName = it)) }
-            BookingField("Số điện thoại *", draft.contactPhone, editable, KeyboardType.Phone) {
-                onDraftChange(draft.copy(contactPhone = it))
+            Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+                Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Người liên hệ", style = MaterialTheme.typography.titleLarge)
+                    BookingField("Họ tên *", draft.contactName, editable) { onDraftChange(draft.copy(contactName = it)) }
+                    BookingField("Số điện thoại *", draft.contactPhone, editable, KeyboardType.Phone) {
+                        onDraftChange(draft.copy(contactPhone = it))
+                    }
+                }
             }
         }
         itemsIndexed(draft.passengers) { index, passenger ->
@@ -92,16 +98,19 @@ fun CreateBookingScreen(
                 modifier = Modifier.fillMaxWidth()
             ) { Text("Thêm hành khách") }
         }
-        state.error?.let { message -> item { OceanNotice(message, true) } }
+        state.error?.let { message -> item {
+            OceanStatePanel("Chưa thể tạo booking", message, "!", error = true)
+        } }
         if (room == null && !state.loading && !state.outcomeUnknown) item {
-            OutlinedButton(onClick = onRetry, enabled = editable) { Text("Tải lại phòng") }
+            OceanStatePanel("Không tải được phòng", "Hãy kiểm tra kết nối và thử lại.", "▣", "Tải lại phòng", onRetry, true)
         }
         item {
-            Button(
+            OceanPrimaryButton(
+                text = if (state.submitting) "Đang giữ chỗ…" else "Xác nhận giữ chỗ",
                 onClick = onSubmit,
                 enabled = editable && !state.loading && room?.available == true && room.remainingCapacity > 0,
-                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)
-            ) { Text(if (state.submitting) "Đang giữ chỗ…" else "Xác nhận giữ chỗ") }
+                loading = state.submitting
+            )
             Text("Bước này tạo booking, chưa thanh toán hoặc trừ tiền.", style = MaterialTheme.typography.bodySmall)
         }
     }
@@ -145,5 +154,7 @@ private fun BookingField(
 ) {
     OutlinedTextField(value, onChange, label = { Text(label) }, enabled = enabled,
         singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+        shape = MaterialTheme.shapes.medium,
+        colors = OutlinedTextFieldDefaults.colors(unfocusedContainerColor = OceanPearl, focusedContainerColor = Color.White),
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp))
 }

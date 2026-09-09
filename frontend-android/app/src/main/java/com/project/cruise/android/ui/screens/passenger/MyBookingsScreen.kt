@@ -26,10 +26,15 @@ fun bookingStatus(value: String) = when (value) {
 fun MyBookingsScreen(state: BookingHistoryState, onRefresh: () -> Unit, onBookingClick: (Long) -> Unit, onBack: () -> Unit) {
     TourPage("Trang chủ", onBack) {
         item { OceanBanner("CHUYẾN ĐI CỦA BẠN", "Booking của tôi", "Quản lý đặt chỗ, thanh toán và vé lên tàu.") }
-        if (state.loading) item { LinearProgressIndicator(Modifier.fillMaxWidth()) }
-        state.error?.let { message -> item { OceanNotice(message, true) } }
+        if (state.loading) item {
+            LinearProgressIndicator(Modifier.fillMaxWidth())
+            OceanStatePanel("Đang tải booking", "Các chuyến đi của bạn đang được đồng bộ.", "≈")
+        }
+        state.error?.let { message -> item {
+            OceanStatePanel("Không tải được booking", message, "!", "Thử lại", onRefresh, true)
+        } }
         if (!state.loading && state.error == null && state.bookings.isEmpty()) item {
-            OceanNotice("Bạn chưa có booking nào.")
+            OceanStatePanel("Bạn chưa có booking", "Booking mới sẽ xuất hiện tại đây sau khi giữ chỗ.", "▤")
         }
             items(state.bookings, key = { it.id }) { booking ->
                 Card(onClick = { onBookingClick(booking.id) }, modifier = Modifier.fillMaxWidth(),
