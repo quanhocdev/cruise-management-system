@@ -20,24 +20,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.contentDescription
 
-val OceanNavy = Color(0xFF0B2545)
-val OceanTeal = Color(0xFF006A69)
-val OceanMint = Color(0xFF98F2F0)
-val OceanMist = Color(0xFFFAF8FF)
-val OceanLavender = Color(0xFFEAEDFF)
-
-/** Scoped to redesigned screens: POS and existing booking flows retain their theme. */
 @Composable
 fun OceanTheme(content: @Composable () -> Unit) {
-    MaterialTheme(colorScheme = lightColorScheme(primary = OceanNavy, onPrimary = Color.White,
-        secondary = OceanTeal, onSecondary = Color.White, secondaryContainer = OceanMint,
-        onSecondaryContainer = Color(0xFF004544), background = OceanMist, surface = OceanMist,
-        onSurface = Color(0xFF131B2E), onBackground = Color(0xFF131B2E),
-        onSurfaceVariant = Color(0xFF44474E), surfaceVariant = OceanLavender,
-        outline = Color(0xFF74777F), outlineVariant = Color(0xFFC4C6CF),
-        error = Color(0xFFBA1A1A), errorContainer = Color(0xFFFFDAD6)),
-        shapes = Shapes(small = RoundedCornerShape(12.dp), medium = RoundedCornerShape(18.dp), large = RoundedCornerShape(24.dp)),
-        content = content)
+    CruiseManagementTheme(content = content)
 }
 
 @Composable
@@ -45,7 +30,7 @@ fun OceanPage(content: @Composable ColumnScope.() -> Unit) {
     OceanTheme {
         Surface(Modifier.fillMaxSize(), color = OceanMist) {
             Box(Modifier.fillMaxSize().safeDrawingPadding().imePadding(), contentAlignment = Alignment.TopCenter) {
-                Column(Modifier.widthIn(max = 560.dp).fillMaxWidth().verticalScroll(rememberScrollState()).padding(24.dp),
+                Column(Modifier.widthIn(max = 560.dp).fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(20.dp), content = content)
             }
         }
@@ -55,8 +40,12 @@ fun OceanPage(content: @Composable ColumnScope.() -> Unit) {
 @Composable
 fun OceanHeader(title: String, onBack: (() -> Unit)? = null, enabled: Boolean = true) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        if (onBack != null) TextButton(onClick = onBack, enabled = enabled,
-            modifier = Modifier.semantics { contentDescription = "Quay lại" }) { Text("←", fontSize = 26.sp) }
+        if (onBack != null) FilledTonalButton(onClick = onBack, enabled = enabled,
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+            modifier = Modifier.heightIn(min = 48.dp).semantics { contentDescription = "Quay lại" }) {
+            Text("←", fontSize = 22.sp)
+        }
+        Spacer(Modifier.width(12.dp))
         Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
     }
 }
@@ -98,6 +87,68 @@ fun OceanNotice(text: String, error: Boolean = false) {
         color = if (error) MaterialTheme.colorScheme.errorContainer else OceanLavender) {
         Text(text, Modifier.padding(16.dp), color = if (error) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodyMedium)
+    }
+}
+
+@Composable
+fun OceanStatePanel(
+    title: String,
+    message: String,
+    symbol: String,
+    actionLabel: String? = null,
+    onAction: (() -> Unit)? = null,
+    error: Boolean = false
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        color = if (error) MaterialTheme.colorScheme.errorContainer else Color.White,
+        tonalElevation = 1.dp
+    ) {
+        Column(
+            Modifier.padding(horizontal = 20.dp, vertical = 28.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(symbol, fontSize = 34.sp)
+            Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(
+                message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (error) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            if (actionLabel != null && onAction != null) {
+                OutlinedButton(onClick = onAction, modifier = Modifier.heightIn(min = 48.dp)) {
+                    Text(actionLabel)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun OceanPrimaryButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    loading: Boolean = false
+) {
+    Button(
+        onClick = onClick,
+        enabled = enabled && !loading,
+        modifier = modifier.fillMaxWidth().heightIn(min = 56.dp),
+        shape = RoundedCornerShape(18.dp)
+    ) {
+        if (loading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(22.dp),
+                color = MaterialTheme.colorScheme.onPrimary,
+                strokeWidth = 2.dp
+            )
+        } else {
+            Text(text, style = MaterialTheme.typography.labelLarge)
+        }
     }
 }
 
