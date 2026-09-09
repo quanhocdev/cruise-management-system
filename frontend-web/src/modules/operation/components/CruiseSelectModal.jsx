@@ -38,19 +38,17 @@ function CruiseSelectModal({
 }) {
   const [maxPassengersInput, setMaxPassengersInput] = useState("");
 
-  // Tự động điền số lượng tối đa hiện tại của tour hoặc gợi ý theo tàu được chọn
+  // Tự động điền số lượng tối đa hiện tại của tour
   useEffect(() => {
     if (tour?.maxPassengers) {
       setMaxPassengersInput(tour.maxPassengers);
     }
   }, [tour]);
 
-  if (!open || !tour) return null;
-
   const currentAssignedCruiseId =
     tour?.cruiseId || tour?.cruise?.id || tour?.assignedCruiseId || null;
 
-  // Gom các nguồn phân công
+  // Gom các nguồn phân công (Đặt đúng thứ tự các Hook lên trên)
   const tourAssignments = useMemo(() => {
     if (Array.isArray(assignments) && assignments.length > 0) {
       return assignments;
@@ -104,10 +102,12 @@ function CruiseSelectModal({
     });
   }, [cruises, tour, currentAssignedCruiseId]);
 
-  // Lấy object du thuyền đang được chọn để biết max capacity của tàu đó
   const selectedCruiseObj = displayCruises.find(
     (c) => c.id === selectedCruiseId,
   );
+
+  // ĐẶT ĐIỀU KIỆN RETURN NULL SAU TẤT CẢ CÁC HOOK ĐỂ KHÔNG BỊ LỆCH THỨ TỰ
+  if (!open || !tour) return null;
 
   // Xử lý gán du thuyền kèm maxPassengers
   const handleAssign = async () => {

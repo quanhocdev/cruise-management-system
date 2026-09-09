@@ -75,6 +75,24 @@ export default function PassengerBooking() {
     updated[index][field] = value;
     setSelectedPassengers(updated);
   };
+  const calculateTotalPrice = () => {
+    if (!selectedPackageInfo) return "0 đ";
+
+    const numPassengers = selectedPassengers.length;
+    if (numPassengers === 0) return "0 đ";
+
+    // Lấy số người tối đa của gói (nếu backend lưu tên là maxPassengers hoặc capacity)
+    const packageCapacity = Number(
+      selectedPackageInfo.maxPassengers || selectedPackageInfo.capacity || 1,
+    );
+    const packagePrice = Number(selectedPackageInfo.price);
+
+    // Tính số lượng gói cần mua (ví dụ: gói 4 người mà có 5 khách thì phải mua 2 gói)
+    const numberOfPackagesNeeded = Math.ceil(numPassengers / packageCapacity);
+
+    const total = numberOfPackagesNeeded * packagePrice;
+    return `${total.toLocaleString("vi-VN")} đ`;
+  };
 
   const addPassengerSlot = () => {
     setSelectedPassengers([
@@ -538,11 +556,9 @@ export default function PassengerBooking() {
               </p>
               <hr />
               <div className="d-flex justify-content-between mb-2">
-                <span className="text-muted">Đơn giá / người:</span>
-                <span className="fw-semibold">
-                  {selectedPackageInfo
-                    ? `${Number(selectedPackageInfo.price).toLocaleString()} đ`
-                    : "0 đ"}
+                <span className="text-muted">Đơn giá: </span>
+                <span className="fw-bold text-primary fs-5">
+                  {calculateTotalPrice()}
                 </span>
               </div>
               <div className="d-flex justify-content-between mb-3">

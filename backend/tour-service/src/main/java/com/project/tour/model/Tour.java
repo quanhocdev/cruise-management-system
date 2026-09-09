@@ -58,11 +58,11 @@ public class Tour {
     @Column(name = "status_booking", nullable = false, length = 30)
     private TourBookingStatus statusBooking = TourBookingStatus.NOT_OPEN;
 
-    @Column(name = "max_passengers", nullable = false)
+    @Column(name = "max_passengers")
     private Integer maxPassengers; // Tổng số chỗ tối đa của tour
 
-    @Column(name = "booked_slots", nullable = false)
-    private Integer bookedSlots = 0; // Số chỗ đã được đặt và thanh toán thành công
+    @Column(name = "booked_slots")
+    private Integer bookedSlots = 0;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

@@ -176,7 +176,7 @@ export default function TourPublicDetail() {
                   <div className="d-flex gap-4 small text-secondary fw-medium">
                     <div>
                       👥 Tối đa:{" "}
-                      <strong>{tour.cruise.maxPassengers} hành khách</strong>
+                      <strong>{tour.maxPassengers} hành khách</strong>
                     </div>
                   </div>
                 </Col>
