@@ -411,8 +411,11 @@ fun NavGraph() {
         composable(
             Routes.PASSENGER_DASHBOARD
         ) {
+            val dashboardBookings by bookingHistoryViewModel.state.collectAsState()
             Dashboard(
                 viewModel = viewModel,
+                bookingState = dashboardBookings,
+                onRefreshBookings = bookingHistoryViewModel::loadMine,
                 onBrowseTours = { navController.navigate(Routes.PASSENGER_TOURS) },
                 onMyBookings = { navController.navigate(Routes.PASSENGER_BOOKINGS) },
                 notificationButton = {
