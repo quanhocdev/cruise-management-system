@@ -22,9 +22,9 @@ public class BookingController {
 
     private Long extractUserId(Principal principal) {
         if (principal instanceof JwtAuthenticationToken jwtAuth) {
-            // Lấy trực tiếp userId từ claim trong token (thường lưu dạng Long hoặc String)
-            Object userIdClaim = jwtAuth.getTokenAttributes().get("userId"); // hoặc "id", tùy cách bạn định nghĩa lúc
-                                                                             // tạo token ở auth-service
+            // Lấy trực tiếp userId từ claim trong token
+            Object userIdClaim = jwtAuth.getTokenAttributes().get("userId");
+
             if (userIdClaim != null) {
                 return Long.valueOf(userIdClaim.toString());
             }

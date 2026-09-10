@@ -2,27 +2,16 @@ FROM maven:3.9.6-eclipse-temurin-17
 
 WORKDIR /app
 
-# ==========================
-# Common
-# ==========================
-
+# 1. Copy và cài đặt module common trước
 COPY common/pom.xml ./common/pom.xml
 COPY common/src ./common/src
-
-# Build common và cài vào Maven local repository
 RUN mvn -f common/pom.xml clean install -DskipTests
 
-# ==========================
-# Tour Service
-# ==========================
-
+# 2. Copy pom và src của tour-service
 COPY tour-service/pom.xml ./tour-service/pom.xml
 COPY tour-service/src ./tour-service/src
 
 WORKDIR /app/tour-service
 
-# Tải dependency của tour-service
-RUN mvn dependency:go-offline -B
-
-# Chạy tour-service
+# 3. Build và chạy trực tiếp không dùng go-offline
 CMD ["mvn", "spring-boot:run"]

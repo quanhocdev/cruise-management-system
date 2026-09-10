@@ -13,7 +13,7 @@ import com.project.tour.dto.roomtype.RoomTypeResponse;
 import com.project.tour.repository.tour.PackageBenefitRepository;
 import com.project.tour.repository.tour.TourPackageRepository;
 import org.springframework.http.HttpStatus;
-import org.springframework.kafka.core.KafkaTemplate; 
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.project.tour.repository.tour.TourRepository;
@@ -29,15 +29,14 @@ public class TourPackageService {
     private final PackageBenefitRepository packageBenefitRepository;
     private final TourRepository tourRepository;
     private final RoomTypeRepository roomTypeRepository;
-    private final KafkaTemplate<String, TourPackageSyncedEvent> kafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    // 👈 Thêm kafkaTemplate vào Constructor Injection
     public TourPackageService(
             TourPackageRepository tourPackageRepository,
             PackageBenefitRepository packageBenefitRepository,
             TourRepository tourRepository,
             RoomTypeRepository roomTypeRepository,
-            KafkaTemplate<String, TourPackageSyncedEvent> kafkaTemplate) {
+            KafkaTemplate<String, Object> kafkaTemplate) {
         this.tourPackageRepository = tourPackageRepository;
         this.packageBenefitRepository = packageBenefitRepository;
         this.tourRepository = tourRepository;
@@ -82,13 +81,12 @@ public class TourPackageService {
 
         // 1. BẮN KAFKA EVENT KHI TẠO MỚI THÀNH CÔNG
         TourPackageSyncedEvent event = new TourPackageSyncedEvent(
-            savedPackage.getId(),
-            savedPackage.getTourId(),
-            savedPackage.getName(),
-            savedPackage.getPrice(),
-            savedPackage.getMaxPassengers(),
-            savedPackage.getStatus().name()
-        );
+                savedPackage.getId(),
+                savedPackage.getTourId(),
+                savedPackage.getName(),
+                savedPackage.getPrice(),
+                savedPackage.getMaxPassengers(),
+                savedPackage.getStatus().name());
         kafkaTemplate.send("tour-package-sync-topic", savedPackage.getId().toString(), event);
 
         return TourPackageMapper.toResponse(savedPackage, savedBenefits);
@@ -145,13 +143,12 @@ public class TourPackageService {
 
         // 2. BẮN KAFKA EVENT KHI CẬP NHẬT THÀNH CÔNG
         TourPackageSyncedEvent event = new TourPackageSyncedEvent(
-            updatedPackage.getId(),
-            updatedPackage.getTourId(),
-            updatedPackage.getName(),
-            updatedPackage.getPrice(),
-            updatedPackage.getMaxPassengers(),
-            updatedPackage.getStatus().name()
-        );
+                updatedPackage.getId(),
+                updatedPackage.getTourId(),
+                updatedPackage.getName(),
+                updatedPackage.getPrice(),
+                updatedPackage.getMaxPassengers(),
+                updatedPackage.getStatus().name());
         kafkaTemplate.send("tour-package-sync-topic", updatedPackage.getId().toString(), event);
 
         return TourPackageMapper.toResponse(updatedPackage, savedBenefits);
@@ -179,13 +176,12 @@ public class TourPackageService {
 
         // 3. BẮN KAFKA EVENT BÁO XÓA TRƯỚC KHI THỰC HIỆN XÓA
         TourPackageSyncedEvent event = new TourPackageSyncedEvent(
-            pkg.getId(),
-            pkg.getTourId(),
-            pkg.getName(),
-            pkg.getPrice(),
-            pkg.getMaxPassengers(),
-            "DELETED"
-        );
+                pkg.getId(),
+                pkg.getTourId(),
+                pkg.getName(),
+                pkg.getPrice(),
+                pkg.getMaxPassengers(),
+                "DELETED");
         kafkaTemplate.send("tour-package-sync-topic", pkg.getId().toString(), event);
 
         packageBenefitRepository.deleteAllByTourPackageId(pkg.getId());

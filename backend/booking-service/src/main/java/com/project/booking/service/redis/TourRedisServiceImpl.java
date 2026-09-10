@@ -37,14 +37,17 @@ public class TourRedisServiceImpl implements TourRedisService {
     @Override
     public boolean tryReserveSeats(UUID tourId, int requestedSeats) {
         String key = "tour:" + tourId + ":remaining";
+        System.out.println(">>> [REDIS] Đang check Key: " + key + " với số ghế yêu cầu: " + requestedSeats);
 
-        // Thực thi Lua Script an toàn tuyệt đối trên Redis
         Long result = redisTemplate.execute(
                 reserveScript,
                 Collections.singletonList(key),
                 String.valueOf(requestedSeats));
 
-        // Nếu kết quả trả về >= 0 nghĩa là đã trừ thành công
+        System.out.println(">>> [REDIS] Kết quả từ Lua Script trả về: " + result);
+        // Ý nghĩa các mã: >= 0 (Thành công, còn dư từng này ghế), -1 (Key không tồn
+        // tại/chưa set), -2 (Không đủ ghế)
+
         if (result != null && result >= 0) {
             return true;
         }

@@ -162,7 +162,7 @@ export default function PassengerBooking() {
 
     const finalTotalPrice = numberOfPackagesNeeded * packagePrice;
 
-    formData.append("totalPrice", finalTotalPrice);
+    // formData.append("totalPrice", finalTotalPrice);
     formData.append("primaryContactName", primaryContactName);
     formData.append("primaryContactPhone", primaryContactPhone);
 

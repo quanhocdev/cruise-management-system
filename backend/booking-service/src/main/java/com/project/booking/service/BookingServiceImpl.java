@@ -71,10 +71,18 @@ public class BookingServiceImpl implements BookingService {
             UUID tourId = UUID.fromString(request.getTourId());
             int passengerCount = request.getPassengers().size();
 
-            boolean reserved = tourRedisService.tryReserveSeats(tourId, passengerCount);
-            if (!reserved) {
-                throw new AppException("Rất tiếc, tour đã hết chỗ hoặc số lượng ghế trống không đủ!",
-                        HttpStatus.BAD_REQUEST);
+            try {
+                System.out.println(">>> [DEBUG] Chuẩn bị gọi Redis cho tourId: " + tourId);
+                boolean reserved = tourRedisService.tryReserveSeats(tourId, passengerCount);
+                System.out.println(">>> [DEBUG] Kết quả gọi Redis xong, reserved = " + reserved);
+
+                if (!reserved) {
+                    throw new AppException("Rất tiếc, tour đã hết chỗ hoặc số lượng ghế trống không đủ!",
+                            HttpStatus.BAD_REQUEST);
+                }
+            } catch (Exception e) {
+                System.out.println(">>> [DEBUG] Lỗi văng ra tại đoạn check Redis: " + e.getMessage());
+                throw e;
             }
 
             // 1. Lấy thông tin gói tour từ bảng local của booking-service (đồng bộ qua
