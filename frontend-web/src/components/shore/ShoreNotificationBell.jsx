@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell } from "lucide-react";
-import shoreNotificationService from "../services/shoreNotificationService";
+import shoreNotificationService from "../../modules/shore/services/shoreNotificationService";
 import "../../styles/shore/NotificationBell.css";
 
 function ShoreNotificationBell() {
