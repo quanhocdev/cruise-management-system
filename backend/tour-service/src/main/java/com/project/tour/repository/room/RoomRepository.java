@@ -13,6 +13,9 @@ import java.util.UUID;
 
 public interface RoomRepository extends JpaRepository<Room, UUID> {
 
+        @Query("SELECT r FROM Room r JOIN FETCH r.cruiseDeck d JOIN FETCH r.roomType WHERE d.cruise.id = :cruiseId ORDER BY d.deckNumber, r.code")
+        List<Room> findTripRoomsByCruiseId(@Param("cruiseId") UUID cruiseId);
+
         boolean existsByCruiseDeck_IdAndCodeIgnoreCase(
                         UUID deckId,
                         String code);

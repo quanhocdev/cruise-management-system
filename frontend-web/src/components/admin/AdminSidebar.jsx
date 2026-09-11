@@ -5,10 +5,10 @@ import {
   Users,
   Ship,
   Anchor,
-  BedDouble,
   Package,
   ConciergeBell,
   FileText,
+  MonitorSmartphone,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -45,6 +45,11 @@ const menuItems = [
     label: "Quản lý dịch vụ",
     icon: ConciergeBell,
     path: "/admin/services",
+  },
+  {
+    label: "Quản lý máy POS",
+    icon: MonitorSmartphone,
+    path: "/admin/pos-terminals",
   },
   {
     label: "Quản lý chính sách",

@@ -26,6 +26,7 @@ public interface AssignmentActivityCruiseRepository
       UUID tourId,
       UUID cruiseAreaId);
 
+
   boolean existsByTourIdAndCruiseAreaId(
       UUID tourId,
       UUID cruiseAreaId);

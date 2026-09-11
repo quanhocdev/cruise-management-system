@@ -29,7 +29,7 @@ import java.text.DateFormat
 import java.util.Date
 
 @Composable
-fun PosHistoryScreen(onBackClick: () -> Unit) {
+fun PosHistoryScreen(onBackClick: () -> Unit, onIdentify: (String) -> Unit) {
     val context = LocalContext.current
     val queue = remember { PosTransactionQueue(context) }
     val transactions by queue.observeAll().collectAsState(initial = emptyList())
@@ -65,7 +65,9 @@ fun PosHistoryScreen(onBackClick: () -> Unit) {
                                 Text(transaction.scanType, fontWeight = FontWeight.Bold, color = Color(0xFF126A70))
                                 Text(statusLabel(status), color = statusColor(status), style = MaterialTheme.typography.labelMedium)
                             }
-                            Text(transaction.scannedValue, modifier = Modifier.padding(top = 8.dp), fontWeight = FontWeight.SemiBold)
+                            Text(if (transaction.scannedValue.startsWith("POS:")) "QR định danh (đã ẩn mã)" else transaction.scannedValue,
+                                modifier = Modifier.padding(top = 8.dp), fontWeight = FontWeight.SemiBold)
+                            TextButton(onClick = { onIdentify(transaction.localId) }) { Text("Xác minh hành khách") }
                             Text(
                                 DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(transaction.createdAt)),
                                 modifier = Modifier.padding(top = 5.dp),

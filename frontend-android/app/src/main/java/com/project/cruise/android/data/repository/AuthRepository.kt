@@ -82,6 +82,11 @@ class AuthRepository(
 
         return apiService.getCurrentUser()
     }
+
+    fun hasStoredSession(): Boolean =
+        !tokenManager.getAccessToken().isNullOrBlank() ||
+            !tokenManager.getRefreshToken().isNullOrBlank()
+
     fun logout() {
         tokenManager.clearTokens()
     }

@@ -18,6 +18,7 @@ public interface AssignmentActivityVisitRepository
     // ===================================================
     // ==
 
+    Optional<AssignmentActivityVisit> findByVisitTourId(UUID targetId);
     List<AssignmentActivityVisit> findAllByOrderByCreatedAtAsc();
 
     List<AssignmentActivityVisit> findAllByTourIdOrderByCreatedAtAsc(

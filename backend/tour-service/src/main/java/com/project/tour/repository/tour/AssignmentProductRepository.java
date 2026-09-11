@@ -14,6 +14,7 @@ import java.util.UUID;
 @Repository
 public interface AssignmentProductRepository extends JpaRepository<AssignmentProduct, UUID> {
 
+    Optional<AssignmentProduct> findByProductTourId(UUID targetId);
     List<AssignmentProduct> findAllByOrderByCreatedAtAsc();
 
     List<AssignmentProduct> findAllByTourIdOrderByCreatedAtAsc(UUID tourId);

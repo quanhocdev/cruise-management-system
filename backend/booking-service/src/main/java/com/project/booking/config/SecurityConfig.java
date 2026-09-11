@@ -20,121 +20,121 @@ import java.util.Arrays;
 @Configuration
 public class SecurityConfig {
 
-        @Bean
-        public PasswordEncoder passwordEncoder() {
-                return new BCryptPasswordEncoder();
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(
+            org.springframework.security.config.annotation.web.builders.HttpSecurity http,
+            BearerTokenResolver bearerTokenResolver,
+            JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
+
+        return http
+                .csrf(csrf -> csrf.disable())
+
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                .authorizeHttpRequests(authorize -> authorize
+
+                        // CORS preflight
+                        .requestMatchers(HttpMethod.OPTIONS, "/**")
+                        .permitAll()
+
+                        // Public/internal endpoints
+                        .requestMatchers(
+                                "/actuator/health",
+                                "/actuator/info",
+                                "/internal/**",
+                                "/api/public/**")
+                        .permitAll()
+
+                        // Admin
+                        .requestMatchers("/api/admin/**")
+                        .hasRole("ADMIN")
+
+                        // Scheduler
+                        .requestMatchers("/api/scheduler/**")
+                        .hasRole("SCHEDULER")
+
+                        // Convenience
+                        .requestMatchers("/api/convenience/**")
+                        .hasRole("CONVENIENCE")
+
+                        .requestMatchers("/api/operation/**")
+                        .hasRole("OPERATION")
+
+                        .requestMatchers("/api/onboard/**")
+                        .hasRole("ONBOARD")
+
+                        .requestMatchers("/api/shore/**")
+                        .hasRole("SHORE")
+
+                        .requestMatchers("/api/passenger/**")
+                        .hasRole("PASSENGER")
+
+                        // Everything else
+                        .anyRequest()
+                        .authenticated())
+
+                .oauth2ResourceServer(resourceServer -> resourceServer
+                        .bearerTokenResolver(bearerTokenResolver)
+                        .jwt(jwt -> jwt
+                                .jwtAuthenticationConverter(
+                                        jwtAuthenticationConverter)))
+
+                .build();
+    }
+
+    @Bean
+    public BearerTokenResolver bearerTokenResolver() {
+
+        DefaultBearerTokenResolver headerResolver = new DefaultBearerTokenResolver();
+
+        return request -> {
+
+            String cookieToken = findAccessTokenCookie(request);
+
+            if (cookieToken != null) {
+                return cookieToken;
+            }
+
+            return headerResolver.resolve(request);
+        };
+    }
+
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+
+        JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
+
+        authoritiesConverter.setAuthoritiesClaimName("scope");
+        authoritiesConverter.setAuthorityPrefix("ROLE_");
+
+        JwtAuthenticationConverter authenticationConverter = new JwtAuthenticationConverter();
+
+        authenticationConverter.setJwtGrantedAuthoritiesConverter(
+                authoritiesConverter);
+
+        return authenticationConverter;
+    }
+
+    private String findAccessTokenCookie(
+            HttpServletRequest request) {
+
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies == null) {
+            return null;
         }
 
-        @Bean
-        public SecurityFilterChain securityFilterChain(
-                        org.springframework.security.config.annotation.web.builders.HttpSecurity http,
-                        BearerTokenResolver bearerTokenResolver,
-                        JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
-
-                return http
-                                .csrf(csrf -> csrf.disable())
-
-                                .sessionManagement(session -> session
-                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                                .authorizeHttpRequests(authorize -> authorize
-
-                                                // CORS preflight
-                                                .requestMatchers(HttpMethod.OPTIONS, "/**")
-                                                .permitAll()
-
-                                                // Public/internal endpoints
-                                                .requestMatchers(
-                                                                "/actuator/health",
-                                                                "/actuator/info",
-                                                                "/internal/**",
-                                                                "/api/public/**")
-                                                .permitAll()
-
-                                                // Admin
-                                                .requestMatchers("/api/admin/**")
-                                                .hasRole("ADMIN")
-
-                                                // Scheduler
-                                                .requestMatchers("/api/scheduler/**")
-                                                .hasRole("SCHEDULER")
-
-                                                // Convenience
-                                                .requestMatchers("/api/convenience/**")
-                                                .hasRole("CONVENIENCE")
-
-                                                .requestMatchers("/api/operation/**")
-                                                .hasRole("OPERATION")
-
-                                                .requestMatchers("/api/onboard/**")
-                                                .hasRole("ONBOARD")
-
-                                                .requestMatchers("/api/shore/**")
-                                                .hasRole("SHORE")
-
-                                                .requestMatchers("/api/passenger/**")
-                                                .hasRole("PASSENGER")
-
-                                                // Everything else
-                                                .anyRequest()
-                                                .authenticated())
-
-                                .oauth2ResourceServer(resourceServer -> resourceServer
-                                                .bearerTokenResolver(bearerTokenResolver)
-                                                .jwt(jwt -> jwt
-                                                                .jwtAuthenticationConverter(
-                                                                                jwtAuthenticationConverter)))
-
-                                .build();
-        }
-
-        @Bean
-        public BearerTokenResolver bearerTokenResolver() {
-
-                DefaultBearerTokenResolver headerResolver = new DefaultBearerTokenResolver();
-
-                return request -> {
-
-                        String cookieToken = findAccessTokenCookie(request);
-
-                        if (cookieToken != null) {
-                                return cookieToken;
-                        }
-
-                        return headerResolver.resolve(request);
-                };
-        }
-
-        @Bean
-        public JwtAuthenticationConverter jwtAuthenticationConverter() {
-
-                JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
-
-                authoritiesConverter.setAuthoritiesClaimName("scope");
-                authoritiesConverter.setAuthorityPrefix("ROLE_");
-
-                JwtAuthenticationConverter authenticationConverter = new JwtAuthenticationConverter();
-
-                authenticationConverter.setJwtGrantedAuthoritiesConverter(
-                                authoritiesConverter);
-
-                return authenticationConverter;
-        }
-
-        private String findAccessTokenCookie(
-                        HttpServletRequest request) {
-
-                Cookie[] cookies = request.getCookies();
-
-                if (cookies == null) {
-                        return null;
-                }
-
-                return Arrays.stream(cookies)
-                                .filter(cookie -> "accessToken".equals(cookie.getName()))
-                                .map(Cookie::getValue)
-                                .filter(value -> !value.isBlank())
-                                .findFirst()
-                                .orElse(null);
-        }
+        return Arrays.stream(cookies)
+                .filter(cookie -> "accessToken".equals(cookie.getName()))
+                .map(Cookie::getValue)
+                .filter(value -> !value.isBlank())
+                .findFirst()
+                .orElse(null);
+    }
 }
