@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell } from "lucide-react";
-import onboardNotificationService from "../services/onboardNotificationService";
+import onboardNotificationService from "../../modules/onboard/services/onboardNotificationService";
 import "../../styles/onboard/NotificationBell.css";
 
 function OnboardNotificationBell() {

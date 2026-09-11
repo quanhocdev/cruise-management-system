@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell } from "lucide-react";
-import convenienceNotificationService from "../services/convenienceNotificationService";
+import convenienceNotificationService from "../../modules/convenience/services/convenienceNotificationService";
 import "../../styles/convenience/ConvenienceNotification.css";
 
 export default function NotificationBell() {
