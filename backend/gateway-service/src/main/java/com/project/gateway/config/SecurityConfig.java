@@ -39,6 +39,7 @@ public class SecurityConfig {
 
                         // Registered POS devices authenticate using terminal headers
                         "/api/v1/pos/transactions/sync",
+                        "/api/v1/pos/identify",
 
                         // Staff activation
                         "/api/auth/activate/verify",

@@ -14,12 +14,7 @@ class AuthInterceptor(
 
         val token = tokenManager.getAccessToken()
 
-        println("AUTH_DEBUG: API ${chain.request().url()}")
-
         if (!token.isNullOrBlank()) {
-            println("AUTH_DEBUG: ACCESS TOKEN FOUND")
-            println("AUTH_DEBUG: ACCESS TOKEN = $token")
-
             val request = chain.request()
                 .newBuilder()
                 .header(
@@ -30,8 +25,6 @@ class AuthInterceptor(
 
             return chain.proceed(request)
         }
-
-        println("AUTH_DEBUG: NO ACCESS TOKEN")
 
         return chain.proceed(
             chain.request()

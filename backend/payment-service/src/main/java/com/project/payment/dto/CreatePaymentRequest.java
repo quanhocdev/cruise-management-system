@@ -48,7 +48,8 @@ public class CreatePaymentRequest {
     }
 
     public void setAmount(BigDecimal amount) {
-        this.amount = amount;
+        // Database amounts may include .00; remove only insignificant zeros, never round money.
+        this.amount = amount == null ? null : amount.stripTrailingZeros();
     }
 
     public PaymentMethod getMethod() {

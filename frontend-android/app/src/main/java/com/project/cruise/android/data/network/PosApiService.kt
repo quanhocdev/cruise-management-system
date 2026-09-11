@@ -5,6 +5,18 @@ import retrofit2.http.Header
 import retrofit2.http.POST
 
 interface PosApiService {
+    @POST("api/v1/pos/identify")
+    suspend fun identify(
+        @Header("X-Terminal-Code") terminalCode: String,
+        @Header("X-POS-Key") posKey: String,
+        @Body request: PosIdentityRequest
+    ): PosIdentityResponse
+    @POST("api/v1/pos/check-in")
+    suspend fun checkIn(
+        @Header("X-Terminal-Code") terminalCode: String,
+        @Header("X-POS-Key") posKey: String,
+        @Body request: PosIdentityRequest
+    ): PosCheckInResponse
     @POST("api/v1/pos/transactions/sync")
     suspend fun sync(
         @Header("X-Terminal-Code") terminalCode: String,
@@ -12,6 +24,19 @@ interface PosApiService {
         @Body request: PosSyncRequest
     ): PosSyncResponse
 }
+
+data class PosIdentityRequest(val scanType: String, val scannedValue: String)
+data class PosIdentityResponse(
+    val status: String, val reason: String?, val passengerVoyageId: Long?,
+    val fullName: String?, val bookingCode: String?, val voyageId: String?,
+    val cabinId: String?, val embarkationStatus: String?
+)
+data class PosCheckInResponse(
+    val status: String, val reason: String?, val passengerVoyageId: Long?,
+    val fullName: String?, val bookingCode: String?, val voyageId: String?,
+    val cabinId: String?, val embarkationStatus: String?, val checkedInAt: String?,
+    val terminalCode: String?
+)
 
 data class PosSyncRequest(
     val localId: String,
