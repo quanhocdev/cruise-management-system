@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell } from "lucide-react";
-import onboardNotificationService from "../services/onboardNotificationService";
-import "../../styles/onboard/NotificationBell.css";
+import shoreNotificationService from "../services/shoreNotificationService";
+import "../../styles/shore/NotificationBell.css";
 
-function OnboardNotificationBell() {
+function ShoreNotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -12,13 +12,11 @@ function OnboardNotificationBell() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Kết nối WebSocket thông qua service của Onboard
-    onboardNotificationService.connect((newNotif) => {
+    shoreNotificationService.connect((newNotif) => {
       setUnreadCount((prev) => prev + 1);
       setNotifications((prev) => [newNotif, ...prev]);
     });
 
-    // Đóng dropdown khi click ra bên ngoài
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);
@@ -27,7 +25,7 @@ function OnboardNotificationBell() {
     document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      onboardNotificationService.disconnect();
+      shoreNotificationService.disconnect();
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
@@ -42,14 +40,14 @@ function OnboardNotificationBell() {
     <div className="relative inline-block" ref={dropdownRef}>
       <button
         type="button"
-        className="onboard-notification-button"
+        className="relative bg-transparent border-none text-gray-600 cursor-pointer p-2 rounded-full flex items-center justify-center hover:bg-gray-100 transition"
         title="Thông báo"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <Bell size={20} />
+        <Bell size={21} />
 
         {unreadCount > 0 && (
-          <span className="onboard-notification-badge">
+          <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-bold h-4 min-w-[16px] rounded-full flex items-center justify-center px-1">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
@@ -58,8 +56,8 @@ function OnboardNotificationBell() {
       {isOpen && (
         <div className="absolute right-0 mt-2 w-80 bg-white shadow-xl rounded-lg overflow-hidden z-50 border border-gray-100 text-left">
           <div className="p-3 font-semibold text-gray-700 border-b bg-gray-50 flex justify-between items-center text-sm">
-            <span>Thông báo Onboard</span>
-            <span className="text-xs text-teal-600 font-normal">
+            <span>Thông báo Shore</span>
+            <span className="text-xs text-blue-600 font-normal">
               {unreadCount} mới
             </span>
           </div>
@@ -73,7 +71,7 @@ function OnboardNotificationBell() {
                 <div
                   key={item.id}
                   onClick={() => handleNotificationClick(item)}
-                  className="p-3 border-b hover:bg-teal-50 cursor-pointer text-sm transition"
+                  className="p-3 border-b hover:bg-blue-50 cursor-pointer text-sm transition"
                 >
                   <p className="font-semibold text-gray-800 text-xs">
                     {item.title}
@@ -92,4 +90,4 @@ function OnboardNotificationBell() {
   );
 }
 
-export default OnboardNotificationBell;
+export default ShoreNotificationBell;

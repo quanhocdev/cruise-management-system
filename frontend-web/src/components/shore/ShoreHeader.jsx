@@ -1,6 +1,5 @@
 import { Menu, UserCircle } from "lucide-react";
-
-import NotificationBell from "../operation/NotificationBell";
+import ShoreNotificationBell from "./ShoreNotificationBell";
 
 import "../../styles/shore/ShoreHeader.css";
 
@@ -19,13 +18,12 @@ function ShoreHeader({ onMenuClick }) {
 
         <div className="shore-header-title">
           <span className="shore-header-title-main">Shore Management</span>
-
           <span className="shore-header-title-sub">Quản lý tour bờ</span>
         </div>
       </div>
 
       <div className="shore-header-right">
-        <NotificationBell />
+        <ShoreNotificationBell />
 
         <div className="shore-header-user">
           <UserCircle size={32} />
