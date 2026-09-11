@@ -12,7 +12,6 @@ import java.util.List;
 public class BookingMapper {
 
     // Chuyển đổi Booking Entity + danh sách BookingPassenger sang BookingResponse
-    // Record
     public BookingResponse toResponse(Booking booking, List<BookingPassenger> passengers) {
         List<BookingPassengerInfoResponse> passengerInfos = passengers.stream()
                 .map(this::toPassengerInfoResponse)

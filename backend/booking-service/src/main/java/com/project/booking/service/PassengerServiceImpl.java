@@ -42,8 +42,6 @@ public class PassengerServiceImpl implements PassengerService {
             return List.of();
         }
 
-        // Lấy danh sách hành khách thông qua các đơn đặt vé (Booking) do user này tạo
-        // (createdByUserId)
         return bookingPassengerRepository.findByBooking_CreatedByUserId(userId).stream()
                 .map(bp -> bp.getPassenger())
                 .distinct() // Tránh trùng lặp nếu hành khách đi nhiều tour khác nhau

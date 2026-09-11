@@ -131,9 +131,9 @@ function ManagerTour() {
   // Gom toàn bộ tour vào client state
   const allTours = useMemo(() => {
     return [
-      ...(pendingTours || []), 
+      ...(pendingTours || []),
       ...(approvedTours || []),
-      ...(readyTours || [])
+      ...(readyTours || []),
     ];
   }, [pendingTours, approvedTours, readyTours]);
 
@@ -276,11 +276,11 @@ function ManagerTour() {
     setSelectedCruiseId(cruiseId);
   };
 
-  const handleAssignCruise = async (cruiseId) => {
+  const handleAssignCruise = async (cruiseId, maxPassengers) => {
     if (!selectedTour || !cruiseId) return;
 
     try {
-      await assignCruise(selectedTour.id, cruiseId);
+      await assignCruise(selectedTour.id, cruiseId, maxPassengers);
       setSelectedCruiseId(cruiseId);
       await loadPendingTours();
     } catch (err) {
@@ -321,7 +321,11 @@ function ManagerTour() {
       };
 
       await approveTour(tour.id, payload);
-      await Promise.all([loadPendingTours(), loadApprovedTours(), loadReadyTours()]);
+      await Promise.all([
+        loadPendingTours(),
+        loadApprovedTours(),
+        loadReadyTours(),
+      ]);
     } catch (err) {
       console.error("APPROVE TOUR ERROR:", err);
     }

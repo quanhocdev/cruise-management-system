@@ -80,7 +80,6 @@ public class EmailDeliveryService {
                     + "</span></p>"
                     + "</div>"
                     + "<p>Vui lòng xuất trình mã QR đính kèm khi check-in.</p>"
-                    // Thêm text-align: center để căn giữa ảnh QR
                     + "<div style='text-align: center; margin: 25px 0;'><img src='cid:qrCode' style='width: 200px; height: 200px; display: inline-block;'/></div>"
                     + "<p style='margin-top: 30px; font-size: 14px; color: #666;'>"
                     + "Bạn có thể xem chi tiết hoặc quản lý các đơn đặt tour của mình tại phần <b>My Booking</b> của hệ thống."

@@ -1,6 +1,6 @@
 // src/modules/passenger/hooks/usePassengerBookings.js
 import { useState, useCallback } from "react";
-import passengerBookingService from "../services/passengerBookingService"; // 👈 Đồng bộ tên biến import
+import passengerBookingService from "../services/passengerBookingService";
 
 export default function usePassengerBookings() {
   const [bookings, setBookings] = useState([]);
@@ -14,7 +14,7 @@ export default function usePassengerBookings() {
     setLoading(true);
     setError("");
     try {
-      const data = await passengerBookingService.getMyBookings(); // 👈 Sửa thành passengerBookingService
+      const data = await passengerBookingService.getMyBookings();
       const list = Array.isArray(data)
         ? data
         : data?.content || data?.data || [];

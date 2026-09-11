@@ -12,15 +12,17 @@ import com.project.booking.mapper.BookingMapper;
 import com.project.booking.model.Booking;
 import com.project.booking.model.Passenger;
 import com.project.booking.model.BookingPassenger;
+import com.project.booking.model.InfoTourPackage;
 import com.project.booking.model.enums.BookingStatus;
 import com.project.booking.repository.BookingRepository;
 import com.project.booking.repository.PassengerRepository;
+import com.project.booking.service.redis.TourRedisService;
 import com.project.booking.repository.BookingPassengerRepository;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import com.project.booking.repository.InfoTourPackageRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -37,22 +39,28 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final PassengerRepository passengerRepository;
     private final BookingPassengerRepository bookingPassengerRepository;
+    private final InfoTourPackageRepository infoTourPackageRepository;
     private final BookingMapper bookingMapper;
     private final FileStorageService fileStorageService;
-    private final KafkaTemplate<String, Object> kafkaTemplate; // Khai báo KafkaTemplate
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final TourRedisService tourRedisService;
 
     public BookingServiceImpl(BookingRepository bookingRepository,
             PassengerRepository passengerRepository,
             BookingPassengerRepository bookingPassengerRepository,
+            InfoTourPackageRepository infoTourPackageRepository,
             BookingMapper bookingMapper,
             FileStorageService fileStorageService,
-            KafkaTemplate<String, Object> kafkaTemplate) { // Inject vào Constructor
+            KafkaTemplate<String, Object> kafkaTemplate,
+            TourRedisService tourRedisService) {
         this.bookingRepository = bookingRepository;
         this.passengerRepository = passengerRepository;
         this.bookingPassengerRepository = bookingPassengerRepository;
+        this.infoTourPackageRepository = infoTourPackageRepository;
         this.bookingMapper = bookingMapper;
         this.fileStorageService = fileStorageService;
         this.kafkaTemplate = kafkaTemplate;
+        this.tourRedisService = tourRedisService;
     }
 
     @Override
@@ -60,12 +68,36 @@ public class BookingServiceImpl implements BookingService {
         try {
             System.out.println(">>> [SERVICE] Bắt đầu xử lý create booking...");
 
-            BigDecimal unitPrice = request.getUnitPrice() != null
-                    ? request.getUnitPrice()
-                    : BigDecimal.ZERO;
-
+            UUID tourId = UUID.fromString(request.getTourId());
             int passengerCount = request.getPassengers().size();
-            BigDecimal totalAmount = unitPrice.multiply(BigDecimal.valueOf(passengerCount));
+
+            try {
+                System.out.println(">>> [DEBUG] Chuẩn bị gọi Redis cho tourId: " + tourId);
+                boolean reserved = tourRedisService.tryReserveSeats(tourId, passengerCount);
+                System.out.println(">>> [DEBUG] Kết quả gọi Redis xong, reserved = " + reserved);
+
+                if (!reserved) {
+                    throw new AppException("Rất tiếc, tour đã hết chỗ hoặc số lượng ghế trống không đủ!",
+                            HttpStatus.BAD_REQUEST);
+                }
+            } catch (Exception e) {
+                System.out.println(">>> [DEBUG] Lỗi văng ra tại đoạn check Redis: " + e.getMessage());
+                throw e;
+            }
+
+            // 1. Lấy thông tin gói tour từ bảng local của booking-service (đồng bộ qua
+            // Kafka)
+            InfoTourPackage pkg = infoTourPackageRepository.findById(UUID.fromString(request.getTourPackageId()))
+                    .orElseThrow(() -> new AppException("Không tìm thấy gói tour hợp lệ trong hệ thống!",
+                            HttpStatus.BAD_REQUEST));
+
+            BigDecimal packagePrice = pkg.getPrice();
+            int maxPassengers = pkg.getMaxPassengers() != null ? pkg.getMaxPassengers() : 1;
+            int numberOfPackagesNeeded = maxPassengers > 1
+                    ? (int) Math.ceil((double) passengerCount / maxPassengers)
+                    : passengerCount;
+
+            BigDecimal totalAmount = packagePrice.multiply(BigDecimal.valueOf(numberOfPackagesNeeded));
 
             Booking booking = new Booking();
             booking.setCreatedByUserId(userId);

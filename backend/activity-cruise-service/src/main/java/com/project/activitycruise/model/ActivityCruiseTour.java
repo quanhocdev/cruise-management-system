@@ -8,7 +8,9 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "activity_cruise_tour")
+@Table(name = "activity_cruise_tour", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_activity_cruise_tour_tour_area", columnNames = { "tour_id", "cruise_area_id" })
+})
 public class ActivityCruiseTour {
 
     @Id

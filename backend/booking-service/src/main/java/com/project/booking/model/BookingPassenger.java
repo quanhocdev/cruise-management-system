@@ -23,11 +23,11 @@ public class BookingPassenger {
     @JoinColumn(name = "booking_id", nullable = false)
     private Booking booking;
 
-    // Thông tin phòng (thay vì cabin)
+    // Thông tin phòng
     @Column(name = "room_id")
     private UUID roomId;
 
-    // Trạng thái check-in của riêng hành khách này
+    // Trạng thái check-in của hành khách
     @Column(name = "checkin_status", nullable = false, length = 30)
     private String checkinStatus = "PENDING"; // PENDING, CHECKED_IN
 
@@ -35,7 +35,6 @@ public class BookingPassenger {
     private LocalDateTime checkedInAt;
 
     // --- GETTERS & SETTERS ---
-    // (Bạn generate đầy đủ getters và setters cho các trường ở đây)
     public Long getId() {
         return id;
     }

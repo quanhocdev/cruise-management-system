@@ -2,7 +2,6 @@ package com.project.payment.controller;
 
 import com.project.payment.dto.CreatePaymentRequest;
 import com.project.payment.dto.PaymentResponse;
-import com.project.payment.exception.PaymentException;
 import com.project.payment.service.PaymentService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -10,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
 import com.project.payment.model.enums.PaymentReferenceType;
-import com.project.payment.model.enums.PaymentStatus;
 
 import java.util.List;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -81,19 +79,4 @@ public class PaymentController {
         }
     }
 
-    // @GetMapping("/booking/{bookingId}")
-    // public ResponseEntity<PaymentResponse> getPaymentByBookingId(
-    // @PathVariable Long bookingId,
-    // @AuthenticationPrincipal Jwt jwt) {
-    // // Tìm payment PENDING theo bookingId và kiểm tra quyền của user
-    // PaymentResponse response = paymentService.getPayments(bookingId,
-    // PaymentReferenceType.BOOKING)
-    // .stream()
-    // .filter(p -> p.getStatus() == PaymentStatus.PENDING)
-    // .findFirst()
-    // .orElseThrow(() -> new PaymentException("No active payment found for this
-    // booking"));
-
-    // return ResponseEntity.ok(response);
-    // }
 }

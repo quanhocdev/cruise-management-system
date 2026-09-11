@@ -3,7 +3,6 @@ package com.project.booking.controller;
 import com.project.booking.dto.booking.BookingResponse;
 import com.project.booking.dto.booking.CreateBookingRequest;
 import com.project.booking.service.BookingService;
-import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -23,9 +22,9 @@ public class BookingController {
 
     private Long extractUserId(Principal principal) {
         if (principal instanceof JwtAuthenticationToken jwtAuth) {
-            // Lấy trực tiếp userId từ claim trong token (thường lưu dạng Long hoặc String)
-            Object userIdClaim = jwtAuth.getTokenAttributes().get("userId"); // hoặc "id", tùy cách bạn định nghĩa lúc
-                                                                             // tạo token ở auth-service
+            // Lấy trực tiếp userId từ claim trong token
+            Object userIdClaim = jwtAuth.getTokenAttributes().get("userId");
+
             if (userIdClaim != null) {
                 return Long.valueOf(userIdClaim.toString());
             }

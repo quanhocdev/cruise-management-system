@@ -461,3 +461,63 @@
     transform: rotate(360deg);
   }
 }
+/* =========================================================
+   CẤU HÌNH SỐ LƯỢNG HÀNH KHÁCH (MAX PASSENGERS INPUT SECTION)
+   ========================================================= */
+.operation-cruise-capacity-box {
+  margin: 14px 24px 0 24px;
+  background: #f8fafc;
+  padding: 14px 18px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.capacity-box-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 13.5px;
+}
+
+.capacity-box-label svg {
+  color: #2563eb;
+}
+
+.capacity-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.capacity-input-field {
+  width: 140px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  background-color: #ffffff;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.capacity-input-field:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.capacity-input-hint {
+  font-size: 12.5px;
+  color: #64748b;
+}
+
+.capacity-input-hint b {
+  color: #0f172a;
+}

@@ -10,13 +10,8 @@ const useActivityCruiseTour = () => {
   const [error, setError] = useState(null);
   const [statusFilter, setStatusFilter] = useState("ALL");
 
-  // Trạng thái riêng cho hành động "Hoàn thành cấu hình"
   const [completing, setCompleting] = useState(false);
   const [completeError, setCompleteError] = useState(null);
-
-  // =====================================================
-  // LOAD ACTIVITIES + CONFIGURATION HISTORY
-  // =====================================================
 
   const loadAllActivities = useCallback(async () => {
     try {
@@ -32,7 +27,6 @@ const useActivityCruiseTour = () => {
       setConfigurationHistory(historyData || []);
     } catch (err) {
       console.error("LOAD ACTIVITY CRUISE TOUR / HISTORY ERROR:", err);
-
       setError(
         err.response?.data?.message || "Không thể tải danh sách hoạt động",
       );
@@ -40,10 +34,6 @@ const useActivityCruiseTour = () => {
       setLoading(false);
     }
   }, []);
-
-  // =====================================================
-  // CONFIGURE ACTIVITY
-  // =====================================================
 
   const configureActivity = useCallback(async (assignmentId, configData) => {
     try {
@@ -61,18 +51,12 @@ const useActivityCruiseTour = () => {
       return updatedItem;
     } catch (err) {
       console.error("CONFIGURE ACTIVITY CRUISE TOUR ERROR:", err);
-
       const message =
         err.response?.data?.message || "Không thể cấu hình hoạt động";
-
       setError(message);
       throw err;
     }
   }, []);
-
-  // =====================================================
-  // UPDATE CONFIG
-  // =====================================================
 
   const updateActivityConfig = useCallback(async (assignmentId, configData) => {
     try {
@@ -90,18 +74,12 @@ const useActivityCruiseTour = () => {
       return updatedItem;
     } catch (err) {
       console.error("UPDATE ACTIVITY CRUISE TOUR ERROR:", err);
-
       const message =
         err.response?.data?.message || "Không thể cập nhật cấu hình hoạt động";
-
       setError(message);
       throw err;
     }
   }, []);
-
-  // =====================================================
-  // COMPLETE TOUR CONFIGURATION
-  // =====================================================
 
   const completeTourConfiguration = useCallback(
     async (tourId) => {
@@ -110,18 +88,14 @@ const useActivityCruiseTour = () => {
         setCompleteError(null);
 
         await activityCruiseTourService.completeTourConfiguration(tourId);
-
-        // Load lại cả activities + history
         await loadAllActivities();
 
         return true;
       } catch (err) {
         console.error("COMPLETE TOUR CONFIGURATION ERROR:", err);
-
         const message =
           err.response?.data?.message ||
           "Không thể hoàn thành cấu hình cho Tour này";
-
         setCompleteError(message);
         throw err;
       } finally {
@@ -131,37 +105,33 @@ const useActivityCruiseTour = () => {
     [loadAllActivities],
   );
 
-  // =====================================================
-  // INITIAL LOAD
-  // =====================================================
-
   useEffect(() => {
     loadAllActivities();
   }, [loadAllActivities]);
 
-  // =====================================================
-  // FILTER ACTIVITIES
-  // =====================================================
-
+  // Lọc và khử trùng lặp dữ liệu tránh việc bị hiện bản ghi nhân đôi trong bảng
   const filteredActivities = useMemo(() => {
+    const uniqueMap = new Map();
+
+    activities.forEach((item) => {
+      const uniqueKey = item.id || item.assignmentId;
+      if (uniqueKey && !uniqueMap.has(uniqueKey)) {
+        uniqueMap.set(uniqueKey, item);
+      }
+    });
+
+    const uniqueList = Array.from(uniqueMap.values());
+
     if (statusFilter === "ALL") {
-      return activities;
+      return uniqueList;
     }
 
-    return activities.filter((item) => item.status === statusFilter);
+    return uniqueList.filter((item) => item.status === statusFilter);
   }, [activities, statusFilter]);
-
-  // =====================================================
-  // COMPLETED TOUR ID SET
-  // =====================================================
 
   const completedTourIds = useMemo(() => {
     return new Set(configurationHistory.map((history) => history.tourId));
   }, [configurationHistory]);
-
-  // =====================================================
-  // TOUR SUMMARIES
-  // =====================================================
 
   const tourSummaries = useMemo(() => {
     const map = new Map();
@@ -180,7 +150,6 @@ const useActivityCruiseTour = () => {
       }
 
       const entry = map.get(item.tourId);
-
       entry.total += 1;
 
       if (item.status === "CONFIGURED") {
@@ -194,18 +163,13 @@ const useActivityCruiseTour = () => {
   return {
     activities,
     filteredActivities,
-
     statusFilter,
     setStatusFilter,
-
     tourSummaries,
-
     loading,
     error,
-
     completing,
     completeError,
-
     loadAllActivities,
     configureActivity,
     updateActivityConfig,
