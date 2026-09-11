@@ -1,22 +1,30 @@
 package com.project.booking.service;
 
-import com.project.booking.dto.*;
+import com.project.booking.dto.booking.CreateBookingRequest;
+import com.project.booking.dto.booking.BookingResponse;
+import com.project.booking.dto.AvailableRoomResponse;
 import java.util.List;
 import java.time.LocalDate;
 import java.util.UUID;
 
 public interface BookingService {
-    BookingResponse create(CreateBookingRequest request, Long userId);
+    // 1. Tạo đơn đặt tour mới (đã bao gồm email trích xuất từ JWT)
+    BookingResponse create(CreateBookingRequest request, Long userId, String email);
+
+    // 2. Lấy thông tin chi tiết đơn hàng
     BookingResponse get(Long id, Long requesterId, boolean privileged);
+
+    // 3. Lấy danh sách đơn hàng cá nhân
     List<BookingResponse> getMine(Long userId);
+
+    // 4. Hủy đơn hàng (chỉ khi CONFIRMED)
     BookingResponse cancel(Long id, Long userId);
-    BookingPaymentContext getPaymentContext(Long id);
-    BookingResponse confirmPayment(Long id, Long paymentId);
-    BookingResponse getByCode(String bookingCode, Long requesterId, boolean privileged);
-    PassengerVoyageResponse checkIn(String bookingCode, Long passengerVoyageId, String nfcTagId);
-    PassengerVoyageResponse board(String nfcTagId);
-    PassengerVoyageResponse disembark(String nfcTagId);
+
+    // 5. Lấy danh sách phòng trống theo Tour và Package
+    List<AvailableRoomResponse> getAvailableRooms(UUID tourId, UUID tourPackageId);
+
+    // 6. Gửi nhắc nhở khởi hành tự động
     int sendDepartureReminders(LocalDate departureDate);
-    FeedbackEligibilityResponse getFeedbackEligibility(Long bookingId, Long userId);
-    List<AvailableRoomResponse> getAvailableRooms(UUID voyageId);
+
+    void processPaymentSuccess(Long bookingId);
 }

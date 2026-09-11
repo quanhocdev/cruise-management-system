@@ -1,311 +1,278 @@
 package com.project.booking.service;
 
-import com.project.booking.dto.*;
-import com.project.booking.client.*;
-import com.project.booking.exception.BookingException;
+import com.project.common.dto.UploadResult;
+import com.project.common.event.BookingConfirmedEvent;
+import com.project.common.event.BookingCreatedEvent;
+import com.project.common.service.file.FileStorageService;
+import com.project.booking.dto.booking.*;
+import com.project.booking.dto.passenger.PassengerRequest;
+import com.project.booking.dto.AvailableRoomResponse;
+import com.project.booking.exception.AppException;
+import com.project.booking.mapper.BookingMapper;
 import com.project.booking.model.Booking;
 import com.project.booking.model.Passenger;
-import com.project.booking.model.PassengerVoyage;
-import com.project.booking.model.enums.*;
-import com.project.booking.repository.*;
+import com.project.booking.model.BookingPassenger;
+import com.project.booking.model.InfoTourPackage;
+import com.project.booking.model.enums.BookingStatus;
+import com.project.booking.repository.BookingRepository;
+import com.project.booking.repository.PassengerRepository;
+import com.project.booking.service.redis.TourRedisService;
+import com.project.booking.repository.BookingPassengerRepository;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.Instant;
+import com.project.booking.repository.InfoTourPackageRepository;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class BookingServiceImpl implements BookingService {
-    private final BookingRepository repository;
+
+    private static final String BOOKING_CREATED_TOPIC = "booking-created-topic";
+
+    private final BookingRepository bookingRepository;
     private final PassengerRepository passengerRepository;
-    private final PassengerVoyageRepository passengerVoyageRepository;
-    private final TourClient tourClient;
-    private final NotificationClient notificationClient;
-    public BookingServiceImpl(BookingRepository repository, PassengerRepository passengerRepository,
-                              PassengerVoyageRepository passengerVoyageRepository, TourClient tourClient,
-                              NotificationClient notificationClient) {
-        this.repository = repository; this.passengerRepository = passengerRepository;
-        this.passengerVoyageRepository = passengerVoyageRepository; this.tourClient = tourClient;
-        this.notificationClient = notificationClient;
+    private final BookingPassengerRepository bookingPassengerRepository;
+    private final InfoTourPackageRepository infoTourPackageRepository;
+    private final BookingMapper bookingMapper;
+    private final FileStorageService fileStorageService;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final TourRedisService tourRedisService;
+
+    public BookingServiceImpl(BookingRepository bookingRepository,
+            PassengerRepository passengerRepository,
+            BookingPassengerRepository bookingPassengerRepository,
+            InfoTourPackageRepository infoTourPackageRepository,
+            BookingMapper bookingMapper,
+            FileStorageService fileStorageService,
+            KafkaTemplate<String, Object> kafkaTemplate,
+            TourRedisService tourRedisService) {
+        this.bookingRepository = bookingRepository;
+        this.passengerRepository = passengerRepository;
+        this.bookingPassengerRepository = bookingPassengerRepository;
+        this.infoTourPackageRepository = infoTourPackageRepository;
+        this.bookingMapper = bookingMapper;
+        this.fileStorageService = fileStorageService;
+        this.kafkaTemplate = kafkaTemplate;
+        this.tourRedisService = tourRedisService;
     }
 
-    @Override @Transactional
-    public synchronized BookingResponse create(CreateBookingRequest request, Long userId) {
-        TourScheduleContext voyage = tourClient.getSchedule(request.voyageId());
-        Map<UUID, TourRoomContext> roomsById = validateAvailability(request, voyage);
-        BigDecimal totalAmount = calculateTotalAmount(request, roomsById);
-        Instant now = Instant.now();
-        Booking booking = new Booking();
-        booking.setCreatedByUserId(userId); booking.setVoyageId(request.voyageId());
-        booking.setPrimaryContactName(request.primaryContactName().trim());
-        booking.setPrimaryContactPhone(request.primaryContactPhone().trim());
-        booking.setTotalAmount(totalAmount);
-        booking.setVoyageStartDate(voyage.startDate());
-        booking.setStatus(BookingStatus.PENDING_PAYMENT); booking.setCreatedAt(now); booking.setUpdatedAt(now);
-        Booking saved = repository.save(booking);
-        for (CreatePassengerRequest item : request.passengers()) {
-            Passenger passenger = new Passenger(); passenger.setUserId(item.userId());
-            passenger.setFullName(item.fullName().trim()); passenger.setDateOfBirth(item.dateOfBirth());
-            passenger.setGender(item.gender().trim()); passenger.setPhoneNumber(item.phoneNumber()); passenger.setEmail(item.email());
-            passenger = passengerRepository.save(passenger);
-            PassengerVoyage link = new PassengerVoyage(); link.setPassenger(passenger); link.setBooking(saved);
-            link.setVoyageId(saved.getVoyageId()); link.setCabinId(item.cabinId());
-            link.setPassengerStatus(PassengerStatus.RESERVED); link.setEmbarkationStatus(EmbarkationStatus.NOT_CHECKED_IN);
-            passengerVoyageRepository.save(link);
+    @Override
+    public synchronized BookingResponse create(CreateBookingRequest request, Long userId, String email) {
+        try {
+            System.out.println(">>> [SERVICE] Bắt đầu xử lý create booking...");
+
+            UUID tourId = UUID.fromString(request.getTourId());
+            int passengerCount = request.getPassengers().size();
+
+            try {
+                System.out.println(">>> [DEBUG] Chuẩn bị gọi Redis cho tourId: " + tourId);
+                boolean reserved = tourRedisService.tryReserveSeats(tourId, passengerCount);
+                System.out.println(">>> [DEBUG] Kết quả gọi Redis xong, reserved = " + reserved);
+
+                if (!reserved) {
+                    throw new AppException("Rất tiếc, tour đã hết chỗ hoặc số lượng ghế trống không đủ!",
+                            HttpStatus.BAD_REQUEST);
+                }
+            } catch (Exception e) {
+                System.out.println(">>> [DEBUG] Lỗi văng ra tại đoạn check Redis: " + e.getMessage());
+                throw e;
+            }
+
+            // 1. Lấy thông tin gói tour từ bảng local của booking-service (đồng bộ qua
+            // Kafka)
+            InfoTourPackage pkg = infoTourPackageRepository.findById(UUID.fromString(request.getTourPackageId()))
+                    .orElseThrow(() -> new AppException("Không tìm thấy gói tour hợp lệ trong hệ thống!",
+                            HttpStatus.BAD_REQUEST));
+
+            BigDecimal packagePrice = pkg.getPrice();
+            int maxPassengers = pkg.getMaxPassengers() != null ? pkg.getMaxPassengers() : 1;
+            int numberOfPackagesNeeded = maxPassengers > 1
+                    ? (int) Math.ceil((double) passengerCount / maxPassengers)
+                    : passengerCount;
+
+            BigDecimal totalAmount = packagePrice.multiply(BigDecimal.valueOf(numberOfPackagesNeeded));
+
+            Booking booking = new Booking();
+            booking.setCreatedByUserId(userId);
+            booking.setPrimaryContactEmail(email);
+            booking.setTourId(UUID.fromString(request.getTourId()));
+            booking.setTourPackageId(UUID.fromString(request.getTourPackageId()));
+            booking.setBookingCode(generateBookingCode());
+            booking.setNumberPassengers(passengerCount);
+            booking.setPrimaryContactName(request.getPrimaryContactName().trim());
+            booking.setPrimaryContactPhone(request.getPrimaryContactPhone().trim());
+            booking.setTotalAmount(totalAmount);
+            booking.setStatus(BookingStatus.PENDING_PAYMENT);
+
+            Booking savedBooking = bookingRepository.save(booking);
+            System.out.println(">>> [SERVICE] Đã lưu xong Booking ID: " + savedBooking.getId());
+
+            for (int i = 0; i < request.getPassengers().size(); i++) {
+                PassengerRequest pReq = request.getPassengers().get(i);
+                System.out.println(">>> [SERVICE] Đang xử lý hành khách thứ " + (i + 1) + ": " + pReq.getFullName());
+
+                Passenger passenger = new Passenger();
+                passenger.setBooking(savedBooking);
+                passenger.setFullName(pReq.getFullName() != null ? pReq.getFullName().trim() : null);
+                passenger.setDateOfBirth(pReq.getDateOfBirth());
+                passenger.setGender(pReq.getGender() != null ? pReq.getGender().trim() : null);
+                passenger.setPhoneNumber(pReq.getPhoneNumber());
+                passenger.setEmail(pReq.getEmail());
+                passenger.setIdCardType(pReq.getIdCardType());
+                passenger.setIdentificationNumber(
+                        pReq.getIdentificationNumber() != null ? pReq.getIdentificationNumber().trim() : null);
+                passenger.setDocumentNote(pReq.getDocumentNote());
+
+                if (pReq.getIdCardImage() != null && !pReq.getIdCardImage().isEmpty()) {
+                    System.out.println(">>> [SERVICE] Đang upload ảnh cho hành khách " + pReq.getFullName());
+                    UploadResult uploadResult = fileStorageService.saveMultipart(
+                            pReq.getIdCardImage(),
+                            "passengers");
+                    passenger.setIdCardImageUrl(uploadResult.getUrl());
+                    passenger.setIdCardImagePublicId(uploadResult.getPublicId());
+                }
+
+                Passenger savedPassenger = passengerRepository.save(passenger);
+
+                BookingPassenger link = new BookingPassenger();
+                link.setBooking(savedBooking);
+                link.setPassenger(savedPassenger);
+                link.setCheckinStatus("PENDING");
+                bookingPassengerRepository.save(link);
+            }
+
+            // =========================================================
+            // BẮN KAFKA EVENT SAU KHI LƯU XONG ĐƠN HÀNG VÀ HÀNH KHÁCH
+            // =========================================================
+            BookingCreatedEvent event = new BookingCreatedEvent(
+                    savedBooking.getId(),
+                    userId,
+                    savedBooking.getTourId(),
+                    savedBooking.getTourPackageId(),
+                    passengerCount,
+                    savedBooking.getTotalAmount(),
+                    LocalDateTime.now());
+
+            // Gửi đi với key là bookingId dạng String để phân vùng (partition) rõ ràng
+            kafkaTemplate.send(BOOKING_CREATED_TOPIC, savedBooking.getId().toString(), event);
+            System.out.println(
+                    ">>> [KAFKA PRODUCER] Đã bắn event PENDING_PAYMENT cho Booking ID: " + savedBooking.getId());
+
+            List<BookingPassenger> links = bookingPassengerRepository
+                    .findAllByBooking_IdOrderByIdAsc(savedBooking.getId());
+            return bookingMapper.toResponse(savedBooking, links);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
         }
-        return toResponse(saved);
     }
 
-    @Override @Transactional(readOnly = true)
+    @Override
+    @Transactional(readOnly = true)
     public BookingResponse get(Long id, Long requesterId, boolean privileged) {
-        Booking booking = find(id);
-        if (!privileged && !Objects.equals(booking.getCreatedByUserId(), requesterId))
-            throw new BookingException(HttpStatus.FORBIDDEN, "You cannot access this booking");
-        return toResponse(booking);
-    }
-
-    @Override @Transactional(readOnly = true)
-    public List<BookingResponse> getMine(Long userId) {
-        return repository.findAllByCreatedByUserIdOrderByCreatedAtDesc(userId).stream().map(this::toResponse).toList();
-    }
-
-    @Override @Transactional
-    public BookingResponse cancel(Long id, Long userId) {
-        Booking booking = find(id);
-        if (!Objects.equals(booking.getCreatedByUserId(), userId))
-            throw new BookingException(HttpStatus.FORBIDDEN, "You cannot cancel this booking");
-        if (booking.getStatus() != BookingStatus.PENDING_PAYMENT)
-            throw new BookingException(HttpStatus.CONFLICT, "Only a pending booking can be cancelled");
-        booking.setStatus(BookingStatus.CANCELLED); booking.setUpdatedAt(Instant.now());
-        passengerVoyageRepository.findAllByBooking_IdOrderByIdAsc(id).forEach(link -> {
-            link.setPassengerStatus(PassengerStatus.CANCELLED); passengerVoyageRepository.save(link);
-        });
-        Booking saved = repository.save(booking);
-        notificationClient.send(saved.getCreatedByUserId(), firstEmail(saved), "BOOKING_CANCELLED",
-            "Booking cancelled", "Your booking #" + saved.getId() + " has been cancelled.", saved.getId());
-        return toResponse(saved);
-    }
-
-    @Override @Transactional(readOnly = true)
-    public BookingPaymentContext getPaymentContext(Long id) {
-        Booking booking = find(id);
-        return new BookingPaymentContext(booking.getId(), booking.getCreatedByUserId(), booking.getTotalAmount(), booking.getStatus());
-    }
-
-    @Override @Transactional
-    public BookingResponse confirmPayment(Long id, Long paymentId) {
-        Booking booking = find(id);
-        if (booking.getStatus() == BookingStatus.CONFIRMED) {
-            if (paymentId.equals(booking.getPaymentId())) return toResponse(booking);
-            throw new BookingException(HttpStatus.CONFLICT, "Booking was confirmed by another payment");
+        Booking booking = findBookingById(id);
+        if (!privileged && !Objects.equals(booking.getCreatedByUserId(), requesterId)) {
+            throw new AppException("You cannot access this booking", HttpStatus.FORBIDDEN);
         }
-        if (booking.getStatus() != BookingStatus.PENDING_PAYMENT)
-            throw new BookingException(HttpStatus.CONFLICT, "Booking is not payable");
-        booking.setStatus(BookingStatus.CONFIRMED); booking.setPaymentId(paymentId);
-        booking.setBookingCode(generateBookingCode(booking.getId())); booking.setUpdatedAt(Instant.now());
-        passengerVoyageRepository.findAllByBooking_IdOrderByIdAsc(id).forEach(link -> {
-            link.setPassengerStatus(PassengerStatus.REGISTERED); passengerVoyageRepository.save(link);
-        });
-        Booking saved = repository.save(booking);
-        notificationClient.send(saved.getCreatedByUserId(), firstEmail(saved), "PAYMENT_SUCCESS",
-            "Payment successful", "Payment confirmed. Your booking code is " + saved.getBookingCode() + ".",
-            saved.getId());
-        return toResponse(saved);
+        List<BookingPassenger> links = bookingPassengerRepository.findAllByBooking_IdOrderByIdAsc(booking.getId());
+        return bookingMapper.toResponse(booking, links);
     }
 
-    @Override @Transactional(readOnly = true)
-    public BookingResponse getByCode(String bookingCode, Long requesterId, boolean privileged) {
-        Booking booking = findByCode(bookingCode);
-        if (!privileged && !Objects.equals(booking.getCreatedByUserId(), requesterId))
-            throw new BookingException(HttpStatus.FORBIDDEN, "You cannot access this booking");
-        return toResponse(booking);
+    @Override
+    @Transactional(readOnly = true)
+    public List<BookingResponse> getMine(Long userId) {
+        return bookingRepository.findAllByCreatedByUserIdOrderByCreatedAtDesc(userId)
+                .stream()
+                .map(booking -> {
+                    List<BookingPassenger> links = bookingPassengerRepository
+                            .findAllByBooking_IdOrderByIdAsc(booking.getId());
+                    return bookingMapper.toResponse(booking, links);
+                })
+                .toList();
     }
 
-    @Override @Transactional
-    public PassengerVoyageResponse checkIn(String bookingCode, Long passengerVoyageId, String nfcTagId) {
-        Booking booking = findByCode(bookingCode);
-        if (booking.getStatus() != BookingStatus.CONFIRMED)
-            throw new BookingException(HttpStatus.CONFLICT, "Only a confirmed booking can be checked in");
-        PassengerVoyage link = findPassengerVoyage(passengerVoyageId);
-        if (!Objects.equals(link.getBooking().getId(), booking.getId()))
-            throw new BookingException(HttpStatus.BAD_REQUEST, "Passenger does not belong to this booking");
-        if (link.getPassengerStatus() != PassengerStatus.REGISTERED)
-            throw new BookingException(HttpStatus.CONFLICT, "Passenger is not registered for this voyage");
-        if (link.getEmbarkationStatus() != EmbarkationStatus.NOT_CHECKED_IN)
-            throw new BookingException(HttpStatus.CONFLICT, "Passenger has already been checked in");
-        String normalizedTag = normalizeTag(nfcTagId);
-        if (passengerVoyageRepository.existsByNfcTagIdIgnoreCase(normalizedTag))
-            throw new BookingException(HttpStatus.CONFLICT, "NFC tag is already assigned");
-        link.setNfcTagId(normalizedTag);
-        link.setEmbarkationStatus(EmbarkationStatus.CHECKED_IN);
-        link.setCheckedInAt(Instant.now());
-        PassengerVoyage saved = passengerVoyageRepository.save(link);
-        notificationClient.send(booking.getCreatedByUserId(), saved.getPassenger().getEmail(), "CHECK_IN_SUCCESS",
-            "Check-in successful", saved.getPassenger().getFullName() + " has checked in successfully.", booking.getId());
-        return toPassengerResponse(saved);
+    @Override
+    public BookingResponse cancel(Long id, Long userId) {
+        Booking booking = findBookingById(id);
+        if (!Objects.equals(booking.getCreatedByUserId(), userId)) {
+            throw new AppException("You cannot cancel this booking", HttpStatus.FORBIDDEN);
+        }
+
+        if (booking.getStatus() != BookingStatus.CONFIRMED) {
+            throw new AppException("Only CONFIRMED bookings can be cancelled", HttpStatus.CONFLICT);
+        }
+
+        booking.setStatus(BookingStatus.CANCELLED);
+        Booking saved = bookingRepository.save(booking);
+
+        List<BookingPassenger> links = bookingPassengerRepository.findAllByBooking_IdOrderByIdAsc(saved.getId());
+        return bookingMapper.toResponse(saved, links);
     }
 
-    @Override @Transactional
-    public PassengerVoyageResponse board(String nfcTagId) {
-        PassengerVoyage link = findByNfc(nfcTagId);
-        if (link.getEmbarkationStatus() != EmbarkationStatus.CHECKED_IN)
-            throw new BookingException(HttpStatus.CONFLICT, "Passenger must be checked in before boarding");
-        link.setEmbarkationStatus(EmbarkationStatus.BOARDED);
-        link.setBoardedAt(Instant.now());
-        return toPassengerResponse(passengerVoyageRepository.save(link));
+    @Override
+    @Transactional(readOnly = true)
+    public List<AvailableRoomResponse> getAvailableRooms(UUID tourId, UUID tourPackageId) {
+        return List.of();
     }
 
-    @Override @Transactional
-    public PassengerVoyageResponse disembark(String nfcTagId) {
-        PassengerVoyage link = findByNfc(nfcTagId);
-        if (link.getEmbarkationStatus() != EmbarkationStatus.BOARDED)
-            throw new BookingException(HttpStatus.CONFLICT, "Passenger must be on board before disembarking");
-        link.setEmbarkationStatus(EmbarkationStatus.DISEMBARKED);
-        link.setDisembarkedAt(Instant.now());
-        return toPassengerResponse(passengerVoyageRepository.save(link));
+    @Override
+    public int sendDepartureReminders(LocalDate departureDate) {
+        return 0;
     }
 
-    @Override @Transactional
-    public int sendDepartureReminders(java.time.LocalDate departureDate) {
-        int sent = 0;
-        for (Booking booking : repository.findAllByStatusAndVoyageStartDateAndDepartureReminderSentAtIsNull(
-                BookingStatus.CONFIRMED, departureDate)) {
-            boolean delivered = notificationClient.send(booking.getCreatedByUserId(), firstEmail(booking),
-                "DEPARTURE_REMINDER", "Upcoming cruise departure",
-                "Your cruise departs on " + departureDate + ". Booking code: " + booking.getBookingCode() + ".",
-                booking.getId());
-            if (delivered) {
-                booking.setDepartureReminderSentAt(Instant.now()); repository.save(booking); sent++;
+    private Booking findBookingById(Long id) {
+        return bookingRepository.findById(id)
+                .orElseThrow(() -> new AppException("Booking not found: " + id, HttpStatus.NOT_FOUND));
+    }
+
+    private String generateBookingCode() {
+        for (int attempt = 0; attempt < 10; attempt++) {
+            String code = "BK-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+            if (!bookingRepository.existsByBookingCode(code)) {
+                return code;
             }
         }
-        return sent;
+        throw new AppException("Cannot generate a unique booking code", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @Override @Transactional(readOnly = true)
-    public FeedbackEligibilityResponse getFeedbackEligibility(Long bookingId, Long userId) {
-        Booking booking = find(bookingId);
-        PassengerVoyage passengerVoyage = passengerVoyageRepository
-            .findFirstByBooking_IdAndPassenger_UserId(bookingId, userId).orElse(null);
-        if (passengerVoyage == null)
-            return new FeedbackEligibilityResponse(booking.getId(), booking.getVoyageId(), null, false);
-        boolean participated = booking.getStatus() == BookingStatus.CONFIRMED
-            && passengerVoyage.getPassengerStatus() == PassengerStatus.REGISTERED
-            && passengerVoyage.getEmbarkationStatus() == EmbarkationStatus.DISEMBARKED;
-        return new FeedbackEligibilityResponse(booking.getId(), booking.getVoyageId(),
-            passengerVoyage.getId(), participated);
-    }
+    @Override
+    @Transactional
+    public void processPaymentSuccess(Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId).orElse(null);
 
-    @Override @Transactional(readOnly = true)
-    public List<AvailableRoomResponse> getAvailableRooms(UUID voyageId) {
-        TourScheduleContext voyage = tourClient.getSchedule(voyageId);
-        if (!"OPEN".equals(voyage.status()))
-            throw new BookingException(HttpStatus.CONFLICT, "Voyage is not open for booking");
-        List<PassengerStatus> occupiedStatuses = List.of(PassengerStatus.RESERVED, PassengerStatus.REGISTERED);
-        return tourClient.getRooms(voyageId).stream().map(room -> {
-            long occupied = passengerVoyageRepository.countByVoyageIdAndCabinIdAndPassengerStatusIn(
-                voyageId, room.roomId(), occupiedStatuses);
-            long remaining = Math.max(0, (long) room.capacity() - occupied);
-            return new AvailableRoomResponse(
-                room.roomId(), room.roomCode(), room.deckId(), room.deckNumber(),
-                room.roomTypeId(), room.roomTypeName(), room.roomTypeDescription(),
-                room.price(), room.capacity(), occupied, remaining, remaining > 0);
-        }).toList();
-    }
-
-    private Booking find(Long id) {
-        return repository.findById(id)
-            .orElseThrow(() -> new BookingException(HttpStatus.NOT_FOUND, "Booking not found: " + id));
-    }
-    private Booking findByCode(String bookingCode) {
-        String normalized = bookingCode == null ? "" : bookingCode.trim();
-        return repository.findByBookingCodeIgnoreCase(normalized)
-            .orElseThrow(() -> new BookingException(HttpStatus.NOT_FOUND, "Booking code not found"));
-    }
-    private PassengerVoyage findPassengerVoyage(Long id) {
-        return passengerVoyageRepository.findById(id)
-            .orElseThrow(() -> new BookingException(HttpStatus.NOT_FOUND, "Passenger voyage not found: " + id));
-    }
-    private PassengerVoyage findByNfc(String nfcTagId) {
-        return passengerVoyageRepository.findByNfcTagIdIgnoreCase(normalizeTag(nfcTagId))
-            .orElseThrow(() -> new BookingException(HttpStatus.NOT_FOUND, "NFC tag is not assigned"));
-    }
-    private String normalizeTag(String nfcTagId) {
-        if (nfcTagId == null || nfcTagId.isBlank())
-            throw new BookingException(HttpStatus.BAD_REQUEST, "NFC tag ID is required");
-        return nfcTagId.trim().toUpperCase(java.util.Locale.ROOT);
-    }
-    private String firstEmail(Booking booking) {
-        return passengerVoyageRepository.findAllByBooking_IdOrderByIdAsc(booking.getId()).stream()
-            .map(PassengerVoyage::getPassenger).map(Passenger::getEmail)
-            .filter(Objects::nonNull).filter(email -> !email.isBlank()).findFirst().orElse(null);
-    }
-    private BookingResponse toResponse(Booking b) {
-        List<PassengerVoyageResponse> passengers = passengerVoyageRepository
-            .findAllByBooking_IdOrderByIdAsc(b.getId()).stream().map(link -> {
-                return toPassengerResponse(link);
-            }).toList();
-        return new BookingResponse(b.getId(), b.getVoyageId(), b.getBookingCode(), b.getCreatedByUserId(),
-            b.getPrimaryContactName(), b.getPrimaryContactPhone(), b.getTotalAmount(), b.getStatus(), b.getPaymentId(),
-            b.getCreatedAt(), b.getUpdatedAt(), passengers);
-    }
-    private PassengerVoyageResponse toPassengerResponse(PassengerVoyage link) {
-        Passenger p = link.getPassenger();
-        return new PassengerVoyageResponse(link.getId(), p.getId(), p.getUserId(), p.getFullName(),
-            p.getDateOfBirth(), p.getGender(), p.getPhoneNumber(), p.getEmail(), link.getCabinId(),
-            link.getPassengerStatus(), link.getEmbarkationStatus(), link.getNfcTagId(),
-            link.getCheckedInAt(), link.getBoardedAt(), link.getDisembarkedAt());
-    }
-    private String generateBookingCode(Long bookingId) {
-        for (int attempt = 0; attempt < 10; attempt++) {
-            String code = "CR" + String.format("%08d", bookingId) + UUID.randomUUID().toString().substring(0, 4).toUpperCase();
-            if (!repository.existsByBookingCode(code)) return code;
+        if (booking == null) {
+            System.out.println(">>> [SERVICE] Không tìm thấy Booking ID: " + bookingId);
+            return;
         }
-        throw new BookingException(HttpStatus.INTERNAL_SERVER_ERROR, "Cannot generate a unique booking code");
-    }
-    private Map<UUID, TourRoomContext> validateAvailability(CreateBookingRequest request, TourScheduleContext voyage) {
-        if (!request.voyageId().equals(voyage.voyageId()))
-            throw new BookingException(HttpStatus.BAD_REQUEST, "Voyage reference does not match");
-        if (!"OPEN".equals(voyage.status()))
-            throw new BookingException(HttpStatus.CONFLICT, "Voyage is not open for booking");
-        if (!voyage.startDate().isAfter(java.time.LocalDate.now()))
-            throw new BookingException(HttpStatus.CONFLICT, "Voyage registration has closed");
-        long occupied = passengerVoyageRepository.countByVoyageIdAndPassengerStatusIn(
-            request.voyageId(), List.of(PassengerStatus.RESERVED, PassengerStatus.REGISTERED));
-        if (occupied + request.passengers().size() > voyage.capacity())
-            throw new BookingException(HttpStatus.CONFLICT, "Voyage does not have enough available capacity");
 
-        Map<UUID, TourRoomContext> roomsById = tourClient.getRooms(request.voyageId()).stream()
-            .collect(Collectors.toMap(TourRoomContext::roomId, room -> room));
-        Map<UUID, Long> requestedByRoom = request.passengers().stream()
-            .collect(Collectors.groupingBy(CreatePassengerRequest::cabinId, Collectors.counting()));
+        if (booking.getStatus() == BookingStatus.PENDING_PAYMENT) {
+            booking.setStatus(BookingStatus.CONFIRMED);
+            Booking savedBooking = bookingRepository.save(booking);
 
-        requestedByRoom.forEach((roomId, requestedSeats) -> {
-            TourRoomContext room = roomsById.get(roomId);
-            if (room == null)
-                throw new BookingException(HttpStatus.BAD_REQUEST, "Selected room does not belong to this voyage");
-            long roomOccupied = passengerVoyageRepository
-                .countByVoyageIdAndCabinIdAndPassengerStatusIn(
-                    request.voyageId(), roomId,
-                    List.of(PassengerStatus.RESERVED, PassengerStatus.REGISTERED));
-            if (roomOccupied + requestedSeats > room.capacity())
-                throw new BookingException(HttpStatus.CONFLICT, "Selected room does not have enough available capacity");
-        });
-        return roomsById;
-    }
+            System.out.println(">>> [SERVICE] Đã cập nhật đơn hàng #" + bookingId + " thành CONFIRMED.");
 
-    private BigDecimal calculateTotalAmount(CreateBookingRequest request, Map<UUID, TourRoomContext> roomsById) {
-        Set<UUID> selectedRoomIds = request.passengers().stream()
-            .map(CreatePassengerRequest::cabinId).collect(Collectors.toSet());
-        return selectedRoomIds.stream()
-            .map(roomsById::get)
-            .filter(Objects::nonNull)
-            .map(TourRoomContext::price)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+            // Bắn Kafka Event sang notification-service
+            BookingConfirmedEvent confirmedEvent = new BookingConfirmedEvent(
+                    savedBooking.getCreatedByUserId(),
+                    savedBooking.getPrimaryContactEmail(),
+                    savedBooking.getPrimaryContactName(),
+                    savedBooking.getBookingCode(),
+                    savedBooking.getNumberPassengers(),
+                    savedBooking.getTotalAmount());
+
+            kafkaTemplate.send("booking-confirmed-topic", savedBooking.getBookingCode(), confirmedEvent);
+            System.out.println(
+                    ">>> [KAFKA PRODUCER] Đã bắn event BookingConfirmedEvent cho mã: " + savedBooking.getBookingCode());
+        } else {
+            System.out.println(">>> [SERVICE] Đơn hàng #" + bookingId + " đã ở trạng thái: " + booking.getStatus());
+        }
     }
 }

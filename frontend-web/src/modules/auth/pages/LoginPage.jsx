@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom"; // Gộp chung vào đây
 import { getRedirectPathByRole } from "../../../routes/roleRoutes";
 
 import { Container, Card, Form, Button, Alert, Spinner } from "react-bootstrap";
@@ -16,17 +16,26 @@ export default function LoginPage() {
 
   const { login } = useAuth();
   const navigate = useNavigate();
-
+  const location = useLocation();
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     setError("");
     setLoading(true);
 
     try {
       const role = await login(username, password);
 
-      const targetPath = getRedirectPathByRole(role);
+      const fromPath = location.state?.from;
+
+      let targetPath;
+      if (role === "PASSENGER" && fromPath) {
+        // Trường hợp 1: Có ngữ cảnh đặt tour từ trước (bấm từ chi tiết tour)
+        targetPath = `${fromPath.pathname}${fromPath.search || ""}`;
+      } else {
+        // Trường hợp 2: Đăng nhập tự do từ Header (hoặc không phải passenger)
+        // Cho về trang TourPublic (trang chủ) thay vì Dashboard nếu là Passenger
+        targetPath = role === "PASSENGER" ? "/" : getRedirectPathByRole(role);
+      }
 
       navigate(targetPath, {
         replace: true,
@@ -37,7 +46,6 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
-
   return (
     <div className="bg-light min-vh-100 d-flex align-items-center justify-content-center py-5">
       <Container>

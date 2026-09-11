@@ -1,0 +1,218 @@
+/* ==========================================================================
+   MyBooking.css — Trang "Hành trình đặt chỗ của tôi"
+   ========================================================================== */
+
+.tour-public-page {
+  --brand-primary: #2563eb;
+  --brand-primary-dark: #1d4ed8;
+  --brand-accent: #0ea5e9;
+  --surface: #ffffff;
+  --surface-muted: #f4f7fb;
+  --border-soft: rgba(15, 23, 42, 0.08);
+  --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.06);
+  --shadow-hover: 0 16px 36px rgba(37, 99, 235, 0.16);
+}
+
+/* ---------------------------------------------------------------- */
+/* HERO BANNER                                                       */
+/* ---------------------------------------------------------------- */
+.tour-public-hero {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    var(--brand-primary) 0%,
+    var(--brand-accent) 100%
+  );
+  overflow: hidden;
+  border-radius: 0 0 32px 32px;
+}
+
+.tour-public-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      circle at 15% 20%,
+      rgba(255, 255, 255, 0.15) 0,
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 85% 80%,
+      rgba(255, 255, 255, 0.12) 0,
+      transparent 45%
+    );
+  pointer-events: none;
+}
+
+.tour-public-hero h1 {
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  letter-spacing: -0.01em;
+  position: relative;
+  z-index: 1;
+}
+
+.tour-public-hero .lead {
+  font-size: clamp(0.9rem, 2vw, 1.05rem);
+  position: relative;
+  z-index: 1;
+}
+
+.tour-public-hero a {
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+  opacity: 0.9;
+}
+
+.tour-public-hero a:hover {
+  opacity: 1;
+  transform: translateX(-3px);
+}
+
+/* ---------------------------------------------------------------- */
+/* FILTER BAR ROW                                                     */
+/* ---------------------------------------------------------------- */
+.tour-public-page .text-muted.small {
+  font-size: 0.85rem;
+}
+
+/* ---------------------------------------------------------------- */
+/* BOOKING CARD                                                       */
+/* ---------------------------------------------------------------- */
+.tour-card {
+  background: var(--surface);
+  border-radius: 20px !important;
+  box-shadow: var(--shadow-soft);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+  border: 1px solid var(--border-soft) !important;
+}
+
+.tour-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-hover);
+}
+
+.tour-card .badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.tour-info-box {
+  background: var(--surface-muted) !important;
+  border-radius: 14px !important;
+  line-height: 1.6;
+}
+
+.tour-info-box > div {
+  border-bottom: 1px dashed rgba(15, 23, 42, 0.08);
+  padding-bottom: 8px;
+}
+
+.tour-info-box > div:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.tour-card .border-top {
+  border-color: var(--border-soft) !important;
+}
+
+.tour-card .btn-outline-primary {
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.tour-card .btn-outline-primary:hover {
+  background: var(--brand-primary);
+  border-color: var(--brand-primary);
+  transform: translateY(-1px);
+}
+
+/* Mã đơn */
+.tour-card .fw-semibold strong {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+/* ---------------------------------------------------------------- */
+/* EMPTY STATE                                                        */
+/* ---------------------------------------------------------------- */
+.tour-public-page .alert-info {
+  background: var(--surface);
+  border: 1px dashed rgba(37, 99, 235, 0.3);
+  border-radius: 20px;
+}
+
+/* ---------------------------------------------------------------- */
+/* LOADING STATE                                                      */
+/* ---------------------------------------------------------------- */
+.tour-public-page .spinner-border {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+/* Tablet */
+@media (max-width: 991.98px) {
+  .tour-public-hero {
+    border-radius: 0 0 24px 24px;
+    padding-top: 2.5rem !important;
+    padding-bottom: 2.5rem !important;
+  }
+
+  .tour-card {
+    border-radius: 16px !important;
+  }
+}
+
+/* Mobile */
+@media (max-width: 575.98px) {
+  .tour-public-hero {
+    text-align: left !important;
+    border-radius: 0 0 18px 18px;
+    padding-top: 1.75rem !important;
+    padding-bottom: 1.75rem !important;
+  }
+
+  .tour-public-hero h1 {
+    font-size: 1.3rem;
+  }
+
+  .tour-public-hero .lead {
+    font-size: 0.85rem;
+  }
+
+  .tour-card {
+    padding: 1rem !important;
+    border-radius: 16px !important;
+  }
+
+  .tour-info-box {
+    font-size: 0.85rem;
+  }
+
+  .tour-card .btn {
+    font-size: 0.82rem;
+  }
+
+  .d-flex.justify-content-between.flex-wrap {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 380px) {
+  .tour-info-box .d-flex.align-items-center.gap-2 {
+    flex-wrap: wrap;
+  }
+}

@@ -13,9 +13,6 @@ export default function useTourCruiseAssignments() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  /**
-   * Tải danh sách du thuyền khả dụng
-   */
   const loadAvailableCruises = useCallback(async (tourId) => {
     setCruiseLoading(true);
     setError("");
@@ -41,9 +38,6 @@ export default function useTourCruiseAssignments() {
     }
   }, []);
 
-  /**
-   * Tải sơ đồ tầng và khu vực du thuyền
-   */
   const loadCruiseLayout = useCallback(async (tourId) => {
     setLayoutLoading(true);
     setError("");
@@ -69,9 +63,9 @@ export default function useTourCruiseAssignments() {
   }, []);
 
   /**
-   * Gán du thuyền cho Tour
+   * Gán du thuyền và cấu hình số lượng tối đa cho Tour
    */
-  const assignCruise = useCallback(async (tourId, cruiseId) => {
+  const assignCruise = useCallback(async (tourId, cruiseId, maxPassengers) => {
     setAssigning(true);
     setError("");
     setSuccess("");
@@ -80,8 +74,9 @@ export default function useTourCruiseAssignments() {
       const updated = await tourCruiseAssignmentService.assignCruise(
         tourId,
         cruiseId,
+        maxPassengers,
       );
-      setSuccess("Gán du thuyền cho Tour thành công.");
+      setSuccess("Gán du thuyền và cấu hình số lượng Tour thành công.");
       return updated;
     } catch (err) {
       console.error("ASSIGN CRUISE ERROR:", err);

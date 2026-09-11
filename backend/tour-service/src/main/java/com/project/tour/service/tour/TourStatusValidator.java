@@ -15,15 +15,28 @@ public class TourStatusValidator {
     // =====================================================
 
     public void validateCanUpdate(Tour tour) {
-
         validateTour(tour);
 
-        if (tour.getStatusTrip() != TourStatusTrip.DRAFT) {
+        TourStatusTrip status = tour.getStatusTrip();
 
-            throw new AppException(
-                    "Tour chỉ được chỉnh sửa khi đang ở trạng thái DRAFT",
-                    HttpStatus.BAD_REQUEST);
+        // Cho phép update nếu là DRAFT, hoặc nếu là APPROVED nhưng chưa có ai đặt vé
+        if (status == TourStatusTrip.DRAFT) {
+            return; // Hợp lệ
         }
+
+        if (status == TourStatusTrip.APPROVED) {
+            if (tour.getBookedSlots() != null && tour.getBookedSlots() > 0) {
+                throw new AppException(
+                        "Không thể chỉnh sửa Tour đã được duyệt và đã có khách đặt chỗ!",
+                        HttpStatus.BAD_REQUEST);
+            }
+            return; // APPROVED nhưng chưa có ai đặt thì cho phép sửa
+        }
+
+        // Các trạng thái khác (IN_PROGRESS, COMPLETED, CANCELLED...) thì cấm tuyệt đối
+        throw new AppException(
+                "Tour chỉ được chỉnh sửa khi ở trạng thái DRAFT hoặc APPROVED (chưa có người đặt)",
+                HttpStatus.BAD_REQUEST);
     }
 
     // =====================================================

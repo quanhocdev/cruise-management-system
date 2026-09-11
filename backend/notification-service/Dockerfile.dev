@@ -1,6 +1,26 @@
-FROM maven:3.9-eclipse-temurin-17
+FROM maven:3.9.11-eclipse-temurin-17
+
 WORKDIR /app
-COPY pom.xml .
+
+# ==========================
+# 1. Copy và build thư viện Common trước
+# ==========================
+COPY common/pom.xml ./common/pom.xml
+COPY common/src ./common/src
+
+# Cài đặt thư viện common vào local maven repository của container
+RUN mvn -f common/pom.xml clean install -DskipTests
+
+# ==========================
+# 2. Copy và build Notification Service
+# ==========================
+COPY notification-service/pom.xml ./notification-service/pom.xml
+COPY notification-service/src ./notification-service/src
+
+WORKDIR /app/notification-service
+
+# Tải dependency của notification-service
 RUN mvn dependency:go-offline -B
-COPY src src
+
+# Chạy service
 CMD ["mvn", "spring-boot:run", "-Dspring-boot.run.fork=false"]

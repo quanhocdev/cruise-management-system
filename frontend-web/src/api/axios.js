@@ -32,9 +32,7 @@ api.interceptors.response.use(
 
     const url = originalRequest.url || "";
 
-    // =====================================================
     // REFRESH REQUEST BỊ LỖI
-    // =====================================================
 
     if (url.includes("/auth/refresh")) {
       isRefreshing = false;
@@ -43,11 +41,11 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // =====================================================
     // AUTH ENDPOINTS
-    // =====================================================
 
     if (
+      url.includes("/public/") ||
+      url.includes("/auth/me") ||
       url.includes("/auth/login") ||
       url.includes("/auth/register") ||
       url.includes("/auth/activate") ||
@@ -56,10 +54,6 @@ api.interceptors.response.use(
     ) {
       return Promise.reject(error);
     }
-
-    // =====================================================
-    // KHÔNG PHẢI 401
-    // =====================================================
 
     if (error.response?.status !== 401 || originalRequest._retry) {
       return Promise.reject(error);
@@ -81,9 +75,7 @@ api.interceptors.response.use(
       });
     }
 
-    // =====================================================
     // REQUEST ĐẦU TIÊN PHÁT HIỆN ACCESS TOKEN HẾT HẠN
-    // =====================================================
 
     originalRequest._retry = true;
     isRefreshing = true;

@@ -1,0 +1,278 @@
+/* src/styles/OperationTourOpenBooking.css */
+
+.operation-tour-open-booking-page {
+  padding: 24px;
+  background-color: #f8fafc;
+  min-height: 100vh;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.operation-tour-open-booking-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.operation-tour-open-booking-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.operation-tour-open-booking-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.operation-tour-open-booking-back:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.operation-tour-open-booking-title span {
+  display: block;
+  font-size: 12px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.operation-tour-open-booking-title h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+/* Card Container */
+.operation-tour-open-booking-container {
+  max-width: 600px;
+  margin: 0 auto;
+  background: #ffffff;
+  padding: 28px;
+  border-radius: 12px;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+}
+
+/* Alerts */
+.operation-tour-open-booking-alert-error {
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 8px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 14px;
+  border: 1px solid #fca5a5;
+}
+
+.operation-tour-open-booking-alert-success {
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  background: #d1fae5;
+  color: #065f46;
+  border-radius: 8px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 14px;
+  border: 1px solid #6ee7b7;
+}
+
+/* Form Styles */
+.operation-tour-open-booking-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.operation-tour-open-booking-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.operation-tour-open-booking-group label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #334155;
+}
+
+.operation-tour-open-booking-group input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  font-size: 14px;
+  color: #0f172a;
+  background-color: #ffffff;
+  box-sizing: border-box;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.operation-tour-open-booking-group input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.operation-tour-open-booking-group input:disabled {
+  background: #f1f5f9;
+  color: #64748b;
+  border-color: #e2e8f0;
+  cursor: not-allowed;
+}
+
+/* Badge Status */
+.operation-tour-open-booking-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  width: fit-content;
+}
+
+.operation-tour-open-booking-badge.open {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.operation-tour-open-booking-badge.waiting {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.operation-tour-open-booking-badge.not-open {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+/* Actions & Buttons */
+.operation-tour-open-booking-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.operation-tour-open-booking-submit-btn {
+  flex: 1;
+  min-width: 150px;
+  background-color: #2563eb;
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 6px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    opacity 0.2s;
+}
+
+.operation-tour-open-booking-submit-btn.update {
+  background-color: #0d9488;
+}
+
+.operation-tour-open-booking-submit-btn.update:hover {
+  background-color: #0f766e;
+}
+
+.operation-tour-open-booking-submit-btn:hover {
+  background-color: #1d4ed8;
+}
+
+.operation-tour-open-booking-submit-btn:disabled,
+.operation-tour-open-booking-delete-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.operation-tour-open-booking-delete-btn {
+  background-color: #fee2e2;
+  color: #991b1b;
+  padding: 12px 16px;
+  border-radius: 6px;
+  border: 1px solid #fca5a5;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background-color 0.2s;
+}
+
+.operation-tour-open-booking-delete-btn:hover {
+  background-color: #fecaca;
+}
+
+/* =========================================================
+   RESPONSIVE MEDIA QUERIES
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .operation-tour-open-booking-page {
+    padding: 16px;
+  }
+
+  .operation-tour-open-booking-container {
+    padding: 20px;
+    margin: 12px auto;
+    border-radius: 8px;
+    box-shadow: none;
+    border: none;
+    background: transparent;
+  }
+
+  .operation-tour-open-booking-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .operation-tour-open-booking-actions {
+    flex-direction: column;
+  }
+
+  .operation-tour-open-booking-submit-btn,
+  .operation-tour-open-booking-delete-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .operation-tour-open-booking-title h1 {
+    font-size: 18px;
+  }
+
+  .operation-tour-open-booking-group input {
+    font-size: 16px; /* Tránh zoom tự động trên iOS */
+    padding: 10px 12px;
+  }
+}

@@ -58,13 +58,15 @@ public class OperationTourController {
         }
 
         // =====================================================
-        // 1. GÁN DU THUYỀN CHO TOUR (Vẫn giữ trạng thái PENDING)
+        // 1. GÁN DU THUYỀN VÀ CẤU HÌNH SỐ LƯỢNG TỐI ĐA CHO TOUR
         // =====================================================
         @PostMapping("/{id}/assign-cruise")
         public ResponseEntity<TourResponse> assignCruise(
                         @PathVariable UUID id,
-                        @RequestParam UUID cruiseId) {
-                return ResponseEntity.ok(tourCruiseAssignmentService.assignCruise(id, cruiseId));
+                        @RequestParam UUID cruiseId,
+                        @RequestParam Integer maxPassengers) {
+                return ResponseEntity.ok(
+                                tourCruiseAssignmentService.assignCruise(id, cruiseId, maxPassengers));
         }
 
         // =====================================================
@@ -84,5 +86,10 @@ public class OperationTourController {
         @GetMapping("/approved")
         public ResponseEntity<List<TourResponse>> getApprovedTours() {
                 return ResponseEntity.ok(operationTourService.getApprovedTours());
+        }
+
+        @GetMapping("/ready")
+        public ResponseEntity<List<TourResponse>> getReadyTours() {
+                return ResponseEntity.ok(operationTourService.getReadyTours());
         }
 }

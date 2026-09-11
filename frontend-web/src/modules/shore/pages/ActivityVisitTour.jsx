@@ -34,7 +34,8 @@ function ShoreManagerTour() {
   const navigate = useNavigate();
 
   const [visitTours, setVisitTours] = useState([]);
-  const [masterToursMap, setMasterToursMap] = useState(new Map()); // Lưu thông tin Master Tour theo tourId
+  const [masterToursMap, setMasterToursMap] = useState(new Map());
+  const [completedTourIds, setCompletedTourIds] = useState(new Set()); // Thêm state lưu các tour đã hoàn thành thực sự
   const [loading, setLoading] = useState(false);
   const [visitTourLoading, setVisitTourLoading] = useState(false);
 
@@ -51,7 +52,7 @@ function ShoreManagerTour() {
   const [selectedScheduleStop, setSelectedScheduleStop] = useState(null);
 
   // =====================================================
-  // LOAD DATA & MASTER TOURS
+  // LOAD DATA & MASTER TOURS & HISTORY
   // =====================================================
 
   const loadData = useCallback(async () => {
@@ -67,7 +68,6 @@ function ShoreManagerTour() {
 
     try {
       const masterData = await visitTourService.getAllMasterTours();
-      console.log("🔍 [DEBUG] Fetched masterData:", masterData);
       const map = new Map();
       if (masterData) {
         masterData.forEach((tour) => {
@@ -77,6 +77,17 @@ function ShoreManagerTour() {
       setMasterToursMap(map);
     } catch (err) {
       console.error("🔥 LOAD MASTER TOURS ERROR:", err);
+    }
+
+    // Tải thêm lịch sử cấu hình để xác định tour nào đã thực sự hoàn thành
+    try {
+      const historyData = await visitTourService.getConfigurationHistory();
+      if (Array.isArray(historyData)) {
+        const completedSet = new Set(historyData.map((item) => item.tourId));
+        setCompletedTourIds(completedSet);
+      }
+    } catch (err) {
+      console.error("🔥 LOAD HISTORY ERROR:", err);
     } finally {
       setLoading(false);
     }
@@ -174,24 +185,11 @@ function ShoreManagerTour() {
   };
 
   // =====================================================
-  // CONFIGURATION (LẤY ĐÚNG THÔNG TIN TỪ MASTER TOUR MAP)
-  // =====================================================
-
-  // =====================================================
-  // CONFIGURATION (CÓ THÊM LOG KIỂM TRA DỮ LIỆU)
+  // CONFIGURATION
   // =====================================================
 
   const handleConfiguration = (tourId, scheduleStopId) => {
-    console.log(
-      "🔍 [DEBUG] Click Configure - tourId:",
-      tourId,
-      "scheduleStopId:",
-      scheduleStopId,
-    );
-    console.log("🔍 [DEBUG] masterToursMap current size:", masterToursMap.size);
-
     const masterTour = masterToursMap.get(tourId);
-    console.log("🔍 [DEBUG] Found masterTour:", masterTour);
 
     let targetStop = null;
     let targetScheduleDate = "";
@@ -213,9 +211,6 @@ function ShoreManagerTour() {
       }
     }
 
-    console.log("🔍 [DEBUG] Found targetStop from Master:", targetStop);
-    console.log("🔍 [DEBUG] Found targetScheduleDate:", targetScheduleDate);
-
     const targetVisitTour = visitTours.find(
       (item) => item.scheduleStopId === scheduleStopId,
     );
@@ -228,19 +223,10 @@ function ShoreManagerTour() {
       scheduleDate: targetScheduleDate || targetVisitTour?.scheduleDate || "",
     };
 
-    console.log(
-      "🔍 [DEBUG] Final selectedScheduleStop passed to Modal:",
-      finalScheduleStopData,
-    );
-
     setSelectedScheduleStop(finalScheduleStopData);
     setEditingVisitTour(targetVisitTour?.name ? targetVisitTour : null);
     setIsModalOpen(true);
   };
-
-  // =====================================================
-  // HISTORY
-  // =====================================================
 
   const handleOpenHistory = () => {
     navigate("/shore/activity-visit-history");
@@ -264,10 +250,6 @@ function ShoreManagerTour() {
     };
   }, [visitTours]);
 
-  // =====================================================
-  // LOADING
-  // =====================================================
-
   if (loading) {
     return (
       <div className="shore-manager-tour">
@@ -278,10 +260,6 @@ function ShoreManagerTour() {
       </div>
     );
   }
-
-  // =====================================================
-  // RENDER
-  // =====================================================
 
   return (
     <div className="shore-manager-tour">
@@ -396,17 +374,17 @@ function ShoreManagerTour() {
             </div>
           </div>
 
-          {/* HIỂN THỊ THÔNG TIN CHI TIẾT MASTER TOUR KÈM SỐ LƯỢNG NGÀY / LỊCH TRÌNH */}
           <div className="shore-manager-tour-completion-list">
             {[...tourConfigurationStatus.entries()].map(([tourId, tours]) => {
               const canComplete = canCompleteTour(tourId);
               const masterTourInfo = masterToursMap.get(tourId);
+              const isReallyCompleted = completedTourIds.has(tourId); // Kiểm tra xem đã thực sự bấm hoàn thành hay chưa
 
               return (
                 <div
                   key={tourId}
                   className={`shore-manager-tour-completion-card ${
-                    canComplete ? "ready" : ""
+                    isReallyCompleted ? "ready" : ""
                   }`}
                 >
                   <div className="shore-manager-tour-completion-info">
@@ -455,20 +433,25 @@ function ShoreManagerTour() {
                   </div>
 
                   <div className="shore-manager-tour-completion-status">
-                    {canComplete ? (
+                    {isReallyCompleted ? (
                       <>
                         <CheckCircle2 size={17} />
-                        <span>Đã cấu hình đầy đủ</span>
+                        <span>Đã hoàn thành cấu hình</span>
+                      </>
+                    ) : canComplete ? (
+                      <>
+                        <CheckCircle2 size={17} />
+                        <span>Đã đủ điều kiện bấm hoàn thành</span>
                       </>
                     ) : (
                       <>
                         <Clock3 size={17} />
-                        <span>Chưa đủ điều kiện hoàn thành</span>
+                        <span>Chưa cấu hình xong các điểm dừng</span>
                       </>
                     )}
                   </div>
 
-                  {canComplete ? (
+                  {isReallyCompleted ? (
                     <div
                       className="shore-manager-tour-completed-badge"
                       style={{
@@ -492,7 +475,7 @@ function ShoreManagerTour() {
                     <button
                       type="button"
                       className="shore-manager-tour-complete-button"
-                      disabled={completeLoading === tourId}
+                      disabled={completeLoading === tourId || !canComplete}
                       onClick={() => handleCompleteConfiguration(tourId)}
                     >
                       {completeLoading === tourId ? (

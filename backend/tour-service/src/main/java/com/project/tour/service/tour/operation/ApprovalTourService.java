@@ -21,6 +21,8 @@ import com.project.tour.repository.tour.AssignmentActivityVisitRepository;
 import com.project.tour.repository.tour.TourRepository;
 import com.project.tour.repository.tour.schedule.ScheduleRepository;
 import com.project.tour.repository.tour.schedule.ScheduleStopRepository;
+import com.project.tour.service.redis.TourRedisService;
+
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -46,6 +48,7 @@ public class ApprovalTourService {
         private final OperationCruiseAssignmentService cruiseAssignmentService;
         private final KafkaTemplate<String, Object> kafkaTemplate;
         private final AssignmentActivityVisitRepository assignmentActivityVisitRepository;
+        private final TourRedisService tourRedisService;
 
         public ApprovalTourService(
                         TourRepository tourRepository,
@@ -55,7 +58,8 @@ public class ApprovalTourService {
                         ScheduleStopRepository scheduleStopRepository,
                         OperationCruiseAssignmentService cruiseAssignmentService,
                         KafkaTemplate<String, Object> kafkaTemplate,
-                        AssignmentActivityVisitRepository assignmentActivityVisitRepository) {
+                        AssignmentActivityVisitRepository assignmentActivityVisitRepository,
+                        TourRedisService tourRedisService) {
                 this.tourRepository = tourRepository;
                 this.cruiseDeckRepository = cruiseDeckRepository;
                 this.cruiseAreaRepository = cruiseAreaRepository;
@@ -64,6 +68,7 @@ public class ApprovalTourService {
                 this.cruiseAssignmentService = cruiseAssignmentService;
                 this.kafkaTemplate = kafkaTemplate;
                 this.assignmentActivityVisitRepository = assignmentActivityVisitRepository;
+                this.tourRedisService = tourRedisService;
         }
 
         // =========================================================
@@ -102,6 +107,8 @@ public class ApprovalTourService {
                 // Đổi trạng thái tour
                 tour.setStatusTrip(TourStatusTrip.APPROVED);
                 Tour savedTour = tourRepository.save(tour);
+
+                tourRedisService.saveRemainingSeats(tourId, tour.getMaxPassengers());
 
                 // Gửi event
                 kafkaTemplate.send(TOUR_APPROVED_TOPIC, tourId.toString(), new TourApprovedEvent(tourId, assignments));
@@ -163,6 +170,17 @@ public class ApprovalTourService {
                 return tourRepository
                                 .findAllByStatusTripOrderByNameAsc(
                                                 TourStatusTrip.APPROVED)
+                                .stream()
+                                .map(TourMapper::toResponse)
+                                .toList();
+        }
+
+        // GET TOURS SẴN SÀNG (READY)
+        @Transactional(readOnly = true)
+        public List<TourResponse> getReadyTours() {
+                return tourRepository
+                                .findAllByStatusTripOrderByNameAsc(
+                                                TourStatusTrip.READY)
                                 .stream()
                                 .map(TourMapper::toResponse)
                                 .toList();

@@ -40,7 +40,8 @@ public class SecurityConfig {
                                                 .requestMatchers(
                                                                 "/actuator/health",
                                                                 "/actuator/info",
-                                                                "/internal/**")
+                                                                "/internal/**",
+                                                                "/api/public/**")
                                                 .permitAll()
 
                                                 // Admin

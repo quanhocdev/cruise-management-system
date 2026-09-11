@@ -3,13 +3,14 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
-import HomePage from "./modules/guest/pages/HomePage";
+import GuestLayout from "./layouts/GuestLayout";
+import TourPublic from "./modules/guest/pages/TourPublic";
+import TourPublicDetail from "./modules/guest/pages/TourPublicDetail";
 
 import RegisterPage from "./modules/auth/pages/RegisterPage";
 import LoginPage from "./modules/auth/pages/LoginPage";
 import VerifyOtpPage from "./modules/auth/pages/VerifyOtpPage";
 import ActivatePage from "./modules/auth/pages/ActivatePage";
-import PaymentResultPage from "./modules/payment/pages/PaymentResultPage";
 
 // Admin imports
 import AdminLayout from "./layouts/AdminLayout";
@@ -28,11 +29,13 @@ import ManagerPolicy from "./modules/admin/pages/ManagerPolicy";
 import ManagerPos from "./modules/admin/pages/ManagerPos";
 
 // Passenger imports
-import PassengerDashboard from "./modules/passenger/pages/Dashboard";
-import PassengerTourDetail from "./modules/passenger/pages/TourDetail";
-import CreatePassengerBooking from "./modules/passenger/pages/CreateBooking";
+// import PassengerDashboard from "./modules/passenger/pages/Dashboard";
+// import PassengerTourDetail from "./modules/passenger/pages/TourDetail";
+// import CreatePassengerBooking from "./modules/passenger/pages/CreateBooking";
 import PassengerBookings from "./modules/passenger/pages/MyBookings";
 import PassengerBookingDetail from "./modules/passenger/pages/BookingDetail";
+import PassengerBooking from "./modules/passenger/pages/PassengerBooking";
+import PaymentResultPage from "./modules/passenger/pages/PaymentResultPage";
 
 // Scheduler imports
 import SchedulerLayout from "./layouts/SchedulerLayout";
@@ -47,6 +50,7 @@ import OperationDashboard from "./modules/operation/pages/Dashboard";
 import OperationManagerTour from "./modules/operation/pages/ManagerTour";
 import OperationTourConfiguration from "./modules/operation/pages/OperationTourConfiguration";
 import ManagerTourPackages from "./modules/operation/pages/ManagerTourPackages";
+import OperationTourOpenBooking from "./modules/operation/pages/OperationTourOpenBooking";
 
 // Convenience imports
 import ConvenienceLayout from "./layouts/ConvenienceLayout";
@@ -78,10 +82,16 @@ export default function App() {
       <AuthProvider>
         <Routes>
           {/* =====================================================
-              PUBLIC ROUTES
+              PUBLIC STOREFRONT ROUTES (WITH HEADER & FOOTER)
               ===================================================== */}
 
-          <Route path="/" element={<HomePage />} />
+          <Route element={<GuestLayout />}>
+            <Route path="/" element={<TourPublic />} />
+            <Route path="/tours" element={<TourPublic />} />
+            <Route path="/tours/:id" element={<TourPublicDetail />} />
+          </Route>
+
+          {/* STANDALONE PUBLIC AUTH & SYSTEM PAGES */}
           <Route path="/activate" element={<ActivatePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
@@ -150,6 +160,7 @@ export default function App() {
             path="/passenger/*"
             element={
               <ProtectedRoute allowedRoles={["PASSENGER"]}>
+<<<<<<< HEAD
                 <Routes>
                   <Route path="dashboard" element={<PassengerDashboard />} />
                   <Route path="tours/:tourId" element={<PassengerTourDetail />} />
@@ -161,9 +172,23 @@ export default function App() {
                     element={<Navigate to="dashboard" replace />}
                   />
                 </Routes>
+=======
+                <GuestLayout />
+>>>>>>> main
               </ProtectedRoute>
             }
-          />
+          >
+            <Route path="bookings/new" element={<PassengerBooking />} />
+            <Route path="bookings" element={<PassengerBookings />} />
+            <Route
+              path="bookings/:bookingId"
+              element={<PassengerBookingDetail />}
+            />
+            {/* Thêm trang kết quả thanh toán nằm bên trong layout passenger nếu muốn đồng bộ giao diện */}
+            <Route path="payment/result" element={<PaymentResultPage />} />
+            {/* Trỏ mặc định về danh sách bookings nếu vào /passenger */}
+            <Route path="" element={<Navigate to="bookings" replace />} />
+          </Route>
 
           {/* =====================================================
               SCHEDULER ROUTES
@@ -220,6 +245,10 @@ export default function App() {
               element={<OperationTourConfiguration />}
             />
             <Route path="tour-packages" element={<ManagerTourPackages />} />
+            <Route
+              path="tour-booking-open"
+              element={<OperationTourOpenBooking />}
+            />
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
 

@@ -1,0 +1,243 @@
+/* ==========================================================================
+   BookingDetail.css — Trang "Chi tiết đơn / Booking Detail"
+   Dùng chung biến màu với MyBooking.css (tour-public-page)
+   ========================================================================== */
+
+.tour-public-page {
+  --brand-primary: #2563eb;
+  --brand-primary-dark: #1d4ed8;
+  --brand-accent: #0ea5e9;
+  --surface: #ffffff;
+  --surface-muted: #f4f7fb;
+  --border-soft: rgba(15, 23, 42, 0.08);
+  --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.06);
+  --shadow-hover: 0 16px 36px rgba(37, 99, 235, 0.16);
+}
+
+/* ---------------------------------------------------------------- */
+/* HERO (bản compact cho trang chi tiết)                              */
+/* ---------------------------------------------------------------- */
+.tour-public-hero {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    var(--brand-primary) 0%,
+    var(--brand-accent) 100%
+  );
+  overflow: hidden;
+  border-radius: 0 0 28px 28px;
+}
+
+.tour-public-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      circle at 15% 20%,
+      rgba(255, 255, 255, 0.15) 0,
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 85% 80%,
+      rgba(255, 255, 255, 0.12) 0,
+      transparent 45%
+    );
+  pointer-events: none;
+}
+
+.tour-public-hero h1 {
+  font-size: clamp(1.15rem, 2.4vw, 1.6rem);
+  letter-spacing: -0.01em;
+  position: relative;
+  z-index: 1;
+}
+
+.tour-public-hero a {
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+  opacity: 0.9;
+}
+
+.tour-public-hero a:hover {
+  opacity: 1;
+  transform: translateX(-3px);
+}
+
+/* ---------------------------------------------------------------- */
+/* CARD CHUNG (tổng quan, hành khách, sidebar)                        */
+/* ---------------------------------------------------------------- */
+.tour-public-page .card {
+  border: 1px solid var(--border-soft) !important;
+  box-shadow: var(--shadow-soft) !important;
+  transition: box-shadow 0.25s ease;
+}
+
+.tour-public-page .card h5.text-primary {
+  color: var(--brand-primary) !important;
+}
+
+/* ---------------------------------------------------------------- */
+/* DÒNG HÀNH KHÁCH                                                    */
+/* ---------------------------------------------------------------- */
+.passenger-row {
+  background: var(--surface-muted) !important;
+  border: 1px solid var(--border-soft) !important;
+  border-radius: 14px !important;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.passenger-row:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+}
+
+.passenger-row .fw-bold.text-dark {
+  color: #0f172a;
+  font-size: 0.95rem;
+}
+
+.passenger-row .btn-outline-primary {
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+  font-weight: 600;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.passenger-row .btn-outline-primary:hover {
+  background: var(--brand-primary);
+  border-color: var(--brand-primary);
+  transform: translateY(-1px);
+}
+
+/* ---------------------------------------------------------------- */
+/* SIDEBAR TÓM TẮT THANH TOÁN                                         */
+/* ---------------------------------------------------------------- */
+.tour-public-page .sticky-top {
+  border-radius: 20px !important;
+}
+
+.tour-public-page .sticky-top .fs-5.text-primary {
+  color: var(--brand-primary) !important;
+}
+
+.tour-public-page .sticky-top .btn-danger {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.tour-public-page .sticky-top .btn-danger:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(220, 38, 38, 0.25);
+}
+
+/* ---------------------------------------------------------------- */
+/* MODAL CHỈNH SỬA HÀNH KHÁCH                                         */
+/* ---------------------------------------------------------------- */
+.modal-content {
+  border-radius: 18px !important;
+  border: none !important;
+  overflow: hidden;
+}
+
+.modal-header {
+  background: var(--surface-muted);
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.modal-footer {
+  border-top: 1px solid var(--border-soft);
+}
+
+.modal-body .form-label {
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 4px;
+}
+
+.modal-body .form-control,
+.modal-body .form-select {
+  border-radius: 10px;
+  border-color: var(--border-soft);
+}
+
+.modal-body .form-control:focus,
+.modal-body .form-select:focus {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
+}
+
+.modal-footer .btn {
+  border-radius: 999px;
+  font-weight: 600;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+/* ---------------------------------------------------------------- */
+/* ALERT TRẠNG THÁI                                                   */
+/* ---------------------------------------------------------------- */
+.tour-public-page .alert {
+  border-radius: 14px;
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+/* Tablet */
+@media (max-width: 991.98px) {
+  .tour-public-hero {
+    border-radius: 0 0 20px 20px;
+  }
+
+  .tour-public-page .sticky-top {
+    position: static !important;
+    top: unset !important;
+  }
+}
+
+/* Mobile */
+@media (max-width: 575.98px) {
+  .tour-public-hero {
+    text-align: left !important;
+    border-radius: 0 0 16px 16px;
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+  }
+
+  .tour-public-page .card.p-4 {
+    padding: 1rem !important;
+  }
+
+  .passenger-row {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 0.75rem;
+  }
+
+  .passenger-row .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .tour-public-page .fs-3 {
+    font-size: 1.1rem !important;
+  }
+
+  .modal-body .row.g-3 > [class*="col-"] {
+    margin-bottom: 0;
+  }
+}
+
+/* Rất nhỏ */
+@media (max-width: 380px) {
+  .passenger-row .small {
+    font-size: 0.78rem;
+  }
+}

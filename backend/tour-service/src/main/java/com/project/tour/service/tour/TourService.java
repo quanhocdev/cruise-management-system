@@ -12,7 +12,7 @@ import com.project.tour.repository.tour.TourRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import com.project.tour.service.redis.TourRedisService;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -25,12 +25,16 @@ public class TourService {
 
         private final TourStatusValidator tourStatusValidator;
 
+        private final TourRedisService tourRedisService;
+
         public TourService(
                         TourRepository tourRepository,
-                        TourStatusValidator tourStatusValidator) {
+                        TourStatusValidator tourStatusValidator,
+                        TourRedisService tourRedisService) {
 
                 this.tourRepository = tourRepository;
                 this.tourStatusValidator = tourStatusValidator;
+                this.tourRedisService = tourRedisService;
         }
 
         // =====================================================
@@ -181,15 +185,16 @@ public class TourService {
         // DELETE
         // =====================================================
 
-        public void deleteTour(
-                        UUID id) {
-
+        public void deleteTour(UUID id) {
                 Tour tour = findById(id);
 
                 // Chỉ DRAFT mới được phép xóa
                 tourStatusValidator.validateCanDelete(tour);
 
                 tourRepository.delete(tour);
+
+                // Dọn dẹp Redis nếu lỡ có key tồn đọng
+                tourRedisService.deleteRemainingSeats(id);
         }
 
         // =====================================================
