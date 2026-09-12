@@ -7,12 +7,14 @@ import com.project.cruise.android.data.dto.auth.RegisterRequest
 import com.project.cruise.android.data.dto.auth.RegisterResponse
 import com.project.cruise.android.data.dto.auth.UserInfoResponse
 import com.project.cruise.android.data.dto.auth.VerifyOtpRequest
+import com.project.cruise.android.data.dto.booking.BookingResponse
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
-
+import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiService {
 
@@ -39,4 +41,14 @@ interface ApiService {
     fun refresh(
         @Header("Authorization") authorization: String
     ): Call<RefreshResponse>
+
+
+    @GET("api/passengers/bookings")
+    suspend fun getMyBookings(): List<BookingResponse>
+
+    @GET("api/passengers/bookings/{id}")
+    suspend fun getBookingById(
+        @Path("id") id: Long,
+        @Query("privileged") privileged: Boolean = false
+    ): BookingResponse
 }

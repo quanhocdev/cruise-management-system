@@ -18,7 +18,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
-
+import com.project.cruise.android.ui.screens.passenger.MyBookingsScreen
+import com.project.cruise.android.ui.screens.passenger.MyBookingDetailScreen
+import com.project.cruise.android.data.repository.BookingRepository
+import com.project.cruise.android.viewmodel.passenger.BookingViewModel
+import com.project.cruise.android.viewmodel.passenger.BookingViewModelFactory
 import com.project.cruise.android.data.auth.TokenManager
 import com.project.cruise.android.data.network.ApiService
 import com.project.cruise.android.data.network.RetrofitClient
@@ -328,25 +332,64 @@ fun NavGraph() {
             )
         }
         // =================================================
-// PASSENGER DASHBOARD
-// =================================================
+        // PASSENGER DASHBOARD
+        // =================================================
 
         composable(Routes.PASSENGER_DASHBOARD) {
             Dashboard(
                 viewModel = viewModel,
-                onBrowseTours = {
-                    // Khi chưa có màn hình tour, bạn có thể để trống hoặc thêm lệnh điều hướng sau
-                },
+                onBrowseTours = {},
                 onMyBookings = {
-                    // Khi chưa có màn hình booking, để trống hoặc điều hướng sau
+                    navController.navigate(Routes.PASSENGER_BOOKINGS) // Chuyển sang danh sách booking
                 },
-                notificationButton = {
-                    // Nút thông báo tạm thời (hoặc bỏ trống nếu chưa dùng)
-                },
+                notificationButton = {},
                 onLogout = {
                     navController.navigate(Routes.GUEST) {
                         popUpTo(Routes.PASSENGER_DASHBOARD) { inclusive = true }
                     }
+                }
+            )
+        }
+        // =================================================
+        // PASSENGER BOOKINGS LIST
+        // =================================================
+        composable(Routes.PASSENGER_BOOKINGS) {
+            val bookingRepo = remember(apiService) { BookingRepository(apiService) }
+            val bookingViewModel: BookingViewModel = viewModel(
+                factory = BookingViewModelFactory(bookingRepo)
+            )
+
+            MyBookingsScreen(
+                viewModel = bookingViewModel,
+                onBookingClick = { bookingId ->
+                    navController.navigate("passenger_bookings/$bookingId")
+                },
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // =================================================
+        // PASSENGER BOOKING DETAIL
+        // =================================================
+        composable(
+            route = Routes.PASSENGER_BOOKING_DETAIL,
+            arguments = listOf(
+                navArgument("bookingId") { type = NavType.LongType }
+            )
+        ) { backStackEntry ->
+            val bookingId = backStackEntry.arguments?.getLong("bookingId") ?: return@composable
+            val bookingRepo = remember(apiService) { BookingRepository(apiService) }
+            val bookingViewModel: BookingViewModel = viewModel(
+                factory = BookingViewModelFactory(bookingRepo)
+            )
+
+            MyBookingDetailScreen(
+                bookingId = bookingId,
+                viewModel = bookingViewModel,
+                onBack = {
+                    navController.popBackStack()
                 }
             )
         }
