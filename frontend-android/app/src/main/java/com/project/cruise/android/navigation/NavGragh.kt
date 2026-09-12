@@ -45,7 +45,14 @@ import com.project.cruise.android.viewmodel.auth.LoginState
 import com.project.cruise.android.viewmodel.auth.RegisterState
 import com.project.cruise.android.viewmodel.auth.SessionState
 import com.project.cruise.android.viewmodel.auth.VerifyOtpState
-
+import com.project.cruise.android.ui.screens.pos.PosDashboardScreen
+import com.project.cruise.android.ui.screens.pos.QrScanScreen
+import com.project.cruise.android.ui.screens.pos.NfcScanScreen
+import com.project.cruise.android.ui.screens.pos.PosHistoryScreen
+import com.project.cruise.android.ui.screens.pos.PosIdentityScreen
+import com.project.cruise.android.data.repository.PosIdentityRepository
+import com.project.cruise.android.viewmodel.pos.PosIdentityViewModel
+import com.project.cruise.android.viewmodel.pos.PosIdentityViewModelFactory
 object Routes {
 
     const val SPLASH = "splash"
@@ -367,6 +374,76 @@ fun NavGraph() {
             MyBookingDetailScreen(
                 bookingId = bookingId,
                 viewModel = bookingViewModel,
+                onBack = { navController.popBackStack() }
+            )
+        }
+        // =================================================
+        // POS - MÁY QUÉT GIẢ LẬP (QR & NFC)
+        // =================================================
+
+        // 1. Dashboard chính của POS
+        composable(Routes.POS_DASHBOARD) {
+            PosDashboardScreen(
+                onBackClick = { navController.popBackStack() },
+                onQrClick = { navController.navigate(Routes.POS_QR_SCAN) },
+                onNfcClick = { navController.navigate(Routes.POS_NFC_SCAN) },
+                onHistoryClick = { navController.navigate(Routes.POS_HISTORY) }
+            )
+        }
+
+        // 2. Màn hình quét QR
+        composable(Routes.POS_QR_SCAN) {
+            QrScanScreen(
+                onBackClick = { navController.popBackStack() },
+                onSaved = { localId ->
+                    // Sau khi quét và lưu local thành công, chuyển sang màn hình xác minh
+                    navController.navigate("pos_identity/$localId") {
+                        popUpTo(Routes.POS_DASHBOARD)
+                    }
+                }
+            )
+        }
+
+        // 3. Màn hình quét NFC
+        composable(Routes.POS_NFC_SCAN) {
+            NfcScanScreen(
+                onBackClick = { navController.popBackStack() },
+                onSaved = { localId ->
+                    // Sau khi nhận diện thẻ NFC và lưu local thành công, chuyển sang màn hình xác minh
+                    navController.navigate("pos_identity/$localId") {
+                        popUpTo(Routes.POS_DASHBOARD)
+                    }
+                }
+            )
+        }
+
+        // 4. Lịch sử giao dịch offline
+        composable(Routes.POS_HISTORY) {
+            PosHistoryScreen(
+                onBackClick = { navController.popBackStack() },
+                onIdentify = { localId ->
+                    navController.navigate("pos_identity/$localId")
+                }
+            )
+        }
+
+        // 5. Màn hình xác minh danh tính và check-in thực tế với Server
+        composable(
+            route = Routes.POS_IDENTITY,
+            arguments = listOf(navArgument("localId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val localId = backStackEntry.arguments?.getString("localId") ?: return@composable
+
+            val repository = remember(context) { PosIdentityRepository(context) }
+            val posViewModel: PosIdentityViewModel = viewModel(
+                factory = PosIdentityViewModelFactory(repository, localId)
+            )
+            val state by posViewModel.state.collectAsState()
+
+            PosIdentityScreen(
+                state = state,
+                onRetry = { posViewModel.verify() },
+                onCheckIn = { posViewModel.checkIn() },
                 onBack = { navController.popBackStack() }
             )
         }

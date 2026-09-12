@@ -61,6 +61,9 @@ android {
 
     kotlinOptions {
         jvmTarget = "11"
+        freeCompilerArgs += listOf(
+            "-opt-in=androidx.camera.core.ExperimentalGetImage"
+        )
     }
 
     buildFeatures {
