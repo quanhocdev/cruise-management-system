@@ -14,7 +14,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.project.cruise.android.data.dto.tour.PublicTourSummaryResponse
+import com.project.cruise.android.ui.components.OceanBottomBar
 import com.project.cruise.android.ui.theme.*
+import com.project.cruise.android.viewmodel.auth.AuthViewModel
+import com.project.cruise.android.viewmodel.auth.MeState
 import com.project.cruise.android.viewmodel.tour.TourListState
 import com.project.cruise.android.viewmodel.tour.TourViewModel
 import java.text.NumberFormat
@@ -23,72 +26,84 @@ import java.util.Locale
 @Composable
 fun TourPublicScreen(
     viewModel: TourViewModel,
+    authViewModel: AuthViewModel,
     onTourClick: (String) -> Unit,
-    onAuthClick: () -> Unit // Thay thế cho onBack
+    onLoginClick: () -> Unit,
+    onUserClick: () -> Unit,
+    onMyBookingsClick: () -> Unit,
+    onLogout: () -> Unit,
+    onHomeClick: () -> Unit = {},
+    onNotificationClick: () -> Unit = {}
 ) {
     val state by viewModel.tourListState.collectAsState()
+    val meState by authViewModel.meState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.fetchPublicTours()
+        authViewModel.getCurrentUser()
     }
 
-    OceanPage {
-        // Sửa Header tại đây: Căn đều 2 bên (Tiêu đề bên trái, nút Tài khoản bên phải)
-        Row(
-            Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                "Khám Phá Tour",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = OceanNavy
+    val isLoggedIn = meState is MeState.Success
+
+    Scaffold(
+        bottomBar = {
+            OceanBottomBar(
+                isLoggedIn = isLoggedIn,
+                currentRoute = "passenger_tours",
+                onHomeClick = onHomeClick,
+                onLoginClick = onLoginClick,
+                onUserClick = onUserClick,
+                onNotificationClick = onNotificationClick
             )
-            FilledTonalButton(
-                onClick = onAuthClick,
-                colors = ButtonDefaults.filledTonalButtonColors(containerColor = Color.White)
-            ) {
-                Text("Tài khoản", color = OceanTeal, fontWeight = FontWeight.Bold)
-            }
-        }
+        },
+        containerColor = Color.Transparent
+    ) { innerPadding ->
+        Box(modifier = Modifier.padding(innerPadding)) {
+            OceanPage {
+                Text(
+                    "Khám Phá Tour",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = OceanNavy
+                )
+                Spacer(Modifier.height(16.dp))
 
-        Spacer(Modifier.height(16.dp))
-
-        when (val currentState = state) {
-            is TourListState.Idle,
-            is TourListState.Loading -> {
-                Box(Modifier.fillMaxWidth().padding(vertical = 40.dp), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = OceanTeal)
-                }
-            }
-            is TourListState.Error -> {
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Lỗi tải dữ liệu", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onErrorContainer)
-                        Text(currentState.message, color = MaterialTheme.colorScheme.onErrorContainer)
-                        OutlinedButton(onClick = { viewModel.fetchPublicTours() }) {
-                            Text("Thử lại")
+                when (val currentState = state) {
+                    is TourListState.Idle,
+                    is TourListState.Loading -> {
+                        Box(Modifier.fillMaxWidth().padding(vertical = 40.dp), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(color = OceanTeal)
                         }
                     }
-                }
-            }
-            is TourListState.Success -> {
-                val tours = currentState.tours
-                if (tours.isEmpty()) {
-                    Box(Modifier.fillMaxWidth().padding(vertical = 40.dp), contentAlignment = Alignment.Center) {
-                        Text("Hiện không có tour nào mở bán.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    is TourListState.Error -> {
+                        Card(
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text("Lỗi tải dữ liệu", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onErrorContainer)
+                                Text(currentState.message, color = MaterialTheme.colorScheme.onErrorContainer)
+                                OutlinedButton(onClick = { viewModel.fetchPublicTours() }) {
+                                    Text("Thử lại")
+                                }
+                            }
+                        }
                     }
-                } else {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        tours.forEach { tour ->
-                            TourSummaryCard(tour = tour, onClick = { onTourClick(tour.id) })
+                    is TourListState.Success -> {
+                        val tours = currentState.tours
+                        if (tours.isEmpty()) {
+                            Box(Modifier.fillMaxWidth().padding(vertical = 40.dp), contentAlignment = Alignment.Center) {
+                                Text("Hiện không có tour nào mở bán.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        } else {
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                tours.forEach { tour ->
+                                    TourSummaryCard(tour = tour, onClick = { onTourClick(tour.id) })
+                                }
+                            }
                         }
                     }
                 }
@@ -96,6 +111,7 @@ fun TourPublicScreen(
         }
     }
 }
+
 @Composable
 fun TourSummaryCard(
     tour: PublicTourSummaryResponse,

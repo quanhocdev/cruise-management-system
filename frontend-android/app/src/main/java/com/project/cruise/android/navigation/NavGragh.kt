@@ -32,7 +32,7 @@ import com.project.cruise.android.data.auth.TokenManager
 import com.project.cruise.android.data.network.ApiService
 import com.project.cruise.android.data.network.RetrofitClient
 import com.project.cruise.android.data.repository.AuthRepository
-
+import com.project.cruise.android.ui.screens.ProfileScreen
 import com.project.cruise.android.ui.screens.GuestScreen
 import com.project.cruise.android.ui.screens.auth.LoginScreen
 import com.project.cruise.android.ui.screens.auth.OtpScreen
@@ -53,6 +53,8 @@ object Routes {
     const val LOGIN = "login"
     const val REGISTER = "register"
     const val OTP = "otp/{userId}"
+
+    const val PASSENGER_PROFILE = "passenger_profile"
     const val PASSENGER_DASHBOARD = "passenger_dashboard"
     const val PASSENGER_NOTIFICATIONS = "passenger_notifications"
     const val PASSENGER_TOURS = "passenger_tours"
@@ -140,7 +142,7 @@ fun NavGraph() {
 
             LaunchedEffect(loginState) {
                 if (loginState is LoginState.Success) {
-                    navController.navigate(Routes.PASSENGER_DASHBOARD) {
+                    navController.navigate(Routes.PASSENGER_TOURS) {
                         popUpTo(Routes.GUEST) { inclusive = true }
                         launchSingleTop = true
                     }
@@ -155,7 +157,6 @@ fun NavGraph() {
                 errorMessage = (loginState as? LoginState.Error)?.message
             )
         }
-
         // =================================================
         // REGISTER
         // =================================================
@@ -215,6 +216,30 @@ fun NavGraph() {
                 errorMessage = (verifyOtpState as? VerifyOtpState.Error)?.message
             )
         }
+        // =================================================
+        // PASSENGER PROFILE
+        // =================================================
+        composable(Routes.PASSENGER_PROFILE) {
+            ProfileScreen(
+                authViewModel = viewModel,
+                onHomeClick = {
+                    navController.navigate(Routes.PASSENGER_TOURS) {
+                        popUpTo(Routes.PASSENGER_TOURS) { inclusive = true }
+                    }
+                },
+                onMyBookingsClick = {
+                    navController.navigate(Routes.PASSENGER_BOOKINGS)
+                },
+                onLogout = {
+                    navController.navigate(Routes.GUEST) {
+                        popUpTo(Routes.PASSENGER_TOURS) { inclusive = true }
+                    }
+                },
+                onNotificationClick = {
+                    // Xử lý chuyển sang trang thông báo nếu có
+                }
+            )
+        }
 
         // =================================================
         // PASSENGER DASHBOARD
@@ -250,15 +275,32 @@ fun NavGraph() {
 
             TourPublicScreen(
                 viewModel = tourViewModel,
+                authViewModel = viewModel,
                 onTourClick = { tourId ->
                     navController.navigate("passenger_tours/$tourId")
                 },
-                onAuthClick = {
-                    navController.navigate(Routes.GUEST) // Bấm nút "Tài khoản" sẽ chuyển sang màn hình Guest
+                onLoginClick = {
+                    navController.navigate(Routes.GUEST) // Chưa đăng nhập -> sang Guest
+                },
+                onUserClick = {
+                    navController.navigate(Routes.PASSENGER_PROFILE) // Đã đăng nhập -> sang Profile
+                },
+                onMyBookingsClick = {
+                    navController.navigate(Routes.PASSENGER_BOOKINGS)
+                },
+                onLogout = {
+                    navController.navigate(Routes.GUEST) {
+                        popUpTo(Routes.PASSENGER_TOURS) { inclusive = true }
+                    }
+                },
+                onHomeClick = {
+                    // Đang ở trang chủ rồi nên giữ nguyên hoặc làm mới
+                },
+                onNotificationClick = {
+                    // Chuyển sang màn hình thông báo sau
                 }
             )
         }
-
         // =================================================
         // PASSENGER TOUR DETAIL (PUBLIC)
         // =================================================
