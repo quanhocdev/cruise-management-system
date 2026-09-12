@@ -8,6 +8,8 @@ import com.project.cruise.android.data.dto.auth.RegisterResponse
 import com.project.cruise.android.data.dto.auth.UserInfoResponse
 import com.project.cruise.android.data.dto.auth.VerifyOtpRequest
 import com.project.cruise.android.data.dto.booking.BookingResponse
+import com.project.cruise.android.data.dto.tour.PublicTourDetailResponse
+import com.project.cruise.android.data.dto.tour.PublicTourSummaryResponse
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -43,6 +45,14 @@ interface ApiService {
     ): Call<RefreshResponse>
 
 
+    @GET("api/public/tours")
+    suspend fun getPublicTours(): List<PublicTourSummaryResponse>
+
+    @GET("api/public/tours/{id}")
+    suspend fun getPublicTourDetail(
+        @Path("id") id: String
+    ): PublicTourDetailResponse
+
     @GET("api/passengers/bookings")
     suspend fun getMyBookings(): List<BookingResponse>
 
@@ -52,3 +62,4 @@ interface ApiService {
         @Query("privileged") privileged: Boolean = false
     ): BookingResponse
 }
+
