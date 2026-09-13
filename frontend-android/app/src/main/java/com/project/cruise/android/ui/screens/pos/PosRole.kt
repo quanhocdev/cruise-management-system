@@ -10,6 +10,14 @@ enum class PosRole(
     ONBOARD("ONBOARD", "Hoạt động trên tàu", "Quản lý người tham gia hoạt động trên tàu"),
     SHORE("SHORE", "Hoạt động bờ", "Quản lý người tham gia hoạt động tham quan");
 
+    val scanOperation: String
+        get() = when (this) {
+            FINANCE -> "CHECK_IN"
+            CONVENIENCE -> "CONVENIENCE_USAGE"
+            ONBOARD -> "ONBOARD_PARTICIPATION"
+            SHORE -> "SHORE_PARTICIPATION"
+        }
+
     companion object {
         fun fromApiRole(value: String?): PosRole? {
             val normalized = value?.trim()?.uppercase()?.removePrefix("ROLE_") ?: return null

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.project.cruise.android.BuildConfig
+import com.project.cruise.android.data.auth.TokenManager
 import com.project.cruise.android.data.local.CruiseDatabase
 import com.project.cruise.android.data.local.pos.PosSyncStatus
 import com.project.cruise.android.data.network.PosSyncRequest
@@ -18,6 +19,7 @@ class PosSyncWorker(
 
     override suspend fun doWork(): Result {
         val dao = CruiseDatabase.getInstance(applicationContext).posTransactionDao()
+        val posApi = RetrofitClient.createPosApiService(TokenManager(applicationContext))
         val waiting = dao.findWaitingForSync()
         if (waiting.isEmpty()) return Result.success()
 
@@ -43,7 +45,7 @@ class PosSyncWorker(
             )
             dao.update(attempt)
             try {
-                val response = RetrofitClient.posApiService.sync(
+                val response = posApi.sync(
                     terminalCode = BuildConfig.POS_TERMINAL_CODE,
                     posKey = BuildConfig.POS_API_KEY,
                     request = PosSyncRequest(

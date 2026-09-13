@@ -37,7 +37,7 @@ internal fun RolePosDashboard(
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val queue = remember { PosTransactionQueue(context) }
-    val pendingCount by queue.observePendingCount().collectAsState(initial = 0)
+    val pendingCount by queue.observePendingCount(role.apiRole).collectAsState(initial = 0)
 
     Column(
         Modifier

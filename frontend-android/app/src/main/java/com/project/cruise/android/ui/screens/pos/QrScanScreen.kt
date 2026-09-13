@@ -34,7 +34,11 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.Executors
 
 @Composable
-fun QrScanScreen(onBackClick: () -> Unit, onSaved: (String) -> Unit) {
+fun QrScanScreen(
+    role: PosRole,
+    onBackClick: () -> Unit,
+    onSaved: (String) -> Unit
+) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val queue = remember { PosTransactionQueue(context) }
@@ -100,7 +104,8 @@ fun QrScanScreen(onBackClick: () -> Unit, onSaved: (String) -> Unit) {
                                         onSuccess = onSaved,
                                         onError = { error = it },
                                         scope = scope,
-                                        queue = queue
+                                        queue = queue,
+                                        role = role
                                     )
                                 }
 
@@ -135,7 +140,8 @@ private fun processImageProxy(
     onSuccess: (String) -> Unit,
     onError: (String) -> Unit,
     scope: kotlinx.coroutines.CoroutineScope,
-    queue: PosTransactionQueue
+    queue: PosTransactionQueue,
+    role: PosRole
 ) {
     val mediaImage = imageProxy.image
     if (mediaImage == null || isSaving) {
@@ -148,7 +154,14 @@ private fun processImageProxy(
                 if (!value.isNullOrBlank() && !isSaving) {
                     onSavingChanged(true)
                     scope.launch {
-                        runCatching { queue.enqueue(PosScanType.QR, value) }
+                        runCatching {
+                            queue.enqueue(
+                                scanType = PosScanType.QR,
+                                scannedValue = value,
+                                operatorRole = role.apiRole,
+                                operation = role.scanOperation
+                            )
+                        }
                             .onSuccess { onSuccess(it) }
                             .onFailure {
                                 onError("Không thể lưu giao dịch trên thiết bị")

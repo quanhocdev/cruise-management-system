@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.project.cruise.android.data.dto.auth.JwtResponse
 import com.project.cruise.android.data.dto.auth.RegisterResponse
 import com.project.cruise.android.data.repository.AuthRepository
+import com.project.cruise.android.ui.screens.pos.PosRole
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -427,4 +428,4 @@ private fun String.isPassengerRole(): Boolean =
     trim().uppercase().removePrefix("ROLE_") == "PASSENGER"
 
 private fun String.isSupportedPosRole(): Boolean =
-    trim().uppercase().removePrefix("ROLE_") in setOf("FINANCE", "CONVENIENCE", "ONBOARD", "SHORE")
+    PosRole.fromApiRole(this) != null

@@ -23,6 +23,12 @@ interface PosTransactionDao {
     @Query("SELECT COUNT(*) FROM pos_transactions WHERE status IN ('PENDING_SYNC', 'FAILED', 'SYNCING')")
     fun observePendingCount(): Flow<Int>
 
+    @Query("SELECT COUNT(*) FROM pos_transactions WHERE operatorRole = :role AND status IN ('PENDING_SYNC', 'FAILED', 'SYNCING')")
+    fun observePendingCountForRole(role: String): Flow<Int>
+
     @Query("SELECT * FROM pos_transactions ORDER BY createdAt DESC")
     fun observeAll(): Flow<List<PosTransactionEntity>>
+
+    @Query("SELECT * FROM pos_transactions WHERE operatorRole = :role ORDER BY createdAt DESC")
+    fun observeAllForRole(role: String): Flow<List<PosTransactionEntity>>
 }

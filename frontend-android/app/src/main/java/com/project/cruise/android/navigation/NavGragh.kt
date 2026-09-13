@@ -133,7 +133,7 @@ fun NavGraph() {
                             popUpTo(Routes.SPLASH) { inclusive = true }
                         }
                     }
-                    SessionState.Unauthenticated -> navController.navigate(Routes.GUEST) {
+                    SessionState.Unauthenticated -> navController.navigate(Routes.PASSENGER_TOURS) {
                         popUpTo(Routes.SPLASH) { inclusive = true }
                     }
                     SessionState.Checking -> Unit
@@ -447,6 +447,7 @@ fun NavGraph() {
             val role = PosRole.fromApiRole(backStackEntry.arguments?.getString("role"))
                 ?: return@composable
             QrScanScreen(
+                role = role,
                 onBackClick = { navController.popBackStack() },
                 onSaved = { localId ->
                     navController.navigate(Routes.posIdentity(role, localId)) {
@@ -463,6 +464,7 @@ fun NavGraph() {
             val role = PosRole.fromApiRole(backStackEntry.arguments?.getString("role"))
                 ?: return@composable
             NfcScanScreen(
+                role = role,
                 onBackClick = { navController.popBackStack() },
                 onSaved = { localId ->
                     navController.navigate(Routes.posIdentity(role, localId)) {
@@ -479,6 +481,7 @@ fun NavGraph() {
             val role = PosRole.fromApiRole(backStackEntry.arguments?.getString("role"))
                 ?: return@composable
             PosManualEntryScreen(
+                role = role,
                 onBackClick = { navController.popBackStack() },
                 onSaved = { localId -> navController.navigate(Routes.posIdentity(role, localId)) }
             )
@@ -510,7 +513,9 @@ fun NavGraph() {
                 ?: return@composable
             val localId = backStackEntry.arguments?.getString("localId") ?: return@composable
 
-            val repository = remember(context) { PosIdentityRepository(context) }
+            val repository = remember(context, role) {
+                PosIdentityRepository(context, role.apiRole)
+            }
             val posViewModel: PosIdentityViewModel = viewModel(
                 factory = PosIdentityViewModelFactory(repository, localId)
             )

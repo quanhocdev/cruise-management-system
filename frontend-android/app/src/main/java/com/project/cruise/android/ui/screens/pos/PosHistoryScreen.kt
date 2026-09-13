@@ -32,12 +32,9 @@ import java.util.Date
 fun PosHistoryScreen(role: PosRole, onBackClick: () -> Unit, onIdentify: (String) -> Unit) {
     val context = LocalContext.current
     val queue = remember { PosTransactionQueue(context) }
-    val transactions by queue.observeAll().collectAsState(initial = emptyList())
-    val visibleTransactions = if (role == PosRole.FINANCE) {
-        transactions
-    } else {
-        transactions.filter { it.scanType == "NFC" }
-    }
+    val transactions by queue.observeAll(role.apiRole).collectAsState(initial = emptyList())
+    val visibleTransactions = if (role == PosRole.FINANCE) transactions
+        else transactions.filter { it.scanType == "NFC" }
 
     Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
         TextButton(onClick = onBackClick) { Text("← Quay lại POS") }
@@ -76,6 +73,11 @@ fun PosHistoryScreen(role: PosRole, onBackClick: () -> Unit, onIdentify: (String
                             }
                             Text(if (transaction.scannedValue.startsWith("POS:")) "QR định danh (đã ẩn mã)" else transaction.scannedValue,
                                 modifier = Modifier.padding(top = 8.dp), fontWeight = FontWeight.SemiBold)
+                            Text(
+                                operationLabel(transaction.operation),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodySmall
+                            )
                             TextButton(onClick = { onIdentify(transaction.localId) }) { Text("Xác minh hành khách") }
                             Text(
                                 DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(transaction.createdAt)),
@@ -92,6 +94,15 @@ fun PosHistoryScreen(role: PosRole, onBackClick: () -> Unit, onIdentify: (String
             }
         }
     }
+}
+
+private fun operationLabel(operation: String) = when (operation) {
+    "CHECK_IN" -> "Nghiệp vụ: check-in"
+    "CHECK_OUT" -> "Nghiệp vụ: checkout"
+    "CONVENIENCE_USAGE" -> "Nghiệp vụ: sử dụng tiện ích"
+    "ONBOARD_PARTICIPATION" -> "Nghiệp vụ: hoạt động trên tàu"
+    "SHORE_PARTICIPATION" -> "Nghiệp vụ: hoạt động bờ"
+    else -> "Nghiệp vụ: nhận diện"
 }
 
 private fun statusLabel(status: PosSyncStatus) = when (status) {

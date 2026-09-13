@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun PosManualEntryScreen(
+    role: PosRole,
     onBackClick: () -> Unit,
     onSaved: (String) -> Unit
 ) {
@@ -59,7 +60,14 @@ fun PosManualEntryScreen(
             onClick = {
                 saving = true
                 scope.launch {
-                    runCatching { queue.enqueue(PosScanType.QR, code.trim()) }
+                    runCatching {
+                        queue.enqueue(
+                            scanType = PosScanType.QR,
+                            scannedValue = code.trim(),
+                            operatorRole = role.apiRole,
+                            operation = role.scanOperation
+                        )
+                    }
                         .onSuccess(onSaved)
                         .onFailure {
                             error = "Không thể lưu mã trên thiết bị"
