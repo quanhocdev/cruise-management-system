@@ -21,6 +21,10 @@ import com.project.auth.model.enums.UserProvider;
 import com.project.auth.model.enums.UserStatus;
 import com.project.auth.repository.RoleRepository;
 import com.project.auth.repository.UserRepository;
+import com.project.common.event.SendStaffInvitationEvent;
+import org.springframework.kafka.core.KafkaTemplate;
+import java.time.Instant;
+
 import com.project.auth.service.mail.MailService;
 import com.project.auth.service.redis.TokenRedisService;
 
@@ -32,21 +36,21 @@ public class StaffServiceImpl implements StaffService {
         private final UserRepository userRepository;
         private final RoleRepository roleRepository;
         private final TokenRedisService tokenRedisService;
-        private final MailService mailService;
         private final PasswordEncoder passwordEncoder;
+        private final KafkaTemplate<String, Object> kafkaTemplate;
 
         public StaffServiceImpl(
                         UserRepository userRepository,
                         RoleRepository roleRepository,
                         TokenRedisService tokenRedisService,
-                        MailService mailService,
-                        PasswordEncoder passwordEncoder) {
+                        PasswordEncoder passwordEncoder,
+                        KafkaTemplate<String, Object> kafkaTemplate) {
 
                 this.userRepository = userRepository;
                 this.roleRepository = roleRepository;
                 this.tokenRedisService = tokenRedisService;
-                this.mailService = mailService;
                 this.passwordEncoder = passwordEncoder;
+                this.kafkaTemplate = kafkaTemplate;
         }
 
         // =====================================================
@@ -100,21 +104,21 @@ public class StaffServiceImpl implements StaffService {
                                 + activationToken;
 
                 try {
-
-                        mailService.sendStaffInvitation(
+                        SendStaffInvitationEvent event = new SendStaffInvitationEvent(
+                                        savedUser.getId(),
                                         savedUser.getEmail(),
                                         savedUser.getUsername(),
-                                        activationLink);
+                                        activationLink,
+                                        Instant.now());
+
+                        kafkaTemplate.send("staff-invitation-topic", event);
 
                 } catch (Exception e) {
-
-                        tokenRedisService.deleteActivationToken(
-                                        activationToken);
-
+                        tokenRedisService.deleteActivationToken(activationToken);
                         userRepository.delete(savedUser);
 
                         throw new AppException(
-                                        "Không thể gửi email kích hoạt tài khoản",
+                                        "Không thể gửi sự kiện kích hoạt tài khoản",
                                         HttpStatus.INTERNAL_SERVER_ERROR);
                 }
 
