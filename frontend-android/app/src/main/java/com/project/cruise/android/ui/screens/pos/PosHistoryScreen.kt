@@ -29,10 +29,15 @@ import java.text.DateFormat
 import java.util.Date
 
 @Composable
-fun PosHistoryScreen(onBackClick: () -> Unit, onIdentify: (String) -> Unit) {
+fun PosHistoryScreen(role: PosRole, onBackClick: () -> Unit, onIdentify: (String) -> Unit) {
     val context = LocalContext.current
     val queue = remember { PosTransactionQueue(context) }
     val transactions by queue.observeAll().collectAsState(initial = emptyList())
+    val visibleTransactions = if (role == PosRole.FINANCE) {
+        transactions
+    } else {
+        transactions.filter { it.scanType == "NFC" }
+    }
 
     Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
         TextButton(onClick = onBackClick) { Text("← Quay lại POS") }
@@ -43,16 +48,20 @@ fun PosHistoryScreen(onBackClick: () -> Unit, onIdentify: (String) -> Unit) {
             fontWeight = FontWeight.Bold
         )
         Text(
-            "${transactions.size} giao dịch lưu trên thiết bị",
+            "${visibleTransactions.size} giao dịch ${if (role == PosRole.FINANCE) "QR/NFC" else "NFC"} lưu trên thiết bị",
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 5.dp, bottom = 20.dp)
         )
 
-        if (transactions.isEmpty()) {
-            Text("Chưa có giao dịch QR hoặc NFC.", modifier = Modifier.padding(top = 30.dp))
+        if (visibleTransactions.isEmpty()) {
+            Text(
+                if (role == PosRole.FINANCE) "Chưa có giao dịch QR hoặc NFC."
+                else "Chưa có giao dịch NFC.",
+                modifier = Modifier.padding(top = 30.dp)
+            )
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(transactions, key = { it.localId }) { transaction ->
+                items(visibleTransactions, key = { it.localId }) { transaction ->
                     val status = runCatching { PosSyncStatus.valueOf(transaction.status) }
                         .getOrDefault(PosSyncStatus.PENDING_SYNC)
                     Card(
