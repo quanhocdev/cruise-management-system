@@ -24,8 +24,6 @@ import com.project.auth.repository.UserRepository;
 import com.project.common.event.SendStaffInvitationEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import java.time.Instant;
-
-import com.project.auth.service.mail.MailService;
 import com.project.auth.service.redis.TokenRedisService;
 
 @Service
