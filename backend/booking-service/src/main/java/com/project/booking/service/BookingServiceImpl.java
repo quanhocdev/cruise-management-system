@@ -152,7 +152,6 @@ public class BookingServiceImpl implements BookingService {
                 BookingPassenger link = new BookingPassenger();
                 link.setBooking(savedBooking);
                 link.setPassenger(savedPassenger);
-                link.setCheckinStatus("PENDING");
                 bookingPassengerRepository.save(link);
             }
 

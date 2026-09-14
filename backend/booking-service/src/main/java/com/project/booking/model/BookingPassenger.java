@@ -1,5 +1,6 @@
 package com.project.booking.model;
 
+import com.project.booking.model.enums.BookingPassengerStatus;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -27,12 +28,18 @@ public class BookingPassenger {
     @Column(name = "room_id")
     private UUID roomId;
 
-    // Trạng thái check-in của hành khách
-    @Column(name = "checkin_status", nullable = false, length = 30)
-    private String checkinStatus = "PENDING"; // PENDING, CHECKED_IN
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 30)
+    private BookingPassengerStatus status = BookingPassengerStatus.PENDING;
 
     @Column(name = "checked_in_at")
     private LocalDateTime checkedInAt;
+
+    @Column(name = "checked_out_at")
+    private LocalDateTime checkedOutAt;
+
+    @Column(name = "nfc_card_uid", length = 100, unique = true)
+    private String nfcCardUid;
 
     // --- GETTERS & SETTERS ---
     public Long getId() {
@@ -67,12 +74,12 @@ public class BookingPassenger {
         this.roomId = roomId;
     }
 
-    public String getCheckinStatus() {
-        return checkinStatus;
+    public BookingPassengerStatus getStatus() {
+        return status;
     }
 
-    public void setCheckinStatus(String checkinStatus) {
-        this.checkinStatus = checkinStatus;
+    public void setStatus(BookingPassengerStatus status) {
+        this.status = status;
     }
 
     public LocalDateTime getCheckedInAt() {
@@ -81,5 +88,21 @@ public class BookingPassenger {
 
     public void setCheckedInAt(LocalDateTime checkedInAt) {
         this.checkedInAt = checkedInAt;
+    }
+
+    public LocalDateTime getCheckedOutAt() {
+        return checkedOutAt;
+    }
+
+    public void setCheckedOutAt(LocalDateTime checkedOutAt) {
+        this.checkedOutAt = checkedOutAt;
+    }
+
+    public String getNfcCardUid() {
+        return nfcCardUid;
+    }
+
+    public void setNfcCardUid(String nfcCardUid) {
+        this.nfcCardUid = nfcCardUid;
     }
 }
