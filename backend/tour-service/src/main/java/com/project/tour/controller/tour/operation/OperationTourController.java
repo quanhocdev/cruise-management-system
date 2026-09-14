@@ -58,15 +58,14 @@ public class OperationTourController {
         }
 
         // =====================================================
-        // 1. GÁN DU THUYỀN VÀ CẤU HÌNH SỐ LƯỢNG TỐI ĐA CHO TOUR
+        // GÁN DU THUYỀN CHO TOUR
         // =====================================================
         @PostMapping("/{id}/assign-cruise")
         public ResponseEntity<TourResponse> assignCruise(
                         @PathVariable UUID id,
-                        @RequestParam UUID cruiseId,
-                        @RequestParam Integer maxPassengers) {
+                        @RequestParam UUID cruiseId) {
                 return ResponseEntity.ok(
-                                tourCruiseAssignmentService.assignCruise(id, cruiseId, maxPassengers));
+                                tourCruiseAssignmentService.assignCruise(id, cruiseId));
         }
 
         // =====================================================

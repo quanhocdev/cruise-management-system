@@ -14,14 +14,14 @@ const tourCruiseAssignmentService = {
   },
 
   /**
-   * Gán du thuyền và cấu hình số lượng tối đa cho Tour
+   * Gán du thuyền cho Tour
    */
-  assignCruise: async (tourId, cruiseId, maxPassengers) => {
+  assignCruise: async (tourId, cruiseId) => {
     const response = await api.post(
       `${BASE_URL}/${tourId}/assign-cruise`,
       null,
       {
-        params: { cruiseId, maxPassengers },
+        params: { cruiseId },
       },
     );
     return response.data;

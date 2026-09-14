@@ -63,9 +63,9 @@ export default function useTourCruiseAssignments() {
   }, []);
 
   /**
-   * Gán du thuyền và cấu hình số lượng tối đa cho Tour
+   * Gán du thuyền cho Tour
    */
-  const assignCruise = useCallback(async (tourId, cruiseId, maxPassengers) => {
+  const assignCruise = useCallback(async (tourId, cruiseId) => {
     setAssigning(true);
     setError("");
     setSuccess("");
@@ -74,9 +74,8 @@ export default function useTourCruiseAssignments() {
       const updated = await tourCruiseAssignmentService.assignCruise(
         tourId,
         cruiseId,
-        maxPassengers,
       );
-      setSuccess("Gán du thuyền và cấu hình số lượng Tour thành công.");
+      setSuccess("Gán du thuyền cho Tour thành công.");
       return updated;
     } catch (err) {
       console.error("ASSIGN CRUISE ERROR:", err);

@@ -276,11 +276,12 @@ function ManagerTour() {
     setSelectedCruiseId(cruiseId);
   };
 
-  const handleAssignCruise = async (cruiseId, maxPassengers) => {
+  // Đã bỏ tham số maxPassengers để đồng bộ với backend mới
+  const handleAssignCruise = async (cruiseId) => {
     if (!selectedTour || !cruiseId) return;
 
     try {
-      await assignCruise(selectedTour.id, cruiseId, maxPassengers);
+      await assignCruise(selectedTour.id, cruiseId);
       setSelectedCruiseId(cruiseId);
       await loadPendingTours();
     } catch (err) {
