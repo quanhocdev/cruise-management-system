@@ -26,7 +26,7 @@ import ManagerRoomType from "./modules/admin/pages/ManagerRoomType";
 import ManagerProduct from "./modules/admin/pages/ManagerProduct";
 import ManagerService from "./modules/admin/pages/ManagerService";
 import ManagerPolicy from "./modules/admin/pages/ManagerPolicy";
-import ManagerPos from "./modules/admin/pages/ManagerPos";
+// import ManagerPos from "./modules/admin/pages/ManagerPos";
 
 // Passenger imports
 // import PassengerDashboard from "./modules/passenger/pages/Dashboard";
@@ -140,7 +140,6 @@ export default function App() {
                     <Route path="services" element={<ManagerService />} />
 
                     <Route path="policies" element={<ManagerPolicy />} />
-                    <Route path="pos-terminals" element={<ManagerPos />} />
 
                     <Route
                       path=""
