@@ -136,7 +136,6 @@ public class TourCruiseAssignmentService {
                 }
 
                 tour.setCruise(cruise);
-                tour.setMaxPassengers(maxPassengers);
                 Tour savedTour = tourRepository.save(tour);
 
                 return TourMapper.toResponse(savedTour);

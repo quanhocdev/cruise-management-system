@@ -16,41 +16,48 @@ public class TourRedisServiceImpl implements TourRedisService {
     public TourRedisServiceImpl(StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
 
-        // Định nghĩa Lua script chuẩn cú pháp Redis
+        // Lua script an toàn luồng để trừ số lượng phòng đồng thời
         this.reserveScript = new DefaultRedisScript<>();
         this.reserveScript.setScriptText(
                 "local remaining = tonumber(redis.call('get', KEYS[1])); " +
                         "if remaining == nil then " +
-                        "    return -1; " +
+                        "   return -1; " +
                         "end; " +
                         "local requested = tonumber(ARGV[1]); " +
                         "if remaining >= requested then " +
-                        "    redis.call('set', KEYS[1], remaining - requested); " + // Sửa redis.set thành
-                                                                                    // redis.call('set', ...)
-                        "    return remaining - requested; " + // Trả về số ghế còn lại sau khi trừ
+                        "   redis.call('set', KEYS[1], remaining - requested); " +
+                        "   return remaining - requested; " +
                         "else " +
-                        "    return -2; " + // Không đủ ghế
+                        "   return -2; " + // Không đủ phòng trống
                         "end;");
         this.reserveScript.setResultType(Long.class);
     }
 
     @Override
-    public void saveRemainingSeats(UUID tourId, Integer maxPassengers) {
-        String key = "tour:" + tourId + ":remaining";
-        redisTemplate.opsForValue().set(key, String.valueOf(maxPassengers));
+    public void savePackageAvailableRooms(UUID tourPackageId, Integer totalRooms) {
+        String key = "tour:package:" + tourPackageId + ":available_rooms";
+        redisTemplate.opsForValue().set(key, String.valueOf(totalRooms != null ? totalRooms : 0));
     }
 
     @Override
-    public Long getRemainingSeats(UUID tourId) {
-        String key = "tour:" + tourId + ":remaining";
+    public Long getPackageAvailableRooms(UUID tourPackageId) {
+        String key = "tour:package:" + tourPackageId + ":available_rooms";
         String value = redisTemplate.opsForValue().get(key);
         return value != null ? Long.valueOf(value) : null;
     }
 
     @Override
-    public void deleteRemainingSeats(UUID tourId) {
-        String key = "tour:" + tourId + ":remaining";
+    public void deletePackageAvailableRooms(UUID tourPackageId) {
+        String key = "tour:package:" + tourPackageId + ":available_rooms";
         redisTemplate.delete(key);
     }
 
+    @Override
+    public Long reservePackageRooms(UUID tourPackageId, int requestedRooms) {
+        String key = "tour:package:" + tourPackageId + ":available_rooms";
+        return redisTemplate.execute(
+                reserveScript,
+                Collections.singletonList(key),
+                String.valueOf(requestedRooms));
+    }
 }

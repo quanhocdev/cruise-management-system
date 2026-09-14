@@ -13,6 +13,12 @@ import java.util.UUID;
 
 public interface RoomRepository extends JpaRepository<Room, UUID> {
 
+        // số phòng vật lý theo cruiseId và roomTypeId
+        long countByCruiseDeck_CruiseIdAndRoomTypeId(UUID cruiseId, UUID roomTypeId);
+
+        // phòng đang ở trạng thái ACTIVE:
+        long countByCruiseDeck_CruiseIdAndRoomTypeIdAndStatus(UUID cruiseId, UUID roomTypeId, RoomStatus status);
+
         @Query("SELECT r FROM Room r JOIN FETCH r.cruiseDeck d JOIN FETCH r.roomType WHERE d.cruise.id = :cruiseId ORDER BY d.deckNumber, r.code")
         List<Room> findTripRoomsByCruiseId(@Param("cruiseId") UUID cruiseId);
 
@@ -39,13 +45,13 @@ public interface RoomRepository extends JpaRepository<Room, UUID> {
         boolean existsByRoomType_Id(UUID roomTypeId);
 
         @Query("""
-                SELECT r FROM Room r
-                JOIN FETCH r.cruiseDeck d
-                JOIN FETCH r.roomType rt
-                WHERE d.cruise.id = :cruiseId
-                  AND d.status = com.project.tour.model.enums.cruise.CruiseDeckStatus.ACTIVE
-                  AND r.status = com.project.tour.model.enums.RoomStatus.ACTIVE
-                ORDER BY d.deckNumber ASC, r.code ASC
-                """)
+                        SELECT r FROM Room r
+                        JOIN FETCH r.cruiseDeck d
+                        JOIN FETCH r.roomType rt
+                        WHERE d.cruise.id = :cruiseId
+                          AND d.status = com.project.tour.model.enums.cruise.CruiseDeckStatus.ACTIVE
+                          AND r.status = com.project.tour.model.enums.RoomStatus.ACTIVE
+                        ORDER BY d.deckNumber ASC, r.code ASC
+                        """)
         List<Room> findActiveRoomsByCruiseId(@Param("cruiseId") UUID cruiseId);
 }

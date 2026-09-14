@@ -14,10 +14,13 @@ import com.project.tour.model.CruiseDeck;
 import com.project.tour.model.Schedule;
 import com.project.tour.model.ScheduleStop;
 import com.project.tour.model.Tour;
+import com.project.tour.model.TourPackage;
 import com.project.tour.model.enums.tour.TourStatusTrip;
 import com.project.tour.repository.cruise.CruiseAreaRepository;
 import com.project.tour.repository.cruise.CruiseDeckRepository;
+import com.project.tour.repository.room.RoomRepository;
 import com.project.tour.repository.tour.AssignmentActivityVisitRepository;
+import com.project.tour.repository.tour.TourPackageRepository;
 import com.project.tour.repository.tour.TourRepository;
 import com.project.tour.repository.tour.schedule.ScheduleRepository;
 import com.project.tour.repository.tour.schedule.ScheduleStopRepository;
@@ -41,6 +44,8 @@ public class ApprovalTourService {
         private static final String TOUR_MASTER_SYNC_TOPIC = "tour-master-sync-topic";
 
         private final TourRepository tourRepository;
+        private final TourPackageRepository tourPackageRepository;
+        private final RoomRepository roomRepository;
         private final CruiseDeckRepository cruiseDeckRepository;
         private final CruiseAreaRepository cruiseAreaRepository;
         private final ScheduleRepository scheduleRepository;
@@ -52,6 +57,8 @@ public class ApprovalTourService {
 
         public ApprovalTourService(
                         TourRepository tourRepository,
+                        TourPackageRepository tourPackageRepository,
+                        RoomRepository roomRepository,
                         CruiseDeckRepository cruiseDeckRepository,
                         CruiseAreaRepository cruiseAreaRepository,
                         ScheduleRepository scheduleRepository,
@@ -61,6 +68,8 @@ public class ApprovalTourService {
                         AssignmentActivityVisitRepository assignmentActivityVisitRepository,
                         TourRedisService tourRedisService) {
                 this.tourRepository = tourRepository;
+                this.tourPackageRepository = tourPackageRepository;
+                this.roomRepository = roomRepository;
                 this.cruiseDeckRepository = cruiseDeckRepository;
                 this.cruiseAreaRepository = cruiseAreaRepository;
                 this.scheduleRepository = scheduleRepository;
@@ -76,10 +85,8 @@ public class ApprovalTourService {
         // =========================================================
         @Transactional(readOnly = true)
         public List<TourResponse> getPendingTours() {
-
                 return tourRepository
-                                .findAllByStatusTripOrderByNameAsc(
-                                                TourStatusTrip.APPROVAL_PENDING)
+                                .findAllByStatusTripOrderByNameAsc(TourStatusTrip.APPROVAL_PENDING)
                                 .stream()
                                 .map(TourMapper::toResponse)
                                 .toList();
@@ -99,8 +106,6 @@ public class ApprovalTourService {
                                         HttpStatus.BAD_REQUEST);
                 }
 
-                // BÊN TRONG approveTour() của ApprovalTourService.java
-
                 // 1. Lấy assignments
                 List<TourAssignmentEvent> assignments = cruiseAssignmentService.getAssignments(tourId);
 
@@ -108,7 +113,20 @@ public class ApprovalTourService {
                 tour.setStatusTrip(TourStatusTrip.APPROVED);
                 Tour savedTour = tourRepository.save(tour);
 
-                tourRedisService.saveRemainingSeats(tourId, tour.getMaxPassengers());
+                // =========================================================
+                // KHỞI TẠO SỐ LƯỢNG PHÒNG TRỐNG LÊN REDIS THEO TỪNG TOUR PACKAGE
+                // =========================================================
+                List<TourPackage> packages = tourPackageRepository.findAllByTourId(tourId);
+                UUID cruiseId = tour.getCruise().getId();
+
+                for (TourPackage pkg : packages) {
+                        if (pkg.getRoomTypeId() != null) {
+                                // Đếm số lượng phòng vật lý thực tế thuộc roomTypeId này trên con tàu của tour
+                                long physicalRoomCount = roomRepository
+                                                .countByCruiseDeck_CruiseIdAndRoomTypeId(cruiseId, pkg.getRoomTypeId());
+                                tourRedisService.savePackageAvailableRooms(pkg.getId(), (int) physicalRoomCount);
+                        }
+                }
 
                 // Gửi event
                 kafkaTemplate.send(TOUR_APPROVED_TOPIC, tourId.toString(), new TourApprovedEvent(tourId, assignments));
@@ -166,10 +184,8 @@ public class ApprovalTourService {
         // GET TOURS ĐÃ ĐƯỢC DUYỆT
         @Transactional(readOnly = true)
         public List<TourResponse> getApprovedTours() {
-
                 return tourRepository
-                                .findAllByStatusTripOrderByNameAsc(
-                                                TourStatusTrip.APPROVED)
+                                .findAllByStatusTripOrderByNameAsc(TourStatusTrip.APPROVED)
                                 .stream()
                                 .map(TourMapper::toResponse)
                                 .toList();
@@ -179,8 +195,7 @@ public class ApprovalTourService {
         @Transactional(readOnly = true)
         public List<TourResponse> getReadyTours() {
                 return tourRepository
-                                .findAllByStatusTripOrderByNameAsc(
-                                                TourStatusTrip.READY)
+                                .findAllByStatusTripOrderByNameAsc(TourStatusTrip.READY)
                                 .stream()
                                 .map(TourMapper::toResponse)
                                 .toList();

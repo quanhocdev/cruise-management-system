@@ -6,9 +6,10 @@ import com.project.tour.dto.tour.UpdateTourRequest;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.tour.TourMapper;
 import com.project.tour.model.Tour;
+import com.project.tour.model.TourPackage;
 import com.project.tour.model.enums.tour.TourStatusTrip;
 import com.project.tour.repository.tour.TourRepository;
-
+import com.project.tour.repository.tour.TourPackageRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,14 +28,18 @@ public class TourService {
 
         private final TourRedisService tourRedisService;
 
+        private final TourPackageRepository tourPackageRepository;
+
         public TourService(
                         TourRepository tourRepository,
                         TourStatusValidator tourStatusValidator,
-                        TourRedisService tourRedisService) {
+                        TourRedisService tourRedisService,
+                        TourPackageRepository tourPackageRepository) {
 
                 this.tourRepository = tourRepository;
                 this.tourStatusValidator = tourStatusValidator;
                 this.tourRedisService = tourRedisService;
+                this.tourPackageRepository = tourPackageRepository;
         }
 
         // =====================================================
@@ -185,18 +190,21 @@ public class TourService {
         // DELETE
         // =====================================================
 
+        // Trong deleteTour(UUID id) của TourService.java:
         public void deleteTour(UUID id) {
                 Tour tour = findById(id);
 
                 // Chỉ DRAFT mới được phép xóa
                 tourStatusValidator.validateCanDelete(tour);
 
+                // Dọn dẹp Redis cho tất cả các tour package thuộc tour này trước khi xóa
+                List<TourPackage> packages = tourPackageRepository.findAllByTourId(id);
+                for (TourPackage pkg : packages) {
+                        tourRedisService.deletePackageAvailableRooms(pkg.getId());
+                }
+
                 tourRepository.delete(tour);
-
-                // Dọn dẹp Redis nếu lỡ có key tồn đọng
-                tourRedisService.deleteRemainingSeats(id);
         }
-
         // =====================================================
         // FIND
         // =====================================================

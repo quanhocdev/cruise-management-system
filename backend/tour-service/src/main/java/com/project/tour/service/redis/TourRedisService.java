@@ -3,9 +3,11 @@ package com.project.tour.service.redis;
 import java.util.UUID;
 
 public interface TourRedisService {
-    void saveRemainingSeats(UUID tourId, Integer maxPassengers);
+    void savePackageAvailableRooms(UUID tourPackageId, Integer totalRooms);
 
-    Long getRemainingSeats(UUID tourId);
+    Long getPackageAvailableRooms(UUID tourPackageId);
 
-    void deleteRemainingSeats(UUID tourId);
+    void deletePackageAvailableRooms(UUID tourPackageId);
+
+    Long reservePackageRooms(UUID tourPackageId, int requestedRooms);
 }
