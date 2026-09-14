@@ -1,3 +1,4 @@
+// src/modules/passenger/hooks/useBookings.js
 import { useCallback, useState } from "react";
 import bookingService from "../services/bookingService";
 
@@ -47,6 +48,9 @@ export default function useBookings() {
     }
   }, []);
 
+  /**
+   * Tạo booking mới, hỗ trợ truyền formData bao gồm numberOfRooms
+   */
   const createBooking = useCallback(async (data) => {
     setSubmitting(true);
     setError("");

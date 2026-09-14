@@ -15,7 +15,6 @@ import useBookings from "../hooks/useBookings";
 import usePassengers from "../hooks/usePassengers";
 import { usePublicTourDetail } from "../../guest/hooks/usePublicTours";
 import "../styles/PassengerBooking.css";
-import { usePayment } from "../hooks/usePayment";
 
 export default function PassengerBooking() {
   const [searchParams] = useSearchParams();
@@ -34,6 +33,7 @@ export default function PassengerBooking() {
   const { passengers, loadPassengers } = usePassengers();
 
   const [tourPackageId, setTourPackageId] = useState(packageIdFromUrl || "");
+  const [numberOfRooms, setNumberOfRooms] = useState(1); // 👈 Thêm state quản lý số lượng phòng
   const [primaryContactName, setPrimaryContactName] = useState(
     user?.fullName || "",
   );
@@ -56,7 +56,6 @@ export default function PassengerBooking() {
   ]);
 
   useEffect(() => {
-    // Không cần truyền user.id nữa, backend tự lấy qua token
     loadPassengers();
   }, [loadPassengers]);
 
@@ -75,26 +74,21 @@ export default function PassengerBooking() {
     updated[index][field] = value;
     setSelectedPassengers(updated);
   };
+
+  // Tính tổng tiền theo số lượng phòng
   const calculateTotalPrice = () => {
     if (!selectedPackageInfo) return "0 đ";
-
-    const numPassengers = selectedPassengers.length;
-    if (numPassengers === 0) return "0 đ";
-
     const packagePrice = Number(selectedPackageInfo.price || 0);
-
-    // Lấy maxPassengers từ backend trả về, mặc định là 1 nếu null/undefined
-    const maxPassengers = Number(selectedPackageInfo.maxPassengers || 1);
-
-    // Tính số lượng gói cần thiết (Ví dụ: Gói tối đa 4 người, có 5 khách thì phải mua 2 gói)
-    const numberOfPackagesNeeded =
-      maxPassengers > 1
-        ? Math.ceil(numPassengers / maxPassengers)
-        : numPassengers;
-
-    const total = numberOfPackagesNeeded * packagePrice;
+    const total = packagePrice * Number(numberOfRooms || 1);
     return `${total.toLocaleString("vi-VN")} đ`;
   };
+
+  // Kiểm tra sức chứa hành khách trên tổng số phòng
+  const maxPassengersPerRoom = Number(selectedPackageInfo?.maxPassengers || 2);
+  const totalAllowedPassengers =
+    maxPassengersPerRoom * Number(numberOfRooms || 1);
+  const isPassengerExceeded =
+    selectedPassengers.length > totalAllowedPassengers;
 
   const addPassengerSlot = () => {
     setSelectedPassengers([
@@ -137,9 +131,6 @@ export default function PassengerBooking() {
     }
   };
 
-  // Bên trong component PassengerBooking:
-  const { fetchPaymentUrl } = usePayment();
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!tourId || !tourPackageId) {
@@ -147,22 +138,17 @@ export default function PassengerBooking() {
       return;
     }
 
+    if (isPassengerExceeded) {
+      alert(
+        `Số lượng hành khách (${selectedPassengers.length} người) vượt quá sức chứa của ${numberOfRooms} phòng (tối đa ${totalAllowedPassengers} khách). Vui lòng đăng ký thêm phòng!`,
+      );
+      return;
+    }
+
     const formData = new FormData();
     formData.append("tourId", tourId);
     formData.append("tourPackageId", tourPackageId);
-
-    const numPassengers = selectedPassengers.length;
-    const packagePrice = Number(selectedPackageInfo?.price || 0);
-    const maxPassengers = Number(selectedPackageInfo?.maxPassengers || 1);
-
-    const numberOfPackagesNeeded =
-      maxPassengers > 1
-        ? Math.ceil(numPassengers / maxPassengers)
-        : numPassengers;
-
-    const finalTotalPrice = numberOfPackagesNeeded * packagePrice;
-
-    // formData.append("totalPrice", finalTotalPrice);
+    formData.append("numberOfRooms", numberOfRooms);
     formData.append("primaryContactName", primaryContactName);
     formData.append("primaryContactPhone", primaryContactPhone);
 
@@ -186,11 +172,9 @@ export default function PassengerBooking() {
     });
 
     try {
-      // Gọi API tạo booking, hệ thống ngầm sẽ tự lo việc bắn Kafka sang Payment Service
       await createBooking(formData);
-
       alert("Đặt vé thành công!");
-      navigate(`/passenger/bookings`); // Nhảy thẳng về trang danh sách vé của tôi
+      navigate(`/passenger/bookings`);
     } catch (err) {
       console.error("Lỗi chi tiết từ Server trả về:", err.response || err);
       alert(
@@ -200,6 +184,7 @@ export default function PassengerBooking() {
       );
     }
   };
+
   if (tourLoading) {
     return (
       <Container className="py-5 text-center">
@@ -230,31 +215,55 @@ export default function PassengerBooking() {
       <Form onSubmit={handleSubmit}>
         <Row className="g-4">
           <Col lg={8}>
-            {/* Lựa chọn Gói Tour */}
+            {/* Lựa chọn Gói Tour & Số lượng phòng */}
             <Card className="border-0 shadow-sm rounded-4 p-4 mb-4">
-              <h5 className="fw-bold text-primary mb-3">1. Chọn Gói Tour</h5>
-              <Form.Group className="mb-3">
-                <Form.Label className="small fw-semibold">
-                  Các gói tour khả dụng
-                </Form.Label>
-                <Form.Select
-                  value={tourPackageId}
-                  onChange={(e) => setTourPackageId(e.target.value)}
-                  required
-                >
-                  <option value="" disabled>
-                    -- Chọn gói tour --
-                  </option>
-                  {tour?.packages?.map((pkg) => (
-                    <option key={pkg.id} value={pkg.id}>
-                      {pkg.name} - {Number(pkg.price).toLocaleString("vi-VN")} đ
+              <h5 className="fw-bold text-primary mb-3">
+                1. Chọn Gói Tour & Số Lượng Phòng
+              </h5>
+
+              <Row>
+                <Col md={8} className="mb-3">
+                  <Form.Label className="small fw-semibold">
+                    Các gói tour khả dụng
+                  </Form.Label>
+                  <Form.Select
+                    value={tourPackageId}
+                    onChange={(e) => setTourPackageId(e.target.value)}
+                    required
+                  >
+                    <option value="" disabled>
+                      -- Chọn gói tour --
                     </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
+                    {tour?.packages?.map((pkg) => (
+                      <option key={pkg.id} value={pkg.id}>
+                        {pkg.name} - {Number(pkg.price).toLocaleString("vi-VN")}{" "}
+                        đ
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Col>
+
+                <Col md={4} className="mb-3">
+                  <Form.Label className="small fw-semibold">
+                    Số lượng phòng đặt
+                  </Form.Label>
+                  <Form.Control
+                    type="number"
+                    min="1"
+                    max="50"
+                    value={numberOfRooms}
+                    onChange={(e) =>
+                      setNumberOfRooms(
+                        Math.max(1, parseInt(e.target.value) || 1),
+                      )
+                    }
+                    required
+                  />
+                </Col>
+              </Row>
 
               {selectedPackageInfo && (
-                <div className="p-3 bg-light rounded-3 border mt-3">
+                <div className="p-3 bg-light rounded-3 border mt-2">
                   <div className="d-flex justify-content-between align-items-center mb-1">
                     <h6 className="fw-bold text-dark m-0">
                       🎁 {selectedPackageInfo.name}
@@ -263,33 +272,17 @@ export default function PassengerBooking() {
                       {Number(selectedPackageInfo.price).toLocaleString(
                         "vi-VN",
                       )}{" "}
-                      đ / người
+                      đ / phòng
                     </span>
                   </div>
                   <p className="text-muted small mb-2">
                     {selectedPackageInfo.description ||
                       "Không có mô tả chi tiết cho gói này."}
                   </p>
-
-                  {selectedPackageInfo.benefits &&
-                    selectedPackageInfo.benefits.length > 0 && (
-                      <>
-                        <div className="fw-semibold text-secondary small mb-1">
-                          Quyền lợi bao gồm:
-                        </div>
-                        <ul className="small text-muted ps-3 mb-0">
-                          {selectedPackageInfo.benefits.map((benefit, idx) => (
-                            <li key={idx}>
-                              {benefit.type} (Số lượng: {benefit.quantity}
-                              {benefit.discountPercent
-                                ? `, Giảm: ${benefit.discountPercent}%`
-                                : ""}
-                              )
-                            </li>
-                          ))}
-                        </ul>
-                      </>
-                    )}
+                  <div className="text-secondary small">
+                    ℹ️ Mỗi phòng chứa tối đa:{" "}
+                    <b>{maxPassengersPerRoom} hành khách</b>
+                  </div>
                 </div>
               )}
             </Card>
@@ -330,9 +323,18 @@ export default function PassengerBooking() {
             {/* Danh sách hành khách */}
             <Card className="border-0 shadow-sm rounded-4 p-4">
               <div className="d-flex justify-content-between align-items-center mb-3">
-                <h5 className="fw-bold text-primary m-0">
-                  3. Danh sách hành khách tham gia
-                </h5>
+                <div>
+                  <h5 className="fw-bold text-primary m-0">
+                    3. Danh sách hành khách tham gia
+                  </h5>
+                  {isPassengerExceeded && (
+                    <small className="text-danger fw-semibold">
+                      ⚠️ Số khách ({selectedPassengers.length}) vượt quá sức
+                      chứa của {numberOfRooms} phòng (Tối đa{" "}
+                      {totalAllowedPassengers} khách). Vui lòng thêm phòng!
+                    </small>
+                  )}
+                </div>
                 <Button
                   variant="outline-primary"
                   size="sm"
@@ -494,8 +496,6 @@ export default function PassengerBooking() {
                         }
                       />
                     </Col>
-
-                    {/* Thêm ô nhập ghi chú giấy tờ tùy thân */}
                     <Col md={12} className="mb-2">
                       <Form.Label className="small">
                         Ghi chú giấy tờ (Tùy chọn)
@@ -518,7 +518,6 @@ export default function PassengerBooking() {
                       <Form.Label className="small fw-semibold text-primary">
                         📷 Tải ảnh CCCD / Giấy tờ tùy thân từ máy
                       </Form.Label>
-
                       <Form.Control
                         size="sm"
                         type="file"
@@ -530,7 +529,6 @@ export default function PassengerBooking() {
                           }
                         }}
                       />
-
                       {p.idCardImage && (
                         <div className="text-success small mt-1">
                           ✓ Đã chọn file: {p.idCardImage.name}
@@ -566,12 +564,10 @@ export default function PassengerBooking() {
               </p>
               <hr />
               <div className="d-flex justify-content-between mb-2">
-                <span className="text-muted">Đơn giá: </span>
-                <span className="fw-bold text-primary fs-5">
-                  {calculateTotalPrice()}
-                </span>
+                <span className="text-muted">Số lượng phòng: </span>
+                <span className="fw-bold text-dark">{numberOfRooms} phòng</span>
               </div>
-              <div className="d-flex justify-content-between mb-3">
+              <div className="d-flex justify-content-between mb-2">
                 <span className="text-muted">Tổng hành khách:</span>
                 <span className="fw-bold">
                   {selectedPassengers.length} người
@@ -580,9 +576,7 @@ export default function PassengerBooking() {
               <div className="d-flex justify-content-between mb-3 border-top pt-2">
                 <span className="fw-bold text-dark">Tổng tiền dự kiến:</span>
                 <span className="fw-bold text-primary fs-5">
-                  <span className="fw-bold text-primary fs-5">
-                    {calculateTotalPrice()}
-                  </span>
+                  {calculateTotalPrice()}
                 </span>
               </div>
               <Button
@@ -590,7 +584,7 @@ export default function PassengerBooking() {
                 variant="success"
                 size="lg"
                 className="w-100 rounded-pill fw-bold shadow-sm"
-                disabled={submitting || !tourPackageId}
+                disabled={submitting || !tourPackageId || isPassengerExceeded}
               >
                 {submitting ? (
                   <Spinner animation="border" size="sm" />
