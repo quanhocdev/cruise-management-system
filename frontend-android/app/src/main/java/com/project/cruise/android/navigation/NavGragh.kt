@@ -42,10 +42,14 @@ import com.project.cruise.android.ui.screens.passenger.Dashboard
 import com.project.cruise.android.viewmodel.auth.AuthViewModel
 import com.project.cruise.android.viewmodel.auth.AuthViewModelFactory
 import com.project.cruise.android.viewmodel.auth.LoginState
+import com.project.cruise.android.viewmodel.auth.PosLoginState
 import com.project.cruise.android.viewmodel.auth.RegisterState
 import com.project.cruise.android.viewmodel.auth.SessionState
 import com.project.cruise.android.viewmodel.auth.VerifyOtpState
 import com.project.cruise.android.ui.screens.pos.PosDashboardScreen
+import com.project.cruise.android.ui.screens.pos.PosLoginScreen
+import com.project.cruise.android.ui.screens.pos.PosManualEntryScreen
+import com.project.cruise.android.ui.screens.pos.PosRole
 import com.project.cruise.android.ui.screens.pos.QrScanScreen
 import com.project.cruise.android.ui.screens.pos.NfcScanScreen
 import com.project.cruise.android.ui.screens.pos.PosHistoryScreen
@@ -71,11 +75,20 @@ object Routes {
     const val PASSENGER_BOOKINGS = "passenger_bookings"
     const val PASSENGER_BOOKING_DETAIL = "passenger_bookings/{bookingId}"
     const val PASSENGER_PAYMENT_RESULT = "passenger_payment_result?paymentId={paymentId}&status={status}"
-    const val POS_DASHBOARD = "pos_dashboard"
-    const val POS_QR_SCAN = "pos_qr_scan"
-    const val POS_NFC_SCAN = "pos_nfc_scan"
-    const val POS_HISTORY = "pos_history"
-    const val POS_IDENTITY = "pos_identity/{localId}"
+    const val POS_LOGIN = "pos_login"
+    const val POS_DASHBOARD = "pos_dashboard/{role}"
+    const val POS_QR_SCAN = "pos_qr_scan/{role}"
+    const val POS_NFC_SCAN = "pos_nfc_scan/{role}"
+    const val POS_MANUAL_ENTRY = "pos_manual_entry/{role}"
+    const val POS_HISTORY = "pos_history/{role}"
+    const val POS_IDENTITY = "pos_identity/{role}/{localId}"
+
+    fun posDashboard(role: PosRole) = "pos_dashboard/${role.apiRole}"
+    fun posQrScan(role: PosRole) = "pos_qr_scan/${role.apiRole}"
+    fun posNfcScan(role: PosRole) = "pos_nfc_scan/${role.apiRole}"
+    fun posManualEntry(role: PosRole) = "pos_manual_entry/${role.apiRole}"
+    fun posHistory(role: PosRole) = "pos_history/${role.apiRole}"
+    fun posIdentity(role: PosRole, localId: String) = "pos_identity/${role.apiRole}/$localId"
 }
 
 @Composable
@@ -108,16 +121,19 @@ fun NavGraph() {
 
     NavHost(
         navController = navController,
-        startDestination = Routes.PASSENGER_TOURS // <-- Đặt TourPublic làm màn hình khởi đầu khi mở app
+        startDestination = Routes.SPLASH
     ) {
 
         composable(Routes.SPLASH) {
             LaunchedEffect(sessionState) {
                 when (sessionState) {
-                    is SessionState.Authenticated -> navController.navigate(Routes.PASSENGER_DASHBOARD) {
-                        popUpTo(Routes.SPLASH) { inclusive = true }
+                    is SessionState.Authenticated -> {
+                        val role = PosRole.fromApiRole((sessionState as SessionState.Authenticated).role)
+                        navController.navigate(role?.let(Routes::posDashboard) ?: Routes.PASSENGER_TOURS) {
+                            popUpTo(Routes.SPLASH) { inclusive = true }
+                        }
                     }
-                    SessionState.Unauthenticated -> navController.navigate(Routes.GUEST) {
+                    SessionState.Unauthenticated -> navController.navigate(Routes.PASSENGER_TOURS) {
                         popUpTo(Routes.SPLASH) { inclusive = true }
                     }
                     SessionState.Checking -> Unit
@@ -136,7 +152,7 @@ fun NavGraph() {
             GuestScreen(
                 onLoginClick = { navController.navigate(Routes.LOGIN) },
                 onRegisterClick = { navController.navigate(Routes.REGISTER) },
-                onPosClick = { navController.navigate(Routes.POS_DASHBOARD) }
+                onPosClick = { navController.navigate(Routes.POS_LOGIN) }
             )
         }
 
@@ -378,69 +394,135 @@ fun NavGraph() {
             )
         }
         // =================================================
-        // POS - MÁY QUÉT GIẢ LẬP (QR & NFC)
+        // POS - ĐĂNG NHẬP VÀ PHÂN QUYỀN THEO ROLE
         // =================================================
 
-        // 1. Dashboard chính của POS
-        composable(Routes.POS_DASHBOARD) {
+        composable(Routes.POS_LOGIN) {
+            val posLoginState by viewModel.posLoginState.collectAsState()
+
+            LaunchedEffect(posLoginState) {
+                val success = posLoginState as? PosLoginState.Success ?: return@LaunchedEffect
+                val role = PosRole.fromApiRole(success.response.role) ?: return@LaunchedEffect
+                navController.navigate(Routes.posDashboard(role)) {
+                    popUpTo(Routes.GUEST) { inclusive = true }
+                    launchSingleTop = true
+                }
+                viewModel.resetPosLoginState()
+            }
+
+            PosLoginScreen(
+                onBackClick = { navController.popBackStack() },
+                onLogin = viewModel::loginPos,
+                isLoading = posLoginState is PosLoginState.Loading,
+                errorMessage = (posLoginState as? PosLoginState.Error)?.message
+            )
+        }
+
+        composable(
+            route = Routes.POS_DASHBOARD,
+            arguments = listOf(navArgument("role") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val role = PosRole.fromApiRole(backStackEntry.arguments?.getString("role"))
+                ?: return@composable
             PosDashboardScreen(
-                onBackClick = { navController.popBackStack() },
-                onQrClick = { navController.navigate(Routes.POS_QR_SCAN) },
-                onNfcClick = { navController.navigate(Routes.POS_NFC_SCAN) },
-                onHistoryClick = { navController.navigate(Routes.POS_HISTORY) }
+                role = role,
+                onLogoutClick = {
+                    viewModel.logout {
+                        navController.navigate(Routes.GUEST) {
+                            popUpTo(navController.graph.id) { inclusive = true }
+                        }
+                    }
+                },
+                onQrClick = { navController.navigate(Routes.posQrScan(role)) },
+                onNfcClick = { navController.navigate(Routes.posNfcScan(role)) },
+                onManualClick = { navController.navigate(Routes.posManualEntry(role)) },
+                onHistoryClick = { navController.navigate(Routes.posHistory(role)) }
             )
         }
 
-        // 2. Màn hình quét QR
-        composable(Routes.POS_QR_SCAN) {
+        composable(
+            route = Routes.POS_QR_SCAN,
+            arguments = listOf(navArgument("role") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val role = PosRole.fromApiRole(backStackEntry.arguments?.getString("role"))
+                ?: return@composable
             QrScanScreen(
+                role = role,
                 onBackClick = { navController.popBackStack() },
                 onSaved = { localId ->
-                    // Sau khi quét và lưu local thành công, chuyển sang màn hình xác minh
-                    navController.navigate("pos_identity/$localId") {
-                        popUpTo(Routes.POS_DASHBOARD)
+                    navController.navigate(Routes.posIdentity(role, localId)) {
+                        popUpTo(Routes.posDashboard(role))
                     }
                 }
             )
         }
 
-        // 3. Màn hình quét NFC
-        composable(Routes.POS_NFC_SCAN) {
+        composable(
+            route = Routes.POS_NFC_SCAN,
+            arguments = listOf(navArgument("role") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val role = PosRole.fromApiRole(backStackEntry.arguments?.getString("role"))
+                ?: return@composable
             NfcScanScreen(
+                role = role,
                 onBackClick = { navController.popBackStack() },
                 onSaved = { localId ->
-                    // Sau khi nhận diện thẻ NFC và lưu local thành công, chuyển sang màn hình xác minh
-                    navController.navigate("pos_identity/$localId") {
-                        popUpTo(Routes.POS_DASHBOARD)
+                    navController.navigate(Routes.posIdentity(role, localId)) {
+                        popUpTo(Routes.posDashboard(role))
                     }
                 }
             )
         }
 
-        // 4. Lịch sử giao dịch offline
-        composable(Routes.POS_HISTORY) {
+        composable(
+            route = Routes.POS_MANUAL_ENTRY,
+            arguments = listOf(navArgument("role") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val role = PosRole.fromApiRole(backStackEntry.arguments?.getString("role"))
+                ?: return@composable
+            PosManualEntryScreen(
+                role = role,
+                onBackClick = { navController.popBackStack() },
+                onSaved = { localId -> navController.navigate(Routes.posIdentity(role, localId)) }
+            )
+        }
+
+        composable(
+            route = Routes.POS_HISTORY,
+            arguments = listOf(navArgument("role") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val role = PosRole.fromApiRole(backStackEntry.arguments?.getString("role"))
+                ?: return@composable
             PosHistoryScreen(
+                role = role,
                 onBackClick = { navController.popBackStack() },
                 onIdentify = { localId ->
-                    navController.navigate("pos_identity/$localId")
+                    navController.navigate(Routes.posIdentity(role, localId))
                 }
             )
         }
 
-        // 5. Màn hình xác minh danh tính và check-in thực tế với Server
         composable(
             route = Routes.POS_IDENTITY,
-            arguments = listOf(navArgument("localId") { type = NavType.StringType })
+            arguments = listOf(
+                navArgument("role") { type = NavType.StringType },
+                navArgument("localId") { type = NavType.StringType }
+            )
         ) { backStackEntry ->
+            val role = PosRole.fromApiRole(backStackEntry.arguments?.getString("role"))
+                ?: return@composable
             val localId = backStackEntry.arguments?.getString("localId") ?: return@composable
 
-            val repository = remember(context) { PosIdentityRepository(context) }
+            val repository = remember(context, role) {
+                PosIdentityRepository(context, role.apiRole)
+            }
             val posViewModel: PosIdentityViewModel = viewModel(
                 factory = PosIdentityViewModelFactory(repository, localId)
             )
             val state by posViewModel.state.collectAsState()
 
             PosIdentityScreen(
+                role = role,
                 state = state,
                 onRetry = { posViewModel.verify() },
                 onCheckIn = { posViewModel.checkIn() },

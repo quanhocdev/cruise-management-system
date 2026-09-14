@@ -19,14 +19,21 @@ class PosTransactionQueue(context: Context) {
     private val appContext = context.applicationContext
     private val dao = CruiseDatabase.getInstance(appContext).posTransactionDao()
 
-    suspend fun enqueue(scanType: PosScanType, scannedValue: String): String {
+    suspend fun enqueue(
+        scanType: PosScanType,
+        scannedValue: String,
+        operatorRole: String = "FINANCE",
+        operation: String = "IDENTIFY"
+    ): String {
         val localId = UUID.randomUUID().toString()
         dao.insert(
             PosTransactionEntity(
                 localId = localId,
                 terminalCode = BuildConfig.POS_TERMINAL_CODE,
                 scanType = scanType.name,
-                scannedValue = scannedValue.trim()
+                scannedValue = scannedValue.trim(),
+                operatorRole = operatorRole,
+                operation = operation
             )
         )
         scheduleSync(appContext)
@@ -34,7 +41,9 @@ class PosTransactionQueue(context: Context) {
     }
 
     fun observePendingCount() = dao.observePendingCount()
+    fun observePendingCount(role: String) = dao.observePendingCountForRole(role)
     fun observeAll() = dao.observeAll()
+    fun observeAll(role: String) = dao.observeAllForRole(role)
 
     companion object {
         private const val UNIQUE_WORK_NAME = "pos-transaction-sync"

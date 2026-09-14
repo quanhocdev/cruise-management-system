@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.project.cruise.android.data.dto.auth.JwtResponse
 import com.project.cruise.android.data.dto.auth.RegisterResponse
 import com.project.cruise.android.data.repository.AuthRepository
+import com.project.cruise.android.ui.screens.pos.PosRole
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -83,6 +84,13 @@ sealed class MeState {
     ) : MeState()
 }
 
+sealed class PosLoginState {
+    object Idle : PosLoginState()
+    object Loading : PosLoginState()
+    data class Success(val response: JwtResponse) : PosLoginState()
+    data class Error(val message: String) : PosLoginState()
+}
+
 sealed class SessionState {
     object Checking : SessionState()
     data class Authenticated(val username: String, val role: String) : SessionState()
@@ -113,7 +121,7 @@ class AuthViewModel(
         viewModelScope.launch {
             runCatching { repository.getCurrentUser() }
                 .onSuccess { user ->
-                    if (user.role.isPassengerRole()) {
+                    if (user.role.isPassengerRole() || user.role.isSupportedPosRole()) {
                         _sessionState.value = SessionState.Authenticated(user.username, user.role)
                     } else {
                         repository.logout()
@@ -189,6 +197,40 @@ class AuthViewModel(
 
         _loginState.value =
             LoginState.Idle
+    }
+
+    private val _posLoginState = MutableStateFlow<PosLoginState>(PosLoginState.Idle)
+    val posLoginState: StateFlow<PosLoginState> = _posLoginState
+
+    fun loginPos(username: String, password: String) {
+        if (username.isBlank() || password.isBlank()) {
+            _posLoginState.value = PosLoginState.Error("Vui lòng nhập tài khoản và mật khẩu")
+            return
+        }
+
+        viewModelScope.launch {
+            _posLoginState.value = PosLoginState.Loading
+            try {
+                val response = repository.login(username, password)
+                if (!response.role.isSupportedPosRole()) {
+                    repository.logout()
+                    _posLoginState.value = PosLoginState.Error(
+                        "Máy POS chỉ dành cho FINANCE, CONVENIENCE, ONBOARD hoặc SHORE"
+                    )
+                } else {
+                    _sessionState.value = SessionState.Authenticated(response.username, response.role)
+                    _posLoginState.value = PosLoginState.Success(response)
+                }
+            } catch (exception: Exception) {
+                _posLoginState.value = PosLoginState.Error(
+                    exception.message ?: "Đăng nhập máy POS thất bại"
+                )
+            }
+        }
+    }
+
+    fun resetPosLoginState() {
+        _posLoginState.value = PosLoginState.Idle
     }
 
 
@@ -371,6 +413,7 @@ class AuthViewModel(
 
             // 2. Reset toàn bộ các StateAuth về Idle
             resetLoginState()
+            resetPosLoginState()
             resetRegisterState()
             resetVerifyOtpState()
             resetMeState()
@@ -382,4 +425,7 @@ class AuthViewModel(
 }
 
 private fun String.isPassengerRole(): Boolean =
-    removePrefix("ROLE_").equals("PASSENGER", ignoreCase = true)
+    trim().uppercase().removePrefix("ROLE_") == "PASSENGER"
+
+private fun String.isSupportedPosRole(): Boolean =
+    PosRole.fromApiRole(this) != null

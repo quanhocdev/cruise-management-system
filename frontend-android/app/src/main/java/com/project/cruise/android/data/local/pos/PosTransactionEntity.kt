@@ -9,6 +9,8 @@ data class PosTransactionEntity(
     val terminalCode: String,
     val scanType: String,
     val scannedValue: String,
+    val operatorRole: String = "FINANCE",
+    val operation: String = "IDENTIFY",
     val status: String = PosSyncStatus.PENDING_SYNC.name,
     val attemptCount: Int = 0,
     val createdAt: Long = System.currentTimeMillis(),

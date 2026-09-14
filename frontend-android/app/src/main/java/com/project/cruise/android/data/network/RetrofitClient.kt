@@ -20,9 +20,6 @@ object RetrofitClient {
     val refreshApiService: ApiService =
         retrofit.create(ApiService::class.java)
 
-    val posApiService: PosApiService =
-        retrofit.create(PosApiService::class.java)
-
     fun createApiService(
         tokenManager: TokenManager,
         retryOnConnectionFailure: Boolean = true
@@ -53,5 +50,24 @@ object RetrofitClient {
             )
             .build()
             .create(ApiService::class.java)
+    }
+
+    fun createPosApiService(tokenManager: TokenManager): PosApiService {
+        val authenticator = TokenAuthenticator(
+            tokenManager = tokenManager,
+            refreshApi = refreshApiService
+        )
+        val client = OkHttpClient.Builder()
+            .retryOnConnectionFailure(true)
+            .addInterceptor(AuthInterceptor(tokenManager))
+            .authenticator(authenticator)
+            .build()
+
+        return Retrofit.Builder()
+            .baseUrl("${AppConfig.HTTP_BASE_URL}/")
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(PosApiService::class.java)
     }
 }
