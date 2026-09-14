@@ -12,6 +12,7 @@ import com.project.tour.model.RoomType;
 import com.project.tour.dto.roomtype.RoomTypeResponse;
 import com.project.tour.repository.tour.PackageBenefitRepository;
 import com.project.tour.repository.tour.TourPackageRepository;
+import com.project.tour.service.redis.TourRedisService; // Import Redis service
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ public class TourPackageService {
     private final PackageBenefitRepository packageBenefitRepository;
     private final TourRepository tourRepository;
     private final RoomTypeRepository roomTypeRepository;
+    private final TourRedisService tourRedisService; // Khai báo Redis service
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     public TourPackageService(
@@ -36,11 +38,13 @@ public class TourPackageService {
             PackageBenefitRepository packageBenefitRepository,
             TourRepository tourRepository,
             RoomTypeRepository roomTypeRepository,
+            TourRedisService tourRedisService, // Inject Redis service vào constructor
             KafkaTemplate<String, Object> kafkaTemplate) {
         this.tourPackageRepository = tourPackageRepository;
         this.packageBenefitRepository = packageBenefitRepository;
         this.tourRepository = tourRepository;
         this.roomTypeRepository = roomTypeRepository;
+        this.tourRedisService = tourRedisService;
         this.kafkaTemplate = kafkaTemplate;
     }
 
@@ -59,7 +63,7 @@ public class TourPackageService {
         tourPackage.setName(request.name());
         tourPackage.setDescription(request.description());
         tourPackage.setPrice(request.price());
-        tourPackage.setMaxPassengers(request.maxPassengers());
+        tourPackage.setMaxPassengers(request.maxPassengers()); // Đây là số lượng phòng mở bán
         tourPackage.setStatus(request.status());
 
         TourPackage savedPackage = tourPackageRepository.save(tourPackage);
@@ -78,6 +82,12 @@ public class TourPackageService {
 
             savedBenefits = packageBenefitRepository.saveAll(benefits);
         }
+
+        // =========================================================
+        // LƯU SỐ LƯỢNG PHÒNG LÊN REDIS KHI TẠO GÓI THÀNH CÔNG
+        // =========================================================
+        int initialRooms = savedPackage.getMaxPassengers() != null ? savedPackage.getMaxPassengers() : 0;
+        tourRedisService.savePackageAvailableRooms(savedPackage.getId(), initialRooms);
 
         // 1. BẮN KAFKA EVENT KHI TẠO MỚI THÀNH CÔNG
         TourPackageSyncedEvent event = new TourPackageSyncedEvent(
@@ -123,6 +133,13 @@ public class TourPackageService {
         }
 
         TourPackage updatedPackage = tourPackageRepository.save(tourPackage);
+
+        // =========================================================
+        // CẬP NHẬT LẠI SỐ LƯỢNG PHÒNG TRÊN REDIS NẾU CÓ THAY ĐỔI
+        // =========================================================
+        if (request.maxPassengers() != null) {
+            tourRedisService.savePackageAvailableRooms(updatedPackage.getId(), request.maxPassengers());
+        }
 
         List<PackageBenefit> savedBenefits = packageBenefitRepository.findAllByTourPackageId(updatedPackage.getId());
         if (request.benefits() != null) {
@@ -183,6 +200,11 @@ public class TourPackageService {
                 pkg.getMaxPassengers(),
                 "DELETED");
         kafkaTemplate.send("tour-package-sync-topic", pkg.getId().toString(), event);
+
+        // =========================================================
+        // DỌN DẸP KEY REDIS TƯƠNG ỨNG KHI XÓA GÓI
+        // =========================================================
+        tourRedisService.deletePackageAvailableRooms(pkg.getId());
 
         packageBenefitRepository.deleteAllByTourPackageId(pkg.getId());
         tourPackageRepository.delete(pkg);

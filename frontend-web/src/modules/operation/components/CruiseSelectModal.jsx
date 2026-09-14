@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo } from "react";
 import "../styles/CruiseSelectModal.css";
 import {
   X,
@@ -12,7 +12,6 @@ import {
   Loader2,
   AlertTriangle,
   Lock,
-  Users,
 } from "lucide-react";
 
 function formatDate(value) {
@@ -36,19 +35,10 @@ function CruiseSelectModal({
   onAssignCruise,
   onClose,
 }) {
-  const [maxPassengersInput, setMaxPassengersInput] = useState("");
-
-  // Tự động điền số lượng tối đa hiện tại của tour
-  useEffect(() => {
-    if (tour?.maxPassengers) {
-      setMaxPassengersInput(tour.maxPassengers);
-    }
-  }, [tour]);
-
   const currentAssignedCruiseId =
     tour?.cruiseId || tour?.cruise?.id || tour?.assignedCruiseId || null;
 
-  // Gom các nguồn phân công (Đặt đúng thứ tự các Hook lên trên)
+  // Gom các nguồn phân công
   const tourAssignments = useMemo(() => {
     if (Array.isArray(assignments) && assignments.length > 0) {
       return assignments;
@@ -102,43 +92,16 @@ function CruiseSelectModal({
     });
   }, [cruises, tour, currentAssignedCruiseId]);
 
-  const selectedCruiseObj = displayCruises.find(
-    (c) => c.id === selectedCruiseId,
-  );
-
-  // ĐẶT ĐIỀU KIỆN RETURN NULL SAU TẤT CẢ CÁC HOOK ĐỂ KHÔNG BỊ LỆCH THỨ TỰ
   if (!open || !tour) return null;
 
-  // Xử lý gán du thuyền kèm maxPassengers
+  // Xử lý gán du thuyền
   const handleAssign = async () => {
-    if (
-      !selectedCruiseId ||
-      !onAssignCruise ||
-      hasAssignedAreas ||
-      !maxPassengersInput
-    ) {
-      return;
-    }
-
-    const numericMax = parseInt(maxPassengersInput, 10);
-    if (isNaN(numericMax) || numericMax <= 0) {
-      alert("Vui lòng nhập số lượng hành khách tối đa hợp lệ lớn hơn 0.");
-      return;
-    }
-
-    if (
-      selectedCruiseObj &&
-      selectedCruiseObj.maxPassengers &&
-      numericMax > selectedCruiseObj.maxPassengers
-    ) {
-      alert(
-        `Số lượng khách của tour (${numericMax}) không được vượt quá sức chứa của du thuyền (${selectedCruiseObj.maxPassengers}).`,
-      );
+    if (!selectedCruiseId || !onAssignCruise || hasAssignedAreas) {
       return;
     }
 
     try {
-      await onAssignCruise(selectedCruiseId, numericMax);
+      await onAssignCruise(selectedCruiseId);
       onClose();
     } catch (error) {
       console.error("Lỗi khi gán du thuyền:", error);
@@ -151,8 +114,8 @@ function CruiseSelectModal({
         {/* HEADER */}
         <div className="operation-cruise-modal-header">
           <div>
-            <h2>Chọn Du thuyền & Cấu hình Tour</h2>
-            <p>Chọn tàu và cấu hình sức chứa tối đa cho hành khách.</p>
+            <h2>Chọn Du thuyền cho Tour</h2>
+            <p>Chọn tàu phù hợp để vận hành hành trình này.</p>
           </div>
 
           <button
@@ -203,31 +166,6 @@ function CruiseSelectModal({
             </div>
           </div>
         )}
-
-        {/* CẤU HÌNH SỐ LƯỢNG HÀNH KHÁCH TỐI ĐA */}
-        <div className="operation-cruise-capacity-box">
-          <label className="capacity-box-label">
-            <Users size={16} />
-            <span>Số lượng hành khách tối đa cho phép đặt vé:</span>
-          </label>
-          <div className="capacity-input-wrapper">
-            <input
-              type="number"
-              min="1"
-              max={selectedCruiseObj?.maxPassengers || 9999}
-              value={maxPassengersInput}
-              onChange={(e) => setMaxPassengersInput(e.target.value)}
-              placeholder="VD: 150"
-              className="capacity-input-field"
-            />
-            {selectedCruiseObj?.maxPassengers && (
-              <span className="capacity-input-hint">
-                Trần sức chứa tàu chọn: <b>{selectedCruiseObj.maxPassengers}</b>{" "}
-                khách
-              </span>
-            )}
-          </div>
-        </div>
 
         {/* TITLE */}
         <div className="operation-cruise-select-title">
@@ -313,7 +251,7 @@ function CruiseSelectModal({
                       </div>
 
                       <span className="cruise-code">
-                        Mã tàu: {cruise.code || "-"} | Sức chứa tối đa:{" "}
+                        Mã tàu: {cruise.code || "-"} | Sức chứa tối đa tàu:{" "}
                         <b>{cruise.maxPassengers}</b> khách
                       </span>
 
@@ -400,9 +338,7 @@ function CruiseSelectModal({
               assigning ||
               loading ||
               hasAssignedAreas ||
-              !maxPassengersInput ||
-              (selectedCruiseId === currentAssignedCruiseId &&
-                Number(maxPassengersInput) === Number(tour?.maxPassengers))
+              selectedCruiseId === currentAssignedCruiseId
             }
           >
             {assigning ? (

@@ -1,11 +1,12 @@
 package com.project.auth.service;
 
+import java.time.Instant;
 import java.util.Random;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.project.auth.service.mail.MailService;
 import com.project.auth.dto.LoginRequest;
 import com.project.auth.dto.RegisterRequest;
 import com.project.auth.dto.RegisterResponse;
@@ -17,6 +18,7 @@ import com.project.auth.model.enums.UserStatus;
 import com.project.auth.repository.UserRepository;
 import com.project.auth.service.redis.RedisService;
 import com.project.auth.service.redis.TokenRedisService;
+import com.project.common.event.SendOtpEvent;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -25,25 +27,25 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final RedisService redisService;
-    private final MailService mailService;
     private final TokenRedisService tokenRedisService;
     private final AuthMapper authMapper;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     public AuthServiceImpl(
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
             RedisService redisService,
-            MailService mailService,
             TokenRedisService tokenRedisService,
-            AuthMapper authMapper) {
+            AuthMapper authMapper,
+            KafkaTemplate<String, Object> kafkaTemplate) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.redisService = redisService;
-        this.mailService = mailService;
         this.tokenRedisService = tokenRedisService;
         this.authMapper = authMapper;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     @Override
@@ -68,11 +70,16 @@ public class AuthServiceImpl implements AuthService {
         }
 
         try {
-            mailService.sendOtp(savedUser.getEmail(), otp);
+            SendOtpEvent event = new SendOtpEvent(
+                    savedUser.getId(),
+                    savedUser.getEmail(),
+                    otp,
+                    Instant.now());
+            kafkaTemplate.send("send-otp-topic", event);
         } catch (Exception e) {
             return authMapper.toRegisterResponseDTO(
                     savedUser,
-                    "Đăng ký thành công nhưng không thể gửi email OTP. Vui lòng bấm gửi lại OTP!");
+                    "Đăng ký thành công nhưng không thể gửi yêu cầu gửi OTP. Vui lòng bấm gửi lại OTP!");
         }
 
         return authMapper.toRegisterResponseDTO(

@@ -88,8 +88,8 @@ public class TourCruiseAssignmentService {
                 }).toList();
         }
 
-        // Gán du thuyền và cấu hình số lượng tối đa cho tour
-        public TourResponse assignCruise(UUID tourId, UUID cruiseId, Integer maxPassengers) {
+        // Gán du thuyền cho tour (đã bỏ kiểm tra maxPassengers)
+        public TourResponse assignCruise(UUID tourId, UUID cruiseId) {
                 Tour tour = tourRepository.findById(tourId)
                                 .orElseThrow(() -> new AppException("Tour not found", HttpStatus.NOT_FOUND));
 
@@ -109,18 +109,6 @@ public class TourCruiseAssignmentService {
                         throw new AppException("Cruise is not active", HttpStatus.BAD_REQUEST);
                 }
 
-                // Kiểm tra ràng buộc dung lượng
-                if (maxPassengers == null || maxPassengers <= 0) {
-                        throw new AppException("Số lượng hành khách tối đa phải lớn hơn 0", HttpStatus.BAD_REQUEST);
-                }
-                if (maxPassengers > cruise.getMaxPassengers()) {
-                        throw new AppException(
-                                        "Số lượng khách tối đa của tour (" + maxPassengers
-                                                        + ") vượt quá sức chứa của du thuyền ("
-                                                        + cruise.getMaxPassengers() + ")",
-                                        HttpStatus.BAD_REQUEST);
-                }
-
                 List<Tour> conflictingTours = findConflictingTours(
                                 cruiseId,
                                 tour.getStartDate(),
@@ -136,7 +124,6 @@ public class TourCruiseAssignmentService {
                 }
 
                 tour.setCruise(cruise);
-                tour.setMaxPassengers(maxPassengers);
                 Tour savedTour = tourRepository.save(tour);
 
                 return TourMapper.toResponse(savedTour);

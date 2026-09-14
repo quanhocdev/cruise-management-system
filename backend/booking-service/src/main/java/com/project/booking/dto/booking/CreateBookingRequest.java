@@ -20,9 +20,9 @@ public class CreateBookingRequest {
     @NotNull(message = "Tour Package ID is required")
     private String tourPackageId;
 
-    // @NotNull(message = "Unit price is required")
-    // @Positive(message = "Unit price must be greater than zero")
-    // private BigDecimal unitPrice;
+    @NotNull(message = "Number of rooms is required")
+    @Positive(message = "Number of rooms must be greater than zero")
+    private Integer numberOfRooms;
 
     @NotBlank(message = "Primary contact name is required")
     @Size(max = 150, message = "Contact name must be less than 150 characters")
@@ -56,13 +56,13 @@ public class CreateBookingRequest {
         this.tourPackageId = tourPackageId;
     }
 
-    // public BigDecimal getUnitPrice() {
-    // return unitPrice;
-    // }
+    public Integer getNumberOfRooms() {
+        return numberOfRooms;
+    }
 
-    // public void setUnitPrice(BigDecimal unitPrice) {
-    // this.unitPrice = unitPrice;
-    // }
+    public void setNumberOfRooms(Integer numberOfRooms) {
+        this.numberOfRooms = numberOfRooms;
+    }
 
     public String getPrimaryContactName() {
         return primaryContactName;

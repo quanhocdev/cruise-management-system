@@ -160,21 +160,7 @@ export default function App() {
             path="/passenger/*"
             element={
               <ProtectedRoute allowedRoles={["PASSENGER"]}>
-<<<<<<< HEAD
-                <Routes>
-                  <Route path="dashboard" element={<PassengerDashboard />} />
-                  <Route path="tours/:tourId" element={<PassengerTourDetail />} />
-                  <Route path="bookings/new" element={<CreatePassengerBooking />} />
-                  <Route path="bookings" element={<PassengerBookings />} />
-                  <Route path="bookings/:bookingId" element={<PassengerBookingDetail />} />
-                  <Route
-                    path=""
-                    element={<Navigate to="dashboard" replace />}
-                  />
-                </Routes>
-=======
                 <GuestLayout />
->>>>>>> main
               </ProtectedRoute>
             }
           >

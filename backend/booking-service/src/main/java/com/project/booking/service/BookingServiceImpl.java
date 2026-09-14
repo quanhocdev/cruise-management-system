@@ -66,45 +66,56 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public synchronized BookingResponse create(CreateBookingRequest request, Long userId, String email) {
         try {
-            System.out.println(">>> [SERVICE] Bắt đầu xử lý create booking...");
+            System.out.println(">>> [SERVICE] Bắt đầu xử lý create booking theo kho phòng...");
 
-            UUID tourId = UUID.fromString(request.getTourId());
+            UUID packageId = UUID.fromString(request.getTourPackageId());
+            int requestedRooms = request.getNumberOfRooms() != null ? request.getNumberOfRooms() : 1;
             int passengerCount = request.getPassengers().size();
 
-            try {
-                System.out.println(">>> [DEBUG] Chuẩn bị gọi Redis cho tourId: " + tourId);
-                boolean reserved = tourRedisService.tryReserveSeats(tourId, passengerCount);
-                System.out.println(">>> [DEBUG] Kết quả gọi Redis xong, reserved = " + reserved);
-
-                if (!reserved) {
-                    throw new AppException("Rất tiếc, tour đã hết chỗ hoặc số lượng ghế trống không đủ!",
-                            HttpStatus.BAD_REQUEST);
-                }
-            } catch (Exception e) {
-                System.out.println(">>> [DEBUG] Lỗi văng ra tại đoạn check Redis: " + e.getMessage());
-                throw e;
-            }
-
-            // 1. Lấy thông tin gói tour từ bảng local của booking-service (đồng bộ qua
-            // Kafka)
-            InfoTourPackage pkg = infoTourPackageRepository.findById(UUID.fromString(request.getTourPackageId()))
+            // 1. Lấy thông tin gói tour từ mirror table (InfoTourPackage)
+            InfoTourPackage pkg = infoTourPackageRepository.findById(packageId)
                     .orElseThrow(() -> new AppException("Không tìm thấy gói tour hợp lệ trong hệ thống!",
                             HttpStatus.BAD_REQUEST));
 
+            // 2. Kiểm tra sức chứa hành khách trên số lượng phòng đặt
+            // Giả sử mỗi phòng cho phép tối đa maxPassengers (hoặc mặc định 2-3 khách/phòng
+            // tùy logic hệ thống)
+            int maxPassengersPerRoom = pkg.getMaxPassengers() != null && pkg.getMaxPassengers() > 0
+                    ? pkg.getMaxPassengers()
+                    : 2; // Mặc định mỗi phòng tối đa 2 khách nếu chưa cấu hình
+
+            int totalAllowedPassengers = maxPassengersPerRoom * requestedRooms;
+            if (passengerCount > totalAllowedPassengers) {
+                throw new AppException(
+                        String.format(
+                                "Số lượng hành khách (%d người) vượt quá sức chứa tối đa của số phòng đã chọn (%d phòng tối đa %d khách). Vui lòng đăng ký thêm phòng hoặc chọn gói phòng lớn hơn!",
+                                passengerCount, requestedRooms, totalAllowedPassengers),
+                        HttpStatus.BAD_REQUEST);
+            }
+
+            // 3. Trừ kho phòng đồng thời trên Redis qua Lua script
+            Long redisResult = tourRedisService.reservePackageRooms(packageId, requestedRooms);
+            if (redisResult == null || redisResult == -1) {
+                throw new AppException("Kho phòng của gói tour này chưa được khởi tạo hoặc không tồn tại!",
+                        HttpStatus.BAD_REQUEST);
+            }
+            if (redisResult == -2) {
+                throw new AppException("Rất tiếc, số lượng phòng trống của gói này không đủ đáp ứng yêu cầu!",
+                        HttpStatus.BAD_REQUEST);
+            }
+
+            // 4. Tính tổng tiền = Giá gói * Số lượng phòng
             BigDecimal packagePrice = pkg.getPrice();
-            int maxPassengers = pkg.getMaxPassengers() != null ? pkg.getMaxPassengers() : 1;
-            int numberOfPackagesNeeded = maxPassengers > 1
-                    ? (int) Math.ceil((double) passengerCount / maxPassengers)
-                    : passengerCount;
+            BigDecimal totalAmount = packagePrice.multiply(BigDecimal.valueOf(requestedRooms));
 
-            BigDecimal totalAmount = packagePrice.multiply(BigDecimal.valueOf(numberOfPackagesNeeded));
-
+            // 5. Lưu thông tin Booking
             Booking booking = new Booking();
             booking.setCreatedByUserId(userId);
             booking.setPrimaryContactEmail(email);
             booking.setTourId(UUID.fromString(request.getTourId()));
-            booking.setTourPackageId(UUID.fromString(request.getTourPackageId()));
+            booking.setTourPackageId(packageId);
             booking.setBookingCode(generateBookingCode());
+            booking.setNumberOfRooms(requestedRooms);
             booking.setNumberPassengers(passengerCount);
             booking.setPrimaryContactName(request.getPrimaryContactName().trim());
             booking.setPrimaryContactPhone(request.getPrimaryContactPhone().trim());
@@ -114,10 +125,9 @@ public class BookingServiceImpl implements BookingService {
             Booking savedBooking = bookingRepository.save(booking);
             System.out.println(">>> [SERVICE] Đã lưu xong Booking ID: " + savedBooking.getId());
 
+            // 6. Lưu danh sách hành khách
             for (int i = 0; i < request.getPassengers().size(); i++) {
                 PassengerRequest pReq = request.getPassengers().get(i);
-                System.out.println(">>> [SERVICE] Đang xử lý hành khách thứ " + (i + 1) + ": " + pReq.getFullName());
-
                 Passenger passenger = new Passenger();
                 passenger.setBooking(savedBooking);
                 passenger.setFullName(pReq.getFullName() != null ? pReq.getFullName().trim() : null);
@@ -131,7 +141,6 @@ public class BookingServiceImpl implements BookingService {
                 passenger.setDocumentNote(pReq.getDocumentNote());
 
                 if (pReq.getIdCardImage() != null && !pReq.getIdCardImage().isEmpty()) {
-                    System.out.println(">>> [SERVICE] Đang upload ảnh cho hành khách " + pReq.getFullName());
                     UploadResult uploadResult = fileStorageService.saveMultipart(
                             pReq.getIdCardImage(),
                             "passengers");
@@ -148,9 +157,7 @@ public class BookingServiceImpl implements BookingService {
                 bookingPassengerRepository.save(link);
             }
 
-            // =========================================================
-            // BẮN KAFKA EVENT SAU KHI LƯU XONG ĐƠN HÀNG VÀ HÀNH KHÁCH
-            // =========================================================
+            // 7. Bắn Kafka Event
             BookingCreatedEvent event = new BookingCreatedEvent(
                     savedBooking.getId(),
                     userId,
@@ -160,7 +167,6 @@ public class BookingServiceImpl implements BookingService {
                     savedBooking.getTotalAmount(),
                     LocalDateTime.now());
 
-            // Gửi đi với key là bookingId dạng String để phân vùng (partition) rõ ràng
             kafkaTemplate.send(BOOKING_CREATED_TOPIC, savedBooking.getId().toString(), event);
             System.out.println(
                     ">>> [KAFKA PRODUCER] Đã bắn event PENDING_PAYMENT cho Booking ID: " + savedBooking.getId());
@@ -259,7 +265,6 @@ public class BookingServiceImpl implements BookingService {
 
             System.out.println(">>> [SERVICE] Đã cập nhật đơn hàng #" + bookingId + " thành CONFIRMED.");
 
-            // Bắn Kafka Event sang notification-service
             BookingConfirmedEvent confirmedEvent = new BookingConfirmedEvent(
                     savedBooking.getCreatedByUserId(),
                     savedBooking.getPrimaryContactEmail(),

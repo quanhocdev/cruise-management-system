@@ -24,15 +24,6 @@ public class TourStatusValidator {
             return; // Hợp lệ
         }
 
-        if (status == TourStatusTrip.APPROVED) {
-            if (tour.getBookedSlots() != null && tour.getBookedSlots() > 0) {
-                throw new AppException(
-                        "Không thể chỉnh sửa Tour đã được duyệt và đã có khách đặt chỗ!",
-                        HttpStatus.BAD_REQUEST);
-            }
-            return; // APPROVED nhưng chưa có ai đặt thì cho phép sửa
-        }
-
         // Các trạng thái khác (IN_PROGRESS, COMPLETED, CANCELLED...) thì cấm tuyệt đối
         throw new AppException(
                 "Tour chỉ được chỉnh sửa khi ở trạng thái DRAFT hoặc APPROVED (chưa có người đặt)",
