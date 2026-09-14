@@ -42,6 +42,9 @@ public class Booking {
     @Column(name = "primary_contact_phone", nullable = false, length = 30)
     private String primaryContactPhone; // SĐT người đại diện
 
+    @Column(name = "number_of_rooms", nullable = false)
+    private Integer numberOfRooms;
+
     @Column(name = "total_amount", nullable = false, precision = 19, scale = 2)
     private BigDecimal totalAmount; // Tổng tiền thanh toán
 
@@ -143,6 +146,14 @@ public class Booking {
 
     public void setPrimaryContactPhone(String primaryContactPhone) {
         this.primaryContactPhone = primaryContactPhone;
+    }
+
+    public Integer getNumberOfRooms() {
+        return numberOfRooms;
+    }
+
+    public void setNumberOfRooms(Integer numberOfRooms) {
+        this.numberOfRooms = numberOfRooms;
     }
 
     public BigDecimal getTotalAmount() {
