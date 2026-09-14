@@ -129,7 +129,6 @@ public class BookingServiceImpl implements BookingService {
             for (int i = 0; i < request.getPassengers().size(); i++) {
                 PassengerRequest pReq = request.getPassengers().get(i);
                 Passenger passenger = new Passenger();
-                passenger.setBooking(savedBooking);
                 passenger.setFullName(pReq.getFullName() != null ? pReq.getFullName().trim() : null);
                 passenger.setDateOfBirth(pReq.getDateOfBirth());
                 passenger.setGender(pReq.getGender() != null ? pReq.getGender().trim() : null);

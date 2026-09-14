@@ -15,6 +15,7 @@ import com.project.tour.model.Schedule;
 import com.project.tour.model.ScheduleStop;
 import com.project.tour.model.Tour;
 import com.project.tour.model.TourPackage;
+import com.project.tour.model.enums.RoomStatus;
 import com.project.tour.model.enums.tour.TourStatusTrip;
 import com.project.tour.repository.cruise.CruiseAreaRepository;
 import com.project.tour.repository.cruise.CruiseDeckRepository;
@@ -119,11 +120,15 @@ public class ApprovalTourService {
                 List<TourPackage> packages = tourPackageRepository.findAllByTourId(tourId);
                 UUID cruiseId = tour.getCruise().getId();
 
+                // Sửa đoạn này trong ApprovalTourService.java
                 for (TourPackage pkg : packages) {
                         if (pkg.getRoomTypeId() != null) {
-                                // Đếm số lượng phòng vật lý thực tế thuộc roomTypeId này trên con tàu của tour
+                                // Chỉ đếm những phòng đang ở trạng thái ACTIVE
                                 long physicalRoomCount = roomRepository
-                                                .countByCruiseDeck_CruiseIdAndRoomTypeId(cruiseId, pkg.getRoomTypeId());
+                                                .countByCruiseDeck_CruiseIdAndRoomTypeIdAndStatus(
+                                                                cruiseId,
+                                                                pkg.getRoomTypeId(),
+                                                                RoomStatus.ACTIVE);
                                 tourRedisService.savePackageAvailableRooms(pkg.getId(), (int) physicalRoomCount);
                         }
                 }

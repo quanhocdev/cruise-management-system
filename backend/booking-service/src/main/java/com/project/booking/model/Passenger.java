@@ -16,9 +16,9 @@ public class Passenger {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "booking_id", nullable = false)
-    private Booking booking;
+    // @ManyToOne(fetch = FetchType.LAZY)
+    // @JoinColumn(name = "booking_id", nullable = false)
+    // private Booking booking;
 
     @Column(name = "full_name", nullable = false, length = 150)
     private String fullName;
@@ -81,13 +81,13 @@ public class Passenger {
         this.id = id;
     }
 
-    public Booking getBooking() {
-        return booking;
-    }
+    // public Booking getBooking() {
+    // return booking;
+    // }
 
-    public void setBooking(Booking booking) {
-        this.booking = booking;
-    }
+    // public void setBooking(Booking booking) {
+    // this.booking = booking;
+    // }
 
     public String getFullName() {
         return fullName;

@@ -30,13 +30,9 @@ public class PassengerMapper {
             return null;
         }
 
-        // Lấy bookingId từ quan hệ Booking nếu cần hiển thị ra DTO (hoặc truyền null
-        // nếu DTO của bạn không có trường này)
-        Long bookingId = passenger.getBooking() != null ? passenger.getBooking().getId() : null;
-
         return new PassengerResponse(
                 passenger.getId(),
-                bookingId, // Thay thế cho passenger.getUserId() cũ
+                null, // userId hoặc để trống vì Passenger lưu độc lập theo user/booking_passenger
                 passenger.getFullName(),
                 passenger.getDateOfBirth(),
                 passenger.getGender(),
