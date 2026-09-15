@@ -1,5 +1,5 @@
 import React from "react";
-
+import "../../styles/FilterStatusNfc.css";
 export default function FilterStatusNfc({ currentFilter, onFilterChange }) {
   const statuses = [
     { value: "ALL", label: "Tất cả" },

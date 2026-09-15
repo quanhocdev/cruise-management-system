@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import "../../styles/NfcCardFormModal.css";
 
 export default function NfcCardFormModal({
   card,

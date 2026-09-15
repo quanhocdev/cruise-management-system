@@ -49,7 +49,7 @@ spring:
             - id: tour-admin-service
               uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
               predicates:
-                - Path=/api/admin/ports/**,/api/admin/cruises/**,/api/admin/decks/**,/api/admin/room-types/**,/api/admin/policies/**
+                - Path=/api/admin/**
 
             # ==========================
             # TOUR SERVICE - SCHEDULER

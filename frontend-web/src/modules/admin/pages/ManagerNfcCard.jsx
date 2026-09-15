@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from "react";
 import useNfcCard from "../hooks/useNfcCard";
-import NfcCardTable from "../../components/nfc/NfcCardTable";
-import FilterStatusNfc from "../../components/nfc/FilterStatusNfc";
-import NfcCardFormModal from "../../components/nfc/NfcCardFormModal";
+import NfcCardTable from "../components/nfc/NfcCardTable";
+import FilterStatusNfc from "../components/nfc/FilterStatusNfc";
+import NfcCardFormModal from "../components/nfc/NfcCardFormModal";
 import "../styles/ManagerNfcCard.css";
 
 export default function ManagerNfcCard() {

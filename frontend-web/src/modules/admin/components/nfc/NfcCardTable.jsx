@@ -1,5 +1,5 @@
 import React from "react";
-
+import "../../styles/NfcCardTable.css";
 export default function NfcCardTable({ cards, onEdit, onDelete }) {
   if (!cards || cards.length === 0) {
     return (
