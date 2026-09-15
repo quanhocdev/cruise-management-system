@@ -2,7 +2,7 @@ package com.project.notification.listener;
 
 import com.project.common.event.TourApprovedEvent;
 import com.project.common.event.TourAssignmentEvent;
-import com.project.notification.service.NotificationService;
+import com.project.notification.service.NotificationApprovalTourService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -15,9 +15,9 @@ public class ApprovalTourListener {
 
     private static final Logger log = LoggerFactory.getLogger(ApprovalTourListener.class);
 
-    private final NotificationService notificationService;
+    private final NotificationApprovalTourService notificationService;
 
-    public ApprovalTourListener(NotificationService notificationService) {
+    public ApprovalTourListener(NotificationApprovalTourService notificationService) {
         this.notificationService = notificationService;
     }
 

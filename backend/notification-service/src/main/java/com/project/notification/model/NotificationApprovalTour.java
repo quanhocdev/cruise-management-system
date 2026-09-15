@@ -47,9 +47,6 @@ public class NotificationApprovalTour {
         if (this.createdAt == null) {
             this.createdAt = Instant.now();
         }
-        if (this.isRead == false) {
-            this.isRead = false;
-        }
     }
 
     public NotificationApprovalTour() {

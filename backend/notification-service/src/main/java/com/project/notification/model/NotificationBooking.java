@@ -8,7 +8,7 @@ import java.time.Instant;
         @Index(name = "idx_notifications_user_created", columnList = "recipient_user_id,created_at"),
         @Index(name = "idx_notifications_user_read", columnList = "recipient_user_id,read_at")
 })
-public class Notification {
+public class NotificationBooking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -36,6 +36,13 @@ public class Notification {
     private Instant readAt;
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.createdAt == null) {
+            this.createdAt = Instant.now();
+        }
+    }
 
     public Long getId() {
         return id;
