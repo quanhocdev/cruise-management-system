@@ -19,9 +19,8 @@ const TourPackageModal = ({
   const [roomTypeId, setRoomTypeId] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
-  const [maxPassengers, setMaxPassengers] = useState("");
   const [status, setStatus] = useState("ACTIVE");
-  const [selectedBenefits, setSelectedBenefits] = useState({}); // key: referenceId, value: benefit object
+  const [selectedBenefits, setSelectedBenefits] = useState({});
 
   // Khai báo state lưu quyền lợi trong Modal
   const [configuredActivities, setConfiguredActivities] = useState([]);
@@ -80,7 +79,6 @@ const TourPackageModal = ({
       setRoomTypeId(initialData.roomTypeId || "");
       setDescription(initialData.description || "");
       setPrice(initialData.price || "");
-      setMaxPassengers(initialData.maxPassengers || "");
       setStatus(initialData.status || "ACTIVE");
 
       if (initialData.benefits) {
@@ -133,7 +131,6 @@ const TourPackageModal = ({
       name,
       description,
       price: price ? Number(price) : 0,
-      maxPassengers: maxPassengers ? Number(maxPassengers) : null,
       status,
       benefits: Object.values(selectedBenefits),
     };
@@ -189,17 +186,6 @@ const TourPackageModal = ({
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 placeholder="0"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Số khách tối đa</label>
-              <input
-                type="number"
-                min="1"
-                value={maxPassengers}
-                onChange={(e) => setMaxPassengers(e.target.value)}
-                placeholder="Không giới hạn"
               />
             </div>
 

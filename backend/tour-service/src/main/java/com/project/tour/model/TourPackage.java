@@ -22,6 +22,10 @@ public class TourPackage {
     @Column(name = "room_type_id")
     private UUID roomTypeId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "room_type_id", referencedColumnName = "id", insertable = false, updatable = false)
+    private RoomType roomType;
+
     @Column(nullable = false, length = 200)
     private String name;
 
@@ -30,9 +34,6 @@ public class TourPackage {
 
     @Column(name = "price", precision = 15, scale = 2, nullable = false)
     private BigDecimal price;
-
-    @Column(name = "max_passengers")
-    private Integer maxPassengers;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -87,6 +88,14 @@ public class TourPackage {
         this.roomTypeId = roomTypeId;
     }
 
+    public RoomType getRoomType() {
+        return roomType;
+    }
+
+    public void setRoomType(RoomType roomType) {
+        this.roomType = roomType;
+    }
+
     public String getName() {
         return name;
     }
@@ -109,14 +118,6 @@ public class TourPackage {
 
     public void setPrice(BigDecimal price) {
         this.price = price;
-    }
-
-    public Integer getMaxPassengers() {
-        return maxPassengers;
-    }
-
-    public void setMaxPassengers(Integer maxPassengers) {
-        this.maxPassengers = maxPassengers;
     }
 
     public TourPackageStatus getStatus() {

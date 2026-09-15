@@ -43,21 +43,10 @@ const TourPackageTable = ({
   // Hàm tìm tên hạng phòng dựa vào roomTypeId
   const getRoomTypeName = (roomTypeId) => {
     if (!roomTypeId) return "Áp dụng toàn tour";
-
-    // Tìm kiếm chính xác phòng theo id (chuyển về string để tránh lệch kiểu UUID/String)
     const found = roomTypes.find((rt) => String(rt.id) === String(roomTypeId));
-
-    // Nếu tìm thấy trả về tên phòng, nếu không thấy trả về chuỗi thông báo hoặc ID rút gọn để debug
     return found ? found.name : "Chưa xác định";
   };
-  // Đặt đoạn này ngay trước lệnh return trong TourPackageTable.jsx
-  console.log("🔍 Kiểm tra dữ liệu RoomTypes:", roomTypes);
-  packages.forEach((pkg) => {
-    console.log(
-      `📦 Package: ${pkg.name} | roomTypeId của gói:`,
-      pkg.roomTypeId,
-    );
-  });
+
   return (
     <>
       <div className="tour-package-table-wrapper">
@@ -68,7 +57,7 @@ const TourPackageTable = ({
               <th>Hạng phòng</th>
               <th>Mô tả</th>
               <th>Giá</th>
-              <th>Khách tối đa</th>
+              <th>Sức chứa</th> {/* Đã đổi từ Khách tối đa thành Sức chứa */}
               <th>Quyền lợi đi kèm</th>
               <th>Trạng thái</th>
               <th className="actions-col">Thao tác</th>
@@ -98,9 +87,10 @@ const TourPackageTable = ({
                   </span>
                 </td>
                 <td>
+                  {/* Hiển thị sức chứa lấy từ room capacity thông qua mapper */}
                   {pkg.maxPassengers != null
-                    ? `${pkg.maxPassengers} khách`
-                    : "Không giới hạn"}
+                    ? `${pkg.maxPassengers} khách/phòng`
+                    : "—"}
                 </td>
                 <td>
                   <button

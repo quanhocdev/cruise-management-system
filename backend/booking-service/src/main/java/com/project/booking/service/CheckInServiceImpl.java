@@ -1,5 +1,5 @@
-package com.project.booking.service;
+// package com.project.booking.service;
 
-public class CheckInServiceImpl {
+// public class CheckInServiceImpl {
 
-}
+// }

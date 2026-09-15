@@ -1,10 +1,10 @@
-package com.project.booking.service;
+// package com.project.booking.service;
 
-import com.project.booking.dto.checkin.CheckInLookupResponse;
-import com.project.booking.dto.checkin.ConfirmCheckInRequest;
+// import com.project.booking.dto.checkin.CheckInLookupResponse;
+// import com.project.booking.dto.checkin.ConfirmCheckInRequest;
 
-public interface CheckInService {
-    CheckInLookupResponse lookupByCode(String bookingCode);
+// public interface CheckInService {
+// CheckInLookupResponse lookupByCode(String bookingCode);
 
-    void confirmCheckIn(ConfirmCheckInRequest request);
-}
+// void confirmCheckIn(ConfirmCheckInRequest request);
+// }
