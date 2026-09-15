@@ -26,6 +26,8 @@ import ManagerRoomType from "./modules/admin/pages/ManagerRoomType";
 import ManagerProduct from "./modules/admin/pages/ManagerProduct";
 import ManagerService from "./modules/admin/pages/ManagerService";
 import ManagerPolicy from "./modules/admin/pages/ManagerPolicy";
+import ManagerNfcCard from "./modules/admin/pages/ManagerNfcCard";
+
 // import ManagerPos from "./modules/admin/pages/ManagerPos";
 
 // Passenger imports
@@ -111,6 +113,8 @@ export default function App() {
                     <Route path="dashboard" element={<AdminDashboard />} />
                     <Route path="accounts" element={<ManagerAccount />} />
                     <Route path="ports" element={<ManagerPort />} />
+                    <Route path="nfc-cards" element={<ManagerNfcCard />} />
+
                     <Route path="cruises" element={<ManagerCruise />} />
 
                     <Route

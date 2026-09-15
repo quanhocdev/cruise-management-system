@@ -1,0 +1,121 @@
+.nfc-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.nfc-modal-content {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 440px;
+  overflow: hidden;
+}
+
+.nfc-modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f9fafb;
+}
+
+.nfc-modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.nfc-modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #9ca3af;
+  cursor: pointer;
+}
+
+.nfc-modal-close:hover {
+  color: #4b5563;
+}
+
+.nfc-modal-body {
+  padding: 20px;
+}
+
+.nfc-form-group {
+  margin-bottom: 16px;
+}
+
+.nfc-form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.nfc-form-input,
+.nfc-form-select {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+  background-color: #ffffff;
+  color: #374151;
+}
+
+.nfc-form-input:focus,
+.nfc-form-select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.nfc-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid #f3f4f6;
+  margin-top: 20px;
+}
+
+.nfc-btn-secondary {
+  padding: 8px 16px;
+  border: 1px solid #d1d5db;
+  background-color: #ffffff;
+  color: #374151;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.nfc-btn-secondary:hover {
+  background-color: #f9fafb;
+}
+
+@media screen and (max-width: 480px) {
+  .nfc-modal-content {
+    max-width: 100%;
+    margin: 0 10px;
+  }
+
+  .nfc-modal-footer {
+    flex-direction: column-reverse;
+  }
+
+  .nfc-modal-footer button {
+    width: 100%;
+  }
+}

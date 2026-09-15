@@ -1,0 +1,40 @@
+.nfc-filter-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nfc-filter-label {
+  font-size: 14px;
+  color: #4b5563;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.nfc-filter-select {
+  width: auto;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 14px;
+  outline: none;
+  background-color: #ffffff;
+  color: #374151;
+  box-sizing: border-box;
+}
+
+.nfc-filter-select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+@media screen and (max-width: 480px) {
+  .nfc-filter-container {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .nfc-filter-select {
+    flex: 1;
+  }
+}
