@@ -1,5 +1,4 @@
-/* src/modules/finance/components/TourSelector.css */
-.tour-selector-container {
+.deck-selector-container {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -7,15 +6,15 @@
   margin-bottom: 16px;
 }
 
-.tour-selector-container label {
+.deck-selector-container label {
   font-size: 14px;
   color: var(--fin-gray-700);
   white-space: nowrap;
 }
 
-.tour-selector-container select {
+.deck-selector-container select {
   height: 40px;
-  min-width: 260px;
+  min-width: 220px;
   padding: 0 14px;
   border: 1px solid var(--fin-gray-300);
   border-radius: var(--fin-radius-sm);
@@ -30,28 +29,28 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  .tour-selector-container select {
+  .deck-selector-container select {
     background: #111827;
   }
 }
 
-.tour-selector-container select:focus {
+.deck-selector-container select:focus {
   border-color: var(--fin-primary);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
-.tour-selector-container select:disabled {
+.deck-selector-container select:disabled {
   background: var(--fin-gray-100);
   color: var(--fin-gray-500);
   cursor: not-allowed;
 }
 
 @media (max-width: 640px) {
-  .tour-selector-container {
+  .deck-selector-container {
     flex-direction: column;
     align-items: stretch;
   }
-  .tour-selector-container select {
+  .deck-selector-container select {
     width: 100%;
     min-width: 0;
   }

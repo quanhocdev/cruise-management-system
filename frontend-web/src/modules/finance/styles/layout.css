@@ -1,0 +1,107 @@
+@import "./variables.css";
+
+.finance-page {
+  padding: 24px 32px;
+  font-family: var(--fin-font);
+  color: var(--fin-gray-900);
+  background: var(--fin-gray-50);
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
+.finance-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.finance-page__title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.finance-page__subtitle {
+  font-size: 13px;
+  color: var(--fin-gray-500);
+  margin-top: 4px;
+}
+
+.finance-card {
+  background: #fff;
+  border: 1px solid var(--fin-gray-200);
+  border-radius: var(--fin-radius);
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: var(--fin-shadow);
+}
+
+@media (prefers-color-scheme: dark) {
+  .finance-card {
+    background: #1a2233;
+  }
+}
+
+.finance-controls-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.finance-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--fin-danger-bg);
+  color: var(--fin-danger);
+  border: 1px solid var(--fin-danger);
+  border-radius: var(--fin-radius-sm);
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.finance-error-banner button {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid currentColor;
+  color: inherit;
+  border-radius: var(--fin-radius-sm);
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.finance-error-banner button:hover {
+  background: rgba(220, 38, 38, 0.1);
+}
+
+.finance-hint-text {
+  color: var(--fin-gray-500);
+  font-size: 13px;
+  margin: 8px 0 0;
+}
+
+@media (max-width: 768px) {
+  .finance-page {
+    padding: 16px;
+  }
+  .finance-page__title {
+    font-size: 19px;
+  }
+  .finance-card {
+    padding: 14px;
+  }
+  .finance-controls-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+}

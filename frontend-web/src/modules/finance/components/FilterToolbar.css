@@ -1,58 +1,62 @@
 /* src/modules/finance/components/FilterToolbar.css */
 .filter-toolbar {
   display: flex;
-  gap: 15px;
-  margin-bottom: 20px;
   flex-wrap: wrap;
-  align-items: center;
-  background: #ffffff;
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.filter-search-input,
+.filter-status-select {
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--fin-gray-300);
+  border-radius: var(--fin-radius-sm);
+  font-size: 14px;
+  background: #fff;
+  color: var(--fin-gray-900);
+  transition:
+    border-color var(--fin-transition),
+    box-shadow var(--fin-transition);
+  outline: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .filter-search-input,
+  .filter-status-select {
+    background: #111827;
+    border-color: var(--fin-gray-300);
+  }
 }
 
 .filter-search-input {
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 14px;
-  flex: 1;
-  min-width: 220px;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.filter-search-input:focus {
-  border-color: #007bff;
+  flex: 1 1 260px;
+  min-width: 180px;
 }
 
 .filter-status-select {
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 14px;
-  background-color: #fff;
+  flex: 0 0 auto;
   min-width: 180px;
-  outline: none;
   cursor: pointer;
 }
 
+.filter-search-input:focus,
 .filter-status-select:focus {
-  border-color: #007bff;
+  border-color: var(--fin-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
-/* Responsive cho thiết bị di động */
-@media (max-width: 768px) {
+.filter-search-input::placeholder {
+  color: var(--fin-gray-500);
+}
+
+@media (max-width: 640px) {
   .filter-toolbar {
     flex-direction: column;
-    align-items: stretch;
-    padding: 12px;
-    gap: 10px;
   }
-
   .filter-search-input,
   .filter-status-select {
     width: 100%;
-    min-width: 100%;
+    flex: 1 1 auto;
   }
 }

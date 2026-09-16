@@ -6,7 +6,7 @@ import LoadingSpinner from "../../../components/common/LoadingSpinner";
 import { useFinanceSchedules, useScheduleStops } from "../hooks/useFinanceTour";
 import { formatDate, formatDateTime } from "../utils/format";
 import { SCHEDULE_STATUS_OPTIONS, labelOf } from "../constants/statuses";
-
+import "../styles/layout.css";
 
 const FinanceTourSchedule = () => {
   const [selectedTourId, setSelectedTourId] = useState("");
@@ -20,57 +20,82 @@ const FinanceTourSchedule = () => {
     setSelectedScheduleId("");
   };
 
-const scheduleColumns = [
-  { header: "Ngày #", accessor: "dayNumber" },
-  { header: "Tên lịch trình", accessor: "name" },
-  { header: "Ngày thực tế", accessor: "realDay", render: formatDate },
-  {
-    header: "Trạng thái",
-    accessor: "status",
-    render: (v) => labelOf(SCHEDULE_STATUS_OPTIONS, v),
-  },
-];
+  const scheduleColumns = [
+    { header: "Ngày #", accessor: "dayNumber" },
+    { header: "Tên lịch trình", accessor: "name" },
+    {
+      header: "Ngày thực tế",
+      accessor: "realDay",
+      render: formatDate,
+    },
+    {
+      header: "Trạng thái",
+      accessor: "status",
+      render: (v) => labelOf(SCHEDULE_STATUS_OPTIONS, v),
+    },
+  ];
+
   const stopColumns = [
     { header: "Thứ tự", accessor: "stopOrder" },
     { header: "Cảng dừng", accessor: "portName" },
-    { header: "Giờ đến", accessor: "arriveAt", render: formatDateTime },
-    { header: "Giờ rời", accessor: "leaveAt", render: formatDateTime },
+    {
+      header: "Giờ đến",
+      accessor: "arriveAt",
+      render: formatDateTime,
+    },
+    {
+      header: "Giờ rời",
+      accessor: "leaveAt",
+      render: formatDateTime,
+    },
   ];
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Quản lý Lịch trình Tour</h2>
+    <div className="finance-page">
+      <div className="finance-page__header">
+        <div>
+          <h2 className="finance-page__title">Quản lý Lịch trình Tour</h2>
+          <p className="finance-page__subtitle">
+            Xem lịch trình và các điểm dừng của từng Tour
+          </p>
+        </div>
+      </div>
 
-      <TourSelector
-        selectedTourId={selectedTourId}
-        onSelectTour={handleSelectTour}
-      />
-
-      {loading ? (
-        <LoadingSpinner />
-      ) : (
-        <DataTable
-          columns={scheduleColumns}
-          data={schedules}
-          selectedKey={selectedScheduleId}
-          onRowClick={(row) => setSelectedScheduleId(row.id)}
-          emptyText={
-            selectedTourId
-              ? "Tour này chưa có lịch trình"
-              : "Chọn một Tour để xem lịch trình"
-          }
+      <div className="finance-card">
+        <TourSelector
+          selectedTourId={selectedTourId}
+          onSelectTour={handleSelectTour}
         />
-      )}
+      </div>
+
+      <div className="finance-card">
+        {loading ? (
+          <LoadingSpinner />
+        ) : (
+          <DataTable
+            columns={scheduleColumns}
+            data={schedules}
+            selectedKey={selectedScheduleId}
+            onRowClick={(row) => setSelectedScheduleId(row.id)}
+            emptyText={
+              selectedTourId
+                ? "Tour này chưa có lịch trình"
+                : "Chọn một Tour để xem lịch trình"
+            }
+          />
+        )}
+      </div>
 
       {selectedScheduleId && (
-        <>
-          <h3 style={{ marginTop: 24 }}>Điểm dừng của lịch trình</h3>
+        <div className="finance-card">
+          <h3 className="finance-page__title">Điểm dừng của lịch trình</h3>
+
           {loadingStops ? (
             <LoadingSpinner />
           ) : (
             <DataTable columns={stopColumns} data={stops} />
           )}
-        </>
+        </div>
       )}
     </div>
   );

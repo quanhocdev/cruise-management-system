@@ -9,6 +9,7 @@ import useFinanceRoom from "../hooks/useFinanceRoom";
 import { useTourCruise } from "../hooks/useFinanceTour";
 import { ROOM_STATUS_OPTIONS, labelOf } from "../constants/statuses";
 import { matchesSearch } from "../utils/format";
+import "../styles/layout.css";
 
 const FinanceRooms = () => {
   const [selectedTourId, setSelectedTourId] = useState("");
@@ -45,37 +46,45 @@ const FinanceRooms = () => {
   ];
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Quản lý Phòng</h2>
+    <div className="finance-page">
+      <div className="finance-page__header">
+        <div>
+          <h2 className="finance-page__title">Quản lý Phòng</h2>
+          <p className="finance-page__subtitle">
+            Xem sơ đồ phòng theo tour và tầng tàu
+          </p>
+        </div>
+      </div>
 
-      <TourSelector
-        selectedTourId={selectedTourId}
-        onSelectTour={handleSelectTour}
-      />
-
-      {selectedTourId && (
-        <p style={{ color: "#555" }}>
-          Tàu:{" "}
-          <strong>
-            {loadingCruise ? "đang tải..." : (cruise?.name ?? "không xác định")}
-          </strong>
-        </p>
-      )}
-
-      <DeckSelector
-        cruiseId={cruise?.id}
-        selectedDeckId={selectedDeckId}
-        onSelectDeck={setSelectedDeckId}
-      />
-
-      <FilterToolbar
-        filterStatus={filterStatus}
-        onStatusChange={setFilterStatus}
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        statusOptions={ROOM_STATUS_OPTIONS}
-        searchPlaceholder="Tìm theo mã phòng hoặc loại phòng..."
-      />
+      <div className="finance-card">
+        <TourSelector
+          selectedTourId={selectedTourId}
+          onSelectTour={handleSelectTour}
+        />
+        {selectedTourId && (
+          <p className="finance-hint-text">
+            Tàu:{" "}
+            <strong>
+              {loadingCruise
+                ? "đang tải..."
+                : (cruise?.name ?? "không xác định")}
+            </strong>
+          </p>
+        )}
+        <DeckSelector
+          cruiseId={cruise?.id}
+          selectedDeckId={selectedDeckId}
+          onSelectDeck={setSelectedDeckId}
+        />
+        <FilterToolbar
+          filterStatus={filterStatus}
+          onStatusChange={setFilterStatus}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          statusOptions={ROOM_STATUS_OPTIONS}
+          searchPlaceholder="Tìm theo mã phòng hoặc loại phòng..."
+        />
+      </div>
 
       {loadingRooms ? (
         <LoadingSpinner />

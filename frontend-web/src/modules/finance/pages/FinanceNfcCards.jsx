@@ -6,6 +6,7 @@ import LoadingSpinner from "../../../components/common/LoadingSpinner";
 import useFinanceNfc from "../hooks/useFinanceNfc";
 import { NFC_STATUS_OPTIONS, labelOf } from "../constants/statuses";
 import { matchesSearch, formatDateTime } from "../utils/format";
+import "../styles/layout.css";
 
 const FinanceNfcCards = () => {
   const { cards, loading, error, reload } = useFinanceNfc();
@@ -33,22 +34,32 @@ const FinanceNfcCards = () => {
   ];
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Quản lý Vòng NFC</h2>
+    <div className="finance-page">
+      <div className="finance-page__header">
+        <div>
+          <h2 className="finance-page__title">Quản lý Vòng NFC</h2>
+          <p className="finance-page__subtitle">
+            Danh sách toàn bộ thẻ NFC trong hệ thống
+          </p>
+        </div>
+      </div>
 
-      <FilterToolbar
-        filterStatus={filterStatus}
-        onStatusChange={setFilterStatus}
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        statusOptions={NFC_STATUS_OPTIONS}
-        searchPlaceholder="Tìm theo mã UID..."
-      />
+      <div className="finance-card">
+        <FilterToolbar
+          filterStatus={filterStatus}
+          onStatusChange={setFilterStatus}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          statusOptions={NFC_STATUS_OPTIONS}
+          searchPlaceholder="Tìm theo mã UID..."
+        />
+      </div>
 
       {error && (
-        <p style={{ color: "#c0392b" }}>
-          Không tải được dữ liệu. <button onClick={reload}>Thử lại</button>
-        </p>
+        <div className="finance-error-banner">
+          <span>Không tải được dữ liệu.</span>
+          <button onClick={reload}>Thử lại</button>
+        </div>
       )}
 
       {loading ? (

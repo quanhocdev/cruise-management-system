@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useDecksByCruise } from "../hooks/useFinanceCruise";
+import "./DeckSelector.css";
 
 const DeckSelector = ({ cruiseId, selectedDeckId, onSelectDeck }) => {
   const { decks, loading } = useDecksByCruise(cruiseId);
