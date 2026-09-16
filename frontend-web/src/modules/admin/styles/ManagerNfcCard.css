@@ -1,0 +1,105 @@
+.nfc-management-page {
+  padding: 24px;
+  background-color: #f9fafb;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.nfc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.nfc-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.nfc-btn-primary {
+  background-color: #2563eb;
+  color: #ffffff;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.nfc-btn-primary:hover {
+  background-color: #1d4ed8;
+}
+
+.nfc-alert-error {
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.nfc-alert-success {
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: #d1fae5;
+  color: #047857;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.nfc-card-container {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  border: 1px solid #f3f4f6;
+  padding: 20px;
+}
+
+.nfc-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.nfc-total-count {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* Responsive Manager Page */
+@media screen and (max-width: 768px) {
+  .nfc-management-page {
+    padding: 12px;
+  }
+
+  .nfc-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .nfc-btn-primary {
+    width: 100%;
+    text-align: center;
+  }
+
+  .nfc-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .nfc-title {
+    font-size: 20px;
+  }
+}

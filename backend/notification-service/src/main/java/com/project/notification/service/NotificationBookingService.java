@@ -1,7 +1,7 @@
 package com.project.notification.service;
 
 import com.project.notification.model.*;
-import com.project.notification.repository.NotificationRepository;
+import com.project.notification.repository.NotificationBookingRepository;
 import com.project.notification.util.QRCodeGenerator;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -11,15 +11,16 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import com.project.common.event.BookingConfirmedEvent;
 
 @Service
-public class EmailDeliveryService {
+public class NotificationBookingService {
     private final JavaMailSender mailSender;
-    private final NotificationRepository repository;
+    private final NotificationBookingRepository repository;
     private final boolean enabled;
     private final String from;
 
-    public EmailDeliveryService(JavaMailSender mailSender, NotificationRepository repository,
+    public NotificationBookingService(JavaMailSender mailSender, NotificationBookingRepository repository,
             @Value("${notification.email.enabled:false}") boolean enabled,
             @Value("${spring.mail.username:}") String from) {
         this.mailSender = mailSender;
@@ -28,8 +29,7 @@ public class EmailDeliveryService {
         this.from = from;
     }
 
-    // 1. Giữ nguyên hàm cũ cho thông báo text thông thường
-    public void deliver(Notification notification) {
+    public void deliver(NotificationBooking notification) {
         if (notification.getRecipientEmail() == null || notification.getRecipientEmail().isBlank())
             return;
         if (!enabled) {
@@ -52,9 +52,8 @@ public class EmailDeliveryService {
         repository.save(notification);
     }
 
-    // 2. Hàm chuyên gửi email HTML đính kèm mã QR cho Booking (Đã có sẵn logic
-    // chuẩn)
-    public void deliverBookingQrEmail(Notification notification, String bookingCode) {
+    // Hàm gửi email đính kèm mã QR cho Booking
+    public void deliverBookingQrEmail(NotificationBooking notification, String bookingCode) {
         if (notification.getRecipientEmail() == null || notification.getRecipientEmail().isBlank())
             return;
         if (!enabled) {
@@ -101,10 +100,9 @@ public class EmailDeliveryService {
         repository.save(notification);
     }
 
-    // 3. Hàm nhận Event từ Kafka, đóng gói vào Notification và gọi hàm
-    // deliverBookingQrEmail
-    public void sendBookingConfirmationEmail(com.project.common.event.BookingConfirmedEvent event) {
-        Notification notification = new Notification();
+    // Hàm nhận Event xác nhận thanh toán từ Kafka (Gửi mail QR + Lưu log)
+    public void sendBookingConfirmationEmail(BookingConfirmedEvent event) {
+        NotificationBooking notification = new NotificationBooking();
         notification.setRecipientUserId(event.recipientUserId());
         notification.setRecipientEmail(event.recipientEmail());
         notification.setRecipientName(event.recipientName());
@@ -113,7 +111,23 @@ public class EmailDeliveryService {
                 "Đơn đặt tour của bạn đã được xác nhận thanh toán thành công với tổng số tiền %.2f VND cho %d hành khách.",
                 event.totalAmount(), event.numberPassengers()));
 
-        // Tận dụng hoàn toàn logic gửi QR và lưu log DB có sẵn
+        notification.setType(NotificationType.BOOKING_CONFIRMED);
         deliverBookingQrEmail(notification, event.bookingCode());
+    }
+
+    // Lưu thông báo chờ thanh toán (PENDING_PAYMENT) khi vừa tạo đơn (Hiện chuông,
+    // không gửi mail QR)
+    public void savePendingPaymentNotification(com.project.common.event.BookingCreatedEvent event) {
+        NotificationBooking notification = new NotificationBooking();
+        notification.setRecipientUserId(event.userId());
+        notification.setTitle("Đơn đặt tour mới đang chờ thanh toán");
+        notification.setMessage(String.format(
+                "Bạn vừa tạo đơn đặt tour thành công. Vui lòng hoàn tất thanh toán trước thời hạn để giữ chỗ. Tổng tiền: %.2f VND",
+                event.totalPrice()));
+
+        notification.setType(NotificationType.PENDING_PAYMENT);
+        notification.setEmailStatus(EmailStatus.NOT_REQUESTED);
+
+        repository.save(notification);
     }
 }

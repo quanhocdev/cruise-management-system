@@ -7,15 +7,15 @@ import java.util.List;
 import java.util.UUID;
 
 public record TourPackageResponse(
-        UUID id,
-        UUID tourId,
-        UUID roomTypeId,
-        String name,
-        String description,
-        BigDecimal price,
-        Integer maxPassengers,
-        TourPackageStatus status,
-        List<PackageBenefitResponse> benefits,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt) {
+                UUID id,
+                UUID tourId,
+                UUID roomTypeId,
+                String name,
+                String description,
+                BigDecimal price,
+                Integer capacity,
+                TourPackageStatus status,
+                List<PackageBenefitResponse> benefits,
+                LocalDateTime createdAt,
+                LocalDateTime updatedAt) {
 }

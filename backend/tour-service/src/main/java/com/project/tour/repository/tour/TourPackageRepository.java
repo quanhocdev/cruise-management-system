@@ -18,4 +18,9 @@ public interface TourPackageRepository extends JpaRepository<TourPackage, UUID> 
 
     @Query("SELECT MIN(tp.price) FROM TourPackage tp WHERE tp.tourId = :tourId")
     BigDecimal findLowestPriceByTourId(@Param("tourId") UUID tourId);
+
+    // Thêm hàm này để khi lấy danh sách package sẽ load luôn thông tin RoomType
+    // (tránh Lazy Loading)
+    @Query("SELECT tp FROM TourPackage tp JOIN FETCH tp.roomType WHERE tp.tourId = :tourId")
+    List<TourPackage> findAllByTourIdWithRoomType(@Param("tourId") UUID tourId);
 }

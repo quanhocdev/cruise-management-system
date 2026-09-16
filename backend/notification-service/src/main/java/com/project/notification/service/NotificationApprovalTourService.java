@@ -10,12 +10,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class NotificationService {
+public class NotificationApprovalTourService {
 
     private final NotificationApprovalTourRepository notificationRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
-    public NotificationService(NotificationApprovalTourRepository notificationRepository,
+    public NotificationApprovalTourService(NotificationApprovalTourRepository notificationRepository,
             SimpMessagingTemplate messagingTemplate) {
         this.notificationRepository = notificationRepository;
         this.messagingTemplate = messagingTemplate;

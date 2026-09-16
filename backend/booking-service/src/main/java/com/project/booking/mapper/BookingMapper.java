@@ -43,7 +43,7 @@ public class BookingMapper {
                 p.getPhoneNumber(),
                 p.getEmail(),
                 link.getRoomId(),
-                link.getCheckinStatus(),
+                link.getStatus() != null ? link.getStatus().name() : null,
                 link.getCheckedInAt());
     }
 
@@ -54,7 +54,7 @@ public class BookingMapper {
                 link.getPassenger().getId(),
                 link.getBooking().getId(),
                 link.getRoomId(),
-                link.getCheckinStatus(),
+                link.getStatus() != null ? link.getStatus().name() : null,
                 link.getCheckedInAt());
     }
 }

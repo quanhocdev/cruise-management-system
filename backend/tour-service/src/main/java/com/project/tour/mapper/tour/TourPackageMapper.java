@@ -31,6 +31,11 @@ public class TourPackageMapper {
                 ? benefits.stream().map(TourPackageMapper::toBenefitResponse).toList()
                 : List.of();
 
+        // Lấy capacity từ RoomType thay cho maxPassengers cũ
+        Integer roomCapacity = (tourPackage.getRoomType() != null && tourPackage.getRoomType().getCapacity() != null)
+                ? tourPackage.getRoomType().getCapacity()
+                : 2;
+
         return new TourPackageResponse(
                 tourPackage.getId(),
                 tourPackage.getTourId(),
@@ -38,7 +43,7 @@ public class TourPackageMapper {
                 tourPackage.getName(),
                 tourPackage.getDescription(),
                 tourPackage.getPrice(),
-                tourPackage.getMaxPassengers(),
+                roomCapacity,
                 tourPackage.getStatus(),
                 benefitResponses,
                 tourPackage.getCreatedAt(),

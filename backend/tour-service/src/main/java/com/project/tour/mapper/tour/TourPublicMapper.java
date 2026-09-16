@@ -117,12 +117,15 @@ public class TourPublicMapper {
                                                         benefit.getDiscountPercent()))
                                         .toList();
 
+                        // Lấy capacity trực tiếp từ RoomType liên kết với TourPackage
+                        Integer roomCapacity = (pkg.getRoomType() != null) ? pkg.getRoomType().getCapacity() : 2;
+
                         return new PublicTourDetailResponse.TourPackageRecord(
                                         pkg.getId(),
                                         pkg.getName(),
                                         pkg.getDescription(),
                                         pkg.getPrice(),
-                                        pkg.getMaxPassengers(),
+                                        roomCapacity,
                                         benefitRecords);
                 }).toList();
 

@@ -2,16 +2,16 @@ package com.project.notification.listener;
 
 import com.project.common.event.SendOtpEvent;
 import com.project.common.event.SendStaffInvitationEvent;
-import com.project.notification.service.AuthEmailService;
+import com.project.notification.service.NotificationAuthService;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 @Component
 public class AuthEventListener {
 
-    private final AuthEmailService authEmailService;
+    private final NotificationAuthService authEmailService;
 
-    public AuthEventListener(AuthEmailService authEmailService) {
+    public AuthEventListener(NotificationAuthService authEmailService) {
         this.authEmailService = authEmailService;
     }
 

@@ -1,0 +1,99 @@
+.nfc-table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.nfc-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.nfc-table th {
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  color: #4b5563;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px;
+}
+
+.nfc-table td {
+  padding: 12px;
+  font-size: 14px;
+  color: #374151;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.nfc-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.nfc-empty-state {
+  text-align: center;
+  padding: 32px;
+  color: #6b7280;
+  border: 1px dashed #d1d5db;
+  border-radius: 8px;
+}
+
+/* Badge trạng thái */
+.badge {
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.badge-available {
+  background-color: #d1fae5;
+  color: #047857;
+}
+
+.badge-assigned {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+.badge-inactive {
+  background-color: #f3f4f6;
+  color: #4b5563;
+}
+
+/* Nút hành động */
+.btn-action-edit {
+  color: #2563eb;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  margin-right: 8px;
+}
+
+.btn-action-edit:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+.btn-action-delete {
+  color: #dc2626;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-action-delete:hover {
+  color: #b91c1c;
+  text-decoration: underline;
+}
+
+@media screen and (max-width: 480px) {
+  .nfc-table th,
+  .nfc-table td {
+    padding: 8px;
+    font-size: 12px;
+  }
+}

@@ -13,6 +13,7 @@ import com.project.booking.model.Booking;
 import com.project.booking.model.Passenger;
 import com.project.booking.model.BookingPassenger;
 import com.project.booking.model.InfoTourPackage;
+import com.project.booking.model.enums.BookingPassengerStatus;
 import com.project.booking.model.enums.BookingStatus;
 import com.project.booking.repository.BookingRepository;
 import com.project.booking.repository.PassengerRepository;
@@ -152,7 +153,7 @@ public class BookingServiceImpl implements BookingService {
                 BookingPassenger link = new BookingPassenger();
                 link.setBooking(savedBooking);
                 link.setPassenger(savedPassenger);
-                link.setCheckinStatus("PENDING");
+                link.setStatus(BookingPassengerStatus.PENDING);
                 bookingPassengerRepository.save(link);
             }
 

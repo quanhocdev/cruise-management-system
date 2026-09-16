@@ -9,6 +9,7 @@ import {
   ConciergeBell,
   FileText,
   MonitorSmartphone,
+  CreditCard, // <-- 1. Import icon cho thẻ NFC
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -35,6 +36,11 @@ const menuItems = [
     label: "Quản lý cảng",
     icon: Anchor,
     path: "/admin/ports",
+  },
+  {
+    label: "Quản lý thẻ NFC",
+    icon: CreditCard, // <-- 2. Thêm mục quản lý thẻ NFC vào menu
+    path: "/admin/nfc-cards",
   },
   {
     label: "Quản lý sản phẩm",
