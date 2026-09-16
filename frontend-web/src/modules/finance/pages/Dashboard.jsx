@@ -1,7 +1,7 @@
-// finance/pages/Dashboard.jsx
+// src/modules/finance/pages/Dashboard.jsx
 import React from "react";
 
-const FinanceDashboard = () => {
+const Dashboard = () => {
   return (
     <div style={{ padding: "20px", fontFamily: "sans-serif" }}>
       <h1>Trang Finance Dashboard</h1>
@@ -10,4 +10,4 @@ const FinanceDashboard = () => {
   );
 };
 
-export default FinanceDashboard;
+export default Dashboard;

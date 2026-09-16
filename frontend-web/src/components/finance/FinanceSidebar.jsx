@@ -1,17 +1,15 @@
+// src/components/finance/FinanceSidebar.jsx (hoặc đường dẫn sidebar hiện tại của bạn)
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
   Ship,
   CalendarDays,
-  Ticket,
-  Settings,
+  DoorOpen,
+  CreditCard,
   ChevronLeft,
   ChevronRight,
   X,
-  Activity,
-  ListChecks,
-  History,
 } from "lucide-react";
 
 import "../../styles/onboard/OnboardSidebar.css";
@@ -24,19 +22,19 @@ const menuItems = [
     end: true,
   },
   {
-    label: "Danh sách hành khách",
-    icon: ListChecks,
-    path: "/finance/activities-catalog",
+    label: "Quản lý Lịch trình Tour",
+    icon: CalendarDays,
+    path: "/finance/tours-schedule", // Đường dẫn trang lịch trình tour
   },
   {
     label: "Danh sách phòng",
-    icon: Activity,
-    path: "/finance/activity-cruise",
+    icon: DoorOpen,
+    path: "/finance/rooms", // Đường dẫn trang quản lý phòng
   },
   {
-    label: "Danh sách vòng nfc",
-    icon: History,
-    path: "/finance/activities-catalog-history",
+    label: "Danh sách vòng NFC",
+    icon: CreditCard,
+    path: "/finance/nfc-cards", // Đường dẫn trang quản lý vòng NFC
   },
 ];
 
@@ -61,7 +59,7 @@ function OnboardSidebar({ mobileOpen, onCloseMobile }) {
           {isExpanded && (
             <div className="onboard-brand-text">
               <strong>Cruise</strong>
-              <span>Onboard</span>
+              <span>Finance</span>
             </div>
           )}
         </div>
@@ -90,7 +88,7 @@ function OnboardSidebar({ mobileOpen, onCloseMobile }) {
       {/* NAVIGATION MENU */}
       <nav className="onboard-sidebar-menu">
         {isExpanded && (
-          <div className="onboard-sidebar-section-title">QUẢN LÝ TRÊN TÀU</div>
+          <div className="onboard-sidebar-section-title">QUẢN LÝ LỄ TÂN</div>
         )}
 
         {menuItems.map((item) => {

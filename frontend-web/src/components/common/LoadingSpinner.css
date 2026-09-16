@@ -1,0 +1,59 @@
+/* src/components/common/LoadingSpinner.css */
+.skeleton-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 15px 0;
+}
+
+.skeleton-row {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  background: #ffffff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.skeleton-pulse {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: 4px;
+  height: 16px;
+}
+
+.skeleton-cell-short {
+  width: 15%;
+}
+
+.skeleton-cell-long {
+  width: 50%;
+}
+
+.skeleton-cell-medium {
+  width: 25%;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Responsive cho thiết bị di động */
+@media (max-width: 768px) {
+  .skeleton-row {
+    gap: 10px;
+    padding: 10px 12px;
+  }
+
+  .skeleton-pulse {
+    height: 14px;
+  }
+}

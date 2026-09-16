@@ -76,7 +76,12 @@ import ActivityVisitTour from "./modules/shore/pages/ActivityVisitTour";
 import ActivityVisitTourHistory from "./modules/shore/pages/ActivityVisitTourHistory";
 
 // Finance imports
+import FinanceLayout from "./layouts/FinanceLayout";
+// Các import trang của Finance
 import FinanceDashboard from "./modules/finance/pages/Dashboard";
+import FinanceTourSchedule from "./modules/finance/pages/FinanceTourSchedule";
+import FinanceRooms from "./modules/finance/pages/FinanceRooms";
+import FinanceNfcCards from "./modules/finance/pages/FinanceNfcCards";
 
 export default function App() {
   return (
@@ -341,20 +346,23 @@ export default function App() {
               ===================================================== */}
 
           <Route
-            path="/finance/*"
+            path="/finance"
             element={
               <ProtectedRoute allowedRoles={["FINANCE"]}>
-                <Routes>
-                  <Route path="dashboard" element={<FinanceDashboard />} />
-
-                  <Route
-                    path=""
-                    element={<Navigate to="dashboard" replace />}
-                  />
-                </Routes>
+                <FinanceLayout />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route path="dashboard" element={<FinanceDashboard />} />
+
+            <Route path="tours-schedule" element={<FinanceTourSchedule />} />
+
+            <Route path="rooms" element={<FinanceRooms />} />
+
+            <Route path="nfc-cards" element={<FinanceNfcCards />} />
+
+            <Route index element={<Navigate to="dashboard" replace />} />
+          </Route>
 
           {/* =====================================================
               FALLBACK 404
