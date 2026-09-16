@@ -1,10 +1,10 @@
-// frontend-web/src/components/onboard/OperationHeader.jsx
+// src/components/finance/FinanceHeader.jsx
 import { Menu } from "lucide-react";
-import OnboardNotificationBell from "./OnboardNotificationBell";
+import NotificationBell from "./NotificationBell"; // Hoặc chỉnh lại đường dẫn relative chính xác tới file NotificationBell
 
 import "../../styles/onboard/OnboardHeader.css";
 
-function OnboardHeader({ onMenuClick }) {
+function FinanceHeader({ onMenuClick }) {
   return (
     <header className="onboard-header">
       <div className="onboard-header-left">
@@ -26,10 +26,11 @@ function OnboardHeader({ onMenuClick }) {
       </div>
 
       <div className="onboard-header-right">
-        <OnboardNotificationBell />
+        {/* Dùng đúng tên NotificationBell thay vì OnboardNotificationBell */}
+        <NotificationBell />
 
         <div className="onboard-user-profile">
-          <div className="onboard-avatar">OB</div>
+          <div className="onboard-avatar">FN</div>
 
           <div className="onboard-user-info">
             <span className="onboard-user-name">Finance role</span>
@@ -43,4 +44,4 @@ function OnboardHeader({ onMenuClick }) {
   );
 }
 
-export default OnboardHeader;
+export default FinanceHeader;

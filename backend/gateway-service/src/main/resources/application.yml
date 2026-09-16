@@ -69,6 +69,15 @@ spring:
                 - Path=/api/operation/**
 
             # ==========================
+            # TOUR SERVICE - FINANCE
+            # ==========================
+
+            - id: tour-finance-service
+              uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
+              predicates:
+                - Path=/api/finance/**
+
+            # ==========================
             # TOUR SERVICE - PUBLIC STOREFRONT
             # ==========================
 
