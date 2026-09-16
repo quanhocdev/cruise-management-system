@@ -1,4 +1,4 @@
-// src/components/finance/FinanceSidebar.jsx (hoặc đường dẫn sidebar hiện tại của bạn)
+// src/components/finance/FinanceSidebar.jsx
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
@@ -15,32 +15,18 @@ import {
 import "../../styles/onboard/OnboardSidebar.css";
 
 const menuItems = [
-  {
-    label: "Dashboard",
-    icon: LayoutDashboard,
-    path: "/finance",
-    end: true,
-  },
+  { label: "Dashboard", icon: LayoutDashboard, path: "/finance", end: true },
   {
     label: "Quản lý Lịch trình Tour",
     icon: CalendarDays,
-    path: "/finance/tours-schedule", // Đường dẫn trang lịch trình tour
+    path: "/finance/tours-schedule",
   },
-  {
-    label: "Danh sách phòng",
-    icon: DoorOpen,
-    path: "/finance/rooms", // Đường dẫn trang quản lý phòng
-  },
-  {
-    label: "Danh sách vòng NFC",
-    icon: CreditCard,
-    path: "/finance/nfc-cards", // Đường dẫn trang quản lý vòng NFC
-  },
+  { label: "Danh sách phòng", icon: DoorOpen, path: "/finance/rooms" },
+  { label: "Danh sách vòng NFC", icon: CreditCard, path: "/finance/nfc-cards" },
 ];
 
-function OnboardSidebar({ mobileOpen, onCloseMobile }) {
+function FinanceSidebar({ mobileOpen, onCloseMobile }) {
   const [collapsed, setCollapsed] = useState(false);
-
   const isExpanded = !collapsed || mobileOpen;
 
   return (
@@ -49,13 +35,11 @@ function OnboardSidebar({ mobileOpen, onCloseMobile }) {
         mobileOpen ? "mobile-open" : ""
       }`}
     >
-      {/* HEADER / BRAND */}
       <div className="onboard-sidebar-header">
         <div className="onboard-sidebar-brand">
           <div className="onboard-brand-icon">
             <Ship size={22} />
           </div>
-
           {isExpanded && (
             <div className="onboard-brand-text">
               <strong>Cruise</strong>
@@ -64,17 +48,15 @@ function OnboardSidebar({ mobileOpen, onCloseMobile }) {
           )}
         </div>
 
-        {/* Toggle Desktop */}
         <button
           type="button"
           className="onboard-sidebar-toggle desktop-only"
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={() => setCollapsed((prev) => !prev)}
           title={collapsed ? "Mở rộng" : "Thu gọn"}
         >
           {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
         </button>
 
-        {/* Close Mobile */}
         <button
           type="button"
           className="onboard-sidebar-toggle mobile-only"
@@ -85,7 +67,6 @@ function OnboardSidebar({ mobileOpen, onCloseMobile }) {
         </button>
       </div>
 
-      {/* NAVIGATION MENU */}
       <nav className="onboard-sidebar-menu">
         {isExpanded && (
           <div className="onboard-sidebar-section-title">QUẢN LÝ LỄ TÂN</div>
@@ -93,7 +74,6 @@ function OnboardSidebar({ mobileOpen, onCloseMobile }) {
 
         {menuItems.map((item) => {
           const Icon = item.icon;
-
           return (
             <NavLink
               key={item.path}
@@ -106,18 +86,15 @@ function OnboardSidebar({ mobileOpen, onCloseMobile }) {
               title={collapsed && !mobileOpen ? item.label : undefined}
             >
               <Icon size={19} className="onboard-nav-icon" />
-
               {isExpanded && <span>{item.label}</span>}
             </NavLink>
           );
         })}
       </nav>
 
-      {/* FOOTER / STATUS */}
       <div className="onboard-sidebar-bottom">
         <div className="onboard-sidebar-status">
           <span className="onboard-status-dot" title="Đã kết nối" />
-
           {isExpanded && (
             <div>
               <strong>Hệ thống hoạt động</strong>
@@ -130,4 +107,4 @@ function OnboardSidebar({ mobileOpen, onCloseMobile }) {
   );
 }
 
-export default OnboardSidebar;
+export default FinanceSidebar;

@@ -1,31 +1,12 @@
 // src/modules/finance/hooks/useFinanceNfc.js
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import financeService from "../services/financeService";
+import useAsyncData from "./useAsyncData";
 
 const useFinanceNfc = () => {
-  const [cards, setCards] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  const fetchCards = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await financeService.getNfcCards();
-      setCards(data);
-    } catch (err) {
-      console.error("🔥 FETCH NFC CARDS ERROR:", err);
-      setError(err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchCards();
-  }, [fetchCards]);
-
-  return { cards, loading, error, reload: fetchCards };
+  const fetcher = useCallback(() => financeService.getNfcCards(), []);
+  const { data, ...rest } = useAsyncData(fetcher);
+  return { cards: data, ...rest };
 };
 
 export default useFinanceNfc;

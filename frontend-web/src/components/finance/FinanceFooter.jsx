@@ -1,6 +1,6 @@
 import "../../styles/onboard/OnboardFooter.css";
 
-function OnboardFooter() {
+function FinanceFooter() {
   return (
     <footer className="onboard-footer">
       <span>© {new Date().getFullYear()} Cruise Management System</span>
@@ -17,4 +17,4 @@ function OnboardFooter() {
   );
 }
 
-export default OnboardFooter;
+export default FinanceFooter;

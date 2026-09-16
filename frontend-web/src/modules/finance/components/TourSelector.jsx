@@ -4,7 +4,7 @@ import { useFinanceTours } from "../hooks/useFinanceTour";
 import "./TourSelector.css";
 
 const TourSelector = ({ selectedTourId, onSelectTour }) => {
-  const { tours, loading } = useFinanceTours();
+  const { tours, loading, error } = useFinanceTours();
 
   return (
     <div className="tour-selector-container">
@@ -17,13 +17,20 @@ const TourSelector = ({ selectedTourId, onSelectTour }) => {
         onChange={(e) => onSelectTour(e.target.value)}
         disabled={loading}
       >
-        <option value="">-- Chọn một Tour để xem --</option>
+        <option value="">
+          {loading ? "Đang tải..." : "-- Chọn một Tour để xem --"}
+        </option>
         {tours.map((tour) => (
           <option key={tour.id} value={tour.id}>
             {tour.name} ({tour.code})
           </option>
         ))}
       </select>
+      {error && (
+        <span style={{ color: "#c0392b", marginLeft: 8 }}>
+          Không tải được danh sách tour
+        </span>
+      )}
     </div>
   );
 };

@@ -12,32 +12,26 @@ function FinanceLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="onboard-layout">
-      {/* Overlay lớp phủ khi mở menu mobile */}
+    <div className="finance-layout">
       {mobileOpen && (
         <div
-          className="onboard-sidebar-overlay"
+          className="finance-sidebar-overlay"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
-      {/* SIDEBAR */}
       <FinanceSidebar
         mobileOpen={mobileOpen}
         onCloseMobile={() => setMobileOpen(false)}
       />
 
-      {/* MAIN AREA */}
       <div className="finance-layout-main">
-        {/* HEADER */}
-        <FinanceHeader onMenuClick={() => setMobileOpen(!mobileOpen)} />
+        <FinanceHeader onMenuClick={() => setMobileOpen((prev) => !prev)} />
 
-        {/* CONTENT */}
         <main className="finance-layout-content">
           <Outlet />
         </main>
 
-        {/* FOOTER */}
         <FinanceFooter />
       </div>
     </div>

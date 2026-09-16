@@ -3,31 +3,74 @@ import React, { useState } from "react";
 import TourSelector from "../components/TourSelector";
 import DataTable from "../components/DataTable";
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
-import { useFinanceSchedule } from "../hooks/useFinanceTour";
+import { useFinanceSchedules, useScheduleStops } from "../hooks/useFinanceTour";
+import { formatDate, formatDateTime } from "../utils/format";
+import { SCHEDULE_STATUS_OPTIONS, labelOf } from "../constants/statuses";
+
 
 const FinanceTourSchedule = () => {
   const [selectedTourId, setSelectedTourId] = useState("");
-  const { schedules, loading } = useFinanceSchedule(selectedTourId);
+  const [selectedScheduleId, setSelectedScheduleId] = useState("");
 
-  const columns = [
-    { header: "ID Lịch trình", accessor: "id" },
-    { header: "Tiêu đề / Tên", accessor: "title" },
-    { header: "Ngày bắt đầu", accessor: "startDate" },
-    { header: "Trạng thái", accessor: "status" },
+  const { schedules, loading } = useFinanceSchedules(selectedTourId);
+  const { stops, loading: loadingStops } = useScheduleStops(selectedScheduleId);
+
+  const handleSelectTour = (tourId) => {
+    setSelectedTourId(tourId);
+    setSelectedScheduleId("");
+  };
+
+const scheduleColumns = [
+  { header: "Ngày #", accessor: "dayNumber" },
+  { header: "Tên lịch trình", accessor: "name" },
+  { header: "Ngày thực tế", accessor: "realDay", render: formatDate },
+  {
+    header: "Trạng thái",
+    accessor: "status",
+    render: (v) => labelOf(SCHEDULE_STATUS_OPTIONS, v),
+  },
+];
+  const stopColumns = [
+    { header: "Thứ tự", accessor: "stopOrder" },
+    { header: "Cảng dừng", accessor: "portName" },
+    { header: "Giờ đến", accessor: "arriveAt", render: formatDateTime },
+    { header: "Giờ rời", accessor: "leaveAt", render: formatDateTime },
   ];
 
   return (
     <div style={{ padding: "20px" }}>
       <h2>Quản lý Lịch trình Tour</h2>
+
       <TourSelector
         selectedTourId={selectedTourId}
-        onSelectTour={setSelectedTourId}
+        onSelectTour={handleSelectTour}
       />
 
       {loading ? (
         <LoadingSpinner />
       ) : (
-        <DataTable columns={columns} data={schedules} />
+        <DataTable
+          columns={scheduleColumns}
+          data={schedules}
+          selectedKey={selectedScheduleId}
+          onRowClick={(row) => setSelectedScheduleId(row.id)}
+          emptyText={
+            selectedTourId
+              ? "Tour này chưa có lịch trình"
+              : "Chọn một Tour để xem lịch trình"
+          }
+        />
+      )}
+
+      {selectedScheduleId && (
+        <>
+          <h3 style={{ marginTop: 24 }}>Điểm dừng của lịch trình</h3>
+          {loadingStops ? (
+            <LoadingSpinner />
+          ) : (
+            <DataTable columns={stopColumns} data={stops} />
+          )}
+        </>
       )}
     </div>
   );

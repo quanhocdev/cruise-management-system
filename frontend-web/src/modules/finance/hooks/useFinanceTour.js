@@ -1,60 +1,55 @@
 // src/modules/finance/hooks/useFinanceTour.js
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useMemo } from "react";
 import financeService from "../services/financeService";
+import useAsyncData from "./useAsyncData";
+import { FINANCE_VISIBLE_TOUR_STATUSES } from "../constants/statuses";
 
-export const useFinanceTours = () => {
-  const [tours, setTours] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+export const useFinanceTours = (cruiseId) => {
+  const fetcher = useCallback(
+    () => financeService.getTours(cruiseId),
+    [cruiseId],
+  );
+  const { data, loading, error, reload } = useAsyncData(fetcher);
 
-  const fetchTours = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await financeService.getTours();
-      setTours(data);
-    } catch (err) {
-      console.error("🔥 FETCH TOURS ERROR:", err);
-      setError(err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  // Chốt chặn phía FE, phòng khi BE chưa lọc status
+  const tours = useMemo(
+    () =>
+      data.filter(
+        (t) =>
+          !t.statusTrip || FINANCE_VISIBLE_TOUR_STATUSES.includes(t.statusTrip),
+      ),
+    [data],
+  );
 
-  useEffect(() => {
-    fetchTours();
-  }, [fetchTours]);
-
-  return { tours, loading, error, reload: fetchTours };
+  return { tours, loading, error, reload };
 };
 
-export const useFinanceSchedule = (tourId) => {
-  const [schedules, setSchedules] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+export const useFinanceSchedules = (tourId) => {
+  const fetcher = useCallback(
+    () => financeService.getSchedulesByTour(tourId),
+    [tourId],
+  );
+  const { data, ...rest } = useAsyncData(fetcher, { enabled: !!tourId });
+  return { schedules: data, ...rest };
+};
 
-  const fetchSchedules = useCallback(async () => {
-    if (!tourId) {
-      setSchedules([]);
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await financeService.getSchedulesByTour(tourId);
-      setSchedules(data);
-    } catch (err) {
-      console.error("🔥 FETCH SCHEDULES ERROR:", err);
-      setError(err);
-      setSchedules([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [tourId]);
+export const useScheduleStops = (scheduleId) => {
+  const fetcher = useCallback(
+    () => financeService.getScheduleStops(scheduleId),
+    [scheduleId],
+  );
+  const { data, ...rest } = useAsyncData(fetcher, { enabled: !!scheduleId });
+  return { stops: data, ...rest };
+};
 
-  useEffect(() => {
-    fetchSchedules();
-  }, [fetchSchedules]);
-
-  return { schedules, loading, error, reload: fetchSchedules };
+export const useTourCruise = (tourId) => {
+  const fetcher = useCallback(
+    () => financeService.getCruiseByTour(tourId),
+    [tourId],
+  );
+  const { data, ...rest } = useAsyncData(fetcher, {
+    enabled: !!tourId,
+    initial: null,
+  });
+  return { cruise: data, ...rest };
 };

@@ -46,3 +46,12 @@
     font-size: 13px;
   }
 }
+.data-table-row--clickable {
+  cursor: pointer;
+}
+.data-table-row--clickable:hover {
+  background: #f5f7fa;
+}
+.data-table-row--selected {
+  background: #e8f0fe;
+}

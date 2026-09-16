@@ -2,7 +2,7 @@
 .finance-layout {
   min-height: 100vh;
   display: flex;
-  background: #f8fafc;
+  background: var(--fin-gray-50, #f8fafc);
   position: relative;
 }
 
@@ -18,9 +18,9 @@
   flex: 1;
   padding: 24px;
   overflow-x: hidden;
+  box-sizing: border-box;
 }
 
-/* Layer mờ đằng sau khi bật Mobile Menu */
 .finance-sidebar-overlay {
   display: none;
 }
