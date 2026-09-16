@@ -1,17 +1,14 @@
 package com.project.payment.service;
 
 import com.project.payment.dto.*;
-import com.project.payment.client.BookingClient;
-import com.project.payment.client.BookingPaymentContext;
-import com.project.payment.client.NotificationClient;
 import com.project.payment.exception.PaymentException;
 import com.project.payment.mapper.PaymentMapper;
 import com.project.payment.model.Payment;
 import com.project.payment.model.enums.*;
 import com.project.payment.repository.PaymentRepository;
-import com.project.common.event.PaymentSuccessEvent; // Import event DTO dùng chung
+import com.project.common.event.PaymentSuccessEvent;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.core.KafkaTemplate; // Import KafkaTemplate
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
@@ -25,20 +22,15 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentMapper mapper;
     private final Map<PaymentMethod, PaymentProvider> providers;
     private final long timeoutMinutes;
-    private final BookingClient bookingClient;
-    private final NotificationClient notificationClient;
-    private final KafkaTemplate<String, Object> kafkaTemplate; // Khai báo KafkaTemplate
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public PaymentServiceImpl(PaymentRepository repository, PaymentMapper mapper,
+    public PaymentServiceImpl(PaymentRepository repository,
+            PaymentMapper mapper,
             List<PaymentProvider> paymentProviders,
-            BookingClient bookingClient,
-            NotificationClient notificationClient,
-            KafkaTemplate<String, Object> kafkaTemplate, // Inject vào constructor
+            KafkaTemplate<String, Object> kafkaTemplate,
             @Value("${vnpay.payment-timeout-minutes:15}") long timeoutMinutes) {
         this.repository = repository;
         this.mapper = mapper;
-        this.bookingClient = bookingClient;
-        this.notificationClient = notificationClient;
         this.kafkaTemplate = kafkaTemplate;
         this.timeoutMinutes = timeoutMinutes;
         providers = new EnumMap<>(PaymentMethod.class);
@@ -52,20 +44,32 @@ public class PaymentServiceImpl implements PaymentService {
             throw new PaymentException("Payment method is not available yet: " + request.getMethod());
         if (request.getReferenceType() != PaymentReferenceType.BOOKING)
             throw new PaymentException("Payment reference type is not available yet: " + request.getReferenceType());
-        BookingPaymentContext booking = bookingClient.getPaymentContext(request.getReferenceId());
-        validateBooking(request, payerId, booking);
+
+        // Tìm bản ghi thanh toán đã được Kafka consumer (BookingListener) tạo sẵn dưới
+        // DB nội bộ
+        Payment payment = repository
+                .findByReferenceIdAndReferenceType(request.getReferenceId(), request.getReferenceType())
+                .orElseThrow(
+                        () -> new PaymentException("Payment reference not found. Please wait for booking sync event."));
+
+        // Validate thông tin trực tiếp từ bản ghi nội bộ
+        if (!payerId.equals(payment.getPayerId()))
+            throw new PaymentException("You cannot pay for this booking");
+        if (payment.getStatus() != PaymentStatus.PENDING)
+            throw new PaymentException("Booking is not payable or already processed");
+        if (request.getAmount().compareTo(payment.getAmount()) != 0)
+            throw new PaymentException("Payment amount does not match booking total");
+
         Instant now = Instant.now();
-        Payment payment = mapper.toEntity(request);
-        payment.setAmount(booking.totalAmount());
-        payment.setPayerId(payerId);
-        payment.setStatus(PaymentStatus.PENDING);
-        payment.setCreatedAt(now);
+        payment.setMethod(request.getMethod());
         payment.setUpdatedAt(now);
         payment.setExpiresAt(now.plus(timeoutMinutes, ChronoUnit.MINUTES));
+
+        // Cập nhật URL thanh toán VNPay vào bản ghi hiện có
+        payment.setPaymentUrl(provider().createPaymentUrl(payment, clientIp));
         Payment saved = repository.save(payment);
-        saved.setPaymentUrl(provider().createPaymentUrl(saved, clientIp));
-        saved.setUpdatedAt(Instant.now());
-        return mapper.toResponse(repository.save(saved));
+
+        return mapper.toResponse(saved);
     }
 
     @Override
@@ -144,8 +148,6 @@ public class PaymentServiceImpl implements PaymentService {
                 kafkaTemplate.send("payment-success-topic", event);
             }
 
-            if (!success && previousStatus != PaymentStatus.FAILED)
-                notificationClient.paymentFailed(saved.getPayerId(), saved.getId(), saved.getReferenceId());
             return saved;
         }
         return payment;
@@ -177,17 +179,6 @@ public class PaymentServiceImpl implements PaymentService {
 
     private Payment find(Long id) {
         return repository.findById(id).orElseThrow(() -> new PaymentException("Payment not found: " + id));
-    }
-
-    private void validateBooking(CreatePaymentRequest request, Long payerId, BookingPaymentContext booking) {
-        if (!request.getReferenceId().equals(booking.bookingId()))
-            throw new PaymentException("Booking reference does not match");
-        if (!payerId.equals(booking.userId()))
-            throw new PaymentException("You cannot pay for this booking");
-        if (!"PENDING_PAYMENT".equals(booking.status()))
-            throw new PaymentException("Booking is not payable");
-        if (request.getAmount().compareTo(booking.totalAmount()) != 0)
-            throw new PaymentException("Payment amount does not match booking total");
     }
 
     private PaymentProvider provider() {

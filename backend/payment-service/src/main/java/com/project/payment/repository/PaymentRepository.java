@@ -11,6 +11,9 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     Optional<Payment> findByTransactionCode(String transactionCode);
 
+    // Thêm dòng này vào Repository của bạn
+    Optional<Payment> findByReferenceIdAndReferenceType(Long referenceId, PaymentReferenceType referenceType);
+
     List<Payment> findAllByReferenceIdAndReferenceTypeOrderByCreatedAtDesc(
             Long referenceId,
             PaymentReferenceType referenceType);

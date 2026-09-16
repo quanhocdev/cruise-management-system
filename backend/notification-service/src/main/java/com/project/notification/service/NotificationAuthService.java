@@ -10,13 +10,13 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AuthEmailService {
+public class NotificationAuthService {
 
     private final JavaMailSender mailSender;
     private final boolean enabled;
     private final String from;
 
-    public AuthEmailService(
+    public NotificationAuthService(
             JavaMailSender mailSender,
             @Value("${notification.email.enabled:false}") boolean enabled,
             @Value("${spring.mail.username:}") String from) {
