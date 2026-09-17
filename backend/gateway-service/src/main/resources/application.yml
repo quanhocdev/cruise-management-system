@@ -75,7 +75,7 @@ spring:
             - id: booking-finance-service
               uri: ${BOOKING_SERVICE_URL:http://booking-service:8082}
               predicates:
-                - Path=/api/finance/scan,/api/finance/bookings,/api/finance/bookings/**
+                - Path=/ws-booking/**,/api/finance/scan,/api/finance/bookings,/api/finance/bookings/**
             # ==========================
             # TOUR SERVICE - FINANCE
             # ==========================
@@ -136,35 +136,6 @@ spring:
               uri: ${BOOKING_SERVICE_URL:http://booking-service:8082}
               predicates:
                 - Path=/api/passengers/**
-
-          # ==========================
-          # CORS
-          # ==========================
-
-          globalcors:
-            add-to-simple-url-handler-mapping: true
-
-            cors-configurations:
-              "[/**]":
-                allowedOrigins:
-                  - "http://localhost:5173"
-
-                allowedMethods:
-                  - GET
-                  - POST
-                  - PUT
-                  - PATCH
-                  - DELETE
-                  - OPTIONS
-
-                allowedHeaders:
-                  - "*"
-
-                allowCredentials: true
-
-                exposedHeaders:
-                  - Authorization
-                  - Set-Cookie
 
 jwt:
   secret: ${JWT_SECRET}

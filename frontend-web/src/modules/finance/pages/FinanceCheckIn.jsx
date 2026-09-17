@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import TourSelector from "../components/TourSelector";
 import DataTable from "../components/DataTable";
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
 import financeService from "../services/financeService";
-import { useTourSocket } from "../hooks/useTourSocket"; // <-- Import custom hook vừa tạo
+import { useTourSocket } from "../hooks/useTourSocket";
 import "../styles/layout.css";
 
 const FinanceCheckIn = () => {
@@ -11,12 +11,6 @@ const FinanceCheckIn = () => {
   const [scannedBookingCode, setScannedBookingCode] = useState("");
   const [passengers, setPassengers] = useState([]);
   const [loadingPassengers, setLoadingPassengers] = useState(false);
-
-  // Gọi Custom Hook xử lý socket
-  const { socketStatus } = useTourSocket(selectedTourId, (notification) => {
-    setScannedBookingCode(notification.bookingCode);
-    loadPassengers(notification.bookingId);
-  });
 
   const loadPassengers = async (bookingId) => {
     setLoadingPassengers(true);
@@ -29,6 +23,16 @@ const FinanceCheckIn = () => {
       setLoadingPassengers(false);
     }
   };
+
+  // Sử dụng useCallback để giữ nguyên tham chiếu của hàm callback qua các lần render,
+  // tránh làm hook useTourSocket bị re-trigger (mount/unmount) liên tục.
+  const handleBookingScanned = useCallback((notification) => {
+    setScannedBookingCode(notification.bookingCode);
+    loadPassengers(notification.bookingId);
+  }, []);
+
+  // Gọi Custom Hook xử lý socket với callback đã được tối ưu
+  const { socketStatus } = useTourSocket(selectedTourId, handleBookingScanned);
 
   const passengerColumns = [
     { header: "Họ và tên", accessor: "fullName" },

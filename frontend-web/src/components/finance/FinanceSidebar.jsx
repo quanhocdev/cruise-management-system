@@ -7,7 +7,8 @@ import {
   CalendarDays,
   DoorOpen,
   CreditCard,
-  TicketCheck, // Thêm icon quản lý đơn vé
+  TicketCheck,
+  QrCode, // Thêm icon quét QR cho quầy lễ tân
   ChevronLeft,
   ChevronRight,
   X,
@@ -17,6 +18,11 @@ import "../../styles/onboard/OnboardSidebar.css";
 
 const menuItems = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/finance", end: true },
+  {
+    label: "Quầy Check-in POS",
+    icon: QrCode,
+    path: "/finance/check-in", // Đường dẫn trang nhận WebSocket từ máy POS
+  },
   {
     label: "Quản lý Đơn đặt Tour",
     icon: TicketCheck,

@@ -6,21 +6,25 @@ export const useTourSocket = (tourId, onBookingScanned) => {
   const [socketStatus, setSocketStatus] = useState("Đang ngắt kết nối");
 
   useEffect(() => {
-    if (!tourId) return;
+    // Nếu chưa có tourId thì không kết nối
+    if (!tourId) {
+      setSocketStatus("Vui lòng chọn Tour để kết nối");
+      return;
+    }
 
-    const socket = new SockJS("http://localhost:8080/ws-booking");
+    setSocketStatus("Đang kết nối...");
+
+    // Dùng thẳng port 8082 của booking-service (hoặc qua gateway nếu đã bỏ globalcors trùng)
+    const socket = new SockJS("http://localhost:8082/ws-booking");
     const stompClient = new Client({
       webSocketFactory: () => socket,
       onConnect: () => {
         setSocketStatus("🟢 Đã kết nối Real-time");
 
-        // Subscribe vào kênh của tour
         stompClient.subscribe(`/topic/tour/${tourId}/scans`, (message) => {
           try {
             const notification = JSON.parse(message.body);
             console.log("[WS] Nhận tín hiệu quét từ POS:", notification);
-
-            // Gọi callback trả dữ liệu về cho Component sử dụng
             if (onBookingScanned) {
               onBookingScanned(notification);
             }
@@ -33,18 +37,21 @@ export const useTourSocket = (tourId, onBookingScanned) => {
         setSocketStatus("🔴 Lỗi kết nối WebSocket");
         console.error("Broker error: " + frame.headers["message"]);
       },
-      onDisconnect: () => {
+      onWebSocketClose: () => {
         setSocketStatus("🟡 Mất kết nối WebSocket");
       },
     });
 
     stompClient.activate();
 
+    // Cleanup function chỉ chạy khi tourId thay đổi hoặc component unmount thực sự
     return () => {
-      stompClient.deactivate();
+      if (stompClient.active) {
+        stompClient.deactivate();
+      }
       setSocketStatus("Đang ngắt kết nối");
     };
-  }, [tourId, onBookingScanned]);
+  }, [tourId]); // Chỉ phụ thuộc vào tourId, loại bỏ việc re-trigger do callback
 
   return { socketStatus };
 };

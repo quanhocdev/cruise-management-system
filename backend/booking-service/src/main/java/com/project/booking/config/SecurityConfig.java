@@ -34,6 +34,8 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
 
+                .cors(cors -> cors.disable())
+
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
@@ -48,7 +50,8 @@ public class SecurityConfig {
                                 "/actuator/health",
                                 "/actuator/info",
                                 "/internal/**",
-                                "/api/public/**")
+                                "/api/public/**",
+                                "/ws-booking/**")
                         .permitAll()
 
                         // Admin
