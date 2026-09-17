@@ -15,23 +15,37 @@ public class BookingFinanceController {
 
     private final FinanceBookingService financeBookingService;
 
-    public BookingFinanceController(FinanceBookingService financeBookingService) {
+    public BookingFinanceController(
+            FinanceBookingService financeBookingService) {
         this.financeBookingService = financeBookingService;
     }
 
-    // 1. Lấy danh sách booking thuộc về 1 Tour cụ thể (Dùng cho bảng hiển thị sau
-    // khi chọn Tour)
     @GetMapping
     public ResponseEntity<List<BookingSummaryResponse>> getBookingsByTour(
             @RequestParam UUID tourId) {
-        return ResponseEntity.ok(financeBookingService.getBookingsByTourId(tourId));
+
+        System.out.println("========================================");
+        System.out.println("[FINANCE] GET /api/finance/bookings");
+        System.out.println("[FINANCE] tourId = " + tourId);
+        System.out.println("========================================");
+
+        List<BookingSummaryResponse> result = financeBookingService.getBookingsByTourId(tourId);
+
+        System.out.println("[FINANCE] bookings size = " + result.size());
+
+        return ResponseEntity.ok(result);
     }
 
-    // 2. Lấy danh sách hành khách của một booking cụ thể (Dùng cho trang chi tiết
-    // hành khách khi bấm vào 1 dòng booking)
     @GetMapping("/{bookingId}/passengers")
     public ResponseEntity<List<BookingPassengerDetailResponse>> getPassengersByBooking(
             @PathVariable Long bookingId) {
-        return ResponseEntity.ok(financeBookingService.getPassengersByBookingId(bookingId));
+
+        System.out.println("========================================");
+        System.out.println("[FINANCE] GET passengers");
+        System.out.println("[FINANCE] bookingId = " + bookingId);
+        System.out.println("========================================");
+
+        return ResponseEntity.ok(
+                financeBookingService.getPassengersByBookingId(bookingId));
     }
 }

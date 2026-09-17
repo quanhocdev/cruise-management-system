@@ -19,7 +19,7 @@ public class FinanceBookingServiceImpl implements FinanceBookingService {
 
     private final BookingRepository bookingRepository;
     private final BookingPassengerRepository bookingPassengerRepository;
-    private final BookingMapper bookingMapper; // Inject Mapper vào đây
+    private final BookingMapper bookingMapper;
 
     public FinanceBookingServiceImpl(
             BookingRepository bookingRepository,
@@ -32,21 +32,66 @@ public class FinanceBookingServiceImpl implements FinanceBookingService {
 
     @Override
     public List<BookingSummaryResponse> getBookingsByTourId(UUID tourId) {
+
+        System.out.println("========================================");
+        System.out.println("[FINANCE SERVICE] getBookingsByTourId()");
+        System.out.println("[FINANCE SERVICE] tourId = " + tourId);
+
+        System.out.println("[FINANCE SERVICE] Calling repository...");
+
         List<Booking> bookings = bookingRepository.findAllByTourId(tourId);
 
-        // Gọi thẳng mapper thay vì tự new DTO thủ công trong service
-        return bookings.stream()
-                .map(bookingMapper::toSummaryResponse)
+        System.out.println(
+                "[FINANCE SERVICE] Repository returned "
+                        + bookings.size()
+                        + " booking(s)");
+
+        System.out.println("[FINANCE SERVICE] Mapping bookings...");
+
+        List<BookingSummaryResponse> result = bookings.stream()
+                .map(booking -> {
+                    System.out.println(
+                            "[FINANCE SERVICE] Mapping booking id = "
+                                    + booking.getId());
+
+                    return bookingMapper.toSummaryResponse(booking);
+                })
                 .toList();
+
+        System.out.println(
+                "[FINANCE SERVICE] Mapping completed. Result size = "
+                        + result.size());
+
+        System.out.println("========================================");
+
+        return result;
     }
 
     @Override
-    public List<BookingPassengerDetailResponse> getPassengersByBookingId(Long bookingId) {
-        List<BookingPassenger> links = bookingPassengerRepository.findAllByBooking_IdOrderByIdAsc(bookingId);
+    public List<BookingPassengerDetailResponse> getPassengersByBookingId(
+            Long bookingId) {
 
-        // Gọi thẳng mapper để xử lý chuyển đổi dữ liệu phức tạp
-        return links.stream()
+        System.out.println("========================================");
+        System.out.println("[FINANCE SERVICE] getPassengersByBookingId()");
+        System.out.println("[FINANCE SERVICE] bookingId = " + bookingId);
+
+        List<BookingPassenger> links = bookingPassengerRepository
+                .findAllByBooking_IdOrderByIdAsc(bookingId);
+
+        System.out.println(
+                "[FINANCE SERVICE] Passenger links found = "
+                        + links.size());
+
+        List<BookingPassengerDetailResponse> result = links.stream()
                 .map(bookingMapper::toPassengerDetailResponse)
                 .toList();
+
+        System.out.println(
+                "[FINANCE SERVICE] Passenger mapping completed. Result size = "
+                        + result.size());
+
+        System.out.println("========================================");
+
+        return result;
     }
 }

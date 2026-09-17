@@ -34,6 +34,40 @@ const financeService = {
   getRoomTypes: async () => (await api.get(`${BASE_URL}/room-types`)).data,
 
   getNfcCards: async () => (await api.get(`${BASE_URL}/nfc-cards`)).data,
+
+  getBookingsByTour: async (tourId) => {
+    console.log("========== FINANCE GET BOOKINGS ==========");
+    console.log("[FE] tourId:", tourId);
+    console.log("[FE] URL:", `${BASE_URL}/bookings`);
+    console.log("[FE] params:", { tourId });
+
+    try {
+      const res = await api.get(`${BASE_URL}/bookings`, {
+        params: { tourId },
+      });
+
+      console.log("[FE] response status:", res.status);
+      console.log("[FE] response data:", res.data);
+
+      return res.data;
+    } catch (error) {
+      console.error("========== FINANCE GET BOOKINGS ERROR ==========");
+      console.error("[FE] message:", error.message);
+      console.error("[FE] status:", error.response?.status);
+      console.error("[FE] response data:", error.response?.data);
+      console.error("[FE] response headers:", error.response?.headers);
+      console.error("[FE] request URL:", error.config?.url);
+      console.error("[FE] request params:", error.config?.params);
+      console.error("[FE] full error:", error);
+
+      throw error;
+    }
+  },
+
+  getPassengersByBooking: async (bookingId) => {
+    const res = await api.get(`${BASE_URL}/bookings/${bookingId}/passengers`);
+    return res.data;
+  },
 };
 
 export default financeService;

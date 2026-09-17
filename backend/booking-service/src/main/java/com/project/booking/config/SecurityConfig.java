@@ -75,6 +75,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/passenger/**")
                         .hasRole("PASSENGER")
 
+                        .requestMatchers("/api/finance/**")
+                        .hasRole("FINANCE")
+
                         // Everything else
                         .anyRequest()
                         .authenticated())

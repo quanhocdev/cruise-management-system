@@ -38,6 +38,13 @@ export const FINANCE_VISIBLE_TOUR_STATUSES = [
   "COMPLETED",
 ];
 
+// Thêm vào src/modules/finance/constants/statuses.js
+export const BOOKING_STATUS_OPTIONS = [
+  { value: "PENDING_PAYMENT", label: "Chờ thanh toán" },
+  { value: "CONFIRMED", label: "Đã xác nhận" },
+  { value: "CANCELLED", label: "Đã hủy" },
+];
+
 // Helper dùng chung cho mọi cột trạng thái
 export const labelOf = (options, value) =>
   options.find((o) => o.value === value)?.label ?? value ?? "—";

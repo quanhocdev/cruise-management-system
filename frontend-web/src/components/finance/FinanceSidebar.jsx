@@ -7,6 +7,7 @@ import {
   CalendarDays,
   DoorOpen,
   CreditCard,
+  TicketCheck, // Thêm icon quản lý đơn vé
   ChevronLeft,
   ChevronRight,
   X,
@@ -16,6 +17,11 @@ import "../../styles/onboard/OnboardSidebar.css";
 
 const menuItems = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/finance", end: true },
+  {
+    label: "Quản lý Đơn đặt Tour",
+    icon: TicketCheck,
+    path: "/finance/bookings",
+  },
   {
     label: "Quản lý Lịch trình Tour",
     icon: CalendarDays,

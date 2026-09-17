@@ -69,6 +69,15 @@ spring:
                 - Path=/api/operation/**
 
             # ==========================
+            # BOOKING SERVICE - FINANCE
+            # ==========================
+
+            - id: booking-finance-service
+              uri: ${BOOKING_SERVICE_URL:http://booking-service:8082}
+              predicates:
+                - Path=/api/finance/bookings,/api/finance/bookings/**
+
+            # ==========================
             # TOUR SERVICE - FINANCE
             # ==========================
 
