@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/pos")
+@RequestMapping("/api/finance")
 public class PosScanController {
 
     private final PosScanService posScanService;

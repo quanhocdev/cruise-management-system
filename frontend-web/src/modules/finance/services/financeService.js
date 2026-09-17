@@ -51,15 +51,6 @@ const financeService = {
 
       return res.data;
     } catch (error) {
-      console.error("========== FINANCE GET BOOKINGS ERROR ==========");
-      console.error("[FE] message:", error.message);
-      console.error("[FE] status:", error.response?.status);
-      console.error("[FE] response data:", error.response?.data);
-      console.error("[FE] response headers:", error.response?.headers);
-      console.error("[FE] request URL:", error.config?.url);
-      console.error("[FE] request params:", error.config?.params);
-      console.error("[FE] full error:", error);
-
       throw error;
     }
   },
