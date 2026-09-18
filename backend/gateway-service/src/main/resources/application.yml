@@ -69,13 +69,32 @@ spring:
                 - Path=/api/operation/**
 
             # ==========================
+            # BOOKING SERVICE - WEBSOCKET
+            # ==========================
+
+            - id: booking-websocket
+              uri: ws://booking-service:8082
+              predicates:
+                - Path=/ws-booking/**
+                - Header=Upgrade,websocket
+
+            # ==========================
+            # BOOKING SERVICE - SOCKJS HTTP
+            # ==========================
+
+            - id: booking-sockjs
+              uri: http://booking-service:8082
+              predicates:
+                - Path=/ws-booking/**
+
+            # ==========================
             # BOOKING SERVICE - FINANCE
             # ==========================
 
             - id: booking-finance-service
               uri: ${BOOKING_SERVICE_URL:http://booking-service:8082}
               predicates:
-                - Path=/ws-booking/**,/api/finance/scan,/api/finance/bookings,/api/finance/bookings/**
+                - Path=/api/finance/scan,/api/finance/bookings,/api/finance/bookings/**
             # ==========================
             # TOUR SERVICE - FINANCE
             # ==========================

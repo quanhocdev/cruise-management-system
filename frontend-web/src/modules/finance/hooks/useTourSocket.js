@@ -15,11 +15,11 @@ export const useTourSocket = (tourId, onBookingScanned) => {
     setSocketStatus("Đang kết nối...");
 
     // Dùng thẳng port 8082 của booking-service (hoặc qua gateway nếu đã bỏ globalcors trùng)
-    const socket = new SockJS("http://localhost:8082/ws-booking");
+    const socket = new SockJS("http://localhost:8080/ws-booking");
     const stompClient = new Client({
       webSocketFactory: () => socket,
       onConnect: () => {
-        setSocketStatus("🟢 Đã kết nối Real-time");
+        setSocketStatus("Đã kết nối Real-time");
 
         stompClient.subscribe(`/topic/tour/${tourId}/scans`, (message) => {
           try {
@@ -34,11 +34,11 @@ export const useTourSocket = (tourId, onBookingScanned) => {
         });
       },
       onStompError: (frame) => {
-        setSocketStatus("🔴 Lỗi kết nối WebSocket");
+        setSocketStatus("Lỗi kết nối WebSocket");
         console.error("Broker error: " + frame.headers["message"]);
       },
       onWebSocketClose: () => {
-        setSocketStatus("🟡 Mất kết nối WebSocket");
+        setSocketStatus("Mất kết nối WebSocket");
       },
     });
 

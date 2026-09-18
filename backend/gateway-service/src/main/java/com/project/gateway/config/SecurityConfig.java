@@ -86,9 +86,18 @@ public class SecurityConfig {
 
                 UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
+                // =====================================================
+                // CORS CHO API BÌNH THƯỜNG
+                // =====================================================
                 source.registerCorsConfiguration(
-                                "/**",
+                                "/api/**",
                                 configuration);
+
+                // =====================================================
+                // KHÔNG đăng ký /** ở đây
+                //
+                // /ws-booking/** để booking-service tự xử lý CORS
+                // =====================================================
 
                 return source;
         }
@@ -109,6 +118,7 @@ public class SecurityConfig {
                                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                                 .authorizeExchange(exchange -> exchange
                                                 .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                                .pathMatchers("/ws-booking/**").permitAll()
                                                 .pathMatchers(PUBLIC_ENDPOINTS).permitAll()
                                                 .anyExchange().authenticated())
                                 .oauth2ResourceServer(resourceServer -> resourceServer

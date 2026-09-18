@@ -19,8 +19,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-booking")
-                // Dùng setAllowedOriginPatterns("*") thay vì để mặc định sinh header chéo
-                .setAllowedOriginPatterns("*")
+                .setAllowedOriginPatterns("http://localhost:5173")
                 .withSockJS();
     }
 }
