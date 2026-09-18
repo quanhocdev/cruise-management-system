@@ -59,6 +59,9 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/operation/**")
                                                 .hasRole("OPERATION")
 
+                                                .requestMatchers("/api/finance/**")
+                                                .hasRole("FINANCE")
+
                                                 .requestMatchers("/api/onboard/**")
                                                 .hasRole("ONBOARD")
 

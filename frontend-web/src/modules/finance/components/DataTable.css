@@ -1,0 +1,114 @@
+/* src/modules/finance/components/DataTable.css */
+.data-table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--fin-gray-200);
+  border-radius: var(--fin-radius);
+  background: #fff;
+}
+
+@media (prefers-color-scheme: dark) {
+  .data-table-container {
+    background: #1a2233;
+  }
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  min-width: 480px;
+}
+
+.data-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--fin-gray-100);
+  color: var(--fin-gray-700);
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--fin-gray-200);
+  white-space: nowrap;
+}
+
+.data-table tbody td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--fin-gray-100);
+  color: var(--fin-gray-900);
+  vertical-align: middle;
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table tbody tr:hover td {
+  background: var(--fin-gray-50);
+}
+
+.data-table-row--clickable {
+  cursor: pointer;
+}
+
+.data-table-row--clickable:hover td {
+  background: var(--fin-primary-light) !important;
+}
+
+.data-table-row--selected td {
+  background: var(--fin-primary-light) !important;
+  font-weight: 500;
+}
+
+.data-table tbody td[colspan] {
+  text-align: center;
+  color: var(--fin-gray-500);
+  padding: 32px 16px;
+  font-size: 13px;
+}
+
+/* Status pill, dùng khi render trả về <span className="status-pill status-pill--x"> */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-pill--success {
+  background: var(--fin-success-bg);
+  color: var(--fin-success);
+}
+
+.status-pill--danger {
+  background: var(--fin-danger-bg);
+  color: var(--fin-danger);
+}
+
+.status-pill--warning {
+  background: var(--fin-warning-bg);
+  color: var(--fin-warning);
+}
+
+.status-pill--neutral {
+  background: var(--fin-gray-100);
+  color: var(--fin-gray-500);
+}
+
+@media (max-width: 640px) {
+  .data-table {
+    font-size: 13px;
+  }
+  .data-table thead th,
+  .data-table tbody td {
+    padding: 10px 12px;
+  }
+}

@@ -524,8 +524,7 @@ fun NavGraph() {
             PosIdentityScreen(
                 role = role,
                 state = state,
-                onRetry = { posViewModel.verify() },
-                onCheckIn = { posViewModel.checkIn() },
+                onRetry = { posViewModel.sendScan() },
                 onBack = { navController.popBackStack() }
             )
         }

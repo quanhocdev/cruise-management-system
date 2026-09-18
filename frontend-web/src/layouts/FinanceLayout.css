@@ -1,0 +1,41 @@
+/* frontend-web/src/layouts/FinanceLayout.css */
+.finance-layout {
+  min-height: 100vh;
+  display: flex;
+  background: var(--fin-gray-50, #f8fafc);
+  position: relative;
+}
+
+.finance-layout-main {
+  min-width: 0;
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.finance-layout-content {
+  flex: 1;
+  padding: 24px;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.finance-sidebar-overlay {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .finance-layout-content {
+    padding: 16px;
+  }
+
+  .finance-sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 45;
+  }
+}

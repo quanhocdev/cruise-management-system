@@ -1,0 +1,62 @@
+/* src/modules/finance/components/FilterToolbar.css */
+.filter-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.filter-search-input,
+.filter-status-select {
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--fin-gray-300);
+  border-radius: var(--fin-radius-sm);
+  font-size: 14px;
+  background: #fff;
+  color: var(--fin-gray-900);
+  transition:
+    border-color var(--fin-transition),
+    box-shadow var(--fin-transition);
+  outline: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .filter-search-input,
+  .filter-status-select {
+    background: #111827;
+    border-color: var(--fin-gray-300);
+  }
+}
+
+.filter-search-input {
+  flex: 1 1 260px;
+  min-width: 180px;
+}
+
+.filter-status-select {
+  flex: 0 0 auto;
+  min-width: 180px;
+  cursor: pointer;
+}
+
+.filter-search-input:focus,
+.filter-status-select:focus {
+  border-color: var(--fin-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.filter-search-input::placeholder {
+  color: var(--fin-gray-500);
+}
+
+@media (max-width: 640px) {
+  .filter-toolbar {
+    flex-direction: column;
+  }
+  .filter-search-input,
+  .filter-status-select {
+    width: 100%;
+    flex: 1 1 auto;
+  }
+}

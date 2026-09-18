@@ -1,0 +1,139 @@
+.tour-card-skeleton {
+  height: 100%;
+  background: #fff;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.tour-card-skeleton__image {
+  width: 100%;
+  height: 220px;
+}
+
+.tour-card-skeleton__body {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+}
+
+.tour-card-skeleton__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e2e2e2 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: tour-skeleton-shimmer 1.5s infinite linear;
+}
+
+.skeleton-line {
+  width: 100%;
+  height: 14px;
+  border-radius: 6px;
+}
+
+.skeleton-line--code {
+  width: 38%;
+  height: 12px;
+}
+
+.skeleton-line--status {
+  width: 22%;
+  height: 24px;
+  border-radius: 12px;
+}
+
+.skeleton-line--title {
+  width: 90%;
+  height: 21px;
+  margin-bottom: 8px;
+}
+
+.skeleton-line--title-short {
+  width: 65%;
+  height: 21px;
+  margin-bottom: 16px;
+}
+
+.tour-card-skeleton__description {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.skeleton-line--short {
+  width: 55%;
+}
+
+.tour-card-skeleton__info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 1rem;
+  margin-bottom: 16px;
+  background: #f8f9fa;
+  border-radius: 0.75rem;
+}
+
+.skeleton-line--medium {
+  width: 75%;
+}
+
+.tour-card-skeleton__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid #e9ecef;
+}
+
+.skeleton-line--price-label {
+  width: 45px;
+  height: 11px;
+  margin-bottom: 8px;
+}
+
+.skeleton-line--price {
+  width: 100px;
+  height: 20px;
+}
+
+.skeleton-button {
+  width: 105px;
+  height: 34px;
+  border-radius: 50px;
+}
+
+@keyframes tour-skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .tour-card-skeleton__image {
+    height: 200px;
+  }
+
+  .tour-card-skeleton__body {
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .tour-card-skeleton__image {
+    height: 220px;
+  }
+}

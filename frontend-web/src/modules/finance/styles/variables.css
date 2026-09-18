@@ -1,0 +1,46 @@
+/* src/modules/finance/styles/variables.css */
+:root {
+  --fin-primary: #2563eb;
+  --fin-primary-dark: #1d4ed8;
+  --fin-primary-light: #eff6ff;
+  --fin-success: #16a34a;
+  --fin-success-bg: #f0fdf4;
+  --fin-danger: #dc2626;
+  --fin-danger-bg: #fef2f2;
+  --fin-warning: #d97706;
+  --fin-warning-bg: #fffbeb;
+  --fin-gray-50: #f9fafb;
+  --fin-gray-100: #f3f4f6;
+  --fin-gray-200: #e5e7eb;
+  --fin-gray-300: #d1d5db;
+  --fin-gray-500: #6b7280;
+  --fin-gray-700: #374151;
+  --fin-gray-900: #111827;
+  --fin-radius: 10px;
+  --fin-radius-sm: 6px;
+  --fin-shadow:
+    0 1px 2px rgba(16, 24, 40, 0.05), 0 1px 3px rgba(16, 24, 40, 0.06);
+  --fin-shadow-md: 0 4px 12px rgba(16, 24, 40, 0.08);
+  --fin-transition: 0.15s ease;
+  --fin-font: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fin-primary: #3b82f6;
+    --fin-primary-dark: #60a5fa;
+    --fin-primary-light: #1e293b;
+    --fin-success-bg: #052e16;
+    --fin-danger-bg: #450a0a;
+    --fin-warning-bg: #451a03;
+    --fin-gray-50: #111827;
+    --fin-gray-100: #1f2937;
+    --fin-gray-200: #374151;
+    --fin-gray-300: #4b5563;
+    --fin-gray-500: #9ca3af;
+    --fin-gray-700: #d1d5db;
+    --fin-gray-900: #f9fafb;
+    --fin-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --fin-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  }
+}

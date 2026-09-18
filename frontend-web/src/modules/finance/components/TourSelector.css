@@ -1,0 +1,58 @@
+/* src/modules/finance/components/TourSelector.css */
+.tour-selector-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.tour-selector-container label {
+  font-size: 14px;
+  color: var(--fin-gray-700);
+  white-space: nowrap;
+}
+
+.tour-selector-container select {
+  height: 40px;
+  min-width: 260px;
+  padding: 0 14px;
+  border: 1px solid var(--fin-gray-300);
+  border-radius: var(--fin-radius-sm);
+  font-size: 14px;
+  background: #fff;
+  color: var(--fin-gray-900);
+  cursor: pointer;
+  outline: none;
+  transition:
+    border-color var(--fin-transition),
+    box-shadow var(--fin-transition);
+}
+
+@media (prefers-color-scheme: dark) {
+  .tour-selector-container select {
+    background: #111827;
+  }
+}
+
+.tour-selector-container select:focus {
+  border-color: var(--fin-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.tour-selector-container select:disabled {
+  background: var(--fin-gray-100);
+  color: var(--fin-gray-500);
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .tour-selector-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .tour-selector-container select {
+    width: 100%;
+    min-width: 0;
+  }
+}

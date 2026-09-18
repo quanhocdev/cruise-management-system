@@ -28,12 +28,7 @@ import ManagerService from "./modules/admin/pages/ManagerService";
 import ManagerPolicy from "./modules/admin/pages/ManagerPolicy";
 import ManagerNfcCard from "./modules/admin/pages/ManagerNfcCard";
 
-// import ManagerPos from "./modules/admin/pages/ManagerPos";
-
 // Passenger imports
-// import PassengerDashboard from "./modules/passenger/pages/Dashboard";
-// import PassengerTourDetail from "./modules/passenger/pages/TourDetail";
-// import CreatePassengerBooking from "./modules/passenger/pages/CreateBooking";
 import PassengerBookings from "./modules/passenger/pages/MyBookings";
 import PassengerBookingDetail from "./modules/passenger/pages/BookingDetail";
 import PassengerBooking from "./modules/passenger/pages/PassengerBooking";
@@ -76,7 +71,14 @@ import ActivityVisitTour from "./modules/shore/pages/ActivityVisitTour";
 import ActivityVisitTourHistory from "./modules/shore/pages/ActivityVisitTourHistory";
 
 // Finance imports
+import FinanceLayout from "./layouts/FinanceLayout";
 import FinanceDashboard from "./modules/finance/pages/Dashboard";
+import FinanceTourSchedule from "./modules/finance/pages/FinanceTourSchedule";
+import FinanceRooms from "./modules/finance/pages/FinanceRooms";
+import FinanceNfcCards from "./modules/finance/pages/FinanceNfcCards";
+import FinanceBookings from "./modules/finance/pages/FinanceBookings";
+import FinanceBookingPassengers from "./modules/finance/pages/FinanceBookingPassengers";
+import FinanceCheckIn from "./modules/finance/pages/FinanceCheckIn";
 
 export default function App() {
   return (
@@ -173,7 +175,6 @@ export default function App() {
               path="bookings/:bookingId"
               element={<PassengerBookingDetail />}
             />
-            {/* Thêm trang kết quả thanh toán nằm bên trong layout passenger nếu muốn đồng bộ giao diện */}
             <Route path="payment/result" element={<PaymentResultPage />} />
             {/* Trỏ mặc định về danh sách bookings nếu vào /passenger */}
             <Route path="" element={<Navigate to="bookings" replace />} />
@@ -341,20 +342,30 @@ export default function App() {
               ===================================================== */}
 
           <Route
-            path="/finance/*"
+            path="/finance"
             element={
               <ProtectedRoute allowedRoles={["FINANCE"]}>
-                <Routes>
-                  <Route path="dashboard" element={<FinanceDashboard />} />
-
-                  <Route
-                    path=""
-                    element={<Navigate to="dashboard" replace />}
-                  />
-                </Routes>
+                <FinanceLayout />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route path="dashboard" element={<FinanceDashboard />} />
+
+            <Route path="check-in" element={<FinanceCheckIn />} />
+            <Route path="tours-schedule" element={<FinanceTourSchedule />} />
+
+            <Route path="bookings" element={<FinanceBookings />} />
+            <Route
+              path="bookings/:bookingId/passengers"
+              element={<FinanceBookingPassengers />}
+            />
+
+            <Route path="rooms" element={<FinanceRooms />} />
+
+            <Route path="nfc-cards" element={<FinanceNfcCards />} />
+
+            <Route index element={<Navigate to="dashboard" replace />} />
+          </Route>
 
           {/* =====================================================
               FALLBACK 404

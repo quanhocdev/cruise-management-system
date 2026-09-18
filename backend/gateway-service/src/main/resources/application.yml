@@ -69,6 +69,42 @@ spring:
                 - Path=/api/operation/**
 
             # ==========================
+            # BOOKING SERVICE - WEBSOCKET
+            # ==========================
+
+            - id: booking-websocket
+              uri: ws://booking-service:8082
+              predicates:
+                - Path=/ws-booking/**
+                - Header=Upgrade,websocket
+
+            # ==========================
+            # BOOKING SERVICE - SOCKJS HTTP
+            # ==========================
+
+            - id: booking-sockjs
+              uri: http://booking-service:8082
+              predicates:
+                - Path=/ws-booking/**
+
+            # ==========================
+            # BOOKING SERVICE - FINANCE
+            # ==========================
+
+            - id: booking-finance-service
+              uri: ${BOOKING_SERVICE_URL:http://booking-service:8082}
+              predicates:
+                - Path=/api/finance/scan,/api/finance/bookings,/api/finance/bookings/**
+            # ==========================
+            # TOUR SERVICE - FINANCE
+            # ==========================
+
+            - id: tour-finance-service
+              uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
+              predicates:
+                - Path=/api/finance/**
+
+            # ==========================
             # TOUR SERVICE - PUBLIC STOREFRONT
             # ==========================
 
@@ -119,35 +155,6 @@ spring:
               uri: ${BOOKING_SERVICE_URL:http://booking-service:8082}
               predicates:
                 - Path=/api/passengers/**
-
-          # ==========================
-          # CORS
-          # ==========================
-
-          globalcors:
-            add-to-simple-url-handler-mapping: true
-
-            cors-configurations:
-              "[/**]":
-                allowedOrigins:
-                  - "http://localhost:5173"
-
-                allowedMethods:
-                  - GET
-                  - POST
-                  - PUT
-                  - PATCH
-                  - DELETE
-                  - OPTIONS
-
-                allowedHeaders:
-                  - "*"
-
-                allowCredentials: true
-
-                exposedHeaders:
-                  - Authorization
-                  - Set-Cookie
 
 jwt:
   secret: ${JWT_SECRET}

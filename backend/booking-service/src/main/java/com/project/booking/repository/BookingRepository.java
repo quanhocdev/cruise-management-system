@@ -4,6 +4,7 @@ import com.project.booking.model.Booking;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findAllByCreatedByUserIdOrderByCreatedAtDesc(Long userId);
@@ -11,4 +12,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     boolean existsByBookingCode(String bookingCode);
 
     Optional<Booking> findByBookingCodeIgnoreCase(String bookingCode);
+
+    List<Booking> findAllByTourId(UUID tourId);
 }

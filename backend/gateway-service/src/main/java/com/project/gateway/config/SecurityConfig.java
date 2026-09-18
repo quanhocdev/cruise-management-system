@@ -45,6 +45,9 @@ public class SecurityConfig {
                         "/api/auth/activate/verify",
                         "/api/auth/activate/set-password",
 
+                        // WebSocket endpoints cho phép public bắt tay
+                        "/ws-booking/**",
+
                         "/api/public/**",
 
                         "/actuator/health",
@@ -52,7 +55,7 @@ public class SecurityConfig {
         };
 
         // =====================================================
-        // CORS
+        // CORS (Tập trung độc quyền tại đây)
         // =====================================================
 
         @Bean
@@ -83,9 +86,18 @@ public class SecurityConfig {
 
                 UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
+                // =====================================================
+                // CORS CHO API BÌNH THƯỜNG
+                // =====================================================
                 source.registerCorsConfiguration(
-                                "/**",
+                                "/api/**",
                                 configuration);
+
+                // =====================================================
+                // KHÔNG đăng ký /** ở đây
+                //
+                // /ws-booking/** để booking-service tự xử lý CORS
+                // =====================================================
 
                 return source;
         }
@@ -102,104 +114,37 @@ public class SecurityConfig {
                         ServerAccessDeniedHandler accessDeniedHandler) {
 
                 return http
-
-                                // =================================================
-                                // CORS
-                                // =================================================
-
                                 .cors(Customizer.withDefaults())
-
-                                // =================================================
-                                // CSRF
-                                // =================================================
-
                                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
-
-                                // =================================================
-                                // AUTHORIZATION
-                                // =================================================
-
                                 .authorizeExchange(exchange -> exchange
-
-                                                // CORS preflight
-                                                .pathMatchers(
-                                                                HttpMethod.OPTIONS)
-                                                .permitAll()
-
-                                                // Public Auth APIs
-                                                .pathMatchers(
-                                                                PUBLIC_ENDPOINTS)
-                                                .permitAll()
-
-                                                // Các API còn lại yêu cầu JWT
+                                                .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                                .pathMatchers("/ws-booking/**").permitAll()
+                                                .pathMatchers(PUBLIC_ENDPOINTS).permitAll()
                                                 .anyExchange().authenticated())
-
-                                // =================================================
-                                // OAUTH2 RESOURCE SERVER
-                                // =================================================
-
                                 .oauth2ResourceServer(resourceServer -> resourceServer
-
-                                                // Web:
-                                                // Cookie: accessToken
-                                                //
-                                                // Android:
-                                                // Authorization: Bearer <token>
-                                                .bearerTokenConverter(
-                                                                bearerTokenConverter)
-
-                                                .authenticationEntryPoint(
-                                                                authenticationEntryPoint)
-
-                                                .accessDeniedHandler(
-                                                                accessDeniedHandler)
-
-                                                // JWT verification
+                                                .bearerTokenConverter(bearerTokenConverter)
+                                                .authenticationEntryPoint(authenticationEntryPoint)
+                                                .accessDeniedHandler(accessDeniedHandler)
                                                 .jwt(Customizer.withDefaults()))
-
-                                // =================================================
-                                // EXCEPTION HANDLING
-                                // =================================================
-
                                 .exceptionHandling(exception -> exception
-
-                                                .authenticationEntryPoint(
-                                                                authenticationEntryPoint)
-
-                                                .accessDeniedHandler(
-                                                                accessDeniedHandler))
-
+                                                .authenticationEntryPoint(authenticationEntryPoint)
+                                                .accessDeniedHandler(accessDeniedHandler))
                                 .build();
         }
 
-        // =====================================================
-        // BEARER TOKEN CONVERTER
-        // =====================================================
-
         @Bean
         public CookieOrHeaderBearerTokenConverter bearerTokenConverter() {
-
                 return new CookieOrHeaderBearerTokenConverter(
                                 new ServerBearerTokenAuthenticationConverter());
         }
 
-        // =====================================================
-        // AUTHENTICATION ENTRY POINT
-        // =====================================================
-
         @Bean
         public ServerAuthenticationEntryPoint authenticationEntryPoint() {
-
                 return new JsonAuthenticationEntryPoint();
         }
 
-        // =====================================================
-        // ACCESS DENIED HANDLER
-        // =====================================================
-
         @Bean
         public ServerAccessDeniedHandler accessDeniedHandler() {
-
                 return new JsonAccessDeniedHandler();
         }
 }

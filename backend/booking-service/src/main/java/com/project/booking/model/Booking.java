@@ -74,7 +74,6 @@ public class Booking {
     }
 
     // --- GETTERS & SETTERS ---
-    // (Bạn hãy generate đầy đủ getters và setters cho các trường trên)
     public Long getId() {
         return id;
     }
@@ -91,7 +90,6 @@ public class Booking {
         this.createdByUserId = createdByUserId;
     }
 
-    // Getter & Setter
     public String getPrimaryContactEmail() {
         return primaryContactEmail;
     }
