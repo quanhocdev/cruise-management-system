@@ -143,4 +143,35 @@ public class FinanceController {
     public ResponseEntity<List<NfcCardResponse>> getAllNfcCards() {
         return ResponseEntity.ok(nfcCardService.getAllCards());
     }
+
+    // 9. Get danh sách phòng trống phù hợp cho booking (lọc theo roomType và kiểm
+    // tra capacity/khóa exclusive)
+    @GetMapping("/bookings/{bookingId}/available-rooms")
+    public ResponseEntity<List<RoomResponse>> getAvailableRoomsForBooking(
+            @PathVariable Long bookingId,
+            @RequestParam UUID roomTypeId) {
+
+        System.out.println("========================================");
+        System.out.println("[TOUR-FINANCE] GET available-rooms for bookingId = " + bookingId);
+        System.out.println("========================================");
+
+        // Bạn có thể gọi qua roomService để xử lý logic lọc phòng trống + khóa
+        // exclusive theo booking
+        List<RoomResponse> availableRooms = roomService.getAvailableRoomsForBooking(bookingId, roomTypeId);
+        return ResponseEntity.ok(availableRooms);
+    }
+
+    // 10. Get danh sách vòng NFC còn trống (Active & Unused) trong Tour cụ thể
+    @GetMapping("/tours/{tourId}/available-wristbands")
+    public ResponseEntity<List<NfcCardResponse>> getAvailableWristbands(
+            @PathVariable UUID tourId) {
+
+        System.out.println("========================================");
+        System.out.println("[TOUR-FINANCE] GET available-wristbands for tourId = " + tourId);
+        System.out.println("========================================");
+
+        // Gọi nfcCardService lấy các vòng ACTIVE và UNUSED thuộc tour này
+        List<NfcCardResponse> availableCards = nfcCardService.getAvailableCardsByTour(tourId);
+        return ResponseEntity.ok(availableCards);
+    }
 }

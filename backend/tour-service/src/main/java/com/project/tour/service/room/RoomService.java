@@ -260,4 +260,23 @@ public class RoomService {
                                                 "Room not found",
                                                 HttpStatus.NOT_FOUND));
         }
+
+        // =====================================================
+        // GET AVAILABLE ROOMS FOR BOOKING
+        // =====================================================
+
+        @Transactional(readOnly = true)
+        public List<RoomResponse> getAvailableRoomsForBooking(
+                        Long bookingId,
+                        UUID roomTypeId) {
+
+                System.out.println("[SERVICE] Lọc phòng trống cho bookingId: " + bookingId + " với roomTypeId: "
+                                + roomTypeId);
+
+                List<Room> rooms = roomRepository.findAllByRoomType_IdAndStatus(roomTypeId, RoomStatus.ACTIVE);
+
+                return rooms.stream()
+                                .map(RoomMapper::toResponse)
+                                .toList();
+        }
 }

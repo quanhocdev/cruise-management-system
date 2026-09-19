@@ -22,10 +22,7 @@ import com.project.gateway.security.JsonAuthenticationEntryPoint;
 @Configuration
 public class SecurityConfig {
 
-        // =====================================================
         // PUBLIC ENDPOINTS
-        // =====================================================
-
         private static final String[] PUBLIC_ENDPOINTS = {
                         "/api/auth/register",
                         "/api/auth/login",
@@ -54,9 +51,7 @@ public class SecurityConfig {
                         "/actuator/info"
         };
 
-        // =====================================================
-        // CORS (Tập trung độc quyền tại đây)
-        // =====================================================
+        // CORS
 
         @Bean
         public CorsConfigurationSource corsConfigurationSource(
@@ -86,25 +81,14 @@ public class SecurityConfig {
 
                 UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
-                // =====================================================
-                // CORS CHO API BÌNH THƯỜNG
-                // =====================================================
+                // CORS CHO REST API, KHÔNG CHO WebSocket (WebSocket CORS được xử lý riêng trong
+                // STOMP)
                 source.registerCorsConfiguration(
                                 "/api/**",
                                 configuration);
 
-                // =====================================================
-                // KHÔNG đăng ký /** ở đây
-                //
-                // /ws-booking/** để booking-service tự xử lý CORS
-                // =====================================================
-
                 return source;
         }
-
-        // =====================================================
-        // SECURITY
-        // =====================================================
 
         @Bean
         public SecurityWebFilterChain securityWebFilterChain(
