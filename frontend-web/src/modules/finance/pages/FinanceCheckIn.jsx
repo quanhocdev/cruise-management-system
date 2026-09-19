@@ -1,243 +1,16 @@
+// src/modules/finance/pages/FinanceCheckIn.jsx
 import React, { useState, useCallback } from "react";
 import TourSelector from "../components/TourSelector";
 import DataTable from "../components/DataTable";
 import LoadingSpinner from "../../../components/common/LoadingSpinner";
 import financeService from "../services/financeService";
 import { useTourSocket } from "../hooks/useTourSocket";
-import { useRoomTypes } from "../hooks/useFinanceRoom";
-import {
-  useAvailableRooms,
-  useAvailableWristbands,
-} from "../hooks/useFinanceCheckIn";
+import CheckInPassengerModal from "../components/CheckInPassengerModal";
 import "../styles/layout.css";
-
-// Component Modal phục vụ check-in từng hành khách
-const CheckInModal = ({ tourId, bookingId, passenger, onClose, onSuccess }) => {
-  const [selectedRoomTypeId, setSelectedRoomTypeId] = useState("");
-  const [selectedRoomId, setSelectedRoomId] = useState("");
-  const [selectedNfcCode, setSelectedNfcCode] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-
-  // Lấy danh mục hạng phòng
-  const { roomTypes } = useRoomTypes();
-
-  // Lấy danh sách phòng trống dựa theo booking và hạng phòng
-  const { availableRooms, loading: loadingRooms } = useAvailableRooms(
-    bookingId,
-    selectedRoomTypeId,
-  );
-
-  // Lấy danh sách vòng NFC khả dụng (AVAILABLE)
-  const { availableWristbands, loading: loadingNfc } =
-    useAvailableWristbands(tourId);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!selectedRoomId || !selectedNfcCode) {
-      alert("Vui lòng chọn đầy đủ phòng và mã vòng NFC!");
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      await financeService.checkInPassenger(bookingId, {
-        passengerId: passenger.id,
-        roomId: selectedRoomId,
-        nfcCode: selectedNfcCode,
-      });
-      alert("Check-in thành công cho hành khách!");
-      onSuccess?.(); // Gọi callback để load lại danh sách hành khách
-      onClose();
-    } catch (err) {
-      console.error("Lỗi khi check-in:", err);
-      alert(err.response?.data?.message || "Check-in thất bại!");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        backgroundColor: "rgba(0,0,0,0.5)",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        zIndex: 1000,
-      }}
-    >
-      <div
-        style={{
-          backgroundColor: "white",
-          padding: "24px",
-          borderRadius: "8px",
-          width: "450px",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-        }}
-      >
-        <h3 style={{ marginTop: 0, marginBottom: "16px" }}>
-          Check-in Hành khách
-        </h3>
-        <p style={{ marginBottom: "12px", color: "#555" }}>
-          Hành khách: <b>{passenger.fullName}</b> (ID: {passenger.id})
-        </p>
-
-        <form
-          onSubmit={handleSubmit}
-          style={{ display: "flex", flexDirection: "column", gap: "12px" }}
-        >
-          {/* 1. Chọn Hạng phòng */}
-          <div>
-            <label
-              style={{
-                display: "block",
-                fontSize: "14px",
-                fontWeight: "bold",
-                marginBottom: "4px",
-              }}
-            >
-              1. Chọn hạng phòng:
-            </label>
-            <select
-              style={{
-                width: "100%",
-                padding: "8px",
-                borderRadius: "4px",
-                border: "1px solid #ccc",
-              }}
-              value={selectedRoomTypeId}
-              onChange={(e) => {
-                setSelectedRoomTypeId(e.target.value);
-                setSelectedRoomId(""); // Reset phòng khi đổi hạng
-              }}
-            >
-              <option value="">-- Chọn hạng phòng --</option>
-              {roomTypes.map((rt) => (
-                <option key={rt.id} value={rt.id}>
-                  {rt.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* 2. Chọn Số phòng trống */}
-          <div>
-            <label
-              style={{
-                display: "block",
-                fontSize: "14px",
-                fontWeight: "bold",
-                marginBottom: "4px",
-              }}
-            >
-              2. Chọn phòng:
-            </label>
-            <select
-              style={{
-                width: "100%",
-                padding: "8px",
-                borderRadius: "4px",
-                border: "1px solid #ccc",
-              }}
-              value={selectedRoomId}
-              onChange={(e) => setSelectedRoomId(e.target.value)}
-              disabled={!selectedRoomTypeId || loadingRooms}
-            >
-              <option value="">
-                {loadingRooms ? "Đang tải phòng..." : "-- Chọn phòng trống --"}
-              </option>
-              {availableRooms.map((room) => (
-                <option key={room.id} value={room.id}>
-                  Phòng {room.code}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* 3. Chọn Vòng NFC */}
-          <div>
-            <label
-              style={{
-                display: "block",
-                fontSize: "14px",
-                fontWeight: "bold",
-                marginBottom: "4px",
-              }}
-            >
-              3. Chọn vòng NFC (AVAILABLE):
-            </label>
-            <select
-              style={{
-                width: "100%",
-                padding: "8px",
-                borderRadius: "4px",
-                border: "1px solid #ccc",
-              }}
-              value={selectedNfcCode}
-              onChange={(e) => setSelectedNfcCode(e.target.value)}
-              disabled={loadingNfc}
-            >
-              <option value="">
-                {loadingNfc ? "Đang tải thẻ NFC..." : "-- Chọn mã thẻ NFC --"}
-              </option>
-              {availableWristbands.map((card) => (
-                <option key={card.id || card.cardUid} value={card.cardUid}>
-                  Mã thẻ: {card.cardUid}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              gap: "8px",
-              marginTop: "16px",
-            }}
-          >
-            <button
-              type="button"
-              onClick={onClose}
-              style={{
-                padding: "8px 16px",
-                background: "#ccc",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
-            >
-              Hủy
-            </button>
-            <button
-              type="submit"
-              disabled={submitting}
-              style={{
-                padding: "8px 16px",
-                background: "#007bff",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
-            >
-              {submitting ? "Đang lưu..." : "Xác nhận Check-in"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
 
 const FinanceCheckIn = () => {
   const [selectedTourId, setSelectedTourId] = useState("");
-  const [currentBookingId, setCurrentBookingId] = useState(null); // Lưu bookingId hiện tại khi quét/chọn
+  const [currentBookingId, setCurrentBookingId] = useState(null);
   const [scannedBookingCode, setScannedBookingCode] = useState("");
   const [passengers, setPassengers] = useState([]);
   const [loadingPassengers, setLoadingPassengers] = useState(false);
@@ -266,7 +39,6 @@ const FinanceCheckIn = () => {
 
   const { socketStatus } = useTourSocket(selectedTourId, handleBookingScanned);
 
-  // Định nghĩa các cột hiển thị trên bảng hành khách kèm nút Thao tác Check-in
   const passengerColumns = [
     { header: "Họ và tên", accessor: "fullName" },
     { header: "Giới tính", accessor: "gender" },
@@ -338,9 +110,9 @@ const FinanceCheckIn = () => {
         <DataTable columns={passengerColumns} data={passengers} />
       )}
 
-      {/* Hiển thị Modal Check-in khi nhân viên bấm nút */}
+      {/* Gọi component Modal độc lập */}
       {activePassengerModal && currentBookingId && (
-        <CheckInModal
+        <CheckInPassengerModal
           tourId={selectedTourId}
           bookingId={currentBookingId}
           passenger={activePassengerModal}

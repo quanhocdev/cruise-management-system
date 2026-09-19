@@ -95,6 +95,7 @@ spring:
               uri: ${BOOKING_SERVICE_URL:http://booking-service:8082}
               predicates:
                 - Path=/api/finance/scan,/api/finance/bookings,/api/finance/bookings/**
+
             # ==========================
             # TOUR SERVICE - FINANCE
             # ==========================
