@@ -22,18 +22,14 @@ public class RegisterController {
         this.authService = authService;
     }
 
-    /**
-     * API ĐĂNG KÝ TÀI KHOẢN
-     */
+    // Đăng ký tài khoản hành khách
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
         RegisterResponse response = authService.register(request);
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * API XÁC THỰC EMAIL
-     */
+    // Xác thực email bằng OTP
     @PostMapping("/verify-email")
     public ResponseEntity<Map<String, String>> verifyEmail(@Valid @RequestBody VerifyOtpRequest request) {
         authService.verifyEmail(request);

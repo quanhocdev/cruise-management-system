@@ -1,4 +1,4 @@
-package com.project.auth.controller.auth;
+package com.project.auth.controller;
 
 import java.util.Map;
 
@@ -7,23 +7,21 @@ import org.springframework.web.bind.annotation.*;
 
 import com.project.auth.dto.ActivateTokenRequest;
 import com.project.auth.dto.SetPasswordRequest;
-import com.project.auth.service.StaffService;
+import com.project.auth.service.StaffActivationService;
 
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/auth/activate")
-public class ActivationController {
+public class StaffActivationController {
 
-    private final StaffService staffService;
+    private final StaffActivationService staffService;
 
-    public ActivationController(StaffService staffService) {
+    public StaffActivationController(StaffActivationService staffService) {
         this.staffService = staffService;
     }
 
-    /**
-     * Kiểm tra activation token
-     */
+    // Xác thực token kích hoạt tài khoản nhân viên
     @PostMapping("/verify")
     public ResponseEntity<Map<String, String>> verify(
             @Valid @RequestBody ActivateTokenRequest request) {
@@ -36,9 +34,7 @@ public class ActivationController {
                         "username", username));
     }
 
-    /**
-     * Thiết lập mật khẩu mới và kích hoạt tài khoản
-     */
+    // Nhân viên đặt mật khẩu kích hoạt
     @PostMapping("/set-password")
     public ResponseEntity<Map<String, String>> setPassword(
             @Valid @RequestBody SetPasswordRequest request) {
