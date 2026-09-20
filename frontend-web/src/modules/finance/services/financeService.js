@@ -81,7 +81,7 @@ const financeService = {
   // Gửi request check-in từng hành khách sang booking-service
   checkInPassenger: async (bookingId, payload) => {
     const res = await api.post(
-      `/api/finance/check-passenger/${bookingId}/check-in-passenger`,
+      `${BASE_URL}/check-passenger/${bookingId}/check-in-passenger`, // Dùng luôn biến BASE_URL hoặc viết là `/finance/check-passenger/...`
       payload,
     );
     return res.data;

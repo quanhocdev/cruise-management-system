@@ -6,7 +6,6 @@ import com.project.common.event.BookingCreatedEvent;
 import com.project.common.service.file.FileStorageService;
 import com.project.booking.dto.booking.*;
 import com.project.booking.dto.passenger.PassengerRequest;
-import com.project.booking.dto.AvailableRoomResponse;
 import com.project.booking.exception.AppException;
 import com.project.booking.mapper.BookingMapper;
 import com.project.booking.model.Booking;
@@ -221,12 +220,6 @@ public class BookingServiceImpl implements BookingService {
 
         List<BookingPassenger> links = bookingPassengerRepository.findAllByBooking_IdOrderByIdAsc(saved.getId());
         return bookingMapper.toResponse(saved, links);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<AvailableRoomResponse> getAvailableRooms(UUID tourId, UUID tourPackageId) {
-        return List.of();
     }
 
     @Override

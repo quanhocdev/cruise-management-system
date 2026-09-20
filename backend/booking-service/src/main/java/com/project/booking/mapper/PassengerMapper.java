@@ -32,7 +32,7 @@ public class PassengerMapper {
 
         return new PassengerResponse(
                 passenger.getId(),
-                null, // userId hoặc để trống vì Passenger lưu độc lập theo user/booking_passenger
+                null,
                 passenger.getFullName(),
                 passenger.getDateOfBirth(),
                 passenger.getGender(),

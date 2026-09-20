@@ -30,10 +30,21 @@ public class CheckPassengerController {
         System.out.println("[FINANCE] nfcCode = " + request.getNfcCode());
         System.out.println("========================================");
 
-        checkPassengerService.processSinglePassengerCheckIn(bookingId, request);
+        try {
+            checkPassengerService.processSinglePassengerCheckIn(bookingId, request);
 
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "message", "Check-in thành công cho hành khách!"));
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Check-in thành công cho hành khách!"));
+        } catch (Exception e) {
+            // IN TRỌN VÉN LỖI 500 RA CONSOLE ĐỂ XEM NÓ BỊ Ở ĐÂU
+            System.err.println("========== LỖI CHECK-IN 500 CHI TIẾT ==========");
+            e.printStackTrace();
+            System.err.println("================================================");
+
+            return ResponseEntity.status(500).body(Map.of(
+                    "error", true,
+                    "message", e.getMessage()));
+        }
     }
 }
