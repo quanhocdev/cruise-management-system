@@ -5,7 +5,6 @@ import com.project.tour.dto.NfcCardResponse;
 import com.project.tour.mapper.NfcCardMapper;
 import com.project.tour.model.NfcCard;
 import com.project.tour.model.enums.NfcCardStatus;
-import com.project.tour.model.enums.RoomStatus;
 import com.project.tour.repository.NfcCardRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,18 +78,14 @@ public class NfcCardService {
     }
 
     // =====================================================
-    // GET AVAILABLE CARDS BY TOUR
-    // =====================================================
-
-    // =====================================================
     // GET AVAILABLE CARDS FOR CHECK-IN
     // =====================================================
 
     @Transactional(readOnly = true)
-    public List<NfcCardResponse> getAvailableCardsByTour(UUID tourId) {
+    public List<NfcCardResponse> getAllAvailableCards() {
         System.out.println("[SERVICE] Lấy danh sách vòng NFC có sẵn (AVAILABLE)");
 
-        // Lấy các thẻ đang ở trạng thái AVAILABLE
+        // Lấy tất cả các thẻ đang ở trạng thái AVAILABLE trong kho
         return nfcCardRepository.findAllByStatus(NfcCardStatus.AVAILABLE)
                 .stream()
                 .map(nfcCardMapper::toResponse)

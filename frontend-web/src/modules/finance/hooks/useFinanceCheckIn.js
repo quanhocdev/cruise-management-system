@@ -16,14 +16,14 @@ export const useAvailableRooms = (bookingId, tourPackageId) => {
   return { availableRooms: data, ...rest };
 };
 
-// Hook lấy danh sách vòng NFC khả dụng của Tour
-export const useAvailableWristbands = (tourId) => {
+// Hook lấy danh sách vòng NFC khả dụng
+export const useAvailableWristbands = () => {
   const fetcher = useCallback(
-    () => financeService.getAvailableWristbands(tourId),
-    [tourId],
+    () => financeService.getAvailableWristbands(),
+    [],
   );
   const { data, ...rest } = useAsyncData(fetcher, {
-    enabled: !!tourId,
+    enabled: true,
     initial: [],
   });
   return { availableWristbands: data, ...rest };

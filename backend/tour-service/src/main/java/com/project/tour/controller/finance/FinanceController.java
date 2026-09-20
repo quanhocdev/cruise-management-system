@@ -155,16 +155,16 @@ public class FinanceController {
     }
 
     // 10. Get danh sách vòng NFC còn trống (Active & Unused) trong Tour cụ thể
-    @GetMapping("/tours/{tourId}/available-wristbands")
-    public ResponseEntity<List<NfcCardResponse>> getAvailableWristbands(
-            @PathVariable UUID tourId) {
+    // Thay vì lấy theo tourId, ta lấy tất cả các thẻ NFC có sẵn (AVAILABLE) trong
+    // kho
+    @GetMapping("/available-wristbands") // Bỏ phần /tours/{tourId} đi cho đúng thực tế
+    public ResponseEntity<List<NfcCardResponse>> getAllAvailableWristbands() {
 
         System.out.println("========================================");
-        System.out.println("[TOUR-FINANCE] GET available-wristbands for tourId = " + tourId);
+        System.out.println("[TOUR-FINANCE] GET all available-wristbands");
         System.out.println("========================================");
 
-        // Gọi nfcCardService lấy các vòng ACTIVE và UNUSED thuộc tour này
-        List<NfcCardResponse> availableCards = nfcCardService.getAvailableCardsByTour(tourId);
+        List<NfcCardResponse> availableCards = nfcCardService.getAllAvailableCards();
         return ResponseEntity.ok(availableCards);
     }
 }

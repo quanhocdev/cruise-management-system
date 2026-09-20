@@ -26,9 +26,8 @@ export default function CheckInPassengerModal({
     tourPackageId,
   );
 
-  // Lấy danh sách vòng NFC khả dụng của Tour
-  const { availableWristbands, loading: loadingNfc } =
-    useAvailableWristbands(tourId);
+  // Lấy danh sách vòng NFC khả dụng
+  const { availableWristbands, loading: loadingNfc } = useAvailableWristbands();
 
   const handleSubmit = async (e) => {
     e.preventDefault();

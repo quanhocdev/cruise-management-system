@@ -72,11 +72,9 @@ const financeService = {
     return res.data;
   },
 
-  // Lấy danh sách vòng NFC còn trống (AVAILABLE) theo tour
-  getAvailableWristbands: async (tourId) => {
-    const res = await api.get(
-      `${BASE_URL}/tours/${tourId}/available-wristbands`,
-    );
+  // Lấy danh sách vòng NFC còn trống (AVAILABLE)
+  getAvailableWristbands: async () => {
+    const res = await api.get(`${BASE_URL}/available-wristbands`);
     return res.data;
   },
 
