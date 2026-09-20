@@ -17,16 +17,16 @@ export default function CheckInPassengerModal({
   const [selectedNfcCode, setSelectedNfcCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  // Lấy trực tiếp roomTypeId đã được gán sẵn từ thông tin hành khách trong đơn đặt tour
-  const roomTypeId = passenger.roomTypeId;
+  // 1. Lấy trực tiếp tourPackageId từ hành khách (đã được map từ booking sang)
+  const tourPackageId = passenger.tourPackageId;
 
-  // Tự động lấy danh sách phòng trống dựa theo booking và hạng phòng đã mua
+  // 2. Gọi hook lấy phòng trống bằng tourPackageId
   const { availableRooms, loading: loadingRooms } = useAvailableRooms(
     bookingId,
-    roomTypeId,
+    tourPackageId,
   );
 
-  // Lấy danh sách vòng NFC khả dụng (AVAILABLE) của Tour
+  // Lấy danh sách vòng NFC khả dụng của Tour
   const { availableWristbands, loading: loadingNfc } =
     useAvailableWristbands(tourId);
 
@@ -40,7 +40,7 @@ export default function CheckInPassengerModal({
     setSubmitting(true);
     try {
       await financeService.checkInPassenger(bookingId, {
-        passengerId: passenger.id,
+        passengerId: passenger.passengerId || passenger.id,
         roomId: selectedRoomId,
         nfcCode: selectedNfcCode,
       });
@@ -92,11 +92,7 @@ export default function CheckInPassengerModal({
           }}
         >
           <p style={{ margin: "4px 0" }}>
-            Hành khách: <b>{passenger.fullName}</b> (ID: {passenger.id})
-          </p>
-          <p style={{ margin: "4px 0", color: "#666" }}>
-            Hạng phòng đã đặt:{" "}
-            <b>{passenger.roomTypeName || "Phòng theo đơn đặt"}</b>
+            Hành khách: <b>{passenger.fullName}</b>
           </p>
         </div>
 
@@ -104,7 +100,7 @@ export default function CheckInPassengerModal({
           onSubmit={handleSubmit}
           style={{ display: "flex", flexDirection: "column", gap: "14px" }}
         >
-          {/* 1. Chọn Số phòng trống (Hệ thống tự lọc theo đúng hạng phòng khách đã đăng ký) */}
+          {/* 1. Chọn số phòng trống */}
           <div>
             <label
               style={{
@@ -125,14 +121,10 @@ export default function CheckInPassengerModal({
               }}
               value={selectedRoomId}
               onChange={(e) => setSelectedRoomId(e.target.value)}
-              disabled={!roomTypeId || loadingRooms}
+              disabled={loadingRooms}
             >
               <option value="">
-                {loadingRooms
-                  ? "Đang tải phòng..."
-                  : !roomTypeId
-                    ? "-- Không xác định được hạng phòng --"
-                    : "-- Chọn phòng trống --"}
+                {loadingRooms ? "Đang tải phòng..." : "-- Chọn số phòng --"}
               </option>
               {availableRooms.map((room) => (
                 <option key={room.id} value={room.id}>
@@ -140,11 +132,6 @@ export default function CheckInPassengerModal({
                 </option>
               ))}
             </select>
-            {!roomTypeId && (
-              <small style={{ color: "red" }}>
-                Lưu ý: Hành khách này chưa được gán hạng phòng trong booking.
-              </small>
-            )}
           </div>
 
           {/* 2. Chọn Vòng NFC */}

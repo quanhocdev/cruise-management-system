@@ -3,14 +3,14 @@ import { useCallback, useState } from "react";
 import financeService from "../services/financeService";
 import useAsyncData from "./useAsyncData";
 
-// Hook lấy danh sách phòng trống
-export const useAvailableRooms = (bookingId, roomTypeId) => {
+// Hook lấy danh sách phòng trống dựa theo tourPackageId
+export const useAvailableRooms = (bookingId, tourPackageId) => {
   const fetcher = useCallback(
-    () => financeService.getAvailableRooms(bookingId, roomTypeId),
-    [bookingId, roomTypeId],
+    () => financeService.getAvailableRooms(bookingId, tourPackageId),
+    [bookingId, tourPackageId],
   );
   const { data, ...rest } = useAsyncData(fetcher, {
-    enabled: !!bookingId && !!roomTypeId,
+    enabled: !!bookingId && !!tourPackageId,
     initial: [],
   });
   return { availableRooms: data, ...rest };

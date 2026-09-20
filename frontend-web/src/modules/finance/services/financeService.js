@@ -62,11 +62,11 @@ const financeService = {
   // Thêm vào trong đối tượng financeService ở src/modules/finance/services/financeService.js
 
   // Lấy danh sách phòng trống theo booking và hạng phòng
-  getAvailableRooms: async (bookingId, roomTypeId) => {
+  getAvailableRooms: async (bookingId, tourPackageId) => {
     const res = await api.get(
-      `${BASE_URL}/bookings/${bookingId}/available-rooms`,
+      `${BASE_URL}/packages/${tourPackageId}/available-rooms`,
       {
-        params: { roomTypeId },
+        params: { bookingId },
       },
     );
     return res.data;

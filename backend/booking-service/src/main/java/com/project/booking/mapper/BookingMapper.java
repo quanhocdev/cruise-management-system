@@ -91,7 +91,10 @@ public class BookingMapper {
             return null;
         }
         var p = link.getPassenger();
+        var booking = link.getBooking(); // Lấy booking cha để lấy tourPackageId
+
         return new BookingPassengerDetailResponse(
+                booking != null ? booking.getTourPackageId() : null, // <-- Truyền tourPackageId vào đây
                 link.getId(),
                 link.getRoomId(),
                 link.getStatus(),

@@ -7,6 +7,7 @@ import financeService from "../services/financeService";
 import { useTourSocket } from "../hooks/useTourSocket";
 import CheckInPassengerModal from "../components/CheckInPassengerModal";
 import "../styles/layout.css";
+import "../styles/financeCheckIn.css";
 
 const FinanceCheckIn = () => {
   const [selectedTourId, setSelectedTourId] = useState("");
@@ -14,8 +15,6 @@ const FinanceCheckIn = () => {
   const [scannedBookingCode, setScannedBookingCode] = useState("");
   const [passengers, setPassengers] = useState([]);
   const [loadingPassengers, setLoadingPassengers] = useState(false);
-
-  // State quản lý Modal check-in cho hành khách cụ thể
   const [activePassengerModal, setActivePassengerModal] = useState(null);
 
   const loadPassengers = async (bookingId) => {
@@ -38,6 +37,32 @@ const FinanceCheckIn = () => {
   }, []);
 
   const { socketStatus } = useTourSocket(selectedTourId, handleBookingScanned);
+
+  const handleManualSearch = async (bookingCode) => {
+    if (!bookingCode.trim() || !selectedTourId) return;
+
+    setLoadingPassengers(true);
+    try {
+      const bookings = await financeService.getBookingsByTour(selectedTourId);
+      const found = bookings.find(
+        (b) => b.bookingCode.toLowerCase() === bookingCode.trim().toLowerCase(),
+      );
+
+      if (found) {
+        setCurrentBookingId(found.id);
+        loadPassengers(found.id);
+      } else {
+        alert("Không tìm thấy mã booking này trong tour hiện tại!");
+        setPassengers([]);
+        setCurrentBookingId(null);
+      }
+    } catch (err) {
+      console.error("Lỗi tìm kiếm booking:", err);
+      alert("Lỗi khi tìm kiếm mã booking!");
+    } finally {
+      setLoadingPassengers(false);
+    }
+  };
 
   const passengerColumns = [
     { header: "Họ và tên", accessor: "fullName" },
@@ -91,16 +116,31 @@ const FinanceCheckIn = () => {
       </div>
 
       {selectedTourId && (
-        <div className="finance-card">
-          <label>Mã Booking đang xử lý: </label>
-          <input
-            type="text"
-            value={scannedBookingCode}
-            onChange={(e) => setScannedBookingCode(e.target.value)}
-            placeholder="Chờ quét mã QR / thẻ từ POS..."
-            style={{ padding: "8px", width: "300px" }}
-            readOnly
-          />
+        <div className="finance-card finance-checkin__container">
+          <label style={{ fontSize: "14px", fontWeight: "bold" }}>
+            Mã Booking (Quét QR hoặc Nhập tay):
+          </label>
+          <div className="finance-checkin__input-group">
+            <input
+              type="text"
+              className="finance-checkin__input"
+              value={scannedBookingCode}
+              onChange={(e) => setScannedBookingCode(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleManualSearch(scannedBookingCode);
+                }
+              }}
+              placeholder="Nhập mã booking hoặc chờ quét QR..."
+            />
+            <button
+              type="button"
+              className="finance-checkin__btn-search"
+              onClick={() => handleManualSearch(scannedBookingCode)}
+            >
+              Tải danh sách
+            </button>
+          </div>
         </div>
       )}
 
@@ -110,7 +150,6 @@ const FinanceCheckIn = () => {
         <DataTable columns={passengerColumns} data={passengers} />
       )}
 
-      {/* Gọi component Modal độc lập */}
       {activePassengerModal && currentBookingId && (
         <CheckInPassengerModal
           tourId={selectedTourId}
