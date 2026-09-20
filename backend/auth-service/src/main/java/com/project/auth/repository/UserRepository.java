@@ -16,8 +16,7 @@ public interface UserRepository extends JpaRepository<Users, Long> {
 
     Boolean existsByEmail(String email);
 
-    // Lọc trực tiếp từ Database, loại bỏ PASSENGER và GUEST ra khỏi danh sách nhân
-    // viên
+    // Lọc trực tiếp từ Database, loại bỏ PASSENGER và GUEST
     @Query("SELECT u FROM Users u WHERE u.role.name NOT IN ('PASSENGER', 'GUEST')")
     List<Users> findAllStaff();
 }

@@ -7,9 +7,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import com.project.auth.dto.CreateStaffRequest;
 import com.project.auth.dto.StaffResponse;
 import com.project.auth.dto.UpdateStaffRequest;
@@ -29,11 +27,9 @@ import com.project.common.event.SendStaffInvitationEvent;
 public class AdminStaffServiceImpl implements AdminStaffService {
 
     private static final Duration ACTIVATION_TOKEN_TTL = Duration.ofMinutes(10);
-
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final TokenRedisService tokenRedisService;
-    private final PasswordEncoder passwordEncoder;
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final StaffMapper staffMapper;
 
@@ -41,21 +37,16 @@ public class AdminStaffServiceImpl implements AdminStaffService {
             UserRepository userRepository,
             RoleRepository roleRepository,
             TokenRedisService tokenRedisService,
-            PasswordEncoder passwordEncoder,
             KafkaTemplate<String, Object> kafkaTemplate,
             StaffMapper staffMapper) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.tokenRedisService = tokenRedisService;
-        this.passwordEncoder = passwordEncoder;
         this.kafkaTemplate = kafkaTemplate;
         this.staffMapper = staffMapper;
     }
 
-    // =====================================================
-    // CREATE STAFF
-    // =====================================================
-
+    // Hàm tạo tài khoản nhân viên mới
     @Override
     public StaffResponse createStaff(CreateStaffRequest request) {
         if (userRepository.existsByUsername(request.username())) {
@@ -114,10 +105,7 @@ public class AdminStaffServiceImpl implements AdminStaffService {
         return staffMapper.toStaffResponse(savedUser);
     }
 
-    // =====================================================
-    // GET ALL STAFF
-    // =====================================================
-
+    // Lấy danh sách tất cả nhân viên
     @Override
     public List<StaffResponse> getAllStaff() {
         return userRepository.findAllStaff()
@@ -126,10 +114,7 @@ public class AdminStaffServiceImpl implements AdminStaffService {
                 .toList();
     }
 
-    // =====================================================
-    // GET STAFF BY ID
-    // =====================================================
-
+    // Lấy thông tin nhân viên theo ID
     @Override
     public StaffResponse getStaffById(Long id) {
         Users user = userRepository.findById(id)
@@ -142,10 +127,7 @@ public class AdminStaffServiceImpl implements AdminStaffService {
         return staffMapper.toStaffResponse(user);
     }
 
-    // =====================================================
-    // UPDATE STAFF
-    // =====================================================
-
+    // Hàm câp nhật thông tin nhân viên
     @Override
     public StaffResponse updateStaff(Long id, UpdateStaffRequest request) {
         Users user = userRepository.findById(id)
@@ -179,10 +161,7 @@ public class AdminStaffServiceImpl implements AdminStaffService {
         return staffMapper.toStaffResponse(savedUser);
     }
 
-    // =====================================================
-    // UPDATE STAFF STATUS
-    // =====================================================
-
+    // Hàm cập nhật trạng thái nhân viên
     @Override
     public StaffResponse updateStaffStatus(Long id, UpdateStaffStatusRequest request) {
         Users user = userRepository.findById(id)
@@ -206,10 +185,7 @@ public class AdminStaffServiceImpl implements AdminStaffService {
         return staffMapper.toStaffResponse(savedUser);
     }
 
-    // =====================================================
-    // HELPERS & MAPPERS
-    // =====================================================
-
+    // HELPERS
     private boolean isStaff(Users user) {
         if (user.getRole() == null) {
             return false;
