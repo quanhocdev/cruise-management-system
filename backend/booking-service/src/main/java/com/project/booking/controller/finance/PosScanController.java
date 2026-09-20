@@ -1,6 +1,6 @@
 package com.project.booking.controller.finance;
 
-import com.project.booking.dto.QrScanRequest;
+import com.project.booking.dto.finance.QrScanRequest;
 import com.project.booking.service.finance.PosScanService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

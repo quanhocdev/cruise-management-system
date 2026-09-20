@@ -59,6 +59,33 @@ const financeService = {
     const res = await api.get(`${BASE_URL}/bookings/${bookingId}/passengers`);
     return res.data;
   },
+  // Thêm vào trong đối tượng financeService ở src/modules/finance/services/financeService.js
+
+  // Lấy danh sách phòng trống theo booking và hạng phòng
+  getAvailableRooms: async (bookingId, tourPackageId) => {
+    const res = await api.get(
+      `${BASE_URL}/packages/${tourPackageId}/available-rooms`,
+      {
+        params: { bookingId },
+      },
+    );
+    return res.data;
+  },
+
+  // Lấy danh sách vòng NFC còn trống (AVAILABLE)
+  getAvailableWristbands: async () => {
+    const res = await api.get(`${BASE_URL}/available-wristbands`);
+    return res.data;
+  },
+
+  // Gửi request check-in từng hành khách sang booking-service
+  checkInPassenger: async (bookingId, payload) => {
+    const res = await api.post(
+      `${BASE_URL}/check-passenger/${bookingId}/check-in-passenger`, // Dùng luôn biến BASE_URL hoặc viết là `/finance/check-passenger/...`
+      payload,
+    );
+    return res.data;
+  },
 };
 
 export default financeService;

@@ -1,5 +1,6 @@
 package com.project.gateway.security;
 
+// bắt lỗi 401
 import java.nio.charset.StandardCharsets;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -12,31 +13,28 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 public class JsonAuthenticationEntryPoint
-        implements ServerAuthenticationEntryPoint {
+                implements ServerAuthenticationEntryPoint {
 
-    private static final byte[] BODY =
-            "{\"status\":401,\"message\":\"Authentication required\"}"
-                    .getBytes(StandardCharsets.UTF_8);
+        private static final byte[] BODY = "{\"status\":401,\"message\":\"Authentication required\"}"
+                        .getBytes(StandardCharsets.UTF_8);
 
-    @Override
-    public Mono<Void> commence(
-            ServerWebExchange exchange,
-            AuthenticationException exception) {
+        @Override
+        public Mono<Void> commence(
+                        ServerWebExchange exchange,
+                        AuthenticationException exception) {
 
-        exchange.getResponse().setStatusCode(
-                HttpStatus.UNAUTHORIZED
-        );
+                exchange.getResponse().setStatusCode(
+                                HttpStatus.UNAUTHORIZED);
 
-        exchange.getResponse()
-                .getHeaders()
-                .setContentType(MediaType.APPLICATION_JSON);
-
-        DataBuffer buffer =
                 exchange.getResponse()
-                        .bufferFactory()
-                        .wrap(BODY);
+                                .getHeaders()
+                                .setContentType(MediaType.APPLICATION_JSON);
 
-        return exchange.getResponse()
-                .writeWith(Mono.just(buffer));
-    }
+                DataBuffer buffer = exchange.getResponse()
+                                .bufferFactory()
+                                .wrap(BODY);
+
+                return exchange.getResponse()
+                                .writeWith(Mono.just(buffer));
+        }
 }

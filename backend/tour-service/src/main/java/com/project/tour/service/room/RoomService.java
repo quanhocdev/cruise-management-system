@@ -8,6 +8,7 @@ import com.project.tour.mapper.room.RoomMapper;
 import com.project.tour.model.CruiseDeck;
 import com.project.tour.model.Room;
 import com.project.tour.model.RoomType;
+import com.project.tour.model.TourPackage;
 import com.project.tour.model.enums.RoomStatus;
 import com.project.tour.repository.cruise.CruiseDeckRepository;
 import com.project.tour.repository.room.RoomRepository;
@@ -16,7 +17,7 @@ import com.project.tour.repository.room.RoomTypeRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import com.project.tour.repository.tour.TourPackageRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -28,15 +29,18 @@ public class RoomService {
         private final RoomRepository roomRepository;
         private final CruiseDeckRepository cruiseDeckRepository;
         private final RoomTypeRepository roomTypeRepository;
+        private final TourPackageRepository tourPackageRepository;
 
         public RoomService(
                         RoomRepository roomRepository,
                         CruiseDeckRepository cruiseDeckRepository,
-                        RoomTypeRepository roomTypeRepository) {
+                        RoomTypeRepository roomTypeRepository,
+                        TourPackageRepository tourPackageRepository) {
 
                 this.roomRepository = roomRepository;
                 this.cruiseDeckRepository = cruiseDeckRepository;
                 this.roomTypeRepository = roomTypeRepository;
+                this.tourPackageRepository = tourPackageRepository;
         }
 
         // =====================================================
@@ -259,5 +263,32 @@ public class RoomService {
                                 .orElseThrow(() -> new AppException(
                                                 "Room not found",
                                                 HttpStatus.NOT_FOUND));
+        }
+
+        // =====================================================
+        // GET AVAILABLE ROOMS FOR BOOKING (Dùng tourPackageId)
+        // =====================================================
+
+        @Transactional(readOnly = true)
+        public List<RoomResponse> getAvailableRoomsForBooking(
+                        Long bookingId,
+                        UUID tourPackageId) { // Đổi tham số từ roomTypeId thành tourPackageId
+
+                System.out.println("[SERVICE] Lọc phòng trống cho bookingId: " + bookingId + " với tourPackageId: "
+                                + tourPackageId);
+
+                // 1. Từ tourPackageId, tour-service tự tra cứu trong bảng tour_packages để lấy
+                // roomTypeId
+                TourPackage tourPackage = tourPackageRepository.findById(tourPackageId)
+                                .orElseThrow(() -> new AppException("Tour package not found", HttpStatus.NOT_FOUND));
+
+                UUID roomTypeId = tourPackage.getRoomTypeId();
+
+                // 2. Lấy danh sách phòng trống dựa theo roomTypeId đã tìm được
+                List<Room> rooms = roomRepository.findAllByRoomType_IdAndStatus(roomTypeId, RoomStatus.ACTIVE);
+
+                return rooms.stream()
+                                .map(RoomMapper::toResponse)
+                                .toList();
         }
 }

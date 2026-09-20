@@ -60,12 +60,7 @@ public class BookingMapper {
                 link.getCheckedInAt());
     }
 
-    // ==========================================
-    // BỔ SUNG CHO PHẦN FINANCE / QUẢN TRỊ TOUR
-    // ==========================================
-
-    // 1. Map Booking Entity sang BookingSummaryResponse (Dùng cho bảng danh sách
-    // booking theo tour)
+    // 1. Map Booking Entity sang BookingSummaryResponse
     public BookingSummaryResponse toSummaryResponse(Booking booking) {
         if (booking == null) {
             return null;
@@ -84,14 +79,16 @@ public class BookingMapper {
                 booking.getCreatedAt());
     }
 
-    // 2. Map BookingPassenger Entity sang BookingPassengerDetailResponse (Dùng cho
-    // trang chi tiết hành khách)
+    // 2. Map BookingPassenger Entity sang BookingPassengerDetailResponse
     public BookingPassengerDetailResponse toPassengerDetailResponse(BookingPassenger link) {
         if (link == null) {
             return null;
         }
         var p = link.getPassenger();
+        var booking = link.getBooking();
+
         return new BookingPassengerDetailResponse(
+                booking != null ? booking.getTourPackageId() : null,
                 link.getId(),
                 link.getRoomId(),
                 link.getStatus(),

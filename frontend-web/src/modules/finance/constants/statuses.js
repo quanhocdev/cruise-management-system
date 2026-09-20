@@ -1,7 +1,4 @@
-// Khớp với enum backend — đã đối chiếu.
-
-// RoomStatus, CruiseStatus, CruiseDeckStatus, CruiseAreaStatus
-// đều dùng chung một bộ ACTIVE / INACTIVE
+// src/modules/finance/constants/statuses.js
 export const ACTIVE_STATUS_OPTIONS = [
   { value: "ACTIVE", label: "Đang khai thác" },
   { value: "INACTIVE", label: "Ngưng khai thác" },

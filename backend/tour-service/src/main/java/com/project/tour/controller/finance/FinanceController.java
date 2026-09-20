@@ -1,20 +1,4 @@
-// package com.project.tour.controller.finance;
 
-// import org.springframework.web.bind.annotation.RequestMapping;
-// import org.springframework.web.bind.annotation.RestController;
-
-// @RestController
-// @RequestMapping("/api/finance/")
-// public class FinanceController {
-//     // get danh sách các tour
-//     // get lịch trình của tour, lịch dừng của tour
-//     // get thuyền của tour được chọn
-//     // get tầng của thuyền của tour
-//     // get khu vực của tàu của tầng của thuyền của tour
-//     // get phòng của tầng của thuyền của tour
-//     // get kiểu phòng của thuyền của tour
-//     // get danh sách các vòng nfc của tour
-// }
 package com.project.tour.controller.finance;
 
 import com.project.tour.dto.tour.TourResponse;
@@ -35,7 +19,7 @@ import com.project.tour.service.cruise.CruiseAreaService;
 import com.project.tour.service.room.RoomService;
 import com.project.tour.service.room.RoomTypeService;
 import com.project.tour.service.NfcCardService;
-
+import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -142,5 +126,45 @@ public class FinanceController {
     @GetMapping("/nfc-cards")
     public ResponseEntity<List<NfcCardResponse>> getAllNfcCards() {
         return ResponseEntity.ok(nfcCardService.getAllCards());
+    }
+
+    @GetMapping("/packages/{tourPackageId}/available-rooms")
+    public ResponseEntity<?> getAvailableRoomsByPackage(
+            @PathVariable UUID tourPackageId,
+            @RequestParam(required = false) Long bookingId) {
+
+        System.out.println("========================================");
+        System.out.println("[TOUR-FINANCE] GET available-rooms for tourPackageId = " + tourPackageId);
+        System.out.println("[TOUR-FINANCE] bookingId = " + bookingId);
+        System.out.println("========================================");
+
+        try {
+            List<RoomResponse> availableRooms = roomService.getAvailableRoomsForBooking(bookingId, tourPackageId);
+            return ResponseEntity.ok(availableRooms);
+        } catch (Exception e) {
+            // IN TRỌN VÉN LỖI RA CONSOLE ĐỂ XEM NÓ BỊ Ở ĐÂU
+            System.err.println("================ LỖI 500 CHI TIẾT ================");
+            e.printStackTrace();
+            System.err.println("==================================================");
+
+            // Trả về message lỗi chi tiết luôn cho Frontend dễ debug
+            return ResponseEntity.status(500).body(Map.of(
+                    "error", true,
+                    "message", e.getMessage()));
+        }
+    }
+
+    // 10. Get danh sách vòng NFC còn trống (Active & Unused) trong Tour cụ thể
+    // Thay vì lấy theo tourId, ta lấy tất cả các thẻ NFC có sẵn (AVAILABLE) trong
+    // kho
+    @GetMapping("/available-wristbands") // Bỏ phần /tours/{tourId} đi cho đúng thực tế
+    public ResponseEntity<List<NfcCardResponse>> getAllAvailableWristbands() {
+
+        System.out.println("========================================");
+        System.out.println("[TOUR-FINANCE] GET all available-wristbands");
+        System.out.println("========================================");
+
+        List<NfcCardResponse> availableCards = nfcCardService.getAllAvailableCards();
+        return ResponseEntity.ok(availableCards);
     }
 }

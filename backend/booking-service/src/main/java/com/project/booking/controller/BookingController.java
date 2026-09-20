@@ -67,7 +67,7 @@ public class BookingController {
             Principal principal) {
 
         Long userId = extractUserId(principal);
-        String email = extractEmail(principal); // <-- Bốc email từ token
+        String email = extractEmail(principal);
 
         System.out.println("==========================================");
         System.out.println(">>> [CONTROLLER] ĐÃ NHẬN ĐƯỢC REQUEST ĐẶT VÉ!");
@@ -75,7 +75,7 @@ public class BookingController {
         System.out.println(">>> Email từ Token: " + email);
         System.out.println("==========================================");
 
-        return ResponseEntity.ok(bookingService.create(request, userId, email)); // Truyền email xuống service
+        return ResponseEntity.ok(bookingService.create(request, userId, email));
     }
 
     @PatchMapping("/{id}/cancel")

@@ -1,0 +1,32 @@
+/* src/modules/finance/styles/financeCheckIn.css */
+.finance-checkin__container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.finance-checkin__input-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.finance-checkin__input {
+  padding: 8px;
+  width: 320px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.finance-checkin__btn-search {
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.finance-checkin__btn-search:hover {
+  background-color: #0056b3;
+}

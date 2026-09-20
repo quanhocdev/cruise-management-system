@@ -1,5 +1,6 @@
 package com.project.gateway.security;
 
+//  bắt lỗi 403
 import java.nio.charset.StandardCharsets;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -13,29 +14,26 @@ import reactor.core.publisher.Mono;
 
 public class JsonAccessDeniedHandler implements ServerAccessDeniedHandler {
 
-    private static final byte[] BODY =
-            "{\"status\":403,\"message\":\"Access denied\"}"
-                    .getBytes(StandardCharsets.UTF_8);
+        private static final byte[] BODY = "{\"status\":403,\"message\":\"Access denied\"}"
+                        .getBytes(StandardCharsets.UTF_8);
 
-    @Override
-    public Mono<Void> handle(
-            ServerWebExchange exchange,
-            AccessDeniedException exception) {
+        @Override
+        public Mono<Void> handle(
+                        ServerWebExchange exchange,
+                        AccessDeniedException exception) {
 
-        exchange.getResponse().setStatusCode(
-                HttpStatus.FORBIDDEN
-        );
+                exchange.getResponse().setStatusCode(
+                                HttpStatus.FORBIDDEN);
 
-        exchange.getResponse()
-                .getHeaders()
-                .setContentType(MediaType.APPLICATION_JSON);
-
-        DataBuffer buffer =
                 exchange.getResponse()
-                        .bufferFactory()
-                        .wrap(BODY);
+                                .getHeaders()
+                                .setContentType(MediaType.APPLICATION_JSON);
 
-        return exchange.getResponse()
-                .writeWith(Mono.just(buffer));
-    }
+                DataBuffer buffer = exchange.getResponse()
+                                .bufferFactory()
+                                .wrap(BODY);
+
+                return exchange.getResponse()
+                                .writeWith(Mono.just(buffer));
+        }
 }

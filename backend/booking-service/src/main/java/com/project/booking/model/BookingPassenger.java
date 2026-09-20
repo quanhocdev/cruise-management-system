@@ -41,6 +41,28 @@ public class BookingPassenger {
     @Column(name = "nfc_card_uid", length = 100, unique = true)
     private String nfcCardUid;
 
+    // --- TIMESTAMPS ---
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        LocalDateTime now = LocalDateTime.now();
+        createdAt = now;
+        updatedAt = now;
+        if (status == null) {
+            status = BookingPassengerStatus.PENDING;
+        }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
     // --- GETTERS & SETTERS ---
     public Long getId() {
         return id;
@@ -104,5 +126,13 @@ public class BookingPassenger {
 
     public void setNfcCardUid(String nfcCardUid) {
         this.nfcCardUid = nfcCardUid;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 }
