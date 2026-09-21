@@ -33,7 +33,7 @@ export default function PassengerBooking() {
   const { passengers, loadPassengers } = usePassengers();
 
   const [tourPackageId, setTourPackageId] = useState(packageIdFromUrl || "");
-  const [numberOfRooms, setNumberOfRooms] = useState(1); // 👈 Thêm state quản lý số lượng phòng
+  const [numberOfRooms, setNumberOfRooms] = useState(1);
   const [primaryContactName, setPrimaryContactName] = useState(
     user?.fullName || "",
   );
