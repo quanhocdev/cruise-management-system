@@ -22,128 +22,128 @@ import java.util.UUID;
 @Transactional
 public class ActivityCruiseTourConfigService {
 
-    private final ActivityCruiseTourAssignmentRepository assignmentRepository;
-    private final ActivityCruiseRepository activityCruiseRepository;
-    private final ActivityCruiseTourMapper activityCruiseTourMapper;
+        private final ActivityCruiseTourAssignmentRepository assignmentRepository;
+        private final ActivityCruiseRepository activityCruiseRepository;
+        private final ActivityCruiseTourMapper activityCruiseTourMapper;
 
-    public ActivityCruiseTourConfigService(
-            ActivityCruiseTourAssignmentRepository assignmentRepository,
-            ActivityCruiseRepository activityCruiseRepository,
-            ActivityCruiseTourMapper activityCruiseTourMapper) {
+        public ActivityCruiseTourConfigService(
+                        ActivityCruiseTourAssignmentRepository assignmentRepository,
+                        ActivityCruiseRepository activityCruiseRepository,
+                        ActivityCruiseTourMapper activityCruiseTourMapper) {
 
-        this.assignmentRepository = assignmentRepository;
-        this.activityCruiseRepository = activityCruiseRepository;
-        this.activityCruiseTourMapper = activityCruiseTourMapper;
-    }
-
-    public ActivityCruiseTourResponse configure(
-            UUID assignmentId,
-            ActivityCruiseTourConfigRequest request) {
-
-        ActivityCruiseTour assignment = assignmentRepository
-                .findById(assignmentId)
-                .orElseThrow(() -> new AppException(
-                        "Activity cruise tour assignment not found",
-                        HttpStatus.NOT_FOUND));
-
-        if (assignment.getStatus() != ActivityCruiseTourStatus.WAITING_CONFIG) {
-            throw new AppException(
-                    "Activity cruise tour is not waiting for configuration",
-                    HttpStatus.BAD_REQUEST);
+                this.assignmentRepository = assignmentRepository;
+                this.activityCruiseRepository = activityCruiseRepository;
+                this.activityCruiseTourMapper = activityCruiseTourMapper;
         }
 
-        ActivityCruise activityCruise = activityCruiseRepository
-                .findById(request.activityCruiseId())
-                .orElseThrow(() -> new AppException(
-                        "Activity cruise not found",
-                        HttpStatus.NOT_FOUND));
+        public ActivityCruiseTourResponse configure(
+                        UUID assignmentId,
+                        ActivityCruiseTourConfigRequest request) {
 
-        if (activityCruise.getStatus() != ActivityCruiseStatus.ACTIVE) {
-            throw new AppException(
-                    "Activity cruise is not active",
-                    HttpStatus.BAD_REQUEST);
+                ActivityCruiseTour assignment = assignmentRepository
+                                .findById(assignmentId)
+                                .orElseThrow(() -> new AppException(
+                                                "Activity cruise tour assignment not found",
+                                                HttpStatus.NOT_FOUND));
+
+                if (assignment.getStatus() != ActivityCruiseTourStatus.WAITING_CONFIG) {
+                        throw new AppException(
+                                        "Activity cruise tour is not waiting for configuration",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                ActivityCruise activityCruise = activityCruiseRepository
+                                .findById(request.activityCruiseId())
+                                .orElseThrow(() -> new AppException(
+                                                "Activity cruise not found",
+                                                HttpStatus.NOT_FOUND));
+
+                if (activityCruise.getStatus() != ActivityCruiseStatus.ACTIVE) {
+                        throw new AppException(
+                                        "Activity cruise is not active",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                validateTime(
+                                request.startTime(),
+                                request.endTime());
+
+                activityCruiseTourMapper.applyConfig(
+                                assignment,
+                                request,
+                                activityCruise);
+
+                // Đã cấu hình xong nhưng Tour chưa READY
+                assignment.setStatus(ActivityCruiseTourStatus.CONFIGURED);
+
+                ActivityCruiseTour saved = assignmentRepository.save(assignment);
+
+                return activityCruiseTourMapper.toResponse(saved);
         }
 
-        validateTime(
-                request.startTime(),
-                request.endTime());
+        public ActivityCruiseTourResponse updateConfig(
+                        UUID assignmentId,
+                        ActivityCruiseTourConfigRequest request) {
 
-        activityCruiseTourMapper.applyConfig(
-                assignment,
-                request,
-                activityCruise);
+                ActivityCruiseTour assignment = assignmentRepository
+                                .findById(assignmentId)
+                                .orElseThrow(() -> new AppException(
+                                                "Activity cruise tour assignment not found",
+                                                HttpStatus.NOT_FOUND));
 
-        // Đã cấu hình xong nhưng Tour chưa READY
-        assignment.setStatus(ActivityCruiseTourStatus.CONFIGURED);
+                if (assignment.getStatus() != ActivityCruiseTourStatus.CONFIGURED) {
+                        throw new AppException(
+                                        "Only CONFIGURED activities can be updated",
+                                        HttpStatus.BAD_REQUEST);
+                }
 
-        ActivityCruiseTour saved = assignmentRepository.save(assignment);
+                ActivityCruise activityCruise = activityCruiseRepository
+                                .findById(request.activityCruiseId())
+                                .orElseThrow(() -> new AppException(
+                                                "Activity cruise not found",
+                                                HttpStatus.NOT_FOUND));
 
-        return activityCruiseTourMapper.toResponse(saved);
-    }
+                if (activityCruise.getStatus() != ActivityCruiseStatus.ACTIVE) {
+                        throw new AppException(
+                                        "Activity cruise is not active",
+                                        HttpStatus.BAD_REQUEST);
+                }
 
-    public ActivityCruiseTourResponse updateConfig(
-            UUID assignmentId,
-            ActivityCruiseTourConfigRequest request) {
+                validateTime(
+                                request.startTime(),
+                                request.endTime());
 
-        ActivityCruiseTour assignment = assignmentRepository
-                .findById(assignmentId)
-                .orElseThrow(() -> new AppException(
-                        "Activity cruise tour assignment not found",
-                        HttpStatus.NOT_FOUND));
+                activityCruiseTourMapper.applyConfig(
+                                assignment,
+                                request,
+                                activityCruise);
 
-        if (assignment.getStatus() != ActivityCruiseTourStatus.CONFIGURED) {
-            throw new AppException(
-                    "Only CONFIGURED activities can be updated",
-                    HttpStatus.BAD_REQUEST);
+                // PATCH vẫn đang ở trạng thái đã cấu hình
+                assignment.setStatus(ActivityCruiseTourStatus.CONFIGURED);
+
+                ActivityCruiseTour saved = assignmentRepository.save(assignment);
+
+                return activityCruiseTourMapper.toResponse(saved);
         }
 
-        ActivityCruise activityCruise = activityCruiseRepository
-                .findById(request.activityCruiseId())
-                .orElseThrow(() -> new AppException(
-                        "Activity cruise not found",
-                        HttpStatus.NOT_FOUND));
+        // =====================================================
+        // VALIDATION
+        // =====================================================
 
-        if (activityCruise.getStatus() != ActivityCruiseStatus.ACTIVE) {
-            throw new AppException(
-                    "Activity cruise is not active",
-                    HttpStatus.BAD_REQUEST);
+        private void validateTime(
+                        LocalDateTime startTime,
+                        LocalDateTime endTime) {
+
+                if (startTime == null || endTime == null) {
+                        throw new AppException(
+                                        "Start time and end time are required",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                if (!startTime.isBefore(endTime)) {
+                        throw new AppException(
+                                        "Start time must be before end time",
+                                        HttpStatus.BAD_REQUEST);
+                }
         }
-
-        validateTime(
-                request.startTime(),
-                request.endTime());
-
-        activityCruiseTourMapper.applyConfig(
-                assignment,
-                request,
-                activityCruise);
-
-        // PATCH vẫn đang ở trạng thái đã cấu hình
-        assignment.setStatus(ActivityCruiseTourStatus.CONFIGURED);
-
-        ActivityCruiseTour saved = assignmentRepository.save(assignment);
-
-        return activityCruiseTourMapper.toResponse(saved);
-    }
-
-    // =====================================================
-    // VALIDATION
-    // =====================================================
-
-    private void validateTime(
-            LocalDateTime startTime,
-            LocalDateTime endTime) {
-
-        if (startTime == null || endTime == null) {
-            throw new AppException(
-                    "Start time and end time are required",
-                    HttpStatus.BAD_REQUEST);
-        }
-
-        if (!startTime.isBefore(endTime)) {
-            throw new AppException(
-                    "Start time must be before end time",
-                    HttpStatus.BAD_REQUEST);
-        }
-    }
 }

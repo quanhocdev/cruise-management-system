@@ -1,14 +1,11 @@
 package com.project.tour.service.activitycruise;
 
 import com.project.tour.dto.activitycruise.ActivityCruiseTourResponse;
-import com.project.tour.dto.activitycruise.HistoryActivityCruiseTourResponse;
 import com.project.tour.mapper.activitycruise.ActivityCruiseTourMapper;
-import com.project.tour.mapper.activitycruise.HistoryActivityCruiseTourMapper;
 import com.project.tour.model.activitycruise.ActivityCruiseTour;
 import com.project.tour.model.activitycruise.enums.ActivityCruiseTourStatus;
 import com.project.tour.model.enums.tour.TourStatusTrip;
 import com.project.tour.repository.activitycruise.ActivityCruiseTourAssignmentRepository;
-import com.project.tour.repository.activitycruise.HistoryActivityCruiseTourRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,19 +19,13 @@ public class ActivityCruiseTourService {
 
         private final ActivityCruiseTourAssignmentRepository assignmentRepository;
         private final ActivityCruiseTourMapper activityCruiseTourMapper;
-        private final HistoryActivityCruiseTourRepository historyRepository;
-        private final HistoryActivityCruiseTourMapper historyMapper;
 
         public ActivityCruiseTourService(
                         ActivityCruiseTourAssignmentRepository assignmentRepository,
-                        ActivityCruiseTourMapper activityCruiseTourMapper,
-                        HistoryActivityCruiseTourRepository historyRepository,
-                        HistoryActivityCruiseTourMapper historyMapper) {
+                        ActivityCruiseTourMapper activityCruiseTourMapper) {
 
                 this.assignmentRepository = assignmentRepository;
                 this.activityCruiseTourMapper = activityCruiseTourMapper;
-                this.historyRepository = historyRepository;
-                this.historyMapper = historyMapper;
         }
 
         // =====================================================
@@ -107,20 +98,6 @@ public class ActivityCruiseTourService {
                                 .findAll()
                                 .stream()
                                 .map(activityCruiseTourMapper::toResponse)
-                                .toList();
-        }
-
-        // =====================================================
-        // GET CONFIGURATION HISTORY
-        // =====================================================
-
-        @Transactional(readOnly = true)
-        public List<HistoryActivityCruiseTourResponse> getConfigurationHistory() {
-
-                return historyRepository
-                                .findAllByOrderByCompletedAtDesc()
-                                .stream()
-                                .map(historyMapper::toResponse)
                                 .toList();
         }
 

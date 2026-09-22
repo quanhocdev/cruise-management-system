@@ -32,10 +32,6 @@ public class ActivityCruiseTourAssignmentController {
                 assignmentService.getByTour(tourId));
     }
 
-    /**
-     * Operation phân công khu vực Activity cho Tour.
-     * Validate tại tour-service -> Bắn Event Kafka xử lý bất đồng bộ.
-     */
     @PostMapping
     public ResponseEntity<Void> assign(
             @Valid @RequestBody ActivityCruiseTourAssignmentRequest request) {
@@ -44,10 +40,6 @@ public class ActivityCruiseTourAssignmentController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 
-    /**
-     * Xóa phân công Activity theo tourId và cruiseAreaId.
-     * Bắn Event Kafka với action "DELETE".
-     */
     @DeleteMapping("/tour/{tourId}/area/{cruiseAreaId}")
     public ResponseEntity<Void> deleteAssignment(
             @PathVariable UUID tourId,
