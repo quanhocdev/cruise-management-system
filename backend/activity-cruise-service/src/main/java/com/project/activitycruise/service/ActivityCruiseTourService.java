@@ -5,7 +5,6 @@ import com.project.activitycruise.dto.HistoryActivityCruiseTourResponse;
 import com.project.activitycruise.mapper.ActivityCruiseTourMapper;
 import com.project.activitycruise.mapper.HistoryActivityCruiseTourMapper;
 import com.project.activitycruise.model.ActivityCruiseTour;
-import com.project.activitycruise.model.HistoryActivityCruiseTour;
 import com.project.activitycruise.model.enums.ActivityCruiseTourStatus;
 import com.project.activitycruise.repository.ActivityCruiseTourAssignmentRepository;
 import com.project.activitycruise.repository.HistoryActivityCruiseTourRepository;
