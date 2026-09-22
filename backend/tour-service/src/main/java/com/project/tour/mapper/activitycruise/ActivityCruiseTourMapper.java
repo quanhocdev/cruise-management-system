@@ -22,22 +22,39 @@ public class ActivityCruiseTourMapper {
         return new ActivityCruiseTourResponse(
                 assignment.getId(),
 
-                // Tour info
+                // =====================================================
+                // TOUR
+                // =====================================================
+
                 assignment.getTourId(),
                 null, // tourCode
                 null, // tourName
 
-                // Activity info
-                activity != null ? activity.getId() : null,
-                activity != null ? activity.getName() : null,
-                activity != null ? activity.getDescription() : null,
-                activity != null ? activity.getImageUrl() : null,
+                // =====================================================
+                // ACTIVITY CRUISE
+                // =====================================================
 
-                // Cruise Area info
+                activity != null
+                        ? activity.getId()
+                        : null,
+
+                assignment.getActivityName(),
+
+                assignment.getActivityDescription(),
+
+                assignment.getImageUrl(),
+
+                // =====================================================
+                // CRUISE AREA
+                // =====================================================
+
                 assignment.getCruiseAreaId(),
                 null, // cruiseAreaName
 
-                // Configuration & Timings
+                // =====================================================
+                // CONFIGURATION
+                // =====================================================
+
                 assignment.getStartTime(),
                 assignment.getEndTime(),
                 assignment.getMaxPassengers(),
@@ -51,6 +68,11 @@ public class ActivityCruiseTourMapper {
     /**
      * Gán cấu hình từ Request DTO và ActivityCruise Entity
      * vào ActivityCruiseTour Entity.
+     *
+     * ActivityCruiseTour giữ snapshot của:
+     * - activityName
+     * - activityDescription
+     * - imageUrl
      */
     public void applyConfig(
             ActivityCruiseTour assignment,
@@ -62,9 +84,36 @@ public class ActivityCruiseTourMapper {
         }
 
         assignment.setActivityCruise(activityCruise);
-        assignment.setStartTime(request.startTime());
-        assignment.setEndTime(request.endTime());
-        assignment.setMaxPassengers(request.maxPassengers());
-        assignment.setPrice(request.price());
+
+        // =====================================================
+        // SNAPSHOT ACTIVITY CRUISE
+        // =====================================================
+
+        if (activityCruise != null) {
+            assignment.setActivityName(
+                    activityCruise.getName());
+
+            assignment.setActivityDescription(
+                    activityCruise.getDescription());
+
+            assignment.setImageUrl(
+                    activityCruise.getImageUrl());
+        }
+
+        // =====================================================
+        // CONFIGURATION
+        // =====================================================
+
+        assignment.setStartTime(
+                request.startTime());
+
+        assignment.setEndTime(
+                request.endTime());
+
+        assignment.setMaxPassengers(
+                request.maxPassengers());
+
+        assignment.setPrice(
+                request.price());
     }
 }

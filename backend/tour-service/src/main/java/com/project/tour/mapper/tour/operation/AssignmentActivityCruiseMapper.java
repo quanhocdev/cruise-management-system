@@ -1,24 +1,35 @@
 package com.project.tour.mapper.tour.operation;
 
 import com.project.tour.dto.tour.operation.AssignmentActivityCruiseResponse;
-import com.project.tour.model.AssignmentActivityCruise;
+import com.project.tour.model.activitycruise.ActivityCruiseTour;
 
-public class AssignmentActivityCruiseMapper {
+public final class AssignmentActivityCruiseMapper {
 
     private AssignmentActivityCruiseMapper() {
     }
 
     public static AssignmentActivityCruiseResponse toResponse(
-            AssignmentActivityCruise entity) {
+            ActivityCruiseTour entity) {
+
+        if (entity == null) {
+            return null;
+        }
 
         return new AssignmentActivityCruiseResponse(
                 entity.getId(),
+
                 entity.getTourId(),
                 entity.getCruiseAreaId(),
 
-                entity.getActivityCruiseTourId(),
-                entity.getActivityCruiseId(),
+                // Không còn activityCruiseTourId riêng.
+                // id của chính ActivityCruiseTour là ID assignment/config.
+                entity.getId(),
 
+                entity.getActivityCruise() != null
+                        ? entity.getActivityCruise().getId()
+                        : null,
+
+                // Snapshot data
                 entity.getActivityName(),
                 entity.getActivityDescription(),
 
@@ -29,7 +40,10 @@ public class AssignmentActivityCruiseMapper {
                 entity.getPrice(),
 
                 entity.getImageUrl(),
-                entity.getStatus(),
+
+                entity.getStatus() != null
+                        ? entity.getStatus().name()
+                        : null,
 
                 entity.getCreatedAt(),
                 entity.getUpdatedAt());

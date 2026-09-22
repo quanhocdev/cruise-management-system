@@ -2,12 +2,14 @@ package com.project.tour.service.tour.operation;
 
 import com.project.common.event.TourAssignmentEvent;
 import com.project.common.event.enums.TourAssignmentType;
-import com.project.tour.model.AssignmentActivityCruise;
+
 import com.project.tour.model.AssignmentProduct;
 import com.project.tour.model.AssignmentService;
 import com.project.tour.model.Schedule;
 import com.project.tour.model.ScheduleStop;
-import com.project.tour.repository.tour.AssignmentActivityCruiseRepository;
+import com.project.tour.model.activitycruise.ActivityCruiseTour;
+
+import com.project.tour.repository.activitycruise.ActivityCruiseTourAssignmentRepository;
 import com.project.tour.repository.tour.AssignmentProductRepository;
 import com.project.tour.repository.tour.AssignmentServiceRepository;
 import com.project.tour.repository.tour.schedule.ScheduleRepository;
@@ -26,7 +28,7 @@ public class OperationCruiseAssignmentService {
 
         private final AssignmentProductRepository assignmentProductRepository;
         private final AssignmentServiceRepository assignmentServiceRepository;
-        private final AssignmentActivityCruiseRepository assignmentActivityCruiseRepository;
+        private final ActivityCruiseTourAssignmentRepository activityCruiseTourRepository;
 
         private final ScheduleRepository scheduleRepository;
         private final ScheduleStopRepository scheduleStopRepository;
@@ -34,13 +36,13 @@ public class OperationCruiseAssignmentService {
         public OperationCruiseAssignmentService(
                         AssignmentProductRepository assignmentProductRepository,
                         AssignmentServiceRepository assignmentServiceRepository,
-                        AssignmentActivityCruiseRepository assignmentActivityCruiseRepository,
+                        ActivityCruiseTourAssignmentRepository activityCruiseTourRepository,
                         ScheduleRepository scheduleRepository,
                         ScheduleStopRepository scheduleStopRepository) {
 
                 this.assignmentProductRepository = assignmentProductRepository;
                 this.assignmentServiceRepository = assignmentServiceRepository;
-                this.assignmentActivityCruiseRepository = assignmentActivityCruiseRepository;
+                this.activityCruiseTourRepository = activityCruiseTourRepository;
 
                 this.scheduleRepository = scheduleRepository;
                 this.scheduleStopRepository = scheduleStopRepository;
@@ -54,8 +56,9 @@ public class OperationCruiseAssignmentService {
                 // PRODUCT
                 // =====================================================
 
-                List<AssignmentProduct> productAssignments = assignmentProductRepository
-                                .findAllByTourIdOrderByCreatedAtAsc(tourId);
+                List<AssignmentProduct> productAssignments =
+                                assignmentProductRepository
+                                                .findAllByTourIdOrderByCreatedAtAsc(tourId);
 
                 for (AssignmentProduct assignment : productAssignments) {
 
@@ -70,8 +73,9 @@ public class OperationCruiseAssignmentService {
                 // SERVICE
                 // =====================================================
 
-                List<AssignmentService> serviceAssignments = assignmentServiceRepository
-                                .findAllByTourIdOrderByCreatedAtAsc(tourId);
+                List<AssignmentService> serviceAssignments =
+                                assignmentServiceRepository
+                                                .findAllByTourIdOrderByCreatedAtAsc(tourId);
 
                 for (AssignmentService assignment : serviceAssignments) {
 
@@ -86,10 +90,11 @@ public class OperationCruiseAssignmentService {
                 // ACTIVITY CRUISE
                 // =====================================================
 
-                List<AssignmentActivityCruise> activityAssignments = assignmentActivityCruiseRepository
-                                .findAllByTourIdOrderByCreatedAtAsc(tourId);
+                List<ActivityCruiseTour> activityAssignments =
+                                activityCruiseTourRepository
+                                                .findAllByTourIdOrderByCreatedAtAsc(tourId);
 
-                for (AssignmentActivityCruise assignment : activityAssignments) {
+                for (ActivityCruiseTour assignment : activityAssignments) {
 
                         assignments.add(
                                         new TourAssignmentEvent(
@@ -102,8 +107,9 @@ public class OperationCruiseAssignmentService {
                 // ACTIVITY VISIT
                 // =====================================================
 
-                List<Schedule> schedules = scheduleRepository
-                                .findAllByTour_IdOrderByDayNumberAsc(tourId);
+                List<Schedule> schedules =
+                                scheduleRepository
+                                                .findAllByTour_IdOrderByDayNumberAsc(tourId);
 
                 if (!schedules.isEmpty()) {
 
@@ -111,9 +117,10 @@ public class OperationCruiseAssignmentService {
                                         .map(Schedule::getId)
                                         .toList();
 
-                        List<ScheduleStop> scheduleStops = scheduleStopRepository
-                                        .findAllBySchedule_IdInOrderBySchedule_DayNumberAscStopOrderAsc(
-                                                        scheduleIds);
+                        List<ScheduleStop> scheduleStops =
+                                        scheduleStopRepository
+                                                        .findAllBySchedule_IdInOrderBySchedule_DayNumberAscStopOrderAsc(
+                                                                        scheduleIds);
 
                         for (ScheduleStop scheduleStop : scheduleStops) {
 
