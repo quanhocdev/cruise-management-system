@@ -3,7 +3,7 @@ package com.project.tour.mapper.tour;
 import com.project.tour.dto.tour.PublicTourDetailResponse;
 import com.project.tour.dto.tour.PublicTourSummaryResponse;
 import com.project.tour.model.*;
-
+import com.project.tour.model.activitycruise.ActivityCruiseTour;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +43,7 @@ public class TourPublicMapper {
                         Map<UUID, AssignmentActivityVisit> stopIdToVisitMap,
                         List<TourPackage> packages,
                         Map<UUID, List<PackageBenefit>> packageIdToBenefitsMap,
-                        List<AssignmentActivityCruise> onboardActivities,
+                        List<ActivityCruiseTour> onboardActivities,
                         List<AssignmentProduct> products,
                         List<AssignmentService> services) {
                 if (tour == null)
