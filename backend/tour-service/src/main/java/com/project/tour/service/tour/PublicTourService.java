@@ -6,9 +6,11 @@ import com.project.tour.exception.AppException;
 import com.project.tour.mapper.tour.TourPublicMapper;
 import com.project.tour.model.*;
 import com.project.tour.model.activitycruise.ActivityCruiseTour;
+import com.project.tour.model.activityvisit.VisitTour;
 import com.project.tour.model.enums.tour.TourBookingStatus;
 import com.project.tour.model.enums.tour.TourStatusTrip;
 import com.project.tour.repository.activitycruise.ActivityCruiseTourAssignmentRepository;
+import com.project.tour.repository.activityvisit.VisitTourRepository;
 import com.project.tour.repository.tour.*;
 import com.project.tour.repository.tour.schedule.ScheduleRepository;
 import com.project.tour.repository.tour.schedule.ScheduleStopRepository;
@@ -33,7 +35,7 @@ public class PublicTourService {
         private final ScheduleRepository scheduleRepository;
         private final ScheduleStopRepository scheduleStopRepository;
 
-        private final AssignmentActivityVisitRepository assignmentActivityVisitRepository;
+        private final VisitTourRepository visitTourRepository;
 
         private final ActivityCruiseTourAssignmentRepository activityCruiseTourAssignmentRepository;
 
@@ -46,7 +48,7 @@ public class PublicTourService {
                         PackageBenefitRepository packageBenefitRepository,
                         ScheduleRepository scheduleRepository,
                         ScheduleStopRepository scheduleStopRepository,
-                        AssignmentActivityVisitRepository assignmentActivityVisitRepository,
+                        VisitTourRepository visitTourRepository,
                         ActivityCruiseTourAssignmentRepository activityCruiseTourAssignmentRepository,
                         AssignmentProductRepository assignmentProductRepository,
                         AssignmentServiceRepository assignmentServiceRepository) {
@@ -56,7 +58,7 @@ public class PublicTourService {
                 this.packageBenefitRepository = packageBenefitRepository;
                 this.scheduleRepository = scheduleRepository;
                 this.scheduleStopRepository = scheduleStopRepository;
-                this.assignmentActivityVisitRepository = assignmentActivityVisitRepository;
+                this.visitTourRepository = visitTourRepository;
                 this.activityCruiseTourAssignmentRepository = activityCruiseTourAssignmentRepository;
                 this.assignmentProductRepository = assignmentProductRepository;
                 this.assignmentServiceRepository = assignmentServiceRepository;
@@ -148,12 +150,12 @@ public class PublicTourService {
                                                 s -> scheduleStopRepository
                                                                 .findAllBySchedule_IdOrderByStopOrderAsc(s.getId())));
 
-                // Map ScheduleStop ID sang AssignmentActivityVisit
-                Map<UUID, AssignmentActivityVisit> stopIdToVisitMap = assignmentActivityVisitRepository
-                                .findAllByTourIdOrderByCreatedAtAsc(tourId)
+                // Map ScheduleStop ID sang VisitTour
+                Map<UUID, VisitTour> stopIdToVisitMap = visitTourRepository
+                                .findAllByTourIdOrderByStartTimeAsc(tourId)
                                 .stream()
                                 .collect(Collectors.toMap(
-                                                AssignmentActivityVisit::getScheduleStopId,
+                                                VisitTour::getScheduleStopId,
                                                 v -> v,
                                                 (v1, v2) -> v1));
 

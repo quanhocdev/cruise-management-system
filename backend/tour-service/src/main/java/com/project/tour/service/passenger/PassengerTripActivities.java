@@ -1,8 +1,9 @@
 package com.project.tour.service.passenger;
 
 import com.project.tour.model.activitycruise.ActivityCruiseTour;
+import com.project.tour.model.activityvisit.VisitTour;
 import com.project.tour.repository.activitycruise.ActivityCruiseTourAssignmentRepository;
-import com.project.tour.repository.tour.AssignmentActivityVisitRepository;
+import com.project.tour.repository.activityvisit.VisitTourRepository;
 import com.project.tour.repository.cruise.CruiseAreaRepository;
 import com.project.tour.repository.tour.schedule.ScheduleStopRepository;
 
@@ -22,7 +23,7 @@ import java.util.UUID;
 public class PassengerTripActivities {
 
     private final ActivityCruiseTourAssignmentRepository onboard;
-    private final AssignmentActivityVisitRepository shore;
+    private final VisitTourRepository shore;
     private final CruiseAreaRepository areas;
     private final ScheduleStopRepository stops;
 
@@ -36,7 +37,7 @@ public class PassengerTripActivities {
 
     public PassengerTripActivities(
             ActivityCruiseTourAssignmentRepository onboard,
-            AssignmentActivityVisitRepository shore,
+            VisitTourRepository shore,
             CruiseAreaRepository areas,
             ScheduleStopRepository stops) {
 
@@ -86,12 +87,12 @@ public class PassengerTripActivities {
         // SHORE ACTIVITIES
         // =====================================================
 
-        for (var a : shore.findAllByTourIdOrderByCreatedAtAsc(tourId)) {
+        for (VisitTour a : shore.findAllByTourIdOrderByStartTimeAsc(tourId)) {
 
             if (!visible(
-                    a.getVisitTourId(),
-                    a.getStatus(),
-                    a.getVisitName())) {
+                    a.getId(),
+                    a.getStatus() != null ? a.getStatus().name() : null,
+                    a.getName())) {
                 continue;
             }
 
@@ -104,16 +105,16 @@ public class PassengerTripActivities {
                             .orElse(null);
 
             result.add(new Activity(
-                    a.getVisitTourId(),
+                    a.getId(),
                     "SHORE",
-                    a.getVisitName(),
-                    a.getVisitDescription(),
+                    a.getName(),
+                    a.getDescription(),
                     a.getStartTime(),
                     a.getEndTime(),
                     location,
                     a.getPrice(),
                     a.getMaxPassengers(),
-                    a.getStatus()));
+                    a.getStatus() != null ? a.getStatus().name() : null));
         }
 
         // =====================================================

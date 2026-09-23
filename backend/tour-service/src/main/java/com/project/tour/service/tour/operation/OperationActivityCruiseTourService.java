@@ -2,7 +2,6 @@ package com.project.tour.service.tour.operation;
 
 import com.project.tour.dto.tour.operation.AssignmentActivityCruiseResponse;
 import com.project.tour.mapper.tour.operation.AssignmentActivityCruiseMapper;
-import com.project.tour.model.activitycruise.ActivityCruiseTour;
 import com.project.tour.repository.activitycruise.ActivityCruiseTourAssignmentRepository;
 
 import org.springframework.stereotype.Service;
@@ -23,10 +22,7 @@ public class OperationActivityCruiseTourService {
                 this.assignmentRepository = assignmentRepository;
         }
 
-        // =========================================================
         // GET ALL
-        // =========================================================
-
         public List<AssignmentActivityCruiseResponse> getAll() {
 
                 return assignmentRepository
@@ -36,10 +32,7 @@ public class OperationActivityCruiseTourService {
                                 .toList();
         }
 
-        // =========================================================
         // GET BY TOUR
-        // =========================================================
-
         public List<AssignmentActivityCruiseResponse> getByTourId(
                         UUID tourId) {
 

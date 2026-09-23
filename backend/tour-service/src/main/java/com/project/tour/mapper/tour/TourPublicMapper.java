@@ -4,6 +4,8 @@ import com.project.tour.dto.tour.PublicTourDetailResponse;
 import com.project.tour.dto.tour.PublicTourSummaryResponse;
 import com.project.tour.model.*;
 import com.project.tour.model.activitycruise.ActivityCruiseTour;
+import com.project.tour.model.activityvisit.VisitTour;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -12,12 +14,20 @@ import java.util.UUID;
 public class TourPublicMapper {
 
         // 1. Map danh sách tóm tắt cho trang chủ
-        public static PublicTourSummaryResponse toSummaryResponse(Tour tour, BigDecimal startingPrice) {
+        public static PublicTourSummaryResponse toSummaryResponse(
+                        Tour tour,
+                        BigDecimal startingPrice) {
+
                 if (tour == null)
                         return null;
 
-                String cruiseName = tour.getCruise() != null ? tour.getCruise().getName() : null;
-                String cruiseImageUrl = tour.getCruise() != null ? tour.getCruise().getImageUrl() : null;
+                String cruiseName = tour.getCruise() != null
+                                ? tour.getCruise().getName()
+                                : null;
+
+                String cruiseImageUrl = tour.getCruise() != null
+                                ? tour.getCruise().getImageUrl()
+                                : null;
 
                 return new PublicTourSummaryResponse(
                                 tour.getId(),
@@ -40,17 +50,19 @@ public class TourPublicMapper {
                         Tour tour,
                         List<Schedule> schedules,
                         Map<UUID, List<ScheduleStop>> scheduleIdToStopsMap,
-                        Map<UUID, AssignmentActivityVisit> stopIdToVisitMap,
+                        Map<UUID, VisitTour> stopIdToVisitMap,
                         List<TourPackage> packages,
                         Map<UUID, List<PackageBenefit>> packageIdToBenefitsMap,
                         List<ActivityCruiseTour> onboardActivities,
                         List<AssignmentProduct> products,
                         List<AssignmentService> services) {
+
                 if (tour == null)
                         return null;
 
                 // Cruise
                 Cruise cruise = tour.getCruise();
+
                 PublicTourDetailResponse.CruiseDetailRecord cruiseRecord = cruise != null
                                 ? new PublicTourDetailResponse.CruiseDetailRecord(
                                                 cruise.getId(),
@@ -64,18 +76,21 @@ public class TourPublicMapper {
                 // Schedules & Stops & Visit Activities
                 List<PublicTourDetailResponse.ScheduleDetailRecord> scheduleRecords = schedules.stream()
                                 .map(schedule -> {
-                                        List<ScheduleStop> stops = scheduleIdToStopsMap.getOrDefault(schedule.getId(),
+
+                                        List<ScheduleStop> stops = scheduleIdToStopsMap.getOrDefault(
+                                                        schedule.getId(),
                                                         List.of());
 
                                         List<PublicTourDetailResponse.ScheduleStopRecord> stopRecords = stops.stream()
                                                         .map(stop -> {
-                                                                AssignmentActivityVisit visit = stopIdToVisitMap
-                                                                                .get(stop.getId());
+
+                                                                VisitTour visit = stopIdToVisitMap.get(stop.getId());
+
                                                                 PublicTourDetailResponse.VisitActivityRecord visitRecord = visit != null
                                                                                 ? new PublicTourDetailResponse.VisitActivityRecord(
                                                                                                 visit.getId(),
-                                                                                                visit.getVisitName(),
-                                                                                                visit.getVisitDescription(),
+                                                                                                visit.getName(),
+                                                                                                visit.getDescription(),
                                                                                                 visit.getStartTime(),
                                                                                                 visit.getEndTime(),
                                                                                                 visit.getPrice(),
@@ -83,6 +98,7 @@ public class TourPublicMapper {
                                                                                 : null;
 
                                                                 Port port = stop.getPort();
+
                                                                 return new PublicTourDetailResponse.ScheduleStopRecord(
                                                                                 stop.getId(),
                                                                                 stop.getStopOrder(),
@@ -94,7 +110,8 @@ public class TourPublicMapper {
                                                                                 port != null ? port.getDescription()
                                                                                                 : null,
                                                                                 visitRecord);
-                                                        }).toList();
+                                                        })
+                                                        .toList();
 
                                         return new PublicTourDetailResponse.ScheduleDetailRecord(
                                                         schedule.getId(),
@@ -103,7 +120,8 @@ public class TourPublicMapper {
                                                         schedule.getDayNumber(),
                                                         schedule.getRealDay(),
                                                         stopRecords);
-                                }).toList();
+                                })
+                                .toList();
 
                 // Packages & Benefits
                 List<PublicTourDetailResponse.TourPackageRecord> packageRecords = packages.stream().map(pkg -> {
