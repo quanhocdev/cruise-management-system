@@ -1,18 +1,13 @@
 package com.project.tour.service.activityvisit;
 
-import com.project.common.event.VisitTourConfiguredEvent;
-import com.project.tour.dto.activityvisit.HistoryActivityVisitTourResponse;
 import com.project.tour.dto.activityvisit.VisitTourResponse;
 import com.project.tour.exception.AppException;
-import com.project.tour.mapper.activityvisit.HistoryActivityVisitTourMapper;
 import com.project.tour.mapper.activityvisit.VisitTourMapper;
-import com.project.tour.model.activityvisit.HistoryActivityVisitTour;
 import com.project.tour.model.activityvisit.VisitTour;
 import com.project.tour.model.activityvisit.enums.VisitTourStatus;
-import com.project.tour.repository.activityvisit.HistoryActivityVisitTourRepository;
 import com.project.tour.repository.activityvisit.VisitTourRepository;
+
 import org.springframework.http.HttpStatus;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,23 +18,12 @@ import java.util.UUID;
 @Transactional
 public class ActivityVisitTourConfigurationService {
 
-    private static final String VISIT_TOUR_CONFIGURED_TOPIC = "visit-tour-configured-topic";
-
     private final VisitTourRepository visitTourRepository;
-    private final HistoryActivityVisitTourRepository historyRepository;
-    private final HistoryActivityVisitTourMapper historyMapper;
-    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     public ActivityVisitTourConfigurationService(
-            VisitTourRepository visitTourRepository,
-            HistoryActivityVisitTourRepository historyRepository,
-            HistoryActivityVisitTourMapper historyMapper,
-            KafkaTemplate<String, Object> kafkaTemplate) {
+            VisitTourRepository visitTourRepository) {
 
         this.visitTourRepository = visitTourRepository;
-        this.historyRepository = historyRepository;
-        this.historyMapper = historyMapper;
-        this.kafkaTemplate = kafkaTemplate;
     }
 
     public void complete(UUID tourId) {
@@ -54,10 +38,14 @@ public class ActivityVisitTourConfigurationService {
         }
 
         // =====================================================
-        // KIỂM TRA TOUR ĐÃ HOÀN THÀNH TRƯỚC ĐÓ CHƯA
+        // KIỂM TRA TOUR ĐÃ HOÀN THÀNH CHƯA
         // =====================================================
 
-        if (historyRepository.existsByTourId(tourId)) {
+        boolean alreadyCompleted = visitTours.stream()
+                .allMatch(visitTour ->
+                        visitTour.getStatus() == VisitTourStatus.COMPLETED);
+
+        if (alreadyCompleted) {
             throw new AppException(
                     "Visit tour configuration for this tour has already been completed",
                     HttpStatus.CONFLICT);
@@ -78,49 +66,14 @@ public class ActivityVisitTourConfigurationService {
         }
 
         // =====================================================
-        // LƯU HISTORY
-        // =====================================================
-
-        HistoryActivityVisitTour history = new HistoryActivityVisitTour();
-
-        history.setTourId(tourId);
-        history.setTotalConfigurations(visitTours.size());
-
-        historyRepository.save(history);
-
-        // =====================================================
-        // PUBLISH KAFKA
+        // ĐÁNH DẤU TẤT CẢ ĐÃ HOÀN THÀNH
         // =====================================================
 
         for (VisitTour visitTour : visitTours) {
-
-            VisitTourConfiguredEvent event = new VisitTourConfiguredEvent(
-                    visitTour.getId(),
-                    visitTour.getTourId(),
-                    visitTour.getScheduleStopId(),
-                    visitTour.getName(),
-                    visitTour.getDescription(),
-                    visitTour.getStartTime(),
-                    visitTour.getEndTime(),
-                    visitTour.getMaxPassengers(),
-                    visitTour.getPrice(),
-                    visitTour.getStatus().name());
-
-            kafkaTemplate.send(
-                    VISIT_TOUR_CONFIGURED_TOPIC,
-                    visitTour.getTourId().toString(),
-                    event);
+            visitTour.setStatus(VisitTourStatus.COMPLETED);
         }
-    }
 
-    @Transactional(readOnly = true)
-    public List<HistoryActivityVisitTourResponse> getConfigurationHistory() {
-
-        return historyRepository
-                .findAllByOrderByCompletedAtDesc()
-                .stream()
-                .map(historyMapper::toResponse)
-                .toList();
+        visitTourRepository.saveAll(visitTours);
     }
 
     @Transactional(readOnly = true)

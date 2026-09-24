@@ -15,39 +15,24 @@ import java.util.UUID;
 public interface VisitTourRepository
                 extends JpaRepository<VisitTour, UUID> {
 
-        // =====================================================
         // GET ALL
-        // =====================================================
-
         List<VisitTour> findAllByOrderByCreatedAtDesc();
 
-        // =====================================================
         // GET BY ID
-        // =====================================================
-
         @Override
         Optional<VisitTour> findById(UUID id);
 
-        // =====================================================
         // GET BY SCHEDULE STOP
-        // =====================================================
-
         List<VisitTour> findAllByScheduleStopIdOrderByStartTimeAsc(
                         UUID scheduleStopId);
 
         Optional<VisitTour> findByScheduleStopId(UUID scheduleStopId);
 
-        // =====================================================
         // GET BY TOUR
-        // =====================================================
-
         List<VisitTour> findAllByTourIdOrderByStartTimeAsc(
                         UUID tourId);
 
-        // =====================================================
         // GET BY TOUR + SCHEDULE STOP
-        // =====================================================
-
         Optional<VisitTour> findByTourIdAndScheduleStopId(
                         UUID tourId,
                         UUID scheduleStopId);
@@ -60,18 +45,12 @@ public interface VisitTourRepository
                         UUID tourId,
                         UUID scheduleStopId);
 
-        // =====================================================
         // GET BY TOUR + STATUS
-        // =====================================================
-
         List<VisitTour> findAllByTourIdAndStatusOrderByStartTimeAsc(
                         UUID tourId,
                         VisitTourStatus status);
 
-        // =====================================================
         // SHORE CONFIGURATION
-        // =====================================================
-
         List<VisitTour> findAllByScheduleStopIdInOrderByStartTimeAsc(
                         Collection<UUID> scheduleStopIds);
 
