@@ -3,17 +3,17 @@ package com.project.tour.service.tour.operation;
 import com.project.common.event.TourAssignmentEvent;
 import com.project.common.event.enums.TourAssignmentType;
 
-import com.project.tour.model.AssignmentProduct;
-import com.project.tour.model.AssignmentService;
 import com.project.tour.model.Schedule;
-import com.project.tour.model.ScheduleStop;
 import com.project.tour.model.activitycruise.ActivityCruiseTour;
+import com.project.tour.model.activityvisit.VisitTour;
+import com.project.tour.model.convenience.product.ProductTour;
+import com.project.tour.model.convenience.service.ServiceTour;
 
 import com.project.tour.repository.activitycruise.ActivityCruiseTourAssignmentRepository;
-import com.project.tour.repository.tour.AssignmentProductRepository;
-import com.project.tour.repository.tour.AssignmentServiceRepository;
+import com.project.tour.repository.activityvisit.VisitTourRepository;
+import com.project.tour.repository.convenience.ProductTourRepository;
+import com.project.tour.repository.convenience.ServiceTourRepository;
 import com.project.tour.repository.tour.schedule.ScheduleRepository;
-import com.project.tour.repository.tour.schedule.ScheduleStopRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,26 +26,25 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class OperationCruiseAssignmentService {
 
-        private final AssignmentProductRepository assignmentProductRepository;
-        private final AssignmentServiceRepository assignmentServiceRepository;
+        private final ProductTourRepository productTourRepository;
+        private final ServiceTourRepository serviceTourRepository;
         private final ActivityCruiseTourAssignmentRepository activityCruiseTourRepository;
+        private final VisitTourRepository visitTourRepository;
 
         private final ScheduleRepository scheduleRepository;
-        private final ScheduleStopRepository scheduleStopRepository;
 
         public OperationCruiseAssignmentService(
-                        AssignmentProductRepository assignmentProductRepository,
-                        AssignmentServiceRepository assignmentServiceRepository,
+                        ProductTourRepository productTourRepository,
+                        ServiceTourRepository serviceTourRepository,
                         ActivityCruiseTourAssignmentRepository activityCruiseTourRepository,
-                        ScheduleRepository scheduleRepository,
-                        ScheduleStopRepository scheduleStopRepository) {
+                        VisitTourRepository visitTourRepository,
+                        ScheduleRepository scheduleRepository) {
 
-                this.assignmentProductRepository = assignmentProductRepository;
-                this.assignmentServiceRepository = assignmentServiceRepository;
+                this.productTourRepository = productTourRepository;
+                this.serviceTourRepository = serviceTourRepository;
                 this.activityCruiseTourRepository = activityCruiseTourRepository;
-
+                this.visitTourRepository = visitTourRepository;
                 this.scheduleRepository = scheduleRepository;
-                this.scheduleStopRepository = scheduleStopRepository;
         }
 
         public List<TourAssignmentEvent> getAssignments(UUID tourId) {
@@ -56,16 +55,15 @@ public class OperationCruiseAssignmentService {
                 // PRODUCT
                 // =====================================================
 
-                List<AssignmentProduct> productAssignments =
-                                assignmentProductRepository
-                                                .findAllByTourIdOrderByCreatedAtAsc(tourId);
+                List<ProductTour> productTours = productTourRepository
+                                .findAllByTourIdOrderByCreatedAtAsc(tourId);
 
-                for (AssignmentProduct assignment : productAssignments) {
+                for (ProductTour productTour : productTours) {
 
                         assignments.add(
                                         new TourAssignmentEvent(
-                                                        assignment.getTourId(),
-                                                        assignment.getCruiseAreaId(),
+                                                        productTour.getTourId(),
+                                                        productTour.getCruiseAreaId(),
                                                         TourAssignmentType.PRODUCT));
                 }
 
@@ -73,16 +71,15 @@ public class OperationCruiseAssignmentService {
                 // SERVICE
                 // =====================================================
 
-                List<AssignmentService> serviceAssignments =
-                                assignmentServiceRepository
-                                                .findAllByTourIdOrderByCreatedAtAsc(tourId);
+                List<ServiceTour> serviceTours = serviceTourRepository
+                                .findAllByTourIdOrderByCreatedAtAsc(tourId);
 
-                for (AssignmentService assignment : serviceAssignments) {
+                for (ServiceTour serviceTour : serviceTours) {
 
                         assignments.add(
                                         new TourAssignmentEvent(
-                                                        assignment.getTourId(),
-                                                        assignment.getCruiseAreaId(),
+                                                        serviceTour.getTourId(),
+                                                        serviceTour.getCruiseAreaId(),
                                                         TourAssignmentType.SERVICE));
                 }
 
@@ -90,16 +87,15 @@ public class OperationCruiseAssignmentService {
                 // ACTIVITY CRUISE
                 // =====================================================
 
-                List<ActivityCruiseTour> activityAssignments =
-                                activityCruiseTourRepository
-                                                .findAllByTourIdOrderByCreatedAtAsc(tourId);
+                List<ActivityCruiseTour> activityCruiseTours = activityCruiseTourRepository
+                                .findAllByTourIdOrderByCreatedAtAsc(tourId);
 
-                for (ActivityCruiseTour assignment : activityAssignments) {
+                for (ActivityCruiseTour activityCruiseTour : activityCruiseTours) {
 
                         assignments.add(
                                         new TourAssignmentEvent(
-                                                        assignment.getTourId(),
-                                                        assignment.getCruiseAreaId(),
+                                                        activityCruiseTour.getTourId(),
+                                                        activityCruiseTour.getCruiseAreaId(),
                                                         TourAssignmentType.ACTIVITY_CRUISE));
                 }
 
@@ -107,29 +103,16 @@ public class OperationCruiseAssignmentService {
                 // ACTIVITY VISIT
                 // =====================================================
 
-                List<Schedule> schedules =
-                                scheduleRepository
-                                                .findAllByTour_IdOrderByDayNumberAsc(tourId);
+                List<VisitTour> visitTours = visitTourRepository
+                                .findAllByTourIdOrderByStartTimeAsc(tourId);
 
-                if (!schedules.isEmpty()) {
+                for (VisitTour visitTour : visitTours) {
 
-                        List<UUID> scheduleIds = schedules.stream()
-                                        .map(Schedule::getId)
-                                        .toList();
-
-                        List<ScheduleStop> scheduleStops =
-                                        scheduleStopRepository
-                                                        .findAllBySchedule_IdInOrderBySchedule_DayNumberAscStopOrderAsc(
-                                                                        scheduleIds);
-
-                        for (ScheduleStop scheduleStop : scheduleStops) {
-
-                                assignments.add(
-                                                new TourAssignmentEvent(
-                                                                tourId,
-                                                                scheduleStop.getId(),
-                                                                TourAssignmentType.ACTIVITY_VISIT));
-                        }
+                        assignments.add(
+                                        new TourAssignmentEvent(
+                                                        visitTour.getTourId(),
+                                                        visitTour.getScheduleStopId(),
+                                                        TourAssignmentType.ACTIVITY_VISIT));
                 }
 
                 return assignments;
