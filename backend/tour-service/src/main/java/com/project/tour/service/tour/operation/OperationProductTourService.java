@@ -2,7 +2,6 @@ package com.project.tour.service.tour.operation;
 
 import com.project.tour.dto.tour.operation.AssignmentProductResponse;
 import com.project.tour.mapper.tour.operation.AssignmentProductMapper;
-import com.project.tour.model.convenience.product.ProductTour;
 import com.project.tour.repository.convenience.ProductTourRepository;
 
 import org.springframework.stereotype.Service;

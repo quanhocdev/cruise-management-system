@@ -17,7 +17,10 @@ import com.project.tour.repository.tour.schedule.ScheduleStopRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import com.project.tour.model.convenience.product.ProductTour;
+import com.project.tour.model.convenience.service.ServiceTour;
+import com.project.tour.repository.convenience.ProductTourRepository;
+import com.project.tour.repository.convenience.ServiceTourRepository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -39,8 +42,8 @@ public class PublicTourService {
 
         private final ActivityCruiseTourAssignmentRepository activityCruiseTourAssignmentRepository;
 
-        private final AssignmentProductRepository assignmentProductRepository;
-        private final AssignmentServiceRepository assignmentServiceRepository;
+        private final ProductTourRepository productTourRepository;
+        private final ServiceTourRepository serviceTourRepository;
 
         public PublicTourService(
                         TourRepository tourRepository,
@@ -50,8 +53,8 @@ public class PublicTourService {
                         ScheduleStopRepository scheduleStopRepository,
                         VisitTourRepository visitTourRepository,
                         ActivityCruiseTourAssignmentRepository activityCruiseTourAssignmentRepository,
-                        AssignmentProductRepository assignmentProductRepository,
-                        AssignmentServiceRepository assignmentServiceRepository) {
+                        ProductTourRepository productTourRepository,
+                        ServiceTourRepository serviceTourRepository) {
 
                 this.tourRepository = tourRepository;
                 this.tourPackageRepository = tourPackageRepository;
@@ -60,8 +63,8 @@ public class PublicTourService {
                 this.scheduleStopRepository = scheduleStopRepository;
                 this.visitTourRepository = visitTourRepository;
                 this.activityCruiseTourAssignmentRepository = activityCruiseTourAssignmentRepository;
-                this.assignmentProductRepository = assignmentProductRepository;
-                this.assignmentServiceRepository = assignmentServiceRepository;
+                this.productTourRepository = productTourRepository;
+                this.serviceTourRepository = serviceTourRepository;
         }
 
         private boolean checkAndUpdateBookingStatus(Tour tour) {
@@ -173,10 +176,10 @@ public class PublicTourService {
                                 .findAllByTourId(tourId);
 
                 // Lấy các assignment khác trên tàu
-                List<AssignmentProduct> products = assignmentProductRepository
+                List<ProductTour> products = productTourRepository
                                 .findAllByTourIdOrderByCreatedAtAsc(tourId);
 
-                List<AssignmentService> services = assignmentServiceRepository
+                List<ServiceTour> services = serviceTourRepository
                                 .findAllByTourIdOrderByCreatedAtAsc(tourId);
 
                 // Ủy quyền toàn bộ việc lắp ráp dữ liệu sang Mapper

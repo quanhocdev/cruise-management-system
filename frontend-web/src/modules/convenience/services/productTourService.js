@@ -1,5 +1,4 @@
 // src/modules/convenience/services/productTourService.js
-// src/modules/convenience/services/productTourService.js
 
 import api from "../../../api/axios";
 
@@ -38,6 +37,7 @@ export const productTourService = {
 
     return response.data;
   },
+
   // =====================================================
   // GET ALL
   // =====================================================
@@ -50,22 +50,11 @@ export const productTourService = {
   },
 
   // =====================================================
-  // GET CONFIGURATION HISTORY
-  // =====================================================
-
-  // GET /api/convenience/product-tours/configuration-history
-  getConfigurationHistory: async () => {
-    const response = await api.get(`${API_URL}/configuration-history`);
-
-    return response.data;
-  },
-
-  // =====================================================
-  // GET CONFIGURATION HISTORY DETAIL
+  // GET BY TOUR
   // =====================================================
 
   // GET /api/convenience/product-tours/tour/{tourId}
-  getConfigurationHistoryDetail: async (tourId) => {
+  getByTour: async (tourId) => {
     const response = await api.get(`${API_URL}/tour/${tourId}`);
 
     return response.data;

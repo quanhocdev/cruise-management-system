@@ -1,3 +1,5 @@
+// src/modules/convenience/hooks/useProduct.js
+
 import { useCallback, useState } from "react";
 import convenienceProductService from "../services/convenienceProductService";
 

@@ -55,7 +55,6 @@ import ConvenienceDashboard from "./modules/convenience/pages/Dashboard";
 import ConvenienceProducts from "./modules/convenience/pages/ConvenienceProducts";
 import ConvenienceServices from "./modules/convenience/pages/ConvenienceServices";
 import ConvenienceTourConfigPage from "./modules/convenience/pages/ConvenienceTourConfigPage";
-import ConvenienceTourHistory from "./modules/convenience/pages/ConvenienceTourHistory";
 
 // Onboard imports
 import OnboardLayout from "./layouts/OnboardLayout";
@@ -322,8 +321,6 @@ export default function App() {
             <Route path="services" element={<ConvenienceServices />} />
 
             <Route path="tour-config" element={<ConvenienceTourConfigPage />} />
-
-            <Route path="tour-history" element={<ConvenienceTourHistory />} />
 
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>

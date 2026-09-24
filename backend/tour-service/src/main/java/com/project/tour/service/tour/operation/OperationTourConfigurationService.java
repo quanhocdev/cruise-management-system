@@ -9,8 +9,6 @@ import com.project.tour.mapper.tour.ProductTourAssignmentMapper;
 import com.project.tour.mapper.tour.ServiceTourAssignmentMapper;
 import com.project.tour.model.CruiseArea;
 import com.project.tour.model.Tour;
-import com.project.tour.model.convenience.product.ProductTour;
-import com.project.tour.model.convenience.service.ServiceTour;
 import com.project.tour.repository.convenience.ProductTourRepository;
 import com.project.tour.repository.convenience.ServiceTourRepository;
 import com.project.tour.repository.cruise.CruiseAreaRepository;
