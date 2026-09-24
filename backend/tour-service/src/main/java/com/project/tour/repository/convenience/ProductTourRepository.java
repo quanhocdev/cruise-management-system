@@ -17,9 +17,16 @@ import java.util.UUID;
 public interface ProductTourRepository
         extends JpaRepository<ProductTour, UUID> {
 
+    boolean existsByTourIdAndCruiseAreaId(
+            UUID tourId,
+            UUID cruiseAreaId);
+
     @EntityGraph(attributePaths = { "product" })
     List<ProductTour> findAllByTourIdOrderByCreatedAtAsc(
             UUID tourId);
+
+    @EntityGraph(attributePaths = { "product" })
+    List<ProductTour> findAllByOrderByCreatedAtAsc();
 
     @EntityGraph(attributePaths = { "product" })
     List<ProductTour> findAllByStatusOrderByCreatedAtAsc(

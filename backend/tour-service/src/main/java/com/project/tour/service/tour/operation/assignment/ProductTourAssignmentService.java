@@ -4,12 +4,13 @@ import com.project.tour.dto.tour.operation.ProductTourAssignmentRequest;
 import com.project.tour.dto.tour.operation.ProductTourAssignmentResponse;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.tour.ProductTourAssignmentMapper;
-import com.project.tour.model.AssignmentProduct;
 import com.project.tour.model.CruiseArea;
 import com.project.tour.model.Tour;
+import com.project.tour.model.convenience.product.ProductTour;
+import com.project.tour.repository.convenience.ProductTourRepository;
 import com.project.tour.repository.cruise.CruiseAreaRepository;
-import com.project.tour.repository.tour.AssignmentProductRepository;
 import com.project.tour.repository.tour.TourRepository;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,18 +22,18 @@ import java.util.UUID;
 @Transactional
 public class ProductTourAssignmentService {
 
-        private final AssignmentProductRepository assignmentRepository;
+        private final ProductTourRepository productTourRepository;
         private final TourRepository tourRepository;
         private final CruiseAreaRepository cruiseAreaRepository;
         private final ProductTourAssignmentMapper assignmentMapper;
 
         public ProductTourAssignmentService(
-                        AssignmentProductRepository assignmentRepository,
+                        ProductTourRepository productTourRepository,
                         TourRepository tourRepository,
                         CruiseAreaRepository cruiseAreaRepository,
                         ProductTourAssignmentMapper assignmentMapper) {
 
-                this.assignmentRepository = assignmentRepository;
+                this.productTourRepository = productTourRepository;
                 this.tourRepository = tourRepository;
                 this.cruiseAreaRepository = cruiseAreaRepository;
                 this.assignmentMapper = assignmentMapper;
@@ -41,7 +42,7 @@ public class ProductTourAssignmentService {
         /**
          * Operation phân công một CruiseArea cho Tour.
          *
-         * Chỉ lưu assignment vào DB của tour-service.
+         * Chỉ lưu ProductTour vào DB của tour-service.
          * KHÔNG bắn Kafka.
          */
         public ProductTourAssignmentResponse assign(
@@ -54,7 +55,8 @@ public class ProductTourAssignmentService {
                                                 HttpStatus.NOT_FOUND));
 
                 // 2. Kiểm tra CruiseArea tồn tại
-                CruiseArea cruiseArea = cruiseAreaRepository.findById(request.cruiseAreaId())
+                CruiseArea cruiseArea = cruiseAreaRepository.findById(
+                                request.cruiseAreaId())
                                 .orElseThrow(() -> new AppException(
                                                 "Cruise area not found",
                                                 HttpStatus.NOT_FOUND));
@@ -88,24 +90,30 @@ public class ProductTourAssignmentService {
                                         HttpStatus.BAD_REQUEST);
                 }
 
-                // 6. Kiểm tra assignment đã tồn tại chưa
-                AssignmentProduct assignment = assignmentRepository
+                // 6. Kiểm tra ProductTour đã tồn tại chưa
+                ProductTour productTour = productTourRepository
                                 .findByTourIdAndCruiseAreaId(
                                                 request.tourId(),
                                                 request.cruiseAreaId())
                                 .orElseGet(() -> {
 
-                                        AssignmentProduct newAssignment = new AssignmentProduct(
-                                                        request.tourId(),
+                                        ProductTour newProductTour = new ProductTour();
+
+                                        newProductTour.setTourId(
+                                                        request.tourId());
+
+                                        newProductTour.setCruiseAreaId(
                                                         request.cruiseAreaId());
 
-                                        // CHỈ lưu vào DB của tour-service
-                                        return assignmentRepository.save(newAssignment);
+                                        // Product chưa được cấu hình.
+                                        // Entity mặc định là WAITING_CONFIG.
+                                        return productTourRepository.save(
+                                                        newProductTour);
                                 });
 
                 // 7. Trả response cho Operation
                 return assignmentMapper.toResponse(
-                                assignment,
+                                productTour,
                                 tour,
                                 cruiseArea);
         }
@@ -122,17 +130,17 @@ public class ProductTourAssignmentService {
                                                 "Tour not found",
                                                 HttpStatus.NOT_FOUND));
 
-                return assignmentRepository
+                return productTourRepository
                                 .findAllByTourIdOrderByCreatedAtAsc(tourId)
                                 .stream()
-                                .map(assignment -> {
+                                .map(productTour -> {
 
                                         CruiseArea cruiseArea = cruiseAreaRepository
-                                                        .findById(assignment.getCruiseAreaId())
+                                                        .findById(productTour.getCruiseAreaId())
                                                         .orElse(null);
 
                                         return assignmentMapper.toResponse(
-                                                        assignment,
+                                                        productTour,
                                                         tour,
                                                         cruiseArea);
                                 })
@@ -142,7 +150,7 @@ public class ProductTourAssignmentService {
         /**
          * Xóa phân công Product.
          *
-         * Chỉ xóa trong DB của tour-service.
+         * Chỉ xóa ProductTour trong DB của tour-service.
          * KHÔNG bắn Kafka.
          */
         @Transactional
@@ -150,7 +158,7 @@ public class ProductTourAssignmentService {
                         UUID tourId,
                         UUID cruiseAreaId) {
 
-                if (!assignmentRepository
+                if (!productTourRepository
                                 .existsByTourIdAndCruiseAreaId(
                                                 tourId,
                                                 cruiseAreaId)) {
@@ -160,8 +168,7 @@ public class ProductTourAssignmentService {
                                         HttpStatus.NOT_FOUND);
                 }
 
-                // Chỉ xóa khỏi DB tour-service
-                assignmentRepository.deleteByTourIdAndCruiseAreaId(
+                productTourRepository.deleteByTourIdAndCruiseAreaId(
                                 tourId,
                                 cruiseAreaId);
         }

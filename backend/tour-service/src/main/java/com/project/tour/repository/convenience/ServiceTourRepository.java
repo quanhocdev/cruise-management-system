@@ -17,6 +17,10 @@ import java.util.UUID;
 public interface ServiceTourRepository
         extends JpaRepository<ServiceTour, UUID> {
 
+    boolean existsByTourIdAndCruiseAreaId(
+            UUID tourId,
+            UUID cruiseAreaId);
+
     @EntityGraph(attributePaths = { "service" })
     Optional<ServiceTour> findByTourIdAndCruiseAreaId(
             UUID tourId,
@@ -25,6 +29,9 @@ public interface ServiceTourRepository
     @EntityGraph(attributePaths = { "service" })
     List<ServiceTour> findAllByTourIdOrderByCreatedAtAsc(
             UUID tourId);
+
+    @EntityGraph(attributePaths = { "service" })
+    List<ServiceTour> findAllByOrderByCreatedAtAsc();
 
     @EntityGraph(attributePaths = { "service" })
     List<ServiceTour> findAllByStatusOrderByCreatedAtAsc(

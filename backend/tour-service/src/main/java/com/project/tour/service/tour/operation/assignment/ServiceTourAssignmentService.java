@@ -4,11 +4,11 @@ import com.project.tour.dto.tour.operation.ServiceTourAssignmentRequest;
 import com.project.tour.dto.tour.operation.ServiceTourAssignmentResponse;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.tour.ServiceTourAssignmentMapper;
-import com.project.tour.model.AssignmentService;
 import com.project.tour.model.CruiseArea;
 import com.project.tour.model.Tour;
+import com.project.tour.model.convenience.service.ServiceTour;
+import com.project.tour.repository.convenience.ServiceTourRepository;
 import com.project.tour.repository.cruise.CruiseAreaRepository;
-import com.project.tour.repository.tour.AssignmentServiceRepository;
 import com.project.tour.repository.tour.TourRepository;
 
 import org.springframework.http.HttpStatus;
@@ -22,18 +22,18 @@ import java.util.UUID;
 @Transactional
 public class ServiceTourAssignmentService {
 
-        private final AssignmentServiceRepository assignmentRepository;
+        private final ServiceTourRepository serviceTourRepository;
         private final TourRepository tourRepository;
         private final CruiseAreaRepository cruiseAreaRepository;
         private final ServiceTourAssignmentMapper assignmentMapper;
 
         public ServiceTourAssignmentService(
-                        AssignmentServiceRepository assignmentRepository,
+                        ServiceTourRepository serviceTourRepository,
                         TourRepository tourRepository,
                         CruiseAreaRepository cruiseAreaRepository,
                         ServiceTourAssignmentMapper assignmentMapper) {
 
-                this.assignmentRepository = assignmentRepository;
+                this.serviceTourRepository = serviceTourRepository;
                 this.tourRepository = tourRepository;
                 this.cruiseAreaRepository = cruiseAreaRepository;
                 this.assignmentMapper = assignmentMapper;
@@ -55,7 +55,8 @@ public class ServiceTourAssignmentService {
                 // 2. Kiểm tra CruiseArea
                 // =====================================================
 
-                CruiseArea cruiseArea = cruiseAreaRepository.findById(request.cruiseAreaId())
+                CruiseArea cruiseArea = cruiseAreaRepository.findById(
+                                request.cruiseAreaId())
                                 .orElseThrow(() -> new AppException(
                                                 "Cruise area not found",
                                                 HttpStatus.NOT_FOUND));
@@ -102,18 +103,23 @@ public class ServiceTourAssignmentService {
                 // 6. Chống phân công trùng
                 // =====================================================
 
-                AssignmentService assignment = assignmentRepository
+                ServiceTour serviceTour = serviceTourRepository
                                 .findByTourIdAndCruiseAreaId(
                                                 request.tourId(),
                                                 request.cruiseAreaId())
                                 .orElseGet(() -> {
 
-                                        AssignmentService newAssignment = new AssignmentService(
-                                                        request.tourId(),
+                                        ServiceTour newServiceTour = new ServiceTour();
+
+                                        newServiceTour.setTourId(
+                                                        request.tourId());
+
+                                        newServiceTour.setCruiseAreaId(
                                                         request.cruiseAreaId());
 
-                                        // Chỉ lưu vào DB của tour-service.
-                                        return assignmentRepository.save(newAssignment);
+                                        // Entity mặc định WAITING_CONFIG.
+                                        return serviceTourRepository.save(
+                                                        newServiceTour);
                                 });
 
                 // =====================================================
@@ -121,33 +127,34 @@ public class ServiceTourAssignmentService {
                 // =====================================================
 
                 return assignmentMapper.toResponse(
-                                assignment,
+                                serviceTour,
                                 tour,
                                 cruiseArea);
         }
 
         /**
-         * Lấy toàn bộ phân công dịch vụ của một Tour.
+         * Lấy toàn bộ phân công Service của một Tour.
          */
         @Transactional(readOnly = true)
-        public List<ServiceTourAssignmentResponse> getByTour(UUID tourId) {
+        public List<ServiceTourAssignmentResponse> getByTour(
+                        UUID tourId) {
 
                 Tour tour = tourRepository.findById(tourId)
                                 .orElseThrow(() -> new AppException(
                                                 "Tour not found",
                                                 HttpStatus.NOT_FOUND));
 
-                return assignmentRepository
+                return serviceTourRepository
                                 .findAllByTourIdOrderByCreatedAtAsc(tourId)
                                 .stream()
-                                .map(assignment -> {
+                                .map(serviceTour -> {
 
                                         CruiseArea cruiseArea = cruiseAreaRepository
-                                                        .findById(assignment.getCruiseAreaId())
+                                                        .findById(serviceTour.getCruiseAreaId())
                                                         .orElse(null);
 
                                         return assignmentMapper.toResponse(
-                                                        assignment,
+                                                        serviceTour,
                                                         tour,
                                                         cruiseArea);
                                 })
@@ -155,10 +162,9 @@ public class ServiceTourAssignmentService {
         }
 
         /**
-         * Xóa phân công dịch vụ.
+         * Xóa phân công Service.
          *
-         * Chỉ xóa trong DB của tour-service.
-         *
+         * Chỉ xóa ServiceTour trong DB của tour-service.
          * Không bắn Kafka.
          */
         @Transactional
@@ -166,24 +172,17 @@ public class ServiceTourAssignmentService {
                         UUID tourId,
                         UUID cruiseAreaId) {
 
-                // =====================================================
-                // 1. Kiểm tra assignment tồn tại
-                // =====================================================
-
-                if (!assignmentRepository.existsByTourIdAndCruiseAreaId(
-                                tourId,
-                                cruiseAreaId)) {
+                if (!serviceTourRepository
+                                .existsByTourIdAndCruiseAreaId(
+                                                tourId,
+                                                cruiseAreaId)) {
 
                         throw new AppException(
                                         "Assignment not found",
                                         HttpStatus.NOT_FOUND);
                 }
 
-                // =====================================================
-                // 2. Xóa assignment
-                // =====================================================
-
-                assignmentRepository.deleteByTourIdAndCruiseAreaId(
+                serviceTourRepository.deleteByTourIdAndCruiseAreaId(
                                 tourId,
                                 cruiseAreaId);
         }
