@@ -1,15 +1,15 @@
 // src/components/shore/ShoreSidebar.jsx
 
 import { useState } from "react";
-import { NavLink, useLocation } from "react-router-dom"; // Import thêm useLocation
+import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   ClipboardList,
-  History,
   Ship,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+
 import "../../styles/shore/ShoreSidebar.css";
 
 const MENU_SECTIONS = [
@@ -28,18 +28,13 @@ const MENU_SECTIONS = [
         path: "/shore/tours",
         extraPaths: ["/shore/visit-tour-configuration"],
       },
-      {
-        label: "Lịch sử cấu hình",
-        icon: History,
-        path: "/shore/history",
-        extraPaths: ["/shore/history/"],
-      },
     ],
   },
 ];
+
 function ShoreSidebar() {
   const [collapsed, setCollapsed] = useState(false);
-  const location = useLocation(); // Lấy pathname hiện tại
+  const location = useLocation();
 
   const toggleSidebar = () => {
     setCollapsed((prev) => !prev);
@@ -92,7 +87,6 @@ function ShoreSidebar() {
             {section.items.map((item) => {
               const Icon = item.icon;
 
-              // Kiểm tra xem pathname hiện tại có khớp với item.path hoặc extraPaths không
               const isCustomActive =
                 location.pathname === item.path ||
                 (item.extraPaths &&
