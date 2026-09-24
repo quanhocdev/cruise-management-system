@@ -26,6 +26,10 @@ public class ActivityVisitTourConfigurationService {
         this.visitTourRepository = visitTourRepository;
     }
 
+    // =====================================================
+    // COMPLETE CONFIGURATION
+    // =====================================================
+
     public void complete(UUID tourId) {
 
         List<VisitTour> visitTours = visitTourRepository
@@ -38,46 +42,81 @@ public class ActivityVisitTourConfigurationService {
         }
 
         // =====================================================
-        // KIỂM TRA TOUR ĐÃ HOÀN THÀNH CHƯA
+        // KIỂM TRA ĐÃ COMPLETE CONFIGURATION CHƯA
         // =====================================================
 
-        boolean alreadyCompleted = visitTours.stream()
+        boolean alreadyConfigured = visitTours.stream()
                 .allMatch(visitTour ->
-                        visitTour.getStatus() == VisitTourStatus.COMPLETED);
+                        visitTour.getStatus() == VisitTourStatus.CONFIGURED);
 
-        if (alreadyCompleted) {
+        if (alreadyConfigured) {
             throw new AppException(
                     "Visit tour configuration for this tour has already been completed",
                     HttpStatus.CONFLICT);
         }
 
         // =====================================================
-        // KIỂM TRA TẤT CẢ ĐÃ CONFIGURED
+        // KIỂM TRA TẤT CẢ ĐANG WAITING_CONFIG
         // =====================================================
 
         for (VisitTour visitTour : visitTours) {
 
-            if (visitTour.getStatus() != VisitTourStatus.CONFIGURED) {
+            if (visitTour.getStatus() != VisitTourStatus.WAITING_CONFIG) {
 
                 throw new AppException(
-                        "All visit tours must be CONFIGURED before completing configuration",
+                        "All visit tours must be WAITING_CONFIG before completing configuration",
                         HttpStatus.BAD_REQUEST);
             }
         }
 
         // =====================================================
-        // ĐÁNH DẤU TẤT CẢ ĐÃ HOÀN THÀNH
+        // KIỂM TRA DỮ LIỆU CẤU HÌNH
         // =====================================================
 
         for (VisitTour visitTour : visitTours) {
-            visitTour.setStatus(VisitTourStatus.COMPLETED);
+
+            if (visitTour.getName() == null
+                    || visitTour.getName().isBlank()
+                    || visitTour.getStartTime() == null
+                    || visitTour.getEndTime() == null
+                    || visitTour.getMaxPassengers() == null
+                    || visitTour.getPrice() == null) {
+
+                throw new AppException(
+                        "All visit tours must be fully configured before completing configuration",
+                        HttpStatus.BAD_REQUEST);
+            }
+
+            if (!visitTour.getStartTime()
+                    .isBefore(visitTour.getEndTime())) {
+
+                throw new AppException(
+                        "Visit tour start time must be before end time",
+                        HttpStatus.BAD_REQUEST);
+            }
+        }
+
+        // =====================================================
+        // HOÀN THÀNH CẤU HÌNH
+        // WAITING_CONFIG → CONFIGURED
+        // =====================================================
+
+        for (VisitTour visitTour : visitTours) {
+
+            visitTour.setStatus(
+                    VisitTourStatus.CONFIGURED);
         }
 
         visitTourRepository.saveAll(visitTours);
     }
 
+    // =====================================================
+    // CONFIGURATION DETAIL
+    // =====================================================
+
     @Transactional(readOnly = true)
-    public List<VisitTourResponse> getConfigurationHistoryDetail(UUID tourId) {
+    public List<VisitTourResponse> getConfigurationHistoryDetail(
+            UUID tourId) {
 
         List<VisitTour> visitTours = visitTourRepository
                 .findAllByTourIdOrderByStartTimeAsc(tourId);

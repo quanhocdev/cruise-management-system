@@ -1,6 +1,5 @@
 package com.project.tour.controller.activityvisit;
 
-import com.project.tour.dto.activityvisit.HistoryActivityVisitTourResponse;
 import com.project.tour.dto.activityvisit.VisitTourResponse;
 import com.project.tour.service.activityvisit.ActivityVisitTourConfigurationService;
 
@@ -25,8 +24,7 @@ public class ActivityVisitTourConfigurationController {
     /**
      * Hoàn thành cấu hình tất cả VisitTour của một Tour.
      *
-     * Tạm thời giữ nguyên trong giai đoạn merge.
-     * Sẽ cleanup history/configuration flow sau khi merge hoàn tất.
+     * WAITING_CONFIG -> CONFIGURED
      */
     @PostMapping("/{tourId}/complete")
     public ResponseEntity<Void> complete(
@@ -37,13 +35,12 @@ public class ActivityVisitTourConfigurationController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/configuration-history")
-    public ResponseEntity<List<HistoryActivityVisitTourResponse>> getConfigurationHistory() {
-
-        return ResponseEntity.ok(
-                configurationService.getConfigurationHistory());
-    }
-
+    /**
+     * Giữ endpoint cũ để không làm frontend hiện tại bị hỏng.
+     *
+     * Không còn trả về HistoryActivityVisitTour.
+     * Chỉ trả về cấu hình VisitTour hiện tại của Tour.
+     */
     @GetMapping("/configuration-history/{tourId}")
     public ResponseEntity<List<VisitTourResponse>> getConfigurationHistoryDetail(
             @PathVariable UUID tourId) {
@@ -51,5 +48,4 @@ public class ActivityVisitTourConfigurationController {
         return ResponseEntity.ok(
                 configurationService.getConfigurationHistoryDetail(tourId));
     }
-
 }

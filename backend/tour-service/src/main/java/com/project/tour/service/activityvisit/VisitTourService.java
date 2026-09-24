@@ -1,3 +1,4 @@
+
 package com.project.tour.service.activityvisit;
 
 import com.project.tour.dto.activityvisit.CreateVisitTourRequest;
@@ -103,13 +104,23 @@ public class VisitTourService {
                                                 "Visit tour not found for this schedule stop.",
                                                 HttpStatus.NOT_FOUND));
 
+                // Chỉ cho phép cấu hình khi chưa hoàn tất cấu hình
+                if (visitTour.getStatus() != VisitTourStatus.WAITING_CONFIG) {
+                        throw new AppException(
+                                        "Visit tour configuration has already been completed and cannot be modified.",
+                                        HttpStatus.CONFLICT);
+                }
+
                 visitTour.setName(request.name());
                 visitTour.setDescription(request.description());
                 visitTour.setStartTime(request.startTime());
                 visitTour.setEndTime(request.endTime());
                 visitTour.setMaxPassengers(request.maxPassengers());
                 visitTour.setPrice(request.price());
-                visitTour.setStatus(VisitTourStatus.CONFIGURED);
+
+                // KHÔNG đổi status ở đây.
+                // Vẫn giữ WAITING_CONFIG cho đến khi Operation
+                // bấm hoàn thành cấu hình.
 
                 return VisitTourMapper.toResponse(
                                 visitTourRepository.save(visitTour));
@@ -125,6 +136,13 @@ public class VisitTourService {
                         UpdateVisitTourRequest request) {
 
                 VisitTour visitTour = findById(id);
+
+                // Chỉ cho phép chỉnh sửa khi đang chờ cấu hình
+                if (visitTour.getStatus() != VisitTourStatus.WAITING_CONFIG) {
+                        throw new AppException(
+                                        "Visit tour configuration has already been completed and cannot be modified.",
+                                        HttpStatus.CONFLICT);
+                }
 
                 validator.validateUpdate(request);
 
@@ -159,6 +177,9 @@ public class VisitTourService {
                 visitTour.setTourId(tourId);
                 visitTour.setScheduleStopId(scheduleStopId);
 
+                // Constructor mặc định của VisitTour sẽ để
+                // status = WAITING_CONFIG.
+
                 return VisitTourMapper.toResponse(
                                 visitTourRepository.save(visitTour));
         }
@@ -170,7 +191,16 @@ public class VisitTourService {
         @Transactional
         public void delete(UUID id) {
 
-                visitTourRepository.delete(findById(id));
+                VisitTour visitTour = findById(id);
+
+                // Chỉ cho phép xóa khi chưa hoàn tất cấu hình
+                if (visitTour.getStatus() != VisitTourStatus.WAITING_CONFIG) {
+                        throw new AppException(
+                                        "Visit tour configuration has already been completed and cannot be deleted.",
+                                        HttpStatus.CONFLICT);
+                }
+
+                visitTourRepository.delete(visitTour);
         }
 
         // =====================================================
