@@ -11,7 +11,6 @@ import {
   X,
   Activity,
   ListChecks,
-  History,
 } from "lucide-react";
 
 import "../../styles/onboard/OnboardSidebar.css";
@@ -32,11 +31,6 @@ const menuItems = [
     label: "Cấu hình hoạt động",
     icon: Activity,
     path: "/onboard/activity-cruise",
-  },
-  {
-    label: "Lịch sử cấu hình",
-    icon: History,
-    path: "/onboard/activity-cruise-history",
   },
   {
     label: "Lịch trình",
@@ -110,7 +104,9 @@ function OnboardSidebar({ mobileOpen, onCloseMobile }) {
       {/* NAVIGATION MENU */}
       <nav className="onboard-sidebar-menu">
         {isExpanded && (
-          <div className="onboard-sidebar-section-title">QUẢN LÝ TRÊN TÀU</div>
+          <div className="onboard-sidebar-section-title">
+            QUẢN LÝ TRÊN TÀU
+          </div>
         )}
 
         {menuItems.map((item) => {

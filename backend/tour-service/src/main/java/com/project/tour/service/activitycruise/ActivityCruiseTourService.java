@@ -1,12 +1,14 @@
 package com.project.tour.service.activitycruise;
 
 import com.project.tour.dto.activitycruise.ActivityCruiseTourResponse;
+import com.project.tour.exception.AppException;
 import com.project.tour.mapper.activitycruise.ActivityCruiseTourMapper;
 import com.project.tour.model.activitycruise.ActivityCruiseTour;
 import com.project.tour.model.activitycruise.enums.ActivityCruiseTourStatus;
 import com.project.tour.model.enums.tour.TourStatusTrip;
 import com.project.tour.repository.activitycruise.ActivityCruiseTourAssignmentRepository;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,6 +52,12 @@ public class ActivityCruiseTourService {
 
                 activityTour.setTourId(tourId);
                 activityTour.setCruiseAreaId(cruiseAreaId);
+
+                // =================================================
+                // ASSIGNMENT MỚI
+                // CHƯA HOÀN THÀNH CẤU HÌNH
+                // =================================================
+
                 activityTour.setStatus(
                                 ActivityCruiseTourStatus.WAITING_CONFIG);
 
@@ -64,11 +72,22 @@ public class ActivityCruiseTourService {
                         UUID tourId,
                         UUID cruiseAreaId) {
 
-                assignmentRepository
+                ActivityCruiseTour assignment = assignmentRepository
                                 .findByTourIdAndCruiseAreaId(
                                                 tourId,
                                                 cruiseAreaId)
-                                .ifPresent(assignmentRepository::delete);
+                                .orElseThrow(() -> new AppException(
+                                                "Activity cruise tour assignment not found",
+                                                HttpStatus.NOT_FOUND));
+
+                if (assignment.getStatus() != ActivityCruiseTourStatus.WAITING_CONFIG) {
+
+                        throw new AppException(
+                                        "Activity cruise configuration has already been completed and cannot be deleted",
+                                        HttpStatus.CONFLICT);
+                }
+
+                assignmentRepository.delete(assignment);
         }
 
         // =====================================================

@@ -1,10 +1,10 @@
 // src/modules/onboard/hooks/useActivityCruiseTour.js
-import { useCallback, useEffect, useState, useMemo } from "react";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { activityCruiseTourService } from "../services/activityCruiseTourService";
 
 const useActivityCruiseTour = () => {
   const [activities, setActivities] = useState([]);
-  const [configurationHistory, setConfigurationHistory] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -13,20 +13,21 @@ const useActivityCruiseTour = () => {
   const [completing, setCompleting] = useState(false);
   const [completeError, setCompleteError] = useState(null);
 
+  // =====================================================
+  // LOAD ALL ACTIVITY CRUISE TOURS
+  // =====================================================
+
   const loadAllActivities = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const [activitiesData, historyData] = await Promise.all([
-        activityCruiseTourService.getAll(),
-        activityCruiseTourService.getConfigurationHistory(),
-      ]);
+      const activitiesData = await activityCruiseTourService.getAll();
 
       setActivities(activitiesData || []);
-      setConfigurationHistory(historyData || []);
     } catch (err) {
-      console.error("LOAD ACTIVITY CRUISE TOUR / HISTORY ERROR:", err);
+      console.error("LOAD ACTIVITY CRUISE TOUR ERROR:", err);
+
       setError(
         err.response?.data?.message || "Không thể tải danh sách hoạt động",
       );
@@ -34,6 +35,10 @@ const useActivityCruiseTour = () => {
       setLoading(false);
     }
   }, []);
+
+  // =====================================================
+  // CONFIGURE ACTIVITY
+  // =====================================================
 
   const configureActivity = useCallback(async (assignmentId, configData) => {
     try {
@@ -51,12 +56,19 @@ const useActivityCruiseTour = () => {
       return updatedItem;
     } catch (err) {
       console.error("CONFIGURE ACTIVITY CRUISE TOUR ERROR:", err);
+
       const message =
         err.response?.data?.message || "Không thể cấu hình hoạt động";
+
       setError(message);
+
       throw err;
     }
   }, []);
+
+  // =====================================================
+  // UPDATE ACTIVITY CONFIG
+  // =====================================================
 
   const updateActivityConfig = useCallback(async (assignmentId, configData) => {
     try {
@@ -74,12 +86,19 @@ const useActivityCruiseTour = () => {
       return updatedItem;
     } catch (err) {
       console.error("UPDATE ACTIVITY CRUISE TOUR ERROR:", err);
+
       const message =
         err.response?.data?.message || "Không thể cập nhật cấu hình hoạt động";
+
       setError(message);
+
       throw err;
     }
   }, []);
+
+  // =====================================================
+  // COMPLETE TOUR CONFIGURATION
+  // =====================================================
 
   const completeTourConfiguration = useCallback(
     async (tourId) => {
@@ -88,15 +107,19 @@ const useActivityCruiseTour = () => {
         setCompleteError(null);
 
         await activityCruiseTourService.completeTourConfiguration(tourId);
+
         await loadAllActivities();
 
         return true;
       } catch (err) {
         console.error("COMPLETE TOUR CONFIGURATION ERROR:", err);
+
         const message =
           err.response?.data?.message ||
           "Không thể hoàn thành cấu hình cho Tour này";
+
         setCompleteError(message);
+
         throw err;
       } finally {
         setCompleting(false);
@@ -105,16 +128,24 @@ const useActivityCruiseTour = () => {
     [loadAllActivities],
   );
 
+  // =====================================================
+  // INITIAL LOAD
+  // =====================================================
+
   useEffect(() => {
     loadAllActivities();
   }, [loadAllActivities]);
 
-  // Lọc và khử trùng lặp dữ liệu tránh việc bị hiện bản ghi nhân đôi trong bảng
+  // =====================================================
+  // FILTER + REMOVE DUPLICATES
+  // =====================================================
+
   const filteredActivities = useMemo(() => {
     const uniqueMap = new Map();
 
     activities.forEach((item) => {
       const uniqueKey = item.id || item.assignmentId;
+
       if (uniqueKey && !uniqueMap.has(uniqueKey)) {
         uniqueMap.set(uniqueKey, item);
       }
@@ -129,15 +160,28 @@ const useActivityCruiseTour = () => {
     return uniqueList.filter((item) => item.status === statusFilter);
   }, [activities, statusFilter]);
 
-  const completedTourIds = useMemo(() => {
-    return new Set(configurationHistory.map((history) => history.tourId));
-  }, [configurationHistory]);
+  // =====================================================
+  // TOUR SUMMARIES
+  // =====================================================
+  //
+  // Không còn dùng Configuration History.
+  //
+  // Một Tour được xem là đã hoàn thành cấu hình khi:
+  //
+  //   configuredCount === total
+  //
+  // và total > 0.
+  //
+  // CONFIGURED = Operation đã Complete Configuration.
+  // =====================================================
 
   const tourSummaries = useMemo(() => {
     const map = new Map();
 
     activities.forEach((item) => {
-      if (!item.tourId) return;
+      if (!item.tourId) {
+        return;
+      }
 
       if (!map.has(item.tourId)) {
         map.set(item.tourId, {
@@ -145,11 +189,12 @@ const useActivityCruiseTour = () => {
           tourCode: item.tourCode || null,
           total: 0,
           configuredCount: 0,
-          completed: completedTourIds.has(item.tourId),
+          completed: false,
         });
       }
 
       const entry = map.get(item.tourId);
+
       entry.total += 1;
 
       if (item.status === "CONFIGURED") {
@@ -157,19 +202,33 @@ const useActivityCruiseTour = () => {
       }
     });
 
+    map.forEach((entry) => {
+      entry.completed =
+        entry.total > 0 && entry.configuredCount === entry.total;
+    });
+
     return Array.from(map.values());
-  }, [activities, completedTourIds]);
+  }, [activities]);
+
+  // =====================================================
+  // RETURN
+  // =====================================================
 
   return {
     activities,
     filteredActivities,
+
     statusFilter,
     setStatusFilter,
+
     tourSummaries,
+
     loading,
     error,
+
     completing,
     completeError,
+
     loadAllActivities,
     configureActivity,
     updateActivityConfig,
