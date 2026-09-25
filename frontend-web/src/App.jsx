@@ -55,20 +55,17 @@ import ConvenienceDashboard from "./modules/convenience/pages/Dashboard";
 import ConvenienceProducts from "./modules/convenience/pages/ConvenienceProducts";
 import ConvenienceServices from "./modules/convenience/pages/ConvenienceServices";
 import ConvenienceTourConfigPage from "./modules/convenience/pages/ConvenienceTourConfigPage";
-import ConvenienceTourHistory from "./modules/convenience/pages/ConvenienceTourHistory";
 
 // Onboard imports
 import OnboardLayout from "./layouts/OnboardLayout";
 import OnboardDashboard from "./modules/onboard/pages/Dashboard";
 import OnboardActivityCruiseTour from "./modules/onboard/pages/ActivityCruiseTour";
 import ActivityCruise from "./modules/onboard/pages/ActivityCruise";
-import ActivityCruiseTourHistory from "./modules/onboard/pages/ActivityCruiseTourHistory";
 
 // Shore imports
 import ShoreLayout from "./layouts/ShoreLayout";
 import ShoreDashboard from "./modules/shore/pages/Dashboard";
 import ActivityVisitTour from "./modules/shore/pages/ActivityVisitTour";
-import ActivityVisitTourHistory from "./modules/shore/pages/ActivityVisitTourHistory";
 
 // Finance imports
 import FinanceLayout from "./layouts/FinanceLayout";
@@ -264,11 +261,6 @@ export default function App() {
             />
 
             <Route
-              path="activity-cruise-history"
-              element={<ActivityCruiseTourHistory />}
-            />
-
-            <Route
               path="schedules"
               element={<div>Trang Lịch trình (Đang phát triển)</div>}
             />
@@ -307,8 +299,6 @@ export default function App() {
 
             <Route path="tours" element={<ActivityVisitTour />} />
 
-            <Route path="history" element={<ActivityVisitTourHistory />} />
-
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
 
@@ -331,8 +321,6 @@ export default function App() {
             <Route path="services" element={<ConvenienceServices />} />
 
             <Route path="tour-config" element={<ConvenienceTourConfigPage />} />
-
-            <Route path="tour-history" element={<ConvenienceTourHistory />} />
 
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>

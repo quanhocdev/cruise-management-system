@@ -1,7 +1,5 @@
 services:
-  # ==========================
   # PostgreSQL cho Auth Service
-  # ==========================
   postgres-auth:
     image: postgres:15-alpine
     container_name: cruise_postgres_auth
@@ -24,9 +22,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # ==========================
   # PostgreSQL cho Tour Service
-  # ==========================
   postgres-tour:
     image: postgres:15-alpine
     container_name: cruise_postgres_tour
@@ -49,9 +45,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # ==========================
   # PostgreSQL cho Booking Service
-  # ==========================
   postgres-booking:
     image: postgres:15-alpine
     container_name: cruise_postgres_booking
@@ -74,84 +68,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # ==========================
-  # PostgreSQL cho Convenience Service
-  # ==========================
-  postgres-convenience:
-    image: postgres:15-alpine
-    container_name: cruise_postgres_convenience
-    restart: always
-    environment:
-      POSTGRES_DB: convenience_service_db
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-    ports:
-      - "5434:5432" # Map cổng 5434 ra máy thật
-    volumes:
-      - postgres_convenience_data:/var/lib/postgresql/data
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U $${POSTGRES_USER:-postgres} -d convenience_service_db",
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # ==========================
-  # PostgreSQL cho Activity Cruise Service
-  # ==========================
-  postgres-activity-cruise:
-    image: postgres:15-alpine
-    container_name: postgres_activity_cruise
-    restart: always
-    environment:
-      POSTGRES_DB: activity_cruise_service_db
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-    ports:
-      - "5435:5432"
-    volumes:
-      - postgres_activity_cruise_data:/var/lib/postgresql/data
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U $${POSTGRES_USER:-postgres} -d activity_cruise_service_db",
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # ==========================
-  # PostgreSQL cho Activity Visit Service
-  # ==========================
-  postgres-activity-visit:
-    image: postgres:15-alpine
-    container_name: postgres_activity_visit
-    restart: always
-    environment:
-      POSTGRES_DB: activity_visit_service_db
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-    ports:
-      - "5436:5432"
-    volumes:
-      - postgres_activity_visit_data:/var/lib/postgresql/data
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U $${POSTGRES_USER:-postgres} -d activity_visit_service_db",
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # ==========================
   # PostgreSQL cho Payment Service
-  # ==========================
   postgres-payment:
     image: postgres:15-alpine
     container_name: cruise_postgres_payment
@@ -174,9 +91,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # ==========================
   # PostgreSQL cho Notification Service
-  # ==========================
   postgres-notification:
     image: postgres:15-alpine
     container_name: cruise_postgres_notification
@@ -225,9 +140,7 @@ services:
   #     timeout: 5s
   #     retries: 5
 
-  # ==========================
   # Redis
-  # ==========================
   redis:
     image: redis:8-alpine
     container_name: cruise_redis
@@ -240,9 +153,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # ==========================
-  # Zookeeper (Bắt buộc cho Kafka)
-  # ==========================
+  # Zookeeper
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     container_name: cruise_zookeeper
@@ -253,9 +164,7 @@ services:
     ports:
       - "2181:2181"
 
-  # ==========================
   # Apache Kafka
-  # ==========================
   kafka:
     image: confluentinc/cp-kafka:7.5.0
     container_name: cruise_kafka
@@ -294,9 +203,7 @@ services:
     depends_on:
       - kafka
 
-  # ==========================
   # pgAdmin
-  # ==========================
   pgadmin:
     image: dpage/pgadmin4
     container_name: cruise_pgadmin
@@ -313,24 +220,16 @@ services:
         condition: service_healthy
       postgres-tour:
         condition: service_healthy
-      postgres-convenience:
-        condition: service_healthy
-      postgres-activity-cruise:
-        condition: service_healthy
-      postgres-activity-visit:
-        condition: service_healthy
       postgres-booking:
         condition: service_healthy
       postgres-payment:
         condition: service_healthy
       postgres-notification:
         condition: service_healthy
-      # postgres-feedback:       # TẠM COMMENT: chưa triển khai
+      # postgres-feedback:
       #   condition: service_healthy
 
-  # ==========================
   # API Gateway
-  # ==========================
   gateway-service:
     build:
       context: ./backend/gateway-service
@@ -346,28 +245,20 @@ services:
     environment:
       AUTH_SERVICE_URL: http://auth-service:8081
       BOOKING_SERVICE_URL: http://booking-service:8082
-      ACTIVITY_SERVICE_URL: http://activity-cruise-service:8083
-      CONVENIENCE_SERVICE_URL: http://convenience-service:8084
       PAYMENT_SERVICE_URL: http://payment-service:8085
       NOTIFICATION_SERVICE_URL: http://notification-service:8086
-      ACTIVITY_VISIT_SERVICE_URL: http://activity-visit-service:8087
       TOUR_SERVICE_URL: http://tour-service:8088
       # FEEDBACK_SERVICE_URL: http://feedback-service:8089
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
     depends_on:
       - auth-service
       - tour-service
-      - convenience-service
-      - activity-cruise-service
-      - activity-visit-service
       - booking-service
       - payment-service
-      # - notification-service   # TẠM COMMENT: chưa triển khai
-      # - feedback-service       # TẠM COMMENT: chưa triển khai
+      - notification-service
+      # - feedback-service
 
-  # ==========================
   # Auth Service
-  # ==========================
   auth-service:
     build:
       context: ./backend
@@ -396,9 +287,7 @@ services:
       redis:
         condition: service_healthy
 
-  # ==========================
   # Tour Service
-  # ==========================
   tour-service:
     build:
       context: ./backend
@@ -426,96 +315,7 @@ services:
       kafka:
         condition: service_started
 
-  # ==========================
-  # Convenience Service
-  # ==========================
-  convenience-service:
-    build:
-      context: ./backend
-      dockerfile: convenience-service/Dockerfile.dev
-    container_name: convenience-service
-    restart: always
-    ports:
-      - "8084:8084"
-    working_dir: /app/convenience-service
-    volumes:
-      - ./backend/convenience-service/src:/app/convenience-service/src
-      - ./backend/common/src:/app/common/src
-      - /app/convenience-service/target
-    env_file:
-      - .env
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-convenience:5432/${CONVENIENCE_DB_NAME:-convenience_service_db}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
-    depends_on:
-      postgres-convenience:
-        condition: service_healthy
-      kafka:
-        condition: service_started
-
-  # ==========================
-  # Activity Cruise Service
-  # ==========================
-  activity-cruise-service:
-    build:
-      context: ./backend
-      dockerfile: activity-cruise-service/Dockerfile.dev
-    container_name: activity-cruise-service
-    restart: always
-    ports:
-      - "8083:8083"
-    working_dir: /app/activity-cruise-service
-    volumes:
-      - ./backend/activity-cruise-service/src:/app/activity-cruise-service/src
-      - ./backend/common/src:/app/common/src
-      - /app/activity-cruise-service/target
-    env_file:
-      - .env
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-activity-cruise:5432/${ACTIVITY_CRUISE_DB_NAME:-activity_cruise_service_db}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
-    depends_on:
-      postgres-activity-cruise:
-        condition: service_healthy
-      kafka:
-        condition: service_started
-
-  # ==========================
-  # Activity Visit Service
-  # ==========================
-  activity-visit-service:
-    build:
-      context: ./backend
-      dockerfile: activity-visit-service/Dockerfile.dev
-    container_name: activity-visit-service
-    restart: always
-    ports:
-      - "8087:8087"
-    working_dir: /app/activity-visit-service
-    volumes:
-      - ./backend/activity-visit-service/src:/app/activity-visit-service/src
-      - ./backend/common/src:/app/common/src
-      - /app/activity-visit-service/target
-    env_file:
-      - .env
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-activity-visit:5432/${ACTIVITY_VISIT_DB_NAME:-activity_visit_service_db}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
-    depends_on:
-      postgres-activity-visit:
-        condition: service_healthy
-      kafka:
-        condition: service_started
-
-  # ==========================
   # Booking Service
-  # ==========================
   booking-service:
     build:
       context: ./backend
@@ -537,20 +337,18 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       TOUR_SERVICE_URL: http://tour-service:8088
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
-      # NOTIFICATION_SERVICE_URL: http://notification-service:8086  # TẠM COMMENT: chưa triển khai
+      # NOTIFICATION_SERVICE_URL: http://notification-service:8086
     depends_on:
       postgres-booking:
         condition: service_healthy
       tour-service:
         condition: service_started
-      # notification-service:      # TẠM COMMENT: chưa triển khai
+      # notification-service:
       #   condition: service_started
       kafka:
         condition: service_started
 
-  # ==========================
   # Payment Service
-  # ==========================
   payment-service:
     build:
       context: ./backend
@@ -578,9 +376,7 @@ services:
       kafka:
         condition: service_started
 
-  # ==========================
   # Notification Service
-  # ==========================
   notification-service:
     build:
       context: ./backend
@@ -642,9 +438,7 @@ services:
   #     kafka:
   #       condition: service_started
 
-  # ==========================
   # React Frontend
-  # ==========================
   frontend-web:
     build:
       context: ./frontend-web
@@ -661,17 +455,12 @@ services:
     depends_on:
       - gateway-service
 
-# ==========================
 # Volumes
-# ==========================
 volumes:
   postgres_auth_data:
   postgres_tour_data:
-  postgres_convenience_data:
-  postgres_activity_cruise_data:
-  postgres_activity_visit_data:
   postgres_booking_data:
   postgres_payment_data:
   postgres_notification_data:
-  # postgres_feedback_data:       # TẠM COMMENT: chưa triển khai
+  # postgres_feedback_data:
   kafka_data:

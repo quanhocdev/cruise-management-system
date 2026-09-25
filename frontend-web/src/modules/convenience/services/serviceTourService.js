@@ -37,6 +37,7 @@ export const serviceTourService = {
 
     return response.data;
   },
+
   // =====================================================
   // GET ALL
   // =====================================================
@@ -49,22 +50,11 @@ export const serviceTourService = {
   },
 
   // =====================================================
-  // GET CONFIGURATION HISTORY
-  // =====================================================
-
-  // GET /api/convenience/service-tours/configuration-history
-  getConfigurationHistory: async () => {
-    const response = await api.get(`${API_URL}/configuration-history`);
-
-    return response.data;
-  },
-
-  // =====================================================
-  // GET CONFIGURATION HISTORY DETAIL
+  // GET BY TOUR
   // =====================================================
 
   // GET /api/convenience/service-tours/tour/{tourId}
-  getConfigurationHistoryDetail: async (tourId) => {
+  getByTour: async (tourId) => {
     const response = await api.get(`${API_URL}/tour/${tourId}`);
 
     return response.data;

@@ -2,11 +2,14 @@ package com.project.booking.service.finance;
 
 import com.project.booking.dto.booking.BookingSummaryResponse;
 import com.project.booking.dto.passenger.BookingPassengerDetailResponse;
+import com.project.booking.exception.AppException;
 import com.project.booking.mapper.BookingMapper;
 import com.project.booking.model.Booking;
 import com.project.booking.model.BookingPassenger;
 import com.project.booking.repository.BookingRepository;
 import com.project.booking.repository.BookingPassengerRepository;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,81 +20,82 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class FinanceBookingServiceImpl implements FinanceBookingService {
 
-    private final BookingRepository bookingRepository;
-    private final BookingPassengerRepository bookingPassengerRepository;
-    private final BookingMapper bookingMapper;
+        private final BookingRepository bookingRepository;
+        private final BookingPassengerRepository bookingPassengerRepository;
+        private final BookingMapper bookingMapper;
 
-    public FinanceBookingServiceImpl(
-            BookingRepository bookingRepository,
-            BookingPassengerRepository bookingPassengerRepository,
-            BookingMapper bookingMapper) {
-        this.bookingRepository = bookingRepository;
-        this.bookingPassengerRepository = bookingPassengerRepository;
-        this.bookingMapper = bookingMapper;
-    }
+        public FinanceBookingServiceImpl(
+                        BookingRepository bookingRepository,
+                        BookingPassengerRepository bookingPassengerRepository,
+                        BookingMapper bookingMapper) {
 
-    @Override
-    public List<BookingSummaryResponse> getBookingsByTourId(UUID tourId) {
+                this.bookingRepository = bookingRepository;
+                this.bookingPassengerRepository = bookingPassengerRepository;
+                this.bookingMapper = bookingMapper;
+        }
 
-        System.out.println("========================================");
-        System.out.println("[FINANCE SERVICE] getBookingsByTourId()");
-        System.out.println("[FINANCE SERVICE] tourId = " + tourId);
+        @Override
+        public List<BookingSummaryResponse> getBookingsByTourId(UUID tourId) {
 
-        System.out.println("[FINANCE SERVICE] Calling repository...");
+                System.out.println("[FINANCE SERVICE] getBookingsByTourId()");
+                System.out.println("[FINANCE SERVICE] tourId = " + tourId);
 
-        List<Booking> bookings = bookingRepository.findAllByTourId(tourId);
+                System.out.println("[FINANCE SERVICE] Calling repository...");
 
-        System.out.println(
-                "[FINANCE SERVICE] Repository returned "
-                        + bookings.size()
-                        + " booking(s)");
+                List<Booking> bookings = bookingRepository.findAllByTourId(tourId);
 
-        System.out.println("[FINANCE SERVICE] Mapping bookings...");
+                System.out.println(
+                                "[FINANCE SERVICE] Repository returned "
+                                                + bookings.size()
+                                                + " booking(s)");
 
-        List<BookingSummaryResponse> result = bookings.stream()
-                .map(booking -> {
-                    System.out.println(
-                            "[FINANCE SERVICE] Mapping booking id = "
-                                    + booking.getId());
+                System.out.println("[FINANCE SERVICE] Mapping bookings...");
 
-                    return bookingMapper.toSummaryResponse(booking);
-                })
-                .toList();
+                List<BookingSummaryResponse> result = bookings.stream()
+                                .map(booking -> {
+                                        System.out.println(
+                                                        "[FINANCE SERVICE] Mapping booking id = "
+                                                                        + booking.getId());
 
-        System.out.println(
-                "[FINANCE SERVICE] Mapping completed. Result size = "
-                        + result.size());
+                                        return bookingMapper.toSummaryResponse(booking);
+                                })
+                                .toList();
 
-        System.out.println("========================================");
+                System.out.println(
+                                "[FINANCE SERVICE] Mapping completed. Result size = "
+                                                + result.size());
 
-        return result;
-    }
+                return result;
+        }
 
-    @Override
-    public List<BookingPassengerDetailResponse> getPassengersByBookingId(
-            Long bookingId) {
+        @Override
+        public List<BookingPassengerDetailResponse> getPassengersByBookingId(
+                        Long bookingId) {
 
-        System.out.println("========================================");
-        System.out.println("[FINANCE SERVICE] getPassengersByBookingId()");
-        System.out.println("[FINANCE SERVICE] bookingId = " + bookingId);
+                System.out.println("[FINANCE SERVICE] getPassengersByBookingId()");
+                System.out.println("[FINANCE SERVICE] bookingId = " + bookingId);
 
-        List<BookingPassenger> links = bookingPassengerRepository
-                .findAllByBooking_IdOrderByIdAsc(bookingId);
+                if (!bookingRepository.existsById(bookingId)) {
+                        throw new AppException(
+                                        "Không tìm thấy booking với ID: " + bookingId,
+                                        HttpStatus.NOT_FOUND);
+                }
 
-        System.out.println(
-                "[FINANCE SERVICE] Passenger links found = "
-                        + links.size());
+                List<BookingPassenger> links = bookingPassengerRepository
+                                .findAllByBooking_IdOrderByIdAsc(bookingId);
 
-        List<BookingPassengerDetailResponse> result = links.stream()
-                .map(bookingMapper::toPassengerDetailResponse)
-                .toList();
+                System.out.println(
+                                "[FINANCE SERVICE] Passenger links found = "
+                                                + links.size());
 
-        System.out.println(
-                "[FINANCE SERVICE] Passenger mapping completed. Result size = "
-                        + result.size());
+                List<BookingPassengerDetailResponse> result = links.stream()
+                                .map(bookingMapper::toPassengerDetailResponse)
+                                .toList();
 
-        System.out.println("========================================");
+                System.out.println(
+                                "[FINANCE SERVICE] Passenger mapping completed. Result size = "
+                                                + result.size());
 
-        return result;
-    }
+                return result;
+        }
 }

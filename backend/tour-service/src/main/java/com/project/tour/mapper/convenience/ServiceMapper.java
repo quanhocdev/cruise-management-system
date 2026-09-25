@@ -1,0 +1,76 @@
+package com.project.tour.mapper.convenience;
+
+import com.project.tour.dto.convenience.service.admin.CreateServiceRequest;
+import com.project.tour.dto.convenience.service.admin.ServiceResponse;
+import com.project.tour.dto.convenience.service.admin.UpdateServiceRequest;
+import com.project.tour.dto.convenience.service.convenience.ServiceConvenienceResponse;
+import com.project.tour.model.convenience.service.Service;
+
+public final class ServiceMapper {
+
+    private ServiceMapper() {
+    }
+
+    public static Service toEntity(
+            CreateServiceRequest request) {
+
+        Service service = new Service();
+
+        service.setName(request.getName());
+        service.setDescription(request.getDescription());
+        service.setPrice(request.getPrice());
+        service.setDurationMinutes(request.getDurationMinutes());
+        service.setMaxPassengers(request.getMaxPassengers());
+
+        return service;
+    }
+
+    public static void updateEntity(
+            Service service,
+            UpdateServiceRequest request) {
+
+        service.setName(request.getName());
+        service.setDescription(request.getDescription());
+        service.setPrice(request.getPrice());
+        service.setDurationMinutes(request.getDurationMinutes());
+        service.setMaxPassengers(request.getMaxPassengers());
+        service.setStatus(request.getStatus());
+    }
+
+    public static ServiceResponse toResponse(
+            Service service) {
+
+        ServiceResponse response = new ServiceResponse();
+
+        response.setId(service.getId());
+        response.setName(service.getName());
+        response.setDescription(service.getDescription());
+        response.setPrice(service.getPrice());
+        response.setDurationMinutes(service.getDurationMinutes());
+        response.setMaxPassengers(service.getMaxPassengers());
+        response.setImageUrl(service.getImageUrl());
+        response.setImagePublicId(service.getImagePublicId());
+        response.setStatus(service.getStatus());
+        response.setCreatedAt(service.getCreatedAt());
+        response.setUpdatedAt(service.getUpdatedAt());
+
+        return response;
+    }
+
+    public static ServiceConvenienceResponse toConvenienceResponse(
+            Service service) {
+
+        if (service == null) {
+            return null;
+        }
+
+        return new ServiceConvenienceResponse(
+                service.getId(),
+                service.getName(),
+                service.getDescription(),
+                service.getPrice(),
+                service.getDurationMinutes(),
+                service.getMaxPassengers(),
+                service.getImageUrl());
+    }
+}

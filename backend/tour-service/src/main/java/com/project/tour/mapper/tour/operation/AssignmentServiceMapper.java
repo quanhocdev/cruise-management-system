@@ -1,30 +1,69 @@
 package com.project.tour.mapper.tour.operation;
 
 import com.project.tour.dto.tour.operation.AssignmentServiceResponse;
-import com.project.tour.model.AssignmentService;
+import com.project.tour.model.convenience.service.ServiceTour;
 
-public class AssignmentServiceMapper {
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+
+public final class AssignmentServiceMapper {
 
     private AssignmentServiceMapper() {
     }
 
     public static AssignmentServiceResponse toResponse(
-            AssignmentService assignment) {
+            ServiceTour serviceTour) {
+
+        if (serviceTour == null) {
+            return null;
+        }
 
         return new AssignmentServiceResponse(
-                assignment.getId(),
-                assignment.getTourId(),
-                assignment.getCruiseAreaId(),
-                assignment.getServiceTourId(),
-                assignment.getServiceId(),
-                assignment.getServiceName(),
-                assignment.getServiceDescription(),
-                assignment.getPrice(),
-                assignment.getMaxPassengers(),
-                assignment.getDurationMinutes(),
-                assignment.getImageUrl(),
-                assignment.getStatus(),
-                assignment.getCreatedAt(),
-                assignment.getUpdatedAt());
+                serviceTour.getId(),
+                serviceTour.getTourId(),
+                serviceTour.getCruiseAreaId(),
+                serviceTour.getId(),
+
+                serviceTour.getService() != null
+                        ? serviceTour.getService().getId()
+                        : null,
+
+                serviceTour.getService() != null
+                        ? serviceTour.getService().getName()
+                        : null,
+
+                serviceTour.getService() != null
+                        ? serviceTour.getService().getDescription()
+                        : null,
+
+                serviceTour.getService() != null
+                        ? serviceTour.getService().getPrice()
+                        : null,
+
+                serviceTour.getMaxPassengers(),
+                serviceTour.getDurationMinutes(),
+
+                serviceTour.getService() != null
+                        ? serviceTour.getService().getImageUrl()
+                        : null,
+
+                serviceTour.getStatus() != null
+                        ? serviceTour.getStatus().name()
+                        : null,
+
+                toLocalDateTime(serviceTour.getCreatedAt()),
+                toLocalDateTime(serviceTour.getUpdatedAt()));
+    }
+
+    private static LocalDateTime toLocalDateTime(
+            java.time.Instant instant) {
+
+        if (instant == null) {
+            return null;
+        }
+
+        return LocalDateTime.ofInstant(
+                instant,
+                ZoneId.systemDefault());
     }
 }

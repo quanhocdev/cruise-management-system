@@ -11,9 +11,6 @@ const useServiceTour = () => {
 
   const [serviceTours, setServiceTours] = useState([]);
 
-  // ✅ Lịch sử các Tour đã hoàn thành cấu hình (HistoryServiceTourResponse[])
-  const [completionHistory, setCompletionHistory] = useState([]);
-
   const [loading, setLoading] = useState(false);
 
   const [error, setError] = useState(null);
@@ -43,28 +40,6 @@ const useServiceTour = () => {
       );
     } finally {
       setLoading(false);
-    }
-  }, []);
-
-  // =====================================================
-  // LOAD CONFIGURATION HISTORY
-  // =====================================================
-  //
-  // ✅ Đây là nguồn dữ liệu DUY NHẤT xác định 1 Tour đã
-  // "Hoàn thành cấu hình" hay chưa — không được suy luận
-  // từ status của từng ServiceTour (status không đổi sau
-  // khi hoàn thành).
-  //
-  // =====================================================
-
-  const loadCompletionHistory = useCallback(async () => {
-    try {
-      const data = await serviceTourService.getConfigurationHistory();
-
-      setCompletionHistory(data || []);
-    } catch (err) {
-      console.error("LOAD SERVICE TOUR CONFIGURATION HISTORY ERROR:", err);
-      // Không set error chung để tránh che mất lỗi load danh sách chính.
     }
   }, []);
 
@@ -144,9 +119,10 @@ const useServiceTour = () => {
 
         const result = await serviceTourService.completeConfiguration(tourId);
 
-        // ✅ Load lại cả 2 nguồn: danh sách chính + lịch sử hoàn thành,
-        // để nút "Hoàn thành" bị khóa lại NGAY sau khi thao tác xong.
-        await Promise.all([loadServiceTours(), loadCompletionHistory()]);
+        // Sau khi Complete, status của ServiceTour
+        // được cập nhật thành CONFIGURED ở backend.
+        // Chỉ cần load lại danh sách chính.
+        await loadServiceTours();
 
         return result;
       } catch (err) {
@@ -162,7 +138,7 @@ const useServiceTour = () => {
         setCompleting(false);
       }
     },
-    [loadServiceTours, loadCompletionHistory],
+    [loadServiceTours],
   );
 
   // =====================================================
@@ -171,17 +147,11 @@ const useServiceTour = () => {
 
   useEffect(() => {
     loadServiceTours();
-    loadCompletionHistory();
-  }, [loadServiceTours, loadCompletionHistory]);
+  }, [loadServiceTours]);
 
   // =====================================================
-  // TOUR SUMMARIES (dùng cho dropdown + canComplete)
+  // TOUR SUMMARIES
   // =====================================================
-
-  const completedTourIds = useMemo(
-    () => new Set(completionHistory.map((h) => h.tourId)),
-    [completionHistory],
-  );
 
   const tourSummaries = useMemo(() => {
     const map = new Map();
@@ -198,6 +168,7 @@ const useServiceTour = () => {
       }
 
       const entry = map.get(item.tourId);
+
       entry.total += 1;
 
       if (item.status === "CONFIGURED") {
@@ -207,11 +178,12 @@ const useServiceTour = () => {
 
     return Array.from(map.values()).map((entry) => ({
       ...entry,
-      // ✅ cờ quyết định khóa nút "Hoàn thành", lấy từ configuration-history
-      // (nguồn đáng tin cậy), KHÔNG suy ra từ status.
-      completed: completedTourIds.has(entry.tourId),
+
+      // Một Tour được xem là đã hoàn thành cấu hình
+      // khi tất cả ServiceTour của Tour đều CONFIGURED.
+      completed: entry.total > 0 && entry.configuredCount === entry.total,
     }));
-  }, [serviceTours, completedTourIds]);
+  }, [serviceTours]);
 
   // =====================================================
   // RETURN
@@ -219,7 +191,6 @@ const useServiceTour = () => {
 
   return {
     serviceTours,
-    completionHistory,
     tourSummaries,
 
     loading,
@@ -229,7 +200,6 @@ const useServiceTour = () => {
     completeError,
 
     loadServiceTours,
-    loadCompletionHistory,
 
     configureService,
     updateService,

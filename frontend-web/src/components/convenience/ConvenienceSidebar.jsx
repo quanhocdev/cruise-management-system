@@ -5,7 +5,6 @@ import {
   ConciergeBell,
   Package,
   ClipboardList,
-  History,
   ChevronLeft,
   ChevronRight,
   Sparkles,
@@ -33,11 +32,6 @@ const menuItems = [
     label: "Cấu hình Tour",
     icon: ClipboardList,
     path: "/convenience/tour-config",
-  },
-  {
-    label: "Lịch sử cấu hình",
-    icon: History,
-    path: "/convenience/tour-history",
   },
 ];
 

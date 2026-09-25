@@ -14,7 +14,7 @@ import {
 import useServiceTour from "../../hooks/useServiceTour";
 import "../../styles/tour-config/ServiceTourConfigTable.css";
 import ServiceTourConfigModal from "./ServiceTourConfigModal";
-import ServiceTourDetailModal from "../history/ServiceTourDetailModal"; // Modal chi tiết khi click con mắt
+// import ServiceTourDetailModal from "../history/ServiceTourDetailModal"; // Modal chi tiết khi click con mắt
 
 // =========================================================
 // STATUS TABS — khớp đúng ServiceTourStatus (Java enum)

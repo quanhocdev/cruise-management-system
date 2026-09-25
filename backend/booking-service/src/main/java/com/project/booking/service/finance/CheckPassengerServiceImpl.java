@@ -7,7 +7,7 @@ import com.project.booking.repository.BookingPassengerRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
+import com.project.booking.exception.AppException;
 
 import java.time.LocalDateTime;
 
@@ -34,9 +34,8 @@ public class CheckPassengerServiceImpl implements CheckPassengerService {
         // Repository)
         BookingPassenger passengerAssignment = bookingPassengerRepository
                 .findByBooking_IdAndPassenger_Id(bookingId, request.getPassengerId())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Không tìm thấy hành khách trong đơn đặt tour này!"));
+                .orElseThrow(() -> new AppException(
+                        "Không tìm thấy hành khách trong đơn đặt tour này!", HttpStatus.NOT_FOUND));
 
         // 2. Gán thông tin phòng, mã thẻ NFC và cập nhật trạng thái
         passengerAssignment.setRoomId(request.getRoomId());

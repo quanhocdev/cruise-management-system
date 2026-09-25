@@ -7,7 +7,6 @@ import com.project.tour.dto.tour.TourResponse;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.tour.TourMapper;
 import com.project.tour.mapper.tour.TourMasterSyncMapper;
-import com.project.tour.model.AssignmentActivityVisit;
 import com.project.tour.model.Cruise;
 import com.project.tour.model.CruiseArea;
 import com.project.tour.model.CruiseDeck;
@@ -20,7 +19,6 @@ import com.project.tour.model.enums.tour.TourStatusTrip;
 import com.project.tour.repository.cruise.CruiseAreaRepository;
 import com.project.tour.repository.cruise.CruiseDeckRepository;
 import com.project.tour.repository.room.RoomRepository;
-import com.project.tour.repository.tour.AssignmentActivityVisitRepository;
 import com.project.tour.repository.tour.TourPackageRepository;
 import com.project.tour.repository.tour.TourRepository;
 import com.project.tour.repository.tour.schedule.ScheduleRepository;
@@ -53,7 +51,6 @@ public class ApprovalTourService {
         private final ScheduleStopRepository scheduleStopRepository;
         private final OperationCruiseAssignmentService cruiseAssignmentService;
         private final KafkaTemplate<String, Object> kafkaTemplate;
-        private final AssignmentActivityVisitRepository assignmentActivityVisitRepository;
         private final TourRedisService tourRedisService;
 
         public ApprovalTourService(
@@ -66,7 +63,6 @@ public class ApprovalTourService {
                         ScheduleStopRepository scheduleStopRepository,
                         OperationCruiseAssignmentService cruiseAssignmentService,
                         KafkaTemplate<String, Object> kafkaTemplate,
-                        AssignmentActivityVisitRepository assignmentActivityVisitRepository,
                         TourRedisService tourRedisService) {
                 this.tourRepository = tourRepository;
                 this.tourPackageRepository = tourPackageRepository;
@@ -77,7 +73,6 @@ public class ApprovalTourService {
                 this.scheduleStopRepository = scheduleStopRepository;
                 this.cruiseAssignmentService = cruiseAssignmentService;
                 this.kafkaTemplate = kafkaTemplate;
-                this.assignmentActivityVisitRepository = assignmentActivityVisitRepository;
                 this.tourRedisService = tourRedisService;
         }
 
@@ -163,25 +158,6 @@ public class ApprovalTourService {
 
                 // 4. Bắn sang Kafka
                 kafkaTemplate.send(TOUR_MASTER_SYNC_TOPIC, tourId.toString(), masterEvent);
-
-                // =========================================================
-                // 5. KHỞI TẠO SẴN CÁC BẢN GHI "MỒI" (WAITING_CONFIG) CHO VISIT
-                // =========================================================
-                for (Schedule schedule : schedules) {
-                        List<ScheduleStop> stops = scheduleIdToStopsMap.get(schedule.getId());
-                        if (stops != null) {
-                                for (ScheduleStop stop : stops) {
-                                        boolean exists = assignmentActivityVisitRepository
-                                                        .existsByTourIdAndScheduleStopId(tourId, stop.getId());
-                                        if (!exists) {
-                                                AssignmentActivityVisit placeholder = new AssignmentActivityVisit(
-                                                                tourId, stop.getId());
-                                                placeholder.setStatus("WAITING_CONFIG");
-                                                assignmentActivityVisitRepository.save(placeholder);
-                                        }
-                                }
-                        }
-                }
 
                 return TourMapper.toResponse(savedTour);
         }

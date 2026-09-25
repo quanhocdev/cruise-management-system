@@ -20,9 +20,6 @@ public class AuthMapper {
         this.roleRepository = roleRepository;
     }
 
-    /**
-     * Map từ RegisterRequest sang Users entity (đã encode password)
-     */
     public Users toUserEntity(RegisterRequest request, String encodedPassword) {
 
         Role passengerRole = roleRepository.findByName("PASSENGER")
@@ -42,9 +39,6 @@ public class AuthMapper {
         return user;
     }
 
-    /**
-     * Map từ Users entity và thông báo sang RegisterResponse
-     */
     public RegisterResponse toRegisterResponseDTO(
             Users user,
             String message) {
@@ -55,9 +49,6 @@ public class AuthMapper {
                 message);
     }
 
-    /**
-     * Map từ Tokens + Users sang JwtResponse trả về cho Client
-     */
     public JwtResponse toJwtResponse(
             String accessToken,
             String refreshToken,

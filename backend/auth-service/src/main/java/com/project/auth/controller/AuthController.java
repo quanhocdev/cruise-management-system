@@ -3,13 +3,11 @@ package com.project.auth.controller;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
 import com.project.auth.dto.JwtResponse;
 import com.project.auth.dto.LoginRequest;
 import com.project.auth.exception.AppException;
@@ -18,7 +16,6 @@ import com.project.auth.service.AuthService;
 import com.project.auth.service.JwtService;
 import com.project.auth.service.redis.TokenRedisService;
 import com.project.auth.util.CookieUtil;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -40,9 +37,7 @@ public class AuthController {
         this.tokenRedisService = tokenRedisService;
     }
 
-    /**
-     * API ĐĂNG NHẬP
-     */
+    // Đăng nhập tài khoản
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(
             @Valid @RequestBody LoginRequest request,
@@ -79,9 +74,7 @@ public class AuthController {
         return ResponseEntity.ok(responseBody);
     }
 
-    /**
-     * API LÀM MỚI TOKEN (Refresh Token)
-     */
+    // Làm mới Access Token bằng Refresh Token
     @PostMapping("/refresh")
     public ResponseEntity<Map<String, String>> refresh(
             HttpServletRequest request,
@@ -121,9 +114,7 @@ public class AuthController {
                 "message", "Access token refreshed"));
     }
 
-    /**
-     * API KIỂM TRA THÔNG TIN USER ĐANG ĐĂNG NHẬP (/me)
-     */
+    // Lấy thông tin người dùng hiện tại
     @GetMapping("/me")
     public ResponseEntity<Map<String, String>> getCurrentUser(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -143,9 +134,7 @@ public class AuthController {
                 "role", role));
     }
 
-    /**
-     * API ĐĂNG XUẤT
-     */
+    // Đăng xuất tài khoản
     @PostMapping("/logout")
     public ResponseEntity<Map<String, String>> logout(
             HttpServletRequest request,
@@ -180,10 +169,8 @@ public class AuthController {
             } catch (Exception ignored) {
             }
         }
-
         // Clear toàn bộ Auth Cookie
         CookieUtil.clearAuthCookies(response);
-
         return ResponseEntity.ok(Map.of("message", "Đăng xuất thành công"));
     }
 }

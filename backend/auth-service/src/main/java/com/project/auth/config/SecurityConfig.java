@@ -44,27 +44,17 @@ public class SecurityConfig {
                         HttpSecurity http) throws Exception {
 
                 http
-                                // =====================================================
-                                // CORS
-                                // =====================================================
-                                // Không xử lý CORS tại Auth Service.
-                                // CORS được Gateway xử lý.
+
                                 .csrf(csrf -> csrf.disable())
 
-                                // =====================================================
                                 // STATELESS
-                                // =====================================================
                                 .sessionManagement(session -> session.sessionCreationPolicy(
                                                 SessionCreationPolicy.STATELESS))
 
-                                // =====================================================
                                 // AUTHORIZATION
-                                // =====================================================
                                 .authorizeHttpRequests(auth -> auth
 
-                                                // -------------------------------------------------
                                                 // Public Auth APIs
-                                                // -------------------------------------------------
                                                 .requestMatchers(
                                                                 "/api/auth/register",
                                                                 "/api/auth/login",
@@ -76,17 +66,13 @@ public class SecurityConfig {
                                                                 "/api/auth/activate/set-password")
                                                 .permitAll()
 
-                                                // -------------------------------------------------
                                                 // Authenticated APIs
-                                                // -------------------------------------------------
                                                 .requestMatchers(
                                                                 "/api/auth/logout",
                                                                 "/api/auth/me")
                                                 .authenticated()
 
-                                                // -------------------------------------------------
                                                 // Web Pages
-                                                // -------------------------------------------------
                                                 .requestMatchers("/admin/**")
                                                 .hasRole("ADMIN")
 
@@ -128,9 +114,7 @@ public class SecurityConfig {
 
                                                 .anyRequest().authenticated())
 
-                                // =====================================================
                                 // OAUTH2 RESOURCE SERVER
-                                // =====================================================
                                 .oauth2ResourceServer(oauth2 -> oauth2
 
                                                 /*
@@ -145,10 +129,7 @@ public class SecurityConfig {
                                                 .bearerTokenResolver(request -> {
 
                                                         /*
-                                                         * =====================================================
-                                                         * REFRESH
-                                                         * =====================================================
-                                                         *
+                                                         * REFRESH ENDPOINT
                                                          * Không lấy accessToken cookie ở /api/auth/refresh.
                                                          *
                                                          * Vì accessToken có thể đã hết hạn.

@@ -1,42 +1,65 @@
 // src/modules/onboard/services/activityCruiseTourService.js
+
 import api from "../../../api/axios";
 
 const API_URL = "/onboard/activity-cruise-tours";
 
 export const activityCruiseTourService = {
+  // =====================================================
+  // GET ALL ASSIGNMENTS
+  // =====================================================
+
   getAll: async () => {
     const response = await api.get(API_URL);
     return response.data;
   },
+
+  // =====================================================
+  // GET PENDING CONFIGURATION
+  // =====================================================
 
   getPendingConfig: async () => {
     const response = await api.get(`${API_URL}/pending-config`);
     return response.data;
   },
 
+  // =====================================================
+  // CREATE / SAVE CONFIGURATION
+  // =====================================================
+
   configure: async (assignmentId, data) => {
     const response = await api.post(`${API_URL}/${assignmentId}/config`, data);
+
     return response.data;
   },
+
+  // =====================================================
+  // UPDATE CONFIGURATION
+  // =====================================================
 
   updateConfig: async (assignmentId, data) => {
     const response = await api.patch(`${API_URL}/${assignmentId}/config`, data);
+
     return response.data;
   },
 
-  // POST /api/onboard/activity-cruise-tours/{tourId}/complete
+  // =====================================================
+  // COMPLETE TOUR CONFIGURATION
+  // =====================================================
+
   completeTourConfiguration: async (tourId) => {
     const response = await api.post(`${API_URL}/${tourId}/complete`);
+
     return response.data;
   },
-  // GET /api/onboard/activity-cruise-tours/configuration-history
-  getConfigurationHistory: async () => {
-    const response = await api.get(`${API_URL}/configuration-history`);
-    return response.data;
-  },
-  // GET /api/onboard/activity-cruise-tours/tour/{tourId}
+
+  // =====================================================
+  // GET CONFIGURATION DETAIL BY TOUR
+  // =====================================================
+
   getConfigurationDetail: async (tourId) => {
     const response = await api.get(`${API_URL}/tour/${tourId}`);
+
     return response.data;
   },
 };

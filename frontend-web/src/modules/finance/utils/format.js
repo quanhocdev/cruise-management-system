@@ -19,7 +19,7 @@ export const formatMoney = (value) =>
         currency: "VND",
       }).format(value);
 
-// Dùng chung cho mọi bộ lọc tìm kiếm — tránh bug ẩn nhầm hàng
+// Dùng chung cho mọi bộ lọc tìm kiếm
 export const matchesSearch = (term, ...fields) => {
   if (!term?.trim()) return true;
   const q = term.trim().toLowerCase();

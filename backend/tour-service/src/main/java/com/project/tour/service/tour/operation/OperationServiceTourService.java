@@ -1,76 +1,42 @@
 package com.project.tour.service.tour.operation;
 
-import com.project.common.event.ServiceTourConfiguredEvent;
 import com.project.tour.dto.tour.operation.AssignmentServiceResponse;
 import com.project.tour.mapper.tour.operation.AssignmentServiceMapper;
-import com.project.tour.model.AssignmentService;
-import com.project.tour.repository.tour.AssignmentServiceRepository;
+import com.project.tour.repository.convenience.ServiceTourRepository;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.UUID;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class OperationServiceTourService {
 
-        private final AssignmentServiceRepository assignmentServiceRepository;
+        private final ServiceTourRepository serviceTourRepository;
 
         public OperationServiceTourService(
-                        AssignmentServiceRepository assignmentServiceRepository) {
+                        ServiceTourRepository serviceTourRepository) {
 
-                this.assignmentServiceRepository = assignmentServiceRepository;
+                this.serviceTourRepository = serviceTourRepository;
         }
 
-        // =========================================================
-        // KAFKA - SERVICE TOUR CONFIGURED
-        // =========================================================
-
-        public void handleServiceTourConfigured(
-                        ServiceTourConfiguredEvent event) {
-
-                AssignmentService assignment = assignmentServiceRepository
-                                .findByTourIdAndCruiseAreaId(
-                                                event.tourId(),
-                                                event.cruiseAreaId())
-                                .orElseThrow(() -> new IllegalStateException(
-                                                "AssignmentService not found for tourId="
-                                                                + event.tourId()
-                                                                + ", cruiseAreaId="
-                                                                + event.cruiseAreaId()));
-
-                assignment.setServiceTourId(event.serviceTourId());
-                assignment.setServiceId(event.serviceId());
-                assignment.setServiceName(event.name());
-                assignment.setServiceDescription(event.description());
-                assignment.setPrice(event.price());
-                assignment.setMaxPassengers(event.maxPassengers());
-                assignment.setDurationMinutes(event.durationMinutes());
-                assignment.setImageUrl(event.imageUrl());
-                assignment.setStatus(event.status());
-
-                assignmentServiceRepository.save(assignment);
-        }
-
-        @Transactional(readOnly = true)
+        // GET ALL
         public List<AssignmentServiceResponse> getAll() {
 
-                return assignmentServiceRepository
+                return serviceTourRepository
                                 .findAllByOrderByCreatedAtAsc()
                                 .stream()
                                 .map(AssignmentServiceMapper::toResponse)
                                 .toList();
         }
 
-        // =========================================================
-        // GET SERVICE ASSIGNMENTS BY TOUR
-        // =========================================================
-
-        @Transactional(readOnly = true)
+        // GET BY TOUR
         public List<AssignmentServiceResponse> getByTourId(
                         UUID tourId) {
 
-                return assignmentServiceRepository
+                return serviceTourRepository
                                 .findAllByTourIdOrderByCreatedAtAsc(tourId)
                                 .stream()
                                 .map(AssignmentServiceMapper::toResponse)

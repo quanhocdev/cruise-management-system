@@ -9,10 +9,11 @@ import com.project.tour.mapper.tour.ProductTourAssignmentMapper;
 import com.project.tour.mapper.tour.ServiceTourAssignmentMapper;
 import com.project.tour.model.CruiseArea;
 import com.project.tour.model.Tour;
+import com.project.tour.repository.convenience.ProductTourRepository;
+import com.project.tour.repository.convenience.ServiceTourRepository;
 import com.project.tour.repository.cruise.CruiseAreaRepository;
-import com.project.tour.repository.tour.AssignmentProductRepository;
-import com.project.tour.repository.tour.AssignmentServiceRepository;
 import com.project.tour.repository.tour.TourRepository;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,8 +27,8 @@ import java.util.UUID;
 public class OperationTourConfigurationService {
 
         private final TourRepository tourRepository;
-        private final AssignmentProductRepository assignmentProductRepository;
-        private final AssignmentServiceRepository serviceRepository;
+        private final ProductTourRepository productTourRepository;
+        private final ServiceTourRepository serviceTourRepository;
         private final CruiseAreaRepository cruiseAreaRepository;
 
         private final ProductTourAssignmentMapper productMapper;
@@ -35,15 +36,15 @@ public class OperationTourConfigurationService {
 
         public OperationTourConfigurationService(
                         TourRepository tourRepository,
-                        AssignmentProductRepository assignmentProductRepository,
-                        AssignmentServiceRepository serviceRepository,
+                        ProductTourRepository productTourRepository,
+                        ServiceTourRepository serviceTourRepository,
                         CruiseAreaRepository cruiseAreaRepository,
                         ProductTourAssignmentMapper productMapper,
                         ServiceTourAssignmentMapper serviceMapper) {
 
                 this.tourRepository = tourRepository;
-                this.assignmentProductRepository = assignmentProductRepository;
-                this.serviceRepository = serviceRepository;
+                this.productTourRepository = productTourRepository;
+                this.serviceTourRepository = serviceTourRepository;
                 this.cruiseAreaRepository = cruiseAreaRepository;
                 this.productMapper = productMapper;
                 this.serviceMapper = serviceMapper;
@@ -52,45 +53,76 @@ public class OperationTourConfigurationService {
         /**
          * Operation lấy toàn bộ cấu hình của một Tour.
          */
-        public OperationTourConfigurationResponse getConfiguration(UUID tourId) {
+        public OperationTourConfigurationResponse getConfiguration(
+                        UUID tourId) {
 
+                // =====================================================
                 // 1. TOUR
-                Tour tour = tourRepository.findById(tourId)
-                                .orElseThrow(() -> new AppException("Tour not found", HttpStatus.NOT_FOUND));
+                // =====================================================
 
+                Tour tour = tourRepository.findById(tourId)
+                                .orElseThrow(() -> new AppException(
+                                                "Tour not found",
+                                                HttpStatus.NOT_FOUND));
+
+                // =====================================================
                 // 2. ACTIVITY
+                // =====================================================
+
                 List<ActivityCruiseTourAssignmentResponse> activities = Collections.emptyList();
 
-                // 3. PRODUCT (Giữ nguyên logic query từ DB tour-service)
-                List<ProductTourAssignmentResponse> products = assignmentProductRepository
+                // =====================================================
+                // 3. PRODUCT
+                // =====================================================
+
+                List<ProductTourAssignmentResponse> products = productTourRepository
                                 .findAllByTourIdOrderByCreatedAtAsc(tourId)
                                 .stream()
-                                .map(assignment -> {
+                                .map(productTour -> {
+
                                         CruiseArea cruiseArea = cruiseAreaRepository
-                                                        .findById(assignment.getCruiseAreaId())
+                                                        .findById(productTour.getCruiseAreaId())
                                                         .orElse(null);
-                                        return productMapper.toResponse(assignment, tour, cruiseArea);
+
+                                        return productMapper.toResponse(
+                                                        productTour,
+                                                        tour,
+                                                        cruiseArea);
                                 })
                                 .toList();
 
-                // 4. SERVICE (Giữ nguyên logic query từ DB tour-service)
-                List<ServiceTourAssignmentResponse> services = serviceRepository
+                // =====================================================
+                // 4. SERVICE
+                // =====================================================
+
+                List<ServiceTourAssignmentResponse> services = serviceTourRepository
                                 .findAllByTourIdOrderByCreatedAtAsc(tourId)
                                 .stream()
-                                .map(assignment -> {
+                                .map(serviceTour -> {
+
                                         CruiseArea cruiseArea = cruiseAreaRepository
-                                                        .findById(assignment.getCruiseAreaId())
+                                                        .findById(serviceTour.getCruiseAreaId())
                                                         .orElse(null);
-                                        return serviceMapper.toResponse(assignment, tour, cruiseArea);
+
+                                        return serviceMapper.toResponse(
+                                                        serviceTour,
+                                                        tour,
+                                                        cruiseArea);
                                 })
                                 .toList();
 
+                // =====================================================
                 // 5. CHECK COMPLETE
+                // =====================================================
+
                 boolean configurationComplete = isActivityConfigurationComplete(activities)
                                 && isProductConfigurationComplete(products)
                                 && isServiceConfigurationComplete(services);
 
-                // 6. RESPONSE (Trả đúng DTO FE đang chờ)
+                // =====================================================
+                // 6. RESPONSE
+                // =====================================================
+
                 return new OperationTourConfigurationResponse(
                                 tour.getId(),
                                 tour.getCode(),
@@ -102,8 +134,9 @@ public class OperationTourConfigurationService {
         }
 
         // =====================================================
-        // PRIVATE VALIDATION (Chỉ dùng nội bộ Backend)
+        // PRIVATE VALIDATION
         // =====================================================
+
         private boolean isActivityConfigurationComplete(
                         List<ActivityCruiseTourAssignmentResponse> activities) {
 
@@ -112,7 +145,8 @@ public class OperationTourConfigurationService {
                 }
 
                 return activities.stream()
-                                .allMatch(activity -> activity.id() != null && activity.cruiseAreaId() != null);
+                                .allMatch(activity -> activity.id() != null
+                                                && activity.cruiseAreaId() != null);
         }
 
         private boolean isProductConfigurationComplete(
@@ -123,7 +157,8 @@ public class OperationTourConfigurationService {
                 }
 
                 return products.stream()
-                                .allMatch(product -> product.id() != null && product.cruiseAreaId() != null);
+                                .allMatch(product -> product.id() != null
+                                                && product.cruiseAreaId() != null);
         }
 
         private boolean isServiceConfigurationComplete(
@@ -134,6 +169,7 @@ public class OperationTourConfigurationService {
                 }
 
                 return services.stream()
-                                .allMatch(service -> service.id() != null && service.cruiseAreaId() != null);
+                                .allMatch(service -> service.id() != null
+                                                && service.cruiseAreaId() != null);
         }
 }

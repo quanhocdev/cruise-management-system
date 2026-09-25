@@ -9,7 +9,6 @@ spring:
     codec:
       max-in-memory-size: 10MB
 
-  # TẮT BANNER ASCII SPRING BOOT
   main:
     banner-mode: "off"
 
@@ -27,17 +26,30 @@ spring:
               predicates:
                 - Path=/api/auth/**,/api/admin/staff/**
 
+            # ==========================
+            # PAYMENT SERVICE
+            # ==========================
+
             - id: payment-service
               uri: ${PAYMENT_SERVICE_URL:http://payment-service:8085}
               predicates:
                 - Path=/api/v1/payments/**,/api/passenger/payments/**
+
+            # ==========================
+            # NOTIFICATION SERVICE
+            # ==========================
+
             - id: notification-service
               uri: ${NOTIFICATION_SERVICE_URL:http://notification-service:8086}
               predicates:
                 - Path=/api/v1/notifications/**
 
+            # ==========================
+            # FEEDBACK SERVICE
+            # ==========================
+
             - id: feedback-service
-              uri: ${FEEDBACK_SERVICE_URL:http://feedback-service:8087}
+              uri: ${FEEDBACK_SERVICE_URL:http://feedback-service:8089}
               predicates:
                 - Path=/api/v1/feedbacks/**,/api/admin/feedbacks/**
 
@@ -94,7 +106,7 @@ spring:
             - id: booking-finance-service
               uri: ${BOOKING_SERVICE_URL:http://booking-service:8082}
               predicates:
-                - Path=/api/finance/scan,/api/finance/bookings,/api/finance/bookings/**, /api/finance/check-passenger/**
+                - Path=/api/finance/scan,/api/finance/bookings,/api/finance/bookings/**,/api/finance/check-passenger/**
 
             # ==========================
             # TOUR SERVICE - FINANCE
@@ -106,7 +118,7 @@ spring:
                 - Path=/api/finance/**
 
             # ==========================
-            # TOUR SERVICE - PUBLIC STOREFRONT
+            # TOUR SERVICE - PUBLIC
             # ==========================
 
             - id: tour-public-service
@@ -115,28 +127,33 @@ spring:
                 - Path=/api/public/**
 
             # ==========================
-            # CONVENIENCE SERVICE
+            # TOUR SERVICE - CONVENIENCE
             # ==========================
-            - id: convenience-service
-              uri: ${CONVENIENCE_SERVICE_URL:http://convenience-service:8084}
+            # Product / Service / ProductTour / ServiceTour
+            # đã được merge vào tour-service
+
+            - id: tour-convenience-service
+              uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
               predicates:
-                - Path=/api/convenience/**,/api/admin/products/**,/api/admin/services/**
+                - Path=/api/convenience/**
 
             # ==========================
-            # ACTIVITY CRUISE SERVICE - ONBOARD
+            # TOUR SERVICE - ACTIVITY CRUISE
             # ==========================
+            # Activity Cruise đã được merge vào tour-service
 
-            - id: activity-cruise-service
-              uri: ${ACTIVITY_SERVICE_URL:http://activity-cruise-service:8083}
+            - id: tour-activity-cruise-service
+              uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
               predicates:
                 - Path=/api/onboard/**
 
             # ==========================
-            # ACTIVITY VISIT SERVICE - SHORE
+            # TOUR SERVICE - ACTIVITY VISIT
             # ==========================
+            # Activity Visit đã được merge vào tour-service
 
-            - id: activity-visit-service
-              uri: ${ACTIVITY_VISIT_SERVICE_URL:http://activity-visit-service:8087}
+            - id: tour-activity-visit-service
+              uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
               predicates:
                 - Path=/api/shore/**
 
@@ -152,6 +169,7 @@ spring:
             # ==========================
             # BOOKING SERVICE - PASSENGER
             # ==========================
+
             - id: booking-service
               uri: ${BOOKING_SERVICE_URL:http://booking-service:8082}
               predicates:
