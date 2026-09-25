@@ -14,7 +14,7 @@ import useProductTour from "../../hooks/useProductTour";
 import "../../styles/tour-config/ProductTourConfigTable.css";
 
 import ProductTourConfigModal from "./ProductTourConfigModal";
-import ProductTourDetailModal from "../history/ProductTourDetailModal"; // Modal chi tiết khi click con mắt
+// import ProductTourDetailModal from "../history/ProductTourDetailModal"; // Modal chi tiết khi click con mắt
 
 // =========================================================
 // STATUS TABS — khớp đúng ProductTourStatus (Java enum)
