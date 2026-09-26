@@ -21,28 +21,18 @@ export default function RoomTypeFormModal({
       keyboard={!saving}
     >
       <Form onSubmit={onSubmit}>
-        {/* =================================================
-            HEADER
-           ================================================= */}
-
         <Modal.Header closeButton={!saving}>
           <Modal.Title>
             {isEditing ? "Chỉnh sửa loại phòng" : "Thêm loại phòng"}
           </Modal.Title>
         </Modal.Header>
 
-        {/* =================================================
-            BODY
-           ================================================= */}
-
         <Modal.Body>
           {error && <Alert variant="danger">{error}</Alert>}
 
           {/* NAME */}
-
           <Form.Group className="mb-3">
             <Form.Label>Tên loại phòng</Form.Label>
-
             <Form.Control
               type="text"
               name="name"
@@ -53,20 +43,34 @@ export default function RoomTypeFormModal({
               disabled={saving}
               autoFocus
             />
-
             <Form.Text className="text-muted">
               Tên loại phòng không được trùng.
             </Form.Text>
           </Form.Group>
 
-          {/* DESCRIPTION */}
+          {/* CAPACITY (THÊM MỚI) */}
+          <Form.Group className="mb-3">
+            <Form.Label>Sức chứa tối đa (người)</Form.Label>
+            <Form.Control
+              type="number"
+              name="capacity"
+              value={form.capacity}
+              onChange={onChange}
+              min={1}
+              placeholder="Ví dụ: 2, 4..."
+              disabled={saving}
+            />
+            <Form.Text className="text-muted">
+              Số lượng khách tối đa cho phép trong loại phòng này.
+            </Form.Text>
+          </Form.Group>
 
+          {/* DESCRIPTION */}
           <Form.Group className="mb-3">
             <Form.Label>Mô tả</Form.Label>
-
             <Form.Control
               as="textarea"
-              rows={5}
+              rows={4}
               name="description"
               value={form.description}
               onChange={onChange}
@@ -74,14 +78,9 @@ export default function RoomTypeFormModal({
               maxLength={5000}
               disabled={saving}
             />
-
             <Form.Text className="text-muted">Tối đa 5000 ký tự.</Form.Text>
           </Form.Group>
         </Modal.Body>
-
-        {/* =================================================
-            FOOTER
-           ================================================= */}
 
         <Modal.Footer>
           <Button variant="secondary" onClick={onClose} disabled={saving}>

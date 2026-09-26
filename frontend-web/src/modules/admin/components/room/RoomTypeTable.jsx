@@ -6,23 +6,14 @@ export default function RoomTypeTable({
   onEdit,
   onDelete,
 }) {
-  // =====================================================
-  // LOADING
-  // =====================================================
-
   if (loading) {
     return (
       <div className="text-center py-5">
         <Spinner animation="border" />
-
         <p className="mt-2 text-muted">Đang tải danh sách loại phòng...</p>
       </div>
     );
   }
-
-  // =====================================================
-  // EMPTY
-  // =====================================================
 
   if (!roomTypes || roomTypes.length === 0) {
     return (
@@ -30,22 +21,18 @@ export default function RoomTypeTable({
     );
   }
 
-  // =====================================================
-  // TABLE
-  // =====================================================
-
   return (
     <div className="table-responsive">
       <Table bordered hover responsive className="align-middle">
         <thead>
           <tr>
             <th style={{ width: "80px" }}>STT</th>
-
-            <th style={{ width: "250px" }}>Tên loại phòng</th>
-
+            <th style={{ width: "220px" }}>Tên loại phòng</th>
+            <th style={{ width: "130px" }} className="text-center">
+              Sức chứa
+            </th>
             <th>Mô tả</th>
-
-            <th className="text-center" style={{ width: "220px" }}>
+            <th className="text-center" style={{ width: "200px" }}>
               Thao tác
             </th>
           </tr>
@@ -55,11 +42,14 @@ export default function RoomTypeTable({
           {roomTypes.map((roomType, index) => (
             <tr key={roomType.id}>
               <td>{index + 1}</td>
-
               <td>
                 <strong>{roomType.name}</strong>
               </td>
-
+              <td className="text-center">
+                <span className="badge bg-info text-dark">
+                  {roomType.capacity || 1} người
+                </span>
+              </td>
               <td>
                 {roomType.description ? (
                   roomType.description
@@ -67,7 +57,6 @@ export default function RoomTypeTable({
                   <span className="text-muted">Không có mô tả</span>
                 )}
               </td>
-
               <td>
                 <div className="d-flex justify-content-center gap-2">
                   <Button
@@ -77,7 +66,6 @@ export default function RoomTypeTable({
                   >
                     Sửa
                   </Button>
-
                   <Button
                     size="sm"
                     variant="outline-danger"

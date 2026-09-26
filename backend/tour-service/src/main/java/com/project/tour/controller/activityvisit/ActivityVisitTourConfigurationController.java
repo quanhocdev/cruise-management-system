@@ -21,11 +21,6 @@ public class ActivityVisitTourConfigurationController {
         this.configurationService = configurationService;
     }
 
-    /**
-     * Hoàn thành cấu hình tất cả VisitTour của một Tour.
-     *
-     * WAITING_CONFIG -> CONFIGURED
-     */
     @PostMapping("/{tourId}/complete")
     public ResponseEntity<Void> complete(
             @PathVariable UUID tourId) {
@@ -35,12 +30,6 @@ public class ActivityVisitTourConfigurationController {
         return ResponseEntity.ok().build();
     }
 
-    /**
-     * Giữ endpoint cũ để không làm frontend hiện tại bị hỏng.
-     *
-     * Không còn trả về HistoryActivityVisitTour.
-     * Chỉ trả về cấu hình VisitTour hiện tại của Tour.
-     */
     @GetMapping("/configuration-history/{tourId}")
     public ResponseEntity<List<VisitTourResponse>> getConfigurationHistoryDetail(
             @PathVariable UUID tourId) {

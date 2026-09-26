@@ -31,10 +31,7 @@ public class VisitTourService {
                 this.validator = validator;
         }
 
-        // =====================================================
         // GET ALL
-        // =====================================================
-
         @Transactional(readOnly = true)
         public List<VisitTourResponse> getAll() {
 
@@ -45,10 +42,7 @@ public class VisitTourService {
                                 .toList();
         }
 
-        // =====================================================
         // GET BY ID
-        // =====================================================
-
         @Transactional(readOnly = true)
         public VisitTourResponse getById(UUID id) {
 
@@ -56,10 +50,7 @@ public class VisitTourService {
                                 findById(id));
         }
 
-        // =====================================================
         // GET BY SCHEDULE STOP
-        // =====================================================
-
         @Transactional(readOnly = true)
         public List<VisitTourResponse> getByScheduleStop(
                         UUID scheduleStopId) {
@@ -72,10 +63,7 @@ public class VisitTourService {
                                 .toList();
         }
 
-        // =====================================================
         // GET BY TOUR
-        // =====================================================
-
         @Transactional(readOnly = true)
         public List<VisitTourResponse> getByTour(
                         UUID tourId) {
@@ -87,10 +75,7 @@ public class VisitTourService {
                                 .toList();
         }
 
-        // =====================================================
         // CREATE / CONFIGURE
-        // =====================================================
-
         @Transactional
         public VisitTourResponse create(
                         UUID scheduleStopId,
@@ -118,18 +103,11 @@ public class VisitTourService {
                 visitTour.setMaxPassengers(request.maxPassengers());
                 visitTour.setPrice(request.price());
 
-                // KHÔNG đổi status ở đây.
-                // Vẫn giữ WAITING_CONFIG cho đến khi Operation
-                // bấm hoàn thành cấu hình.
-
                 return VisitTourMapper.toResponse(
                                 visitTourRepository.save(visitTour));
         }
 
-        // =====================================================
         // UPDATE
-        // =====================================================
-
         @Transactional
         public VisitTourResponse update(
                         UUID id,
@@ -154,10 +132,7 @@ public class VisitTourService {
                                 visitTourRepository.save(visitTour));
         }
 
-        // =====================================================
         // CREATE FROM TOUR APPROVED
-        // =====================================================
-
         @Transactional
         public VisitTourResponse createVisitTourFromEvent(
                         UUID tourId,
@@ -184,10 +159,7 @@ public class VisitTourService {
                                 visitTourRepository.save(visitTour));
         }
 
-        // =====================================================
         // DELETE
-        // =====================================================
-
         @Transactional
         public void delete(UUID id) {
 
@@ -203,10 +175,7 @@ public class VisitTourService {
                 visitTourRepository.delete(visitTour);
         }
 
-        // =====================================================
         // FINDER
-        // =====================================================
-
         private VisitTour findById(UUID id) {
 
                 return visitTourRepository

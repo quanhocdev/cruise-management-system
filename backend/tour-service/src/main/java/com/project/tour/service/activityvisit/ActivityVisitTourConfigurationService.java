@@ -26,10 +26,7 @@ public class ActivityVisitTourConfigurationService {
         this.visitTourRepository = visitTourRepository;
     }
 
-    // =====================================================
     // COMPLETE CONFIGURATION
-    // =====================================================
-
     public void complete(UUID tourId) {
 
         List<VisitTour> visitTours = visitTourRepository
@@ -41,13 +38,9 @@ public class ActivityVisitTourConfigurationService {
                     HttpStatus.NOT_FOUND);
         }
 
-        // =====================================================
         // KIỂM TRA ĐÃ COMPLETE CONFIGURATION CHƯA
-        // =====================================================
-
         boolean alreadyConfigured = visitTours.stream()
-                .allMatch(visitTour ->
-                        visitTour.getStatus() == VisitTourStatus.CONFIGURED);
+                .allMatch(visitTour -> visitTour.getStatus() == VisitTourStatus.CONFIGURED);
 
         if (alreadyConfigured) {
             throw new AppException(
@@ -55,10 +48,7 @@ public class ActivityVisitTourConfigurationService {
                     HttpStatus.CONFLICT);
         }
 
-        // =====================================================
         // KIỂM TRA TẤT CẢ ĐANG WAITING_CONFIG
-        // =====================================================
-
         for (VisitTour visitTour : visitTours) {
 
             if (visitTour.getStatus() != VisitTourStatus.WAITING_CONFIG) {
@@ -69,10 +59,7 @@ public class ActivityVisitTourConfigurationService {
             }
         }
 
-        // =====================================================
         // KIỂM TRA DỮ LIỆU CẤU HÌNH
-        // =====================================================
-
         for (VisitTour visitTour : visitTours) {
 
             if (visitTour.getName() == null
@@ -96,11 +83,6 @@ public class ActivityVisitTourConfigurationService {
             }
         }
 
-        // =====================================================
-        // HOÀN THÀNH CẤU HÌNH
-        // WAITING_CONFIG → CONFIGURED
-        // =====================================================
-
         for (VisitTour visitTour : visitTours) {
 
             visitTour.setStatus(
@@ -110,10 +92,7 @@ public class ActivityVisitTourConfigurationService {
         visitTourRepository.saveAll(visitTours);
     }
 
-    // =====================================================
     // CONFIGURATION DETAIL
-    // =====================================================
-
     @Transactional(readOnly = true)
     public List<VisitTourResponse> getConfigurationHistoryDetail(
             UUID tourId) {

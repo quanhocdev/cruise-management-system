@@ -30,10 +30,7 @@ public class ActivityCruiseTourService {
                 this.activityCruiseTourMapper = activityCruiseTourMapper;
         }
 
-        // =====================================================
         // TẠO ACTIVITY CRUISE TOUR ASSIGNMENT
-        // =====================================================
-
         public void createActivityCruiseTour(
                         UUID tourId,
                         UUID cruiseAreaId) {
@@ -53,21 +50,13 @@ public class ActivityCruiseTourService {
                 activityTour.setTourId(tourId);
                 activityTour.setCruiseAreaId(cruiseAreaId);
 
-                // =================================================
-                // ASSIGNMENT MỚI
-                // CHƯA HOÀN THÀNH CẤU HÌNH
-                // =================================================
-
                 activityTour.setStatus(
                                 ActivityCruiseTourStatus.WAITING_CONFIG);
 
                 assignmentRepository.save(activityTour);
         }
 
-        // =====================================================
         // XÓA ACTIVITY CRUISE TOUR ASSIGNMENT
-        // =====================================================
-
         public void deleteActivityCruiseTour(
                         UUID tourId,
                         UUID cruiseAreaId) {
@@ -90,10 +79,7 @@ public class ActivityCruiseTourService {
                 assignmentRepository.delete(assignment);
         }
 
-        // =====================================================
         // GET ACTIVITIES ĐANG CHỜ CẤU HÌNH
-        // =====================================================
-
         @Transactional(readOnly = true)
         public List<ActivityCruiseTourResponse> getPendingConfig() {
 
@@ -106,10 +92,7 @@ public class ActivityCruiseTourService {
                                 .toList();
         }
 
-        // =====================================================
         // GET ALL ASSIGNMENTS
-        // =====================================================
-
         @Transactional(readOnly = true)
         public List<ActivityCruiseTourResponse> getAllAssignments() {
 
@@ -120,10 +103,7 @@ public class ActivityCruiseTourService {
                                 .toList();
         }
 
-        // =====================================================
         // GET CONFIGURATION DETAIL BY TOUR
-        // =====================================================
-
         @Transactional(readOnly = true)
         public List<ActivityCruiseTourResponse> getConfigurationDetail(
                         UUID tourId) {

@@ -24,12 +24,13 @@ export default function ManagerRoomType() {
   const [editingRoomType, setEditingRoomType] = useState(null);
 
   // =====================================================
-  // FORM
+  // FORM (Thêm capacity mặc định là 1)
   // =====================================================
 
   const [form, setForm] = useState({
     name: "",
     description: "",
+    capacity: 1,
   });
 
   // =====================================================
@@ -38,12 +39,11 @@ export default function ManagerRoomType() {
 
   const handleOpenCreate = () => {
     setEditingRoomType(null);
-
     setForm({
       name: "",
       description: "",
+      capacity: 1,
     });
-
     setError("");
     setSuccess("");
     setShowModal(true);
@@ -55,58 +55,38 @@ export default function ManagerRoomType() {
 
   const handleOpenEdit = (roomType) => {
     setEditingRoomType(roomType);
-
     setForm({
       name: roomType.name || "",
       description: roomType.description || "",
+      capacity: roomType.capacity || 1,
     });
-
     setError("");
     setSuccess("");
     setShowModal(true);
   };
 
-  // =====================================================
-  // CLOSE
-  // =====================================================
-
   const handleCloseModal = () => {
-    if (saving) {
-      return;
-    }
-
+    if (saving) return;
     setShowModal(false);
   };
 
-  // =====================================================
-  // CHANGE
-  // =====================================================
-
   const handleChange = (event) => {
     const { name, value } = event.target;
-
     setForm((previous) => ({
       ...previous,
-      [name]: value,
+      // Ép kiểu number nếu là trường capacity
+      [name]: name === "capacity" ? (value === "" ? "" : Number(value)) : value,
     }));
   };
 
-  // =====================================================
-  // SUBMIT
-  // =====================================================
-
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     setError("");
     setSuccess("");
 
-    // ===================================================
-    // VALIDATION
-    // ===================================================
-
     const name = form.name.trim();
     const description = form.description.trim();
+    const capacity = Number(form.capacity);
 
     if (!name) {
       setError("Vui lòng nhập tên loại phòng.");
@@ -118,25 +98,25 @@ export default function ManagerRoomType() {
       return;
     }
 
+    if (!capacity || capacity < 1) {
+      setError("Sức chứa tối đa phải từ 1 người trở lên.");
+      return;
+    }
+
     if (description.length > 5000) {
       setError("Mô tả không được vượt quá 5000 ký tự.");
       return;
     }
 
-    // ===================================================
-    // REQUEST
-    // ===================================================
-
     const data = {
       name,
       description,
+      capacity,
     };
 
     setSaving(true);
-
     try {
       let result;
-
       if (!editingRoomType) {
         result = await createRoomType(data);
       } else {
@@ -151,49 +131,27 @@ export default function ManagerRoomType() {
     }
   };
 
-  // =====================================================
-  // DELETE
-  // =====================================================
-
   const handleDelete = async (roomType) => {
     const confirmed = window.confirm(
       `Bạn có chắc muốn xóa loại phòng "${roomType.name}" không?`,
     );
-
-    if (!confirmed) {
-      return;
-    }
-
+    if (!confirmed) return;
     await deleteRoomType(roomType.id);
   };
 
-  // =====================================================
-  // RENDER
-  // =====================================================
-
   return (
     <div className="container-fluid py-4">
-      {/* =================================================
-          HEADER
-         ================================================= */}
-
       <div className="d-flex justify-content-between align-items-start mb-4">
         <div>
           <h2>Quản lý loại phòng</h2>
-
           <p className="text-muted mb-0">
             Quản lý các loại phòng được sử dụng trên các tầng của du thuyền.
           </p>
         </div>
-
         <Button variant="primary" onClick={handleOpenCreate}>
           + Thêm loại phòng
         </Button>
       </div>
-
-      {/* =================================================
-          SUCCESS
-         ================================================= */}
 
       {success && (
         <Alert variant="success" dismissible onClose={() => setSuccess("")}>
@@ -201,19 +159,11 @@ export default function ManagerRoomType() {
         </Alert>
       )}
 
-      {/* =================================================
-          ERROR
-         ================================================= */}
-
       {error && !showModal && (
         <Alert variant="danger" dismissible onClose={() => setError("")}>
           {error}
         </Alert>
       )}
-
-      {/* =================================================
-          TABLE
-         ================================================= */}
 
       <RoomTypeTable
         roomTypes={roomTypes}
@@ -221,10 +171,6 @@ export default function ManagerRoomType() {
         onEdit={handleOpenEdit}
         onDelete={handleDelete}
       />
-
-      {/* =================================================
-          MODAL
-         ================================================= */}
 
       <RoomTypeFormModal
         show={showModal}
