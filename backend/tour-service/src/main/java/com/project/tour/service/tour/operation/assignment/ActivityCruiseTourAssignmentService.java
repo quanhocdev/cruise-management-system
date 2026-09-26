@@ -37,20 +37,6 @@ public class ActivityCruiseTourAssignmentService {
                 this.cruiseAreaRepository = cruiseAreaRepository;
         }
 
-        /**
-         * Operation phân công một CruiseArea cho Activity Cruise của Tour.
-         *
-         * Chỉ tạo assignment trong activity_cruise_tour.
-         *
-         * Khi mới phân công:
-         * - Chưa chọn Activity Cruise cụ thể
-         * - Chưa có thời gian
-         * - Chưa có giá
-         * - Chưa có capacity
-         * - Status = WAITING_CONFIG
-         *
-         * Chưa bắn Kafka.
-         */
         public ActivityCruiseTourAssignmentResponse assign(
                         ActivityCruiseTourAssignmentRequest request) {
 

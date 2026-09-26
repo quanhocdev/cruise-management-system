@@ -39,12 +39,6 @@ public class ProductTourAssignmentService {
                 this.assignmentMapper = assignmentMapper;
         }
 
-        /**
-         * Operation phân công một CruiseArea cho Tour.
-         *
-         * Chỉ lưu ProductTour vào DB của tour-service.
-         * KHÔNG bắn Kafka.
-         */
         public ProductTourAssignmentResponse assign(
                         ProductTourAssignmentRequest request) {
 

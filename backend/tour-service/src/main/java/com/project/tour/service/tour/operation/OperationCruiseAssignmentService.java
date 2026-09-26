@@ -3,12 +3,10 @@ package com.project.tour.service.tour.operation;
 import com.project.common.event.TourAssignmentEvent;
 import com.project.common.event.enums.TourAssignmentType;
 
-import com.project.tour.model.Schedule;
 import com.project.tour.model.activitycruise.ActivityCruiseTour;
 import com.project.tour.model.activityvisit.VisitTour;
 import com.project.tour.model.convenience.product.ProductTour;
 import com.project.tour.model.convenience.service.ServiceTour;
-
 import com.project.tour.repository.activitycruise.ActivityCruiseTourAssignmentRepository;
 import com.project.tour.repository.activityvisit.VisitTourRepository;
 import com.project.tour.repository.convenience.ProductTourRepository;
@@ -31,30 +29,23 @@ public class OperationCruiseAssignmentService {
         private final ActivityCruiseTourAssignmentRepository activityCruiseTourRepository;
         private final VisitTourRepository visitTourRepository;
 
-        private final ScheduleRepository scheduleRepository;
-
         public OperationCruiseAssignmentService(
                         ProductTourRepository productTourRepository,
                         ServiceTourRepository serviceTourRepository,
                         ActivityCruiseTourAssignmentRepository activityCruiseTourRepository,
-                        VisitTourRepository visitTourRepository,
-                        ScheduleRepository scheduleRepository) {
+                        VisitTourRepository visitTourRepository) {
 
                 this.productTourRepository = productTourRepository;
                 this.serviceTourRepository = serviceTourRepository;
                 this.activityCruiseTourRepository = activityCruiseTourRepository;
                 this.visitTourRepository = visitTourRepository;
-                this.scheduleRepository = scheduleRepository;
         }
 
         public List<TourAssignmentEvent> getAssignments(UUID tourId) {
 
                 List<TourAssignmentEvent> assignments = new ArrayList<>();
 
-                // =====================================================
                 // PRODUCT
-                // =====================================================
-
                 List<ProductTour> productTours = productTourRepository
                                 .findAllByTourIdOrderByCreatedAtAsc(tourId);
 

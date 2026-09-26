@@ -138,25 +138,22 @@ public class VisitTourService {
                         UUID tourId,
                         UUID scheduleStopId) {
 
-                if (visitTourRepository.existsByTourIdAndScheduleStopId(
-                                tourId,
-                                scheduleStopId)) {
+                return visitTourRepository
+                                .findByTourIdAndScheduleStopId(tourId, scheduleStopId)
+                                .map(VisitTourMapper::toResponse)
+                                .orElseGet(() -> {
 
-                        throw new AppException(
-                                        "VisitTour already exists for this tour and schedule stop",
-                                        HttpStatus.CONFLICT);
-                }
+                                        VisitTour visitTour = new VisitTour();
 
-                VisitTour visitTour = new VisitTour();
+                                        visitTour.setTourId(tourId);
+                                        visitTour.setScheduleStopId(scheduleStopId);
 
-                visitTour.setTourId(tourId);
-                visitTour.setScheduleStopId(scheduleStopId);
+                                        // Constructor mặc định của VisitTour sẽ để
+                                        // status = WAITING_CONFIG.
 
-                // Constructor mặc định của VisitTour sẽ để
-                // status = WAITING_CONFIG.
-
-                return VisitTourMapper.toResponse(
-                                visitTourRepository.save(visitTour));
+                                        return VisitTourMapper.toResponse(
+                                                        visitTourRepository.save(visitTour));
+                                });
         }
 
         // DELETE
