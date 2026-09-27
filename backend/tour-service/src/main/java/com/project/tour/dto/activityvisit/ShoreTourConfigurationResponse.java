@@ -1,6 +1,6 @@
 package com.project.tour.dto.activityvisit;
 
-import com.project.tour.model.activityvisit.enums.VisitTourStatus;
+import com.project.tour.model.shore.enums.VisitTourStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -10,63 +10,63 @@ import java.util.UUID;
 
 public record ShoreTourConfigurationResponse(
 
-        UUID tourId,
-        String tourCode,
-        String tourName,
-        String tourDescription,
+                UUID tourId,
+                String tourCode,
+                String tourName,
+                String tourDescription,
 
-        LocalDate startDate,
-        LocalDate endDate,
+                LocalDate startDate,
+                LocalDate endDate,
 
-        List<ScheduleConfiguration> schedules
+                List<ScheduleConfiguration> schedules
 
 ) {
 
-    public record ScheduleConfiguration(
+        public record ScheduleConfiguration(
 
-            UUID scheduleId,
-            Integer dayNumber,
-            LocalDate realDay,
-            String scheduleName,
+                        UUID scheduleId,
+                        Integer dayNumber,
+                        LocalDate realDay,
+                        String scheduleName,
 
-            List<ScheduleStopConfiguration> stops
+                        List<ScheduleStopConfiguration> stops
 
-    ) {
-    }
+        ) {
+        }
 
-    public record ScheduleStopConfiguration(
+        public record ScheduleStopConfiguration(
 
-            UUID scheduleStopId,
+                        UUID scheduleStopId,
 
-            UUID portId,
-            String portName,
+                        UUID portId,
+                        String portName,
 
-            Integer stopOrder,
+                        Integer stopOrder,
 
-            LocalDateTime arriveAt,
-            LocalDateTime leaveAt,
+                        LocalDateTime arriveAt,
+                        LocalDateTime leaveAt,
 
-            List<VisitTourConfiguration> visitTours
+                        List<VisitTourConfiguration> visitTours
 
-    ) {
-    }
+        ) {
+        }
 
-    public record VisitTourConfiguration(
+        public record VisitTourConfiguration(
 
-            UUID id,
+                        UUID id,
 
-            String name,
-            String description,
+                        String name,
+                        String description,
 
-            LocalDateTime startTime,
-            LocalDateTime endTime,
+                        LocalDateTime startTime,
+                        LocalDateTime endTime,
 
-            Integer maxPassengers,
+                        Integer maxPassengers,
 
-            BigDecimal price,
+                        BigDecimal price,
 
-            VisitTourStatus status
+                        VisitTourStatus status
 
-    ) {
-    }
+        ) {
+        }
 }

@@ -4,15 +4,15 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.project.tour.model.activitycruise.enums.ActivityCruiseStatus;
+import com.project.tour.model.onboard.enums.ActivityCruiseStatus;
 
 public record CreateActivityCruiseRequest(
 
-        @NotBlank(message = "Tên hoạt động không được để trống") String name,
+                @NotBlank(message = "Tên hoạt động không được để trống") String name,
 
-        String description,
+                String description,
 
-        @NotNull(message = "Trạng thái không được để trống") ActivityCruiseStatus status,
+                @NotNull(message = "Trạng thái không được để trống") ActivityCruiseStatus status,
 
-        MultipartFile image) {
+                MultipartFile image) {
 }

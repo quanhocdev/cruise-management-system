@@ -3,7 +3,7 @@ package com.project.tour.mapper.activityvisit;
 import com.project.tour.dto.activityvisit.CreateVisitTourRequest;
 import com.project.tour.dto.activityvisit.UpdateVisitTourRequest;
 import com.project.tour.dto.activityvisit.VisitTourResponse;
-import com.project.tour.model.activityvisit.VisitTour;
+import com.project.tour.model.shore.VisitTour;
 
 public final class VisitTourMapper {
 
@@ -104,4 +104,3 @@ public final class VisitTourMapper {
                 visitTour.getUpdatedAt());
     }
 }
-

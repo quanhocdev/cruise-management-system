@@ -3,24 +3,24 @@ package com.project.tour.dto.activitycruise;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import com.project.tour.model.activitycruise.enums.ActivityCruiseStatus;
+import com.project.tour.model.onboard.enums.ActivityCruiseStatus;
 
 public record ActivityCruiseResponse(
 
-        UUID id,
+                UUID id,
 
-        String name,
+                String name,
 
-        String description,
+                String description,
 
-        ActivityCruiseStatus status,
+                ActivityCruiseStatus status,
 
-        String imageUrl,
+                String imageUrl,
 
-        String imagePublicId,
+                String imagePublicId,
 
-        LocalDateTime createdAt,
+                LocalDateTime createdAt,
 
-        LocalDateTime updatedAt) {
+                LocalDateTime updatedAt) {
 
 }

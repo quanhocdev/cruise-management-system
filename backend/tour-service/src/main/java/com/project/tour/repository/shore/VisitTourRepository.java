@@ -1,7 +1,7 @@
-package com.project.tour.repository.activityvisit;
+package com.project.tour.repository.shore;
 
-import com.project.tour.model.activityvisit.VisitTour;
-import com.project.tour.model.activityvisit.enums.VisitTourStatus;
+import com.project.tour.model.shore.VisitTour;
+import com.project.tour.model.shore.enums.VisitTourStatus;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

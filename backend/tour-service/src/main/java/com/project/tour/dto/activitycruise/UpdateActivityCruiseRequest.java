@@ -2,16 +2,16 @@ package com.project.tour.dto.activitycruise;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import com.project.tour.model.activitycruise.enums.ActivityCruiseStatus;
+import com.project.tour.model.onboard.enums.ActivityCruiseStatus;
 
 public record UpdateActivityCruiseRequest(
 
-        String name,
+                String name,
 
-        String description,
+                String description,
 
-        ActivityCruiseStatus status,
+                ActivityCruiseStatus status,
 
-        MultipartFile image) {
+                MultipartFile image) {
 
 }

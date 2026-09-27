@@ -1,6 +1,6 @@
-package com.project.tour.model.activityvisit;
+package com.project.tour.model.shore;
 
-import com.project.tour.model.activityvisit.enums.VisitTourStatus;
+import com.project.tour.model.shore.enums.VisitTourStatus;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;

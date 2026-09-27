@@ -1,4 +1,4 @@
-package com.project.tour.model.activityvisit.enums;
+package com.project.tour.model.shore.enums;
 
 public enum VisitTourStatus {
 

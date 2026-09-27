@@ -265,10 +265,7 @@ public class RoomService {
                                                 HttpStatus.NOT_FOUND));
         }
 
-        // =====================================================
-        // GET AVAILABLE ROOMS FOR BOOKING (Dùng tourPackageId)
-        // =====================================================
-
+        // GET AVAILABLE ROOMS FOR BOOKING
         @Transactional(readOnly = true)
         public List<RoomResponse> getAvailableRoomsForBooking(
                         Long bookingId,

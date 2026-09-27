@@ -4,7 +4,7 @@ import com.project.tour.dto.tour.operation.ActivityCruiseTourAssignmentResponse;
 import com.project.tour.model.CruiseArea;
 import com.project.tour.model.CruiseDeck;
 import com.project.tour.model.Tour;
-import com.project.tour.model.activitycruise.ActivityCruiseTour;
+import com.project.tour.model.onboard.ActivityCruiseTour;
 
 public final class ActivityCruiseTourAssignmentMapper {
 

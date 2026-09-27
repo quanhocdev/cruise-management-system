@@ -3,7 +3,7 @@ package com.project.tour.mapper.activitycruise;
 import com.project.tour.dto.activitycruise.ActivityCruiseResponse;
 import com.project.tour.dto.activitycruise.CreateActivityCruiseRequest;
 import com.project.tour.dto.activitycruise.UpdateActivityCruiseRequest;
-import com.project.tour.model.activitycruise.ActivityCruise;
+import com.project.tour.model.onboard.ActivityCruise;
 
 public final class ActivityCruiseMapper {
 

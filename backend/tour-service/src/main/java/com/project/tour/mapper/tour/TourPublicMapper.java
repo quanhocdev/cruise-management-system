@@ -3,10 +3,10 @@ package com.project.tour.mapper.tour;
 import com.project.tour.dto.tour.PublicTourDetailResponse;
 import com.project.tour.dto.tour.PublicTourSummaryResponse;
 import com.project.tour.model.*;
-import com.project.tour.model.activitycruise.ActivityCruiseTour;
-import com.project.tour.model.activityvisit.VisitTour;
+import com.project.tour.model.shore.VisitTour;
 import com.project.tour.model.convenience.product.ProductTour;
 import com.project.tour.model.convenience.service.ServiceTour;
+import com.project.tour.model.onboard.ActivityCruiseTour;
 
 import java.math.BigDecimal;
 import java.util.List;

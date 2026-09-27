@@ -1,10 +1,10 @@
-package com.project.tour.model.activitycruise;
+package com.project.tour.model.onboard;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.project.tour.model.activitycruise.enums.ActivityCruiseStatus;
+import com.project.tour.model.onboard.enums.ActivityCruiseStatus;
 
 import java.time.LocalDateTime;
 import java.util.Objects;

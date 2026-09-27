@@ -1,11 +1,11 @@
-package com.project.tour.service.activitycruise;
+package com.project.tour.service.onboard;
 
 import com.project.tour.dto.activitycruise.ActivityCruiseTourResponse;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.activitycruise.ActivityCruiseTourMapper;
-import com.project.tour.model.activitycruise.ActivityCruiseTour;
-import com.project.tour.model.activitycruise.enums.ActivityCruiseTourStatus;
 import com.project.tour.model.enums.tour.TourStatusTrip;
+import com.project.tour.model.onboard.ActivityCruiseTour;
+import com.project.tour.model.onboard.enums.ActivityCruiseTourStatus;
 import com.project.tour.repository.activitycruise.ActivityCruiseTourAssignmentRepository;
 
 import org.springframework.http.HttpStatus;

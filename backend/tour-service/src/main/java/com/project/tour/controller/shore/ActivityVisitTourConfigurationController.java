@@ -1,4 +1,4 @@
-package com.project.tour.controller.activityvisit;
+package com.project.tour.controller.shore;
 
 import com.project.tour.dto.activityvisit.VisitTourResponse;
 import com.project.tour.service.activityvisit.ActivityVisitTourConfigurationService;

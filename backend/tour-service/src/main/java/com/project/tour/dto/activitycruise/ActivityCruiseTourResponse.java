@@ -4,34 +4,34 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import com.project.tour.model.activitycruise.enums.ActivityCruiseTourStatus;
+import com.project.tour.model.onboard.enums.ActivityCruiseTourStatus;
 
 public record ActivityCruiseTourResponse(
 
-        UUID id,
+                UUID id,
 
-        UUID tourId,
-        String tourCode,
-        String tourName,
+                UUID tourId,
+                String tourCode,
+                String tourName,
 
-        // Activity info
-        UUID activityCruiseId,
-        String activityCruiseName,
-        String activityCruiseDescription,
-        String activityCruiseImageUrl,
+                // Activity info
+                UUID activityCruiseId,
+                String activityCruiseName,
+                String activityCruiseDescription,
+                String activityCruiseImageUrl,
 
-        // Cruise Area info
-        UUID cruiseAreaId,
-        String cruiseAreaName,
+                // Cruise Area info
+                UUID cruiseAreaId,
+                String cruiseAreaName,
 
-        // Configuration & Timings
-        LocalDateTime startTime,
-        LocalDateTime endTime,
-        Integer maxPassengers,
-        BigDecimal price,
-        ActivityCruiseTourStatus status,
+                // Configuration & Timings
+                LocalDateTime startTime,
+                LocalDateTime endTime,
+                Integer maxPassengers,
+                BigDecimal price,
+                ActivityCruiseTourStatus status,
 
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt) {
+                LocalDateTime createdAt,
+                LocalDateTime updatedAt) {
 
 }

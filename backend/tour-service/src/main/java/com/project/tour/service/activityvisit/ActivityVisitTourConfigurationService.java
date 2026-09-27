@@ -3,9 +3,9 @@ package com.project.tour.service.activityvisit;
 import com.project.tour.dto.activityvisit.VisitTourResponse;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.activityvisit.VisitTourMapper;
-import com.project.tour.model.activityvisit.VisitTour;
-import com.project.tour.model.activityvisit.enums.VisitTourStatus;
-import com.project.tour.repository.activityvisit.VisitTourRepository;
+import com.project.tour.model.shore.VisitTour;
+import com.project.tour.model.shore.enums.VisitTourStatus;
+import com.project.tour.repository.shore.VisitTourRepository;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

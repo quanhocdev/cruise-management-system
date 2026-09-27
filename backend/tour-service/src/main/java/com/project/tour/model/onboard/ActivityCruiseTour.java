@@ -1,11 +1,12 @@
-package com.project.tour.model.activitycruise;
+package com.project.tour.model.onboard;
 
-import com.project.tour.model.activitycruise.enums.ActivityCruiseTourStatus;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
+
+import com.project.tour.model.onboard.enums.ActivityCruiseTourStatus;
 
 @Entity
 @Table(name = "activity_cruise_tour", uniqueConstraints = {

@@ -1,6 +1,6 @@
 package com.project.tour.dto.activityvisit;
 
-import com.project.tour.model.activityvisit.enums.VisitTourStatus;
+import com.project.tour.model.shore.enums.VisitTourStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -8,29 +8,29 @@ import java.util.UUID;
 
 public record VisitTourResponse(
 
-        UUID id,
+                UUID id,
 
-        UUID tourId,
+                UUID tourId,
 
-        UUID scheduleStopId,
+                UUID scheduleStopId,
 
-        String name,
+                String name,
 
-        String description,
+                String description,
 
-        LocalDateTime startTime,
+                LocalDateTime startTime,
 
-        LocalDateTime endTime,
+                LocalDateTime endTime,
 
-        Integer maxPassengers,
+                Integer maxPassengers,
 
-        BigDecimal price,
+                BigDecimal price,
 
-        VisitTourStatus status,
+                VisitTourStatus status,
 
-        LocalDateTime createdAt,
+                LocalDateTime createdAt,
 
-        LocalDateTime updatedAt
+                LocalDateTime updatedAt
 
 ) {
 }

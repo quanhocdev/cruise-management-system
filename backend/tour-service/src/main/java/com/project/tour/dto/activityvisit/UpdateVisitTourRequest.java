@@ -1,23 +1,23 @@
 package com.project.tour.dto.activityvisit;
 
-import com.project.tour.model.activityvisit.enums.VisitTourStatus;
+import com.project.tour.model.shore.enums.VisitTourStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public record UpdateVisitTourRequest(
 
-        String name,
+                String name,
 
-        String description,
+                String description,
 
-        LocalDateTime startTime,
+                LocalDateTime startTime,
 
-        LocalDateTime endTime,
+                LocalDateTime endTime,
 
-        Integer maxPassengers,
+                Integer maxPassengers,
 
-        BigDecimal price,
+                BigDecimal price,
 
-        VisitTourStatus status) {
+                VisitTourStatus status) {
 }

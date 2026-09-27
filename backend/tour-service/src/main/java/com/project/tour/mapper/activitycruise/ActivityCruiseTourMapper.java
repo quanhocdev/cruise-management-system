@@ -2,118 +2,118 @@ package com.project.tour.mapper.activitycruise;
 
 import com.project.tour.dto.activitycruise.ActivityCruiseTourConfigRequest;
 import com.project.tour.dto.activitycruise.ActivityCruiseTourResponse;
-import com.project.tour.model.activitycruise.ActivityCruise;
-import com.project.tour.model.activitycruise.ActivityCruiseTour;
+import com.project.tour.model.onboard.ActivityCruise;
+import com.project.tour.model.onboard.ActivityCruiseTour;
 
 import org.springframework.stereotype.Component;
 
 @Component
 public class ActivityCruiseTourMapper {
 
-    public ActivityCruiseTourResponse toResponse(
-            ActivityCruiseTour assignment) {
+        public ActivityCruiseTourResponse toResponse(
+                        ActivityCruiseTour assignment) {
 
-        if (assignment == null) {
-            return null;
+                if (assignment == null) {
+                        return null;
+                }
+
+                ActivityCruise activity = assignment.getActivityCruise();
+
+                return new ActivityCruiseTourResponse(
+                                assignment.getId(),
+
+                                // =====================================================
+                                // TOUR
+                                // =====================================================
+
+                                assignment.getTourId(),
+                                null, // tourCode
+                                null, // tourName
+
+                                // =====================================================
+                                // ACTIVITY CRUISE
+                                // =====================================================
+
+                                activity != null
+                                                ? activity.getId()
+                                                : null,
+
+                                assignment.getActivityName(),
+
+                                assignment.getActivityDescription(),
+
+                                assignment.getImageUrl(),
+
+                                // =====================================================
+                                // CRUISE AREA
+                                // =====================================================
+
+                                assignment.getCruiseAreaId(),
+                                null, // cruiseAreaName
+
+                                // =====================================================
+                                // CONFIGURATION
+                                // =====================================================
+
+                                assignment.getStartTime(),
+                                assignment.getEndTime(),
+                                assignment.getMaxPassengers(),
+                                assignment.getPrice(),
+                                assignment.getStatus(),
+
+                                assignment.getCreatedAt(),
+                                assignment.getUpdatedAt());
         }
 
-        ActivityCruise activity = assignment.getActivityCruise();
+        /**
+         * Gán cấu hình từ Request DTO và ActivityCruise Entity
+         * vào ActivityCruiseTour Entity.
+         *
+         * ActivityCruiseTour giữ snapshot của:
+         * - activityName
+         * - activityDescription
+         * - imageUrl
+         */
+        public void applyConfig(
+                        ActivityCruiseTour assignment,
+                        ActivityCruiseTourConfigRequest request,
+                        ActivityCruise activityCruise) {
 
-        return new ActivityCruiseTourResponse(
-                assignment.getId(),
+                if (assignment == null || request == null) {
+                        return;
+                }
 
-                // =====================================================
-                // TOUR
-                // =====================================================
-
-                assignment.getTourId(),
-                null, // tourCode
-                null, // tourName
-
-                // =====================================================
-                // ACTIVITY CRUISE
-                // =====================================================
-
-                activity != null
-                        ? activity.getId()
-                        : null,
-
-                assignment.getActivityName(),
-
-                assignment.getActivityDescription(),
-
-                assignment.getImageUrl(),
+                assignment.setActivityCruise(activityCruise);
 
                 // =====================================================
-                // CRUISE AREA
+                // SNAPSHOT ACTIVITY CRUISE
                 // =====================================================
 
-                assignment.getCruiseAreaId(),
-                null, // cruiseAreaName
+                if (activityCruise != null) {
+                        assignment.setActivityName(
+                                        activityCruise.getName());
+
+                        assignment.setActivityDescription(
+                                        activityCruise.getDescription());
+
+                        assignment.setImageUrl(
+                                        activityCruise.getImageUrl());
+                }
 
                 // =====================================================
                 // CONFIGURATION
                 // =====================================================
 
-                assignment.getStartTime(),
-                assignment.getEndTime(),
-                assignment.getMaxPassengers(),
-                assignment.getPrice(),
-                assignment.getStatus(),
+                assignment.setStartTime(
+                                request.startTime());
 
-                assignment.getCreatedAt(),
-                assignment.getUpdatedAt());
-    }
+                assignment.setEndTime(
+                                request.endTime());
 
-    /**
-     * Gán cấu hình từ Request DTO và ActivityCruise Entity
-     * vào ActivityCruiseTour Entity.
-     *
-     * ActivityCruiseTour giữ snapshot của:
-     * - activityName
-     * - activityDescription
-     * - imageUrl
-     */
-    public void applyConfig(
-            ActivityCruiseTour assignment,
-            ActivityCruiseTourConfigRequest request,
-            ActivityCruise activityCruise) {
+                assignment.setMaxPassengers(
+                                request.maxPassengers());
 
-        if (assignment == null || request == null) {
-            return;
+                assignment.setPrice(
+                                request.price());
         }
-
-        assignment.setActivityCruise(activityCruise);
-
-        // =====================================================
-        // SNAPSHOT ACTIVITY CRUISE
-        // =====================================================
-
-        if (activityCruise != null) {
-            assignment.setActivityName(
-                    activityCruise.getName());
-
-            assignment.setActivityDescription(
-                    activityCruise.getDescription());
-
-            assignment.setImageUrl(
-                    activityCruise.getImageUrl());
-        }
-
-        // =====================================================
-        // CONFIGURATION
-        // =====================================================
-
-        assignment.setStartTime(
-                request.startTime());
-
-        assignment.setEndTime(
-                request.endTime());
-
-        assignment.setMaxPassengers(
-                request.maxPassengers());
-
-        assignment.setPrice(
-                request.price());
-    }
 }

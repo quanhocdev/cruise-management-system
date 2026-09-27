@@ -1,4 +1,4 @@
-package com.project.tour.model.activitycruise.enums;
+package com.project.tour.model.onboard.enums;
 
 public enum ActivityCruiseTourStatus {
 
