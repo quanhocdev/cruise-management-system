@@ -78,10 +78,8 @@ const ActivityCruiseTour = () => {
   );
 
   const canComplete =
-    !!selectedTourSummary &&
-    !selectedTourSummary.completed &&
-    selectedTourSummary.total > 0 &&
-    selectedTourSummary.configuredCount === selectedTourSummary.total;
+    !!selectedTourIdToComplete &&
+    (!selectedTourSummary || !selectedTourSummary.completed);
 
   const handleCompleteTour = async () => {
     if (!selectedTourIdToComplete || !canComplete) return;

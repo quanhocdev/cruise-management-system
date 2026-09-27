@@ -3,7 +3,7 @@ package com.project.tour.service.tour.operation;
 import com.project.common.event.TourApprovedEvent;
 import com.project.common.event.TourAssignmentEvent;
 import com.project.common.event.TourMasterSyncEvent;
-import com.project.tour.dto.tour.TourResponse;
+import com.project.tour.dto.scheduler.tour.TourResponse;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.tour.TourMapper;
 import com.project.tour.mapper.tour.TourMasterSyncMapper;
@@ -24,6 +24,7 @@ import com.project.tour.repository.tour.TourRepository;
 import com.project.tour.repository.tour.schedule.ScheduleRepository;
 import com.project.tour.repository.tour.schedule.ScheduleStopRepository;
 import com.project.tour.service.redis.TourRedisService;
+import com.project.tour.service.shore.VisitTourService;
 
 import java.util.Map;
 import org.springframework.http.HttpStatus;
@@ -52,6 +53,7 @@ public class ApprovalTourService {
         private final OperationCruiseAssignmentService cruiseAssignmentService;
         private final KafkaTemplate<String, Object> kafkaTemplate;
         private final TourRedisService tourRedisService;
+        private final VisitTourService visitTourService;
 
         public ApprovalTourService(
                         TourRepository tourRepository,
@@ -63,7 +65,8 @@ public class ApprovalTourService {
                         ScheduleStopRepository scheduleStopRepository,
                         OperationCruiseAssignmentService cruiseAssignmentService,
                         KafkaTemplate<String, Object> kafkaTemplate,
-                        TourRedisService tourRedisService) {
+                        TourRedisService tourRedisService,
+                        VisitTourService visitTourService) {
                 this.tourRepository = tourRepository;
                 this.tourPackageRepository = tourPackageRepository;
                 this.roomRepository = roomRepository;
@@ -74,6 +77,7 @@ public class ApprovalTourService {
                 this.cruiseAssignmentService = cruiseAssignmentService;
                 this.kafkaTemplate = kafkaTemplate;
                 this.tourRedisService = tourRedisService;
+                this.visitTourService = visitTourService;
         }
 
         // =========================================================
@@ -109,13 +113,10 @@ public class ApprovalTourService {
                 tour.setStatusTrip(TourStatusTrip.APPROVED);
                 Tour savedTour = tourRepository.save(tour);
 
-                // =========================================================
                 // KHỞI TẠO SỐ LƯỢNG PHÒNG TRỐNG LÊN REDIS THEO TỪNG TOUR PACKAGE
-                // =========================================================
                 List<TourPackage> packages = tourPackageRepository.findAllByTourId(tourId);
                 UUID cruiseId = tour.getCruise().getId();
 
-                // Sửa đoạn này trong ApprovalTourService.java
                 for (TourPackage pkg : packages) {
                         if (pkg.getRoomTypeId() != null) {
                                 // Chỉ đếm những phòng đang ở trạng thái ACTIVE
@@ -151,6 +152,13 @@ public class ApprovalTourService {
                                                 schedule -> scheduleStopRepository
                                                                 .findAllBySchedule_IdOrderByStopOrderAsc(
                                                                                 schedule.getId())));
+
+                // TỰ ĐỘNG TẠO VISIT TOUR CHO TỪNG SCHEDULE STOP
+                scheduleIdToStopsMap.values().stream()
+                                .flatMap(List::stream)
+                                .forEach(stop -> visitTourService.createVisitTourFromEvent(
+                                                tourId,
+                                                stop.getId()));
 
                 // 3. Sử dụng Mapper để tạo Master Event
                 TourMasterSyncEvent masterEvent = TourMasterSyncMapper.toEvent(

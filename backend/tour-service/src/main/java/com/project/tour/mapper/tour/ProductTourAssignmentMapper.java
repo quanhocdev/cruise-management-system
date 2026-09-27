@@ -1,7 +1,7 @@
 package com.project.tour.mapper.tour;
 
-import com.project.tour.dto.tour.operation.ProductTourAssignmentRequest;
-import com.project.tour.dto.tour.operation.ProductTourAssignmentResponse;
+import com.project.tour.dto.operation.assignment.product.ProductTourAssignmentRequest;
+import com.project.tour.dto.operation.assignment.product.ProductTourAssignmentResponse;
 import com.project.tour.model.CruiseArea;
 import com.project.tour.model.CruiseDeck;
 import com.project.tour.model.Tour;
@@ -12,69 +12,69 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProductTourAssignmentMapper {
 
-    /**
-     * Map Request -> Entity.
-     */
-    public ProductTour toEntity(
-            ProductTourAssignmentRequest request) {
+        /**
+         * Map Request -> Entity.
+         */
+        public ProductTour toEntity(
+                        ProductTourAssignmentRequest request) {
 
-        if (request == null) {
-            return null;
+                if (request == null) {
+                        return null;
+                }
+
+                ProductTour entity = new ProductTour();
+
+                entity.setTourId(request.tourId());
+                entity.setCruiseAreaId(request.cruiseAreaId());
+
+                return entity;
         }
 
-        ProductTour entity = new ProductTour();
+        /**
+         * Map Entity -> Response kèm thông tin Tour & CruiseArea.
+         */
+        public ProductTourAssignmentResponse toResponse(
+                        ProductTour entity,
+                        Tour tour,
+                        CruiseArea cruiseArea) {
 
-        entity.setTourId(request.tourId());
-        entity.setCruiseAreaId(request.cruiseAreaId());
+                if (entity == null) {
+                        return null;
+                }
 
-        return entity;
-    }
+                CruiseDeck cruiseDeck = cruiseArea != null
+                                ? cruiseArea.getCruiseDeck()
+                                : null;
 
-    /**
-     * Map Entity -> Response kèm thông tin Tour & CruiseArea.
-     */
-    public ProductTourAssignmentResponse toResponse(
-            ProductTour entity,
-            Tour tour,
-            CruiseArea cruiseArea) {
+                return new ProductTourAssignmentResponse(
+                                // Assignment Info
+                                entity.getId(),
 
-        if (entity == null) {
-            return null;
+                                // Tour Info
+                                entity.getTourId(),
+                                tour != null
+                                                ? tour.getCode()
+                                                : null,
+                                tour != null
+                                                ? tour.getName()
+                                                : null,
+
+                                // Cruise Area Info
+                                entity.getCruiseAreaId(),
+                                cruiseArea != null
+                                                ? cruiseArea.getName()
+                                                : null,
+
+                                // Cruise Deck Info
+                                cruiseDeck != null
+                                                ? cruiseDeck.getId()
+                                                : null,
+                                cruiseDeck != null
+                                                ? cruiseDeck.getDeckNumber()
+                                                : null,
+
+                                // Timestamps
+                                entity.getCreatedAt(),
+                                entity.getUpdatedAt());
         }
-
-        CruiseDeck cruiseDeck = cruiseArea != null
-                ? cruiseArea.getCruiseDeck()
-                : null;
-
-        return new ProductTourAssignmentResponse(
-                // Assignment Info
-                entity.getId(),
-
-                // Tour Info
-                entity.getTourId(),
-                tour != null
-                        ? tour.getCode()
-                        : null,
-                tour != null
-                        ? tour.getName()
-                        : null,
-
-                // Cruise Area Info
-                entity.getCruiseAreaId(),
-                cruiseArea != null
-                        ? cruiseArea.getName()
-                        : null,
-
-                // Cruise Deck Info
-                cruiseDeck != null
-                        ? cruiseDeck.getId()
-                        : null,
-                cruiseDeck != null
-                        ? cruiseDeck.getDeckNumber()
-                        : null,
-
-                // Timestamps
-                entity.getCreatedAt(),
-                entity.getUpdatedAt());
-    }
 }

@@ -1,0 +1,51 @@
+package com.project.tour.controller.operation;
+
+import com.project.tour.dto.operation.assignment.activitycruise.ActivityCruiseTourAssignmentRequest;
+import com.project.tour.dto.operation.assignment.activitycruise.ActivityCruiseTourAssignmentResponse;
+import com.project.tour.service.tour.operation.assignment.ActivityCruiseTourAssignmentService;
+
+import jakarta.validation.Valid;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api/operation/activity-cruise-tour-assignment")
+public class ActivityCruiseTourAssignmentController {
+
+    private final ActivityCruiseTourAssignmentService assignmentService;
+
+    public ActivityCruiseTourAssignmentController(
+            ActivityCruiseTourAssignmentService assignmentService) {
+
+        this.assignmentService = assignmentService;
+    }
+
+    @GetMapping("/tour/{tourId}")
+    public ResponseEntity<List<ActivityCruiseTourAssignmentResponse>> getByTour(
+            @PathVariable UUID tourId) {
+
+        return ResponseEntity.ok(
+                assignmentService.getByTour(tourId));
+    }
+
+    @PostMapping
+    public ResponseEntity<Void> assign(
+            @Valid @RequestBody ActivityCruiseTourAssignmentRequest request) {
+
+        assignmentService.assign(request);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    }
+
+    @DeleteMapping("/tour/{tourId}/area/{cruiseAreaId}")
+    public ResponseEntity<Void> deleteAssignment(
+            @PathVariable UUID tourId,
+            @PathVariable UUID cruiseAreaId) {
+
+        assignmentService.deleteAssignment(tourId, cruiseAreaId);
+        return ResponseEntity.noContent().build();
+    }
+}

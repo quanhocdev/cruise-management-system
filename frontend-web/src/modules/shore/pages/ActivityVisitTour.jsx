@@ -135,12 +135,7 @@ function ShoreManagerTour() {
   const canCompleteTour = useCallback(
     (tourId) => {
       const tours = tourConfigurationStatus.get(tourId);
-
-      if (!tours || tours.length === 0) {
-        return false;
-      }
-
-      return tours.every((visitTour) => visitTour.status === "CONFIGURED");
+      return !!tours && tours.length > 0;
     },
     [tourConfigurationStatus],
   );

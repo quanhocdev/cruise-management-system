@@ -5,10 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import productTourService from "../services/productTourService";
 
 const useProductTour = () => {
-  // =====================================================
   // STATE
-  // =====================================================
-
   const [productTours, setProductTours] = useState([]);
 
   const [loading, setLoading] = useState(false);
@@ -19,10 +16,7 @@ const useProductTour = () => {
 
   const [completeError, setCompleteError] = useState(null);
 
-  // =====================================================
   // LOAD ALL
-  // =====================================================
-
   const loadProductTours = useCallback(async () => {
     try {
       setLoading(true);
@@ -43,10 +37,7 @@ const useProductTour = () => {
     }
   }, []);
 
-  // =====================================================
   // CREATE CONFIG
-  // =====================================================
-
   const configureProduct = useCallback(async (assignmentId, configData) => {
     try {
       setError(null);
@@ -75,10 +66,7 @@ const useProductTour = () => {
     }
   }, []);
 
-  // =====================================================
   // UPDATE CONFIG
-  // =====================================================
-
   const updateProduct = useCallback(async (assignmentId, configData) => {
     try {
       setError(null);
@@ -107,22 +95,15 @@ const useProductTour = () => {
     }
   }, []);
 
-  // =====================================================
   // COMPLETE TOUR CONFIGURATION
-  // =====================================================
-
   const completeTourConfiguration = useCallback(
     async (tourId) => {
       try {
         setCompleting(true);
         setCompleteError(null);
 
-        const result =
-          await productTourService.completeConfiguration(tourId);
+        const result = await productTourService.completeConfiguration(tourId);
 
-        // Sau khi Complete, status của ProductTour
-        // được cập nhật thành CONFIGURED ở backend.
-        // Chỉ cần load lại danh sách chính.
         await loadProductTours();
 
         return result;
@@ -130,8 +111,7 @@ const useProductTour = () => {
         console.error("COMPLETE PRODUCT TOUR ERROR:", err);
 
         const message =
-          err.response?.data?.message ||
-          "Không thể hoàn thành cấu hình Tour";
+          err.response?.data?.message || "Không thể hoàn thành cấu hình Tour";
 
         setCompleteError(message);
 
@@ -143,18 +123,12 @@ const useProductTour = () => {
     [loadProductTours],
   );
 
-  // =====================================================
   // INITIAL LOAD
-  // =====================================================
-
   useEffect(() => {
     loadProductTours();
   }, [loadProductTours]);
 
-  // =====================================================
   // TOUR SUMMARIES
-  // =====================================================
-
   const tourSummaries = useMemo(() => {
     const map = new Map();
 
@@ -181,18 +155,11 @@ const useProductTour = () => {
     return Array.from(map.values()).map((entry) => ({
       ...entry,
 
-      // Một Tour được xem là đã hoàn thành cấu hình
-      // khi tất cả ProductTour của Tour đều CONFIGURED.
-      completed:
-        entry.total > 0 &&
-        entry.configuredCount === entry.total,
+      completed: entry.total > 0 && entry.configuredCount === entry.total,
     }));
   }, [productTours]);
 
-  // =====================================================
   // RETURN
-  // =====================================================
-
   return {
     productTours,
     tourSummaries,

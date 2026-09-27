@@ -1,7 +1,7 @@
 package com.project.tour.mapper.tour;
 
-import com.project.tour.dto.tour.packages.PackageBenefitResponse;
-import com.project.tour.dto.tour.packages.TourPackageResponse;
+import com.project.tour.dto.operation.packages.TourPackageResponse;
+import com.project.tour.dto.operation.packages.benefit.PackageBenefitResponse;
 import com.project.tour.model.PackageBenefit;
 import com.project.tour.model.TourPackage;
 

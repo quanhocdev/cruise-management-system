@@ -1,51 +1,51 @@
 package com.project.tour.mapper.tour.operation;
 
-import com.project.tour.dto.tour.operation.AssignmentActivityCruiseResponse;
-import com.project.tour.model.activitycruise.ActivityCruiseTour;
+import com.project.tour.dto.operation.configured.AssignmentActivityCruiseResponse;
+import com.project.tour.model.onboard.ActivityCruiseTour;
 
 public final class AssignmentActivityCruiseMapper {
 
-    private AssignmentActivityCruiseMapper() {
-    }
-
-    public static AssignmentActivityCruiseResponse toResponse(
-            ActivityCruiseTour entity) {
-
-        if (entity == null) {
-            return null;
+        private AssignmentActivityCruiseMapper() {
         }
 
-        return new AssignmentActivityCruiseResponse(
-                entity.getId(),
+        public static AssignmentActivityCruiseResponse toResponse(
+                        ActivityCruiseTour entity) {
 
-                entity.getTourId(),
-                entity.getCruiseAreaId(),
+                if (entity == null) {
+                        return null;
+                }
 
-                // Không còn activityCruiseTourId riêng.
-                // id của chính ActivityCruiseTour là ID assignment/config.
-                entity.getId(),
+                return new AssignmentActivityCruiseResponse(
+                                entity.getId(),
 
-                entity.getActivityCruise() != null
-                        ? entity.getActivityCruise().getId()
-                        : null,
+                                entity.getTourId(),
+                                entity.getCruiseAreaId(),
 
-                // Snapshot data
-                entity.getActivityName(),
-                entity.getActivityDescription(),
+                                // Không còn activityCruiseTourId riêng.
+                                // id của chính ActivityCruiseTour là ID assignment/config.
+                                entity.getId(),
 
-                entity.getStartTime(),
-                entity.getEndTime(),
+                                entity.getActivityCruise() != null
+                                                ? entity.getActivityCruise().getId()
+                                                : null,
 
-                entity.getMaxPassengers(),
-                entity.getPrice(),
+                                // Snapshot data
+                                entity.getActivityName(),
+                                entity.getActivityDescription(),
 
-                entity.getImageUrl(),
+                                entity.getStartTime(),
+                                entity.getEndTime(),
 
-                entity.getStatus() != null
-                        ? entity.getStatus().name()
-                        : null,
+                                entity.getMaxPassengers(),
+                                entity.getPrice(),
 
-                entity.getCreatedAt(),
-                entity.getUpdatedAt());
-    }
+                                entity.getImageUrl(),
+
+                                entity.getStatus() != null
+                                                ? entity.getStatus().name()
+                                                : null,
+
+                                entity.getCreatedAt(),
+                                entity.getUpdatedAt());
+        }
 }

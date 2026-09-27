@@ -1,6 +1,6 @@
 package com.project.tour.service.tour.operation;
 
-import com.project.tour.dto.tour.operation.AssignmentProductResponse;
+import com.project.tour.dto.operation.configured.AssignmentProductResponse;
 import com.project.tour.mapper.tour.operation.AssignmentProductMapper;
 import com.project.tour.repository.convenience.ProductTourRepository;
 

@@ -1,10 +1,10 @@
 package com.project.tour.service.room;
 
-import com.project.tour.dto.roomtype.CreateRoomTypeRequest;
-import com.project.tour.dto.roomtype.RoomTypeResponse;
-import com.project.tour.dto.roomtype.UpdateRoomTypeRequest;
+import com.project.tour.dto.admin.roomtype.CreateRoomTypeRequest;
+import com.project.tour.dto.admin.roomtype.RoomTypeResponse;
+import com.project.tour.dto.admin.roomtype.UpdateRoomTypeRequest;
 import com.project.tour.exception.AppException;
-import com.project.tour.mapper.room.RoomTypeMapper;
+import com.project.tour.mapper.admin.room.RoomTypeMapper;
 import com.project.tour.model.RoomType;
 import com.project.tour.repository.room.RoomRepository;
 import com.project.tour.repository.room.RoomTypeRepository;

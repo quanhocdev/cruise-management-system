@@ -1,8 +1,8 @@
 package com.project.tour.controller.convenience.product;
 
-import com.project.tour.dto.convenience.product.admin.CreateProductRequest;
-import com.project.tour.dto.convenience.product.admin.ProductResponse;
-import com.project.tour.dto.convenience.product.admin.UpdateProductRequest;
+import com.project.tour.dto.admin.product.CreateProductRequest;
+import com.project.tour.dto.admin.product.ProductResponse;
+import com.project.tour.dto.admin.product.UpdateProductRequest;
 import com.project.tour.service.convenience.product.ProductService;
 
 import jakarta.validation.Valid;

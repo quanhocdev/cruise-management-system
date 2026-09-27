@@ -1,10 +1,10 @@
 package com.project.tour.service.room;
 
-import com.project.tour.dto.room.CreateRoomRequest;
-import com.project.tour.dto.room.RoomResponse;
-import com.project.tour.dto.room.UpdateRoomRequest;
+import com.project.tour.dto.admin.room.CreateRoomRequest;
+import com.project.tour.dto.admin.room.RoomResponse;
+import com.project.tour.dto.admin.room.UpdateRoomRequest;
 import com.project.tour.exception.AppException;
-import com.project.tour.mapper.room.RoomMapper;
+import com.project.tour.mapper.admin.room.RoomMapper;
 import com.project.tour.model.CruiseDeck;
 import com.project.tour.model.Room;
 import com.project.tour.model.RoomType;
@@ -265,10 +265,7 @@ public class RoomService {
                                                 HttpStatus.NOT_FOUND));
         }
 
-        // =====================================================
-        // GET AVAILABLE ROOMS FOR BOOKING (Dùng tourPackageId)
-        // =====================================================
-
+        // GET AVAILABLE ROOMS FOR BOOKING
         @Transactional(readOnly = true)
         public List<RoomResponse> getAvailableRoomsForBooking(
                         Long bookingId,

@@ -1,8 +1,8 @@
 package com.project.tour.mapper.tour.schedule;
 
-import com.project.tour.dto.tour.schedule.stop.CreateScheduleStopRequest;
-import com.project.tour.dto.tour.schedule.stop.ScheduleStopResponse;
-import com.project.tour.dto.tour.schedule.stop.UpdateScheduleStopRequest;
+import com.project.tour.dto.scheduler.stop.CreateScheduleStopRequest;
+import com.project.tour.dto.scheduler.stop.ScheduleStopResponse;
+import com.project.tour.dto.scheduler.stop.UpdateScheduleStopRequest;
 import com.project.tour.model.Port;
 import com.project.tour.model.Schedule;
 import com.project.tour.model.ScheduleStop;

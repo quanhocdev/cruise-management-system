@@ -1,7 +1,7 @@
 package com.project.tour.service.tour.operation.assignment;
 
-import com.project.tour.dto.tour.operation.ProductTourAssignmentRequest;
-import com.project.tour.dto.tour.operation.ProductTourAssignmentResponse;
+import com.project.tour.dto.operation.assignment.product.ProductTourAssignmentRequest;
+import com.project.tour.dto.operation.assignment.product.ProductTourAssignmentResponse;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.tour.ProductTourAssignmentMapper;
 import com.project.tour.model.CruiseArea;
@@ -39,12 +39,6 @@ public class ProductTourAssignmentService {
                 this.assignmentMapper = assignmentMapper;
         }
 
-        /**
-         * Operation phân công một CruiseArea cho Tour.
-         *
-         * Chỉ lưu ProductTour vào DB của tour-service.
-         * KHÔNG bắn Kafka.
-         */
         public ProductTourAssignmentResponse assign(
                         ProductTourAssignmentRequest request) {
 

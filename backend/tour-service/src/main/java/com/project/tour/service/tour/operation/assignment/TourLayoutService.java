@@ -1,6 +1,6 @@
 package com.project.tour.service.tour.operation.assignment;
 
-import com.project.tour.dto.tour.operation.OperationCruiseLayoutResponse;
+import com.project.tour.dto.operation.assignment.OperationCruiseLayoutResponse;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.tour.operation.OperationCruiseMapper;
 import com.project.tour.model.CruiseArea;

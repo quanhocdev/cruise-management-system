@@ -1,15 +1,15 @@
 package com.project.tour.service.tour.operation.assignment;
 
-import com.project.tour.dto.tour.operation.ActivityCruiseTourAssignmentRequest;
-import com.project.tour.dto.tour.operation.ActivityCruiseTourAssignmentResponse;
+import com.project.tour.dto.operation.assignment.activitycruise.ActivityCruiseTourAssignmentRequest;
+import com.project.tour.dto.operation.assignment.activitycruise.ActivityCruiseTourAssignmentResponse;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.tour.ActivityCruiseTourAssignmentMapper;
 import com.project.tour.model.CruiseArea;
 import com.project.tour.model.Tour;
-import com.project.tour.model.activitycruise.ActivityCruiseTour;
-import com.project.tour.model.activitycruise.enums.ActivityCruiseTourStatus;
-import com.project.tour.repository.activitycruise.ActivityCruiseTourAssignmentRepository;
+import com.project.tour.model.onboard.ActivityCruiseTour;
+import com.project.tour.model.onboard.enums.ActivityCruiseTourStatus;
 import com.project.tour.repository.cruise.CruiseAreaRepository;
+import com.project.tour.repository.onboard.ActivityCruiseTourAssignmentRepository;
 import com.project.tour.repository.tour.TourRepository;
 
 import org.springframework.http.HttpStatus;
@@ -37,20 +37,6 @@ public class ActivityCruiseTourAssignmentService {
                 this.cruiseAreaRepository = cruiseAreaRepository;
         }
 
-        /**
-         * Operation phân công một CruiseArea cho Activity Cruise của Tour.
-         *
-         * Chỉ tạo assignment trong activity_cruise_tour.
-         *
-         * Khi mới phân công:
-         * - Chưa chọn Activity Cruise cụ thể
-         * - Chưa có thời gian
-         * - Chưa có giá
-         * - Chưa có capacity
-         * - Status = WAITING_CONFIG
-         *
-         * Chưa bắn Kafka.
-         */
         public ActivityCruiseTourAssignmentResponse assign(
                         ActivityCruiseTourAssignmentRequest request) {
 

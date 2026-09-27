@@ -1,0 +1,22 @@
+package com.project.tour.dto.operation.packages;
+
+import com.project.tour.dto.operation.packages.benefit.PackageBenefitResponse;
+import com.project.tour.model.enums.TourPackageStatus;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+
+public record TourPackageResponse(
+        UUID id,
+        UUID tourId,
+        UUID roomTypeId,
+        String name,
+        String description,
+        BigDecimal price,
+        Integer capacity,
+        TourPackageStatus status,
+        List<PackageBenefitResponse> benefits,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt) {
+}

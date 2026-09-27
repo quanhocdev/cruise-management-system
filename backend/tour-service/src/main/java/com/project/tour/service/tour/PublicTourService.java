@@ -1,16 +1,14 @@
 package com.project.tour.service.tour;
 
-import com.project.tour.dto.tour.PublicTourDetailResponse;
-import com.project.tour.dto.tour.PublicTourSummaryResponse;
+import com.project.tour.dto.guest.PublicTourDetailResponse;
+import com.project.tour.dto.guest.PublicTourSummaryResponse;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.tour.TourPublicMapper;
 import com.project.tour.model.*;
-import com.project.tour.model.activitycruise.ActivityCruiseTour;
-import com.project.tour.model.activityvisit.VisitTour;
+import com.project.tour.model.shore.VisitTour;
 import com.project.tour.model.enums.tour.TourBookingStatus;
 import com.project.tour.model.enums.tour.TourStatusTrip;
-import com.project.tour.repository.activitycruise.ActivityCruiseTourAssignmentRepository;
-import com.project.tour.repository.activityvisit.VisitTourRepository;
+import com.project.tour.model.onboard.ActivityCruiseTour;
 import com.project.tour.repository.tour.*;
 import com.project.tour.repository.tour.schedule.ScheduleRepository;
 import com.project.tour.repository.tour.schedule.ScheduleStopRepository;
@@ -21,6 +19,9 @@ import com.project.tour.model.convenience.product.ProductTour;
 import com.project.tour.model.convenience.service.ServiceTour;
 import com.project.tour.repository.convenience.ProductTourRepository;
 import com.project.tour.repository.convenience.ServiceTourRepository;
+import com.project.tour.repository.onboard.ActivityCruiseTourAssignmentRepository;
+import com.project.tour.repository.shore.VisitTourRepository;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;

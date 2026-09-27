@@ -1,8 +1,8 @@
 package com.project.tour.mapper.tour.operation;
 
-import com.project.tour.dto.tour.operation.OperationCruiseAreaResponse;
-import com.project.tour.dto.tour.operation.OperationCruiseLayoutResponse;
-import com.project.tour.dto.tour.operation.OperationRoomResponse;
+import com.project.tour.dto.operation.assignment.OperationCruiseLayoutResponse;
+import com.project.tour.dto.operation.assignment.cruise.OperationCruiseAreaResponse;
+import com.project.tour.dto.operation.assignment.room.OperationRoomResponse;
 import com.project.tour.model.CruiseArea;
 import com.project.tour.model.CruiseDeck;
 import com.project.tour.model.Room; // Giả định tên Entity Room của bạn
