@@ -1,4 +1,4 @@
-package com.project.tour.controller.tour.operation;
+package com.project.tour.controller.operation;
 
 import com.project.tour.dto.tour.operation.ProductTourAssignmentRequest;
 import com.project.tour.dto.tour.operation.ProductTourAssignmentResponse; // Fix import DTO

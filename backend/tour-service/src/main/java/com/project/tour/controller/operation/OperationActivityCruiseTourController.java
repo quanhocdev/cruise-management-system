@@ -1,4 +1,4 @@
-package com.project.tour.controller.tour.operation;
+package com.project.tour.controller.operation;
 
 import com.project.tour.dto.tour.operation.AssignmentActivityCruiseResponse;
 import com.project.tour.service.tour.operation.OperationActivityCruiseTourService;

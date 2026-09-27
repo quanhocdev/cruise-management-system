@@ -1,4 +1,4 @@
-package com.project.tour.controller;
+package com.project.tour.controller.admin;
 
 import com.project.tour.dto.NfcCardRequest;
 import com.project.tour.dto.NfcCardResponse;

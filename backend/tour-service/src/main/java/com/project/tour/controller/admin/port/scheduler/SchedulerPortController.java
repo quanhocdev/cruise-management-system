@@ -1,4 +1,4 @@
-package com.project.tour.controller.port.scheduler;
+package com.project.tour.controller.admin.port.scheduler;
 
 import com.project.tour.dto.port.PortResponse;
 import com.project.tour.service.port.PortService;

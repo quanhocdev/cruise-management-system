@@ -1,4 +1,4 @@
-package com.project.tour.controller.tour;
+package com.project.tour.controller.scheduler;
 
 import com.project.tour.dto.tour.schedule.CreateScheduleRequest;
 import com.project.tour.dto.tour.schedule.ScheduleResponse;
