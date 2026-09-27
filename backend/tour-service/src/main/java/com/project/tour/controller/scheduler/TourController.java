@@ -1,8 +1,8 @@
 package com.project.tour.controller.scheduler;
 
-import com.project.tour.dto.tour.CreateTourRequest;
-import com.project.tour.dto.tour.TourResponse;
-import com.project.tour.dto.tour.UpdateTourRequest;
+import com.project.tour.dto.scheduler.tour.CreateTourRequest;
+import com.project.tour.dto.scheduler.tour.TourResponse;
+import com.project.tour.dto.scheduler.tour.UpdateTourRequest;
 import com.project.tour.model.enums.tour.TourStatusTrip;
 import com.project.tour.service.tour.TourService;
 

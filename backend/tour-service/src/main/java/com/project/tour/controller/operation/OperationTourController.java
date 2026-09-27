@@ -1,7 +1,7 @@
 package com.project.tour.controller.operation;
 
 import com.project.tour.dto.admin.cruise.CruiseAvailabilityResponse;
-import com.project.tour.dto.tour.TourResponse;
+import com.project.tour.dto.scheduler.tour.TourResponse;
 import com.project.tour.dto.tour.operation.OperationCruiseLayoutResponse;
 import com.project.tour.service.tour.operation.ApprovalTourService;
 import com.project.tour.service.tour.operation.assignment.TourCruiseAssignmentService;

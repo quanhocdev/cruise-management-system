@@ -3,7 +3,7 @@ package com.project.tour.service.tour.operation;
 import com.project.common.event.TourApprovedEvent;
 import com.project.common.event.TourAssignmentEvent;
 import com.project.common.event.TourMasterSyncEvent;
-import com.project.tour.dto.tour.TourResponse;
+import com.project.tour.dto.scheduler.tour.TourResponse;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.tour.TourMapper;
 import com.project.tour.mapper.tour.TourMasterSyncMapper;

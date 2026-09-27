@@ -1,6 +1,4 @@
-package com.project.tour.dto.scheduler;
-
-import com.project.tour.model.enums.ScheduleStatus;
+package com.project.tour.dto.scheduler.schedule;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -9,7 +7,7 @@ import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
-public class UpdateScheduleRequest {
+public class CreateScheduleRequest {
 
     @NotBlank(message = "Schedule name is required")
     @Size(max = 150, message = "Schedule name must not exceed 150 characters")
@@ -24,9 +22,6 @@ public class UpdateScheduleRequest {
 
     @NotNull(message = "Real day is required")
     private LocalDate realDay;
-
-    @NotNull(message = "Schedule status is required")
-    private ScheduleStatus status;
 
     public String getName() {
         return name;
@@ -58,13 +53,5 @@ public class UpdateScheduleRequest {
 
     public void setRealDay(LocalDate realDay) {
         this.realDay = realDay;
-    }
-
-    public ScheduleStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(ScheduleStatus status) {
-        this.status = status;
     }
 }

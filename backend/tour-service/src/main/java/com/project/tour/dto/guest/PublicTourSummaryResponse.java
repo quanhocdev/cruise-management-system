@@ -1,41 +1,24 @@
-package com.project.tour.dto.tour;
+package com.project.tour.dto.guest;
 
 import com.project.tour.model.enums.tour.TourBookingStatus;
 import com.project.tour.model.enums.tour.TourStatusTrip;
-
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record TourResponse(
-
+public record PublicTourSummaryResponse(
         UUID id,
-
         String code,
-
         String name,
-
         String description,
-
         LocalDate startDate,
-
         LocalDate endDate,
-
-        UUID cruiseId,
-
         String cruiseName,
-
-        TourStatusTrip statusTrip,
-
-        LocalDateTime bookingStart,
-
-        LocalDateTime bookingEnd,
-
+        String cruiseImageUrl,
         TourBookingStatus statusBooking,
-
-        LocalDateTime createdAt,
-
-        LocalDateTime updatedAt
-
-) {
+        TourStatusTrip statusTrip,
+        LocalDateTime bookingStart,
+        LocalDateTime bookingEnd,
+        BigDecimal startingPrice) {
 }

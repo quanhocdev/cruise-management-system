@@ -1,7 +1,7 @@
 package com.project.tour.mapper.tour;
 
-import com.project.tour.dto.tour.PublicTourDetailResponse;
-import com.project.tour.dto.tour.PublicTourSummaryResponse;
+import com.project.tour.dto.guest.PublicTourDetailResponse;
+import com.project.tour.dto.guest.PublicTourSummaryResponse;
 import com.project.tour.model.*;
 import com.project.tour.model.shore.VisitTour;
 import com.project.tour.model.convenience.product.ProductTour;

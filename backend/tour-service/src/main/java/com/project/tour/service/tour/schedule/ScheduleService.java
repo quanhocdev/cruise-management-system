@@ -1,8 +1,8 @@
 package com.project.tour.service.tour.schedule;
 
-import com.project.tour.dto.scheduler.CreateScheduleRequest;
-import com.project.tour.dto.scheduler.ScheduleResponse;
-import com.project.tour.dto.scheduler.UpdateScheduleRequest;
+import com.project.tour.dto.scheduler.schedule.CreateScheduleRequest;
+import com.project.tour.dto.scheduler.schedule.ScheduleResponse;
+import com.project.tour.dto.scheduler.schedule.UpdateScheduleRequest;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.tour.schedule.ScheduleMapper;
 import com.project.tour.model.Schedule;

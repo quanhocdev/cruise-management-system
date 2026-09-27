@@ -1,35 +1,32 @@
-package com.project.tour.dto.scheduler;
+package com.project.tour.dto.scheduler.schedule;
 
 import com.project.tour.model.enums.ScheduleStatus;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
+
 import java.time.LocalDate;
-import java.util.UUID;
 
-public class ScheduleResponse {
+public class UpdateScheduleRequest {
 
-    private UUID id;
-    private UUID tourId;
+    @NotBlank(message = "Schedule name is required")
+    @Size(max = 150, message = "Schedule name must not exceed 150 characters")
     private String name;
+
+    @Size(max = 5000, message = "Description must not exceed 5000 characters")
     private String description;
+
+    @NotNull(message = "Day number is required")
+    @Positive(message = "Day number must be greater than 0")
     private Integer dayNumber;
+
+    @NotNull(message = "Real day is required")
     private LocalDate realDay;
+
+    @NotNull(message = "Schedule status is required")
     private ScheduleStatus status;
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public UUID getTourId() {
-        return tourId;
-    }
-
-    public void setTourId(UUID tourId) {
-        this.tourId = tourId;
-    }
 
     public String getName() {
         return name;

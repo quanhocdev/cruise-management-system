@@ -1,7 +1,7 @@
 package com.project.tour.controller.guest;
 
-import com.project.tour.dto.tour.PublicTourDetailResponse;
-import com.project.tour.dto.tour.PublicTourSummaryResponse;
+import com.project.tour.dto.guest.PublicTourDetailResponse;
+import com.project.tour.dto.guest.PublicTourSummaryResponse;
 import com.project.tour.service.tour.PublicTourService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

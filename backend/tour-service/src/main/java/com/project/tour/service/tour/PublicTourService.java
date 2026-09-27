@@ -1,7 +1,7 @@
 package com.project.tour.service.tour;
 
-import com.project.tour.dto.tour.PublicTourDetailResponse;
-import com.project.tour.dto.tour.PublicTourSummaryResponse;
+import com.project.tour.dto.guest.PublicTourDetailResponse;
+import com.project.tour.dto.guest.PublicTourSummaryResponse;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.tour.TourPublicMapper;
 import com.project.tour.model.*;
