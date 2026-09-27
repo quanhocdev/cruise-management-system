@@ -1,8 +1,8 @@
 package com.project.tour.mapper.convenience;
 
-import com.project.tour.dto.convenience.product.admin.CreateProductRequest;
-import com.project.tour.dto.convenience.product.admin.ProductResponse;
-import com.project.tour.dto.convenience.product.admin.UpdateProductRequest;
+import com.project.tour.dto.admin.product.CreateProductRequest;
+import com.project.tour.dto.admin.product.ProductResponse;
+import com.project.tour.dto.admin.product.UpdateProductRequest;
 import com.project.tour.dto.convenience.product.convenience.ProductConvenienceResponse;
 import com.project.tour.model.convenience.product.Product;
 

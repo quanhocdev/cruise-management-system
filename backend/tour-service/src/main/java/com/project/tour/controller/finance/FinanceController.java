@@ -2,14 +2,14 @@
 package com.project.tour.controller.finance;
 
 import com.project.tour.dto.tour.TourResponse;
-import com.project.tour.dto.tour.schedule.ScheduleResponse;
-import com.project.tour.dto.tour.schedule.stop.ScheduleStopResponse;
 import com.project.tour.dto.admin.cruise.CruiseResponse;
 import com.project.tour.dto.admin.cruise.area.CruiseAreaResponse;
 import com.project.tour.dto.admin.cruise.deck.CruiseDeckResponse;
 import com.project.tour.dto.admin.nfc.NfcCardResponse;
 import com.project.tour.dto.admin.room.RoomResponse;
 import com.project.tour.dto.admin.roomtype.RoomTypeResponse;
+import com.project.tour.dto.scheduler.ScheduleResponse;
+import com.project.tour.dto.scheduler.stop.ScheduleStopResponse;
 import com.project.tour.service.tour.TourService;
 import com.project.tour.service.tour.schedule.ScheduleService;
 import com.project.tour.service.tour.schedule.stop.ScheduleStopService;

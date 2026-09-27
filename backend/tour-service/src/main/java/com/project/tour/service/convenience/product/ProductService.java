@@ -2,9 +2,9 @@ package com.project.tour.service.convenience.product;
 
 import com.project.common.dto.UploadResult;
 import com.project.common.service.file.FileStorageService;
-import com.project.tour.dto.convenience.product.admin.CreateProductRequest;
-import com.project.tour.dto.convenience.product.admin.ProductResponse;
-import com.project.tour.dto.convenience.product.admin.UpdateProductRequest;
+import com.project.tour.dto.admin.product.CreateProductRequest;
+import com.project.tour.dto.admin.product.ProductResponse;
+import com.project.tour.dto.admin.product.UpdateProductRequest;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.convenience.ProductMapper;
 import com.project.tour.model.convenience.enums.ProductStatus;
@@ -22,173 +22,173 @@ import java.util.UUID;
 @Transactional
 public class ProductService {
 
-    private final ProductRepository productRepository;
-    private final FileStorageService fileStorageService;
+        private final ProductRepository productRepository;
+        private final FileStorageService fileStorageService;
 
-    public ProductService(
-            ProductRepository productRepository,
-            FileStorageService fileStorageService) {
+        public ProductService(
+                        ProductRepository productRepository,
+                        FileStorageService fileStorageService) {
 
-        this.productRepository = productRepository;
-        this.fileStorageService = fileStorageService;
-    }
-
-    // =====================================================
-    // CREATE
-    // =====================================================
-
-    public ProductResponse createProduct(
-            CreateProductRequest request) {
-
-        if (productRepository.existsByNameIgnoreCase(
-                request.name())) {
-
-            throw new AppException(
-                    "Product name already exists",
-                    HttpStatus.CONFLICT);
+                this.productRepository = productRepository;
+                this.fileStorageService = fileStorageService;
         }
 
-        Product product = ProductMapper.toEntity(request);
+        // =====================================================
+        // CREATE
+        // =====================================================
 
-        if (request.image() != null
-                && !request.image().isEmpty()) {
+        public ProductResponse createProduct(
+                        CreateProductRequest request) {
 
-            UploadResult uploadResult = fileStorageService.saveMultipart(
-                    request.image(),
-                    "products");
+                if (productRepository.existsByNameIgnoreCase(
+                                request.name())) {
 
-            product.setImageUrl(uploadResult.getUrl());
-            product.setImagePublicId(uploadResult.getPublicId());
+                        throw new AppException(
+                                        "Product name already exists",
+                                        HttpStatus.CONFLICT);
+                }
+
+                Product product = ProductMapper.toEntity(request);
+
+                if (request.image() != null
+                                && !request.image().isEmpty()) {
+
+                        UploadResult uploadResult = fileStorageService.saveMultipart(
+                                        request.image(),
+                                        "products");
+
+                        product.setImageUrl(uploadResult.getUrl());
+                        product.setImagePublicId(uploadResult.getPublicId());
+                }
+
+                Product savedProduct = productRepository.save(product);
+
+                return ProductMapper.toResponse(savedProduct);
         }
 
-        Product savedProduct = productRepository.save(product);
+        // =====================================================
+        // GET BY ID
+        // =====================================================
 
-        return ProductMapper.toResponse(savedProduct);
-    }
+        @Transactional(readOnly = true)
+        public ProductResponse getProductById(
+                        UUID productId) {
 
-    // =====================================================
-    // GET BY ID
-    // =====================================================
+                Product product = findProduct(productId);
 
-    @Transactional(readOnly = true)
-    public ProductResponse getProductById(
-            UUID productId) {
-
-        Product product = findProduct(productId);
-
-        return ProductMapper.toResponse(product);
-    }
-
-    // =====================================================
-    // GET ALL
-    // =====================================================
-
-    @Transactional(readOnly = true)
-    public List<ProductResponse> getProducts() {
-
-        return productRepository
-                .findAllByOrderByNameAsc()
-                .stream()
-                .map(ProductMapper::toResponse)
-                .toList();
-    }
-
-    // =====================================================
-    // GET ACTIVE
-    // =====================================================
-
-    @Transactional(readOnly = true)
-    public List<ProductResponse> getActiveProducts() {
-
-        return productRepository
-                .findAllByStatusOrderByNameAsc(
-                        ProductStatus.ACTIVE)
-                .stream()
-                .map(ProductMapper::toResponse)
-                .toList();
-    }
-
-    // =====================================================
-    // UPDATE
-    // =====================================================
-
-    public ProductResponse updateProduct(
-            UUID productId,
-            UpdateProductRequest request) {
-
-        Product product = findProduct(productId);
-
-        if (productRepository.existsByNameIgnoreCaseAndIdNot(
-                request.name(),
-                productId)) {
-
-            throw new AppException(
-                    "Product name already exists",
-                    HttpStatus.CONFLICT);
+                return ProductMapper.toResponse(product);
         }
 
-        String oldPublicId = product.getImagePublicId();
+        // =====================================================
+        // GET ALL
+        // =====================================================
 
-        ProductMapper.updateEntity(
-                product,
-                request);
+        @Transactional(readOnly = true)
+        public List<ProductResponse> getProducts() {
 
-        if (request.image() != null
-                && !request.image().isEmpty()) {
-
-            UploadResult uploadResult = fileStorageService.saveMultipart(
-                    request.image(),
-                    "products");
-
-            product.setImageUrl(
-                    uploadResult.getUrl());
-
-            product.setImagePublicId(
-                    uploadResult.getPublicId());
-
-            if (oldPublicId != null
-                    && !oldPublicId.isBlank()) {
-
-                fileStorageService.delete(oldPublicId);
-            }
+                return productRepository
+                                .findAllByOrderByNameAsc()
+                                .stream()
+                                .map(ProductMapper::toResponse)
+                                .toList();
         }
 
-        Product updatedProduct = productRepository.save(product);
+        // =====================================================
+        // GET ACTIVE
+        // =====================================================
 
-        return ProductMapper.toResponse(
-                updatedProduct);
-    }
+        @Transactional(readOnly = true)
+        public List<ProductResponse> getActiveProducts() {
 
-    // =====================================================
-    // DELETE
-    // =====================================================
-
-    public void deleteProduct(
-            UUID productId) {
-
-        Product product = findProduct(productId);
-
-        if (product.getImagePublicId() != null
-                && !product.getImagePublicId().isBlank()) {
-
-            fileStorageService.delete(
-                    product.getImagePublicId());
+                return productRepository
+                                .findAllByStatusOrderByNameAsc(
+                                                ProductStatus.ACTIVE)
+                                .stream()
+                                .map(ProductMapper::toResponse)
+                                .toList();
         }
 
-        productRepository.delete(product);
-    }
+        // =====================================================
+        // UPDATE
+        // =====================================================
 
-    // =====================================================
-    // FIND HELPER
-    // =====================================================
+        public ProductResponse updateProduct(
+                        UUID productId,
+                        UpdateProductRequest request) {
 
-    private Product findProduct(
-            UUID productId) {
+                Product product = findProduct(productId);
 
-        return productRepository
-                .findById(productId)
-                .orElseThrow(() -> new AppException(
-                        "Product not found",
-                        HttpStatus.NOT_FOUND));
-    }
+                if (productRepository.existsByNameIgnoreCaseAndIdNot(
+                                request.name(),
+                                productId)) {
+
+                        throw new AppException(
+                                        "Product name already exists",
+                                        HttpStatus.CONFLICT);
+                }
+
+                String oldPublicId = product.getImagePublicId();
+
+                ProductMapper.updateEntity(
+                                product,
+                                request);
+
+                if (request.image() != null
+                                && !request.image().isEmpty()) {
+
+                        UploadResult uploadResult = fileStorageService.saveMultipart(
+                                        request.image(),
+                                        "products");
+
+                        product.setImageUrl(
+                                        uploadResult.getUrl());
+
+                        product.setImagePublicId(
+                                        uploadResult.getPublicId());
+
+                        if (oldPublicId != null
+                                        && !oldPublicId.isBlank()) {
+
+                                fileStorageService.delete(oldPublicId);
+                        }
+                }
+
+                Product updatedProduct = productRepository.save(product);
+
+                return ProductMapper.toResponse(
+                                updatedProduct);
+        }
+
+        // =====================================================
+        // DELETE
+        // =====================================================
+
+        public void deleteProduct(
+                        UUID productId) {
+
+                Product product = findProduct(productId);
+
+                if (product.getImagePublicId() != null
+                                && !product.getImagePublicId().isBlank()) {
+
+                        fileStorageService.delete(
+                                        product.getImagePublicId());
+                }
+
+                productRepository.delete(product);
+        }
+
+        // =====================================================
+        // FIND HELPER
+        // =====================================================
+
+        private Product findProduct(
+                        UUID productId) {
+
+                return productRepository
+                                .findById(productId)
+                                .orElseThrow(() -> new AppException(
+                                                "Product not found",
+                                                HttpStatus.NOT_FOUND));
+        }
 }

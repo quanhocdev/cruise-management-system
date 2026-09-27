@@ -1,4 +1,4 @@
-package com.project.tour.dto.tour.schedule.stop;
+package com.project.tour.dto.scheduler.stop;
 
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;

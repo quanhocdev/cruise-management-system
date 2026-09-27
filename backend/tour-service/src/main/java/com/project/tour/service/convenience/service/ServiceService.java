@@ -2,9 +2,9 @@ package com.project.tour.service.convenience.service;
 
 import com.project.common.dto.UploadResult;
 import com.project.common.service.file.FileStorageService;
-import com.project.tour.dto.convenience.service.admin.CreateServiceRequest;
-import com.project.tour.dto.convenience.service.admin.ServiceResponse;
-import com.project.tour.dto.convenience.service.admin.UpdateServiceRequest;
+import com.project.tour.dto.admin.service.CreateServiceRequest;
+import com.project.tour.dto.admin.service.ServiceResponse;
+import com.project.tour.dto.admin.service.UpdateServiceRequest;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.convenience.ServiceMapper;
 import com.project.tour.model.convenience.enums.ServiceStatus;
@@ -21,150 +21,150 @@ import java.util.UUID;
 @Transactional
 public class ServiceService {
 
-    private final ServiceRepository serviceRepository;
-    private final FileStorageService fileStorageService;
+        private final ServiceRepository serviceRepository;
+        private final FileStorageService fileStorageService;
 
-    public ServiceService(
-            ServiceRepository serviceRepository,
-            FileStorageService fileStorageService) {
+        public ServiceService(
+                        ServiceRepository serviceRepository,
+                        FileStorageService fileStorageService) {
 
-        this.serviceRepository = serviceRepository;
-        this.fileStorageService = fileStorageService;
-    }
-
-    public ServiceResponse createService(
-            CreateServiceRequest request) {
-
-        if (serviceRepository.existsByNameIgnoreCase(
-                request.getName())) {
-
-            throw new AppException(
-                    "Service name already exists",
-                    HttpStatus.CONFLICT);
+                this.serviceRepository = serviceRepository;
+                this.fileStorageService = fileStorageService;
         }
 
-        Service service = ServiceMapper.toEntity(request);
+        public ServiceResponse createService(
+                        CreateServiceRequest request) {
 
-        if (request.getImage() != null
-                && !request.getImage().isEmpty()) {
+                if (serviceRepository.existsByNameIgnoreCase(
+                                request.getName())) {
 
-            UploadResult uploadResult = fileStorageService.saveMultipart(
-                    request.getImage(),
-                    "services");
+                        throw new AppException(
+                                        "Service name already exists",
+                                        HttpStatus.CONFLICT);
+                }
 
-            service.setImageUrl(
-                    uploadResult.getUrl());
+                Service service = ServiceMapper.toEntity(request);
 
-            service.setImagePublicId(
-                    uploadResult.getPublicId());
+                if (request.getImage() != null
+                                && !request.getImage().isEmpty()) {
+
+                        UploadResult uploadResult = fileStorageService.saveMultipart(
+                                        request.getImage(),
+                                        "services");
+
+                        service.setImageUrl(
+                                        uploadResult.getUrl());
+
+                        service.setImagePublicId(
+                                        uploadResult.getPublicId());
+                }
+
+                Service saved = serviceRepository.save(service);
+
+                return ServiceMapper.toResponse(saved);
         }
 
-        Service saved = serviceRepository.save(service);
+        @Transactional(readOnly = true)
+        public ServiceResponse getServiceById(
+                        UUID serviceId) {
 
-        return ServiceMapper.toResponse(saved);
-    }
-
-    @Transactional(readOnly = true)
-    public ServiceResponse getServiceById(
-            UUID serviceId) {
-
-        return ServiceMapper.toResponse(
-                findById(serviceId));
-    }
-
-    @Transactional(readOnly = true)
-    public List<ServiceResponse> getServices(
-            boolean activeOnly) {
-
-        List<Service> services;
-
-        if (activeOnly) {
-
-            services = serviceRepository
-                    .findAllByStatusOrderByNameAsc(
-                            ServiceStatus.ACTIVE);
-
-        } else {
-
-            services = serviceRepository
-                    .findAllByOrderByNameAsc();
+                return ServiceMapper.toResponse(
+                                findById(serviceId));
         }
 
-        return services.stream()
-                .map(ServiceMapper::toResponse)
-                .toList();
-    }
+        @Transactional(readOnly = true)
+        public List<ServiceResponse> getServices(
+                        boolean activeOnly) {
 
-    public ServiceResponse updateService(
-            UUID serviceId,
-            UpdateServiceRequest request) {
+                List<Service> services;
 
-        Service service = findById(serviceId);
+                if (activeOnly) {
 
-        if (serviceRepository
-                .existsByNameIgnoreCaseAndIdNot(
-                        request.getName(),
-                        serviceId)) {
+                        services = serviceRepository
+                                        .findAllByStatusOrderByNameAsc(
+                                                        ServiceStatus.ACTIVE);
 
-            throw new AppException(
-                    "Service name already exists",
-                    HttpStatus.CONFLICT);
+                } else {
+
+                        services = serviceRepository
+                                        .findAllByOrderByNameAsc();
+                }
+
+                return services.stream()
+                                .map(ServiceMapper::toResponse)
+                                .toList();
         }
 
-        String oldPublicId = service.getImagePublicId();
+        public ServiceResponse updateService(
+                        UUID serviceId,
+                        UpdateServiceRequest request) {
 
-        ServiceMapper.updateEntity(
-                service,
-                request);
+                Service service = findById(serviceId);
 
-        if (request.getImage() != null
-                && !request.getImage().isEmpty()) {
+                if (serviceRepository
+                                .existsByNameIgnoreCaseAndIdNot(
+                                                request.getName(),
+                                                serviceId)) {
 
-            UploadResult uploadResult = fileStorageService.saveMultipart(
-                    request.getImage(),
-                    "services");
+                        throw new AppException(
+                                        "Service name already exists",
+                                        HttpStatus.CONFLICT);
+                }
 
-            service.setImageUrl(
-                    uploadResult.getUrl());
+                String oldPublicId = service.getImagePublicId();
 
-            service.setImagePublicId(
-                    uploadResult.getPublicId());
+                ServiceMapper.updateEntity(
+                                service,
+                                request);
 
-            if (oldPublicId != null
-                    && !oldPublicId.isBlank()) {
+                if (request.getImage() != null
+                                && !request.getImage().isEmpty()) {
 
-                fileStorageService.delete(
-                        oldPublicId);
-            }
+                        UploadResult uploadResult = fileStorageService.saveMultipart(
+                                        request.getImage(),
+                                        "services");
+
+                        service.setImageUrl(
+                                        uploadResult.getUrl());
+
+                        service.setImagePublicId(
+                                        uploadResult.getPublicId());
+
+                        if (oldPublicId != null
+                                        && !oldPublicId.isBlank()) {
+
+                                fileStorageService.delete(
+                                                oldPublicId);
+                        }
+                }
+
+                Service updated = serviceRepository.save(service);
+
+                return ServiceMapper.toResponse(updated);
         }
 
-        Service updated = serviceRepository.save(service);
+        public void deleteService(
+                        UUID serviceId) {
 
-        return ServiceMapper.toResponse(updated);
-    }
+                Service service = findById(serviceId);
 
-    public void deleteService(
-            UUID serviceId) {
+                if (service.getImagePublicId() != null
+                                && !service.getImagePublicId().isBlank()) {
 
-        Service service = findById(serviceId);
+                        fileStorageService.delete(
+                                        service.getImagePublicId());
+                }
 
-        if (service.getImagePublicId() != null
-                && !service.getImagePublicId().isBlank()) {
-
-            fileStorageService.delete(
-                    service.getImagePublicId());
+                serviceRepository.delete(service);
         }
 
-        serviceRepository.delete(service);
-    }
+        private Service findById(
+                        UUID serviceId) {
 
-    private Service findById(
-            UUID serviceId) {
-
-        return serviceRepository
-                .findById(serviceId)
-                .orElseThrow(() -> new AppException(
-                        "Service not found",
-                        HttpStatus.NOT_FOUND));
-    }
+                return serviceRepository
+                                .findById(serviceId)
+                                .orElseThrow(() -> new AppException(
+                                                "Service not found",
+                                                HttpStatus.NOT_FOUND));
+        }
 }

@@ -1,4 +1,4 @@
-package com.project.tour.dto.tour.schedule;
+package com.project.tour.dto.scheduler;
 
 import com.project.tour.model.enums.ScheduleStatus;
 

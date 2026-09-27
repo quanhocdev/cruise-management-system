@@ -1,4 +1,4 @@
-package com.project.tour.dto.convenience.service.admin;
+package com.project.tour.dto.admin.service;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

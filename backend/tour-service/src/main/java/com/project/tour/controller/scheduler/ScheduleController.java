@@ -1,8 +1,8 @@
 package com.project.tour.controller.scheduler;
 
-import com.project.tour.dto.tour.schedule.CreateScheduleRequest;
-import com.project.tour.dto.tour.schedule.ScheduleResponse;
-import com.project.tour.dto.tour.schedule.UpdateScheduleRequest;
+import com.project.tour.dto.scheduler.CreateScheduleRequest;
+import com.project.tour.dto.scheduler.ScheduleResponse;
+import com.project.tour.dto.scheduler.UpdateScheduleRequest;
 import com.project.tour.service.tour.schedule.ScheduleService;
 
 import jakarta.validation.Valid;

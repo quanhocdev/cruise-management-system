@@ -1,4 +1,4 @@
-package com.project.tour.dto.tour.schedule.stop;
+package com.project.tour.dto.scheduler.stop;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

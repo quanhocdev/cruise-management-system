@@ -1,8 +1,8 @@
 package com.project.tour.controller.scheduler;
 
-import com.project.tour.dto.tour.schedule.stop.CreateScheduleStopRequest;
-import com.project.tour.dto.tour.schedule.stop.ScheduleStopResponse;
-import com.project.tour.dto.tour.schedule.stop.UpdateScheduleStopRequest;
+import com.project.tour.dto.scheduler.stop.CreateScheduleStopRequest;
+import com.project.tour.dto.scheduler.stop.ScheduleStopResponse;
+import com.project.tour.dto.scheduler.stop.UpdateScheduleStopRequest;
 import com.project.tour.service.tour.schedule.stop.ScheduleStopService;
 
 import jakarta.validation.Valid;

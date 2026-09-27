@@ -1,8 +1,8 @@
 package com.project.tour.mapper.convenience;
 
-import com.project.tour.dto.convenience.service.admin.CreateServiceRequest;
-import com.project.tour.dto.convenience.service.admin.ServiceResponse;
-import com.project.tour.dto.convenience.service.admin.UpdateServiceRequest;
+import com.project.tour.dto.admin.service.CreateServiceRequest;
+import com.project.tour.dto.admin.service.ServiceResponse;
+import com.project.tour.dto.admin.service.UpdateServiceRequest;
 import com.project.tour.dto.convenience.service.convenience.ServiceConvenienceResponse;
 import com.project.tour.model.convenience.service.Service;
 
