@@ -1,4 +1,4 @@
-package com.project.tour.dto.roomtype;
+package com.project.tour.dto.admin.roomtype;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Min;
 import java.math.BigDecimal;
 
-public class UpdateRoomTypeRequest {
+public class CreateRoomTypeRequest {
 
     @NotBlank(message = "Room type name is required")
     @Size(max = 100, message = "Room type name must not exceed 100 characters")
@@ -39,8 +39,19 @@ public class UpdateRoomTypeRequest {
         this.description = description;
     }
 
-    public BigDecimal getPrice() { return price; }
-    public void setPrice(BigDecimal price) { this.price = price; }
-    public Integer getCapacity() { return capacity; }
-    public void setCapacity(Integer capacity) { this.capacity = capacity; }
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
+    public Integer getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(Integer capacity) {
+        this.capacity = capacity;
+    }
 }

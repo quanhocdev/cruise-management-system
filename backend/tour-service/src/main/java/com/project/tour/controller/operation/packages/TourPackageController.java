@@ -1,5 +1,6 @@
 package com.project.tour.controller.operation.packages;
 
+import com.project.tour.dto.admin.roomtype.RoomTypeResponse;
 import com.project.tour.dto.tour.packages.TourPackageRequest;
 import com.project.tour.dto.tour.packages.TourPackageResponse;
 import com.project.tour.service.tour.TourPackageService;
@@ -7,7 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.project.tour.dto.roomtype.RoomTypeResponse;
+
 import java.util.List;
 import java.util.UUID;
 

@@ -1,8 +1,8 @@
 package com.project.tour.mapper.room;
 
-import com.project.tour.dto.roomtype.CreateRoomTypeRequest;
-import com.project.tour.dto.roomtype.RoomTypeResponse;
-import com.project.tour.dto.roomtype.UpdateRoomTypeRequest;
+import com.project.tour.dto.admin.roomtype.CreateRoomTypeRequest;
+import com.project.tour.dto.admin.roomtype.RoomTypeResponse;
+import com.project.tour.dto.admin.roomtype.UpdateRoomTypeRequest;
 import com.project.tour.model.RoomType;
 
 public class RoomTypeMapper {
@@ -13,8 +13,10 @@ public class RoomTypeMapper {
 
         roomType.setName(request.getName());
         roomType.setDescription(request.getDescription());
-        if (request.getPrice() != null) roomType.setPrice(request.getPrice());
-        if (request.getCapacity() != null) roomType.setCapacity(request.getCapacity());
+        if (request.getPrice() != null)
+            roomType.setPrice(request.getPrice());
+        if (request.getCapacity() != null)
+            roomType.setCapacity(request.getCapacity());
 
         return roomType;
     }
@@ -25,8 +27,10 @@ public class RoomTypeMapper {
 
         roomType.setName(request.getName());
         roomType.setDescription(request.getDescription());
-        if (request.getPrice() != null) roomType.setPrice(request.getPrice());
-        if (request.getCapacity() != null) roomType.setCapacity(request.getCapacity());
+        if (request.getPrice() != null)
+            roomType.setPrice(request.getPrice());
+        if (request.getCapacity() != null)
+            roomType.setCapacity(request.getCapacity());
     }
 
     public static RoomTypeResponse toResponse(RoomType roomType) {

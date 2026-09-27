@@ -1,7 +1,7 @@
 package com.project.tour.mapper.room;
 
-import com.project.tour.dto.room.RoomResponse;
-import com.project.tour.dto.room.UpdateRoomRequest;
+import com.project.tour.dto.admin.room.RoomResponse;
+import com.project.tour.dto.admin.room.UpdateRoomRequest;
 import com.project.tour.model.CruiseDeck;
 import com.project.tour.model.Room;
 import com.project.tour.model.RoomType;

@@ -1,4 +1,4 @@
-package com.project.tour.dto.roomtype;
+package com.project.tour.dto.admin.roomtype;
 
 import java.util.UUID;
 import java.math.BigDecimal;
@@ -35,8 +35,19 @@ public class RoomTypeResponse {
         this.description = description;
     }
 
-    public BigDecimal getPrice() { return price; }
-    public void setPrice(BigDecimal price) { this.price = price; }
-    public Integer getCapacity() { return capacity; }
-    public void setCapacity(Integer capacity) { this.capacity = capacity; }
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
+    public Integer getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(Integer capacity) {
+        this.capacity = capacity;
+    }
 }

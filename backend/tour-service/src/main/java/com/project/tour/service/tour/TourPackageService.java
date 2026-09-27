@@ -1,6 +1,7 @@
 package com.project.tour.service.tour;
 
 import com.project.common.event.TourPackageSyncedEvent;
+import com.project.tour.dto.admin.roomtype.RoomTypeResponse;
 import com.project.tour.dto.tour.packages.TourPackageRequest;
 import com.project.tour.dto.tour.packages.TourPackageResponse;
 import com.project.tour.exception.AppException;
@@ -9,7 +10,6 @@ import com.project.tour.model.PackageBenefit;
 import com.project.tour.model.TourPackage;
 import com.project.tour.model.Tour;
 import com.project.tour.model.RoomType;
-import com.project.tour.dto.roomtype.RoomTypeResponse;
 import com.project.tour.repository.tour.PackageBenefitRepository;
 import com.project.tour.repository.tour.TourPackageRepository;
 import com.project.tour.service.redis.TourRedisService;
@@ -255,7 +255,7 @@ public class TourPackageService {
         List<RoomType> roomTypes = roomTypeRepository.findRoomTypesByCruiseId(cruiseId);
 
         return roomTypes.stream().map(rt -> {
-            com.project.tour.dto.roomtype.RoomTypeResponse dto = new com.project.tour.dto.roomtype.RoomTypeResponse();
+            com.project.tour.dto.admin.roomtype.RoomTypeResponse dto = new com.project.tour.dto.admin.roomtype.RoomTypeResponse();
             dto.setId(rt.getId());
             dto.setName(rt.getName());
             dto.setDescription(rt.getDescription());
