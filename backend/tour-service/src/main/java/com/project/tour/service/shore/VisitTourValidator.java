@@ -1,7 +1,7 @@
 package com.project.tour.service.shore;
 
-import com.project.tour.dto.activityvisit.CreateVisitTourRequest;
-import com.project.tour.dto.activityvisit.UpdateVisitTourRequest;
+import com.project.tour.dto.shore.CreateVisitTourRequest;
+import com.project.tour.dto.shore.UpdateVisitTourRequest;
 import com.project.tour.exception.AppException;
 import com.project.tour.model.shore.enums.VisitTourStatus;
 

@@ -1,4 +1,4 @@
-package com.project.tour.dto.activityvisit;
+package com.project.tour.dto.shore;
 
 import com.project.tour.model.shore.enums.VisitTourStatus;
 

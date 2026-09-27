@@ -1,6 +1,6 @@
 package com.project.tour.controller.shore;
 
-import com.project.tour.dto.activityvisit.VisitTourResponse;
+import com.project.tour.dto.shore.VisitTourResponse;
 import com.project.tour.service.shore.ActivityVisitTourConfigurationService;
 
 import java.util.List;

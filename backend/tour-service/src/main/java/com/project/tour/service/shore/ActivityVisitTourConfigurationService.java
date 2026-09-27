@@ -1,6 +1,6 @@
 package com.project.tour.service.shore;
 
-import com.project.tour.dto.activityvisit.VisitTourResponse;
+import com.project.tour.dto.shore.VisitTourResponse;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.activityvisit.VisitTourMapper;
 import com.project.tour.model.shore.VisitTour;

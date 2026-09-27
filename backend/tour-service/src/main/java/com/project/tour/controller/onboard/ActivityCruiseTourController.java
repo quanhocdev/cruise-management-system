@@ -1,7 +1,7 @@
 package com.project.tour.controller.onboard;
 
-import com.project.tour.dto.activitycruise.ActivityCruiseTourConfigRequest;
-import com.project.tour.dto.activitycruise.ActivityCruiseTourResponse;
+import com.project.tour.dto.onboard.ActivityCruiseTourConfigRequest;
+import com.project.tour.dto.onboard.ActivityCruiseTourResponse;
 import com.project.tour.service.onboard.ActivityCruiseTourConfigService;
 import com.project.tour.service.onboard.ActivityCruiseTourService;
 

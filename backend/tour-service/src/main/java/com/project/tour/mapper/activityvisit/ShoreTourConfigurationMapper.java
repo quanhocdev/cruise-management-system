@@ -1,6 +1,6 @@
 package com.project.tour.mapper.activityvisit;
 
-import com.project.tour.dto.activityvisit.ShoreTourConfigurationResponse;
+import com.project.tour.dto.shore.ShoreTourConfigurationResponse;
 import com.project.tour.model.shore.VisitTour;
 
 import java.time.LocalDate;

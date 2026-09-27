@@ -1,6 +1,6 @@
 package com.project.tour.service.shore;
 
-import com.project.tour.dto.activityvisit.TourVisitSyncResponse;
+import com.project.tour.dto.shore.TourVisitSyncResponse;
 import com.project.tour.exception.AppException;
 import com.project.tour.model.Schedule;
 import com.project.tour.model.ScheduleStop;

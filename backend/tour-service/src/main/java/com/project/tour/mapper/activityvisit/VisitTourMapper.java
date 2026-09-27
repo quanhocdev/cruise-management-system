@@ -1,8 +1,8 @@
 package com.project.tour.mapper.activityvisit;
 
-import com.project.tour.dto.activityvisit.CreateVisitTourRequest;
-import com.project.tour.dto.activityvisit.UpdateVisitTourRequest;
-import com.project.tour.dto.activityvisit.VisitTourResponse;
+import com.project.tour.dto.shore.CreateVisitTourRequest;
+import com.project.tour.dto.shore.UpdateVisitTourRequest;
+import com.project.tour.dto.shore.VisitTourResponse;
 import com.project.tour.model.shore.VisitTour;
 
 public final class VisitTourMapper {

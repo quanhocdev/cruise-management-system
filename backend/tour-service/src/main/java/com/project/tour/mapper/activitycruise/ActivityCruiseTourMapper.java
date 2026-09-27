@@ -1,7 +1,7 @@
 package com.project.tour.mapper.activitycruise;
 
-import com.project.tour.dto.activitycruise.ActivityCruiseTourConfigRequest;
-import com.project.tour.dto.activitycruise.ActivityCruiseTourResponse;
+import com.project.tour.dto.onboard.ActivityCruiseTourConfigRequest;
+import com.project.tour.dto.onboard.ActivityCruiseTourResponse;
 import com.project.tour.model.onboard.ActivityCruise;
 import com.project.tour.model.onboard.ActivityCruiseTour;
 
