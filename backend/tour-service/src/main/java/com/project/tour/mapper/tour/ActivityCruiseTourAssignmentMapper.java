@@ -1,6 +1,6 @@
 package com.project.tour.mapper.tour;
 
-import com.project.tour.dto.operation.ActivityCruiseTourAssignmentResponse;
+import com.project.tour.dto.operation.assignment.activitycruise.ActivityCruiseTourAssignmentResponse;
 import com.project.tour.model.CruiseArea;
 import com.project.tour.model.CruiseDeck;
 import com.project.tour.model.Tour;

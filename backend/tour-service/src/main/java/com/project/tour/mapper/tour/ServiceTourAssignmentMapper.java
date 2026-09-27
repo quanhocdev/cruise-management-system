@@ -1,7 +1,7 @@
 package com.project.tour.mapper.tour;
 
-import com.project.tour.dto.operation.ServiceTourAssignmentRequest;
-import com.project.tour.dto.operation.ServiceTourAssignmentResponse;
+import com.project.tour.dto.operation.assignment.service.ServiceTourAssignmentRequest;
+import com.project.tour.dto.operation.assignment.service.ServiceTourAssignmentResponse;
 import com.project.tour.model.CruiseArea;
 import com.project.tour.model.CruiseDeck;
 import com.project.tour.model.Tour;

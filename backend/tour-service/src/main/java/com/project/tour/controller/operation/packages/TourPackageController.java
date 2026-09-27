@@ -1,8 +1,8 @@
 package com.project.tour.controller.operation.packages;
 
 import com.project.tour.dto.admin.roomtype.RoomTypeResponse;
-import com.project.tour.dto.tour.packages.TourPackageRequest;
-import com.project.tour.dto.tour.packages.TourPackageResponse;
+import com.project.tour.dto.operation.packages.TourPackageRequest;
+import com.project.tour.dto.operation.packages.TourPackageResponse;
 import com.project.tour.service.tour.TourPackageService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
