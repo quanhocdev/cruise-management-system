@@ -1,6 +1,6 @@
 package com.project.tour.controller.operation;
 
-import com.project.tour.dto.tour.operation.AssignmentServiceResponse;
+import com.project.tour.dto.operation.configured.AssignmentServiceResponse;
 import com.project.tour.service.tour.operation.OperationServiceTourService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

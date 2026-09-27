@@ -1,7 +1,7 @@
 package com.project.tour.service.tour.operation.assignment;
 
-import com.project.tour.dto.tour.operation.ProductTourAssignmentRequest;
-import com.project.tour.dto.tour.operation.ProductTourAssignmentResponse;
+import com.project.tour.dto.operation.ProductTourAssignmentRequest;
+import com.project.tour.dto.operation.ProductTourAssignmentResponse;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.tour.ProductTourAssignmentMapper;
 import com.project.tour.model.CruiseArea;

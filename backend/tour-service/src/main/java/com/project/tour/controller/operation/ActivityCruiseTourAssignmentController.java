@@ -1,7 +1,7 @@
 package com.project.tour.controller.operation;
 
-import com.project.tour.dto.tour.operation.ActivityCruiseTourAssignmentRequest;
-import com.project.tour.dto.tour.operation.ActivityCruiseTourAssignmentResponse;
+import com.project.tour.dto.operation.ActivityCruiseTourAssignmentRequest;
+import com.project.tour.dto.operation.ActivityCruiseTourAssignmentResponse;
 import com.project.tour.service.tour.operation.assignment.ActivityCruiseTourAssignmentService;
 
 import jakarta.validation.Valid;

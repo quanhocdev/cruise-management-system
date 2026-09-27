@@ -1,9 +1,9 @@
 package com.project.tour.service.tour.operation;
 
-import com.project.tour.dto.tour.operation.ActivityCruiseTourAssignmentResponse;
-import com.project.tour.dto.tour.operation.OperationTourConfigurationResponse;
-import com.project.tour.dto.tour.operation.ProductTourAssignmentResponse;
-import com.project.tour.dto.tour.operation.ServiceTourAssignmentResponse;
+import com.project.tour.dto.operation.ActivityCruiseTourAssignmentResponse;
+import com.project.tour.dto.operation.OperationTourConfigurationResponse;
+import com.project.tour.dto.operation.ProductTourAssignmentResponse;
+import com.project.tour.dto.operation.ServiceTourAssignmentResponse;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.tour.ProductTourAssignmentMapper;
 import com.project.tour.mapper.tour.ServiceTourAssignmentMapper;

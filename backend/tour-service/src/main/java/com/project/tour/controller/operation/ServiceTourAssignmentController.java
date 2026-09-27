@@ -1,7 +1,7 @@
 package com.project.tour.controller.operation;
 
-import com.project.tour.dto.tour.operation.ServiceTourAssignmentRequest;
-import com.project.tour.dto.tour.operation.ServiceTourAssignmentResponse;
+import com.project.tour.dto.operation.ServiceTourAssignmentRequest;
+import com.project.tour.dto.operation.ServiceTourAssignmentResponse;
 import com.project.tour.service.tour.operation.assignment.ServiceTourAssignmentService;
 
 import jakarta.validation.Valid;

@@ -1,6 +1,6 @@
 package com.project.tour.mapper.tour.operation;
 
-import com.project.tour.dto.tour.operation.AssignmentActivityCruiseResponse;
+import com.project.tour.dto.operation.configured.AssignmentActivityCruiseResponse;
 import com.project.tour.model.onboard.ActivityCruiseTour;
 
 public final class AssignmentActivityCruiseMapper {

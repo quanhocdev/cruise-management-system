@@ -1,6 +1,6 @@
 package com.project.tour.mapper.tour.operation;
 
-import com.project.tour.dto.tour.operation.AssignmentActivityVisitResponse;
+import com.project.tour.dto.operation.configured.AssignmentActivityVisitResponse;
 import com.project.tour.model.shore.VisitTour;
 
 public final class AssignmentActivityVisitMapper {
