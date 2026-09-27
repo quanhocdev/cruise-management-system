@@ -1,7 +1,7 @@
 package com.project.tour.controller.shore;
 
 import com.project.tour.dto.activityvisit.VisitTourResponse;
-import com.project.tour.service.activityvisit.ActivityVisitTourConfigurationService;
+import com.project.tour.service.shore.ActivityVisitTourConfigurationService;
 
 import java.util.List;
 import java.util.UUID;

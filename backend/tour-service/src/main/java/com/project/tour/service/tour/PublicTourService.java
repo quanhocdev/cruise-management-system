@@ -9,7 +9,6 @@ import com.project.tour.model.shore.VisitTour;
 import com.project.tour.model.enums.tour.TourBookingStatus;
 import com.project.tour.model.enums.tour.TourStatusTrip;
 import com.project.tour.model.onboard.ActivityCruiseTour;
-import com.project.tour.repository.activitycruise.ActivityCruiseTourAssignmentRepository;
 import com.project.tour.repository.tour.*;
 import com.project.tour.repository.tour.schedule.ScheduleRepository;
 import com.project.tour.repository.tour.schedule.ScheduleStopRepository;
@@ -20,6 +19,7 @@ import com.project.tour.model.convenience.product.ProductTour;
 import com.project.tour.model.convenience.service.ServiceTour;
 import com.project.tour.repository.convenience.ProductTourRepository;
 import com.project.tour.repository.convenience.ServiceTourRepository;
+import com.project.tour.repository.onboard.ActivityCruiseTourAssignmentRepository;
 import com.project.tour.repository.shore.VisitTourRepository;
 
 import java.math.BigDecimal;

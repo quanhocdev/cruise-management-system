@@ -23,8 +23,8 @@ import com.project.tour.repository.tour.TourPackageRepository;
 import com.project.tour.repository.tour.TourRepository;
 import com.project.tour.repository.tour.schedule.ScheduleRepository;
 import com.project.tour.repository.tour.schedule.ScheduleStopRepository;
-import com.project.tour.service.activityvisit.VisitTourService;
 import com.project.tour.service.redis.TourRedisService;
+import com.project.tour.service.shore.VisitTourService;
 
 import java.util.Map;
 import org.springframework.http.HttpStatus;

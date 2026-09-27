@@ -4,8 +4,8 @@ import com.project.tour.dto.activityvisit.CreateVisitTourRequest;
 import com.project.tour.dto.activityvisit.TourVisitSyncResponse;
 import com.project.tour.dto.activityvisit.UpdateVisitTourRequest;
 import com.project.tour.dto.activityvisit.VisitTourResponse;
-import com.project.tour.service.activityvisit.VisitTourMasterService;
-import com.project.tour.service.activityvisit.VisitTourService;
+import com.project.tour.service.shore.VisitTourMasterService;
+import com.project.tour.service.shore.VisitTourService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

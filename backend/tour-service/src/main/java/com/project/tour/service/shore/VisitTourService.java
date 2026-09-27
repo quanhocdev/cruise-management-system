@@ -1,5 +1,5 @@
 
-package com.project.tour.service.activityvisit;
+package com.project.tour.service.shore;
 
 import com.project.tour.dto.activityvisit.CreateVisitTourRequest;
 import com.project.tour.dto.activityvisit.UpdateVisitTourRequest;

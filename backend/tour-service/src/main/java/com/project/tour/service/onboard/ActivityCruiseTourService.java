@@ -6,7 +6,7 @@ import com.project.tour.mapper.activitycruise.ActivityCruiseTourMapper;
 import com.project.tour.model.enums.tour.TourStatusTrip;
 import com.project.tour.model.onboard.ActivityCruiseTour;
 import com.project.tour.model.onboard.enums.ActivityCruiseTourStatus;
-import com.project.tour.repository.activitycruise.ActivityCruiseTourAssignmentRepository;
+import com.project.tour.repository.onboard.ActivityCruiseTourAssignmentRepository;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

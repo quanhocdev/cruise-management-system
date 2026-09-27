@@ -1,4 +1,4 @@
-package com.project.tour.service.activityvisit;
+package com.project.tour.service.shore;
 
 import com.project.tour.dto.activityvisit.TourVisitSyncResponse;
 import com.project.tour.exception.AppException;

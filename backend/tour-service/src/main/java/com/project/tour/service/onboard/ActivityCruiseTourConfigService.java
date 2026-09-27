@@ -8,8 +8,8 @@ import com.project.tour.model.onboard.ActivityCruise;
 import com.project.tour.model.onboard.ActivityCruiseTour;
 import com.project.tour.model.onboard.enums.ActivityCruiseStatus;
 import com.project.tour.model.onboard.enums.ActivityCruiseTourStatus;
-import com.project.tour.repository.activitycruise.ActivityCruiseRepository;
-import com.project.tour.repository.activitycruise.ActivityCruiseTourAssignmentRepository;
+import com.project.tour.repository.onboard.ActivityCruiseRepository;
+import com.project.tour.repository.onboard.ActivityCruiseTourAssignmentRepository;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

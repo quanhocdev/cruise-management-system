@@ -6,8 +6,7 @@ import com.project.tour.dto.activitycruise.UpdateActivityCruiseRequest;
 import com.project.tour.mapper.activitycruise.ActivityCruiseMapper;
 import com.project.tour.model.onboard.ActivityCruise;
 import com.project.tour.model.onboard.enums.ActivityCruiseStatus;
-import com.project.tour.repository.activitycruise.ActivityCruiseRepository;
-
+import com.project.tour.repository.onboard.ActivityCruiseRepository;
 import com.project.common.dto.UploadResult;
 import com.project.common.service.file.FileStorageService;
 

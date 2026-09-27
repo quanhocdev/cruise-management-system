@@ -2,7 +2,7 @@ package com.project.tour.service.tour.operation;
 
 import com.project.tour.dto.tour.operation.AssignmentActivityCruiseResponse;
 import com.project.tour.mapper.tour.operation.AssignmentActivityCruiseMapper;
-import com.project.tour.repository.activitycruise.ActivityCruiseTourAssignmentRepository;
+import com.project.tour.repository.onboard.ActivityCruiseTourAssignmentRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

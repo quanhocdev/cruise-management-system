@@ -2,8 +2,8 @@ package com.project.tour.service.passenger;
 
 import com.project.tour.model.shore.VisitTour;
 import com.project.tour.model.onboard.ActivityCruiseTour;
-import com.project.tour.repository.activitycruise.ActivityCruiseTourAssignmentRepository;
 import com.project.tour.repository.cruise.CruiseAreaRepository;
+import com.project.tour.repository.onboard.ActivityCruiseTourAssignmentRepository;
 import com.project.tour.repository.shore.VisitTourRepository;
 import com.project.tour.repository.tour.schedule.ScheduleStopRepository;
 

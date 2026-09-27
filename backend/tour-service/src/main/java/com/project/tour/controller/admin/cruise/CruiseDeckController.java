@@ -1,4 +1,4 @@
-package com.project.tour.controller.cruise;
+package com.project.tour.controller.admin.cruise;
 
 import com.project.tour.dto.cruise.deck.CreateCruiseDeckRequest;
 import com.project.tour.dto.cruise.deck.CruiseDeckResponse;
