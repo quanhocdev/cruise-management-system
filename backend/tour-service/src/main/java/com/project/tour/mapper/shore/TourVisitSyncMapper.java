@@ -1,3 +1,4 @@
+package com.project.tour.mapper.shore;
 // package com.project.tour.mapper.activityvisit;
 
 // import com.project.tour.dto.activityvisit.TourVisitSyncResponse;

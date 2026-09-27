@@ -1,7 +1,7 @@
 package com.project.tour.service.convenience.product;
 
 import com.project.tour.dto.convenience.product.convenience.ProductConvenienceResponse;
-import com.project.tour.mapper.convenience.ProductMapper;
+import com.project.tour.mapper.admin.product.ProductMapper;
 import com.project.tour.model.convenience.enums.ProductStatus;
 import com.project.tour.model.convenience.product.Product;
 import com.project.tour.repository.convenience.ProductRepository;

@@ -1,4 +1,4 @@
-package com.project.tour.mapper.activityvisit;
+package com.project.tour.mapper.shore;
 
 import com.project.tour.dto.shore.ShoreTourConfigurationResponse;
 import com.project.tour.model.shore.VisitTour;

@@ -6,7 +6,7 @@ import com.project.tour.dto.admin.service.CreateServiceRequest;
 import com.project.tour.dto.admin.service.ServiceResponse;
 import com.project.tour.dto.admin.service.UpdateServiceRequest;
 import com.project.tour.exception.AppException;
-import com.project.tour.mapper.convenience.ServiceMapper;
+import com.project.tour.mapper.admin.service.ServiceMapper;
 import com.project.tour.model.convenience.enums.ServiceStatus;
 import com.project.tour.model.convenience.service.Service;
 import com.project.tour.repository.convenience.ServiceRepository;

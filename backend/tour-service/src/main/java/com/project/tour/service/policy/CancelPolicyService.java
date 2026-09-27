@@ -4,7 +4,7 @@ import com.project.tour.dto.admin.policy.cancel.CancelPolicyResponse;
 import com.project.tour.dto.admin.policy.cancel.CreateCancelPolicyRequest;
 import com.project.tour.dto.admin.policy.cancel.UpdateCancelPolicyRequest;
 import com.project.tour.exception.AppException;
-import com.project.tour.mapper.policy.CancelPolicyMapper;
+import com.project.tour.mapper.admin.policy.CancelPolicyMapper;
 import com.project.tour.model.CancelPolicy;
 import com.project.tour.model.Policy;
 import com.project.tour.model.enums.policy.PolicyType;

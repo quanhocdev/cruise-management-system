@@ -4,7 +4,7 @@ import com.project.tour.dto.admin.cruise.deck.CreateCruiseDeckRequest;
 import com.project.tour.dto.admin.cruise.deck.CruiseDeckResponse;
 import com.project.tour.dto.admin.cruise.deck.UpdateCruiseDeckRequest;
 import com.project.tour.exception.AppException;
-import com.project.tour.mapper.cruise.CruiseDeckMapper;
+import com.project.tour.mapper.admin.cruise.CruiseDeckMapper;
 import com.project.tour.model.Cruise;
 import com.project.tour.model.CruiseDeck;
 import com.project.tour.model.enums.cruise.CruiseDeckStatus;

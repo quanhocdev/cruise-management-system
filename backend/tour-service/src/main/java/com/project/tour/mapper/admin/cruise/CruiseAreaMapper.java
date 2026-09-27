@@ -1,4 +1,4 @@
-package com.project.tour.mapper.cruise;
+package com.project.tour.mapper.admin.cruise;
 
 import com.project.tour.dto.admin.cruise.area.CreateCruiseAreaRequest;
 import com.project.tour.dto.admin.cruise.area.CruiseAreaResponse;

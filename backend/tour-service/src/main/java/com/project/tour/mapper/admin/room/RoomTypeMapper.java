@@ -1,4 +1,4 @@
-package com.project.tour.mapper.room;
+package com.project.tour.mapper.admin.room;
 
 import com.project.tour.dto.admin.roomtype.CreateRoomTypeRequest;
 import com.project.tour.dto.admin.roomtype.RoomTypeResponse;

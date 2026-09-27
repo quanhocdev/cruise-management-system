@@ -1,4 +1,4 @@
-package com.project.tour.mapper.convenience;
+package com.project.tour.mapper.admin.service;
 
 import com.project.tour.dto.admin.service.CreateServiceRequest;
 import com.project.tour.dto.admin.service.ServiceResponse;

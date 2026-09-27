@@ -1,4 +1,4 @@
-package com.project.tour.mapper.port;
+package com.project.tour.mapper.admin.port;
 
 import com.project.tour.dto.admin.port.CreatePortRequest;
 import com.project.tour.dto.admin.port.PortResponse;

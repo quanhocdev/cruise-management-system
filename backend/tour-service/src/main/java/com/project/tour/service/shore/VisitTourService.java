@@ -5,7 +5,7 @@ import com.project.tour.dto.shore.CreateVisitTourRequest;
 import com.project.tour.dto.shore.UpdateVisitTourRequest;
 import com.project.tour.dto.shore.VisitTourResponse;
 import com.project.tour.exception.AppException;
-import com.project.tour.mapper.activityvisit.VisitTourMapper;
+import com.project.tour.mapper.shore.VisitTourMapper;
 import com.project.tour.model.shore.VisitTour;
 import com.project.tour.model.shore.enums.VisitTourStatus;
 import com.project.tour.repository.shore.VisitTourRepository;

@@ -1,4 +1,4 @@
-package com.project.tour.mapper.convenience;
+package com.project.tour.mapper.admin.product;
 
 import com.project.tour.dto.admin.product.CreateProductRequest;
 import com.project.tour.dto.admin.product.ProductResponse;

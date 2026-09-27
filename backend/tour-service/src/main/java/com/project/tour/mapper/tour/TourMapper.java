@@ -20,10 +20,8 @@ public final class TourMapper {
                 tour.setCode(request.code());
                 tour.setName(request.name());
                 tour.setDescription(request.description());
-
                 tour.setStartDate(request.startDate());
                 tour.setEndDate(request.endDate());
-
                 return tour;
         }
 

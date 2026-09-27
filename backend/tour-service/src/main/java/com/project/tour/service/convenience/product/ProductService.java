@@ -6,7 +6,7 @@ import com.project.tour.dto.admin.product.CreateProductRequest;
 import com.project.tour.dto.admin.product.ProductResponse;
 import com.project.tour.dto.admin.product.UpdateProductRequest;
 import com.project.tour.exception.AppException;
-import com.project.tour.mapper.convenience.ProductMapper;
+import com.project.tour.mapper.admin.product.ProductMapper;
 import com.project.tour.model.convenience.enums.ProductStatus;
 import com.project.tour.model.convenience.product.Product;
 import com.project.tour.repository.convenience.ProductRepository;

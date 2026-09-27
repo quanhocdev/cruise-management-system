@@ -1,4 +1,4 @@
-package com.project.tour.mapper.policy;
+package com.project.tour.mapper.admin.policy;
 
 import com.project.tour.dto.admin.policy.cancel.CancelPolicyResponse;
 import com.project.tour.dto.admin.policy.cancel.CreateCancelPolicyRequest;

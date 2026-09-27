@@ -1,6 +1,5 @@
 package com.project.tour.service.onboard;
 
-import com.project.tour.mapper.activitycruise.ActivityCruiseMapper;
 import com.project.tour.model.onboard.ActivityCruise;
 import com.project.tour.model.onboard.enums.ActivityCruiseStatus;
 import com.project.tour.repository.onboard.ActivityCruiseRepository;
@@ -10,6 +9,7 @@ import com.project.tour.dto.onboard.ActivityCruiseResponse;
 import com.project.tour.dto.onboard.CreateActivityCruiseRequest;
 import com.project.tour.dto.onboard.UpdateActivityCruiseRequest;
 import com.project.tour.exception.AppException;
+import com.project.tour.mapper.onboard.ActivityCruiseMapper;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

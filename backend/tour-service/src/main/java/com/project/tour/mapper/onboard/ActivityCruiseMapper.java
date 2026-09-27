@@ -1,4 +1,4 @@
-package com.project.tour.mapper.activitycruise;
+package com.project.tour.mapper.onboard;
 
 import com.project.tour.dto.onboard.ActivityCruiseResponse;
 import com.project.tour.dto.onboard.CreateActivityCruiseRequest;

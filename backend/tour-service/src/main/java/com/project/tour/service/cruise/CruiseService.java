@@ -6,7 +6,7 @@ import com.project.tour.dto.admin.cruise.CreateCruiseRequest;
 import com.project.tour.dto.admin.cruise.CruiseResponse;
 import com.project.tour.dto.admin.cruise.UpdateCruiseRequest;
 import com.project.tour.exception.AppException;
-import com.project.tour.mapper.cruise.CruiseMapper;
+import com.project.tour.mapper.admin.cruise.CruiseMapper;
 import com.project.tour.model.Cruise;
 import com.project.tour.model.enums.cruise.CruiseStatus;
 import com.project.tour.repository.cruise.CruiseRepository;

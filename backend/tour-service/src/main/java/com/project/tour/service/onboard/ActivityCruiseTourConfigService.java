@@ -3,7 +3,7 @@ package com.project.tour.service.onboard;
 import com.project.tour.dto.onboard.ActivityCruiseTourConfigRequest;
 import com.project.tour.dto.onboard.ActivityCruiseTourResponse;
 import com.project.tour.exception.AppException;
-import com.project.tour.mapper.activitycruise.ActivityCruiseTourMapper;
+import com.project.tour.mapper.onboard.ActivityCruiseTourMapper;
 import com.project.tour.model.onboard.ActivityCruise;
 import com.project.tour.model.onboard.ActivityCruiseTour;
 import com.project.tour.model.onboard.enums.ActivityCruiseStatus;
