@@ -1,8 +1,8 @@
 package com.project.tour.mapper.port;
 
-import com.project.tour.dto.port.CreatePortRequest;
-import com.project.tour.dto.port.PortResponse;
-import com.project.tour.dto.port.UpdatePortRequest;
+import com.project.tour.dto.admin.port.CreatePortRequest;
+import com.project.tour.dto.admin.port.PortResponse;
+import com.project.tour.dto.admin.port.UpdatePortRequest;
 import com.project.tour.model.Port;
 import org.springframework.stereotype.Component;
 

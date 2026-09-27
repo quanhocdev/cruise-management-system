@@ -1,4 +1,4 @@
-package com.project.tour.dto.policy.cancel;
+package com.project.tour.dto.admin.policy.cancel;
 
 import java.math.BigDecimal;
 import java.util.UUID;

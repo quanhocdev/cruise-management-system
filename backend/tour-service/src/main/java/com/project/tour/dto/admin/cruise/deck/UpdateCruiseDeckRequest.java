@@ -1,4 +1,4 @@
-package com.project.tour.dto.cruise.deck;
+package com.project.tour.dto.admin.cruise.deck;
 
 import com.project.tour.model.enums.cruise.CruiseDeckStatus;
 

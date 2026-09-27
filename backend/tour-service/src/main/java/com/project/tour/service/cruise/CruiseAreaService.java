@@ -2,9 +2,9 @@ package com.project.tour.service.cruise;
 
 import com.project.common.dto.UploadResult;
 import com.project.common.service.file.FileStorageService;
-import com.project.tour.dto.cruise.area.CreateCruiseAreaRequest;
-import com.project.tour.dto.cruise.area.CruiseAreaResponse;
-import com.project.tour.dto.cruise.area.UpdateCruiseAreaRequest;
+import com.project.tour.dto.admin.cruise.area.CreateCruiseAreaRequest;
+import com.project.tour.dto.admin.cruise.area.CruiseAreaResponse;
+import com.project.tour.dto.admin.cruise.area.UpdateCruiseAreaRequest;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.cruise.CruiseAreaMapper;
 import com.project.tour.model.CruiseArea;

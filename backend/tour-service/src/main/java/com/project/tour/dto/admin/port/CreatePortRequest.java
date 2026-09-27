@@ -1,6 +1,5 @@
-package com.project.tour.dto.port;
+package com.project.tour.dto.admin.port;
 
-import com.project.tour.model.enums.PortStatus;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -9,7 +8,7 @@ import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 
-public class UpdatePortRequest {
+public class CreatePortRequest {
 
     @NotBlank(message = "Port name is required")
     @Size(max = 150, message = "Port name must not exceed 150 characters")
@@ -28,10 +27,7 @@ public class UpdatePortRequest {
     @Size(max = 1000, message = "Description must not exceed 1000 characters")
     private String description;
 
-    @NotNull(message = "Port status is required")
-    private PortStatus status;
-
-    public UpdatePortRequest() {
+    public CreatePortRequest() {
     }
 
     public String getName() {
@@ -64,13 +60,5 @@ public class UpdatePortRequest {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public PortStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(PortStatus status) {
-        this.status = status;
     }
 }

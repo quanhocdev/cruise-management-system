@@ -2,9 +2,9 @@ package com.project.tour.service.port;
 
 import com.project.common.dto.location.AddressResponse;
 import com.project.common.service.location.GeocodingService;
-import com.project.tour.dto.port.CreatePortRequest;
-import com.project.tour.dto.port.PortResponse;
-import com.project.tour.dto.port.UpdatePortRequest;
+import com.project.tour.dto.admin.port.CreatePortRequest;
+import com.project.tour.dto.admin.port.PortResponse;
+import com.project.tour.dto.admin.port.UpdatePortRequest;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.port.PortMapper;
 import com.project.tour.model.Port;

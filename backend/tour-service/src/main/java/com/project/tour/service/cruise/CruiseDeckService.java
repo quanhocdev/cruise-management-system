@@ -1,8 +1,8 @@
 package com.project.tour.service.cruise;
 
-import com.project.tour.dto.cruise.deck.CreateCruiseDeckRequest;
-import com.project.tour.dto.cruise.deck.CruiseDeckResponse;
-import com.project.tour.dto.cruise.deck.UpdateCruiseDeckRequest;
+import com.project.tour.dto.admin.cruise.deck.CreateCruiseDeckRequest;
+import com.project.tour.dto.admin.cruise.deck.CruiseDeckResponse;
+import com.project.tour.dto.admin.cruise.deck.UpdateCruiseDeckRequest;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.cruise.CruiseDeckMapper;
 import com.project.tour.model.Cruise;

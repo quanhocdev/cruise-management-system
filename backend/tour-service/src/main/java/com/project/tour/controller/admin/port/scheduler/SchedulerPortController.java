@@ -1,6 +1,6 @@
 package com.project.tour.controller.admin.port.scheduler;
 
-import com.project.tour.dto.port.PortResponse;
+import com.project.tour.dto.admin.port.PortResponse;
 import com.project.tour.service.port.PortService;
 
 import org.springframework.http.ResponseEntity;

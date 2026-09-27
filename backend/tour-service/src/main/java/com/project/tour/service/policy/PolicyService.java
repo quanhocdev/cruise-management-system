@@ -1,8 +1,8 @@
 package com.project.tour.service.policy;
 
-import com.project.tour.dto.policy.CreatePolicyRequest;
-import com.project.tour.dto.policy.PolicyResponse;
-import com.project.tour.dto.policy.UpdatePolicyRequest;
+import com.project.tour.dto.admin.policy.CreatePolicyRequest;
+import com.project.tour.dto.admin.policy.PolicyResponse;
+import com.project.tour.dto.admin.policy.UpdatePolicyRequest;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.policy.PolicyMapper;
 import com.project.tour.model.Policy;

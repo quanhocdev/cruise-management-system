@@ -1,8 +1,8 @@
 package com.project.tour.controller.admin.policy;
 
-import com.project.tour.dto.policy.booking.BookingPolicyResponse;
-import com.project.tour.dto.policy.booking.CreateBookingPolicyRequest;
-import com.project.tour.dto.policy.booking.UpdateBookingPolicyRequest;
+import com.project.tour.dto.admin.policy.booking.BookingPolicyResponse;
+import com.project.tour.dto.admin.policy.booking.CreateBookingPolicyRequest;
+import com.project.tour.dto.admin.policy.booking.UpdateBookingPolicyRequest;
 import com.project.tour.service.policy.BookingPolicyService;
 
 import jakarta.validation.Valid;

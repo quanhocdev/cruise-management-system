@@ -1,6 +1,6 @@
 package com.project.tour.service.tour.operation;
 
-import com.project.tour.dto.cruise.CruiseAvailabilityResponse;
+import com.project.tour.dto.admin.cruise.CruiseAvailabilityResponse;
 import com.project.tour.exception.AppException;
 import com.project.tour.model.Cruise;
 import com.project.tour.model.Tour;
@@ -20,112 +20,112 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class OperationCruiseAvailabilityService {
 
-    private final TourRepository tourRepository;
-    private final CruiseRepository cruiseRepository;
+        private final TourRepository tourRepository;
+        private final CruiseRepository cruiseRepository;
 
-    public OperationCruiseAvailabilityService(
-            TourRepository tourRepository,
-            CruiseRepository cruiseRepository) {
+        public OperationCruiseAvailabilityService(
+                        TourRepository tourRepository,
+                        CruiseRepository cruiseRepository) {
 
-        this.tourRepository = tourRepository;
-        this.cruiseRepository = cruiseRepository;
-    }
-
-    /**
-     * Lấy danh sách Cruise và kiểm tra khả dụng cho Tour.
-     */
-    public List<CruiseAvailabilityResponse> getAvailableCruises(
-            UUID tourId) {
-
-        Tour tour = tourRepository.findById(tourId)
-                .orElseThrow(() -> new AppException(
-                        "Tour not found",
-                        HttpStatus.NOT_FOUND));
-
-        if (tour.getStatusTrip() != TourStatusTrip.APPROVAL_PENDING) {
-            throw new AppException(
-                    "Tour is not waiting for approval",
-                    HttpStatus.BAD_REQUEST);
+                this.tourRepository = tourRepository;
+                this.cruiseRepository = cruiseRepository;
         }
 
-        List<Cruise> allCruises = cruiseRepository.findAll();
+        /**
+         * Lấy danh sách Cruise và kiểm tra khả dụng cho Tour.
+         */
+        public List<CruiseAvailabilityResponse> getAvailableCruises(
+                        UUID tourId) {
 
-        return allCruises.stream()
-                .map(cruise -> buildAvailabilityResponse(
-                        cruise,
-                        tour))
-                .toList();
-    }
+                Tour tour = tourRepository.findById(tourId)
+                                .orElseThrow(() -> new AppException(
+                                                "Tour not found",
+                                                HttpStatus.NOT_FOUND));
 
-    /**
-     * Kiểm tra một Cruise có bị trùng lịch với Tour khác hay không.
-     */
-    private List<Tour> findConflictingTours(
-            UUID cruiseId,
-            LocalDate startDate,
-            LocalDate endDate) {
+                if (tour.getStatusTrip() != TourStatusTrip.APPROVAL_PENDING) {
+                        throw new AppException(
+                                        "Tour is not waiting for approval",
+                                        HttpStatus.BAD_REQUEST);
+                }
 
-        return tourRepository.findConflictingTours(
-                cruiseId,
-                List.of(
-                        TourStatusTrip.APPROVED,
-                        TourStatusTrip.IN_PROGRESS),
-                startDate,
-                endDate);
-    }
+                List<Cruise> allCruises = cruiseRepository.findAll();
 
-    /**
-     * Tạo response trạng thái khả dụng của một Cruise.
-     */
-    private CruiseAvailabilityResponse buildAvailabilityResponse(
-            Cruise cruise,
-            Tour tour) {
-
-        // Cruise không ACTIVE
-        if (cruise.getStatus() != CruiseStatus.ACTIVE) {
-
-            return new CruiseAvailabilityResponse(
-                    cruise.getId(),
-                    cruise.getCode(),
-                    cruise.getName(),
-                    cruise.getStatus(),
-                    false,
-                    "Du thuyền đang ở trạng thái: "
-                            + cruise.getStatus().name(),
-                    List.of());
+                return allCruises.stream()
+                                .map(cruise -> buildAvailabilityResponse(
+                                                cruise,
+                                                tour))
+                                .toList();
         }
 
-        // Tìm các Tour bị trùng lịch
-        List<Tour> conflictingTours = findConflictingTours(
-                cruise.getId(),
-                tour.getStartDate(),
-                tour.getEndDate());
+        /**
+         * Kiểm tra một Cruise có bị trùng lịch với Tour khác hay không.
+         */
+        private List<Tour> findConflictingTours(
+                        UUID cruiseId,
+                        LocalDate startDate,
+                        LocalDate endDate) {
 
-        List<CruiseAvailabilityResponse.ConflictingTourInfo> conflictInfos = conflictingTours.stream()
-                .filter(t -> !t.getId().equals(tour.getId()))
-                .map(t -> new CruiseAvailabilityResponse.ConflictingTourInfo(
-                        t.getId(),
-                        t.getCode(),
-                        t.getName(),
-                        t.getStartDate(),
-                        t.getEndDate()))
-                .toList();
+                return tourRepository.findConflictingTours(
+                                cruiseId,
+                                List.of(
+                                                TourStatusTrip.APPROVED,
+                                                TourStatusTrip.IN_PROGRESS),
+                                startDate,
+                                endDate);
+        }
 
-        boolean isAvailable = conflictInfos.isEmpty();
+        /**
+         * Tạo response trạng thái khả dụng của một Cruise.
+         */
+        private CruiseAvailabilityResponse buildAvailabilityResponse(
+                        Cruise cruise,
+                        Tour tour) {
 
-        String reason = isAvailable
-                ? "Khả dụng"
-                : "Trùng lịch với "
-                        + conflictInfos.size()
-                        + " Tour khác";
+                // Cruise không ACTIVE
+                if (cruise.getStatus() != CruiseStatus.ACTIVE) {
 
-        return new CruiseAvailabilityResponse(
-                cruise.getId(),
-                cruise.getCode(),
-                cruise.getName(),
-                cruise.getStatus(),
-                isAvailable,
-                reason,
-                conflictInfos);
-    }
+                        return new CruiseAvailabilityResponse(
+                                        cruise.getId(),
+                                        cruise.getCode(),
+                                        cruise.getName(),
+                                        cruise.getStatus(),
+                                        false,
+                                        "Du thuyền đang ở trạng thái: "
+                                                        + cruise.getStatus().name(),
+                                        List.of());
+                }
+
+                // Tìm các Tour bị trùng lịch
+                List<Tour> conflictingTours = findConflictingTours(
+                                cruise.getId(),
+                                tour.getStartDate(),
+                                tour.getEndDate());
+
+                List<CruiseAvailabilityResponse.ConflictingTourInfo> conflictInfos = conflictingTours.stream()
+                                .filter(t -> !t.getId().equals(tour.getId()))
+                                .map(t -> new CruiseAvailabilityResponse.ConflictingTourInfo(
+                                                t.getId(),
+                                                t.getCode(),
+                                                t.getName(),
+                                                t.getStartDate(),
+                                                t.getEndDate()))
+                                .toList();
+
+                boolean isAvailable = conflictInfos.isEmpty();
+
+                String reason = isAvailable
+                                ? "Khả dụng"
+                                : "Trùng lịch với "
+                                                + conflictInfos.size()
+                                                + " Tour khác";
+
+                return new CruiseAvailabilityResponse(
+                                cruise.getId(),
+                                cruise.getCode(),
+                                cruise.getName(),
+                                cruise.getStatus(),
+                                isAvailable,
+                                reason,
+                                conflictInfos);
+        }
 }

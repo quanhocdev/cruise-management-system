@@ -1,4 +1,4 @@
-package com.project.tour.dto.port;
+package com.project.tour.dto.admin.port;
 
 import com.project.tour.model.enums.PortStatus;
 

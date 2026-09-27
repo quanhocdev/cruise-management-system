@@ -1,4 +1,4 @@
-package com.project.tour.dto.cruise;
+package com.project.tour.dto.admin.cruise;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

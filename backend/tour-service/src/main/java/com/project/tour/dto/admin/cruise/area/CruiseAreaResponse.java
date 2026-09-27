@@ -1,4 +1,4 @@
-package com.project.tour.dto.cruise.area;
+package com.project.tour.dto.admin.cruise.area;
 
 import java.util.UUID;
 

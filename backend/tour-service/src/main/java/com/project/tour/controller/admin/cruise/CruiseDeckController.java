@@ -1,8 +1,8 @@
 package com.project.tour.controller.admin.cruise;
 
-import com.project.tour.dto.cruise.deck.CreateCruiseDeckRequest;
-import com.project.tour.dto.cruise.deck.CruiseDeckResponse;
-import com.project.tour.dto.cruise.deck.UpdateCruiseDeckRequest;
+import com.project.tour.dto.admin.cruise.deck.CreateCruiseDeckRequest;
+import com.project.tour.dto.admin.cruise.deck.CruiseDeckResponse;
+import com.project.tour.dto.admin.cruise.deck.UpdateCruiseDeckRequest;
 import com.project.tour.service.cruise.CruiseDeckService;
 
 import jakarta.validation.Valid;

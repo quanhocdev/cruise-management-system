@@ -1,4 +1,4 @@
-package com.project.tour.dto.policy.booking;
+package com.project.tour.dto.admin.policy.booking;
 
 import java.math.BigDecimal;
 import java.util.UUID;

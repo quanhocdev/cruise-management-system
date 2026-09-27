@@ -1,8 +1,8 @@
 package com.project.tour.service.policy;
 
-import com.project.tour.dto.policy.cancel.CancelPolicyResponse;
-import com.project.tour.dto.policy.cancel.CreateCancelPolicyRequest;
-import com.project.tour.dto.policy.cancel.UpdateCancelPolicyRequest;
+import com.project.tour.dto.admin.policy.cancel.CancelPolicyResponse;
+import com.project.tour.dto.admin.policy.cancel.CreateCancelPolicyRequest;
+import com.project.tour.dto.admin.policy.cancel.UpdateCancelPolicyRequest;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.policy.CancelPolicyMapper;
 import com.project.tour.model.CancelPolicy;

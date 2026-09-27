@@ -1,4 +1,4 @@
-package com.project.tour.dto.cruise.deck;
+package com.project.tour.dto.admin.cruise.deck;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;

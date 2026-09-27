@@ -1,8 +1,8 @@
 package com.project.tour.mapper.cruise;
 
-import com.project.tour.dto.cruise.area.CreateCruiseAreaRequest;
-import com.project.tour.dto.cruise.area.CruiseAreaResponse;
-import com.project.tour.dto.cruise.area.UpdateCruiseAreaRequest;
+import com.project.tour.dto.admin.cruise.area.CreateCruiseAreaRequest;
+import com.project.tour.dto.admin.cruise.area.CruiseAreaResponse;
+import com.project.tour.dto.admin.cruise.area.UpdateCruiseAreaRequest;
 import com.project.tour.model.CruiseArea;
 
 public class CruiseAreaMapper {

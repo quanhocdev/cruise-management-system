@@ -1,4 +1,4 @@
-package com.project.tour.dto.policy.booking;
+package com.project.tour.dto.admin.policy.booking;
 
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -7,7 +7,9 @@ import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 
-public class CreateBookingPolicyRequest {
+import com.project.tour.model.enums.policy.PolicyStatus;
+
+public class UpdateBookingPolicyRequest {
 
     @NotNull(message = "Days before departure is required")
     @Min(value = 0, message = "Days before departure must be non-negative")
@@ -17,6 +19,9 @@ public class CreateBookingPolicyRequest {
     @DecimalMin(value = "0.00", message = "Discount percent must be at least 0")
     @DecimalMax(value = "100.00", message = "Discount percent must not exceed 100")
     private BigDecimal discountPercent;
+
+    @NotNull(message = "Policy status is required")
+    private PolicyStatus status;
 
     public Integer getDaysBeforeDeparture() {
         return daysBeforeDeparture;
@@ -32,5 +37,13 @@ public class CreateBookingPolicyRequest {
 
     public void setDiscountPercent(BigDecimal discountPercent) {
         this.discountPercent = discountPercent;
+    }
+
+    public PolicyStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(PolicyStatus status) {
+        this.status = status;
     }
 }

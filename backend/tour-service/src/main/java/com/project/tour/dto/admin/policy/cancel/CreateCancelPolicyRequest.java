@@ -1,4 +1,4 @@
-package com.project.tour.dto.policy.cancel;
+package com.project.tour.dto.admin.policy.cancel;
 
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;

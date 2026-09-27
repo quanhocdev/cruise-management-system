@@ -1,14 +1,12 @@
-package com.project.tour.dto.policy;
+package com.project.tour.dto.admin.policy;
 
-import com.project.tour.model.enums.policy.PolicyType;
+import com.project.tour.model.enums.policy.PolicyStatus;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-public class CreatePolicyRequest {
-
-    @NotNull(message = "Policy type is required")
-    private PolicyType type;
+public class UpdatePolicyRequest {
 
     @NotBlank(message = "Policy title is required")
     @Size(max = 200, message = "Policy title must not exceed 200 characters")
@@ -17,13 +15,8 @@ public class CreatePolicyRequest {
     @NotBlank(message = "Policy content is required")
     private String content;
 
-    public PolicyType getType() {
-        return type;
-    }
-
-    public void setType(PolicyType type) {
-        this.type = type;
-    }
+    @NotNull(message = "Policy status is required")
+    private PolicyStatus status;
 
     public String getTitle() {
         return title;
@@ -39,5 +32,13 @@ public class CreatePolicyRequest {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public PolicyStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(PolicyStatus status) {
+        this.status = status;
     }
 }
