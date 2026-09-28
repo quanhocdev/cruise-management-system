@@ -38,10 +38,18 @@ fun PosManualEntryScreen(
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        TextButton(onClick = onBackClick, enabled = !saving) { Text("← Quay lại Finance POS") }
-        Text("Nhập mã booking", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        TextButton(onClick = onBackClick, enabled = !saving) { Text("← Quay lại POS") }
         Text(
-            "Nhập nguyên mã định danh in dưới QR hoặc trong email của hành khách.",
+            if (role == PosRole.ONBOARD) "Nhập mã vé khách" else "Nhập mã booking",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            if (role == PosRole.ONBOARD) {
+                "Nhập nguyên nội dung QR trên vé. Tính năng này dùng để kiểm thử trên máy ảo hoặc khi camera không đọc được mã."
+            } else {
+                "Nhập nguyên mã định danh in dưới QR hoặc trong email của hành khách."
+            },
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         OutlinedTextField(
@@ -51,8 +59,8 @@ fun PosManualEntryScreen(
                 error = null
             },
             modifier = Modifier.fillMaxWidth(),
-            label = { Text("Mã booking") },
-            placeholder = { Text("Mã trong email xác nhận") },
+            label = { Text(if (role == PosRole.ONBOARD) "Mã QR vé" else "Mã booking") },
+            placeholder = { Text(if (role == PosRole.ONBOARD) "Nội dung in dưới QR" else "Mã trong email xác nhận") },
             enabled = !saving,
             minLines = 2,
             shape = RoundedCornerShape(16.dp)
@@ -85,10 +93,14 @@ fun PosManualEntryScreen(
                 CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
                 Spacer(Modifier.width(8.dp))
             }
-            Text("Gửi mã booking")
+            Text(if (role == PosRole.ONBOARD) "Kiểm tra mã vé" else "Gửi mã booking")
         }
         Text(
-            "Mã được lưu trên thiết bị trước khi gửi. Hoàn tất thủ tục tại quầy lễ tân sau khi gửi mã.",
+            if (role == PosRole.ONBOARD) {
+                "Mã được lưu trên thiết bị. Chưa được coi là đã lên tàu cho đến khi backend xác nhận thành công."
+            } else {
+                "Mã được lưu trên thiết bị trước khi gửi. Hoàn tất thủ tục tại quầy lễ tân sau khi gửi mã."
+            },
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

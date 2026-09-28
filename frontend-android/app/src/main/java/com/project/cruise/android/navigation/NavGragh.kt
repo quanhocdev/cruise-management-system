@@ -55,12 +55,16 @@ import com.project.cruise.android.ui.screens.pos.NfcScanScreen
 import com.project.cruise.android.ui.screens.pos.PosHistoryScreen
 import com.project.cruise.android.ui.screens.pos.PosIdentityScreen
 import com.project.cruise.android.ui.screens.pos.ConvenienceCustomerScreen
+import com.project.cruise.android.ui.screens.pos.OnboardTicketScreen
 import com.project.cruise.android.data.repository.PosIdentityRepository
 import com.project.cruise.android.data.repository.ConveniencePosRepository
+import com.project.cruise.android.data.repository.OnboardPosRepository
 import com.project.cruise.android.viewmodel.pos.PosIdentityViewModel
 import com.project.cruise.android.viewmodel.pos.PosIdentityViewModelFactory
 import com.project.cruise.android.viewmodel.pos.ConveniencePosViewModel
 import com.project.cruise.android.viewmodel.pos.ConveniencePosViewModelFactory
+import com.project.cruise.android.viewmodel.pos.OnboardPosViewModel
+import com.project.cruise.android.viewmodel.pos.OnboardPosViewModelFactory
 object Routes {
 
     const val SPLASH = "splash"
@@ -87,6 +91,7 @@ object Routes {
     const val POS_HISTORY = "pos_history/{role}"
     const val POS_IDENTITY = "pos_identity/{role}/{localId}"
     const val POS_CONVENIENCE_CUSTOMER = "pos_convenience_customer/{localId}"
+    const val POS_ONBOARD_TICKET = "pos_onboard_ticket/{localId}"
 
     fun posDashboard(role: PosRole) = "pos_dashboard/${role.apiRole}"
     fun posQrScan(role: PosRole) = "pos_qr_scan/${role.apiRole}"
@@ -95,6 +100,7 @@ object Routes {
     fun posHistory(role: PosRole) = "pos_history/${role.apiRole}"
     fun posIdentity(role: PosRole, localId: String) = "pos_identity/${role.apiRole}/$localId"
     fun posConvenienceCustomer(localId: String) = "pos_convenience_customer/$localId"
+    fun posOnboardTicket(localId: String) = "pos_onboard_ticket/$localId"
 }
 
 @Composable
@@ -458,10 +464,10 @@ fun NavGraph() {
                 role = role,
                 onBackClick = { navController.popBackStack() },
                 onSaved = { localId ->
-                    val destination = if (role == PosRole.CONVENIENCE) {
-                        Routes.posConvenienceCustomer(localId)
-                    } else {
-                        Routes.posIdentity(role, localId)
+                    val destination = when (role) {
+                        PosRole.CONVENIENCE -> Routes.posConvenienceCustomer(localId)
+                        PosRole.ONBOARD -> Routes.posOnboardTicket(localId)
+                        else -> Routes.posIdentity(role, localId)
                     }
                     navController.navigate(destination) {
                         popUpTo(Routes.posDashboard(role))
@@ -496,7 +502,12 @@ fun NavGraph() {
             PosManualEntryScreen(
                 role = role,
                 onBackClick = { navController.popBackStack() },
-                onSaved = { localId -> navController.navigate(Routes.posIdentity(role, localId)) }
+                onSaved = { localId ->
+                    navController.navigate(
+                        if (role == PosRole.ONBOARD) Routes.posOnboardTicket(localId)
+                        else Routes.posIdentity(role, localId)
+                    )
+                }
             )
         }
 
@@ -510,7 +521,31 @@ fun NavGraph() {
                 role = role,
                 onBackClick = { navController.popBackStack() },
                 onIdentify = { localId ->
-                    navController.navigate(Routes.posIdentity(role, localId))
+                    navController.navigate(
+                        if (role == PosRole.ONBOARD) Routes.posOnboardTicket(localId)
+                        else Routes.posIdentity(role, localId)
+                    )
+                }
+            )
+        }
+
+        composable(
+            route = Routes.POS_ONBOARD_TICKET,
+            arguments = listOf(navArgument("localId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val localId = backStackEntry.arguments?.getString("localId") ?: return@composable
+            val repository = remember(context) { OnboardPosRepository(context) }
+            val onboardViewModel: OnboardPosViewModel = viewModel(
+                factory = OnboardPosViewModelFactory(repository, localId)
+            )
+            val state by onboardViewModel.state.collectAsState()
+            OnboardTicketScreen(
+                state = state,
+                onBack = {
+                    navController.popBackStack(
+                        Routes.posDashboard(PosRole.ONBOARD),
+                        inclusive = false
+                    )
                 }
             )
         }

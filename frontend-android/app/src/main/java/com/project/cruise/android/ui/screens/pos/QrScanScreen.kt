@@ -92,9 +92,17 @@ fun QrScanScreen(
             Text("← Quay lại POS")
         }
         Spacer(Modifier.height(16.dp))
-        Text("Quét QR booking", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         Text(
-            "Đưa mã QR của vé hoặc booking vào giữa khung hình.",
+            if (role == PosRole.ONBOARD) "Quét QR vé khách" else "Quét QR booking",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            if (role == PosRole.ONBOARD) {
+                "Đưa QR trên vé của hành khách vào giữa khung hình."
+            } else {
+                "Đưa mã QR của vé hoặc booking vào giữa khung hình."
+            },
             modifier = Modifier.padding(top = 8.dp),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
@@ -146,7 +154,11 @@ fun QrScanScreen(
         error?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 12.dp)) }
         Spacer(Modifier.height(24.dp))
         Text(
-            "Đưa QR trong email vào giữa khung hình. Gửi mã thành công chưa phải hoàn tất check-in.",
+            if (role == PosRole.ONBOARD) {
+                "Quét được mã chưa có nghĩa khách đã được xác nhận lên tàu."
+            } else {
+                "Đưa QR trong email vào giữa khung hình. Gửi mã thành công chưa phải hoàn tất check-in."
+            },
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center

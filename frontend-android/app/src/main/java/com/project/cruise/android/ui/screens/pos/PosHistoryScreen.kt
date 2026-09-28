@@ -39,8 +39,11 @@ fun PosHistoryScreen(role: PosRole, onBackClick: () -> Unit, onIdentify: (String
     val context = LocalContext.current
     val queue = remember { PosTransactionQueue(context) }
     val transactions by queue.observeAll(role.apiRole).collectAsState(initial = emptyList())
-    val visibleTransactions = if (role == PosRole.FINANCE) transactions
-        else transactions.filter { it.scanType == "NFC" }
+    val visibleTransactions = when (role) {
+        PosRole.FINANCE -> transactions
+        PosRole.ONBOARD -> transactions.filter { it.scanType == "QR" }
+        else -> transactions.filter { it.scanType == "NFC" }
+    }
 
     var onlyPending by rememberSaveable { mutableStateOf(false) }
     val filtered = if (onlyPending) visibleTransactions.filter { it.status != PosSyncStatus.SYNCED.name } else visibleTransactions
@@ -54,7 +57,11 @@ fun PosHistoryScreen(role: PosRole, onBackClick: () -> Unit, onIdentify: (String
             fontWeight = FontWeight.Bold
         )
         Text(
-            "${visibleTransactions.size} bản ghi ${if (role == PosRole.FINANCE) "QR/NFC" else "NFC"} lưu trên thiết bị",
+            "${visibleTransactions.size} bản ghi ${when (role) {
+                PosRole.FINANCE -> "QR/NFC"
+                PosRole.ONBOARD -> "QR"
+                else -> "NFC"
+            }} lưu trên thiết bị",
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 5.dp, bottom = 20.dp)
         )
@@ -93,6 +100,9 @@ fun PosHistoryScreen(role: PosRole, onBackClick: () -> Unit, onIdentify: (String
                             if (role == PosRole.FINANCE && transaction.scanType == "QR" && status != PosSyncStatus.SYNCED && status != PosSyncStatus.SYNCING) {
                                 Text("Kiểm tra quầy lễ tân trước khi gửi lại.", style = MaterialTheme.typography.bodySmall)
                                 TextButton(onClick = { onIdentify(transaction.localId) }) { Text("Kiểm tra / gửi lại mã") }
+                            }
+                            if (role == PosRole.ONBOARD && transaction.scanType == "QR") {
+                                TextButton(onClick = { onIdentify(transaction.localId) }) { Text("Xem trạng thái vé") }
                             }
                             Text(
                                 DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(transaction.createdAt)),
