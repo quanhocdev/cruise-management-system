@@ -6,63 +6,51 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.project.cruise.android.viewmodel.pos.PosScanState
 
 @Composable
-fun PosIdentityScreen(
-    role: PosRole,
-    state: PosScanState,
-    onRetry: () -> Unit,
-    onBack: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .safeDrawingPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        TextButton(onClick = onBack) { Text("← Quay lại POS") }
-
-        Text("Gửi mã quét đến máy chủ", style = MaterialTheme.typography.headlineMedium)
-
-        if (state.loading) {
-            CircularProgressIndicator()
-            Text("Đang truyền dữ liệu và kích hoạt màn hình lễ tân…")
-        }
-
-        state.error?.let {
-            Text(it, color = MaterialTheme.colorScheme.error)
-        }
-
-        state.response?.let { res ->
-            if (res.success) {
-                Text("Gửi mã thành công!", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleLarge)
-                Text("Thông điệp từ hệ thống: ${res.message}")
-                if (res.bookingId != null) {
-                    Text("Mã định danh Booking ID: ${res.bookingId}")
+fun PosIdentityScreen(role: PosRole, state: PosScanState, onRetry: () -> Unit, onBack: () -> Unit) {
+    val success = state.response?.success == true
+    PosTheme {
+        Surface(color = PosBackground, modifier = Modifier.fillMaxSize()) {
+            Column(Modifier.safeDrawingPadding().verticalScroll(rememberScrollState()).padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                TextButton(onClick = onBack, enabled = !state.loading) { Text("← Quay lại POS") }
+                PosBadge(role.title, role.accent())
+                PosPanel {
+                    if (state.loading) CircularProgressIndicator(color = role.accent())
+                    else PosBadge(when { success -> "Đã gửi"; state.localReadOnly -> "Chỉ lưu trên thiết bị"; else -> "Chưa xác nhận" },
+                        if (success) role.accent() else Color(0xFF995417))
+                    Text(when {
+                        state.loading -> "Đang gửi mã booking"
+                        state.localReadOnly -> "Đã đọc mã vòng NFC"
+                        success -> "Đã gửi mã booking"
+                        else -> "Kiểm tra kết quả"
+                    }, style = MaterialTheme.typography.headlineMedium, color = PosInk, fontWeight = FontWeight.Bold)
+                    Text(when {
+                        state.loading -> "Vui lòng chờ phản hồi trước khi thực hiện thao tác tiếp theo."
+                        state.localReadOnly -> "Mã vòng đã được lưu. Chưa xác nhận danh tính, quyền tham gia hoặc việc sử dụng dịch vụ của hành khách."
+                        success -> "Tiếp tục làm thủ tục tại quầy lễ tân. Kết quả này chưa xác nhận khách đã check-in."
+                        else -> state.error ?: state.response?.message ?: "Chưa có kết quả xác nhận."
+                    }, color = PosMuted)
+                    if (success) state.response?.bookingId?.let {
+                        HorizontalDivider()
+                        Text("Tham chiếu booking • $it", color = PosInk)
+                    }
                 }
-                Card(
-                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
-                ) {
-                    Text(
-                        "Mã QR đã được truyền tới hệ thống. Màn hình Web của lễ tân đã tự động hiển thị thông tin hành khách để gán phòng và check-in.",
-                        modifier = Modifier.padding(16.dp),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                if (!state.loading) {
+                    Button(onClick = onBack, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = role.accent())) { Text("Về trang tác vụ") }
+                    if (!success && !state.localReadOnly && role == PosRole.FINANCE) {
+                        Text("Nếu kết nối bị gián đoạn, hãy kiểm tra lịch sử và quầy lễ tân trước khi gửi lại để tránh lặp thao tác.",
+                            color = PosMuted, style = MaterialTheme.typography.bodySmall)
+                        OutlinedButton(onClick = onRetry, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) { Text("Thử lại sau khi kiểm tra") }
+                    }
                 }
-            } else {
-                Text("Máy chủ từ chối", color = MaterialTheme.colorScheme.error)
-                Text("Lý do: ${res.message}")
             }
-        }
-
-        Spacer(Modifier.height(16.dp))
-        OutlinedButton(onClick = onRetry, enabled = !state.loading) {
-            Text("Thử gửi lại")
         }
     }
 }

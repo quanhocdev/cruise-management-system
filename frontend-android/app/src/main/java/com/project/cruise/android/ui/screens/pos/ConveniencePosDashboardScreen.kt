@@ -5,13 +5,15 @@ import androidx.compose.ui.graphics.Color
 
 @Composable
 fun ConveniencePosDashboardScreen(
+    username: String,
     onLogoutClick: () -> Unit,
     onNfcClick: () -> Unit,
     onHistoryClick: () -> Unit
 ) {
     RolePosDashboard(
+        username = username,
         role = PosRole.CONVENIENCE,
-        accent = Color(0xFF7C3AED),
+        accent = PosRole.CONVENIENCE.accent(),
         actions = listOf(
             PosDashboardAction(
                 "Quét NFC hành khách",
@@ -20,7 +22,7 @@ fun ConveniencePosDashboardScreen(
                 onNfcClick
             )
         ),
-        notice = "Role CONVENIENCE chỉ dùng NFC. Ghi nhận dịch vụ sẽ được bật khi backend cung cấp API.",
+        notice = "Đọc vòng NFC để lưu mã nhận diện. Việc đọc vòng chưa xác nhận sử dụng dịch vụ hoặc phát sinh chi phí.",
         onLogoutClick = onLogoutClick,
         onHistoryClick = onHistoryClick
     )

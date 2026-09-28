@@ -424,8 +424,10 @@ fun NavGraph() {
         ) { backStackEntry ->
             val role = PosRole.fromApiRole(backStackEntry.arguments?.getString("role"))
                 ?: return@composable
+            val posSession by viewModel.sessionState.collectAsState()
             PosDashboardScreen(
                 role = role,
+                username = (posSession as? SessionState.Authenticated)?.username.orEmpty(),
                 onLogoutClick = {
                     viewModel.logout {
                         navController.navigate(Routes.GUEST) {
@@ -525,7 +527,7 @@ fun NavGraph() {
                 role = role,
                 state = state,
                 onRetry = { posViewModel.sendScan() },
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack(Routes.posDashboard(role), inclusive = false) }
             )
         }
     }

@@ -27,38 +27,34 @@ fun PosLoginScreen(
     errorMessage: String?
 ) {
     var username by rememberSaveable { mutableStateOf("") }
-    var password by rememberSaveable { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     var revealPassword by rememberSaveable { mutableStateOf(false) }
 
-    OceanTheme {
-        Surface(Modifier.fillMaxSize(), color = Color(0xFFF5F8F8)) {
+    PosTheme {
+        Surface(Modifier.fillMaxSize(), color = PosBackground) {
             Column(
                 Modifier
                     .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(OceanNavy, Color(0xFF124E59), Color(0xFFF5F8F8))
-                        )
-                    )
+                    .background(PosBackground)
                     .safeDrawingPadding()
                     .verticalScroll(rememberScrollState())
                     .imePadding()
                     .padding(24.dp)
             ) {
                 TextButton(onClick = onBackClick, enabled = !isLoading) {
-                    Text("← Quay lại", color = Color.White)
+                    Text("← Quay lại", color = PosInk)
                 }
                 Spacer(Modifier.height(32.dp))
-                Text("CRUISE POS", color = OceanMint, style = MaterialTheme.typography.labelLarge)
+                Text("CRUISE POS", color = OceanTeal, style = MaterialTheme.typography.labelLarge)
                 Text(
                     "Đăng nhập nhân viên",
-                    color = Color.White,
+                    color = PosInk,
                     style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    "Dùng tài khoản được Admin cấp. Khu vực này không hỗ trợ đăng ký.",
-                    color = Color.White.copy(alpha = .82f),
+                    "Đăng nhập để bắt đầu phiên làm việc của bạn.",
+                    color = PosMuted,
                     modifier = Modifier.padding(top = 8.dp)
                 )
 
@@ -66,7 +62,7 @@ fun PosLoginScreen(
                     modifier = Modifier.fillMaxWidth().padding(top = 28.dp),
                     shape = RoundedCornerShape(26.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
                     Column(
                         Modifier.padding(20.dp),
@@ -113,19 +109,19 @@ fun PosLoginScreen(
                 }
 
                 Text(
-                    "Role được phép",
+                    "Bộ phận sử dụng POS",
                     modifier = Modifier.padding(top = 24.dp, bottom = 10.dp),
                     color = OceanNavy,
                     fontWeight = FontWeight.Bold
                 )
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     PosRole.entries.forEach { role ->
                         Surface(
                             color = Color.White.copy(alpha = .92f),
                             shape = RoundedCornerShape(999.dp)
                         ) {
                             Text(
-                                role.apiRole,
+                                role.title,
                                 Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
                                 color = OceanNavy,
                                 style = MaterialTheme.typography.labelMedium

@@ -5,13 +5,15 @@ import androidx.compose.ui.graphics.Color
 
 @Composable
 fun OnboardPosDashboardScreen(
+    username: String,
     onLogoutClick: () -> Unit,
     onNfcClick: () -> Unit,
     onHistoryClick: () -> Unit
 ) {
     RolePosDashboard(
+        username = username,
         role = PosRole.ONBOARD,
-        accent = Color(0xFFDB6B32),
+        accent = PosRole.ONBOARD.accent(),
         actions = listOf(
             PosDashboardAction(
                 "Quét NFC người tham gia",
@@ -20,7 +22,7 @@ fun OnboardPosDashboardScreen(
                 onNfcClick
             )
         ),
-        notice = "Role ONBOARD không hiển thị QR. Ghi nhận hoạt động sẽ được bật khi backend cung cấp API.",
+        notice = "Đọc vòng NFC của người tham gia. Bản ghi đọc vòng chưa phải xác nhận tham gia hoạt động.",
         onLogoutClick = onLogoutClick,
         onHistoryClick = onHistoryClick
     )

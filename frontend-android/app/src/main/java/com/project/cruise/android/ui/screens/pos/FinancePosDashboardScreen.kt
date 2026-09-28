@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color
 
 @Composable
 fun FinancePosDashboardScreen(
+    username: String,
     onLogoutClick: () -> Unit,
     onQrClick: () -> Unit,
     onNfcClick: () -> Unit,
@@ -12,8 +13,9 @@ fun FinancePosDashboardScreen(
     onHistoryClick: () -> Unit
 ) {
     RolePosDashboard(
+        username = username,
         role = PosRole.FINANCE,
-        accent = Color(0xFF126A70),
+        accent = PosRole.FINANCE.accent(),
         actions = listOf(
             PosDashboardAction(
                 "Quét QR trong email",
@@ -42,7 +44,7 @@ fun FinancePosDashboardScreen(
                 status = "Đang chờ API backend"
             )
         ),
-        notice = "FINANCE là quầy lễ tân POS duy nhất được dùng cả QR, NFC và mã nhập tay.",
+        notice = "Gửi mã booking để tiếp tục thủ tục tại quầy lễ tân. Gửi mã thành công chưa phải hoàn tất check-in.",
         onLogoutClick = onLogoutClick,
         onHistoryClick = onHistoryClick
     )

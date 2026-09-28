@@ -1,5 +1,6 @@
 package com.project.cruise.android.ui.screens.pos
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,16 +29,17 @@ fun PosManualEntryScreen(
     var saving by rememberSaveable { mutableStateOf(false) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
 
+    PosTheme {
     Column(
         Modifier
-            .fillMaxSize()
+            .fillMaxSize().background(PosBackground)
             .safeDrawingPadding()
             .verticalScroll(rememberScrollState())
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         TextButton(onClick = onBackClick, enabled = !saving) { Text("← Quay lại Finance POS") }
-        Text("Nhập mã thủ công", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        Text("Nhập mã booking", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         Text(
             "Nhập nguyên mã định danh in dưới QR hoặc trong email của hành khách.",
             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -49,8 +51,8 @@ fun PosManualEntryScreen(
                 error = null
             },
             modifier = Modifier.fillMaxWidth(),
-            label = { Text("Mã định danh") },
-            placeholder = { Text("Ví dụ: POS:...") },
+            label = { Text("Mã booking") },
+            placeholder = { Text("Mã trong email xác nhận") },
             enabled = !saving,
             minLines = 2,
             shape = RoundedCornerShape(16.dp)
@@ -83,12 +85,14 @@ fun PosManualEntryScreen(
                 CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
                 Spacer(Modifier.width(8.dp))
             }
-            Text("Kiểm tra hành khách")
+            Text("Gửi mã booking")
         }
         Text(
-            "Mã vẫn được lưu vào Room trước khi gửi máy chủ, giống luồng quét QR/NFC.",
+            "Mã được lưu trên thiết bị trước khi gửi. Hoàn tất thủ tục tại quầy lễ tân sau khi gửi mã.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
+}
+
 }

@@ -1,6 +1,14 @@
 package com.project.cruise.android.ui.screens.pos
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import android.Manifest
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
+import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -60,6 +68,15 @@ fun QrScanScreen(
         if (!it) error = "Cần quyền camera để quét mã QR"
     }
 
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                hasPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
     LaunchedEffect(Unit) { if (!hasPermission) permissionLauncher.launch(Manifest.permission.CAMERA) }
     DisposableEffect(Unit) {
         onDispose {
@@ -69,12 +86,13 @@ fun QrScanScreen(
         }
     }
 
-    Column(Modifier.fillMaxSize().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+    PosTheme {
+    Column(Modifier.fillMaxSize().background(PosBackground).safeDrawingPadding().verticalScroll(rememberScrollState()).padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         TextButton(onClick = onBackClick, modifier = Modifier.align(Alignment.Start), enabled = !isSaving) {
             Text("← Quay lại POS")
         }
         Spacer(Modifier.height(16.dp))
-        Text("Quét mã QR", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        Text("Quét QR booking", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         Text(
             "Đưa mã QR của vé hoặc booking vào giữa khung hình.",
             modifier = Modifier.padding(top = 8.dp),
@@ -116,18 +134,26 @@ fun QrScanScreen(
                     },
                     modifier = Modifier.fillMaxSize()
                 )
-            } else Text("Chưa có quyền sử dụng camera", textAlign = TextAlign.Center)
+            } else Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("Cho phép camera để đọc mã booking", textAlign = TextAlign.Center)
+                TextButton(onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) }) { Text("Cho phép camera") }
+                TextButton(onClick = {
+                    context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${context.packageName}")))
+                }) { Text("Mở cài đặt ứng dụng") }
+            }
             if (isSaving) CircularProgressIndicator()
         }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 12.dp)) }
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(24.dp))
         Text(
-            "Mã được lưu bằng Room trước, sau đó WorkManager tự đồng bộ khi có mạng.",
+            "Đưa QR trong email vào giữa khung hình. Gửi mã thành công chưa phải hoàn tất check-in.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
     }
+}
+
 }
 
 @androidx.annotation.OptIn(ExperimentalGetImage::class)
