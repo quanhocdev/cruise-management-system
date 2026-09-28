@@ -1,28 +1,32 @@
-package com.project.tour.mapper.tour.assignment;
+package com.project.tour.mapper.operation.assignment;
 
-import com.project.tour.dto.operation.assignment.product.ProductTourAssignmentRequest;
-import com.project.tour.dto.operation.assignment.product.ProductTourAssignmentResponse;
+import com.project.tour.dto.operation.assignment.service.ServiceTourAssignmentRequest;
+import com.project.tour.dto.operation.assignment.service.ServiceTourAssignmentResponse;
 import com.project.tour.model.CruiseArea;
 import com.project.tour.model.CruiseDeck;
 import com.project.tour.model.Tour;
-import com.project.tour.model.convenience.product.ProductTour;
+import com.project.tour.model.convenience.service.ServiceTour;
 
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+
 @Component
-public class ProductTourAssignmentMapper {
+public class ServiceTourAssignmentMapper {
 
         /**
          * Map Request -> Entity.
          */
-        public ProductTour toEntity(
-                        ProductTourAssignmentRequest request) {
+        public ServiceTour toEntity(
+                        ServiceTourAssignmentRequest request) {
 
                 if (request == null) {
                         return null;
                 }
 
-                ProductTour entity = new ProductTour();
+                ServiceTour entity = new ServiceTour();
 
                 entity.setTourId(request.tourId());
                 entity.setCruiseAreaId(request.cruiseAreaId());
@@ -33,8 +37,8 @@ public class ProductTourAssignmentMapper {
         /**
          * Map Entity -> Response kèm thông tin Tour & CruiseArea.
          */
-        public ProductTourAssignmentResponse toResponse(
-                        ProductTour entity,
+        public ServiceTourAssignmentResponse toResponse(
+                        ServiceTour entity,
                         Tour tour,
                         CruiseArea cruiseArea) {
 
@@ -46,7 +50,7 @@ public class ProductTourAssignmentMapper {
                                 ? cruiseArea.getCruiseDeck()
                                 : null;
 
-                return new ProductTourAssignmentResponse(
+                return new ServiceTourAssignmentResponse(
                                 // Assignment Info
                                 entity.getId(),
 
@@ -74,7 +78,19 @@ public class ProductTourAssignmentMapper {
                                                 : null,
 
                                 // Timestamps
-                                entity.getCreatedAt(),
-                                entity.getUpdatedAt());
+                                toLocalDateTime(entity.getCreatedAt()),
+                                toLocalDateTime(entity.getUpdatedAt()));
+        }
+
+        private LocalDateTime toLocalDateTime(
+                        Instant instant) {
+
+                if (instant == null) {
+                        return null;
+                }
+
+                return LocalDateTime.ofInstant(
+                                instant,
+                                ZoneId.systemDefault());
         }
 }

@@ -1,4 +1,4 @@
-package com.project.tour.mapper.tour.assignment;
+package com.project.tour.mapper.operation.assignment;
 
 import com.project.tour.dto.operation.assignment.activitycruise.ActivityCruiseTourAssignmentResponse;
 import com.project.tour.model.CruiseArea;

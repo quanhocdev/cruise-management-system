@@ -3,7 +3,7 @@ package com.project.tour.service.tour.operation.assignment;
 import com.project.tour.dto.operation.assignment.service.ServiceTourAssignmentRequest;
 import com.project.tour.dto.operation.assignment.service.ServiceTourAssignmentResponse;
 import com.project.tour.exception.AppException;
-import com.project.tour.mapper.tour.assignment.ServiceTourAssignmentMapper;
+import com.project.tour.mapper.operation.assignment.ServiceTourAssignmentMapper;
 import com.project.tour.model.CruiseArea;
 import com.project.tour.model.Tour;
 import com.project.tour.model.convenience.service.ServiceTour;

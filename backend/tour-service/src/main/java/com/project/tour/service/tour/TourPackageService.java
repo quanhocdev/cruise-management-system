@@ -5,7 +5,7 @@ import com.project.tour.dto.admin.roomtype.RoomTypeResponse;
 import com.project.tour.dto.operation.packages.TourPackageRequest;
 import com.project.tour.dto.operation.packages.TourPackageResponse;
 import com.project.tour.exception.AppException;
-import com.project.tour.mapper.tour.TourPackageMapper;
+import com.project.tour.mapper.operation.TourPackageMapper;
 import com.project.tour.model.PackageBenefit;
 import com.project.tour.model.TourPackage;
 import com.project.tour.model.Tour;

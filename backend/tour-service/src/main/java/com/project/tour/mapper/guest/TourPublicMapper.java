@@ -1,4 +1,4 @@
-package com.project.tour.mapper.tour;
+package com.project.tour.mapper.guest;
 
 import com.project.tour.dto.guest.PublicTourDetailResponse;
 import com.project.tour.dto.guest.PublicTourSummaryResponse;

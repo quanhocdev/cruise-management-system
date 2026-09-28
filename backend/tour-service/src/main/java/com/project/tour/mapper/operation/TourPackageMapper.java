@@ -1,4 +1,4 @@
-package com.project.tour.mapper.tour;
+package com.project.tour.mapper.operation;
 
 import com.project.tour.dto.operation.packages.TourPackageResponse;
 import com.project.tour.dto.operation.packages.benefit.PackageBenefitResponse;

@@ -2,7 +2,7 @@ package com.project.tour.service.tour.operation.assignment;
 
 import com.project.tour.dto.operation.assignment.OperationCruiseLayoutResponse;
 import com.project.tour.exception.AppException;
-import com.project.tour.mapper.tour.configured.OperationCruiseMapper;
+import com.project.tour.mapper.operation.configured.OperationCruiseMapper;
 import com.project.tour.model.CruiseArea;
 import com.project.tour.model.CruiseDeck;
 import com.project.tour.model.Room;

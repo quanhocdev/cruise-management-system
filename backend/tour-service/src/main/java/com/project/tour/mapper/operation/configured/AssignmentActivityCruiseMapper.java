@@ -1,4 +1,4 @@
-package com.project.tour.mapper.tour.configured;
+package com.project.tour.mapper.operation.configured;
 
 import com.project.tour.dto.operation.configured.AssignmentActivityCruiseResponse;
 import com.project.tour.model.onboard.ActivityCruiseTour;
