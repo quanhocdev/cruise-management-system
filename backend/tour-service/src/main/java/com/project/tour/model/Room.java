@@ -1,5 +1,6 @@
 package com.project.tour.model;
 
+import com.project.tour.model.admin.CruiseDeck;
 import com.project.tour.model.enums.RoomStatus;
 import jakarta.persistence.*;
 

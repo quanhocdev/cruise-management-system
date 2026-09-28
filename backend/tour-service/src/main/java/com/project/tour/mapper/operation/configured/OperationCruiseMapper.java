@@ -3,9 +3,9 @@ package com.project.tour.mapper.operation.configured;
 import com.project.tour.dto.operation.assignment.OperationCruiseLayoutResponse;
 import com.project.tour.dto.operation.assignment.cruise.OperationCruiseAreaResponse;
 import com.project.tour.dto.operation.assignment.room.OperationRoomResponse;
-import com.project.tour.model.CruiseArea;
-import com.project.tour.model.CruiseDeck;
 import com.project.tour.model.Room; // Giả định tên Entity Room của bạn
+import com.project.tour.model.admin.CruiseArea;
+import com.project.tour.model.admin.CruiseDeck;
 
 import java.util.Collections;
 import java.util.List;

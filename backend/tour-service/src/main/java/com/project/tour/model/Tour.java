@@ -1,5 +1,6 @@
 package com.project.tour.model;
 
+import com.project.tour.model.admin.Cruise;
 import com.project.tour.model.enums.tour.TourBookingStatus;
 import com.project.tour.model.enums.tour.TourStatusTrip;
 

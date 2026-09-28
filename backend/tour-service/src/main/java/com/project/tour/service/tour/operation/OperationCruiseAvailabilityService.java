@@ -2,8 +2,8 @@ package com.project.tour.service.tour.operation;
 
 import com.project.tour.dto.admin.cruise.CruiseAvailabilityResponse;
 import com.project.tour.exception.AppException;
-import com.project.tour.model.Cruise;
 import com.project.tour.model.Tour;
+import com.project.tour.model.admin.Cruise;
 import com.project.tour.model.enums.cruise.CruiseStatus;
 import com.project.tour.model.enums.tour.TourStatusTrip;
 import com.project.tour.repository.cruise.CruiseRepository;

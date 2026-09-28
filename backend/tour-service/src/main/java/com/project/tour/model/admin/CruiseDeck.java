@@ -1,4 +1,4 @@
-package com.project.tour.model;
+package com.project.tour.model.admin;
 
 import jakarta.persistence.*;
 

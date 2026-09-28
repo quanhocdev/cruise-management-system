@@ -1,18 +1,18 @@
-package com.project.tour.model;
+package com.project.tour.model.admin;
 
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
+import com.project.tour.model.Policy;
 import com.project.tour.model.enums.policy.PolicyStatus;
 
 @Entity
-@Table(name = "booking_policies", uniqueConstraints = @UniqueConstraint(name = "uk_booking_policy_days", columnNames = {
-        "policy_id",
-        "days_before_departure"
-}))
-public class BookingPolicy {
+@Table(name = "cancel_policies", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_cancel_policy_days", columnNames = { "policy_id", "days_before" })
+})
+public class CancelPolicy {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -22,11 +22,11 @@ public class BookingPolicy {
     @JoinColumn(name = "policy_id", nullable = false)
     private Policy policy;
 
-    @Column(name = "days_before_departure", nullable = false)
-    private Integer daysBeforeDeparture;
+    @Column(name = "days_before", nullable = false)
+    private Integer daysBefore;
 
-    @Column(name = "discount_percent", nullable = false, precision = 5, scale = 2)
-    private BigDecimal discountPercent;
+    @Column(name = "refund_percent", nullable = false, precision = 5, scale = 2)
+    private BigDecimal refundPercent;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -48,20 +48,20 @@ public class BookingPolicy {
         this.policy = policy;
     }
 
-    public Integer getDaysBeforeDeparture() {
-        return daysBeforeDeparture;
+    public Integer getDaysBefore() {
+        return daysBefore;
     }
 
-    public void setDaysBeforeDeparture(Integer daysBeforeDeparture) {
-        this.daysBeforeDeparture = daysBeforeDeparture;
+    public void setDaysBefore(Integer daysBefore) {
+        this.daysBefore = daysBefore;
     }
 
-    public BigDecimal getDiscountPercent() {
-        return discountPercent;
+    public BigDecimal getRefundPercent() {
+        return refundPercent;
     }
 
-    public void setDiscountPercent(BigDecimal discountPercent) {
-        this.discountPercent = discountPercent;
+    public void setRefundPercent(BigDecimal refundPercent) {
+        this.refundPercent = refundPercent;
     }
 
     public PolicyStatus getStatus() {

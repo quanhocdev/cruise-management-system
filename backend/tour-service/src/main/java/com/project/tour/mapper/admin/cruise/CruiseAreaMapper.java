@@ -3,7 +3,7 @@ package com.project.tour.mapper.admin.cruise;
 import com.project.tour.dto.admin.cruise.area.CreateCruiseAreaRequest;
 import com.project.tour.dto.admin.cruise.area.CruiseAreaResponse;
 import com.project.tour.dto.admin.cruise.area.UpdateCruiseAreaRequest;
-import com.project.tour.model.CruiseArea;
+import com.project.tour.model.admin.CruiseArea;
 
 public class CruiseAreaMapper {
 

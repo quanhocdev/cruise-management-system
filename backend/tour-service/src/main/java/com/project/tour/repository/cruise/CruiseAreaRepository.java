@@ -1,6 +1,6 @@
 package com.project.tour.repository.cruise;
 
-import com.project.tour.model.CruiseArea;
+import com.project.tour.model.admin.CruiseArea;
 import com.project.tour.model.enums.cruise.CruiseAreaStatus;
 
 import org.springframework.data.jpa.repository.JpaRepository;

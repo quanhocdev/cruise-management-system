@@ -4,8 +4,8 @@ import com.project.tour.dto.operation.assignment.activitycruise.ActivityCruiseTo
 import com.project.tour.dto.operation.assignment.activitycruise.ActivityCruiseTourAssignmentResponse;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.operation.assignment.ActivityCruiseTourAssignmentMapper;
-import com.project.tour.model.CruiseArea;
 import com.project.tour.model.Tour;
+import com.project.tour.model.admin.CruiseArea;
 import com.project.tour.model.onboard.ActivityCruiseTour;
 import com.project.tour.model.onboard.enums.ActivityCruiseTourStatus;
 import com.project.tour.repository.cruise.CruiseAreaRepository;

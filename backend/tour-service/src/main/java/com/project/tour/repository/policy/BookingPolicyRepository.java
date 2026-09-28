@@ -1,6 +1,6 @@
 package com.project.tour.repository.policy;
 
-import com.project.tour.model.BookingPolicy;
+import com.project.tour.model.admin.BookingPolicy;
 import com.project.tour.model.enums.policy.PolicyStatus;
 
 import org.springframework.data.jpa.repository.JpaRepository;

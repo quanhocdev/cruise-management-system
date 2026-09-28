@@ -2,9 +2,9 @@ package com.project.tour.mapper.operation.assignment;
 
 import com.project.tour.dto.operation.assignment.service.ServiceTourAssignmentRequest;
 import com.project.tour.dto.operation.assignment.service.ServiceTourAssignmentResponse;
-import com.project.tour.model.CruiseArea;
-import com.project.tour.model.CruiseDeck;
 import com.project.tour.model.Tour;
+import com.project.tour.model.admin.CruiseArea;
+import com.project.tour.model.admin.CruiseDeck;
 import com.project.tour.model.convenience.service.ServiceTour;
 
 import org.springframework.stereotype.Component;
