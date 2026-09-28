@@ -1,4 +1,4 @@
-package com.project.tour.mapper.tour;
+package com.project.tour.mapper.scheduler;
 
 import com.project.tour.dto.scheduler.tour.CreateTourRequest;
 import com.project.tour.dto.scheduler.tour.TourResponse;

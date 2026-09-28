@@ -5,7 +5,7 @@ import com.project.common.event.TourAssignmentEvent;
 import com.project.common.event.TourMasterSyncEvent;
 import com.project.tour.dto.scheduler.tour.TourResponse;
 import com.project.tour.exception.AppException;
-import com.project.tour.mapper.tour.TourMapper;
+import com.project.tour.mapper.scheduler.TourMapper;
 import com.project.tour.mapper.tour.TourMasterSyncMapper;
 import com.project.tour.model.Cruise;
 import com.project.tour.model.CruiseArea;

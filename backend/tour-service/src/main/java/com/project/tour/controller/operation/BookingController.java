@@ -1,6 +1,6 @@
 package com.project.tour.controller.operation;
 
-import com.project.tour.dto.booking.TourOpenBookingRequest;
+import com.project.tour.dto.operation.booking.TourOpenBookingRequest;
 import com.project.tour.dto.scheduler.tour.TourResponse;
 import com.project.tour.service.tour.TourBookingService;
 import jakarta.validation.Valid;

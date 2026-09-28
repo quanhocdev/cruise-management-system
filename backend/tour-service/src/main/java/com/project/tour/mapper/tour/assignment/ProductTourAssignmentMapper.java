@@ -1,4 +1,4 @@
-package com.project.tour.mapper.tour;
+package com.project.tour.mapper.tour.assignment;
 
 import com.project.tour.dto.operation.assignment.product.ProductTourAssignmentRequest;
 import com.project.tour.dto.operation.assignment.product.ProductTourAssignmentResponse;

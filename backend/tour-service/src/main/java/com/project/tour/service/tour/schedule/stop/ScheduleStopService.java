@@ -4,7 +4,7 @@ import com.project.tour.dto.scheduler.stop.CreateScheduleStopRequest;
 import com.project.tour.dto.scheduler.stop.ScheduleStopResponse;
 import com.project.tour.dto.scheduler.stop.UpdateScheduleStopRequest;
 import com.project.tour.exception.AppException;
-import com.project.tour.mapper.tour.schedule.ScheduleStopMapper;
+import com.project.tour.mapper.scheduler.schedule.ScheduleStopMapper;
 import com.project.tour.model.Port;
 import com.project.tour.model.Schedule;
 import com.project.tour.model.ScheduleStop;

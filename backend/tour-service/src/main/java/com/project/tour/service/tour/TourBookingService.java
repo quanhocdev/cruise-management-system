@@ -1,9 +1,9 @@
 package com.project.tour.service.tour;
 
-import com.project.tour.dto.booking.TourOpenBookingRequest;
+import com.project.tour.dto.operation.booking.TourOpenBookingRequest;
 import com.project.tour.dto.scheduler.tour.TourResponse;
 import com.project.tour.exception.AppException;
-import com.project.tour.mapper.tour.TourMapper;
+import com.project.tour.mapper.scheduler.TourMapper;
 import com.project.tour.model.Tour;
 import com.project.tour.model.enums.tour.TourBookingStatus;
 import com.project.tour.model.enums.tour.TourStatusTrip;

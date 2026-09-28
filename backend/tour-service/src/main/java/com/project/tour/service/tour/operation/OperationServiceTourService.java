@@ -1,7 +1,7 @@
 package com.project.tour.service.tour.operation;
 
 import com.project.tour.dto.operation.configured.AssignmentServiceResponse;
-import com.project.tour.mapper.tour.operation.AssignmentServiceMapper;
+import com.project.tour.mapper.tour.configured.AssignmentServiceMapper;
 import com.project.tour.repository.convenience.ServiceTourRepository;
 
 import org.springframework.stereotype.Service;

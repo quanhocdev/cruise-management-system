@@ -3,7 +3,7 @@ package com.project.tour.service.tour.operation.assignment;
 import com.project.tour.dto.admin.cruise.CruiseAvailabilityResponse;
 import com.project.tour.dto.scheduler.tour.TourResponse;
 import com.project.tour.exception.AppException;
-import com.project.tour.mapper.tour.TourMapper;
+import com.project.tour.mapper.scheduler.TourMapper;
 import com.project.tour.model.Cruise;
 import com.project.tour.model.Tour;
 import com.project.tour.model.enums.cruise.CruiseStatus;
