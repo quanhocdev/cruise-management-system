@@ -54,9 +54,13 @@ import com.project.cruise.android.ui.screens.pos.QrScanScreen
 import com.project.cruise.android.ui.screens.pos.NfcScanScreen
 import com.project.cruise.android.ui.screens.pos.PosHistoryScreen
 import com.project.cruise.android.ui.screens.pos.PosIdentityScreen
+import com.project.cruise.android.ui.screens.pos.ConvenienceCustomerScreen
 import com.project.cruise.android.data.repository.PosIdentityRepository
+import com.project.cruise.android.data.repository.ConveniencePosRepository
 import com.project.cruise.android.viewmodel.pos.PosIdentityViewModel
 import com.project.cruise.android.viewmodel.pos.PosIdentityViewModelFactory
+import com.project.cruise.android.viewmodel.pos.ConveniencePosViewModel
+import com.project.cruise.android.viewmodel.pos.ConveniencePosViewModelFactory
 object Routes {
 
     const val SPLASH = "splash"
@@ -82,6 +86,7 @@ object Routes {
     const val POS_MANUAL_ENTRY = "pos_manual_entry/{role}"
     const val POS_HISTORY = "pos_history/{role}"
     const val POS_IDENTITY = "pos_identity/{role}/{localId}"
+    const val POS_CONVENIENCE_CUSTOMER = "pos_convenience_customer/{localId}"
 
     fun posDashboard(role: PosRole) = "pos_dashboard/${role.apiRole}"
     fun posQrScan(role: PosRole) = "pos_qr_scan/${role.apiRole}"
@@ -89,6 +94,7 @@ object Routes {
     fun posManualEntry(role: PosRole) = "pos_manual_entry/${role.apiRole}"
     fun posHistory(role: PosRole) = "pos_history/${role.apiRole}"
     fun posIdentity(role: PosRole, localId: String) = "pos_identity/${role.apiRole}/$localId"
+    fun posConvenienceCustomer(localId: String) = "pos_convenience_customer/$localId"
 }
 
 @Composable
@@ -452,7 +458,12 @@ fun NavGraph() {
                 role = role,
                 onBackClick = { navController.popBackStack() },
                 onSaved = { localId ->
-                    navController.navigate(Routes.posIdentity(role, localId)) {
+                    val destination = if (role == PosRole.CONVENIENCE) {
+                        Routes.posConvenienceCustomer(localId)
+                    } else {
+                        Routes.posIdentity(role, localId)
+                    }
+                    navController.navigate(destination) {
                         popUpTo(Routes.posDashboard(role))
                     }
                 }
@@ -500,6 +511,28 @@ fun NavGraph() {
                 onBackClick = { navController.popBackStack() },
                 onIdentify = { localId ->
                     navController.navigate(Routes.posIdentity(role, localId))
+                }
+            )
+        }
+
+        composable(
+            route = Routes.POS_CONVENIENCE_CUSTOMER,
+            arguments = listOf(navArgument("localId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val localId = backStackEntry.arguments?.getString("localId") ?: return@composable
+            val repository = remember(context) { ConveniencePosRepository(context) }
+            val convenienceViewModel: ConveniencePosViewModel = viewModel(
+                factory = ConveniencePosViewModelFactory(repository, localId)
+            )
+            val state by convenienceViewModel.state.collectAsState()
+            ConvenienceCustomerScreen(
+                state = state,
+                onRetry = convenienceViewModel::reload,
+                onBack = {
+                    navController.popBackStack(
+                        Routes.posDashboard(PosRole.CONVENIENCE),
+                        inclusive = false
+                    )
                 }
             )
         }

@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.project.cruise.android.BuildConfig
 import com.project.cruise.android.data.local.pos.PosScanType
 import com.project.cruise.android.data.repository.PosTransactionQueue
 import kotlinx.coroutines.launch
@@ -40,6 +41,30 @@ fun NfcScanScreen(
     val scope = rememberCoroutineScope()
     var isSaving by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    var debugUid by remember { mutableStateOf("") }
+
+    fun saveUid(uid: String) {
+        val normalizedUid = uid.trim().uppercase()
+        if (normalizedUid.isBlank()) return
+        scope.launch {
+            if (isSaving) return@launch
+            isSaving = true
+            error = null
+            runCatching {
+                queue.enqueue(
+                    scanType = PosScanType.NFC,
+                    scannedValue = normalizedUid,
+                    operatorRole = role.apiRole,
+                    operation = role.scanOperation
+                )
+            }
+                .onSuccess(onSaved)
+                .onFailure {
+                    error = "Không thể lưu lượt đọc NFC trên thiết bị"
+                    isSaving = false
+                }
+        }
+    }
 
     val lifecycleOwner = LocalLifecycleOwner.current
     var nfcEnabled by remember { mutableStateOf(adapter?.isEnabled == true) }
@@ -59,25 +84,10 @@ fun NfcScanScreen(
             adapter.enableReaderMode(
                 activity,
                 { tag ->
-                    scope.launch {
-                    if (!isSaving) {
-                        val uid = tag.id.joinToString("") { byte -> "%02X".format(byte.toInt() and 0xFF) }
-                        isSaving = true
-                            runCatching {
-                                queue.enqueue(
-                                    scanType = PosScanType.NFC,
-                                    scannedValue = uid,
-                                    operatorRole = role.apiRole,
-                                    operation = role.scanOperation
-                                )
-                            }
-                                .onSuccess { onSaved(it) }
-                                .onFailure {
-                                    error = "Không thể lưu giao dịch trên thiết bị"
-                                    isSaving = false
-                                }
-                        }
+                    val uid = tag.id.joinToString("") { byte ->
+                        "%02X".format(byte.toInt() and 0xFF)
                     }
+                    saveUid(uid)
                 },
                 NfcAdapter.FLAG_READER_NFC_A or NfcAdapter.FLAG_READER_NFC_B or
                     NfcAdapter.FLAG_READER_NFC_F or NfcAdapter.FLAG_READER_NFC_V or
@@ -124,6 +134,31 @@ fun NfcScanScreen(
         if (adapter != null && !nfcEnabled) {
             TextButton(onClick = { context.startActivity(Intent(Settings.ACTION_NFC_SETTINGS)) }) {
                 Text("Mở cài đặt NFC")
+            }
+        }
+        if (BuildConfig.DEBUG && role == PosRole.CONVENIENCE) {
+            PosPanel {
+                Text("Giả lập UID · Chỉ bản debug", fontWeight = FontWeight.Bold, color = PosInk)
+                Text(
+                    "Dùng trên máy ảo không có NFC. Giá trị được lưu như một lượt đọc NFC để kiểm tra giao diện.",
+                    color = PosMuted,
+                    style = MaterialTheme.typography.bodySmall
+                )
+                OutlinedTextField(
+                    value = debugUid,
+                    onValueChange = { debugUid = it; error = null },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("UID vòng NFC") },
+                    placeholder = { Text("Ví dụ: DEMO-NFC-002") },
+                    enabled = !isSaving,
+                    singleLine = true
+                )
+                Button(
+                    onClick = { saveUid(debugUid) },
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+                    enabled = debugUid.isNotBlank() && !isSaving,
+                    colors = ButtonDefaults.buttonColors(containerColor = role.accent())
+                ) { Text("Tiếp tục với UID giả lập") }
             }
         }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 12.dp)) }
