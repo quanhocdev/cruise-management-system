@@ -2,8 +2,8 @@ package com.project.tour.mapper.operation;
 
 import com.project.tour.dto.operation.packages.TourPackageResponse;
 import com.project.tour.dto.operation.packages.benefit.PackageBenefitResponse;
-import com.project.tour.model.PackageBenefit;
-import com.project.tour.model.TourPackage;
+import com.project.tour.model.operation.PackageBenefit;
+import com.project.tour.model.operation.TourPackage;
 
 import java.util.List;
 

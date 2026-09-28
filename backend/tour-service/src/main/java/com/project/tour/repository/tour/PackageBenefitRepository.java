@@ -1,8 +1,9 @@
 package com.project.tour.repository.tour;
 
-import com.project.tour.model.PackageBenefit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import com.project.tour.model.operation.PackageBenefit;
 
 import java.util.List;
 import java.util.UUID;

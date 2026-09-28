@@ -6,8 +6,6 @@ import com.project.tour.dto.operation.packages.TourPackageRequest;
 import com.project.tour.dto.operation.packages.TourPackageResponse;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.operation.TourPackageMapper;
-import com.project.tour.model.PackageBenefit;
-import com.project.tour.model.TourPackage;
 import com.project.tour.model.admin.RoomType;
 import com.project.tour.repository.tour.PackageBenefitRepository;
 import com.project.tour.repository.tour.TourPackageRepository;
@@ -22,6 +20,8 @@ import com.project.tour.repository.room.RoomTypeRepository;
 import java.util.List;
 import java.util.UUID;
 import com.project.tour.model.enums.RoomStatus;
+import com.project.tour.model.operation.PackageBenefit;
+import com.project.tour.model.operation.TourPackage;
 import com.project.tour.model.scheduler.Tour;
 
 @Service

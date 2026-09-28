@@ -1,4 +1,4 @@
-package com.project.tour.model;
+package com.project.tour.model.operation;
 
 import com.project.tour.model.enums.tour.BenefitType;
 import jakarta.persistence.*;

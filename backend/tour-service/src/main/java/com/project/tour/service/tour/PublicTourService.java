@@ -9,6 +9,8 @@ import com.project.tour.model.shore.VisitTour;
 import com.project.tour.model.enums.tour.TourBookingStatus;
 import com.project.tour.model.enums.tour.TourStatusTrip;
 import com.project.tour.model.onboard.ActivityCruiseTour;
+import com.project.tour.model.operation.PackageBenefit;
+import com.project.tour.model.operation.TourPackage;
 import com.project.tour.model.scheduler.Schedule;
 import com.project.tour.model.scheduler.ScheduleStop;
 import com.project.tour.model.scheduler.Tour;
