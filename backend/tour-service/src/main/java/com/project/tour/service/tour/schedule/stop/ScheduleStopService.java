@@ -5,8 +5,6 @@ import com.project.tour.dto.scheduler.stop.ScheduleStopResponse;
 import com.project.tour.dto.scheduler.stop.UpdateScheduleStopRequest;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.scheduler.schedule.ScheduleStopMapper;
-import com.project.tour.model.Schedule;
-import com.project.tour.model.ScheduleStop;
 import com.project.tour.repository.PortRepository;
 import com.project.tour.repository.tour.schedule.ScheduleRepository;
 import com.project.tour.repository.tour.schedule.ScheduleStopRepository;
@@ -14,9 +12,13 @@ import com.project.tour.repository.tour.schedule.ScheduleStopRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.project.tour.model.Tour;
+
 import com.project.tour.model.admin.Port;
 import com.project.tour.model.enums.tour.TourStatusTrip;
+import com.project.tour.model.scheduler.Schedule;
+import com.project.tour.model.scheduler.ScheduleStop;
+import com.project.tour.model.scheduler.Tour;
+
 import java.util.List;
 import java.util.UUID;
 

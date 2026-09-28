@@ -1,9 +1,10 @@
 package com.project.tour.repository.room;
 
-import com.project.tour.model.RoomType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import com.project.tour.model.admin.RoomType;
 
 import java.util.List;
 import java.util.Optional;

@@ -3,8 +3,8 @@ package com.project.tour.mapper.scheduler;
 import com.project.tour.dto.scheduler.tour.CreateTourRequest;
 import com.project.tour.dto.scheduler.tour.TourResponse;
 import com.project.tour.dto.scheduler.tour.UpdateTourRequest;
-import com.project.tour.model.Tour;
 import com.project.tour.model.admin.Cruise;
+import com.project.tour.model.scheduler.Tour;
 
 public final class TourMapper {
 

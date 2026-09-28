@@ -4,9 +4,9 @@ import com.project.tour.dto.operation.assignment.product.ProductTourAssignmentRe
 import com.project.tour.dto.operation.assignment.product.ProductTourAssignmentResponse;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.operation.assignment.ProductTourAssignmentMapper;
-import com.project.tour.model.Tour;
 import com.project.tour.model.admin.CruiseArea;
 import com.project.tour.model.convenience.product.ProductTour;
+import com.project.tour.model.scheduler.Tour;
 import com.project.tour.repository.convenience.ProductTourRepository;
 import com.project.tour.repository.cruise.CruiseAreaRepository;
 import com.project.tour.repository.tour.TourRepository;

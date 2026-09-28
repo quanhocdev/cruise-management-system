@@ -1,6 +1,5 @@
 package com.project.tour.model.admin;
 
-import com.project.tour.model.RoomType;
 import com.project.tour.model.enums.RoomStatus;
 import jakarta.persistence.*;
 

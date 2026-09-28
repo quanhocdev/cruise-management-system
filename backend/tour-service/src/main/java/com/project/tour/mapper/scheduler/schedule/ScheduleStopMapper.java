@@ -3,9 +3,9 @@ package com.project.tour.mapper.scheduler.schedule;
 import com.project.tour.dto.scheduler.stop.CreateScheduleStopRequest;
 import com.project.tour.dto.scheduler.stop.ScheduleStopResponse;
 import com.project.tour.dto.scheduler.stop.UpdateScheduleStopRequest;
-import com.project.tour.model.Schedule;
-import com.project.tour.model.ScheduleStop;
 import com.project.tour.model.admin.Port;
+import com.project.tour.model.scheduler.Schedule;
+import com.project.tour.model.scheduler.ScheduleStop;
 
 public class ScheduleStopMapper {
 

@@ -7,8 +7,8 @@ import com.project.tour.dto.operation.assignment.service.ServiceTourAssignmentRe
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.operation.assignment.ProductTourAssignmentMapper;
 import com.project.tour.mapper.operation.assignment.ServiceTourAssignmentMapper;
-import com.project.tour.model.Tour;
 import com.project.tour.model.admin.CruiseArea;
+import com.project.tour.model.scheduler.Tour;
 import com.project.tour.repository.convenience.ProductTourRepository;
 import com.project.tour.repository.convenience.ServiceTourRepository;
 import com.project.tour.repository.cruise.CruiseAreaRepository;

@@ -1,6 +1,7 @@
-package com.project.tour.model;
+package com.project.tour.model.scheduler;
 
 import com.project.tour.model.enums.ScheduleStatus;
+
 import jakarta.persistence.*;
 
 import java.time.LocalDate;

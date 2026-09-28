@@ -2,10 +2,10 @@ package com.project.tour.mapper.operation.assignment;
 
 import com.project.tour.dto.operation.assignment.product.ProductTourAssignmentRequest;
 import com.project.tour.dto.operation.assignment.product.ProductTourAssignmentResponse;
-import com.project.tour.model.Tour;
 import com.project.tour.model.admin.CruiseArea;
 import com.project.tour.model.admin.CruiseDeck;
 import com.project.tour.model.convenience.product.ProductTour;
+import com.project.tour.model.scheduler.Tour;
 
 import org.springframework.stereotype.Component;
 

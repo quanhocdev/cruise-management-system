@@ -6,6 +6,9 @@ import com.project.tour.model.*;
 import com.project.tour.model.admin.Cruise;
 import com.project.tour.model.admin.CruiseArea;
 import com.project.tour.model.admin.CruiseDeck;
+import com.project.tour.model.scheduler.Schedule;
+import com.project.tour.model.scheduler.ScheduleStop;
+import com.project.tour.model.scheduler.Tour;
 
 import java.util.List;
 import java.util.Map;

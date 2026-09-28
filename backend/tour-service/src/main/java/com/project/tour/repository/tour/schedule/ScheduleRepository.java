@@ -1,7 +1,7 @@
 package com.project.tour.repository.tour.schedule;
 
-import com.project.tour.model.Schedule;
 import com.project.tour.model.enums.ScheduleStatus;
+import com.project.tour.model.scheduler.Schedule;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

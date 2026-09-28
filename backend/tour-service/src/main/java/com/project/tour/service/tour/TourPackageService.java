@@ -8,8 +8,7 @@ import com.project.tour.exception.AppException;
 import com.project.tour.mapper.operation.TourPackageMapper;
 import com.project.tour.model.PackageBenefit;
 import com.project.tour.model.TourPackage;
-import com.project.tour.model.Tour;
-import com.project.tour.model.RoomType;
+import com.project.tour.model.admin.RoomType;
 import com.project.tour.repository.tour.PackageBenefitRepository;
 import com.project.tour.repository.tour.TourPackageRepository;
 import com.project.tour.service.redis.TourRedisService;
@@ -23,6 +22,7 @@ import com.project.tour.repository.room.RoomTypeRepository;
 import java.util.List;
 import java.util.UUID;
 import com.project.tour.model.enums.RoomStatus;
+import com.project.tour.model.scheduler.Tour;
 
 @Service
 @Transactional

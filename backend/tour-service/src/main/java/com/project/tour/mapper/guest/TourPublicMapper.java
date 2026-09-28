@@ -9,6 +9,9 @@ import com.project.tour.model.shore.VisitTour;
 import com.project.tour.model.convenience.product.ProductTour;
 import com.project.tour.model.convenience.service.ServiceTour;
 import com.project.tour.model.onboard.ActivityCruiseTour;
+import com.project.tour.model.scheduler.Schedule;
+import com.project.tour.model.scheduler.ScheduleStop;
+import com.project.tour.model.scheduler.Tour;
 
 import java.math.BigDecimal;
 import java.util.List;
