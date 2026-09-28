@@ -7,7 +7,7 @@ import financeService from "../services/financeService";
 import { useTourSocket } from "../hooks/useTourSocket";
 import CheckInPassengerModal from "../components/CheckInPassengerModal";
 import "../styles/layout.css";
-import "../styles/financeCheckIn.css";
+import "../styles/FinanceCheckIn.css";
 
 const FinanceCheckIn = () => {
   const [selectedTourId, setSelectedTourId] = useState("");

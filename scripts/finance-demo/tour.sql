@@ -1,0 +1,11 @@
+BEGIN;
+INSERT INTO tour.cruises (id,code,name,max_passengers,status,created_at,updated_at) VALUES ('3f96612d-a234-5a55-a7f0-e87e0f90c813','DEMO-POS-CRUISE','DEMO - Tau kiem thu POS',4,'ACTIVE','2026-09-28 09:00:00','2026-09-28 09:00:00') ON CONFLICT DO NOTHING;
+INSERT INTO tour.cruise_decks (id,deck_number,status,cruise_id) VALUES ('d4ec25c8-7195-56d0-8702-dae6f3986c8e',1,'ACTIVE','3f96612d-a234-5a55-a7f0-e87e0f90c813') ON CONFLICT DO NOTHING;
+INSERT INTO tour.room_types (id,name,capacity,price) VALUES ('7bd07726-5068-5906-b79b-d6f3d0433a96','DEMO - Phong doi POS',2,1000000) ON CONFLICT DO NOTHING;
+INSERT INTO tour.rooms (id,code,status,cruise_deck_id,room_type_id) VALUES ('628e5bc9-ee5c-545c-9ad5-c12cfd53b427','DEMO-101','ACTIVE','d4ec25c8-7195-56d0-8702-dae6f3986c8e','7bd07726-5068-5906-b79b-d6f3d0433a96') ON CONFLICT DO NOTHING;
+INSERT INTO tour.nfc_cards (id,card_uid,status,created_at,updated_at) VALUES ('a0bce219-a9b3-5534-a4c6-b1fad2da70c0','DEMO-NFC-001','AVAILABLE','2026-09-28 09:00:00','2026-09-28 09:00:00') ON CONFLICT DO NOTHING;
+INSERT INTO tour.rooms (id,code,status,cruise_deck_id,room_type_id) VALUES ('730eeb2c-7002-5bf4-9a54-59e03c23f3ae','DEMO-102','ACTIVE','d4ec25c8-7195-56d0-8702-dae6f3986c8e','7bd07726-5068-5906-b79b-d6f3d0433a96') ON CONFLICT DO NOTHING;
+INSERT INTO tour.nfc_cards (id,card_uid,status,created_at,updated_at) VALUES ('6e8cc2b6-e6e8-5c6c-9f6e-6ef7be86c83c','DEMO-NFC-002','AVAILABLE','2026-09-28 09:00:00','2026-09-28 09:00:00') ON CONFLICT DO NOTHING;
+INSERT INTO tour.tours (id,code,name,start_date,end_date,status_booking,status_trip,cruise_id,created_at,updated_at) VALUES ('5eb13aa7-2b23-5501-a2de-2143c9e4a747','DEMO-POS-2026','DEMO - Finance QR va NFC','2026-09-28','2026-10-02','CLOSED','IN_PROGRESS','3f96612d-a234-5a55-a7f0-e87e0f90c813','2026-09-28 09:00:00','2026-09-28 09:00:00') ON CONFLICT DO NOTHING;
+INSERT INTO tour.tour_packages (id,name,price,room_type_id,status,tour_id,created_at,updated_at) VALUES ('cea5b2f9-13f7-5b07-ad83-42e4ff99aa21','DEMO - Goi Finance',1000000,'7bd07726-5068-5906-b79b-d6f3d0433a96','ACTIVE','5eb13aa7-2b23-5501-a2de-2143c9e4a747','2026-09-28 09:00:00','2026-09-28 09:00:00') ON CONFLICT DO NOTHING;
+COMMIT;

@@ -17,34 +17,17 @@ public class CheckPassengerController {
         this.checkPassengerService = checkPassengerService;
     }
 
+    @GetMapping("/available-wristbands")
+    public java.util.List<?> availableWristbands() {
+        return checkPassengerService.getAvailableWristbands();
+    }
+
     @PostMapping("/{bookingId}/check-in-passenger")
     public ResponseEntity<?> checkInSinglePassenger(
             @PathVariable Long bookingId,
             @RequestBody PassengerCheckInRequest request) {
 
-        System.out.println("========================================");
-        System.out.println("[FINANCE] POST Check-in single passenger");
-        System.out.println("[FINANCE] bookingId = " + bookingId);
-        System.out.println("[FINANCE] passengerId = " + request.getPassengerId());
-        System.out.println("[FINANCE] roomId = " + request.getRoomId());
-        System.out.println("[FINANCE] nfcCode = " + request.getNfcCode());
-        System.out.println("========================================");
-
-        try {
-            checkPassengerService.processSinglePassengerCheckIn(bookingId, request);
-
-            return ResponseEntity.ok(Map.of(
-                    "success", true,
-                    "message", "Check-in thành công cho hành khách!"));
-        } catch (Exception e) {
-            // IN TRỌN VÉN LỖI 500 RA CONSOLE ĐỂ XEM NÓ BỊ Ở ĐÂU
-            System.err.println("========== LỖI CHECK-IN 500 CHI TIẾT ==========");
-            e.printStackTrace();
-            System.err.println("================================================");
-
-            return ResponseEntity.status(500).body(Map.of(
-                    "error", true,
-                    "message", e.getMessage()));
-        }
+        checkPassengerService.processSinglePassengerCheckIn(bookingId, request);
+        return ResponseEntity.ok(Map.of("success", true, "message", "Check-in thành công cho hành khách!"));
     }
 }

@@ -74,7 +74,7 @@ const financeService = {
 
   // Lấy danh sách vòng NFC còn trống (AVAILABLE)
   getAvailableWristbands: async () => {
-    const res = await api.get(`${BASE_URL}/available-wristbands`);
+    const res = await api.get(`${BASE_URL}/check-passenger/available-wristbands`);
     return res.data;
   },
 

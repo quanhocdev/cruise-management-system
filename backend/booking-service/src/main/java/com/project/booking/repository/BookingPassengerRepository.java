@@ -11,6 +11,10 @@ public interface BookingPassengerRepository extends JpaRepository<BookingPasseng
 
     List<BookingPassenger> findByBooking_CreatedByUserId(Long userId);
 
+    List<BookingPassenger> findAllByStatus(com.project.booking.model.enums.BookingPassengerStatus status);
+
+    boolean existsByNfcCardUidAndStatus(String uid, com.project.booking.model.enums.BookingPassengerStatus status);
+
     // Kiểm tra xem hành khách này có đang thuộc bất kỳ đơn hàng CONFIRMED nào không
     boolean existsByPassenger_IdAndBooking_Status(Long passengerId, BookingStatus status);
 

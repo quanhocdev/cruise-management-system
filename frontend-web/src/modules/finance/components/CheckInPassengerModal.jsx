@@ -109,7 +109,7 @@ export default function CheckInPassengerModal({
                 marginBottom: "4px",
               }}
             >
-              1. Chọn số phòng trống:
+              1. Chọn phòng phù hợp:
             </label>
             <select
               style={{

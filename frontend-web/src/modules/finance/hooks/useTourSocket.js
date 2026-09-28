@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 
 export const useTourSocket = (tourId, onBookingScanned) => {
   const [socketStatus, setSocketStatus] = useState("Đang ngắt kết nối");
+
+  const callbackRef = useRef(onBookingScanned);
+  callbackRef.current = onBookingScanned;
 
   useEffect(() => {
     // Nếu chưa có tourId thì không kết nối
@@ -15,9 +18,9 @@ export const useTourSocket = (tourId, onBookingScanned) => {
     setSocketStatus("Đang kết nối...");
 
     // Dùng thẳng port 8082 của booking-service (hoặc qua gateway nếu đã bỏ globalcors trùng)
-    const socket = new SockJS("http://localhost:8080/ws-booking");
     const stompClient = new Client({
-      webSocketFactory: () => socket,
+      webSocketFactory: () => new SockJS("http://localhost:8080/ws-booking"),
+      reconnectDelay: 3000,
       onConnect: () => {
         setSocketStatus("Đã kết nối Real-time");
 
@@ -25,8 +28,8 @@ export const useTourSocket = (tourId, onBookingScanned) => {
           try {
             const notification = JSON.parse(message.body);
             console.log("[WS] Nhận tín hiệu quét từ POS:", notification);
-            if (onBookingScanned) {
-              onBookingScanned(notification);
+            if (callbackRef.current) {
+              callbackRef.current(notification);
             }
           } catch (err) {
             console.error("Lỗi parse tin nhắn socket:", err);

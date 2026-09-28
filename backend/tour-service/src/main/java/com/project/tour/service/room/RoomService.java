@@ -30,17 +30,20 @@ public class RoomService {
         private final CruiseDeckRepository cruiseDeckRepository;
         private final RoomTypeRepository roomTypeRepository;
         private final TourPackageRepository tourPackageRepository;
+        private final com.project.tour.repository.tour.TourRepository tourRepository;
 
         public RoomService(
                         RoomRepository roomRepository,
                         CruiseDeckRepository cruiseDeckRepository,
                         RoomTypeRepository roomTypeRepository,
-                        TourPackageRepository tourPackageRepository) {
+                        TourPackageRepository tourPackageRepository,
+                        com.project.tour.repository.tour.TourRepository tourRepository) {
 
                 this.roomRepository = roomRepository;
                 this.cruiseDeckRepository = cruiseDeckRepository;
                 this.roomTypeRepository = roomTypeRepository;
                 this.tourPackageRepository = tourPackageRepository;
+                this.tourRepository = tourRepository;
         }
 
         // =====================================================
@@ -282,12 +285,16 @@ public class RoomService {
                 TourPackage tourPackage = tourPackageRepository.findById(tourPackageId)
                                 .orElseThrow(() -> new AppException("Tour package not found", HttpStatus.NOT_FOUND));
 
+                var tour = tourRepository.findById(tourPackage.getTourId())
+                        .orElseThrow(() -> new AppException("Tour not found", HttpStatus.NOT_FOUND));
+                if (tour.getCruise() == null) return List.of();
                 UUID roomTypeId = tourPackage.getRoomTypeId();
 
                 // 2. Lấy danh sách phòng trống dựa theo roomTypeId đã tìm được
                 List<Room> rooms = roomRepository.findAllByRoomType_IdAndStatus(roomTypeId, RoomStatus.ACTIVE);
 
                 return rooms.stream()
+                                .filter(room -> room.getCruiseDeck().getCruise().getId().equals(tour.getCruise().getId()))
                                 .map(RoomMapper::toResponse)
                                 .toList();
         }
