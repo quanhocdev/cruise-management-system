@@ -15,6 +15,9 @@ interface PosApiService {
 
     @GET("api/convenience/services")
     suspend fun getConvenienceServices(): List<ConvenienceServiceResponse>
+
+    @GET("api/shore/visit-tours")
+    suspend fun getShoreVisitTours(): List<ShoreVisitTourResponse>
 }
 
 // DTO khớp với bên Backend
@@ -44,4 +47,17 @@ data class ConvenienceServiceResponse(
     val durationMinutes: Int?,
     val maxPassengers: Int?,
     val imageUrl: String?
+)
+
+data class ShoreVisitTourResponse(
+    val id: String,
+    val tourId: String?,
+    val scheduleStopId: String?,
+    val name: String,
+    val description: String?,
+    val startTime: String?,
+    val endTime: String?,
+    val maxPassengers: Int?,
+    val price: Double?,
+    val status: String?
 )

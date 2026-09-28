@@ -40,15 +40,19 @@ fun PosManualEntryScreen(
     ) {
         TextButton(onClick = onBackClick, enabled = !saving) { Text("← Quay lại POS") }
         Text(
-            if (role == PosRole.ONBOARD) "Nhập mã vé khách" else "Nhập mã booking",
+            when (role) {
+                PosRole.ONBOARD -> "Nhập mã vé khách"
+                PosRole.SHORE -> "Nhập mã khách tham quan"
+                else -> "Nhập mã booking"
+            },
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold
         )
         Text(
-            if (role == PosRole.ONBOARD) {
-                "Nhập nguyên nội dung QR trên vé. Tính năng này dùng để kiểm thử trên máy ảo hoặc khi camera không đọc được mã."
-            } else {
-                "Nhập nguyên mã định danh in dưới QR hoặc trong email của hành khách."
+            when (role) {
+                PosRole.ONBOARD -> "Nhập nguyên nội dung QR trên vé. Tính năng này dùng để kiểm thử trên máy ảo hoặc khi camera không đọc được mã."
+                PosRole.SHORE -> "Nhập nguyên nội dung QR của khách. Dùng để kiểm thử máy ảo hoặc khi camera không đọc được mã."
+                else -> "Nhập nguyên mã định danh in dưới QR hoặc trong email của hành khách."
             },
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -59,8 +63,8 @@ fun PosManualEntryScreen(
                 error = null
             },
             modifier = Modifier.fillMaxWidth(),
-            label = { Text(if (role == PosRole.ONBOARD) "Mã QR vé" else "Mã booking") },
-            placeholder = { Text(if (role == PosRole.ONBOARD) "Nội dung in dưới QR" else "Mã trong email xác nhận") },
+            label = { Text(if (role == PosRole.FINANCE) "Mã booking" else "Mã QR vé") },
+            placeholder = { Text(if (role == PosRole.FINANCE) "Mã trong email xác nhận" else "Nội dung in dưới QR") },
             enabled = !saving,
             minLines = 2,
             shape = RoundedCornerShape(16.dp)
@@ -93,13 +97,13 @@ fun PosManualEntryScreen(
                 CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
                 Spacer(Modifier.width(8.dp))
             }
-            Text(if (role == PosRole.ONBOARD) "Kiểm tra mã vé" else "Gửi mã booking")
+            Text(if (role == PosRole.FINANCE) "Gửi mã booking" else "Kiểm tra mã vé")
         }
         Text(
-            if (role == PosRole.ONBOARD) {
-                "Mã được lưu trên thiết bị. Chưa được coi là đã lên tàu cho đến khi backend xác nhận thành công."
-            } else {
-                "Mã được lưu trên thiết bị trước khi gửi. Hoàn tất thủ tục tại quầy lễ tân sau khi gửi mã."
+            when (role) {
+                PosRole.ONBOARD -> "Mã được lưu trên thiết bị. Chưa được coi là đã lên tàu cho đến khi backend xác nhận thành công."
+                PosRole.SHORE -> "Mã được lưu trên thiết bị. Chưa xác nhận khách đã rời tàu hoặc quay lại."
+                else -> "Mã được lưu trên thiết bị trước khi gửi. Hoàn tất thủ tục tại quầy lễ tân sau khi gửi mã."
             },
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant

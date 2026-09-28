@@ -23,7 +23,7 @@ fun PosDashboardScreen(
             username, onLogoutClick, onQrClick, onManualClick, onHistoryClick
         )
         PosRole.SHORE -> ShorePosDashboardScreen(
-            username, onLogoutClick, onNfcClick, onHistoryClick
+            username, onLogoutClick, onQrClick, onManualClick, onHistoryClick
         )
     }
 }

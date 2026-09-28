@@ -7,7 +7,8 @@ import androidx.compose.ui.graphics.Color
 fun ShorePosDashboardScreen(
     username: String,
     onLogoutClick: () -> Unit,
-    onNfcClick: () -> Unit,
+    onQrClick: () -> Unit,
+    onManualClick: () -> Unit,
     onHistoryClick: () -> Unit
 ) {
     RolePosDashboard(
@@ -16,13 +17,19 @@ fun ShorePosDashboardScreen(
         accent = PosRole.SHORE.accent(),
         actions = listOf(
             PosDashboardAction(
-                "Quét NFC người tham gia",
-                "Xác định hành khách tham gia chuyến tham quan bờ",
-                "NFC",
-                onNfcClick
+                "Quét QR khách tham quan",
+                "Kiểm tra khách trước khi rời tàu hoặc khi quay lại",
+                "QR",
+                onQrClick
+            ),
+            PosDashboardAction(
+                "Nhập mã vé",
+                "Dùng khi máy ảo hoặc camera không đọc được QR",
+                "123",
+                onManualClick
             )
         ),
-        notice = "Đọc vòng NFC tại điểm tham quan. Bản ghi đọc vòng chưa xác nhận khách đã khởi hành hoặc trở về.",
+        notice = "Chọn đúng chuyến tham quan rồi kiểm tra khách. Lượt quét chỉ là bản ghi cục bộ cho tới khi backend xác nhận rời tàu hoặc quay lại.",
         onLogoutClick = onLogoutClick,
         onHistoryClick = onHistoryClick
     )

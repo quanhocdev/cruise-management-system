@@ -41,7 +41,7 @@ fun PosHistoryScreen(role: PosRole, onBackClick: () -> Unit, onIdentify: (String
     val transactions by queue.observeAll(role.apiRole).collectAsState(initial = emptyList())
     val visibleTransactions = when (role) {
         PosRole.FINANCE -> transactions
-        PosRole.ONBOARD -> transactions.filter { it.scanType == "QR" }
+        PosRole.ONBOARD, PosRole.SHORE -> transactions.filter { it.scanType == "QR" }
         else -> transactions.filter { it.scanType == "NFC" }
     }
 
@@ -59,7 +59,7 @@ fun PosHistoryScreen(role: PosRole, onBackClick: () -> Unit, onIdentify: (String
         Text(
             "${visibleTransactions.size} bản ghi ${when (role) {
                 PosRole.FINANCE -> "QR/NFC"
-                PosRole.ONBOARD -> "QR"
+                PosRole.ONBOARD, PosRole.SHORE -> "QR"
                 else -> "NFC"
             }} lưu trên thiết bị",
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -103,6 +103,9 @@ fun PosHistoryScreen(role: PosRole, onBackClick: () -> Unit, onIdentify: (String
                             }
                             if (role == PosRole.ONBOARD && transaction.scanType == "QR") {
                                 TextButton(onClick = { onIdentify(transaction.localId) }) { Text("Xem trạng thái vé") }
+                            }
+                            if (role == PosRole.SHORE && transaction.scanType == "QR") {
+                                TextButton(onClick = { onIdentify(transaction.localId) }) { Text("Xem lượt tham quan") }
                             }
                             Text(
                                 DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(transaction.createdAt)),
