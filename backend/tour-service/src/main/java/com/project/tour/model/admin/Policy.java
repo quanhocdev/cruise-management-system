@@ -1,4 +1,4 @@
-package com.project.tour.model;
+package com.project.tour.model.admin;
 
 import com.project.tour.model.enums.policy.PolicyType;
 import com.project.tour.model.enums.policy.PolicyStatus;

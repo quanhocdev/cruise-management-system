@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-import com.project.tour.model.Policy;
 import com.project.tour.model.enums.policy.PolicyStatus;
 
 @Entity

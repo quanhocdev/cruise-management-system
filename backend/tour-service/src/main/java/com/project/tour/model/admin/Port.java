@@ -1,4 +1,4 @@
-package com.project.tour.model;
+package com.project.tour.model.admin;
 
 import com.project.tour.model.enums.PortStatus;
 import jakarta.persistence.*;
@@ -46,19 +46,19 @@ public class Port {
     private LocalDateTime updatedAt;
 
     @PrePersist
-    protected void onCreate()   {
+    protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();
 
         createdAt = now;
         updatedAt = now;
 
-        if (status == null)  {
+        if (status == null) {
             status = PortStatus.ACTIVE;
         }
     }
 
     @PreUpdate
-    protected void onUpdate()   {
+    protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
 
@@ -66,7 +66,7 @@ public class Port {
         return id;
     }
 
-    public void setId(UUID id)  {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -74,7 +74,7 @@ public class Port {
         return name;
     }
 
-    public void setName(String name)    {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -82,23 +82,23 @@ public class Port {
         return city;
     }
 
-    public void setCity(String city)   {
+    public void setCity(String city) {
         this.city = city;
     }
 
-    public String getCountry()  {
+    public String getCountry() {
         return country;
     }
 
-    public void setCountry(String country)    {
+    public void setCountry(String country) {
         this.country = country;
     }
 
-    public String getAddress()  {
+    public String getAddress() {
         return address;
     }
 
-    public void setAddress(String address)  {
+    public void setAddress(String address) {
         this.address = address;
     }
 
@@ -106,27 +106,27 @@ public class Port {
         return latitude;
     }
 
-    public void setLatitude(BigDecimal latitude)    {
+    public void setLatitude(BigDecimal latitude) {
         this.latitude = latitude;
     }
 
-    public BigDecimal getLongitude()   {
+    public BigDecimal getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(BigDecimal longitude)    {
+    public void setLongitude(BigDecimal longitude) {
         this.longitude = longitude;
     }
 
-    public String getDescription()  {
+    public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description)  {
+    public void setDescription(String description) {
         this.description = description;
     }
 
-    public PortStatus getStatus()   {
+    public PortStatus getStatus() {
         return status;
     }
 
@@ -138,7 +138,7 @@ public class Port {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt)  {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
@@ -146,7 +146,7 @@ public class Port {
         return updatedAt;
     }
 
-    public void setUpdatedAt(LocalDateTime updatedAt)   {
+    public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
 }

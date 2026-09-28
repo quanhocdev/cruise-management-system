@@ -3,8 +3,8 @@ package com.project.tour.mapper.admin.policy;
 import com.project.tour.dto.admin.policy.booking.BookingPolicyResponse;
 import com.project.tour.dto.admin.policy.booking.CreateBookingPolicyRequest;
 import com.project.tour.dto.admin.policy.booking.UpdateBookingPolicyRequest;
-import com.project.tour.model.Policy;
 import com.project.tour.model.admin.BookingPolicy;
+import com.project.tour.model.admin.Policy;
 
 public class BookingPolicyMapper {
 

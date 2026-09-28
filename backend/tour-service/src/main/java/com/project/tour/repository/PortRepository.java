@@ -1,12 +1,12 @@
 package com.project.tour.repository;
 
-import com.project.tour.model.Port;
+import com.project.tour.model.admin.Port;
 import com.project.tour.model.enums.PortStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.UUID;
 
-public interface PortRepository extends JpaRepository<Port, UUID>   {
+public interface PortRepository extends JpaRepository<Port, UUID> {
     List<Port> findAllByStatusOrderByNameAsc(PortStatus status);
 }

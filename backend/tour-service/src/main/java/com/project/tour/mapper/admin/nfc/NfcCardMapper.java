@@ -1,7 +1,8 @@
 package com.project.tour.mapper.admin.nfc;
 
 import com.project.tour.dto.admin.nfc.NfcCardResponse;
-import com.project.tour.model.NfcCard;
+import com.project.tour.model.admin.NfcCard;
+
 import org.springframework.stereotype.Component;
 
 @Component

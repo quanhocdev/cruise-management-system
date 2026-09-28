@@ -1,4 +1,4 @@
-package com.project.tour.model;
+package com.project.tour.model.admin;
 
 import com.project.tour.model.enums.NfcCardStatus;
 import jakarta.persistence.*;

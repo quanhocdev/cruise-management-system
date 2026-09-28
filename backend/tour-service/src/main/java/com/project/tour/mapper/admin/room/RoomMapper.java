@@ -2,9 +2,9 @@ package com.project.tour.mapper.admin.room;
 
 import com.project.tour.dto.admin.room.RoomResponse;
 import com.project.tour.dto.admin.room.UpdateRoomRequest;
-import com.project.tour.model.Room;
 import com.project.tour.model.RoomType;
 import com.project.tour.model.admin.CruiseDeck;
+import com.project.tour.model.admin.Room;
 
 public class RoomMapper {
 

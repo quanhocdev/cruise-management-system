@@ -1,6 +1,6 @@
 package com.project.tour.repository;
 
-import com.project.tour.model.NfcCard;
+import com.project.tour.model.admin.NfcCard;
 import com.project.tour.model.enums.NfcCardStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

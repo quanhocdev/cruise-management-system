@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.project.tour.model.admin.Port;
+
 @Entity
 @Table(name = "schedule_stops", uniqueConstraints = {
         @UniqueConstraint(name = "uk_schedule_stops_schedule_order", columnNames = { "schedule_id", "stop_order" })

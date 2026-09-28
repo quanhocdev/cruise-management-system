@@ -7,7 +7,7 @@ import com.project.tour.dto.admin.port.PortResponse;
 import com.project.tour.dto.admin.port.UpdatePortRequest;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.admin.port.PortMapper;
-import com.project.tour.model.Port;
+import com.project.tour.model.admin.Port;
 import com.project.tour.model.enums.PortStatus;
 import com.project.tour.repository.PortRepository;
 
