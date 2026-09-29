@@ -262,4 +262,32 @@ public class TourPackageService {
             return dto;
         }).toList();
     }
+
+    @Transactional(readOnly = true)
+    public Integer getPackageRoomCapacity(UUID tourPackageId) {
+
+        TourPackage tourPackage = tourPackageRepository.findById(tourPackageId)
+                .orElseThrow(() -> new AppException(
+                        "Tour package not found",
+                        HttpStatus.NOT_FOUND));
+
+        if (tourPackage.getRoomTypeId() == null) {
+            throw new AppException(
+                    "Tour package does not have a room type",
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        RoomType roomType = roomTypeRepository.findById(tourPackage.getRoomTypeId())
+                .orElseThrow(() -> new AppException(
+                        "Room type not found",
+                        HttpStatus.NOT_FOUND));
+
+        if (roomType.getCapacity() == null || roomType.getCapacity() <= 0) {
+            throw new AppException(
+                    "Room type capacity is invalid",
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        return roomType.getCapacity();
+    }
 }
