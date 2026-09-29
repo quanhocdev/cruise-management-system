@@ -16,6 +16,7 @@ public class TourRoomTypeClient {
     public TourRoomTypeClient(
             RestClient.Builder restClientBuilder,
             @Value("${tour-service.url}") String tourServiceUrl) {
+
         this.restClient = restClientBuilder
                 .baseUrl(tourServiceUrl)
                 .build();
@@ -23,11 +24,11 @@ public class TourRoomTypeClient {
 
     @Retry(name = "tourService")
     @CircuitBreaker(name = "tourService")
-    public Integer getRoomTypeCapacity(UUID roomTypeId) {
+    public Integer getPackageRoomCapacity(UUID tourPackageId) {
 
         return restClient
                 .get()
-                .uri("/internal/room-types/{roomTypeId}/capacity", roomTypeId)
+                .uri("/internal/tour-packages/{tourPackageId}/room-capacity", tourPackageId)
                 .retrieve()
                 .body(Integer.class);
     }
