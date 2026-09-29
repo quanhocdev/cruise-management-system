@@ -6,11 +6,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 
 import java.util.Arrays;
@@ -20,9 +24,10 @@ public class SecurityConfig {
 
         @Bean
         public SecurityFilterChain securityFilterChain(
-                        org.springframework.security.config.annotation.web.builders.HttpSecurity http,
+                        HttpSecurity http,
                         BearerTokenResolver bearerTokenResolver,
-                        JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
+                        JwtAuthenticationConverter jwtAuthenticationConverter,
+                        InternalApiKeyFilter internalApiKeyFilter) throws Exception {
 
                 return http
                                 .csrf(csrf -> csrf.disable())
@@ -36,11 +41,10 @@ public class SecurityConfig {
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**")
                                                 .permitAll()
 
-                                                // Public/internal endpoints
+                                                // Public endpoints
                                                 .requestMatchers(
                                                                 "/actuator/health",
                                                                 "/actuator/info",
-                                                                "/internal/**",
                                                                 "/api/public/**")
                                                 .permitAll()
 
@@ -56,24 +60,37 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/convenience/**")
                                                 .hasRole("CONVENIENCE")
 
+                                                // Operation
                                                 .requestMatchers("/api/operation/**")
                                                 .hasRole("OPERATION")
 
+                                                // Finance
                                                 .requestMatchers("/api/finance/**")
                                                 .hasRole("FINANCE")
 
+                                                // Onboard
                                                 .requestMatchers("/api/onboard/**")
                                                 .hasRole("ONBOARD")
 
+                                                // Shore
                                                 .requestMatchers("/api/shore/**")
                                                 .hasRole("SHORE")
 
+                                                // Passenger
                                                 .requestMatchers("/api/passenger/**")
                                                 .hasRole("PASSENGER")
+
+                                                // Internal endpoints
+                                                .requestMatchers("/internal/**")
+                                                .permitAll()
 
                                                 // Everything else
                                                 .anyRequest()
                                                 .authenticated())
+
+                                .addFilterBefore(
+                                                internalApiKeyFilter,
+                                                BearerTokenAuthenticationFilter.class)
 
                                 .oauth2ResourceServer(resourceServer -> resourceServer
                                                 .bearerTokenResolver(bearerTokenResolver)
@@ -132,5 +149,10 @@ public class SecurityConfig {
                                 .filter(value -> !value.isBlank())
                                 .findFirst()
                                 .orElse(null);
+        }
+
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
         }
 }

@@ -11,15 +11,21 @@ import java.util.UUID;
 @Component
 public class TourRoomTypeClient {
 
+    private static final String INTERNAL_API_KEY_HEADER = "X-Internal-API-Key";
+
     private final RestClient restClient;
+    private final String internalApiKey;
 
     public TourRoomTypeClient(
             RestClient.Builder restClientBuilder,
-            @Value("${tour-service.url}") String tourServiceUrl) {
+            @Value("${tour-service.url}") String tourServiceUrl,
+            @Value("${internal.api-key}") String internalApiKey) {
 
         this.restClient = restClientBuilder
                 .baseUrl(tourServiceUrl)
                 .build();
+
+        this.internalApiKey = internalApiKey;
     }
 
     @Retry(name = "tourService")
@@ -28,7 +34,12 @@ public class TourRoomTypeClient {
 
         return restClient
                 .get()
-                .uri("/internal/tour-packages/{tourPackageId}/room-capacity", tourPackageId)
+                .uri(
+                        "/internal/tour-packages/{tourPackageId}/room-capacity",
+                        tourPackageId)
+                .header(
+                        INTERNAL_API_KEY_HEADER,
+                        internalApiKey)
                 .retrieve()
                 .body(Integer.class);
     }
