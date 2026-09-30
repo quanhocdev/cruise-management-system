@@ -214,18 +214,21 @@ flowchart LR
 
 ## 🧰 Tech Stack
 
-| Layer                     | Technology                   |
-| ------------------------- | ---------------------------- |
-| ⚙️ Backend                | Spring Boot                  |
-| 🌐 Web frontend           | React, JavaScript, HTML, CSS |
-| 📱 Mobile                 | Android, Jetpack Compose     |
-| 📨 Messaging              | Apache Kafka                 |
-| 🗄️ Database               | PostgreSQL (with ORM)        |
-| ⚡ Cache / temporary data | Redis, Caffeine (e.g. OTP)   |
-| ☁️ Media storage          | Cloudinary (images, video)   |
-| 🔴 Real-time              | WebSocket, WebRTC            |
-| 🔑 Auth                   | JWT, Spring Security OAuth2  |
-| 🐳 Deployment             | Docker                       |
+| Layer                     | Technology                        |
+| ------------------------- | --------------------------------- |
+| ⚙️ Backend                | Spring Boot                       |
+| 🌐 Web frontend           | React, JavaScript, HTML, CSS      |
+| 📱 Mobile                 | Android, Jetpack Compose          |
+| 📨 Messaging              | Apache Kafka                      |
+| 🗄️ Database               | PostgreSQL (with ORM)             |
+| ⚡ Cache / temporary data | Redis, Caffeine (e.g. OTP)        |
+| ☁️ Media storage          | Cloudinary (images, video)        |
+| 🔴 Real-time              | WebSocket, WebRTC                 |
+| 🔑 Auth                   | JWT, Spring Security OAuth2       |
+| 💳 Payment                | VNPay (sandbox)                   |
+| 🗺️ Maps / geolocation     | Mapbox, Nominatim (OpenStreetMap) |
+| ✉️ Email                  | SMTP (Gmail)                      |
+| 🐳 Deployment             | Docker                            |
 
 ---
 
@@ -264,8 +267,8 @@ flowchart LR
 ### 1️⃣ Clone the repository
 
 ```bash
-git clone <your-repository-url>
-cd <your-repository-folder>
+git clone https://github.com/quanhocdev/cruise-management-system.git
+cd cruise-management-system
 cp .env.example .env   # then fill in your values
 ```
 
@@ -309,20 +312,86 @@ Open the `frontend-android` folder in Android Studio, sync Gradle, and run it on
 
 <br/>
 
-Copy `.env.example` to `.env` and set the following variables (names are examples; adjust to your setup):
+Copy `.env.example` to `.env` and replace every `your_..._here` placeholder with your own value.
 
-| Variable                                                               | Description                  |
-| ---------------------------------------------------------------------- | ---------------------------- |
-| `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`                                 | PostgreSQL connection        |
-| `REDIS_HOST`, `REDIS_PORT`                                             | Redis connection             |
-| `KAFKA_BOOTSTRAP_SERVERS`                                              | Kafka brokers                |
-| `JWT_ISSUER_URI` / `JWT_SECRET`                                        | JWT / OAuth2 configuration   |
-| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Cloudinary credentials       |
-| `MAIL_HOST`, `MAIL_USERNAME`, `MAIL_PASSWORD`                          | Email delivery for QR codes  |
-| `PAYMENT_*`                                                            | Payment provider credentials |
+**🗄️ Database (PostgreSQL)**
+
+| Variable            | Description                      |
+| ------------------- | -------------------------------- |
+| `POSTGRES_USER`     | Database username                |
+| `POSTGRES_PASSWORD` | Database password                |
+| `POSTGRES_DB`       | Default database name            |
+| `AUTH_DB_NAME`      | Database name for `auth-service` |
+| `TOUR_DB_NAME`      | Database name for `tour-service` |
+| `DB_PORT`           | Database port                    |
+
+**🛠️ pgAdmin**
+
+| Variable           | Description                |
+| ------------------ | -------------------------- |
+| `PGADMIN_EMAIL`    | Login email for pgAdmin    |
+| `PGADMIN_PASSWORD` | Login password for pgAdmin |
+
+**⚡ Redis**
+
+| Variable     | Description |
+| ------------ | ----------- |
+| `REDIS_HOST` | Redis host  |
+| `REDIS_PORT` | Redis port  |
+
+**🌍 CORS**
+
+| Variable               | Description                                |
+| ---------------------- | ------------------------------------------ |
+| `CORS_ALLOWED_ORIGINS` | Allowed frontend origins (comma-separated) |
+
+**✉️ Mail (SMTP)**
+
+| Variable                     | Description                                         |
+| ---------------------------- | --------------------------------------------------- |
+| `MAIL_USERNAME`              | Sender email address (for example, a Gmail account) |
+| `MAIL_PASSWORD`              | App password for the sender account                 |
+| `MAIL_HOST`                  | SMTP host (for example, `smtp.gmail.com`)           |
+| `MAIL_PORT`                  | SMTP port (for example, `587`)                      |
+| `NOTIFICATION_EMAIL_ENABLED` | `true` to send real emails, `false` to disable      |
+
+**🗺️ Maps and geolocation**
+
+| Variable              | Description                          |
+| --------------------- | ------------------------------------ |
+| `MAPBOX_PUBLIC_TOKEN` | Mapbox public access token           |
+| `MAPBOX_SECRET_TOKEN` | Mapbox secret access token           |
+| `NOMINATIM_URL`       | Nominatim reverse-geocoding endpoint |
+
+**🔑 JWT and internal security**
+
+| Variable                 | Description                                   |
+| ------------------------ | --------------------------------------------- |
+| `JWT_SECRET`             | Signing secret, at least 32 random characters |
+| `JWT_ACCESS_EXPIRATION`  | Access token lifetime in milliseconds         |
+| `JWT_REFRESH_EXPIRATION` | Refresh token lifetime in milliseconds        |
+| `INTERNAL_API_KEY`       | Long random key for service-to-service calls  |
+
+**☁️ Cloudinary**
+
+| Variable                | Description           |
+| ----------------------- | --------------------- |
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name |
+| `CLOUDINARY_API_KEY`    | Cloudinary API key    |
+| `CLOUDINARY_API_SECRET` | Cloudinary API secret |
+
+**💳 VNPay (sandbox)**
+
+| Variable            | Description                                       |
+| ------------------- | ------------------------------------------------- |
+| `VNPAY_PAYMENT_URL` | VNPay payment gateway URL                         |
+| `VNPAY_RETURN_URL`  | URL VNPay redirects the customer to after payment |
+| `VNPAY_IPN_URL`     | URL VNPay calls to notify the payment result      |
+| `VNPAY_TMN_CODE`    | Merchant terminal code                            |
+| `VNPAY_HASH_SECRET` | Secret key used to sign requests                  |
 
 > [!WARNING]
-> Never commit secrets. Use a `.env` file or your secret manager and keep it out of version control.
+> Never commit your real `.env` file. Only `.env.example` (with placeholders) belongs in version control.
 
 </details>
 
@@ -354,7 +423,12 @@ _Specify your license here (for example, MIT)._
 
 ## 📬 Contact
 
-_Add author name, email, or links here._
+| 👤 Author           | 📧 Email                                                      | 🔗 GitHub                                    |
+| ------------------- | ------------------------------------------------------------- | -------------------------------------------- |
+| **Huỳnh Minh Quân** | [minhquanthcs257@gmail.com](mailto:minhquanthcs257@gmail.com) | [@quanhocdev](https://github.com/quanhocdev) |
+| **Trịnh Quốc Đạt**  | [zatdat02@gmail.com](mailto:zatdat02@gmail.com)               |                                              |
+
+Project repository: [github.com/quanhocdev/cruise-management-system](https://github.com/quanhocdev/cruise-management-system)
 
 <div align="center">
 
