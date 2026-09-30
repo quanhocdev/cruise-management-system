@@ -2,7 +2,6 @@ package com.project.tour.service.passenger;
 
 import com.project.tour.dto.passenger.*;
 import com.project.tour.exception.AppException;
-import com.project.tour.model.*;
 import com.project.tour.model.admin.Cruise;
 import com.project.tour.model.admin.Room;
 import com.project.tour.model.admin.RoomType;
@@ -17,8 +16,6 @@ import com.project.tour.repository.tour.schedule.ScheduleRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;

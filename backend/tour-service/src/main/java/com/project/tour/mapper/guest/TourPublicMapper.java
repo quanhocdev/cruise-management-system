@@ -2,7 +2,6 @@ package com.project.tour.mapper.guest;
 
 import com.project.tour.dto.guest.PublicTourDetailResponse;
 import com.project.tour.dto.guest.PublicTourSummaryResponse;
-import com.project.tour.model.*;
 import com.project.tour.model.admin.Cruise;
 import com.project.tour.model.admin.Port;
 import com.project.tour.model.shore.VisitTour;

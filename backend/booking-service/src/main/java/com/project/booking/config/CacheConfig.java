@@ -13,7 +13,7 @@ public class CacheConfig {
     @Bean
     public Cache<String, String> serviceTokenCache() {
         return Caffeine.newBuilder()
-                .expireAfterWrite(Duration.ofMinutes(29))
+                .expireAfterWrite(Duration.ofMinutes(2))
                 .maximumSize(10)
                 .build();
     }

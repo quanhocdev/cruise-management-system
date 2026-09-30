@@ -43,8 +43,18 @@ public class ServiceTokenClient {
         String cachedToken = serviceTokenCache.getIfPresent(CACHE_KEY);
 
         if (cachedToken != null) {
+
+            System.out.println(
+                    ">>> [OAUTH2 CACHE] Lấy service token từ Caffeine");
+
             return cachedToken;
         }
+
+        System.out.println(
+                ">>> [OAUTH2 CACHE] Không tìm thấy token trong Caffeine");
+
+        System.out.println(
+                ">>> [OAUTH2] Đang gọi Auth Service để lấy token mới...");
 
         return requestNewAccessToken();
     }
@@ -55,24 +65,41 @@ public class ServiceTokenClient {
         String cachedToken = serviceTokenCache.getIfPresent(CACHE_KEY);
 
         if (cachedToken != null) {
+
+            System.out.println(
+                    ">>> [OAUTH2 CACHE] Token đã được thread khác lấy trước đó");
+
             return cachedToken;
         }
 
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
 
-        formData.add("grant_type", "client_credentials");
-        formData.add("scope", scope);
+        formData.add(
+                "grant_type",
+                "client_credentials");
+
+        formData.add(
+                "scope",
+                scope);
+
+        System.out.println(
+                ">>> [OAUTH2] POST /oauth2/token");
 
         ServiceTokenResponse response = restClient
                 .post()
                 .uri("/oauth2/token")
-                .headers(headers -> headers.setBasicAuth(clientId, clientSecret))
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .headers(headers -> headers.setBasicAuth(
+                        clientId,
+                        clientSecret))
+                .contentType(
+                        MediaType.APPLICATION_FORM_URLENCODED)
                 .body(formData)
                 .retrieve()
                 .body(ServiceTokenResponse.class);
 
-        if (response == null || response.getAccessToken() == null) {
+        if (response == null
+                || response.getAccessToken() == null) {
+
             throw new IllegalStateException(
                     "Auth Service không trả về service access token");
         }
@@ -80,6 +107,12 @@ public class ServiceTokenClient {
         serviceTokenCache.put(
                 CACHE_KEY,
                 response.getAccessToken());
+
+        System.out.println(
+                ">>> [OAUTH2 CACHE] Đã lưu service token vào Caffeine"
+                        + " | expires_in="
+                        + response.getExpiresIn()
+                        + "s");
 
         return response.getAccessToken();
     }

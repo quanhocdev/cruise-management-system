@@ -2,7 +2,6 @@ package com.project.tour.mapper.guest;
 
 import com.project.common.event.TourAssignmentEvent;
 import com.project.common.event.TourMasterSyncEvent;
-import com.project.tour.model.*;
 import com.project.tour.model.admin.Cruise;
 import com.project.tour.model.admin.CruiseArea;
 import com.project.tour.model.admin.CruiseDeck;
