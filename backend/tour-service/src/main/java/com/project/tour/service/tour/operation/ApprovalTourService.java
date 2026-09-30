@@ -5,17 +5,17 @@ import com.project.common.event.TourAssignmentEvent;
 import com.project.common.event.TourMasterSyncEvent;
 import com.project.tour.dto.scheduler.tour.TourResponse;
 import com.project.tour.exception.AppException;
-import com.project.tour.mapper.tour.TourMapper;
-import com.project.tour.mapper.tour.TourMasterSyncMapper;
-import com.project.tour.model.Cruise;
-import com.project.tour.model.CruiseArea;
-import com.project.tour.model.CruiseDeck;
-import com.project.tour.model.Schedule;
-import com.project.tour.model.ScheduleStop;
-import com.project.tour.model.Tour;
-import com.project.tour.model.TourPackage;
+import com.project.tour.mapper.guest.TourMasterSyncMapper;
+import com.project.tour.mapper.scheduler.TourMapper;
+import com.project.tour.model.admin.Cruise;
+import com.project.tour.model.admin.CruiseArea;
+import com.project.tour.model.admin.CruiseDeck;
 import com.project.tour.model.enums.RoomStatus;
 import com.project.tour.model.enums.tour.TourStatusTrip;
+import com.project.tour.model.operation.TourPackage;
+import com.project.tour.model.scheduler.Schedule;
+import com.project.tour.model.scheduler.ScheduleStop;
+import com.project.tour.model.scheduler.Tour;
 import com.project.tour.repository.cruise.CruiseAreaRepository;
 import com.project.tour.repository.cruise.CruiseDeckRepository;
 import com.project.tour.repository.room.RoomRepository;
@@ -112,22 +112,6 @@ public class ApprovalTourService {
                 // Đổi trạng thái tour
                 tour.setStatusTrip(TourStatusTrip.APPROVED);
                 Tour savedTour = tourRepository.save(tour);
-
-                // KHỞI TẠO SỐ LƯỢNG PHÒNG TRỐNG LÊN REDIS THEO TỪNG TOUR PACKAGE
-                List<TourPackage> packages = tourPackageRepository.findAllByTourId(tourId);
-                UUID cruiseId = tour.getCruise().getId();
-
-                for (TourPackage pkg : packages) {
-                        if (pkg.getRoomTypeId() != null) {
-                                // Chỉ đếm những phòng đang ở trạng thái ACTIVE
-                                long physicalRoomCount = roomRepository
-                                                .countByCruiseDeck_CruiseIdAndRoomTypeIdAndStatus(
-                                                                cruiseId,
-                                                                pkg.getRoomTypeId(),
-                                                                RoomStatus.ACTIVE);
-                                tourRedisService.savePackageAvailableRooms(pkg.getId(), (int) physicalRoomCount);
-                        }
-                }
 
                 // Gửi event
                 kafkaTemplate.send(TOUR_APPROVED_TOPIC, tourId.toString(), new TourApprovedEvent(tourId, assignments));

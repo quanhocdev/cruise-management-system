@@ -4,13 +4,14 @@ import com.project.tour.dto.scheduler.schedule.CreateScheduleRequest;
 import com.project.tour.dto.scheduler.schedule.ScheduleResponse;
 import com.project.tour.dto.scheduler.schedule.UpdateScheduleRequest;
 import com.project.tour.exception.AppException;
-import com.project.tour.mapper.tour.schedule.ScheduleMapper;
-import com.project.tour.model.Schedule;
-import com.project.tour.model.Tour;
+import com.project.tour.mapper.scheduler.schedule.ScheduleMapper;
 import com.project.tour.model.enums.ScheduleStatus;
 import com.project.tour.repository.tour.TourRepository;
 import com.project.tour.repository.tour.schedule.ScheduleRepository;
 import com.project.tour.model.enums.tour.TourStatusTrip;
+import com.project.tour.model.scheduler.Schedule;
+import com.project.tour.model.scheduler.Tour;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

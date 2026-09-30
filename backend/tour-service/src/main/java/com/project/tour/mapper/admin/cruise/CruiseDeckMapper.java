@@ -2,8 +2,8 @@ package com.project.tour.mapper.admin.cruise;
 
 import com.project.tour.dto.admin.cruise.deck.CruiseDeckResponse;
 import com.project.tour.dto.admin.cruise.deck.UpdateCruiseDeckRequest;
-import com.project.tour.model.Cruise;
-import com.project.tour.model.CruiseDeck;
+import com.project.tour.model.admin.Cruise;
+import com.project.tour.model.admin.CruiseDeck;
 
 public class CruiseDeckMapper {
 

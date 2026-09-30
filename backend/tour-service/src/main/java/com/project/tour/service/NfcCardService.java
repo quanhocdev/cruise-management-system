@@ -3,7 +3,7 @@ package com.project.tour.service;
 import com.project.tour.dto.admin.nfc.NfcCardRequest;
 import com.project.tour.dto.admin.nfc.NfcCardResponse;
 import com.project.tour.mapper.admin.nfc.NfcCardMapper;
-import com.project.tour.model.NfcCard;
+import com.project.tour.model.admin.NfcCard;
 import com.project.tour.model.enums.NfcCardStatus;
 import com.project.tour.repository.NfcCardRepository;
 import org.springframework.stereotype.Service;

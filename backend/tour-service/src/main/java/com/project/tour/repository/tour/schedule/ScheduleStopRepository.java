@@ -1,8 +1,9 @@
 package com.project.tour.repository.tour.schedule;
 
-import com.project.tour.model.ScheduleStop;
-
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.project.tour.model.scheduler.ScheduleStop;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;

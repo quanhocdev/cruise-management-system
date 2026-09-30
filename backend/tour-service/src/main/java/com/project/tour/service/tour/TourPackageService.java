@@ -5,11 +5,8 @@ import com.project.tour.dto.admin.roomtype.RoomTypeResponse;
 import com.project.tour.dto.operation.packages.TourPackageRequest;
 import com.project.tour.dto.operation.packages.TourPackageResponse;
 import com.project.tour.exception.AppException;
-import com.project.tour.mapper.tour.TourPackageMapper;
-import com.project.tour.model.PackageBenefit;
-import com.project.tour.model.TourPackage;
-import com.project.tour.model.Tour;
-import com.project.tour.model.RoomType;
+import com.project.tour.mapper.operation.TourPackageMapper;
+import com.project.tour.model.admin.RoomType;
 import com.project.tour.repository.tour.PackageBenefitRepository;
 import com.project.tour.repository.tour.TourPackageRepository;
 import com.project.tour.service.redis.TourRedisService;
@@ -23,6 +20,9 @@ import com.project.tour.repository.room.RoomTypeRepository;
 import java.util.List;
 import java.util.UUID;
 import com.project.tour.model.enums.RoomStatus;
+import com.project.tour.model.operation.PackageBenefit;
+import com.project.tour.model.operation.TourPackage;
+import com.project.tour.model.scheduler.Tour;
 
 @Service
 @Transactional
@@ -261,5 +261,33 @@ public class TourPackageService {
             dto.setDescription(rt.getDescription());
             return dto;
         }).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Integer getPackageRoomCapacity(UUID tourPackageId) {
+
+        TourPackage tourPackage = tourPackageRepository.findById(tourPackageId)
+                .orElseThrow(() -> new AppException(
+                        "Tour package not found",
+                        HttpStatus.NOT_FOUND));
+
+        if (tourPackage.getRoomTypeId() == null) {
+            throw new AppException(
+                    "Tour package does not have a room type",
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        RoomType roomType = roomTypeRepository.findById(tourPackage.getRoomTypeId())
+                .orElseThrow(() -> new AppException(
+                        "Room type not found",
+                        HttpStatus.NOT_FOUND));
+
+        if (roomType.getCapacity() == null || roomType.getCapacity() <= 0) {
+            throw new AppException(
+                    "Room type capacity is invalid",
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        return roomType.getCapacity();
     }
 }

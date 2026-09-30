@@ -3,7 +3,7 @@ package com.project.tour.mapper.admin.policy;
 import com.project.tour.dto.admin.policy.CreatePolicyRequest;
 import com.project.tour.dto.admin.policy.PolicyResponse;
 import com.project.tour.dto.admin.policy.UpdatePolicyRequest;
-import com.project.tour.model.Policy;
+import com.project.tour.model.admin.Policy;
 import com.project.tour.model.enums.policy.PolicyStatus;
 
 public class PolicyMapper {

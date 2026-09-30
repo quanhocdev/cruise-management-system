@@ -1,6 +1,6 @@
 package com.project.tour.repository.cruise;
 
-import com.project.tour.model.CruiseDeck;
+import com.project.tour.model.admin.CruiseDeck;
 import com.project.tour.model.enums.cruise.CruiseDeckStatus;
 
 import org.springframework.data.jpa.repository.JpaRepository;

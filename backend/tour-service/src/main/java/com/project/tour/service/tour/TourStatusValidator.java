@@ -1,8 +1,8 @@
 package com.project.tour.service.tour;
 
 import com.project.tour.exception.AppException;
-import com.project.tour.model.Tour;
 import com.project.tour.model.enums.tour.TourStatusTrip;
+import com.project.tour.model.scheduler.Tour;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
