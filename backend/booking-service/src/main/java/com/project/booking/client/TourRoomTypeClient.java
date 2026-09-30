@@ -11,36 +11,34 @@ import java.util.UUID;
 @Component
 public class TourRoomTypeClient {
 
-    private static final String INTERNAL_API_KEY_HEADER = "X-Internal-API-Key";
+        private final RestClient restClient;
+        private final ServiceTokenClient serviceTokenClient;
 
-    private final RestClient restClient;
-    private final String internalApiKey;
+        public TourRoomTypeClient(
+                        RestClient.Builder restClientBuilder,
+                        @Value("${tour-service.url}") String tourServiceUrl,
+                        ServiceTokenClient serviceTokenClient) {
 
-    public TourRoomTypeClient(
-            RestClient.Builder restClientBuilder,
-            @Value("${tour-service.url}") String tourServiceUrl,
-            @Value("${internal.api-key}") String internalApiKey) {
+                this.restClient = restClientBuilder
+                                .baseUrl(tourServiceUrl)
+                                .build();
 
-        this.restClient = restClientBuilder
-                .baseUrl(tourServiceUrl)
-                .build();
+                this.serviceTokenClient = serviceTokenClient;
+        }
 
-        this.internalApiKey = internalApiKey;
-    }
+        @Retry(name = "tourService")
+        @CircuitBreaker(name = "tourService")
+        public Integer getPackageRoomCapacity(UUID tourPackageId) {
 
-    @Retry(name = "tourService")
-    @CircuitBreaker(name = "tourService")
-    public Integer getPackageRoomCapacity(UUID tourPackageId) {
+                String accessToken = serviceTokenClient.getAccessToken();
 
-        return restClient
-                .get()
-                .uri(
-                        "/internal/tour-packages/{tourPackageId}/room-capacity",
-                        tourPackageId)
-                .header(
-                        INTERNAL_API_KEY_HEADER,
-                        internalApiKey)
-                .retrieve()
-                .body(Integer.class);
-    }
+                return restClient
+                                .get()
+                                .uri(
+                                                "/internal/tour-packages/{tourPackageId}/room-capacity",
+                                                tourPackageId)
+                                .headers(headers -> headers.setBearerAuth(accessToken))
+                                .retrieve()
+                                .body(Integer.class);
+        }
 }
