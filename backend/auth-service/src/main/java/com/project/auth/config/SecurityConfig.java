@@ -15,6 +15,7 @@ import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthen
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.core.annotation.Order;
 
 @Configuration
 public class SecurityConfig {
@@ -40,6 +41,7 @@ public class SecurityConfig {
         }
 
         @Bean
+        @Order(2)
         public SecurityFilterChain securityFilterChain(
                         HttpSecurity http) throws Exception {
 
