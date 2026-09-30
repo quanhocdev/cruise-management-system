@@ -113,22 +113,6 @@ public class ApprovalTourService {
                 tour.setStatusTrip(TourStatusTrip.APPROVED);
                 Tour savedTour = tourRepository.save(tour);
 
-                // KHỞI TẠO SỐ LƯỢNG PHÒNG TRỐNG LÊN REDIS THEO TỪNG TOUR PACKAGE
-                List<TourPackage> packages = tourPackageRepository.findAllByTourId(tourId);
-                UUID cruiseId = tour.getCruise().getId();
-
-                for (TourPackage pkg : packages) {
-                        if (pkg.getRoomTypeId() != null) {
-                                // Chỉ đếm những phòng đang ở trạng thái ACTIVE
-                                long physicalRoomCount = roomRepository
-                                                .countByCruiseDeck_CruiseIdAndRoomTypeIdAndStatus(
-                                                                cruiseId,
-                                                                pkg.getRoomTypeId(),
-                                                                RoomStatus.ACTIVE);
-                                tourRedisService.savePackageAvailableRooms(pkg.getId(), (int) physicalRoomCount);
-                        }
-                }
-
                 // Gửi event
                 kafkaTemplate.send(TOUR_APPROVED_TOPIC, tourId.toString(), new TourApprovedEvent(tourId, assignments));
 

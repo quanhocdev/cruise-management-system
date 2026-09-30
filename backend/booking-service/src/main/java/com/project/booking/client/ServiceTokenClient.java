@@ -1,5 +1,6 @@
 package com.project.booking.client;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.benmanes.caffeine.cache.Cache;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -98,7 +99,8 @@ public class ServiceTokenClient {
                 .body(ServiceTokenResponse.class);
 
         if (response == null
-                || response.getAccessToken() == null) {
+                || response.getAccessToken() == null
+                || response.getAccessToken().isBlank()) {
 
             throw new IllegalStateException(
                     "Auth Service không trả về service access token");
@@ -119,25 +121,32 @@ public class ServiceTokenClient {
 
     public static class ServiceTokenResponse {
 
-        private String access_token;
-        private String token_type;
+        @JsonProperty("access_token")
+        private String accessToken;
+
+        @JsonProperty("token_type")
+        private String tokenType;
+
+        @JsonProperty("scope")
         private String scope;
-        private long expires_in;
+
+        @JsonProperty("expires_in")
+        private long expiresIn;
 
         public String getAccessToken() {
-            return access_token;
+            return accessToken;
         }
 
         public void setAccessToken(String accessToken) {
-            this.access_token = accessToken;
+            this.accessToken = accessToken;
         }
 
         public String getTokenType() {
-            return token_type;
+            return tokenType;
         }
 
         public void setTokenType(String tokenType) {
-            this.token_type = tokenType;
+            this.tokenType = tokenType;
         }
 
         public String getScope() {
@@ -149,11 +158,11 @@ public class ServiceTokenClient {
         }
 
         public long getExpiresIn() {
-            return expires_in;
+            return expiresIn;
         }
 
         public void setExpiresIn(long expiresIn) {
-            this.expires_in = expiresIn;
+            this.expiresIn = expiresIn;
         }
     }
 }
