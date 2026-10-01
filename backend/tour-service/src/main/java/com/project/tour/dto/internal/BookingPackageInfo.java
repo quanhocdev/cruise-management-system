@@ -1,5 +1,10 @@
 package com.project.tour.dto.internal;
 
-public class BookingPackageInfo {
+import java.math.BigDecimal;
+import java.util.UUID;
 
+public record BookingPackageInfo(
+        UUID packageId,
+        BigDecimal price,
+        Integer roomCapacity) {
 }

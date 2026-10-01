@@ -11,7 +11,6 @@ import com.project.booking.mapper.BookingMapper;
 import com.project.booking.model.Booking;
 import com.project.booking.model.Passenger;
 import com.project.booking.model.BookingPassenger;
-import com.project.booking.model.InfoTourPackage;
 import com.project.booking.model.enums.BookingPassengerStatus;
 import com.project.booking.model.enums.BookingStatus;
 import com.project.booking.repository.BookingRepository;
@@ -22,7 +21,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.project.booking.repository.InfoTourPackageRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -40,7 +38,6 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final PassengerRepository passengerRepository;
     private final BookingPassengerRepository bookingPassengerRepository;
-    private final InfoTourPackageRepository infoTourPackageRepository;
     private final BookingMapper bookingMapper;
     private final FileStorageService fileStorageService;
     private final KafkaTemplate<String, Object> kafkaTemplate;
@@ -50,7 +47,6 @@ public class BookingServiceImpl implements BookingService {
     public BookingServiceImpl(BookingRepository bookingRepository,
             PassengerRepository passengerRepository,
             BookingPassengerRepository bookingPassengerRepository,
-            InfoTourPackageRepository infoTourPackageRepository,
             BookingMapper bookingMapper,
             FileStorageService fileStorageService,
             KafkaTemplate<String, Object> kafkaTemplate,
@@ -59,7 +55,6 @@ public class BookingServiceImpl implements BookingService {
         this.bookingRepository = bookingRepository;
         this.passengerRepository = passengerRepository;
         this.bookingPassengerRepository = bookingPassengerRepository;
-        this.infoTourPackageRepository = infoTourPackageRepository;
         this.bookingMapper = bookingMapper;
         this.fileStorageService = fileStorageService;
         this.kafkaTemplate = kafkaTemplate;
