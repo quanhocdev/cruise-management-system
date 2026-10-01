@@ -1,0 +1,24 @@
+\set ON_ERROR_STOP on
+BEGIN;
+DELETE FROM tour.activity_cruise_tour WHERE id IN (SELECT md5('flow-activity-tour-' || i)::uuid FROM generate_series(1, 6) g(i));
+DELETE FROM tour.service_tours WHERE id IN (SELECT md5('flow-service-tour-' || i)::uuid FROM generate_series(1, 6) g(i));
+DELETE FROM tour.product_tour WHERE id IN (SELECT md5('flow-product-tour-' || i)::uuid FROM generate_series(1, 6) g(i));
+DELETE FROM tour.visit_tour WHERE id IN (SELECT md5('flow-visit-' || i)::uuid FROM generate_series(1, 12) g(i));
+DELETE FROM tour.booking_policies WHERE policy_id = md5('flow-policy-booking')::uuid;
+DELETE FROM tour.cancel_policies WHERE policy_id = md5('flow-policy-cancel')::uuid;
+DELETE FROM tour.policies WHERE id IN (md5('flow-policy-booking')::uuid, md5('flow-policy-cancel')::uuid);
+DELETE FROM tour.schedule_stops WHERE id IN (SELECT md5('flow-stop-' || i)::uuid FROM generate_series(1, 36) g(i));
+DELETE FROM tour.schedules WHERE id IN (SELECT md5('flow-schedule-' || i)::uuid FROM generate_series(1, 18) g(i));
+DELETE FROM tour.tour_packages WHERE id IN (SELECT md5('flow-package-' || i)::uuid FROM generate_series(1, 12) g(i));
+DELETE FROM tour.tours WHERE id IN (SELECT md5('flow-tour-' || i)::uuid FROM generate_series(1, 6) g(i));
+DELETE FROM tour.rooms WHERE id IN (SELECT md5('flow-room-' || i)::uuid FROM generate_series(1, 30) g(i));
+DELETE FROM tour.cruise_areas WHERE id IN (SELECT md5('flow-area-' || i)::uuid FROM generate_series(1, 12) g(i));
+DELETE FROM tour.cruise_decks WHERE id IN (SELECT md5('flow-deck-' || i)::uuid FROM generate_series(1, 6) g(i));
+DELETE FROM tour.cruises WHERE id IN (SELECT md5('flow-cruise-' || i)::uuid FROM generate_series(1, 3) g(i));
+DELETE FROM tour.room_types WHERE id IN (SELECT md5('flow-room-type-' || i)::uuid FROM generate_series(1, 3) g(i));
+DELETE FROM tour.ports WHERE id IN (SELECT md5('flow-port-' || i)::uuid FROM generate_series(1, 6) g(i));
+DELETE FROM tour.products WHERE id IN (SELECT md5('flow-product-' || i)::uuid FROM generate_series(1, 8) g(i));
+DELETE FROM tour.services WHERE id IN (SELECT md5('flow-service-' || i)::uuid FROM generate_series(1, 6) g(i));
+DELETE FROM tour.activity_cruise WHERE id IN (SELECT md5('flow-activity-' || i)::uuid FROM generate_series(1, 6) g(i));
+DELETE FROM tour.nfc_cards WHERE id IN (SELECT md5('flow-nfc-' || i)::uuid FROM generate_series(1, 50) g(i));
+COMMIT;
