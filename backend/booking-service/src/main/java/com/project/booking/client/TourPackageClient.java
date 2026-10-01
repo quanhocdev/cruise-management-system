@@ -6,15 +6,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Component
-public class TourRoomTypeClient {
+public class TourPackageClient {
 
         private final RestClient restClient;
         private final ServiceTokenClient serviceTokenClient;
 
-        public TourRoomTypeClient(
+        public TourPackageClient(
                         RestClient.Builder restClientBuilder,
                         @Value("${tour-service.url}") String tourServiceUrl,
                         ServiceTokenClient serviceTokenClient) {
@@ -28,17 +29,23 @@ public class TourRoomTypeClient {
 
         @Retry(name = "tourService")
         @CircuitBreaker(name = "tourService")
-        public Integer getPackageRoomCapacity(UUID tourPackageId) {
+        public BookingPackageInfo getBookingPackageInfo(UUID tourPackageId) {
 
                 String accessToken = serviceTokenClient.getAccessToken();
 
                 return restClient
                                 .get()
                                 .uri(
-                                                "/internal/tour-packages/{tourPackageId}/room-capacity",
+                                                "/internal/tour-packages/{tourPackageId}/booking-info",
                                                 tourPackageId)
                                 .headers(headers -> headers.setBearerAuth(accessToken))
                                 .retrieve()
-                                .body(Integer.class);
+                                .body(BookingPackageInfo.class);
+        }
+
+        public record BookingPackageInfo(
+                        UUID packageId,
+                        BigDecimal price,
+                        Integer roomCapacity) {
         }
 }

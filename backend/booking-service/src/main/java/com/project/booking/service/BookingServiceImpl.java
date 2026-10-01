@@ -29,7 +29,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import com.project.booking.client.TourRoomTypeClient;
+import com.project.booking.client.TourPackageClient;
 
 @Service
 @Transactional
@@ -45,7 +45,7 @@ public class BookingServiceImpl implements BookingService {
     private final FileStorageService fileStorageService;
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final TourRedisService tourRedisService;
-    private final TourRoomTypeClient tourRoomTypeClient;
+    private final TourPackageClient tourPackageClient;
 
     public BookingServiceImpl(BookingRepository bookingRepository,
             PassengerRepository passengerRepository,
@@ -55,7 +55,7 @@ public class BookingServiceImpl implements BookingService {
             FileStorageService fileStorageService,
             KafkaTemplate<String, Object> kafkaTemplate,
             TourRedisService tourRedisService,
-            TourRoomTypeClient tourRoomTypeClient) {
+            TourPackageClient tourPackageClient) {
         this.bookingRepository = bookingRepository;
         this.passengerRepository = passengerRepository;
         this.bookingPassengerRepository = bookingPassengerRepository;
@@ -64,166 +64,158 @@ public class BookingServiceImpl implements BookingService {
         this.fileStorageService = fileStorageService;
         this.kafkaTemplate = kafkaTemplate;
         this.tourRedisService = tourRedisService;
-        this.tourRoomTypeClient = tourRoomTypeClient;
+        this.tourPackageClient = tourPackageClient;
     }
 
     @Override
-public synchronized BookingResponse create(CreateBookingRequest request, Long userId, String email) {
-    try {
-        System.out.println(">>> [SERVICE] Bắt đầu xử lý create booking theo kho phòng...");
+    public synchronized BookingResponse create(CreateBookingRequest request, Long userId, String email) {
+        try {
+            System.out.println(">>> [SERVICE] Bắt đầu xử lý create booking theo kho phòng...");
 
-        UUID packageId = UUID.fromString(request.getTourPackageId());
-        int requestedRooms = request.getNumberOfRooms() != null
-                ? request.getNumberOfRooms()
-                : 1;
-        int passengerCount = request.getPassengers().size();
+            UUID packageId = UUID.fromString(request.getTourPackageId());
+            int requestedRooms = request.getNumberOfRooms() != null
+                    ? request.getNumberOfRooms()
+                    : 1;
+            int passengerCount = request.getPassengers().size();
 
-        // 1. Lấy thông tin gói tour từ mirror table
-        InfoTourPackage pkg = infoTourPackageRepository.findById(packageId)
-                .orElseThrow(() -> new AppException(
-                        "Không tìm thấy gói tour hợp lệ trong hệ thống!",
-                        HttpStatus.BAD_REQUEST));
+            // 1. Lấy thông tin gói tour từ Tour service thông qua TourPackageClient
+            TourPackageClient.BookingPackageInfo packageInfo = tourPackageClient.getBookingPackageInfo(packageId);
 
-        // 2. Lấy sức chứa phòng từ Tour Service
-        Integer roomCapacity =
-                tourRoomTypeClient.getPackageRoomCapacity(packageId);
+            Integer roomCapacity = packageInfo.roomCapacity();
+            BigDecimal packagePrice = packageInfo.price();
 
-        if (roomCapacity == null || roomCapacity <= 0) {
-            throw new AppException(
-                    "Không thể xác định sức chứa của loại phòng!",
-                    HttpStatus.BAD_REQUEST);
-        }
-
-        // 3. Kiểm tra sức chứa hành khách
-        int totalAllowedPassengers = roomCapacity * requestedRooms;
-
-        if (passengerCount > totalAllowedPassengers) {
-            throw new AppException(
-                    String.format(
-                            "Số lượng hành khách (%d người) vượt quá sức chứa của %d phòng (%d người).",
-                            passengerCount,
-                            requestedRooms,
-                            totalAllowedPassengers),
-                    HttpStatus.BAD_REQUEST);
-        }
-
-        // 4. Trừ kho phòng đồng thời trên Redis qua Lua script
-        Long redisResult =
-                tourRedisService.reservePackageRooms(packageId, requestedRooms);
-
-        if (redisResult == null || redisResult == -1) {
-            throw new AppException(
-                    "Kho phòng của gói tour này chưa được khởi tạo hoặc không tồn tại!",
-                    HttpStatus.BAD_REQUEST);
-        }
-
-        if (redisResult == -2) {
-            throw new AppException(
-                    "Rất tiếc, số lượng phòng trống của gói này không đủ đáp ứng yêu cầu!",
-                    HttpStatus.BAD_REQUEST);
-        }
-
-        // 5. Tính tổng tiền = Giá gói * Số lượng phòng
-        BigDecimal packagePrice = pkg.getPrice();
-        BigDecimal totalAmount =
-                packagePrice.multiply(BigDecimal.valueOf(requestedRooms));
-
-        // 6. Lưu thông tin Booking
-        Booking booking = new Booking();
-        booking.setCreatedByUserId(userId);
-        booking.setPrimaryContactEmail(email);
-        booking.setTourId(UUID.fromString(request.getTourId()));
-        booking.setTourPackageId(packageId);
-        booking.setBookingCode(generateBookingCode());
-        booking.setNumberOfRooms(requestedRooms);
-        booking.setNumberPassengers(passengerCount);
-        booking.setPrimaryContactName(request.getPrimaryContactName().trim());
-        booking.setPrimaryContactPhone(request.getPrimaryContactPhone().trim());
-        booking.setTotalAmount(totalAmount);
-        booking.setStatus(BookingStatus.PENDING_PAYMENT);
-
-        Booking savedBooking = bookingRepository.save(booking);
-
-        System.out.println(
-                ">>> [SERVICE] Đã lưu xong Booking ID: " + savedBooking.getId());
-
-        // 7. Lưu danh sách hành khách
-        for (int i = 0; i < request.getPassengers().size(); i++) {
-            PassengerRequest pReq = request.getPassengers().get(i);
-
-            Passenger passenger = new Passenger();
-            passenger.setFullName(
-                    pReq.getFullName() != null
-                            ? pReq.getFullName().trim()
-                            : null);
-            passenger.setDateOfBirth(pReq.getDateOfBirth());
-            passenger.setGender(
-                    pReq.getGender() != null
-                            ? pReq.getGender().trim()
-                            : null);
-            passenger.setPhoneNumber(pReq.getPhoneNumber());
-            passenger.setEmail(pReq.getEmail());
-            passenger.setIdCardType(pReq.getIdCardType());
-            passenger.setIdentificationNumber(
-                    pReq.getIdentificationNumber() != null
-                            ? pReq.getIdentificationNumber().trim()
-                            : null);
-            passenger.setDocumentNote(pReq.getDocumentNote());
-
-            if (pReq.getIdCardImage() != null
-                    && !pReq.getIdCardImage().isEmpty()) {
-
-                UploadResult uploadResult =
-                        fileStorageService.saveMultipart(
-                                pReq.getIdCardImage(),
-                                "passengers");
-
-                passenger.setIdCardImageUrl(uploadResult.getUrl());
-                passenger.setIdCardImagePublicId(
-                        uploadResult.getPublicId());
+            if (roomCapacity == null || roomCapacity <= 0) {
+                throw new AppException(
+                        "Không thể xác định sức chứa của loại phòng!",
+                        HttpStatus.BAD_REQUEST);
             }
 
-            Passenger savedPassenger =
-                    passengerRepository.save(passenger);
+            // 2. Kiểm tra sức chứa hành khách
+            int totalAllowedPassengers = roomCapacity * requestedRooms;
 
-            BookingPassenger link = new BookingPassenger();
-            link.setBooking(savedBooking);
-            link.setPassenger(savedPassenger);
-            link.setStatus(BookingPassengerStatus.PENDING);
+            if (passengerCount > totalAllowedPassengers) {
+                throw new AppException(
+                        String.format(
+                                "Số lượng hành khách (%d người) vượt quá sức chứa của %d phòng (%d người).",
+                                passengerCount,
+                                requestedRooms,
+                                totalAllowedPassengers),
+                        HttpStatus.BAD_REQUEST);
+            }
 
-            bookingPassengerRepository.save(link);
+            // 3. Trừ kho phòng đồng thời trên Redis qua Lua script
+            Long redisResult = tourRedisService.reservePackageRooms(packageId, requestedRooms);
+
+            if (redisResult == null || redisResult == -1) {
+                throw new AppException(
+                        "Kho phòng của gói tour này chưa được khởi tạo hoặc không tồn tại!",
+                        HttpStatus.BAD_REQUEST);
+            }
+
+            if (redisResult == -2) {
+                throw new AppException(
+                        "Rất tiếc, số lượng phòng trống của gói này không đủ đáp ứng yêu cầu!",
+                        HttpStatus.BAD_REQUEST);
+            }
+
+            // 4. Tính tổng tiền = Giá gói * Số lượng phòng
+            BigDecimal totalAmount = packagePrice.multiply(BigDecimal.valueOf(requestedRooms));
+
+            // 5. Lưu thông tin Booking
+            Booking booking = new Booking();
+            booking.setCreatedByUserId(userId);
+            booking.setPrimaryContactEmail(email);
+            booking.setTourId(UUID.fromString(request.getTourId()));
+            booking.setTourPackageId(packageId);
+            booking.setBookingCode(generateBookingCode());
+            booking.setNumberOfRooms(requestedRooms);
+            booking.setNumberPassengers(passengerCount);
+            booking.setPrimaryContactName(request.getPrimaryContactName().trim());
+            booking.setPrimaryContactPhone(request.getPrimaryContactPhone().trim());
+            booking.setTotalAmount(totalAmount);
+            booking.setStatus(BookingStatus.PENDING_PAYMENT);
+
+            Booking savedBooking = bookingRepository.save(booking);
+
+            System.out.println(
+                    ">>> [SERVICE] Đã lưu xong Booking ID: " + savedBooking.getId());
+
+            // 6. Lưu danh sách hành khách
+            for (int i = 0; i < request.getPassengers().size(); i++) {
+                PassengerRequest pReq = request.getPassengers().get(i);
+
+                Passenger passenger = new Passenger();
+                passenger.setFullName(
+                        pReq.getFullName() != null
+                                ? pReq.getFullName().trim()
+                                : null);
+                passenger.setDateOfBirth(pReq.getDateOfBirth());
+                passenger.setGender(
+                        pReq.getGender() != null
+                                ? pReq.getGender().trim()
+                                : null);
+                passenger.setPhoneNumber(pReq.getPhoneNumber());
+                passenger.setEmail(pReq.getEmail());
+                passenger.setIdCardType(pReq.getIdCardType());
+                passenger.setIdentificationNumber(
+                        pReq.getIdentificationNumber() != null
+                                ? pReq.getIdentificationNumber().trim()
+                                : null);
+                passenger.setDocumentNote(pReq.getDocumentNote());
+
+                if (pReq.getIdCardImage() != null
+                        && !pReq.getIdCardImage().isEmpty()) {
+
+                    UploadResult uploadResult = fileStorageService.saveMultipart(
+                            pReq.getIdCardImage(),
+                            "passengers");
+
+                    passenger.setIdCardImageUrl(uploadResult.getUrl());
+                    passenger.setIdCardImagePublicId(
+                            uploadResult.getPublicId());
+                }
+
+                Passenger savedPassenger = passengerRepository.save(passenger);
+
+                BookingPassenger link = new BookingPassenger();
+                link.setBooking(savedBooking);
+                link.setPassenger(savedPassenger);
+                link.setStatus(BookingPassengerStatus.PENDING);
+
+                bookingPassengerRepository.save(link);
+            }
+
+            // 7. Bắn Kafka Event
+            BookingCreatedEvent event = new BookingCreatedEvent(
+                    savedBooking.getId(),
+                    userId,
+                    savedBooking.getTourId(),
+                    savedBooking.getTourPackageId(),
+                    passengerCount,
+                    savedBooking.getTotalAmount(),
+                    LocalDateTime.now());
+
+            kafkaTemplate.send(
+                    BOOKING_CREATED_TOPIC,
+                    savedBooking.getId().toString(),
+                    event);
+
+            System.out.println(
+                    ">>> [KAFKA PRODUCER] Đã bắn event PENDING_PAYMENT cho Booking ID: "
+                            + savedBooking.getId());
+
+            // 8. Lấy danh sách hành khách
+            List<BookingPassenger> links = bookingPassengerRepository
+                    .findAllByBooking_IdOrderByIdAsc(savedBooking.getId());
+
+            return bookingMapper.toResponse(savedBooking, links);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
         }
-
-        // 8. Bắn Kafka Event
-        BookingCreatedEvent event = new BookingCreatedEvent(
-                savedBooking.getId(),
-                userId,
-                savedBooking.getTourId(),
-                savedBooking.getTourPackageId(),
-                passengerCount,
-                savedBooking.getTotalAmount(),
-                LocalDateTime.now());
-
-        kafkaTemplate.send(
-                BOOKING_CREATED_TOPIC,
-                savedBooking.getId().toString(),
-                event);
-
-        System.out.println(
-                ">>> [KAFKA PRODUCER] Đã bắn event PENDING_PAYMENT cho Booking ID: "
-                        + savedBooking.getId());
-
-        List<BookingPassenger> links =
-                bookingPassengerRepository
-                        .findAllByBooking_IdOrderByIdAsc(savedBooking.getId());
-
-        return bookingMapper.toResponse(savedBooking, links);
-
-    } catch (Exception e) {
-        e.printStackTrace();
-        throw e;
     }
-}
+
     @Override
     @Transactional(readOnly = true)
     public BookingResponse get(Long id, Long requesterId, boolean privileged) {
