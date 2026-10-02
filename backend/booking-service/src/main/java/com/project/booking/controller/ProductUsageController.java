@@ -17,7 +17,8 @@ public class ProductUsageController {
 
     private final ProductUsageService productUsageService;
 
-    public ProductUsageController(ProductUsageService productUsageService) {
+    public ProductUsageController(
+            ProductUsageService productUsageService) {
         this.productUsageService = productUsageService;
     }
 
@@ -32,7 +33,7 @@ public class ProductUsageController {
     }
 
     @GetMapping("/booking-passenger/{bookingPassengerId}")
-    @PreAuthorize("hasAnyRole('CONVENIENCE', 'PASSENGER')")
+    @PreAuthorize("hasRole('CONVENIENCE')")
     public ResponseEntity<List<ProductUsageResponse>> getByBookingPassenger(
             @PathVariable Long bookingPassengerId) {
 

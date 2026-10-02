@@ -83,7 +83,7 @@ public class SecurityConfig {
                         .hasRole("SHORE")
 
                         // Passenger
-                        .requestMatchers("/api/passenger/**")
+                        .requestMatchers("/api/passengers/**")
                         .hasRole("PASSENGER")
 
                         // Internal service-to-service endpoints
@@ -106,8 +106,7 @@ public class SecurityConfig {
     @Bean
     public BearerTokenResolver bearerTokenResolver() {
 
-        DefaultBearerTokenResolver headerResolver =
-                new DefaultBearerTokenResolver();
+        DefaultBearerTokenResolver headerResolver = new DefaultBearerTokenResolver();
 
         return request -> {
 
@@ -124,8 +123,7 @@ public class SecurityConfig {
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
 
-        JwtAuthenticationConverter converter =
-                new JwtAuthenticationConverter();
+        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
 
         converter.setJwtGrantedAuthoritiesConverter(
                 new MixedScopeAuthoritiesConverter());
@@ -137,14 +135,14 @@ public class SecurityConfig {
      * Chuyển scope trong JWT thành authority phù hợp.
      *
      * User JWT:
-     *     scope = ADMIN
-     *     scope = PASSENGER
+     * scope = ADMIN
+     * scope = PASSENGER
      *
      * -> ROLE_ADMIN
      * -> ROLE_PASSENGER
      *
      * Service JWT:
-     *     scope = tour.read
+     * scope = tour.read
      *
      * -> SCOPE_tour.read
      */
@@ -167,8 +165,7 @@ public class SecurityConfig {
                 scopes.addAll(
                         Arrays.stream(scopeString.split(" "))
                                 .filter(scope -> !scope.isBlank())
-                                .toList()
-                );
+                                .toList());
 
             } else if (scopeClaim instanceof Collection<?> collection) {
 
@@ -237,8 +234,7 @@ public class SecurityConfig {
         }
 
         return Arrays.stream(cookies)
-                .filter(cookie ->
-                        "accessToken".equals(cookie.getName()))
+                .filter(cookie -> "accessToken".equals(cookie.getName()))
                 .map(Cookie::getValue)
                 .filter(value -> !value.isBlank())
                 .findFirst()
