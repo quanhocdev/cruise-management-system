@@ -23,6 +23,14 @@ powershell -ExecutionPolicy Bypass -File .\dev\test-data\cleanup-demo.ps1
 - 8 san pham, 6 dich vu, 6 hoat dong tren tau va 12 tour tham quan bo.
 - 50 vong NFC: `FLOW-NFC-001` den `FLOW-NFC-035` kha dung; `036` den `047` da gan; `048` den `050` ngung su dung.
 - 24 booking, 48 hanh khach va 24 giao dich thanh toan.
+- 12 khoa ton kho Redis, moi goi duoc khoi tao 10 phong de test tao booking that.
+
+## Tour nao dung cho luong nao
+
+- `FLOW-TOUR-01` va `FLOW-TOUR-03`: trang thai `OPEN`, dung de tao booking moi.
+- `FLOW-TOUR-02` va `FLOW-TOUR-04`: trang thai `CLOSED`, dung de kiem tra giao dien khoa dat cho.
+- `FLOW-TOUR-05`: chuyen da huy, dung de kiem tra thong bao huy.
+- `FLOW-TOUR-06`: dang cho mo dat cho, dung de kiem tra trang thai cho.
 
 ## Ma dung de test nhanh
 
