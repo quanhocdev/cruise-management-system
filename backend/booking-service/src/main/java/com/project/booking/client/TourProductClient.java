@@ -55,6 +55,7 @@ public class TourProductClient {
             BigDecimal unitPrice,
             String productTourStatus,
             boolean productActive,
+            UUID packageBenefitId,
             Integer benefitQuantity,
             BigDecimal discountPercent) {
     }

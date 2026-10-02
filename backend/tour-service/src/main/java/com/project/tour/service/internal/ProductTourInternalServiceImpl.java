@@ -74,6 +74,7 @@ public class ProductTourInternalServiceImpl
                 productTour.getProduct().getPrice(),
                 productTour.getStatus(),
                 productTour.getProduct().getStatus() == ProductStatus.ACTIVE,
+                benefit != null ? benefit.getId() : null,
                 benefitQuantity,
                 discountPercent);
     }

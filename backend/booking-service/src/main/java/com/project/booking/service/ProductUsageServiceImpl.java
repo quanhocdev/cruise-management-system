@@ -4,9 +4,11 @@ import com.project.booking.client.TourProductClient;
 import com.project.booking.dto.ProductUsageRequest;
 import com.project.booking.dto.ProductUsageResponse;
 import com.project.booking.mapper.ProductUsageMapper;
+import com.project.booking.model.BenefitConsumption;
 import com.project.booking.model.Booking;
 import com.project.booking.model.BookingPassenger;
 import com.project.booking.model.ProductUsage;
+import com.project.booking.repository.BenefitConsumptionRepository;
 import com.project.booking.repository.BookingPassengerRepository;
 import com.project.booking.repository.ProductUsageRepository;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class ProductUsageServiceImpl implements ProductUsageService {
@@ -26,17 +29,20 @@ public class ProductUsageServiceImpl implements ProductUsageService {
     private final BookingPassengerRepository bookingPassengerRepository;
     private final ProductUsageMapper productUsageMapper;
     private final TourProductClient tourProductClient;
+    private final BenefitConsumptionRepository benefitConsumptionRepository;
 
     public ProductUsageServiceImpl(
             ProductUsageRepository productUsageRepository,
             BookingPassengerRepository bookingPassengerRepository,
             ProductUsageMapper productUsageMapper,
-            TourProductClient tourProductClient) {
+            TourProductClient tourProductClient,
+            BenefitConsumptionRepository benefitConsumptionRepository) {
 
         this.productUsageRepository = productUsageRepository;
         this.bookingPassengerRepository = bookingPassengerRepository;
         this.productUsageMapper = productUsageMapper;
         this.tourProductClient = tourProductClient;
+        this.benefitConsumptionRepository = benefitConsumptionRepository;
     }
 
     @Override
@@ -71,7 +77,7 @@ public class ProductUsageServiceImpl implements ProductUsageService {
                     "Booking không có tour package");
         }
 
-        // 2. Gọi Tour Service
+        // 2. Gọi Tour Service lấy thông tin ProductTour
         TourProductClient.ProductUsageInfo productInfo = tourProductClient.getProductUsageInfo(
                 request.productTourId(),
                 booking.getTourPackageId());
@@ -97,7 +103,8 @@ public class ProductUsageServiceImpl implements ProductUsageService {
         }
 
         // 5. Kiểm tra ProductTour status
-        validateProductTourStatus(productInfo.productTourStatus());
+        validateProductTourStatus(
+                productInfo.productTourStatus());
 
         // 6. Kiểm tra giá
         if (productInfo.unitPrice() == null
@@ -108,15 +115,37 @@ public class ProductUsageServiceImpl implements ProductUsageService {
                     "Giá Product không hợp lệ");
         }
 
-        // 7. Lấy số lượng benefit đã sử dụng
-        long usedBenefitQuantity = productUsageRepository
-                .sumUsedQuantityByBookingIdAndProductTourId(
-                        booking.getId(),
-                        request.productTourId());
+        // 7. Lấy thông tin PackageBenefit
+        UUID packageBenefitId = productInfo.packageBenefitId();
 
         int benefitQuantity = productInfo.benefitQuantity() == null
                 ? 0
                 : Math.max(productInfo.benefitQuantity(), 0);
+
+        BenefitConsumption benefitConsumption = null;
+
+        long usedBenefitQuantity = 0;
+
+        if (packageBenefitId != null && benefitQuantity > 0) {
+
+            // Đảm bảo BenefitConsumption tồn tại
+            benefitConsumptionRepository.createIfNotExists(
+                    booking.getId(),
+                    packageBenefitId);
+
+            // Lock row để chống race condition
+            benefitConsumption = benefitConsumptionRepository
+                    .findForUpdate(
+                            booking.getId(),
+                            packageBenefitId)
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.INTERNAL_SERVER_ERROR,
+                            "Không tìm thấy BenefitConsumption"));
+
+            usedBenefitQuantity = benefitConsumption.getUsedQuantity() == null
+                    ? 0
+                    : benefitConsumption.getUsedQuantity();
+        }
 
         // 8. Tính số lượng được miễn phí trong lần sử dụng này
         long remainingFreeQuantity = Math.max(
@@ -129,8 +158,9 @@ public class ProductUsageServiceImpl implements ProductUsageService {
 
         long paidQuantityThisUsage = request.quantity() - freeQuantityThisUsage;
 
-        // 9. Tính tiền trước discount
-        BigDecimal unitPrice = productInfo.unitPrice();
+        // 9. Tính tổng tiền trước discount
+        BigDecimal unitPrice = productInfo.unitPrice()
+                .setScale(2, RoundingMode.HALF_UP);
 
         BigDecimal grossAmount = unitPrice.multiply(
                 BigDecimal.valueOf(request.quantity()));
@@ -165,15 +195,35 @@ public class ProductUsageServiceImpl implements ProductUsageService {
         // 12. Tổng discount
         BigDecimal discountAmount = freeDiscountAmount
                 .add(percentDiscountAmount)
-                .setScale(2, RoundingMode.HALF_UP);
+                .setScale(
+                        2,
+                        RoundingMode.HALF_UP);
 
         // 13. Final amount
         BigDecimal finalAmount = grossAmount
                 .subtract(discountAmount)
                 .max(BigDecimal.ZERO)
-                .setScale(2, RoundingMode.HALF_UP);
+                .setScale(
+                        2,
+                        RoundingMode.HALF_UP);
 
-        // 14. Tạo ProductUsage
+        // 14. Cập nhật BenefitConsumption
+        if (benefitConsumption != null
+                && freeQuantityThisUsage > 0) {
+
+            int currentUsedQuantity = benefitConsumption.getUsedQuantity() == null
+                    ? 0
+                    : benefitConsumption.getUsedQuantity();
+
+            benefitConsumption.setUsedQuantity(
+                    currentUsedQuantity
+                            + (int) freeQuantityThisUsage);
+
+            benefitConsumptionRepository.save(
+                    benefitConsumption);
+        }
+
+        // 15. Tạo ProductUsage
         ProductUsage usage = new ProductUsage();
 
         usage.setBookingPassenger(bookingPassenger);
@@ -181,14 +231,13 @@ public class ProductUsageServiceImpl implements ProductUsageService {
         usage.setQuantity(request.quantity());
 
         // Snapshot giá tại thời điểm sử dụng
-        usage.setUnitPrice(
-                unitPrice.setScale(2, RoundingMode.HALF_UP));
+        usage.setUnitPrice(unitPrice);
 
         usage.setDiscountAmount(discountAmount);
         usage.setFinalAmount(finalAmount);
         usage.setUsedAt(LocalDateTime.now());
 
-        // 15. Save
+        // 16. Save ProductUsage
         ProductUsage savedUsage = productUsageRepository.save(usage);
 
         return productUsageMapper.toResponse(savedUsage);
@@ -207,6 +256,7 @@ public class ProductUsageServiceImpl implements ProductUsageService {
                 .toList();
     }
 
+    // Validate ProductTour status
     private void validateProductTourStatus(String status) {
 
         if (status == null) {
@@ -240,7 +290,8 @@ public class ProductUsageServiceImpl implements ProductUsageService {
             default:
                 throw new ResponseStatusException(
                         HttpStatus.BAD_REQUEST,
-                        "Trạng thái ProductTour không hợp lệ: " + status);
+                        "Trạng thái ProductTour không hợp lệ: "
+                                + status);
         }
     }
 }

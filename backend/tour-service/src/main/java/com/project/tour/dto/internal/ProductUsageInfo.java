@@ -6,24 +6,14 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 public record ProductUsageInfo(
-
         UUID productTourId,
-
         UUID tourId,
-
         UUID productId,
-
         String productName,
-
         BigDecimal unitPrice,
-
         ProductTourStatus productTourStatus,
-
         boolean productActive,
-
+        UUID packageBenefitId,
         Integer benefitQuantity,
-
-        BigDecimal discountPercent
-
-) {
+        BigDecimal discountPercent) {
 }
