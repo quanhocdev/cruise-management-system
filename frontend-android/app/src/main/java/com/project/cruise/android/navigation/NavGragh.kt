@@ -23,9 +23,12 @@ import com.project.cruise.android.ui.screens.passenger.MyBookingDetailScreen
 import com.project.cruise.android.ui.screens.TourPublicScreen
 import com.project.cruise.android.ui.screens.TourDetailPublicScreen
 import com.project.cruise.android.data.repository.BookingRepository
+import com.project.cruise.android.data.repository.PassengerBookingRepository
 import com.project.cruise.android.data.repository.TourRepository
 import com.project.cruise.android.viewmodel.passenger.BookingViewModel
 import com.project.cruise.android.viewmodel.passenger.BookingViewModelFactory
+import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModel
+import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModelFactory
 import com.project.cruise.android.viewmodel.tour.TourViewModel
 import com.project.cruise.android.viewmodel.tour.TourViewModelFactory
 import com.project.cruise.android.data.auth.TokenManager
@@ -38,6 +41,7 @@ import com.project.cruise.android.ui.screens.auth.LoginScreen
 import com.project.cruise.android.ui.screens.auth.OtpScreen
 import com.project.cruise.android.ui.screens.auth.RegisterScreen
 import com.project.cruise.android.ui.screens.passenger.Dashboard
+import com.project.cruise.android.ui.screens.passenger.CreateBookingScreen
 
 import com.project.cruise.android.viewmodel.auth.AuthViewModel
 import com.project.cruise.android.viewmodel.auth.AuthViewModelFactory
@@ -369,6 +373,44 @@ fun NavGraph() {
                     navController.navigate(Routes.LOGIN)
                 },
                 onBack = { navController.popBackStack() }
+            )
+        }
+
+        // =================================================
+        // PASSENGER CREATE BOOKING
+        // =================================================
+
+        composable(
+            route = Routes.PASSENGER_CREATE_BOOKING,
+            arguments = listOf(
+                navArgument("tourId") { type = NavType.StringType },
+                navArgument("packageId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val tourId = backStackEntry.arguments?.getString("tourId") ?: return@composable
+            val packageId = backStackEntry.arguments?.getString("packageId") ?: return@composable
+            val bookingViewModel: PassengerBookingViewModel = viewModel(
+                viewModelStoreOwner = backStackEntry,
+                factory = PassengerBookingViewModelFactory(
+                    PassengerBookingRepository(apiService),
+                    tourId,
+                    packageId
+                )
+            )
+            val bookingState by bookingViewModel.state.collectAsState()
+
+            CreateBookingScreen(
+                state = bookingState,
+                onDraftChange = bookingViewModel::edit,
+                onSubmit = bookingViewModel::submit,
+                onRetry = bookingViewModel::refreshPackage,
+                onBack = { navController.popBackStack() },
+                onDone = {
+                    navController.navigate(Routes.PASSENGER_BOOKINGS) {
+                        popUpTo(Routes.PASSENGER_CREATE_BOOKING) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
             )
         }
 
