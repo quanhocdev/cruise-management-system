@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface ServiceUsageRepository extends JpaRepository<ServiceUsage, Long> {
 
@@ -33,7 +34,7 @@ public interface ServiceUsageRepository extends JpaRepository<ServiceUsage, Long
             """)
     Optional<ServiceUsage> findActiveUsage(
             @Param("bookingPassengerId") Long bookingPassengerId,
-            @Param("serviceTourId") java.util.UUID serviceTourId,
+            @Param("serviceTourId") UUID serviceTourId,
             @Param("now") LocalDateTime now);
 
     /**
@@ -53,7 +54,7 @@ public interface ServiceUsageRepository extends JpaRepository<ServiceUsage, Long
                   )
             """)
     long countActiveUsages(
-            @Param("serviceTourId") java.util.UUID serviceTourId,
+            @Param("serviceTourId") UUID serviceTourId,
             @Param("now") LocalDateTime now);
 
     /**
@@ -66,5 +67,19 @@ public interface ServiceUsageRepository extends JpaRepository<ServiceUsage, Long
      * Lấy lịch sử sử dụng một service tour.
      */
     List<ServiceUsage> findAllByServiceTourIdOrderByUsedAtDesc(
-            java.util.UUID serviceTourId);
+            UUID serviceTourId);
+
+    /**
+     * Lấy toàn bộ lịch sử sử dụng service
+     * của tất cả passenger thuộc các booking do user tạo.
+     *
+     * Quan hệ:
+     *
+     * ServiceUsage
+     * -> BookingPassenger
+     * -> Booking
+     * -> createdByUserId
+     */
+    List<ServiceUsage> findAllByBookingPassenger_Booking_CreatedByUserIdOrderByUsedAtDesc(
+            Long userId);
 }

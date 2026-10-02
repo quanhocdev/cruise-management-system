@@ -11,4 +11,6 @@ public interface ProductUsageService {
 
     List<ProductUsageResponse> getByBookingPassengerId(
             Long bookingPassengerId);
+
+    List<ProductUsageResponse> getByUserId(Long userId);
 }

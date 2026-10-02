@@ -365,6 +365,21 @@ public class ServiceUsageService {
                 .map(serviceUsageMapper::toResponse)
                 .toList();
     }
+    // =============================================================
+    // Lấy toàn bộ lịch sử sử dụng service
+    // của các passenger thuộc booking do user tạo
+    // =============================================================
+
+    @Transactional(readOnly = true)
+    public List<ServiceUsageResponse> getByUserId(Long userId) {
+
+        return serviceUsageRepository
+                .findAllByBookingPassenger_Booking_CreatedByUserIdOrderByUsedAtDesc(
+                        userId)
+                .stream()
+                .map(serviceUsageMapper::toResponse)
+                .toList();
+    }
 
     // =============================================================
     // Kiểm tra capacity

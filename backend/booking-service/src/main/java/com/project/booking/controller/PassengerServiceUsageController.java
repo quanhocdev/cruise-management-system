@@ -1,9 +1,8 @@
 package com.project.booking.controller;
 
-import com.project.booking.dto.ProductUsageResponse;
-import com.project.booking.service.ProductUsageService;
+import com.project.booking.dto.ServiceUsageResponse;
+import com.project.booking.service.ServiceUsageService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,25 +10,27 @@ import org.springframework.web.bind.annotation.RestController;
 import java.security.Principal;
 import java.util.List;
 
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+
 @RestController
-@RequestMapping("/api/passengers/product-usages")
-public class PassengerProductUsageController {
+@RequestMapping("/api/passengers/service-usages")
+public class PassengerServiceUsageController {
 
-    private final ProductUsageService productUsageService;
+    private final ServiceUsageService serviceUsageService;
 
-    public PassengerProductUsageController(
-            ProductUsageService productUsageService) {
-        this.productUsageService = productUsageService;
+    public PassengerServiceUsageController(
+            ServiceUsageService serviceUsageService) {
+        this.serviceUsageService = serviceUsageService;
     }
 
     @GetMapping
-    public ResponseEntity<List<ProductUsageResponse>> getMine(
+    public ResponseEntity<List<ServiceUsageResponse>> getMine(
             Principal principal) {
 
         Long userId = extractUserId(principal);
 
         return ResponseEntity.ok(
-                productUsageService.getByUserId(userId));
+                serviceUsageService.getByUserId(userId));
     }
 
     private Long extractUserId(Principal principal) {

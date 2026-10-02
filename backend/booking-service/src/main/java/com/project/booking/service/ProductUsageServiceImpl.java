@@ -307,4 +307,15 @@ public class ProductUsageServiceImpl implements ProductUsageService {
                                                                 + status);
                 }
         }
+
+        @Override
+        @Transactional(readOnly = true)
+        public List<ProductUsageResponse> getByUserId(Long userId) {
+
+                return productUsageRepository
+                                .findAllByBookingPassenger_Booking_CreatedByUserIdOrderByUsedAtDesc(userId)
+                                .stream()
+                                .map(productUsageMapper::toResponse)
+                                .toList();
+        }
 }
