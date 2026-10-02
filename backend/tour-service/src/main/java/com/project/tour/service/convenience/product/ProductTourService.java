@@ -360,4 +360,38 @@ public class ProductTourService {
                                                 "Product tour not found",
                                                 HttpStatus.NOT_FOUND));
         }
+
+        @Transactional
+        public void consumeQuantity(
+                        UUID productTourId,
+                        Integer quantity) {
+
+                if (quantity == null || quantity <= 0) {
+                        throw new AppException(
+                                        "Quantity must be greater than 0",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                int updatedRows = productTourRepository.decreaseQuantity(
+                                productTourId,
+                                quantity);
+
+                if (updatedRows == 0) {
+
+                        throw new AppException(
+                                        "ProductTour does not have enough quantity",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                ProductTour productTour = productTourRepository
+                                .findById(productTourId)
+                                .orElseThrow(() -> new AppException(
+                                                "Product tour not found",
+                                                HttpStatus.NOT_FOUND));
+
+                if (productTour.getQuantity() == 0) {
+                        productTour.setStatus(ProductTourStatus.OUT_OF_STOCK);
+                        productTourRepository.save(productTour);
+                }
+        }
 }
