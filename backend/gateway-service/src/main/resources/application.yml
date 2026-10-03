@@ -127,7 +127,24 @@ spring:
                 - Path=/api/public/**
 
             # ==========================
-            # TOUR SERVICE - CONVENIENCE
+            # BOOKING SERVICE - CONVENIENCE NFC
+
+            - id: booking-convenience-nfc
+              uri: ${BOOKING_SERVICE_URL:http://booking-service:8082}
+              predicates:
+                - Path=/api/convenience/nfc/**
+
+            # ==========================
+            # BOOKING SERVICE - CONVENIENCE USAGE
+            # ==========================
+
+            - id: booking-convenience-service
+              uri: ${BOOKING_SERVICE_URL:http://booking-service:8082}
+              predicates:
+                - Path=/api/convenience/product-usages/**,/api/convenience/service-usages/**
+
+            # ==========================
+            # TOUR SERVICE - CONVENIENCE MASTER / TOUR
             # ==========================
             # Product / Service / ProductTour / ServiceTour
             # đã được merge vào tour-service
@@ -135,7 +152,7 @@ spring:
             - id: tour-convenience-service
               uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
               predicates:
-                - Path=/api/convenience/**
+                - Path=/api/convenience/products/**,/api/convenience/services/**,/api/convenience/product-tours/**,/api/convenience/service-tours/**
 
             # ==========================
             # TOUR SERVICE - ACTIVITY CRUISE

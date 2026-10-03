@@ -23,6 +23,7 @@ data class ConvenienceUsageUiState(
     val lastProductUsage: ProductUsageResponse? = null,
     val lastServiceUsage: ServiceUsageResponse? = null,
 
+    val successMessage: String? = null,
     val errorMessage: String? = null
 )
 
@@ -47,7 +48,8 @@ class ConvenienceUsageViewModel(
 
         _uiState.value = _uiState.value.copy(
             isLoading = true,
-            errorMessage = null
+            errorMessage = null,
+            successMessage = null
         )
 
         viewModelScope.launch {
@@ -99,6 +101,7 @@ class ConvenienceUsageViewModel(
         _uiState.value = _uiState.value.copy(
             isSubmitting = true,
             errorMessage = null,
+            successMessage = null,
             lastProductUsage = null
         )
 
@@ -116,6 +119,7 @@ class ConvenienceUsageViewModel(
                     _uiState.value = _uiState.value.copy(
                         isSubmitting = false,
                         lastProductUsage = response,
+                        successMessage = "Đã ghi nhận sử dụng sản phẩm !",
                         errorMessage = null
                     )
                 }
@@ -142,6 +146,7 @@ class ConvenienceUsageViewModel(
         _uiState.value = _uiState.value.copy(
             isSubmitting = true,
             errorMessage = null,
+            successMessage = null,
             lastServiceUsage = null
         )
 
@@ -158,6 +163,7 @@ class ConvenienceUsageViewModel(
                     _uiState.value = _uiState.value.copy(
                         isSubmitting = false,
                         lastServiceUsage = response,
+                        successMessage = "Đã ghi nhận sử dụng dịch vụ !",
                         errorMessage = null
                     )
                 }
@@ -175,6 +181,12 @@ class ConvenienceUsageViewModel(
     fun clearError() {
         _uiState.value = _uiState.value.copy(
             errorMessage = null
+        )
+    }
+
+    fun clearSuccess() {
+        _uiState.value = _uiState.value.copy(
+            successMessage = null
         )
     }
 

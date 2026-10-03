@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
+import android.media.AudioManager
+import android.media.ToneGenerator
 import android.nfc.NfcAdapter
 import android.provider.Settings
 import androidx.compose.foundation.background
@@ -40,6 +42,9 @@ fun ConvenienceNfcScanScreen(
 
     val uiState by viewModel.uiState.collectAsState()
 
+    // Luôn lấy giá trị isResolving mới nhất bên trong callback NFC.
+    val isResolving by rememberUpdatedState(uiState.isResolving)
+
     DisposableEffect(activity, adapter) {
 
         if (activity != null && adapter != null && adapter.isEnabled) {
@@ -48,7 +53,7 @@ fun ConvenienceNfcScanScreen(
                 activity,
                 { tag ->
 
-                    if (uiState.isResolving) {
+                    if (isResolving) {
                         return@enableReaderMode
                     }
 
@@ -56,6 +61,10 @@ fun ConvenienceNfcScanScreen(
                         "%02X".format(byte.toInt() and 0xFF)
                     }
 
+                    // NFC đã được điện thoại đọc thành công.
+                    playNfcSuccessSound()
+
+                    // Gửi UID lên backend để xác định hành khách.
                     viewModel.resolveNfc(uid)
                 },
                 NfcAdapter.FLAG_READER_NFC_A or
@@ -202,6 +211,25 @@ fun ConvenienceNfcScanScreen(
             textAlign = TextAlign.Center
         )
     }
+}
+
+/**
+ * Phát một tiếng beep ngắn khi điện thoại đọc được NFC tag.
+ *
+ * Không cần thêm file âm thanh vào res/raw.
+ */
+private fun playNfcSuccessSound() {
+    val toneGenerator = ToneGenerator(
+        AudioManager.STREAM_NOTIFICATION,
+        80
+    )
+
+    toneGenerator.startTone(
+        ToneGenerator.TONE_PROP_BEEP,
+        120
+    )
+
+    toneGenerator.release()
 }
 
 private tailrec fun Context.findActivity(): Activity? = when (this) {

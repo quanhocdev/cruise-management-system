@@ -14,6 +14,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.project.cruise.android.data.dto.convenience.ProductTourResponse
 import com.project.cruise.android.data.dto.convenience.ServiceTourResponse
 import com.project.cruise.android.viewmodel.ConvenienceUsageViewModel
+import android.media.AudioManager
+import android.media.ToneGenerator
 
 @Composable
 fun ConvenienceUsageScreen(
@@ -27,6 +29,15 @@ fun ConvenienceUsageScreen(
     viewModel: ConvenienceUsageViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(uiState.successMessage) {
+        if (uiState.successMessage != null) {
+            val toneGenerator = ToneGenerator(
+                AudioManager.STREAM_NOTIFICATION, 100 )
+                toneGenerator.startTone( ToneGenerator.TONE_PROP_ACK, 200 )
+                toneGenerator.release()
+                kotlinx.coroutines.delay(2000)
+                viewModel.clearSuccess() } }
 
     var selectedType by remember {
         mutableStateOf(ConvenienceUsageType.PRODUCT)
@@ -319,6 +330,14 @@ fun ConvenienceUsageScreen(
             )
         }
 
+        uiState.successMessage?.let { message ->
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = message,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold
+            )
+        }
         Spacer(modifier = Modifier.height(12.dp))
 
         Button(
