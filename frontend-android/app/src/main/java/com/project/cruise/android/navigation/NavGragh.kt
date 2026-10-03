@@ -18,6 +18,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
+import android.net.Uri
+import com.project.cruise.android.ui.screens.pos.ConvenienceNfcScanScreen
 import com.project.cruise.android.ui.screens.passenger.MyBookingsScreen
 import com.project.cruise.android.ui.screens.passenger.MyBookingDetailScreen
 import com.project.cruise.android.ui.screens.TourPublicScreen
@@ -89,6 +91,25 @@ object Routes {
     fun posManualEntry(role: PosRole) = "pos_manual_entry/${role.apiRole}"
     fun posHistory(role: PosRole) = "pos_history/${role.apiRole}"
     fun posIdentity(role: PosRole, localId: String) = "pos_identity/${role.apiRole}/$localId"
+
+    const val POS_CONVENIENCE_USAGE =
+        "pos_convenience_usage/{bookingPassengerId}/{passengerName}/{bookingId}/{tourId}/{tourPackageId}"
+
+    fun posConvenienceUsage(
+        bookingPassengerId: Long,
+        passengerName: String?,
+        bookingId: Long,
+        tourId: String,
+        tourPackageId: String
+    ): String {
+        return "pos_convenience_usage/" +
+                "$bookingPassengerId/" +
+                "${Uri.encode(passengerName ?: "")}/" +
+                "$bookingId/" +
+                "$tourId/" +
+                "$tourPackageId"
+    }
+
 }
 
 @Composable
@@ -459,19 +480,103 @@ fun NavGraph() {
 
         composable(
             route = Routes.POS_NFC_SCAN,
-            arguments = listOf(navArgument("role") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val role = PosRole.fromApiRole(backStackEntry.arguments?.getString("role"))
-                ?: return@composable
-            NfcScanScreen(
-                role = role,
-                onBackClick = { navController.popBackStack() },
-                onSaved = { localId ->
-                    navController.navigate(Routes.posIdentity(role, localId)) {
-                        popUpTo(Routes.posDashboard(role))
-                    }
+            arguments = listOf(
+                navArgument("role") {
+                    type = NavType.StringType
                 }
             )
+        ) { backStackEntry ->
+
+            val role = PosRole.fromApiRole(
+                backStackEntry.arguments?.getString("role")
+            ) ?: return@composable
+
+            if (role == PosRole.CONVENIENCE) {
+
+                ConvenienceNfcScanScreen(
+                    onBackClick = {
+                        navController.popBackStack()
+                    },
+                    onResolved = { response ->
+
+                        navController.navigate(
+                            Routes.posConvenienceUsage(
+                                bookingPassengerId = response.bookingPassengerId,
+                                passengerName = response.passengerName,
+                                bookingId = response.bookingId,
+                                tourId = response.tourId,
+                                tourPackageId = response.tourPackageId
+                            )
+                        ) {
+                            popUpTo(
+                                Routes.posDashboard(role)
+                            )
+                        }
+                    }
+                )
+
+            } else {
+
+                NfcScanScreen(
+                    role = role,
+                    onBackClick = {
+                        navController.popBackStack()
+                    },
+                    onSaved = { localId ->
+                        navController.navigate(
+                            Routes.posIdentity(role, localId)
+                        ) {
+                            popUpTo(
+                                Routes.posDashboard(role)
+                            )
+                        }
+                    }
+                )
+            }
+        }
+
+        composable(
+            route = Routes.POS_CONVENIENCE_USAGE,
+            arguments = listOf(
+                navArgument("bookingPassengerId") {
+                    type = NavType.LongType
+                },
+                navArgument("passengerName") {
+                    type = NavType.StringType
+                },
+                navArgument("bookingId") {
+                    type = NavType.LongType
+                },
+                navArgument("tourId") {
+                    type = NavType.StringType
+                },
+                navArgument("tourPackageId") {
+                    type = NavType.StringType
+                }
+            )
+        ) { backStackEntry ->
+
+            val bookingPassengerId =
+                backStackEntry.arguments?.getLong("bookingPassengerId")
+                    ?: return@composable
+
+            val passengerName =
+                backStackEntry.arguments?.getString("passengerName")
+                    ?: ""
+
+            val bookingId =
+                backStackEntry.arguments?.getLong("bookingId")
+                    ?: return@composable
+
+            val tourId =
+                backStackEntry.arguments?.getString("tourId")
+                    ?: return@composable
+
+            val tourPackageId =
+                backStackEntry.arguments?.getString("tourPackageId")
+                    ?: return@composable
+
+            // TODO: màn hình Convenience chọn Product / Service
         }
 
         composable(

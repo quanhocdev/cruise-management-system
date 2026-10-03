@@ -15,12 +15,12 @@ fun ConveniencePosDashboardScreen(
         actions = listOf(
             PosDashboardAction(
                 "Quét NFC hành khách",
-                "Xác định người sử dụng sản phẩm hoặc dịch vụ tiện ích",
+                "Xác định hành khách và ghi nhận sản phẩm hoặc dịch vụ tiện ích",
                 "NFC",
                 onNfcClick
             )
         ),
-        notice = "Role CONVENIENCE chỉ dùng NFC. Ghi nhận dịch vụ sẽ được bật khi backend cung cấp API.",
+        notice = "Nhân viên quét NFC của hành khách, sau đó chọn sản phẩm hoặc dịch vụ để ghi nhận.",
         onLogoutClick = onLogoutClick,
         onHistoryClick = onHistoryClick
     )

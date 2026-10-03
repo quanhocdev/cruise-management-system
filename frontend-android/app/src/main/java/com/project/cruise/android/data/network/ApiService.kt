@@ -8,6 +8,8 @@ import com.project.cruise.android.data.dto.auth.RegisterResponse
 import com.project.cruise.android.data.dto.auth.UserInfoResponse
 import com.project.cruise.android.data.dto.auth.VerifyOtpRequest
 import com.project.cruise.android.data.dto.booking.BookingResponse
+import com.project.cruise.android.data.dto.convenience.NfcResolveRequest
+import com.project.cruise.android.data.dto.convenience.NfcResolveResponse
 import com.project.cruise.android.data.dto.tour.PublicTourDetailResponse
 import com.project.cruise.android.data.dto.tour.PublicTourSummaryResponse
 import retrofit2.Call
@@ -61,5 +63,11 @@ interface ApiService {
         @Path("id") id: Long,
         @Query("privileged") privileged: Boolean = false
     ): BookingResponse
+
+
+    @POST("api/convenience/nfc/resolve")
+    suspend fun resolveConvenienceNfc(
+        @Body request: NfcResolveRequest
+    ): NfcResolveResponse
 }
 
