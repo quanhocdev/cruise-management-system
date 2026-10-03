@@ -5,7 +5,11 @@ import com.project.cruise.android.data.auth.TokenManager
 import com.project.cruise.android.data.dto.convenience.NfcResolveRequest
 import com.project.cruise.android.data.dto.convenience.NfcResolveResponse
 import com.project.cruise.android.data.dto.convenience.ProductTourResponse
+import com.project.cruise.android.data.dto.convenience.ProductUsageRequest
+import com.project.cruise.android.data.dto.convenience.ProductUsageResponse
 import com.project.cruise.android.data.dto.convenience.ServiceTourResponse
+import com.project.cruise.android.data.dto.convenience.ServiceUsageRequest
+import com.project.cruise.android.data.dto.convenience.ServiceUsageResponse
 import com.project.cruise.android.data.network.RetrofitClient
 
 class ConvenienceRepository(context: Context) {
@@ -38,4 +42,30 @@ class ConvenienceRepository(context: Context) {
     ): List<ServiceTourResponse> {
         return apiService.getConvenienceServiceTours(tourId)
     }
+    suspend fun createProductUsage(
+        nfcCardUid: String,
+        productTourId: String,
+        quantity: Int
+    ): ProductUsageResponse {
+        return apiService.createProductUsage(
+            ProductUsageRequest(
+                nfcCardUid = nfcCardUid,
+                productTourId = productTourId,
+                quantity = quantity
+            )
+        )
+    }
+
+    suspend fun createServiceUsage(
+        nfcCardUid: String,
+        serviceTourId: String
+    ): ServiceUsageResponse {
+        return apiService.createServiceUsage(
+            ServiceUsageRequest(
+                nfcCardUid = nfcCardUid,
+                serviceTourId = serviceTourId
+            )
+        )
+    }
+
 }

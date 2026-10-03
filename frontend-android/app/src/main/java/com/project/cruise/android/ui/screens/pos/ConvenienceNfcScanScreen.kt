@@ -21,16 +21,15 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.project.cruise.android.data.dto.convenience.NfcResolveResponse
 import com.project.cruise.android.viewmodel.ConvenienceNfcScanViewModel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @Composable
 fun ConvenienceNfcScanScreen(
     onBackClick: () -> Unit,
-    onResolved: (NfcResolveResponse) -> Unit,
+    onResolved: (NfcResolveResponse, String) -> Unit,
     viewModel: ConvenienceNfcScanViewModel = viewModel()
 ) {
     val context = LocalContext.current
+
     val activity = remember(context) {
         context.findActivity()
     }
@@ -40,8 +39,6 @@ fun ConvenienceNfcScanScreen(
     }
 
     val uiState by viewModel.uiState.collectAsState()
-
-    val scope = rememberCoroutineScope()
 
     DisposableEffect(activity, adapter) {
 
@@ -77,9 +74,16 @@ fun ConvenienceNfcScanScreen(
         }
     }
 
-    LaunchedEffect(uiState.resolved) {
-        uiState.resolved?.let { response ->
-            onResolved(response)
+    LaunchedEffect(uiState.resolved, uiState.nfcCardUid) {
+
+        val response = uiState.resolved
+        val nfcCardUid = uiState.nfcCardUid
+
+        if (response != null && !nfcCardUid.isNullOrBlank()) {
+            onResolved(
+                response,
+                nfcCardUid
+            )
         }
     }
 

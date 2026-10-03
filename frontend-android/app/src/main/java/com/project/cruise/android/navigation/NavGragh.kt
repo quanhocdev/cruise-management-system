@@ -57,6 +57,7 @@ import com.project.cruise.android.ui.screens.pos.NfcScanScreen
 import com.project.cruise.android.ui.screens.pos.PosHistoryScreen
 import com.project.cruise.android.ui.screens.pos.PosIdentityScreen
 import com.project.cruise.android.data.repository.PosIdentityRepository
+import com.project.cruise.android.ui.screens.pos.ConvenienceUsageScreen
 import com.project.cruise.android.viewmodel.pos.PosIdentityViewModel
 import com.project.cruise.android.viewmodel.pos.PosIdentityViewModelFactory
 object Routes {
@@ -93,23 +94,24 @@ object Routes {
     fun posIdentity(role: PosRole, localId: String) = "pos_identity/${role.apiRole}/$localId"
 
     const val POS_CONVENIENCE_USAGE =
-        "pos_convenience_usage/{bookingPassengerId}/{passengerName}/{bookingId}/{tourId}/{tourPackageId}"
+        "pos_convenience_usage/{bookingPassengerId}/{passengerName}/{bookingId}/{tourId}/{tourPackageId}/{nfcCardUid}"
 
     fun posConvenienceUsage(
         bookingPassengerId: Long,
         passengerName: String?,
         bookingId: Long,
         tourId: String,
-        tourPackageId: String
+        tourPackageId: String,
+        nfcCardUid: String
     ): String {
         return "pos_convenience_usage/" +
                 "$bookingPassengerId/" +
                 "${Uri.encode(passengerName ?: "")}/" +
                 "$bookingId/" +
                 "$tourId/" +
-                "$tourPackageId"
+                "$tourPackageId/" +
+                Uri.encode(nfcCardUid)
     }
-
 }
 
 @Composable
@@ -497,7 +499,7 @@ fun NavGraph() {
                     onBackClick = {
                         navController.popBackStack()
                     },
-                    onResolved = { response ->
+                    onResolved = { response, nfcCardUid ->
 
                         navController.navigate(
                             Routes.posConvenienceUsage(
@@ -505,7 +507,8 @@ fun NavGraph() {
                                 passengerName = response.passengerName,
                                 bookingId = response.bookingId,
                                 tourId = response.tourId,
-                                tourPackageId = response.tourPackageId
+                                tourPackageId = response.tourPackageId,
+                                nfcCardUid = nfcCardUid
                             )
                         ) {
                             popUpTo(
@@ -534,7 +537,6 @@ fun NavGraph() {
                 )
             }
         }
-
         composable(
             route = Routes.POS_CONVENIENCE_USAGE,
             arguments = listOf(
@@ -551,6 +553,9 @@ fun NavGraph() {
                     type = NavType.StringType
                 },
                 navArgument("tourPackageId") {
+                    type = NavType.StringType
+                },
+                navArgument("nfcCardUid") {
                     type = NavType.StringType
                 }
             )
@@ -576,9 +581,22 @@ fun NavGraph() {
                 backStackEntry.arguments?.getString("tourPackageId")
                     ?: return@composable
 
-            // TODO: màn hình Convenience chọn Product / Service
-        }
+            val nfcCardUid =
+                backStackEntry.arguments?.getString("nfcCardUid")
+                    ?: return@composable
 
+            ConvenienceUsageScreen(
+                bookingPassengerId = bookingPassengerId,
+                passengerName = passengerName,
+                bookingId = bookingId,
+                tourId = tourId,
+                tourPackageId = tourPackageId,
+                nfcCardUid = nfcCardUid,
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
         composable(
             route = Routes.POS_MANUAL_ENTRY,
             arguments = listOf(navArgument("role") { type = NavType.StringType })

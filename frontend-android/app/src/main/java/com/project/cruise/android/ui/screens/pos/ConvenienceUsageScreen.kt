@@ -6,16 +6,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-
-data class ConvenienceUsageItem(
-    val id: String,
-    val name: String,
-    val description: String? = null,
-    val price: String? = null
-)
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.project.cruise.android.data.dto.convenience.ProductTourResponse
+import com.project.cruise.android.data.dto.convenience.ServiceTourResponse
+import com.project.cruise.android.viewmodel.ConvenienceUsageViewModel
 
 @Composable
 fun ConvenienceUsageScreen(
@@ -24,36 +22,41 @@ fun ConvenienceUsageScreen(
     bookingId: Long,
     tourId: String,
     tourPackageId: String,
-    products: List<ConvenienceUsageItem>,
-    services: List<ConvenienceUsageItem>,
-    isLoading: Boolean,
-    isSubmitting: Boolean,
-    errorMessage: String?,
+    nfcCardUid: String,
     onBackClick: () -> Unit,
-    onConfirmProduct: (productTourId: String, quantity: Int) -> Unit,
-    onConfirmService: (serviceTourId: String) -> Unit
+    viewModel: ConvenienceUsageViewModel = viewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+
     var selectedType by remember {
         mutableStateOf(ConvenienceUsageType.PRODUCT)
     }
 
-    var selectedItem by remember {
-        mutableStateOf<ConvenienceUsageItem?>(null)
+    var selectedProduct by remember {
+        mutableStateOf<ProductTourResponse?>(null)
+    }
+
+    var selectedService by remember {
+        mutableStateOf<ServiceTourResponse?>(null)
     }
 
     var quantity by remember {
         mutableIntStateOf(1)
     }
 
-    LaunchedEffect(selectedType) {
-        selectedItem = null
-        quantity = 1
+    LaunchedEffect(tourId) {
+        viewModel.loadConvenienceTours(tourId)
     }
 
-    val items = when (selectedType) {
-        ConvenienceUsageType.PRODUCT -> products
-        ConvenienceUsageType.SERVICE -> services
+    LaunchedEffect(selectedType) {
+        selectedProduct = null
+        selectedService = null
+        quantity = 1
+        viewModel.clearError()
     }
+
+    val isProduct =
+        selectedType == ConvenienceUsageType.PRODUCT
 
     Column(
         modifier = Modifier
@@ -63,7 +66,7 @@ fun ConvenienceUsageScreen(
 
         TextButton(
             onClick = onBackClick,
-            enabled = !isSubmitting
+            enabled = !uiState.isSubmitting
         ) {
             Text("← Quay lại")
         }
@@ -121,7 +124,7 @@ fun ConvenienceUsageScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             FilterChip(
-                selected = selectedType == ConvenienceUsageType.PRODUCT,
+                selected = isProduct,
                 onClick = {
                     selectedType = ConvenienceUsageType.PRODUCT
                 },
@@ -134,7 +137,7 @@ fun ConvenienceUsageScreen(
             Spacer(modifier = Modifier.width(8.dp))
 
             FilterChip(
-                selected = selectedType == ConvenienceUsageType.SERVICE,
+                selected = !isProduct,
                 onClick = {
                     selectedType = ConvenienceUsageType.SERVICE
                 },
@@ -148,12 +151,10 @@ fun ConvenienceUsageScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = when (selectedType) {
-                ConvenienceUsageType.PRODUCT ->
-                    "Chọn sản phẩm"
-
-                ConvenienceUsageType.SERVICE ->
-                    "Chọn dịch vụ"
+            text = if (isProduct) {
+                "Chọn sản phẩm"
+            } else {
+                "Chọn dịch vụ"
             },
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold
@@ -161,61 +162,104 @@ fun ConvenienceUsageScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        if (isLoading) {
+        if (uiState.isLoading) {
 
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
+                contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator()
             }
 
-        } else if (items.isEmpty()) {
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-            ) {
-                Text(
-                    text = when (selectedType) {
-                        ConvenienceUsageType.PRODUCT ->
-                            "Tour này không có sản phẩm tiện ích."
-
-                        ConvenienceUsageType.SERVICE ->
-                            "Tour này không có dịch vụ tiện ích."
-                    },
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
         } else {
 
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(
-                    items = items,
-                    key = { it.id }
-                ) { item ->
+            if (isProduct) {
 
-                    ConvenienceUsageItemCard(
-                        item = item,
-                        selected = selectedItem?.id == item.id,
-                        onClick = {
-                            selectedItem = item
+                if (uiState.products.isEmpty()) {
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                    ) {
+                        Text(
+                            text = "Tour này không có sản phẩm tiện ích.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                } else {
+
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(
+                            items = uiState.products,
+                            key = { it.id }
+                        ) { product ->
+
+                            ConvenienceProductCard(
+                                product = product,
+                                selected =
+                                    selectedProduct?.id == product.id,
+                                onClick = {
+                                    selectedProduct = product
+                                }
+                            )
                         }
-                    )
+                    }
+                }
+
+            } else {
+
+                if (uiState.services.isEmpty()) {
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                    ) {
+                        Text(
+                            text = "Tour này không có dịch vụ tiện ích.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                } else {
+
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(
+                            items = uiState.services,
+                            key = { it.id }
+                        ) { service ->
+
+                            ConvenienceServiceCard(
+                                service = service,
+                                selected =
+                                    selectedService?.id == service.id,
+                                onClick = {
+                                    selectedService = service
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }
 
-        if (selectedType == ConvenienceUsageType.PRODUCT &&
-            selectedItem != null
+        if (
+            isProduct &&
+            selectedProduct != null
         ) {
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -238,7 +282,8 @@ fun ConvenienceUsageScreen(
                         if (quantity > 1) {
                             quantity--
                         }
-                    }
+                    },
+                    enabled = !uiState.isSubmitting
                 ) {
                     Text("−")
                 }
@@ -256,14 +301,15 @@ fun ConvenienceUsageScreen(
                 OutlinedButton(
                     onClick = {
                         quantity++
-                    }
+                    },
+                    enabled = !uiState.isSubmitting
                 ) {
                     Text("+")
                 }
             }
         }
 
-        errorMessage?.let { message ->
+        uiState.errorMessage?.let { message ->
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -278,34 +324,45 @@ fun ConvenienceUsageScreen(
         Button(
             onClick = {
 
-                val item = selectedItem ?: return@Button
+                if (isProduct) {
 
-                when (selectedType) {
+                    val product = selectedProduct
+                        ?: return@Button
 
-                    ConvenienceUsageType.PRODUCT -> {
-                        onConfirmProduct(
-                            item.id,
-                            quantity
-                        )
-                    }
+                    viewModel.createProductUsage(
+                        nfcCardUid = nfcCardUid,
+                        productTourId = product.id,
+                        quantity = quantity
+                    )
 
-                    ConvenienceUsageType.SERVICE -> {
-                        onConfirmService(
-                            item.id
-                        )
-                    }
+                } else {
+
+                    val service = selectedService
+                        ?: return@Button
+
+                    viewModel.createServiceUsage(
+                        nfcCardUid = nfcCardUid,
+                        serviceTourId = service.id
+                    )
                 }
             },
-            enabled = selectedItem != null &&
-                    !isLoading &&
-                    !isSubmitting,
+            enabled =
+                if (isProduct) {
+                    selectedProduct != null
+                } else {
+                    selectedService != null
+                } &&
+                        !uiState.isLoading &&
+                        !uiState.isSubmitting,
             modifier = Modifier.fillMaxWidth()
         ) {
-            if (isSubmitting) {
+            if (uiState.isSubmitting) {
+
                 CircularProgressIndicator(
                     modifier = Modifier.size(20.dp),
                     strokeWidth = 2.dp
                 )
+
             } else {
                 Text("Xác nhận")
             }
@@ -314,8 +371,8 @@ fun ConvenienceUsageScreen(
 }
 
 @Composable
-private fun ConvenienceUsageItemCard(
-    item: ConvenienceUsageItem,
+private fun ConvenienceProductCard(
+    product: ProductTourResponse,
     selected: Boolean,
     onClick: () -> Unit
 ) {
@@ -337,12 +394,13 @@ private fun ConvenienceUsageItemCard(
         ) {
 
             Text(
-                text = item.name,
+                text = product.productName
+                    ?: "Không có tên sản phẩm",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
 
-            item.description
+            product.productDescription
                 ?.takeIf { it.isNotBlank() }
                 ?.let { description ->
 
@@ -355,7 +413,64 @@ private fun ConvenienceUsageItemCard(
                     )
                 }
 
-            item.price
+            product.quantity?.let { quantity ->
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Số lượng cấu hình: $quantity",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ConvenienceServiceCard(
+    service: ServiceTourResponse,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        colors = if (selected) {
+            CardDefaults.cardColors(
+                containerColor =
+                    MaterialTheme.colorScheme.primaryContainer
+            )
+        } else {
+            CardDefaults.cardColors()
+        }
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+
+            Text(
+                text = service.serviceName
+                    ?: "Không có tên dịch vụ",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+
+            service.serviceDescription
+                ?.takeIf { it.isNotBlank() }
+                ?.let { description ->
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+            service.servicePrice
                 ?.takeIf { it.isNotBlank() }
                 ?.let { price ->
 
@@ -366,6 +481,17 @@ private fun ConvenienceUsageItemCard(
                         fontWeight = FontWeight.SemiBold
                     )
                 }
+
+            service.durationMinutes?.let { duration ->
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = "Thời lượng: $duration phút",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }

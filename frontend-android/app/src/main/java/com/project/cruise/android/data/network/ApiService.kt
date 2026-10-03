@@ -21,7 +21,10 @@ import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
-
+import com.project.cruise.android.data.dto.convenience.ProductUsageRequest
+import com.project.cruise.android.data.dto.convenience.ProductUsageResponse
+import com.project.cruise.android.data.dto.convenience.ServiceUsageRequest
+import com.project.cruise.android.data.dto.convenience.ServiceUsageResponse
 interface ApiService {
 
 
@@ -81,5 +84,16 @@ interface ApiService {
     suspend fun getConvenienceServiceTours(
         @Path("tourId") tourId: String
     ): List<ServiceTourResponse>
+
+    @POST("api/convenience/product-usages")
+    suspend fun createProductUsage(
+        @Body request: ProductUsageRequest
+    ): ProductUsageResponse
+
+    @POST("api/convenience/service-usages")
+    suspend fun createServiceUsage(
+        @Body request: ServiceUsageRequest
+    ): ServiceUsageResponse
+
 }
 

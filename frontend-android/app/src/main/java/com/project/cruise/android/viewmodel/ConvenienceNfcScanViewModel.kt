@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 
 data class ConvenienceNfcScanUiState(
     val isResolving: Boolean = false,
+    val nfcCardUid: String? = null,
     val resolved: NfcResolveResponse? = null,
     val error: String? = null
 )
@@ -37,6 +38,7 @@ class ConvenienceNfcScanViewModel(
 
         _uiState.value = _uiState.value.copy(
             isResolving = true,
+            nfcCardUid = nfcCardUid,
             resolved = null,
             error = null
         )
@@ -48,12 +50,14 @@ class ConvenienceNfcScanViewModel(
                 .onSuccess { response ->
                     _uiState.value = ConvenienceNfcScanUiState(
                         isResolving = false,
+                        nfcCardUid = nfcCardUid,
                         resolved = response
                     )
                 }
                 .onFailure { exception ->
                     _uiState.value = ConvenienceNfcScanUiState(
                         isResolving = false,
+                        nfcCardUid = nfcCardUid,
                         error = exception.message
                             ?: "Không thể xác định hành khách từ NFC."
                     )
