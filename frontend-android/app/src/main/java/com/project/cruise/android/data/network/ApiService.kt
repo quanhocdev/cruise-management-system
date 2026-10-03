@@ -10,6 +10,8 @@ import com.project.cruise.android.data.dto.auth.VerifyOtpRequest
 import com.project.cruise.android.data.dto.booking.BookingResponse
 import com.project.cruise.android.data.dto.convenience.NfcResolveRequest
 import com.project.cruise.android.data.dto.convenience.NfcResolveResponse
+import com.project.cruise.android.data.dto.convenience.ProductTourResponse
+import com.project.cruise.android.data.dto.convenience.ServiceTourResponse
 import com.project.cruise.android.data.dto.tour.PublicTourDetailResponse
 import com.project.cruise.android.data.dto.tour.PublicTourSummaryResponse
 import retrofit2.Call
@@ -69,5 +71,15 @@ interface ApiService {
     suspend fun resolveConvenienceNfc(
         @Body request: NfcResolveRequest
     ): NfcResolveResponse
+
+    @GET("api/convenience/product-tours/tour/{tourId}")
+    suspend fun getConvenienceProductTours(
+        @Path("tourId") tourId: String
+    ): List<ProductTourResponse>
+
+    @GET("api/convenience/service-tours/tour/{tourId}")
+    suspend fun getConvenienceServiceTours(
+        @Path("tourId") tourId: String
+    ): List<ServiceTourResponse>
 }
 
