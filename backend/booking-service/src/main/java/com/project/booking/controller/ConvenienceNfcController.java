@@ -1,7 +1,7 @@
 package com.project.booking.controller;
 
-import com.project.booking.dto.convenience.NfcResolveRequest;
-import com.project.booking.dto.convenience.NfcResolveResponse;
+import com.project.booking.dto.nfc.NfcResolveRequest;
+import com.project.booking.dto.nfc.NfcResolveResponse;
 import com.project.booking.service.ConvenienceNfcService;
 
 import jakarta.validation.Valid;
@@ -22,12 +22,6 @@ public class ConvenienceNfcController {
         this.convenienceNfcService = convenienceNfcService;
     }
 
-    /**
-     * Resolve NFC card -> BookingPassenger -> Booking -> Tour.
-     *
-     * Dùng cho Convenience POS trước khi chọn
-     * ProductTour hoặc ServiceTour.
-     */
     @PostMapping("/resolve")
     @PreAuthorize("hasRole('CONVENIENCE')")
     public ResponseEntity<NfcResolveResponse> resolve(
