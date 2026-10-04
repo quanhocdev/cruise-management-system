@@ -56,7 +56,7 @@ public class ActivityCruiseClient {
             LocalDateTime startTime,
             LocalDateTime endTime,
             Integer maxPassengers,
-            BigDecimal unitPrice,
+            BigDecimal price,
             String activityCruiseTourStatus,
             boolean activityActive,
             UUID packageBenefitId,
