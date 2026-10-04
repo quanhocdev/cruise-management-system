@@ -9,7 +9,7 @@ import com.project.tour.model.onboard.ActivityCruiseTour;
 import com.project.tour.model.onboard.enums.ActivityCruiseTourStatus;
 import com.project.tour.model.scheduler.Tour;
 import com.project.tour.repository.cruise.CruiseAreaRepository;
-import com.project.tour.repository.onboard.ActivityCruiseTourAssignmentRepository;
+import com.project.tour.repository.onboard.ActivityCruiseTourRepository;
 import com.project.tour.repository.tour.TourRepository;
 
 import org.springframework.http.HttpStatus;
@@ -23,12 +23,12 @@ import java.util.UUID;
 @Transactional
 public class ActivityCruiseTourAssignmentService {
 
-        private final ActivityCruiseTourAssignmentRepository assignmentRepository;
+        private final ActivityCruiseTourRepository assignmentRepository;
         private final TourRepository tourRepository;
         private final CruiseAreaRepository cruiseAreaRepository;
 
         public ActivityCruiseTourAssignmentService(
-                        ActivityCruiseTourAssignmentRepository assignmentRepository,
+                        ActivityCruiseTourRepository assignmentRepository,
                         TourRepository tourRepository,
                         CruiseAreaRepository cruiseAreaRepository) {
 

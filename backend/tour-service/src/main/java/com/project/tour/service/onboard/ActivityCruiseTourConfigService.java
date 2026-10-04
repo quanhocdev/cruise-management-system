@@ -9,7 +9,7 @@ import com.project.tour.model.onboard.ActivityCruiseTour;
 import com.project.tour.model.onboard.enums.ActivityCruiseStatus;
 import com.project.tour.model.onboard.enums.ActivityCruiseTourStatus;
 import com.project.tour.repository.onboard.ActivityCruiseRepository;
-import com.project.tour.repository.onboard.ActivityCruiseTourAssignmentRepository;
+import com.project.tour.repository.onboard.ActivityCruiseTourRepository;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -24,12 +24,12 @@ import java.util.UUID;
 @Transactional
 public class ActivityCruiseTourConfigService {
 
-        private final ActivityCruiseTourAssignmentRepository assignmentRepository;
+        private final ActivityCruiseTourRepository assignmentRepository;
         private final ActivityCruiseRepository activityCruiseRepository;
         private final ActivityCruiseTourMapper activityCruiseTourMapper;
 
         public ActivityCruiseTourConfigService(
-                        ActivityCruiseTourAssignmentRepository assignmentRepository,
+                        ActivityCruiseTourRepository assignmentRepository,
                         ActivityCruiseRepository activityCruiseRepository,
                         ActivityCruiseTourMapper activityCruiseTourMapper) {
 

@@ -1,5 +1,6 @@
 package com.project.booking.service;
 
+import com.project.booking.client.ActivityCruiseClient;
 import com.project.booking.dto.ActivityCruiseUsageRequest;
 import com.project.booking.dto.ActivityCruiseUsageResponse;
 import com.project.booking.mapper.ActivityCruiseUsageMapper;
@@ -14,22 +15,24 @@ import java.util.List;
 public class ActivityCruiseUsageServiceImpl
         implements ActivityCruiseUsageService {
 
-    private final ActivityCruiseUsageRepository
+    private final ActivityCruiseUsageRepository activityCruiseUsageRepository;
+private final ActivityCruiseUsageMapper activityCruiseUsageMapper;
+private final ActivityCruiseClient activityCruiseClient;
+
+public ActivityCruiseUsageServiceImpl(
+        ActivityCruiseUsageRepository activityCruiseUsageRepository,
+        ActivityCruiseUsageMapper activityCruiseUsageMapper,
+        ActivityCruiseClient activityCruiseClient) {
+
+    this.activityCruiseUsageRepository =
             activityCruiseUsageRepository;
 
-    private final ActivityCruiseUsageMapper
+    this.activityCruiseUsageMapper =
             activityCruiseUsageMapper;
 
-    public ActivityCruiseUsageServiceImpl(
-            ActivityCruiseUsageRepository activityCruiseUsageRepository,
-            ActivityCruiseUsageMapper activityCruiseUsageMapper) {
-
-        this.activityCruiseUsageRepository =
-                activityCruiseUsageRepository;
-
-        this.activityCruiseUsageMapper =
-                activityCruiseUsageMapper;
-    }
+    this.activityCruiseClient =
+            activityCruiseClient;
+}
 
     @Override
     @Transactional
