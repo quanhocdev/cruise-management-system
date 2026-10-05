@@ -4,8 +4,8 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.project.cruise.android.data.dto.convenience.ProductTourResponse
-import com.project.cruise.android.data.dto.convenience.ServiceTourResponse
 import com.project.cruise.android.data.dto.convenience.ProductUsageResponse
+import com.project.cruise.android.data.dto.convenience.ServiceTourResponse
 import com.project.cruise.android.data.dto.convenience.ServiceUsageResponse
 import com.project.cruise.android.data.repository.ConvenienceRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,51 +33,34 @@ class ConvenienceUsageViewModel(
 
     private val repository = ConvenienceRepository(application)
 
-    private val _uiState = MutableStateFlow(
-        ConvenienceUsageUiState()
-    )
-
-    val uiState: StateFlow<ConvenienceUsageUiState> =
-        _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(ConvenienceUsageUiState())
+    val uiState: StateFlow<ConvenienceUsageUiState> = _uiState.asStateFlow()
 
     fun loadConvenienceTours(tourId: String) {
-
-        if (_uiState.value.isLoading) {
-            return
-        }
-
-        _uiState.value = _uiState.value.copy(
-            isLoading = true,
-            errorMessage = null,
-            successMessage = null
-        )
-
         viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isLoading = true,
+                errorMessage = null
+            )
 
-            runCatching {
-
+            try {
                 val products = repository.getProductTours(tourId)
                 val services = repository.getServiceTours(tourId)
 
-                Pair(products, services)
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    products = products,
+                    services = services,
+                    errorMessage = null
+                )
+
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    errorMessage =
+                        e.message ?: "Không thể tải tiện ích"
+                )
             }
-                .onSuccess { (products, services) ->
-
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        products = products,
-                        services = services,
-                        errorMessage = null
-                    )
-                }
-                .onFailure { exception ->
-
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        errorMessage = exception.message
-                            ?: "Không thể tải danh sách tiện ích."
-                    )
-                }
         }
     }
 
@@ -86,51 +69,45 @@ class ConvenienceUsageViewModel(
         productTourId: String,
         quantity: Int
     ) {
-
         if (_uiState.value.isSubmitting) {
             return
         }
 
-        if (quantity < 1) {
+        if (quantity <= 0) {
             _uiState.value = _uiState.value.copy(
-                errorMessage = "Số lượng phải lớn hơn 0."
+                errorMessage = "Số lượng phải lớn hơn 0"
             )
             return
         }
 
-        _uiState.value = _uiState.value.copy(
-            isSubmitting = true,
-            errorMessage = null,
-            successMessage = null,
-            lastProductUsage = null
-        )
-
         viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isSubmitting = true,
+                errorMessage = null,
+                successMessage = null
+            )
 
-            runCatching {
-                repository.createProductUsage(
+            try {
+                val response = repository.createProductUsage(
                     nfcCardUid = nfcCardUid,
                     productTourId = productTourId,
                     quantity = quantity
                 )
+
+                _uiState.value = _uiState.value.copy(
+                    isSubmitting = false,
+                    lastProductUsage = response,
+                    successMessage = "Đã ghi nhận sử dụng sản phẩm !",
+                    errorMessage = null
+                )
+
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isSubmitting = false,
+                    errorMessage =
+                        e.message ?: "Không thể ghi nhận sử dụng sản phẩm"
+                )
             }
-                .onSuccess { response ->
-
-                    _uiState.value = _uiState.value.copy(
-                        isSubmitting = false,
-                        lastProductUsage = response,
-                        successMessage = "Đã ghi nhận sử dụng sản phẩm !",
-                        errorMessage = null
-                    )
-                }
-                .onFailure { exception ->
-
-                    _uiState.value = _uiState.value.copy(
-                        isSubmitting = false,
-                        errorMessage = exception.message
-                            ?: "Không thể ghi nhận sản phẩm."
-                    )
-                }
         }
     }
 
@@ -138,43 +115,37 @@ class ConvenienceUsageViewModel(
         nfcCardUid: String,
         serviceTourId: String
     ) {
-
         if (_uiState.value.isSubmitting) {
             return
         }
 
-        _uiState.value = _uiState.value.copy(
-            isSubmitting = true,
-            errorMessage = null,
-            successMessage = null,
-            lastServiceUsage = null
-        )
-
         viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isSubmitting = true,
+                errorMessage = null,
+                successMessage = null
+            )
 
-            runCatching {
-                repository.createServiceUsage(
+            try {
+                val response = repository.createServiceUsage(
                     nfcCardUid = nfcCardUid,
                     serviceTourId = serviceTourId
                 )
+
+                _uiState.value = _uiState.value.copy(
+                    isSubmitting = false,
+                    lastServiceUsage = response,
+                    successMessage = "Đã ghi nhận sử dụng dịch vụ !",
+                    errorMessage = null
+                )
+
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isSubmitting = false,
+                    errorMessage =
+                        e.message ?: "Không thể ghi nhận sử dụng dịch vụ"
+                )
             }
-                .onSuccess { response ->
-
-                    _uiState.value = _uiState.value.copy(
-                        isSubmitting = false,
-                        lastServiceUsage = response,
-                        successMessage = "Đã ghi nhận sử dụng dịch vụ !",
-                        errorMessage = null
-                    )
-                }
-                .onFailure { exception ->
-
-                    _uiState.value = _uiState.value.copy(
-                        isSubmitting = false,
-                        errorMessage = exception.message
-                            ?: "Không thể ghi nhận dịch vụ."
-                    )
-                }
         }
     }
 
@@ -195,5 +166,9 @@ class ConvenienceUsageViewModel(
             lastProductUsage = null,
             lastServiceUsage = null
         )
+    }
+
+    fun reset() {
+        _uiState.value = ConvenienceUsageUiState()
     }
 }

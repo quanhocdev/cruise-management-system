@@ -15,12 +15,12 @@ fun OnboardPosDashboardScreen(
         actions = listOf(
             PosDashboardAction(
                 "Quét NFC người tham gia",
-                "Xác định hành khách tham gia hoạt động trên tàu",
+                "Xác định hành khách và ghi nhận tham gia hoạt động trên tàu",
                 "NFC",
                 onNfcClick
             )
         ),
-        notice = "Role ONBOARD không hiển thị QR. Ghi nhận hoạt động sẽ được bật khi backend cung cấp API.",
+        notice = "Quét NFC để xác định hành khách và ghi nhận tham gia hoạt động trên tàu.",
         onLogoutClick = onLogoutClick,
         onHistoryClick = onHistoryClick
     )

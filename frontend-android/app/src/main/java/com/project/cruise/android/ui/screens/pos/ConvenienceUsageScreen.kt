@@ -33,9 +33,16 @@ fun ConvenienceUsageScreen(
     LaunchedEffect(uiState.successMessage) {
         if (uiState.successMessage != null) {
             val toneGenerator = ToneGenerator(
-                AudioManager.STREAM_NOTIFICATION, 100 )
-                toneGenerator.startTone( ToneGenerator.TONE_PROP_ACK, 200 )
-                toneGenerator.release()
+                AudioManager.STREAM_NOTIFICATION,
+                100
+            )
+
+            toneGenerator.startTone(
+                ToneGenerator.TONE_PROP_ACK,
+                200
+            )
+
+            toneGenerator.release()
                 kotlinx.coroutines.delay(2000)
                 viewModel.clearSuccess() } }
 
