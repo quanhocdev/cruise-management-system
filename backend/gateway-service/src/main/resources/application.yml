@@ -154,11 +154,13 @@ spring:
               predicates:
                 - Path=/api/convenience/products/**,/api/convenience/services/**,/api/convenience/product-tours/**,/api/convenience/service-tours/**
 
-            # ==========================
-            # TOUR SERVICE - ACTIVITY CRUISE
-            # ==========================
-            # Activity Cruise đã được merge vào tour-service
+            # BOOKING SERVICE - ONBOARD NFC / USAGE
+            - id: booking-onboard-service
+              uri: ${BOOKING_SERVICE_URL:http://booking-service:8082}
+              predicates:
+                - Path=/api/onboard/nfc/**,/api/onboard/activity-cruise-usages/**
 
+            # TOUR SERVICE - ACTIVITY CRUISE
             - id: tour-activity-cruise-service
               uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
               predicates:
