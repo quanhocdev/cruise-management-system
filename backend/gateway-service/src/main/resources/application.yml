@@ -167,10 +167,15 @@ spring:
                 - Path=/api/onboard/**
 
             # ==========================
-            # TOUR SERVICE - ACTIVITY VISIT
+            # BOOKING SERVICE - SHORE NFC / USAGE
             # ==========================
-            # Activity Visit đã được merge vào tour-service
 
+            - id: booking-shore-service
+              uri: ${BOOKING_SERVICE_URL:http://booking-service:8082}
+              predicates:
+                - Path=/api/shore/nfc/**,/api/shore/activity-visit-usages/**
+
+            # TOUR SERVICE - ACTIVITY VISIT
             - id: tour-activity-visit-service
               uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
               predicates:
