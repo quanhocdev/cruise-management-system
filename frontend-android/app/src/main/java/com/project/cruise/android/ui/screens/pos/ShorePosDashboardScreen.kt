@@ -15,12 +15,12 @@ fun ShorePosDashboardScreen(
         actions = listOf(
             PosDashboardAction(
                 "Quét NFC người tham gia",
-                "Xác định hành khách tham gia chuyến tham quan bờ",
+                "Xác định hành khách và ghi nhận tham gia hoạt động tham quan bờ",
                 "NFC",
                 onNfcClick
             )
         ),
-        notice = "Role SHORE không hiển thị QR. Ghi nhận chuyến tham quan sẽ được bật khi backend cung cấp API.",
+        notice = "Quét NFC để xác định hành khách và ghi nhận tham gia hoạt động tham quan bờ.",
         onLogoutClick = onLogoutClick,
         onHistoryClick = onHistoryClick
     )

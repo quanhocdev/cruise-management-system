@@ -59,6 +59,8 @@ import com.project.cruise.android.ui.screens.pos.PosHistoryScreen
 import com.project.cruise.android.ui.screens.pos.PosIdentityScreen
 import com.project.cruise.android.data.repository.PosIdentityRepository
 import com.project.cruise.android.ui.screens.pos.ConvenienceUsageScreen
+import com.project.cruise.android.ui.screens.pos.ShoreNfcScanScreen
+import com.project.cruise.android.ui.screens.pos.ShoreUsageScreen
 import com.project.cruise.android.viewmodel.pos.PosIdentityViewModel
 import com.project.cruise.android.viewmodel.pos.PosIdentityViewModelFactory
 object Routes {
@@ -100,6 +102,9 @@ object Routes {
     const val POS_ONBOARD_USAGE =
         "pos_onboard_usage/{bookingPassengerId}/{passengerName}/{bookingId}/{tourId}/{tourPackageId}/{nfcCardUid}"
 
+    const val POS_SHORE_USAGE =
+        "pos_shore_usage/{bookingPassengerId}/{passengerName}/{bookingId}/{tourId}/{tourPackageId}/{nfcCardUid}"
+
     fun posConvenienceUsage(
         bookingPassengerId: Long,
         passengerName: String?,
@@ -125,6 +130,22 @@ object Routes {
         nfcCardUid: String
     ): String {
         return "pos_onboard_usage/" +
+                "$bookingPassengerId/" +
+                "${Uri.encode(passengerName ?: "")}/" +
+                "$bookingId/" +
+                "$tourId/" +
+                "$tourPackageId/" +
+                Uri.encode(nfcCardUid)
+    }
+    fun posShoreUsage(
+        bookingPassengerId: Long,
+        passengerName: String?,
+        bookingId: Long,
+        tourId: String,
+        tourPackageId: String,
+        nfcCardUid: String
+    ): String {
+        return "pos_shore_usage/" +
                 "$bookingPassengerId/" +
                 "${Uri.encode(passengerName ?: "")}/" +
                 "$bookingId/" +
@@ -564,6 +585,31 @@ fun NavGraph() {
                     }
                 )
 
+            } else if (role == PosRole.SHORE) {
+
+                ShoreNfcScanScreen(
+                    onBackClick = {
+                        navController.popBackStack()
+                    },
+                    onResolved = { response, nfcCardUid ->
+
+                        navController.navigate(
+                            Routes.posShoreUsage(
+                                bookingPassengerId = response.bookingPassengerId,
+                                passengerName = response.passengerName,
+                                bookingId = response.bookingId,
+                                tourId = response.tourId,
+                                tourPackageId = response.tourPackageId,
+                                nfcCardUid = nfcCardUid
+                            )
+                        ) {
+                            popUpTo(
+                                Routes.posDashboard(role)
+                            )
+                        }
+                    }
+                )
+
             } else {
 
                 NfcScanScreen(
@@ -693,6 +739,66 @@ fun NavGraph() {
                     ?: return@composable
 
             OnboardUsageScreen(
+                bookingPassengerId = bookingPassengerId,
+                passengerName = passengerName,
+                bookingId = bookingId,
+                tourId = tourId,
+                tourPackageId = tourPackageId,
+                nfcCardUid = nfcCardUid,
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
+        composable(
+            route = Routes.POS_SHORE_USAGE,
+            arguments = listOf(
+                navArgument("bookingPassengerId") {
+                    type = NavType.LongType
+                },
+                navArgument("passengerName") {
+                    type = NavType.StringType
+                },
+                navArgument("bookingId") {
+                    type = NavType.LongType
+                },
+                navArgument("tourId") {
+                    type = NavType.StringType
+                },
+                navArgument("tourPackageId") {
+                    type = NavType.StringType
+                },
+                navArgument("nfcCardUid") {
+                    type = NavType.StringType
+                }
+            )
+        ) { backStackEntry ->
+
+            val bookingPassengerId =
+                backStackEntry.arguments?.getLong("bookingPassengerId")
+                    ?: return@composable
+
+            val passengerName =
+                backStackEntry.arguments?.getString("passengerName")
+                    ?: ""
+
+            val bookingId =
+                backStackEntry.arguments?.getLong("bookingId")
+                    ?: return@composable
+
+            val tourId =
+                backStackEntry.arguments?.getString("tourId")
+                    ?: return@composable
+
+            val tourPackageId =
+                backStackEntry.arguments?.getString("tourPackageId")
+                    ?: return@composable
+
+            val nfcCardUid =
+                backStackEntry.arguments?.getString("nfcCardUid")
+                    ?: return@composable
+
+            ShoreUsageScreen(
                 bookingPassengerId = bookingPassengerId,
                 passengerName = passengerName,
                 bookingId = bookingId,
