@@ -25,7 +25,9 @@ import com.project.cruise.android.data.dto.convenience.ProductUsageRequest
 import com.project.cruise.android.data.dto.convenience.ProductUsageResponse
 import com.project.cruise.android.data.dto.convenience.ServiceUsageRequest
 import com.project.cruise.android.data.dto.convenience.ServiceUsageResponse
-
+import com.project.cruise.android.data.dto.shore.ActivityVisitTourResponse
+import com.project.cruise.android.data.dto.shore.ActivityVisitUsageRequest
+import com.project.cruise.android.data.dto.shore.ActivityVisitUsageResponse
 import com.project.cruise.android.data.dto.onboard.ActivityCruiseTourResponse
 import com.project.cruise.android.data.dto.onboard.ActivityCruiseUsageRequest
 import com.project.cruise.android.data.dto.onboard.ActivityCruiseUsageResponse
@@ -100,6 +102,21 @@ interface ApiService {
     suspend fun createServiceUsage(
         @Body request: ServiceUsageRequest
     ): ServiceUsageResponse
+
+    @POST("api/shore/nfc/resolve")
+    suspend fun resolveShoreNfc(
+        @Body request: NfcResolveRequest
+    ): NfcResolveResponse
+
+    @GET("api/shore/visit-tours/tour/{tourId}")
+    suspend fun getShoreActivityVisitTours(
+        @Path("tourId") tourId: String
+    ): List<ActivityVisitTourResponse>
+
+    @POST("api/shore/activity-visit-usages")
+    suspend fun createActivityVisitUsage(
+        @Body request: ActivityVisitUsageRequest
+    ): ActivityVisitUsageResponse
 
     @POST("api/onboard/nfc/resolve")
     suspend fun resolveOnboardNfc(
