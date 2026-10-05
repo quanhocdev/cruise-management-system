@@ -2,8 +2,8 @@ package com.project.cruise.android.data.repository
 
 import android.content.Context
 import com.project.cruise.android.data.auth.TokenManager
-import com.project.cruise.android.data.dto.convenience.NfcResolveRequest
-import com.project.cruise.android.data.dto.convenience.NfcResolveResponse
+import com.project.cruise.android.data.dto.nfc.NfcResolveRequest
+import com.project.cruise.android.data.dto.nfc.NfcResolveResponse
 import com.project.cruise.android.data.dto.convenience.ProductTourResponse
 import com.project.cruise.android.data.dto.convenience.ProductUsageRequest
 import com.project.cruise.android.data.dto.convenience.ProductUsageResponse

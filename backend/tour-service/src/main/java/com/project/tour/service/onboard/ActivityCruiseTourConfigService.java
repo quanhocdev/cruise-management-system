@@ -10,7 +10,6 @@ import com.project.tour.model.onboard.enums.ActivityCruiseStatus;
 import com.project.tour.model.onboard.enums.ActivityCruiseTourStatus;
 import com.project.tour.repository.onboard.ActivityCruiseRepository;
 import com.project.tour.repository.onboard.ActivityCruiseTourRepository;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

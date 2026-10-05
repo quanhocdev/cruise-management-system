@@ -1,4 +1,4 @@
-package com.project.cruise.android.data.dto.convenience
+package com.project.cruise.android.data.dto.nfc
 
 data class NfcResolveResponse(
     val bookingPassengerId: Long,

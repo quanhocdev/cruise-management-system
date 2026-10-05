@@ -8,8 +8,8 @@ import com.project.cruise.android.data.dto.auth.RegisterResponse
 import com.project.cruise.android.data.dto.auth.UserInfoResponse
 import com.project.cruise.android.data.dto.auth.VerifyOtpRequest
 import com.project.cruise.android.data.dto.booking.BookingResponse
-import com.project.cruise.android.data.dto.convenience.NfcResolveRequest
-import com.project.cruise.android.data.dto.convenience.NfcResolveResponse
+import com.project.cruise.android.data.dto.nfc.NfcResolveRequest
+import com.project.cruise.android.data.dto.nfc.NfcResolveResponse
 import com.project.cruise.android.data.dto.convenience.ProductTourResponse
 import com.project.cruise.android.data.dto.convenience.ServiceTourResponse
 import com.project.cruise.android.data.dto.tour.PublicTourDetailResponse
@@ -25,6 +25,12 @@ import com.project.cruise.android.data.dto.convenience.ProductUsageRequest
 import com.project.cruise.android.data.dto.convenience.ProductUsageResponse
 import com.project.cruise.android.data.dto.convenience.ServiceUsageRequest
 import com.project.cruise.android.data.dto.convenience.ServiceUsageResponse
+
+import com.project.cruise.android.data.dto.onboard.ActivityCruiseTourResponse
+import com.project.cruise.android.data.dto.onboard.ActivityCruiseUsageRequest
+import com.project.cruise.android.data.dto.onboard.ActivityCruiseUsageResponse
+
+
 interface ApiService {
 
 
@@ -95,5 +101,19 @@ interface ApiService {
         @Body request: ServiceUsageRequest
     ): ServiceUsageResponse
 
+    @POST("api/onboard/nfc/resolve")
+    suspend fun resolveOnboardNfc(
+        @Body request: NfcResolveRequest
+    ): NfcResolveResponse
+
+    @GET("api/onboard/activity-cruise-tours/tour/{tourId}")
+    suspend fun getOnboardActivityCruiseTours(
+        @Path("tourId") tourId: String
+    ): List<ActivityCruiseTourResponse>
+
+    @POST("api/onboard/activity-cruise-usages")
+    suspend fun createActivityCruiseUsage(
+        @Body request: ActivityCruiseUsageRequest
+    ): ActivityCruiseUsageResponse
 }
 

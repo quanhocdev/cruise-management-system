@@ -3,7 +3,7 @@ package com.project.cruise.android.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.project.cruise.android.data.dto.convenience.NfcResolveResponse
+import com.project.cruise.android.data.dto.nfc.NfcResolveResponse
 import com.project.cruise.android.data.repository.ConvenienceRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
