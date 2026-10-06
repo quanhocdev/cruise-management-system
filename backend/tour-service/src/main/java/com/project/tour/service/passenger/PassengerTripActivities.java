@@ -51,10 +51,7 @@ public class PassengerTripActivities {
 
                 List<Activity> result = new ArrayList<>();
 
-                // =====================================================
                 // ONBOARD ACTIVITIES
-                // =====================================================
-
                 for (ActivityCruiseTour a : onboard.findAllByTourIdOrderByCreatedAtAsc(tourId)) {
 
                         if (!visible(
@@ -83,10 +80,7 @@ public class PassengerTripActivities {
                                         a.getStatus() != null ? a.getStatus().name() : null));
                 }
 
-                // =====================================================
                 // SHORE ACTIVITIES
-                // =====================================================
-
                 for (VisitTour a : shore.findAllByTourIdOrderByStartTimeAsc(tourId)) {
 
                         if (!visible(
@@ -117,10 +111,7 @@ public class PassengerTripActivities {
                                         a.getStatus() != null ? a.getStatus().name() : null));
                 }
 
-                // =====================================================
                 // SORT
-                // =====================================================
-
                 result.sort(
                                 Comparator.comparing(
                                                 Activity::startTime,
@@ -142,8 +133,6 @@ public class PassengerTripActivities {
                                 && !name.isBlank();
         }
 
-        // These are synchronized descriptions,
-        // not live registration/seat counts.
         public record Activity(
                         UUID id,
                         String type,

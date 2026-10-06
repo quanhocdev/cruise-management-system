@@ -2,7 +2,7 @@ package com.project.booking.controller;
 
 import com.project.booking.dto.ActivityCruiseUsageRequest;
 import com.project.booking.dto.ActivityCruiseUsageResponse;
-import com.project.booking.service.ActivityCruiseUsageService;
+import com.project.booking.service.onboard.ActivityCruiseUsageService;
 
 import jakarta.validation.Valid;
 

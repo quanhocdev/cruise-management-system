@@ -1,7 +1,7 @@
 package com.project.booking.controller;
 
 import com.project.booking.dto.ActivityCruiseUsageResponse;
-import com.project.booking.service.ActivityCruiseUsageService;
+import com.project.booking.service.onboard.ActivityCruiseUsageService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
