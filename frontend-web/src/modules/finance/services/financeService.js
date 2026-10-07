@@ -86,6 +86,18 @@ const financeService = {
     );
     return res.data;
   },
+
+  getCheckoutPreview: async (bookingId) => {
+    const res = await api.get(
+      `${BASE_URL}/bookings/${bookingId}/checkout-preview`,
+    );
+    return res.data;
+  },
+
+  confirmCheckout: async (bookingId) => {
+    const res = await api.post(`${BASE_URL}/bookings/${bookingId}/checkout`);
+    return res.data;
+  },
 };
 
 export default financeService;

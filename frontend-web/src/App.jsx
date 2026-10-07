@@ -76,6 +76,7 @@ import FinanceNfcCards from "./modules/finance/pages/FinanceNfcCards";
 import FinanceBookings from "./modules/finance/pages/FinanceBookings";
 import FinanceBookingPassengers from "./modules/finance/pages/FinanceBookingPassengers";
 import FinanceCheckIn from "./modules/finance/pages/FinanceCheckIn";
+import FinanceCheckout from "./modules/finance/pages/FinanceCheckout";
 
 export default function App() {
   return (
@@ -340,6 +341,7 @@ export default function App() {
             <Route path="dashboard" element={<FinanceDashboard />} />
 
             <Route path="check-in" element={<FinanceCheckIn />} />
+            <Route path="checkout" element={<FinanceCheckout />} />
             <Route path="tours-schedule" element={<FinanceTourSchedule />} />
 
             <Route path="bookings" element={<FinanceBookings />} />
