@@ -1,7 +1,7 @@
 package com.project.booking.service.onboard;
 
-import com.project.booking.dto.ActivityCruiseUsageRequest;
-import com.project.booking.dto.ActivityCruiseUsageResponse;
+import com.project.booking.dto.onboard.ActivityCruiseUsageRequest;
+import com.project.booking.dto.onboard.ActivityCruiseUsageResponse;
 
 import java.util.List;
 

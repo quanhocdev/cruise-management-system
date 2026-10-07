@@ -1,6 +1,6 @@
 package com.project.booking.controller;
 
-import com.project.booking.dto.ServiceUsageResponse;
+import com.project.booking.dto.convenience.service.ServiceUsageResponse;
 import com.project.booking.service.ServiceUsageService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

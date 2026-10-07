@@ -1,6 +1,6 @@
 package com.project.booking.mapper;
 
-import com.project.booking.dto.ActivityCruiseUsageResponse;
+import com.project.booking.dto.onboard.ActivityCruiseUsageResponse;
 import com.project.booking.model.ActivityCruiseUsage;
 import org.springframework.stereotype.Component;
 

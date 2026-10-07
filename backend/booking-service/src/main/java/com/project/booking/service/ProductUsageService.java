@@ -1,7 +1,7 @@
 package com.project.booking.service;
 
-import com.project.booking.dto.ProductUsageRequest;
-import com.project.booking.dto.ProductUsageResponse;
+import com.project.booking.dto.convenience.product.ProductUsageRequest;
+import com.project.booking.dto.convenience.product.ProductUsageResponse;
 
 import java.util.List;
 

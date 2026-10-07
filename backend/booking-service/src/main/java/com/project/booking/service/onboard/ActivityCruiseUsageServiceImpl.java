@@ -1,22 +1,17 @@
 package com.project.booking.service.onboard;
 
 import com.project.booking.client.ActivityCruiseClient;
-import com.project.booking.dto.ActivityCruiseUsageRequest;
-import com.project.booking.dto.ActivityCruiseUsageResponse;
+import com.project.booking.dto.onboard.ActivityCruiseUsageRequest;
+import com.project.booking.dto.onboard.ActivityCruiseUsageResponse;
 import com.project.booking.mapper.ActivityCruiseUsageMapper;
 import com.project.booking.model.ActivityCruiseUsage;
 import com.project.booking.model.BenefitConsumption;
 import com.project.booking.model.Booking;
 import com.project.booking.model.BookingPassenger;
 import com.project.booking.repository.ActivityCruiseUsageRepository;
-import com.project.booking.repository.BenefitConsumptionRepository;
-import com.project.booking.repository.BookingPassengerRepository;
-
-import org.springframework.http.HttpStatus;
+import com.project.booking.service.BenefitConsumptionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -28,8 +23,7 @@ public class ActivityCruiseUsageServiceImpl
         private final ActivityCruiseUsageRepository activityCruiseUsageRepository;
         private final ActivityCruiseUsageMapper activityCruiseUsageMapper;
         private final ActivityCruiseClient activityCruiseClient;
-        private final BookingPassengerRepository bookingPassengerRepository;
-        private final BenefitConsumptionRepository benefitConsumptionRepository;
+        private final BenefitConsumptionService benefitConsumptionService;
         private final ActivityCruiseValidator activityCruiseValidator;
         private final ActivityPricingCalculator activityPricingCalculator;
 
@@ -37,16 +31,14 @@ public class ActivityCruiseUsageServiceImpl
                         ActivityCruiseUsageRepository activityCruiseUsageRepository,
                         ActivityCruiseUsageMapper activityCruiseUsageMapper,
                         ActivityCruiseClient activityCruiseClient,
-                        BookingPassengerRepository bookingPassengerRepository,
-                        BenefitConsumptionRepository benefitConsumptionRepository,
+                        BenefitConsumptionService benefitConsumptionService,
                         ActivityCruiseValidator activityCruiseValidator,
                         ActivityPricingCalculator activityPricingCalculator) {
 
                 this.activityCruiseUsageRepository = activityCruiseUsageRepository;
                 this.activityCruiseUsageMapper = activityCruiseUsageMapper;
                 this.activityCruiseClient = activityCruiseClient;
-                this.bookingPassengerRepository = bookingPassengerRepository;
-                this.benefitConsumptionRepository = benefitConsumptionRepository;
+                this.benefitConsumptionService = benefitConsumptionService;
                 this.activityCruiseValidator = activityCruiseValidator;
                 this.activityPricingCalculator = activityPricingCalculator;
         }
@@ -56,27 +48,25 @@ public class ActivityCruiseUsageServiceImpl
         public ActivityCruiseUsageResponse create(
                         ActivityCruiseUsageRequest request) {
 
-                // 1. Validate hành khách bằng NFC qua Validator
+                // 1. Validate hành khách bằng NFC
                 BookingPassenger bookingPassenger = activityCruiseValidator
                                 .validateAndGetPassenger(request.nfcCardUid());
 
                 Booking booking = bookingPassenger.getBooking();
 
-                // 2. Gọi Tour Service lấy thông tin ActivityCruiseTour
+                // 2. Lấy thông tin ActivityCruiseTour
                 ActivityCruiseClient.ActivityCruiseUsageInfo activityInfo = activityCruiseClient
                                 .getActivityCruiseUsageInfo(
                                                 request.activityCruiseTourId(),
                                                 booking.getTourPackageId());
 
-                // 3 -> 7. Validate toàn bộ nghiệp vụ liên quan đến tour/thời gian/slot qua
-                // Validator
+                // 3 -> 7. Validate nghiệp vụ
                 activityCruiseValidator.validateBookingAndActivity(
                                 booking,
                                 activityInfo,
                                 request.activityCruiseTourId());
 
-                // 8 & 9. Lấy thông tin PackageBenefit và khóa row (Lock row) chống Race
-                // Condition
+                // 8 & 9. Benefit + lock row
                 UUID packageBenefitId = activityInfo.packageBenefitId();
                 int benefitQuantity = activityInfo.benefitQuantity() == null
                                 ? 0
@@ -86,39 +76,26 @@ public class ActivityCruiseUsageServiceImpl
                 long usedBenefitQuantity = 0;
 
                 if (packageBenefitId != null && benefitQuantity > 0) {
-                        benefitConsumptionRepository.createIfNotExists(
+                        benefitConsumption = benefitConsumptionService.getForUpdate(
                                         booking.getId(),
                                         packageBenefitId);
-
-                        benefitConsumption = benefitConsumptionRepository
-                                        .findForUpdate(
-                                                        booking.getId(),
-                                                        packageBenefitId)
-                                        .orElseThrow(() -> new ResponseStatusException(
-                                                        HttpStatus.INTERNAL_SERVER_ERROR,
-                                                        "Không tìm thấy BenefitConsumption"));
 
                         usedBenefitQuantity = benefitConsumption.getUsedQuantity() == null
                                         ? 0
                                         : benefitConsumption.getUsedQuantity();
                 }
 
-                // 10 -> 15. Tính toán giá tiền, discount qua Calculator
+                // 10 -> 15. Tính tiền
                 var pricingResult = activityPricingCalculator.calculate(activityInfo, usedBenefitQuantity);
 
-                // 16. Cập nhật BenefitConsumption nếu sử dụng suất miễn phí
-                if (benefitConsumption != null && pricingResult.freeQuantityThisUsage() > 0) {
-                        int currentUsedQuantity = benefitConsumption.getUsedQuantity() == null
-                                        ? 0
-                                        : benefitConsumption.getUsedQuantity();
-
-                        benefitConsumption.setUsedQuantity(
-                                        currentUsedQuantity + (int) pricingResult.freeQuantityThisUsage());
-
-                        benefitConsumptionRepository.save(benefitConsumption);
+                // 16. Cập nhật lượt benefit đã dùng
+                if (benefitConsumption != null) {
+                        benefitConsumptionService.consume(
+                                        benefitConsumption,
+                                        pricingResult.freeQuantityThisUsage());
                 }
 
-                // 17 & 18. Tạo, lưu ActivityCruiseUsage và trả về response
+                // 17 & 18. Lưu usage
                 ActivityCruiseUsage usage = new ActivityCruiseUsage();
                 usage.setBookingPassenger(bookingPassenger);
                 usage.setActivityCruiseTourId(request.activityCruiseTourId());

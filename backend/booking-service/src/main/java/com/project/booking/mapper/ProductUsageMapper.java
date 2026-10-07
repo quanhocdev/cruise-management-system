@@ -1,6 +1,6 @@
 package com.project.booking.mapper;
 
-import com.project.booking.dto.ProductUsageResponse;
+import com.project.booking.dto.convenience.product.ProductUsageResponse;
 import com.project.booking.model.ProductUsage;
 import org.springframework.stereotype.Component;
 

@@ -2,8 +2,8 @@ package com.project.booking.service.shore;
 
 import com.project.booking.client.VisitTourClient;
 import com.project.booking.client.VisitTourClient.VisitTourUsageInfo;
-import com.project.booking.dto.ActivityVisitUsageRequest;
-import com.project.booking.dto.ActivityVisitUsageResponse;
+import com.project.booking.dto.onboard.ActivityVisitUsageRequest;
+import com.project.booking.dto.shore.ActivityVisitUsageResponse;
 import com.project.booking.exception.AppException;
 import com.project.booking.mapper.ActivityVisitUsageMapper;
 import com.project.booking.model.ActivityVisitUsage;

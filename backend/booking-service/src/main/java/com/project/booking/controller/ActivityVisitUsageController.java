@@ -1,7 +1,7 @@
 package com.project.booking.controller;
 
-import com.project.booking.dto.ActivityVisitUsageRequest;
-import com.project.booking.dto.ActivityVisitUsageResponse;
+import com.project.booking.dto.onboard.ActivityVisitUsageRequest;
+import com.project.booking.dto.shore.ActivityVisitUsageResponse;
 import com.project.booking.service.shore.ActivityVisitUsageService;
 
 import jakarta.validation.Valid;
