@@ -1,7 +1,8 @@
 package com.project.booking.controller;
 
 import com.project.booking.dto.ActivityVisitUsageResponse;
-import com.project.booking.service.ActivityVisitUsageService;
+import com.project.booking.service.shore.ActivityVisitUsageService;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

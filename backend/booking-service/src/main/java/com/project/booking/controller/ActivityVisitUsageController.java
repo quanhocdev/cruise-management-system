@@ -2,7 +2,8 @@ package com.project.booking.controller;
 
 import com.project.booking.dto.ActivityVisitUsageRequest;
 import com.project.booking.dto.ActivityVisitUsageResponse;
-import com.project.booking.service.ActivityVisitUsageService;
+import com.project.booking.service.shore.ActivityVisitUsageService;
+
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
