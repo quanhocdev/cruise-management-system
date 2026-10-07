@@ -1,10 +1,8 @@
-package com.project.booking.controller;
+package com.project.booking.controller.convenience;
 
-import com.project.booking.dto.onboard.ActivityCruiseUsageResponse;
-import com.project.booking.service.onboard.ActivityCruiseUsageService;
-
+import com.project.booking.dto.convenience.service.ServiceUsageResponse;
+import com.project.booking.service.ServiceUsageService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,26 +10,27 @@ import org.springframework.web.bind.annotation.RestController;
 import java.security.Principal;
 import java.util.List;
 
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+
 @RestController
-@RequestMapping("/api/passengers/activity-cruise-usages")
-public class PassengerActivityCruiseUsageController {
+@RequestMapping("/api/passengers/service-usages")
+public class PassengerServiceUsageController {
 
-    private final ActivityCruiseUsageService activityCruiseUsageService;
+    private final ServiceUsageService serviceUsageService;
 
-    public PassengerActivityCruiseUsageController(
-            ActivityCruiseUsageService activityCruiseUsageService) {
-
-        this.activityCruiseUsageService = activityCruiseUsageService;
+    public PassengerServiceUsageController(
+            ServiceUsageService serviceUsageService) {
+        this.serviceUsageService = serviceUsageService;
     }
 
     @GetMapping
-    public ResponseEntity<List<ActivityCruiseUsageResponse>> getMine(
+    public ResponseEntity<List<ServiceUsageResponse>> getMine(
             Principal principal) {
 
         Long userId = extractUserId(principal);
 
         return ResponseEntity.ok(
-                activityCruiseUsageService.getByUserId(userId));
+                serviceUsageService.getByUserId(userId));
     }
 
     private Long extractUserId(Principal principal) {
@@ -47,9 +46,7 @@ public class PassengerActivityCruiseUsageController {
 
         try {
             return Long.valueOf(principal.getName());
-
         } catch (Exception e) {
-
             throw new IllegalStateException(
                     "Không thể xác định userId từ token xác thực.");
         }

@@ -1,8 +1,9 @@
-package com.project.booking.controller;
+package com.project.booking.controller.convenience;
 
-import com.project.booking.dto.convenience.service.ServiceUsageResponse;
-import com.project.booking.service.ServiceUsageService;
+import com.project.booking.dto.convenience.product.ProductUsageResponse;
+import com.project.booking.service.ProductUsageService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -10,27 +11,25 @@ import org.springframework.web.bind.annotation.RestController;
 import java.security.Principal;
 import java.util.List;
 
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-
 @RestController
-@RequestMapping("/api/passengers/service-usages")
-public class PassengerServiceUsageController {
+@RequestMapping("/api/passengers/product-usages")
+public class PassengerProductUsageController {
 
-    private final ServiceUsageService serviceUsageService;
+    private final ProductUsageService productUsageService;
 
-    public PassengerServiceUsageController(
-            ServiceUsageService serviceUsageService) {
-        this.serviceUsageService = serviceUsageService;
+    public PassengerProductUsageController(
+            ProductUsageService productUsageService) {
+        this.productUsageService = productUsageService;
     }
 
     @GetMapping
-    public ResponseEntity<List<ServiceUsageResponse>> getMine(
+    public ResponseEntity<List<ProductUsageResponse>> getMine(
             Principal principal) {
 
         Long userId = extractUserId(principal);
 
         return ResponseEntity.ok(
-                serviceUsageService.getByUserId(userId));
+                productUsageService.getByUserId(userId));
     }
 
     private Long extractUserId(Principal principal) {

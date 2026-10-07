@@ -1,4 +1,4 @@
-package com.project.booking.controller;
+package com.project.booking.controller.onboard;
 
 import com.project.booking.dto.nfc.NfcResolveRequest;
 import com.project.booking.dto.nfc.NfcResolveResponse;
@@ -9,19 +9,19 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/shore/nfc")
-public class ShoreNfcController {
+@RequestMapping("/api/onboard/nfc")
+public class OnboardNfcController {
 
     private final ConvenienceNfcService convenienceNfcService;
 
-    public ShoreNfcController(
+    public OnboardNfcController(
             ConvenienceNfcService convenienceNfcService) {
 
         this.convenienceNfcService = convenienceNfcService;
     }
 
     @PostMapping("/resolve")
-    @PreAuthorize("hasRole('SHORE')")
+    @PreAuthorize("hasRole('ONBOARD')")
     public ResponseEntity<NfcResolveResponse> resolve(
             @Valid @RequestBody NfcResolveRequest request) {
 

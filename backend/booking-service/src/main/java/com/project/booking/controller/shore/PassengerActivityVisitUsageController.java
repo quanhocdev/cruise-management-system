@@ -1,4 +1,4 @@
-package com.project.booking.controller;
+package com.project.booking.controller.shore;
 
 import com.project.booking.dto.shore.ActivityVisitUsageResponse;
 import com.project.booking.service.shore.ActivityVisitUsageService;
