@@ -4,10 +4,18 @@ import com.project.booking.dto.finance.CheckoutPreviewResponse;
 import com.project.booking.dto.finance.CheckoutPreviewResponse.PassengerCheckoutPreview;
 import com.project.booking.dto.finance.CheckoutPreviewResponse.UsageItem;
 import com.project.booking.mapper.CheckoutPreviewMapper;
+import com.project.booking.model.Bill;
+import com.project.booking.model.BillItem;
 import com.project.booking.model.Booking;
 import com.project.booking.model.BookingPassenger;
+import com.project.booking.model.ActivityCruiseUsage;
+import com.project.booking.model.ActivityVisitUsage;
+import com.project.booking.model.ProductUsage;
+import com.project.booking.model.ServiceUsage;
 import com.project.booking.repository.ActivityCruiseUsageRepository;
 import com.project.booking.repository.ActivityVisitUsageRepository;
+import com.project.booking.repository.BillItemRepository;
+import com.project.booking.repository.BillRepository;
 import com.project.booking.repository.BookingPassengerRepository;
 import com.project.booking.repository.BookingRepository;
 import com.project.booking.repository.ProductUsageRepository;
@@ -18,7 +26,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Transactional(readOnly = true)
@@ -30,6 +41,8 @@ public class CheckoutServiceImpl implements CheckoutService {
     private final ActivityCruiseUsageRepository activityCruiseUsageRepository;
     private final ServiceUsageRepository serviceUsageRepository;
     private final ProductUsageRepository productUsageRepository;
+    private final BillRepository billRepository;
+    private final BillItemRepository billItemRepository;
     private final CheckoutPreviewMapper checkoutPreviewMapper;
 
     public CheckoutServiceImpl(
@@ -39,6 +52,8 @@ public class CheckoutServiceImpl implements CheckoutService {
             ActivityCruiseUsageRepository activityCruiseUsageRepository,
             ServiceUsageRepository serviceUsageRepository,
             ProductUsageRepository productUsageRepository,
+            BillRepository billRepository,
+            BillItemRepository billItemRepository,
             CheckoutPreviewMapper checkoutPreviewMapper) {
 
         this.bookingRepository = bookingRepository;
@@ -47,16 +62,15 @@ public class CheckoutServiceImpl implements CheckoutService {
         this.activityCruiseUsageRepository = activityCruiseUsageRepository;
         this.serviceUsageRepository = serviceUsageRepository;
         this.productUsageRepository = productUsageRepository;
+        this.billRepository = billRepository;
+        this.billItemRepository = billItemRepository;
         this.checkoutPreviewMapper = checkoutPreviewMapper;
     }
 
     @Override
     public CheckoutPreviewResponse getCheckoutPreview(Long bookingId) {
 
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Booking không tồn tại: " + bookingId));
+        Booking booking = getBooking(bookingId);
 
         List<BookingPassenger> bookingPassengers = bookingPassengerRepository
                 .findAllByBooking_IdOrderByIdAsc(bookingId);
@@ -76,6 +90,110 @@ public class CheckoutServiceImpl implements CheckoutService {
                 booking.getPrimaryContactEmail(),
                 passengers,
                 grandTotal);
+    }
+
+    @Override
+    @Transactional
+    public Bill confirmCheckout(Long bookingId) {
+
+        Booking booking = getBooking(bookingId);
+
+        List<BookingPassenger> bookingPassengers = bookingPassengerRepository
+                .findAllByBooking_IdOrderByIdAsc(bookingId);
+
+        BigDecimal grandTotal = BigDecimal.ZERO;
+
+        Bill bill = new Bill();
+        bill.setBooking(booking);
+        bill.setBillCode(generateBillCode());
+        bill.setTotalAmount(BigDecimal.ZERO);
+
+        Bill savedBill = billRepository.save(bill);
+
+        for (BookingPassenger bookingPassenger : bookingPassengers) {
+
+            Long bookingPassengerId = bookingPassenger.getId();
+
+            List<ActivityVisitUsage> activityVisitUsages = activityVisitUsageRepository
+                    .findAllByBookingPassengerIdOrderByUsedAtDesc(
+                            bookingPassengerId);
+
+            for (ActivityVisitUsage usage : activityVisitUsages) {
+                BillItem item = createBillItem(
+                        savedBill,
+                        bookingPassengerId,
+                        "ACTIVITY_VISIT",
+                        usage.getId(),
+                        usage.getQuantity(),
+                        usage.getUnitPrice(),
+                        usage.getDiscountAmount(),
+                        usage.getFinalAmount());
+
+                billItemRepository.save(item);
+                grandTotal = grandTotal.add(usage.getFinalAmount());
+            }
+
+            List<ActivityCruiseUsage> activityCruiseUsages = activityCruiseUsageRepository
+                    .findAllByBookingPassengerIdOrderByUsedAtDesc(
+                            bookingPassengerId);
+
+            for (ActivityCruiseUsage usage : activityCruiseUsages) {
+                BillItem item = createBillItem(
+                        savedBill,
+                        bookingPassengerId,
+                        "ACTIVITY_CRUISE",
+                        usage.getId(),
+                        usage.getQuantity(),
+                        usage.getUnitPrice(),
+                        usage.getDiscountAmount(),
+                        usage.getFinalAmount());
+
+                billItemRepository.save(item);
+                grandTotal = grandTotal.add(usage.getFinalAmount());
+            }
+
+            List<ServiceUsage> serviceUsages = serviceUsageRepository
+                    .findAllByBookingPassenger_IdOrderByUsedAtDesc(
+                            bookingPassengerId);
+
+            for (ServiceUsage usage : serviceUsages) {
+                BillItem item = createBillItem(
+                        savedBill,
+                        bookingPassengerId,
+                        "SERVICE",
+                        usage.getId(),
+                        1,
+                        usage.getUnitPrice(),
+                        usage.getDiscountAmount(),
+                        usage.getFinalAmount());
+
+                billItemRepository.save(item);
+                grandTotal = grandTotal.add(usage.getFinalAmount());
+            }
+
+            List<ProductUsage> productUsages = productUsageRepository
+                    .findAllByBookingPassenger_IdOrderByUsedAtDesc(
+                            bookingPassengerId);
+
+            for (ProductUsage usage : productUsages) {
+                BillItem item = createBillItem(
+                        savedBill,
+                        bookingPassengerId,
+                        "PRODUCT",
+                        usage.getId(),
+                        usage.getQuantity(),
+                        usage.getUnitPrice(),
+                        usage.getDiscountAmount(),
+                        usage.getFinalAmount());
+
+                billItemRepository.save(item);
+                grandTotal = grandTotal.add(usage.getFinalAmount());
+            }
+        }
+
+        savedBill.setTotalAmount(grandTotal);
+
+        return billRepository.save(savedBill);
     }
 
     private PassengerCheckoutPreview buildPassengerPreview(
@@ -130,10 +248,54 @@ public class CheckoutServiceImpl implements CheckoutService {
                 passengerTotal);
     }
 
+    private BillItem createBillItem(
+            Bill bill,
+            Long bookingPassengerId,
+            String usageType,
+            Long usageId,
+            Integer quantity,
+            BigDecimal unitPrice,
+            BigDecimal discountAmount,
+            BigDecimal finalAmount) {
+
+        BillItem item = new BillItem();
+
+        item.setBill(bill);
+        item.setBookingPassengerId(bookingPassengerId);
+        item.setUsageType(usageType);
+        item.setUsageId(usageId);
+        item.setQuantity(quantity);
+        item.setUnitPrice(unitPrice);
+        item.setDiscountAmount(discountAmount);
+        item.setFinalAmount(finalAmount);
+
+        return item;
+    }
+
     private BigDecimal calculateTotal(List<UsageItem> usages) {
 
         return usages.stream()
                 .map(UsageItem::finalAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private Booking getBooking(Long bookingId) {
+
+        return bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Booking không tồn tại: " + bookingId));
+    }
+
+    private String generateBillCode() {
+
+        return "BILL-"
+                + LocalDateTime.now()
+                        .format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
+                + "-"
+                + UUID.randomUUID()
+                        .toString()
+                        .substring(0, 8)
+                        .toUpperCase();
     }
 }
