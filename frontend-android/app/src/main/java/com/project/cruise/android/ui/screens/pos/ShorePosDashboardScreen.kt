@@ -1,7 +1,6 @@
 package com.project.cruise.android.ui.screens.pos
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 
 @Composable
 fun ShorePosDashboardScreen(
@@ -17,19 +16,19 @@ fun ShorePosDashboardScreen(
         accent = PosRole.SHORE.accent(),
         actions = listOf(
             PosDashboardAction(
-                "Quét QR khách tham quan",
+                "Quét QR tham quan",
                 "Kiểm tra khách trước khi rời tàu hoặc khi quay lại",
                 "QR",
                 onQrClick
             ),
             PosDashboardAction(
                 "Nhập mã vé",
-                "Dùng khi máy ảo hoặc camera không đọc được QR",
+                "Đối chiếu mã khi không đọc được QR",
                 "123",
                 onManualClick
             )
         ),
-        notice = "Chọn đúng chuyến tham quan rồi kiểm tra khách. Lượt quét chỉ là bản ghi cục bộ cho tới khi backend xác nhận rời tàu hoặc quay lại.",
+        notice = "Chọn đúng chuyến tham quan để đối chiếu. Mã đã lưu chưa xác nhận khách rời tàu hoặc trở về.",
         onLogoutClick = onLogoutClick,
         onHistoryClick = onHistoryClick
     )

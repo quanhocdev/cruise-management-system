@@ -511,6 +511,11 @@ fun NavGraph() {
             QrScanScreen(
                 role = role,
                 onBackClick = { navController.popBackStack() },
+                onManualClick = {
+                    navController.navigate(Routes.posManualEntry(role)) {
+                        popUpTo(Routes.posDashboard(role))
+                    }
+                },
                 onSaved = { localId ->
                     val destination = when (role) {
                         PosRole.CONVENIENCE -> Routes.posConvenienceCustomer(localId)
@@ -535,7 +540,7 @@ fun NavGraph() {
                 role = role,
                 onBackClick = { navController.popBackStack() },
                 onSaved = { localId ->
-                    navController.navigate(Routes.posIdentity(role, localId)) {
+                    navController.navigate(if (role == PosRole.CONVENIENCE) Routes.posConvenienceCustomer(localId) else Routes.posIdentity(role, localId)) {
                         popUpTo(Routes.posDashboard(role))
                     }
                 }
@@ -554,6 +559,7 @@ fun NavGraph() {
                 onSaved = { localId ->
                     navController.navigate(
                         when (role) {
+                            PosRole.CONVENIENCE -> Routes.posConvenienceCustomer(localId)
                             PosRole.ONBOARD -> Routes.posOnboardTicket(localId)
                             PosRole.SHORE -> Routes.posShoreVisit(localId)
                             else -> Routes.posIdentity(role, localId)
@@ -575,6 +581,7 @@ fun NavGraph() {
                 onIdentify = { localId ->
                     navController.navigate(
                         when (role) {
+                            PosRole.CONVENIENCE -> Routes.posConvenienceCustomer(localId)
                             PosRole.ONBOARD -> Routes.posOnboardTicket(localId)
                             PosRole.SHORE -> Routes.posShoreVisit(localId)
                             else -> Routes.posIdentity(role, localId)

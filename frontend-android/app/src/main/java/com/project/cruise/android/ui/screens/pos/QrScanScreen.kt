@@ -45,7 +45,8 @@ import java.util.concurrent.Executors
 fun QrScanScreen(
     role: PosRole,
     onBackClick: () -> Unit,
-    onSaved: (String) -> Unit
+    onSaved: (String) -> Unit,
+    onManualClick: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -61,6 +62,8 @@ fun QrScanScreen(
     var hasPermission by remember {
         mutableStateOf(ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
     }
+    var camera by remember { mutableStateOf<androidx.camera.core.Camera?>(null) }
+    var torch by remember { mutableStateOf(false) }
     var isSaving by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
@@ -87,32 +90,18 @@ fun QrScanScreen(
     }
 
     PosTheme {
-    Column(Modifier.fillMaxSize().background(PosBackground).safeDrawingPadding().verticalScroll(rememberScrollState()).padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        TextButton(onClick = onBackClick, modifier = Modifier.align(Alignment.Start), enabled = !isSaving) {
-            Text("← Quay lại POS")
-        }
-        Spacer(Modifier.height(16.dp))
-        Text(
-            when (role) {
-                PosRole.ONBOARD -> "Quét QR vé khách"
-                PosRole.SHORE -> "Quét QR khách tham quan"
-                else -> "Quét QR booking"
-            },
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            when (role) {
-                PosRole.ONBOARD -> "Đưa QR trên vé của hành khách vào giữa khung hình."
-                PosRole.SHORE -> "Đưa QR của khách tham quan vào giữa khung hình."
-                else -> "Đưa mã QR của vé hoặc booking vào giữa khung hình."
-            },
-            modifier = Modifier.padding(top = 8.dp),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
+    Column(Modifier.fillMaxSize().background(PosBackground).safeDrawingPadding().verticalScroll(rememberScrollState()).padding(20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(18.dp)) {
+        PosTopBar("Quét QR", role, onBackClick, !isSaving)
+        Text(when(role) {
+            PosRole.ONBOARD -> "Đưa vé khách vào khung"
+            PosRole.SHORE -> "Đưa QR tham quan vào khung"
+            else -> "Đưa QR booking vào khung"
+        }, style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
+        Text("Giữ mã rõ nét. Thiết bị sẽ tự đọc khi nhận diện được QR.",
+            color = PosMuted, textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyMedium)
         Box(
-            Modifier.padding(top = 24.dp).fillMaxWidth().height(360.dp).clip(RoundedCornerShape(22.dp)),
+            Modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(26.dp)).background(PosInk),
             contentAlignment = Alignment.Center
         ) {
             if (hasPermission) {
@@ -140,36 +129,60 @@ fun QrScanScreen(
                                 }
 
                                 provider.unbindAll()
-                                provider.bindToLifecycle(lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, preview, analysis)
+                                runCatching {
+                                    camera = provider.bindToLifecycle(lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, preview, analysis)
+                                }.onFailure { error = "Không mở được camera. Hãy nhập mã thủ công hoặc thử lại." }
                             }, ContextCompat.getMainExecutor(previewContext))
                         }
                     },
                     modifier = Modifier.fillMaxSize()
                 )
-            } else Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Cho phép camera để đọc mã booking", textAlign = TextAlign.Center)
+            } else Column(Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                PosGlyph(PosSymbol.QR, androidx.compose.ui.graphics.Color.White, Modifier.size(56.dp))
+                Text("Cho phép camera để đọc QR", color = androidx.compose.ui.graphics.Color.White, textAlign = TextAlign.Center)
                 TextButton(onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) }) { Text("Cho phép camera") }
                 TextButton(onClick = {
                     context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${context.packageName}")))
                 }) { Text("Mở cài đặt ứng dụng") }
             }
-            if (isSaving) CircularProgressIndicator()
+            if (hasPermission) {
+                androidx.compose.foundation.Canvas(Modifier.fillMaxSize().padding(38.dp)) {
+                    val corner = size.width*.17f
+                    val color = androidx.compose.ui.graphics.Color(0xFF9DE1DE)
+                    val stroke = 4.dp.toPx()
+                    fun edge(a: androidx.compose.ui.geometry.Offset, b: androidx.compose.ui.geometry.Offset) =
+                        drawLine(color,a,b,stroke,androidx.compose.ui.graphics.StrokeCap.Round)
+                    edge(androidx.compose.ui.geometry.Offset.Zero, androidx.compose.ui.geometry.Offset(corner,0f))
+                    edge(androidx.compose.ui.geometry.Offset.Zero, androidx.compose.ui.geometry.Offset(0f,corner))
+                    edge(androidx.compose.ui.geometry.Offset(size.width,0f), androidx.compose.ui.geometry.Offset(size.width-corner,0f))
+                    edge(androidx.compose.ui.geometry.Offset(size.width,0f), androidx.compose.ui.geometry.Offset(size.width,corner))
+                    edge(androidx.compose.ui.geometry.Offset(0f,size.height), androidx.compose.ui.geometry.Offset(corner,size.height))
+                    edge(androidx.compose.ui.geometry.Offset(0f,size.height), androidx.compose.ui.geometry.Offset(0f,size.height-corner))
+                    edge(androidx.compose.ui.geometry.Offset(size.width,size.height), androidx.compose.ui.geometry.Offset(size.width-corner,size.height))
+                    edge(androidx.compose.ui.geometry.Offset(size.width,size.height), androidx.compose.ui.geometry.Offset(size.width,size.height-corner))
+                }
+            }
+            if (isSaving) CircularProgressIndicator(color = androidx.compose.ui.graphics.Color.White)
         }
-        error?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 12.dp)) }
-        Spacer(Modifier.height(24.dp))
-        Text(
-            when (role) {
-                PosRole.ONBOARD -> "Quét được mã chưa có nghĩa khách đã được xác nhận lên tàu."
-                PosRole.SHORE -> "Quét được mã chưa xác nhận khách đã rời tàu hoặc quay lại."
-                else -> "Đưa QR trong email vào giữa khung hình. Gửi mã thành công chưa phải hoàn tất check-in."
-            },
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
+        if(camera?.cameraInfo?.hasFlashUnit() == true) {
+            OutlinedButton(onClick = {
+                torch = !torch
+                camera?.cameraControl?.enableTorch(torch)
+            }, enabled = !isSaving) { Text(if(torch) "Tắt đèn hỗ trợ" else "Bật đèn hỗ trợ") }
+        }
+        onManualClick?.let { manual ->
+            OutlinedButton(onClick = manual, enabled = !isSaving,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp), shape = RoundedCornerShape(16.dp)) {
+                PosGlyph(PosSymbol.KEYBOARD, role.accent())
+                Spacer(Modifier.width(10.dp))
+                Text("Nhập mã thay thế")
+            }
+        }
+        error?.let { PosNotice(it, warning = true) }
+        PosNotice(if(role == PosRole.FINANCE) "Gửi mã thành công chưa phải hoàn tất check-in."
+            else "Đọc được QR chưa xác nhận hành khách đủ điều kiện tham gia.")
     }
-}
-
+    }
 }
 
 @androidx.annotation.OptIn(ExperimentalGetImage::class)

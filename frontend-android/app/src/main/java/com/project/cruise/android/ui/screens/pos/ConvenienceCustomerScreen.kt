@@ -4,81 +4,68 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.project.cruise.android.data.network.ConvenienceProductResponse
-import com.project.cruise.android.data.network.ConvenienceServiceResponse
 import com.project.cruise.android.viewmodel.pos.ConveniencePosState
 import java.text.NumberFormat
 import java.util.Locale
 
-private enum class ConvenienceCatalogTab { PRODUCTS, SERVICES }
-
 @Composable
-fun ConvenienceCustomerScreen(
-    state: ConveniencePosState,
-    onRetry: () -> Unit,
-    onBack: () -> Unit
-) {
-    var selectedTab by remember { mutableStateOf(ConvenienceCatalogTab.PRODUCTS) }
+fun ConvenienceCustomerScreen(state: ConveniencePosState, onRetry: () -> Unit, onBack: () -> Unit) {
+    val role = PosRole.CONVENIENCE
+    var services by rememberSaveable { mutableStateOf(false) }
+    var query by rememberSaveable { mutableStateOf("") }
     PosTheme {
-        Column(
-            Modifier.fillMaxSize().background(PosBackground).safeDrawingPadding().padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            TextButton(onClick = onBack) { Text("← Về POS tiện ích") }
-            PosBadge(PosRole.CONVENIENCE.title, PosRole.CONVENIENCE.accent())
-            Text("Nhận diện và danh mục", style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold, color = PosInk)
-
-            when {
-                state.loading -> {
-                    NfcIdentityPanel(state.nfcUid)
-                    ConvenienceLoading()
-                }
-                state.error != null -> {
-                    NfcIdentityPanel(state.nfcUid)
-                    ConvenienceError(state.error, onRetry)
-                }
-                else -> {
-                    NfcIdentityPanel(state.nfcUid)
-
-                    TabRow(selectedTabIndex = selectedTab.ordinal, containerColor = Color.Transparent) {
-                        Tab(selected = selectedTab == ConvenienceCatalogTab.PRODUCTS,
-                            onClick = { selectedTab = ConvenienceCatalogTab.PRODUCTS },
-                            text = { Text("Sản phẩm (${state.products.size})") })
-                        Tab(selected = selectedTab == ConvenienceCatalogTab.SERVICES,
-                            onClick = { selectedTab = ConvenienceCatalogTab.SERVICES },
-                            text = { Text("Dịch vụ (${state.services.size})") })
+        Box(Modifier.fillMaxSize().background(PosBackground).safeDrawingPadding().imePadding(), contentAlignment = Alignment.TopCenter) {
+            LazyColumn(Modifier.widthIn(max = 640.dp).fillMaxWidth(), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                item { PosTopBar("Tiện ích cho khách", role, onBack) }
+                state.nfcUid?.let { uid -> item {
+                    PosPanel {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            PosGlyph(PosSymbol.NFC, role.accent(), Modifier.size(32.dp))
+                            Column(Modifier.weight(1f)) { Text("Vòng tay đã đọc", fontWeight = FontWeight.Bold); Text(posDisplayCode(uid), color = PosMuted, style = MaterialTheme.typography.bodySmall) }
+                            PosBadge("Đã lưu", role.accent())
+                        }
+                        PosNotice("Chưa xác minh được hành khách. Danh mục dưới đây dùng để tham khảo, chưa ghi nhận sử dụng.", warning = true)
                     }
-
-                    val empty = selectedTab == ConvenienceCatalogTab.PRODUCTS && state.products.isEmpty() ||
-                        selectedTab == ConvenienceCatalogTab.SERVICES && state.services.isEmpty()
-                    if (empty) {
-                        PosPanel { Text("Chưa có dữ liệu đang hoạt động.", color = PosMuted) }
-                    } else {
-                        LazyColumn(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(10.dp),
-                            contentPadding = PaddingValues(bottom = 12.dp)
-                        ) {
-                            if (selectedTab == ConvenienceCatalogTab.PRODUCTS) {
-                                items(state.products, key = { it.id }) { ProductCard(it) }
-                            } else {
-                                items(state.services, key = { it.id }) { ServiceCard(it) }
+                } }
+                when {
+                    state.loading -> item { PosPanel { CircularProgressIndicator(color = role.accent()); Text("Đang tải tiện ích…", color = PosMuted) } }
+                    state.error != null -> item { PosPanel { Text("Không tải được tiện ích", style = MaterialTheme.typography.titleMedium); Text(state.error, color = PosMuted); PosPrimaryButton("Thử lại", role, onRetry) } }
+                    else -> {
+                        item {
+                            Text("Danh mục tiện ích", style = MaterialTheme.typography.titleLarge)
+                            Text("Giá và thông tin được cung cấp bởi hệ thống", color = PosMuted, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 5.dp))
+                        }
+                        item {
+                            OutlinedTextField(query, { query = it }, modifier = Modifier.fillMaxWidth(), singleLine = true, shape = RoundedCornerShape(16.dp),
+                                placeholder = { Text("Tìm sản phẩm, dịch vụ") }, leadingIcon = { PosGlyph(PosSymbol.SEARCH, PosMuted) })
+                        }
+                        item {
+                            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                FilterChip(!services, { services = false }, label = { Text("Sản phẩm · ${state.products.size}") })
+                                FilterChip(services, { services = true }, label = { Text("Dịch vụ · ${state.services.size}") })
                             }
                         }
-                    }
-                    Surface(color = Color(0xFFFFEED0), shape = MaterialTheme.shapes.medium) {
-                        Text(
-                            "Chỉ xem danh mục. Chưa thể ghi nhận sử dụng hoặc phát sinh phí cho tới khi backend xác minh khách và cung cấp API giao dịch.",
-                            Modifier.padding(14.dp), color = Color(0xFF745014),
-                            style = MaterialTheme.typography.bodySmall
-                        )
+                        if(services) {
+                            val filtered = state.services.filter { it.name.contains(query, ignoreCase = true) }
+                            if(filtered.isEmpty()) item { PosEmptyState("Chưa có dịch vụ phù hợp", "Thử tìm với tên khác.", PosSymbol.BAG) }
+                            items(filtered, key = { it.id }) { item ->
+                                CatalogCard(item.name, item.description, formatVnd(item.price), listOfNotNull(item.durationMinutes?.let { "$it phút" }, item.maxPassengers?.let { "Tối đa $it khách" }).joinToString(" · "))
+                            }
+                        } else {
+                            val filtered = state.products.filter { it.name.contains(query, ignoreCase = true) }
+                            if(filtered.isEmpty()) item { PosEmptyState("Chưa có sản phẩm phù hợp", "Thử tìm với tên khác.", PosSymbol.BAG) }
+                            items(filtered, key = { it.id }) { item -> CatalogCard(item.name, item.description, formatVnd(item.price), item.stockQuantity?.let { "Số lượng danh mục: $it" }.orEmpty()) }
+                        }
+                        item { PosNotice("Chỉ xem danh mục. Chưa xác nhận quyền lợi hoặc phát sinh chi phí cho khách.") }
                     }
                 }
             }
@@ -87,85 +74,17 @@ fun ConvenienceCustomerScreen(
 }
 
 @Composable
-private fun NfcIdentityPanel(uid: String?) {
-    if (uid == null) return
+private fun CatalogCard(name: String, description: String?, price: String, metadata: String) {
     PosPanel {
-        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-            Text("Vòng NFC", fontWeight = FontWeight.Bold, color = PosInk)
-            PosBadge("Chưa xác minh", Color(0xFF995417))
-        }
-        Text(maskUid(uid), color = PosInk, style = MaterialTheme.typography.titleMedium)
-        Text(
-            "Backend hiện chưa có API tra hành khách theo UID NFC. POS chưa thể hiển thị tên khách, phòng, chuyến hoặc quyền lợi.",
-            color = PosMuted,
-            style = MaterialTheme.typography.bodySmall
-        )
-    }
-}
-
-@Composable
-private fun ConvenienceLoading() {
-    PosPanel {
-        CircularProgressIndicator(color = PosRole.CONVENIENCE.accent())
-        Text("Đang tải danh mục tiện ích…", color = PosMuted)
-    }
-}
-
-@Composable
-private fun ConvenienceError(message: String, onRetry: () -> Unit) {
-    PosPanel {
-        Text("Không tải được dữ liệu", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
-        Text(message, color = PosMuted)
-        Button(onClick = onRetry) { Text("Thử lại") }
-    }
-}
-
-@Composable
-private fun ProductCard(item: ConvenienceProductResponse) {
-    CatalogCard(item.name, item.description, formatVnd(item.price)) {
-        item.stockQuantity?.let { Text("Số lượng trong danh mục: $it", color = PosMuted,
-            style = MaterialTheme.typography.bodySmall) }
-    }
-}
-
-@Composable
-private fun ServiceCard(item: ConvenienceServiceResponse) {
-    CatalogCard(item.name, item.description, formatVnd(item.price)) {
-        val metadata = listOfNotNull(
-            item.durationMinutes?.let { "$it phút" },
-            item.maxPassengers?.let { "Tối đa $it khách" }
-        ).joinToString(" · ")
-        if (metadata.isNotBlank()) Text(metadata, color = PosMuted,
-            style = MaterialTheme.typography.bodySmall)
-    }
-}
-
-@Composable
-private fun CatalogCard(
-    name: String,
-    description: String?,
-    price: String,
-    metadata: @Composable ColumnScope.() -> Unit
-) {
-    Surface(Modifier.fillMaxWidth(), color = Color.White, shape = MaterialTheme.shapes.large) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(name, Modifier.weight(1f), fontWeight = FontWeight.Bold, color = PosInk)
+        Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            Box(Modifier.size(48.dp).background(PosRole.CONVENIENCE.accent().copy(alpha=.08f), RoundedCornerShape(14.dp)), contentAlignment = Alignment.Center) { PosGlyph(PosSymbol.BAG, PosRole.CONVENIENCE.accent()) }
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                Text(name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Text(price, color = PosRole.CONVENIENCE.accent(), fontWeight = FontWeight.Bold)
+                description?.takeIf { it.isNotBlank() }?.let { Text(it, color = PosMuted, style = MaterialTheme.typography.bodySmall) }
+                if(metadata.isNotBlank()) Text(metadata, color = PosMuted, style = MaterialTheme.typography.labelMedium)
             }
-            description?.takeIf { it.isNotBlank() }?.let {
-                Text(it, color = PosMuted, style = MaterialTheme.typography.bodySmall)
-            }
-            metadata()
         }
     }
 }
-
-private fun formatVnd(value: Double?): String = value?.let {
-    NumberFormat.getCurrencyInstance(Locale.forLanguageTag("vi-VN")).format(it)
-} ?: "Chưa có giá"
-
-private fun maskUid(uid: String): String = when {
-    uid.length <= 8 -> uid
-    else -> "${uid.take(4)}••••${uid.takeLast(4)}"
-}
+private fun formatVnd(value: Double?): String = value?.let { NumberFormat.getCurrencyInstance(Locale.forLanguageTag("vi-VN")).format(it) } ?: "Chưa có giá"

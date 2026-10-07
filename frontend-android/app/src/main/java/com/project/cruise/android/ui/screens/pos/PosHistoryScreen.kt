@@ -1,120 +1,72 @@
 package com.project.cruise.android.ui.screens.pos
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import com.project.cruise.android.ui.theme.OceanTheme
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.project.cruise.android.data.local.pos.PosSyncStatus
 import com.project.cruise.android.data.repository.PosTransactionQueue
-import java.text.DateFormat
+import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 
 @Composable
 fun PosHistoryScreen(role: PosRole, onBackClick: () -> Unit, onIdentify: (String) -> Unit) {
     val context = LocalContext.current
-    val queue = remember { PosTransactionQueue(context) }
+    val queue = remember(context) { PosTransactionQueue(context) }
     val transactions by queue.observeAll(role.apiRole).collectAsState(initial = emptyList())
-    val visibleTransactions = when (role) {
-        PosRole.FINANCE -> transactions
-        PosRole.ONBOARD, PosRole.SHORE -> transactions.filter { it.scanType == "QR" }
-        else -> transactions.filter { it.scanType == "NFC" }
-    }
-
+    val visible = transactions.filter { role == PosRole.FINANCE || it.scanType == (if(role == PosRole.CONVENIENCE) "NFC" else "QR") }.sortedByDescending { it.createdAt }
     var onlyPending by rememberSaveable { mutableStateOf(false) }
-    val filtered = if (onlyPending) visibleTransactions.filter { it.status != PosSyncStatus.SYNCED.name } else visibleTransactions
+    var query by rememberSaveable { mutableStateOf("") }
+    val filtered = visible.filter { (!onlyPending || it.status != PosSyncStatus.SYNCED.name) && it.scannedValue.contains(query, ignoreCase = true) }
     PosTheme {
-    Column(modifier = Modifier.fillMaxSize().background(PosBackground).safeDrawingPadding().padding(24.dp)) {
-        TextButton(onClick = onBackClick) { Text("← Quay lại POS") }
-        Text(
-            "Lịch sử thao tác",
-            modifier = Modifier.padding(top = 18.dp),
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            "${visibleTransactions.size} bản ghi ${when (role) {
-                PosRole.FINANCE -> "QR/NFC"
-                PosRole.ONBOARD, PosRole.SHORE -> "QR"
-                else -> "NFC"
-            }} lưu trên thiết bị",
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 5.dp, bottom = 20.dp)
-        )
-
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilterChip(selected = !onlyPending, onClick = { onlyPending = false }, label = { Text("Tất cả") })
-            FilterChip(selected = onlyPending, onClick = { onlyPending = true }, label = { Text("Chưa xác nhận") })
-        }
-        if (filtered.isEmpty()) {
-            Text(
-                if (onlyPending) "Không có bản ghi cần kiểm tra." else "Chưa có lượt quét. Các thao tác đã lưu sẽ xuất hiện ở đây.",
-                modifier = Modifier.padding(top = 30.dp)
-            )
-        } else {
-            LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Box(Modifier.fillMaxSize().background(PosBackground).safeDrawingPadding().imePadding(), contentAlignment = Alignment.TopCenter) {
+            LazyColumn(Modifier.widthIn(max = 640.dp).fillMaxWidth(), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                item { PosTopBar("Lịch sử thao tác", role, onBackClick) }
+                item {
+                    PosPanel {
+                        Text("${visible.size} bản ghi", style = MaterialTheme.typography.headlineMedium)
+                        Text("Lịch sử lưu trên thiết bị này", style = MaterialTheme.typography.bodySmall, color = PosMuted)
+                        OutlinedTextField(query, { query = it }, modifier = Modifier.fillMaxWidth(), placeholder = { Text("Tìm mã đã quét") },
+                            leadingIcon = { PosGlyph(PosSymbol.SEARCH, PosMuted) }, singleLine = true, shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            FilterChip(!onlyPending, { onlyPending = false }, label = { Text("Tất cả") })
+                            FilterChip(onlyPending, { onlyPending = true }, label = { Text("Chưa xác nhận") })
+                        }
+                    }
+                }
+                if(filtered.isEmpty()) item { PosEmptyState(if(query.isNotBlank()) "Không tìm thấy mã" else "Chưa có thao tác", "Các lượt quét phù hợp sẽ xuất hiện tại đây.") }
                 items(filtered, key = { it.localId }) { transaction ->
-                    val status = runCatching { PosSyncStatus.valueOf(transaction.status) }
-                        .getOrDefault(PosSyncStatus.PENDING_SYNC)
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White)
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text(transaction.scanType, fontWeight = FontWeight.Bold, color = Color(0xFF126A70))
-                                Text(statusLabel(status), color = statusColor(status), style = MaterialTheme.typography.labelMedium)
-                            }
-                            Text(if (transaction.scannedValue.startsWith("POS:")) "QR định danh (đã ẩn mã)" else transaction.scannedValue,
-                                modifier = Modifier.padding(top = 8.dp), fontWeight = FontWeight.SemiBold)
-                            Text(
-                                operationLabel(transaction.operation),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                            if (role == PosRole.FINANCE && transaction.scanType == "QR" && status != PosSyncStatus.SYNCED && status != PosSyncStatus.SYNCING) {
-                                Text("Kiểm tra quầy lễ tân trước khi gửi lại.", style = MaterialTheme.typography.bodySmall)
+                    val status = runCatching { PosSyncStatus.valueOf(transaction.status) }.getOrDefault(PosSyncStatus.PENDING_SYNC)
+                    PosPanel {
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            PosGlyph(if(transaction.scanType == "NFC") PosSymbol.NFC else PosSymbol.QR, role.accent())
+                            Text(transaction.scanType, Modifier.weight(1f), fontWeight = FontWeight.Bold)
+                            PosBadge(statusLabel(status), statusColor(status))
+                        }
+                        Text(posDisplayCode(transaction.scannedValue), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                        Text(operationLabel(transaction.operation), color = PosMuted, style = MaterialTheme.typography.bodySmall)
+                        HorizontalDivider()
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            PosGlyph(PosSymbol.CLOCK, PosMuted, Modifier.size(16.dp))
+                            Text(SimpleDateFormat("HH:mm · dd/MM/yyyy", Locale.getDefault()).format(Date(transaction.createdAt)), color = PosMuted, style = MaterialTheme.typography.bodySmall)
+                        }
+                        transaction.lastError?.let { PosNotice(it, warning = true) }
+                        when {
+                            role == PosRole.FINANCE && transaction.scanType == "QR" && status != PosSyncStatus.SYNCED && status != PosSyncStatus.SYNCING -> {
+                                Text("Kiểm tra quầy lễ tân trước khi gửi lại.", color = PosMuted, style = MaterialTheme.typography.bodySmall)
                                 TextButton(onClick = { onIdentify(transaction.localId) }) { Text("Kiểm tra / gửi lại mã") }
                             }
-                            if (role == PosRole.ONBOARD && transaction.scanType == "QR") {
-                                TextButton(onClick = { onIdentify(transaction.localId) }) { Text("Xem trạng thái vé") }
-                            }
-                            if (role == PosRole.SHORE && transaction.scanType == "QR") {
-                                TextButton(onClick = { onIdentify(transaction.localId) }) { Text("Xem lượt tham quan") }
-                            }
-                            Text(
-                                DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(transaction.createdAt)),
-                                modifier = Modifier.padding(top = 5.dp),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            transaction.lastError?.let {
-                                Text(it, modifier = Modifier.padding(top = 7.dp), color = Color(0xFF9A650E), style = MaterialTheme.typography.bodySmall)
+                            role == PosRole.ONBOARD || role == PosRole.SHORE || role == PosRole.CONVENIENCE -> {
+                                TextButton(onClick = { onIdentify(transaction.localId) }) { Text("Xem chi tiết") }
                             }
                         }
                     }
@@ -124,27 +76,17 @@ fun PosHistoryScreen(role: PosRole, onBackClick: () -> Unit, onIdentify: (String
     }
 }
 
+private fun operationLabel(value: String) = when(value) {
+    "CHECK_IN" -> "Hỗ trợ thủ tục tại quầy"; "CONVENIENCE_USAGE" -> "Kiểm tra tiện ích"
+    "ONBOARD_PARTICIPATION" -> "Kiểm tra vé khách"; "SHORE_PARTICIPATION" -> "Kiểm tra tham quan"
+    else -> "Nhận diện"
 }
-
-private fun operationLabel(operation: String) = when (operation) {
-    "CHECK_IN" -> "Hỗ trợ thủ tục tại quầy"
-    "CHECK_OUT" -> "Nghiệp vụ: checkout"
-    "CONVENIENCE_USAGE" -> "Nghiệp vụ: sử dụng tiện ích"
-    "ONBOARD_PARTICIPATION" -> "Nghiệp vụ: hoạt động trên tàu"
-    "SHORE_PARTICIPATION" -> "Nghiệp vụ: hoạt động bờ"
-    else -> "Nghiệp vụ: nhận diện"
+private fun statusLabel(value: PosSyncStatus) = when(value) {
+    PosSyncStatus.PENDING_SYNC -> "Đã lưu trên máy"; PosSyncStatus.SYNCING -> "Đang gửi"
+    PosSyncStatus.SYNCED -> "Đã gửi"; PosSyncStatus.FAILED -> "Cần kiểm tra"; PosSyncStatus.CANCELLED -> "Đã hủy"
 }
-
-private fun statusLabel(status: PosSyncStatus) = when (status) {
-    PosSyncStatus.PENDING_SYNC -> "Đã lưu trên máy"
-    PosSyncStatus.SYNCING -> "Đang đồng bộ"
-    PosSyncStatus.SYNCED -> "Đã gửi"
-    PosSyncStatus.FAILED -> "Cần kiểm tra"
-    PosSyncStatus.CANCELLED -> "Đã hủy"
-}
-
-private fun statusColor(status: PosSyncStatus) = when (status) {
-    PosSyncStatus.SYNCED -> Color(0xFF176B5B)
-    PosSyncStatus.FAILED, PosSyncStatus.CANCELLED -> Color(0xFFA63E32)
-    else -> Color(0xFF9A650E)
+private fun statusColor(value: PosSyncStatus) = when(value) {
+    PosSyncStatus.SYNCED -> PosRole.FINANCE.accent()
+    PosSyncStatus.FAILED, PosSyncStatus.CANCELLED -> androidx.compose.ui.graphics.Color(0xFFAF3939)
+    else -> PosAmber
 }

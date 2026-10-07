@@ -1,0 +1,10 @@
+// Opt-in POS-only test run. The full androidTest suite is not changed.
+allprojects {
+    afterEvaluate { p ->
+        if (p.path == ':app') {
+            def posTests = p.file('src/androidTest/java/com/project/cruise/android/pos')
+            p.extensions.getByName('kotlin').sourceSets.getByName('androidTest').kotlin.setSrcDirs([posTests])
+            p.android.sourceSets.getByName('androidTest').java.setSrcDirs([posTests])
+        }
+    }
+}

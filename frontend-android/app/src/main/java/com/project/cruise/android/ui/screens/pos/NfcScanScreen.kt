@@ -98,80 +98,50 @@ fun NfcScanScreen(
         onDispose { if (activity != null && adapter != null) adapter.disableReaderMode(activity) }
     }
 
-    PosTheme {
-    Column(Modifier.fillMaxSize().background(PosBackground).safeDrawingPadding().verticalScroll(rememberScrollState()).padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        TextButton(onClick = onBackClick, modifier = Modifier.align(Alignment.Start), enabled = !isSaving) {
-            Text("← Quay lại POS")
-        }
-        Spacer(Modifier.height(24.dp))
-        PosBadge(role.title, role.accent())
-        Spacer(Modifier.height(20.dp))
-        Text("Đọc vòng NFC", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-        Text(
-            when {
-                adapter == null -> "Điện thoại này không hỗ trợ NFC."
-                !nfcEnabled -> "NFC đang tắt. Hãy bật NFC trong Cài đặt rồi quay lại màn hình này."
-                else -> "Đưa thẻ hoặc vòng đeo tay NFC sát mặt sau điện thoại."
-            },
-            modifier = Modifier.padding(top = 12.dp),
-            color = if (adapter == null || !nfcEnabled) MaterialTheme.colorScheme.error
-                else MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
-        Box(
-            Modifier.padding(top = 40.dp).background(role.accent().copy(alpha = .10f), CircleShape).padding(56.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            if (isSaving) CircularProgressIndicator()
-            else Text("NFC", color = role.accent(), style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
-        }
-        Text(
-            if (isSaving) "Đã nhận thẻ, đang lưu giao dịch..." else "Giữ thẻ ổn định trong giây lát",
-            modifier = Modifier.padding(top = 24.dp),
-            fontWeight = FontWeight.SemiBold,
-            textAlign = TextAlign.Center
-        )
-        if (adapter != null && !nfcEnabled) {
-            TextButton(onClick = { context.startActivity(Intent(Settings.ACTION_NFC_SETTINGS)) }) {
-                Text("Mở cài đặt NFC")
+    PosPage {
+        PosTopBar("Đọc vòng NFC", role, onBackClick, !isSaving)
+        PosPanel {
+            Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(18.dp)) {
+                PosBadge(when { adapter == null -> "Thiết bị không hỗ trợ"; !nfcEnabled -> "NFC đang tắt"; else -> "Sẵn sàng đọc vòng" },
+                    if(adapter == null || !nfcEnabled) PosAmber else role.accent())
+                Text("Chạm vòng tay\nđể bắt đầu", style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
+                Box(Modifier.size(224.dp), contentAlignment = Alignment.Center) {
+                    androidx.compose.foundation.Canvas(Modifier.fillMaxSize()) {
+                        drawCircle(role.accent().copy(alpha=.05f))
+                        drawCircle(role.accent().copy(alpha=.10f), radius = size.minDimension*.38f,
+                            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.dp.toPx()))
+                        drawCircle(role.accent().copy(alpha=.12f), radius = size.minDimension*.28f)
+                    }
+                    if(isSaving) CircularProgressIndicator(color = role.accent())
+                    else PosGlyph(PosSymbol.NFC, role.accent(), Modifier.size(72.dp))
+                }
+                Text(when {
+                    isSaving -> "Đã nhận vòng, đang lưu mã…"
+                    adapter == null -> "Thiết bị này không có đầu đọc NFC."
+                    !nfcEnabled -> "Bật NFC trong cài đặt rồi quay lại."
+                    else -> "Giữ vòng tay sát mặt sau điện thoại trong giây lát."
+                }, color = PosMuted, textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyMedium)
+                if(adapter != null && !nfcEnabled) PosPrimaryButton("Mở cài đặt NFC", role, {
+                    context.startActivity(Intent(Settings.ACTION_NFC_SETTINGS))
+                })
             }
         }
         if (BuildConfig.DEBUG && role == PosRole.CONVENIENCE) {
             PosPanel {
-                Text("Giả lập UID · Chỉ bản debug", fontWeight = FontWeight.Bold, color = PosInk)
-                Text(
-                    "Dùng trên máy ảo không có NFC. Giá trị được lưu như một lượt đọc NFC để kiểm tra giao diện.",
-                    color = PosMuted,
-                    style = MaterialTheme.typography.bodySmall
-                )
-                OutlinedTextField(
-                    value = debugUid,
-                    onValueChange = { debugUid = it; error = null },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text("UID vòng NFC") },
-                    placeholder = { Text("Ví dụ: DEMO-NFC-002") },
-                    enabled = !isSaving,
-                    singleLine = true
-                )
-                Button(
-                    onClick = { saveUid(debugUid) },
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
-                    enabled = debugUid.isNotBlank() && !isSaving,
-                    colors = ButtonDefaults.buttonColors(containerColor = role.accent())
-                ) { Text("Tiếp tục với UID giả lập") }
+                PosBadge("CHỈ BẢN DEBUG", role.accent())
+                Text("Kiểm thử không cần vòng tay", fontWeight = FontWeight.Bold)
+                Text("Nhập UID để thử luồng trên máy ảo.", color = PosMuted, style = MaterialTheme.typography.bodySmall)
+                OutlinedTextField(value = debugUid, onValueChange = { debugUid = it; error = null },
+                    modifier = Modifier.fillMaxWidth(), label = { Text("UID vòng NFC") },
+                    placeholder = { Text("Ví dụ: SEA-NFC-001") }, enabled = !isSaving, singleLine = true,
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp))
+                PosPrimaryButton("Đọc UID giả lập", role, { saveUid(debugUid) }, debugUid.isNotBlank(), isSaving)
             }
         }
-        error?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 12.dp)) }
-        Spacer(Modifier.height(24.dp))
-        Text(
-            "Đọc vòng chỉ lưu mã trên thiết bị. Chưa xác nhận danh tính, quyền tham gia hoặc chi phí của hành khách.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
+        error?.let { PosNotice(it, warning = true) }
+        PosNotice("Đọc vòng chỉ lưu mã trên thiết bị. Danh tính và quyền sử dụng của khách cần được xác minh.")
     }
-}
-
 }
 
 private tailrec fun Context.findActivity(): Activity? = when (this) {

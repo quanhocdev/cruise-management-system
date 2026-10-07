@@ -1,7 +1,6 @@
 package com.project.cruise.android.ui.screens.pos
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 
 @Composable
 fun OnboardPosDashboardScreen(
@@ -24,12 +23,12 @@ fun OnboardPosDashboardScreen(
             ),
             PosDashboardAction(
                 "Nhập mã vé",
-                "Dùng khi máy ảo hoặc camera không đọc được QR",
+                "Đối chiếu mã khi không đọc được QR",
                 "123",
                 onManualClick
             )
         ),
-        notice = "Quét vé chỉ bắt đầu bước kiểm tra. Chỉ xác nhận khách lên tàu sau khi backend trả đúng hành khách, chuyến và trạng thái vé hợp lệ.",
+        notice = "Lượt quét được lưu để kiểm tra. Chỉ cho khách lên tàu sau khi vé và chuyến đã được xác minh.",
         onLogoutClick = onLogoutClick,
         onHistoryClick = onHistoryClick
     )

@@ -1,7 +1,6 @@
 package com.project.cruise.android.ui.screens.pos
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 
 @Composable
 fun ConveniencePosDashboardScreen(
@@ -16,8 +15,8 @@ fun ConveniencePosDashboardScreen(
         accent = PosRole.CONVENIENCE.accent(),
         actions = listOf(
             PosDashboardAction(
-                "Quét NFC hành khách",
-                "Xác định người sử dụng sản phẩm hoặc dịch vụ tiện ích",
+                "Chạm vòng tay NFC",
+                "Đọc mã vòng và xem danh mục tiện ích",
                 "NFC",
                 onNfcClick
             )
