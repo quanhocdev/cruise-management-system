@@ -24,7 +24,10 @@ public class CheckoutMapper {
                 bill.getBooking().getId(),
                 bill.getTotalAmount(),
                 bill.getCreatedAt(),
-                itemResponses);
+                itemResponses,
+                null,
+                null,
+                null);
     }
 
     private CheckoutResponse.BillItemResponse toItemResponse(

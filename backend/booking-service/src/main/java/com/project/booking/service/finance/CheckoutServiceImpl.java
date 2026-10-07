@@ -4,14 +4,16 @@ import com.project.booking.dto.finance.CheckoutPreviewResponse;
 import com.project.booking.dto.finance.CheckoutPreviewResponse.PassengerCheckoutPreview;
 import com.project.booking.dto.finance.CheckoutPreviewResponse.UsageItem;
 import com.project.booking.dto.finance.CheckoutResponse;
+import com.project.booking.dto.payment.BillPaymentRequest;
+import com.project.booking.dto.payment.BillPaymentResponse;
 import com.project.booking.mapper.CheckoutMapper;
 import com.project.booking.mapper.CheckoutPreviewMapper;
+import com.project.booking.model.ActivityCruiseUsage;
+import com.project.booking.model.ActivityVisitUsage;
 import com.project.booking.model.Bill;
 import com.project.booking.model.BillItem;
 import com.project.booking.model.Booking;
 import com.project.booking.model.BookingPassenger;
-import com.project.booking.model.ActivityCruiseUsage;
-import com.project.booking.model.ActivityVisitUsage;
 import com.project.booking.model.ProductUsage;
 import com.project.booking.model.ServiceUsage;
 import com.project.booking.repository.ActivityCruiseUsageRepository;
@@ -22,6 +24,7 @@ import com.project.booking.repository.BookingPassengerRepository;
 import com.project.booking.repository.BookingRepository;
 import com.project.booking.repository.ProductUsageRepository;
 import com.project.booking.repository.ServiceUsageRepository;
+import com.project.booking.service.PaymentCheckoutService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +50,7 @@ public class CheckoutServiceImpl implements CheckoutService {
     private final BillItemRepository billItemRepository;
     private final CheckoutPreviewMapper checkoutPreviewMapper;
     private final CheckoutMapper checkoutMapper;
+    private final PaymentCheckoutService paymentCheckoutService;
 
     public CheckoutServiceImpl(
             BookingRepository bookingRepository,
@@ -58,7 +62,8 @@ public class CheckoutServiceImpl implements CheckoutService {
             BillRepository billRepository,
             BillItemRepository billItemRepository,
             CheckoutPreviewMapper checkoutPreviewMapper,
-            CheckoutMapper checkoutMapper) {
+            CheckoutMapper checkoutMapper,
+            PaymentCheckoutService paymentCheckoutService) {
 
         this.bookingRepository = bookingRepository;
         this.bookingPassengerRepository = bookingPassengerRepository;
@@ -70,6 +75,7 @@ public class CheckoutServiceImpl implements CheckoutService {
         this.billItemRepository = billItemRepository;
         this.checkoutPreviewMapper = checkoutPreviewMapper;
         this.checkoutMapper = checkoutMapper;
+        this.paymentCheckoutService = paymentCheckoutService;
     }
 
     @Override
@@ -200,10 +206,33 @@ public class CheckoutServiceImpl implements CheckoutService {
 
         Bill finalBill = billRepository.save(savedBill);
 
+        /*
+         * Bill đã được tạo.
+         * Bây giờ booking-service gọi payment-service qua REST
+         * để tạo Payment và lấy VNPay paymentUrl.
+         */
+        BillPaymentRequest paymentRequest = new BillPaymentRequest(
+                finalBill.getId(),
+                booking.getCreatedByUserId(),
+                finalBill.getTotalAmount());
+
+        BillPaymentResponse paymentResponse = paymentCheckoutService.createPayment(paymentRequest);
+
         List<BillItem> items = billItemRepository
                 .findAllByBill_IdOrderByIdAsc(finalBill.getId());
 
-        return checkoutMapper.toResponse(finalBill, items);
+        CheckoutResponse checkoutResponse = checkoutMapper.toResponse(finalBill, items);
+
+        return new CheckoutResponse(
+                checkoutResponse.billId(),
+                checkoutResponse.billCode(),
+                checkoutResponse.bookingId(),
+                checkoutResponse.totalAmount(),
+                checkoutResponse.createdAt(),
+                checkoutResponse.items(),
+                paymentResponse.paymentId(),
+                paymentResponse.paymentUrl(),
+                paymentResponse.status());
     }
 
     private PassengerCheckoutPreview buildPassengerPreview(

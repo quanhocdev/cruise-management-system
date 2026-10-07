@@ -10,7 +10,10 @@ public record CheckoutResponse(
         Long bookingId,
         BigDecimal totalAmount,
         LocalDateTime createdAt,
-        List<BillItemResponse> items) {
+        List<BillItemResponse> items,
+        Long paymentId,
+        String paymentUrl,
+        String paymentStatus) {
 
     public record BillItemResponse(
             Long id,
