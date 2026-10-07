@@ -17,19 +17,18 @@ public class PaymentClient {
             RestClient.Builder restClientBuilder,
             @Value("${payment-service.url}") String paymentServiceUrl) {
 
-        this.restClient = restClientBuilder
+        this.restClient = restClientBuilder.clone()
                 .baseUrl(paymentServiceUrl)
                 .build();
     }
 
     @Retry(name = "paymentService")
     @CircuitBreaker(name = "paymentService")
-    public BillPaymentResponse createBillPayment(
-            BillPaymentRequest request) {
+    public BillPaymentResponse createBillPayment(BillPaymentRequest request) {
 
         return restClient
                 .post()
-                .uri("/api/v1/payments/bills")
+                .uri("/internal/payments/bills")
                 .body(request)
                 .retrieve()
                 .body(BillPaymentResponse.class);

@@ -1,0 +1,344 @@
+/* ==========================================================================
+   financeCheckout.css — Quầy Thanh toán
+   Chỉ style phần riêng của trang này. Bảng đã có DataTable.css,
+   ô chọn tour đã có TourSelector.css, card/page đã có layout.css.
+   Breakpoints: 1024px · 768px · 480px
+   ========================================================================== */
+
+/* ---------- 1. Ô nhập mã booking ---------- */
+.finance-checkout__container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.finance-checkout__container label {
+  color: var(--fin-gray-700);
+}
+
+.finance-checkout__input-group {
+  display: flex;
+  gap: 10px;
+}
+
+.finance-checkout__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 44px;
+  padding: 0 14px;
+  font-size: 16px; /* >=16px để iOS không tự zoom */
+  color: var(--fin-gray-900);
+  background: #fff;
+  border: 1px solid var(--fin-gray-300);
+  border-radius: var(--fin-radius-sm);
+  outline: none;
+  transition:
+    border-color var(--fin-transition),
+    box-shadow var(--fin-transition);
+}
+
+.finance-checkout__input:focus {
+  border-color: var(--fin-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.finance-checkout__btn-search,
+.finance-checkout__btn-payment {
+  font-weight: 600;
+  color: #fff;
+  background: var(--fin-primary);
+  border: none;
+  border-radius: var(--fin-radius-sm);
+  cursor: pointer;
+  transition: opacity var(--fin-transition);
+}
+
+.finance-checkout__btn-search {
+  flex: 0 0 auto;
+  height: 44px;
+  padding: 0 20px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.finance-checkout__btn-search:hover:not(:disabled),
+.finance-checkout__btn-payment:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.finance-checkout__btn-search:disabled,
+.finance-checkout__btn-payment:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---------- 2. Xem trước checkout ---------- */
+.finance-checkout__preview {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.finance-checkout__preview h3 {
+  margin: 0 0 12px;
+  font-size: 18px;
+  color: var(--fin-gray-900);
+}
+
+/* Thông tin booking */
+.finance-checkout__booking-info {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding: 16px;
+  background: var(--fin-gray-50);
+  border: 1px solid var(--fin-gray-200);
+  border-radius: var(--fin-radius);
+}
+
+.finance-checkout__booking-info h3 {
+  grid-column: 1 / -1;
+  margin-bottom: 0;
+}
+
+.finance-checkout__booking-info > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.finance-checkout__booking-info span {
+  font-size: 13px;
+  color: var(--fin-gray-500);
+}
+
+.finance-checkout__booking-info strong {
+  font-size: 15px;
+  color: var(--fin-gray-900);
+  overflow-wrap: anywhere; /* email dài không làm vỡ layout */
+}
+
+/* Hành khách */
+.finance-checkout__passengers {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.finance-checkout__passengers > h3 {
+  margin-bottom: 0;
+}
+
+.finance-checkout__passenger {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid var(--fin-gray-200);
+  border-radius: var(--fin-radius);
+}
+
+.finance-checkout__passenger-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--fin-gray-200);
+}
+
+.finance-checkout__passenger-header h4 {
+  margin: 0;
+  font-size: 16px;
+  color: var(--fin-gray-900);
+}
+
+.finance-checkout__passenger-header strong {
+  color: var(--fin-primary);
+  white-space: nowrap;
+}
+
+.finance-checkout__usage-section {
+  min-width: 0;
+}
+
+.finance-checkout__usage-section > h4 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fin-gray-500);
+}
+
+/* ---------- 3. Tổng tiền + nút thanh toán ---------- */
+.finance-checkout__total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 22px;
+  color: #fff;
+  background: var(--fin-primary);
+  border-radius: var(--fin-radius);
+}
+
+.finance-checkout__total span {
+  font-size: 15px;
+  opacity: 0.9;
+}
+
+.finance-checkout__total strong {
+  font-size: 30px;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.finance-checkout__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.finance-checkout__btn-payment {
+  min-width: 220px;
+  height: 52px;
+  padding: 0 32px;
+  font-size: 17px;
+}
+
+.finance-checkout__btn-search:focus-visible,
+.finance-checkout__btn-payment:focus-visible {
+  outline: 3px solid var(--fin-primary);
+  outline-offset: 2px;
+}
+
+/* ---------- Dark mode (cùng cách với DataTable.css) ---------- */
+@media (prefers-color-scheme: dark) {
+  .finance-checkout__input,
+  .finance-checkout__passenger {
+    background: #1a2233;
+  }
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+/* Tablet ngang */
+@media (max-width: 1024px) {
+  .finance-checkout__booking-info {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .finance-checkout__total strong {
+    font-size: 26px;
+  }
+}
+
+/* Tablet dọc: nút thanh toán dính đáy màn hình */
+@media (max-width: 768px) {
+  .finance-checkout__preview {
+    gap: 20px;
+  }
+
+  .finance-checkout__passenger {
+    padding: 14px;
+  }
+
+  .finance-checkout__total {
+    padding: 16px 18px;
+  }
+
+  .finance-checkout__total strong {
+    font-size: 24px;
+  }
+
+  .finance-checkout__actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px));
+    background: #fff;
+    border-top: 1px solid var(--fin-gray-200);
+  }
+
+  .finance-checkout__btn-payment {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 768px) and (prefers-color-scheme: dark) {
+  .finance-checkout__actions {
+    background: #1a2233;
+  }
+}
+
+/* Điện thoại */
+@media (max-width: 480px) {
+  .finance-checkout__input-group {
+    flex-direction: column;
+  }
+
+  .finance-checkout__input,
+  .finance-checkout__btn-search {
+    width: 100%;
+  }
+
+  .finance-checkout__booking-info {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: 12px 14px;
+  }
+
+  .finance-checkout__booking-info h3 {
+    margin-bottom: 8px;
+  }
+
+  /* Mỗi dòng: nhãn bên trái, giá trị bên phải */
+  .finance-checkout__booking-info > div {
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    border-top: 1px solid var(--fin-gray-200);
+  }
+
+  .finance-checkout__booking-info strong {
+    text-align: right;
+  }
+
+  .finance-checkout__passenger-header {
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+
+  .finance-checkout__total strong {
+    font-size: 22px;
+  }
+
+  .finance-checkout__btn-payment {
+    height: 54px;
+    font-size: 16px;
+  }
+}
+
+/* Điện thoại xoay ngang: bỏ sticky cho đỡ chiếm chỗ */
+@media (max-height: 480px) and (orientation: landscape) {
+  .finance-checkout__actions {
+    position: static;
+    padding: 0;
+    background: none;
+    border: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .finance-checkout__input,
+  .finance-checkout__btn-search,
+  .finance-checkout__btn-payment {
+    transition: none;
+  }
+}
