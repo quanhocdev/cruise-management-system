@@ -2,26 +2,19 @@ package com.project.cruise.android.ui.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.project.cruise.android.data.dto.tour.PublicTourSummaryResponse
-import com.project.cruise.android.ui.components.OceanBottomBar
+import com.project.cruise.android.data.dto.tour.*
+import com.project.cruise.android.ui.components.*
 import com.project.cruise.android.ui.theme.*
-import com.project.cruise.android.viewmodel.auth.AuthViewModel
-import com.project.cruise.android.viewmodel.auth.MeState
-import com.project.cruise.android.viewmodel.tour.TourListState
-import com.project.cruise.android.viewmodel.tour.TourViewModel
-import java.text.NumberFormat
-import java.util.Locale
+import com.project.cruise.android.viewmodel.auth.*
+import com.project.cruise.android.viewmodel.tour.*
 
 @Composable
 fun TourPublicScreen(
@@ -31,81 +24,105 @@ fun TourPublicScreen(
     onLoginClick: () -> Unit,
     onUserClick: () -> Unit,
     onMyBookingsClick: () -> Unit,
-    onLogout: () -> Unit,
     onHomeClick: () -> Unit = {},
-    onNotificationClick: () -> Unit = {}
 ) {
     val state by viewModel.tourListState.collectAsState()
-    val meState by authViewModel.meState.collectAsState()
-
-    LaunchedEffect(Unit) {
-        viewModel.fetchPublicTours()
-        authViewModel.getCurrentUser()
-    }
-
-    val isLoggedIn = meState is MeState.Success
-
-    Scaffold(
+    val session by authViewModel.sessionState.collectAsState()
+    LaunchedEffect(Unit) { viewModel.fetchPublicTours() }
+    val loggedIn = session is SessionState.Authenticated
+    TourCatalogContent(
+        state,
+        onTourClick,
+        { viewModel.fetchPublicTours() },
         bottomBar = {
             OceanBottomBar(
-                isLoggedIn = isLoggedIn,
-                currentRoute = "passenger_tours",
-                onHomeClick = onHomeClick,
-                onLoginClick = onLoginClick,
-                onUserClick = onUserClick,
-                onNotificationClick = onNotificationClick
+                loggedIn,
+                "passenger_tours",
+                onHomeClick,
+                onLoginClick,
+                onUserClick,
+                onMyBookingsClick = onMyBookingsClick,
             )
         },
-        containerColor = Color.Transparent
-    ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
-            OceanPage {
-                Text(
-                    "Khám Phá Tour",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = OceanNavy
-                )
-                Spacer(Modifier.height(16.dp))
+    )
+}
 
-                when (val currentState = state) {
-                    is TourListState.Idle,
-                    is TourListState.Loading -> {
-                        Box(Modifier.fillMaxWidth().padding(vertical = 40.dp), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator(color = OceanTeal)
-                        }
-                    }
-                    is TourListState.Error -> {
-                        Card(
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Text("Lỗi tải dữ liệu", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onErrorContainer)
-                                Text(currentState.message, color = MaterialTheme.colorScheme.onErrorContainer)
-                                OutlinedButton(onClick = { viewModel.fetchPublicTours() }) {
-                                    Text("Thử lại")
+@Composable
+fun TourCatalogContent(
+    state: TourListState,
+    onTourClick: (String) -> Unit,
+    onRetry: () -> Unit,
+    bottomBar: @Composable () -> Unit = {},
+) {
+    var query by rememberSaveable { mutableStateOf("") }
+    var openOnly by rememberSaveable { mutableStateOf(false) }
+    val tours = (state as? TourListState.Success)?.tours.orEmpty()
+    val filtered =
+        remember(tours, query, openOnly) {
+            tours.filter { tour ->
+                (!openOnly || tour.statusBooking == TourBookingStatus.OPEN) &&
+                    (query.isBlank() ||
+                        listOf(tour.name, tour.code, tour.cruiseName).any {
+                            it?.contains(query.trim(), ignoreCase = true) == true
+                        })
+            }
+        }
+    PassengerPage("Khám phá", "OCEANCRUISE · HÀNH TRÌNH TRÊN BIỂN", bottomBar = bottomBar) {
+        item { PassengerDiscoveryHero() }
+        item {
+            OutlinedTextField(
+                query,
+                { query = it },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(18.dp),
+                placeholder = {
+                    Text(
+                        "Tìm tour hoặc du thuyền",
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    )
+                },
+                leadingIcon = { PassengerIcon(PassengerGlyph.SEARCH) },
+                trailingIcon = {
+                    if (query.isNotEmpty()) TextButton(onClick = { query = "" }) { Text("Xóa") }
+                },
+            )
+        }
+        item {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(!openOnly, { openOnly = false }, label = { Text("Tất cả") })
+                FilterChip(openOnly, { openOnly = true }, label = { Text("Đang mở bán") })
+            }
+            PassengerSection(
+                "Hành trình dành cho bạn",
+                if (state is TourListState.Success) "${filtered.size} hành trình phù hợp"
+                else "Khám phá những chuyến đi mới",
+            )
+        }
+        when (state) {
+            TourListState.Idle,
+            TourListState.Loading -> item { PassengerLoading() }
+            is TourListState.Error -> item { PassengerError(state.message, onRetry) }
+            is TourListState.Success -> {
+                if (filtered.isEmpty())
+                    item {
+                        PassengerEmpty(
+                            "Chưa có hành trình phù hợp",
+                            if (tours.isEmpty()) "Các chuyến đi sẽ xuất hiện khi được công bố."
+                            else "Thử tên khác hoặc xem tất cả hành trình.",
+                            if (tours.isEmpty()) "Tải lại" else "Xóa bộ lọc",
+                            {
+                                if (tours.isEmpty()) onRetry()
+                                else {
+                                    query = ""
+                                    openOnly = false
                                 }
-                            }
-                        }
+                            },
+                        )
                     }
-                    is TourListState.Success -> {
-                        val tours = currentState.tours
-                        if (tours.isEmpty()) {
-                            Box(Modifier.fillMaxWidth().padding(vertical = 40.dp), contentAlignment = Alignment.Center) {
-                                Text("Hiện không có tour nào mở bán.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            }
-                        } else {
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(12.dp),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                tours.forEach { tour ->
-                                    TourSummaryCard(tour = tour, onClick = { onTourClick(tour.id) })
-                                }
-                            }
-                        }
-                    }
+                items(filtered, key = { it.id }) { tour ->
+                    TourSummaryCard(tour) { onTourClick(tour.id) }
                 }
             }
         }
@@ -113,67 +130,47 @@ fun TourPublicScreen(
 }
 
 @Composable
-fun TourSummaryCard(
-    tour: PublicTourSummaryResponse,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(
-                Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+fun TourSummaryCard(tour: PublicTourSummaryResponse, onClick: () -> Unit) {
+    PassengerCard(Modifier.clickable(onClick = onClick)) {
+        CruiseVisual(tour.cruiseImageUrl)
+        PassengerPill(
+            tourSaleLabel(tour.statusBooking),
+            tour.statusBooking == TourBookingStatus.OPEN,
+        )
+        Text(
+            tour.name ?: "Hành trình ${tour.code.orEmpty()}",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = OceanNavy,
+        )
+        Text(
+            tour.cruiseName ?: "Du thuyền chưa cập nhật",
+            color = OceanSlate,
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            PassengerIcon(PassengerGlyph.CALENDAR, modifier = Modifier.size(20.dp))
+            Text(
+                "${passengerDate(tour.startDate)} – ${passengerDate(tour.endDate)}",
+                color = OceanSlate,
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+        HorizontalDivider(color = OceanLine)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text("Giá từ", style = MaterialTheme.typography.labelSmall, color = OceanSlate)
                 Text(
-                    text = tour.name ?: "Tour #${tour.code}",
-                    style = MaterialTheme.typography.titleMedium,
+                    passengerMoney(tour.startingPrice),
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = OceanTeal
-                )
-                Surface(
-                    color = OceanMint.copy(alpha = 0.3f),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(
-                        text = tour.statusBooking?.name ?: "OPEN",
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = OceanNavy,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-
-            Text("Tàu: ${tour.cruiseName ?: "N/A"}", style = MaterialTheme.typography.bodyMedium)
-            Text("Thời gian: ${tour.startDate ?: ""} đến ${tour.endDate ?: ""}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-
-            val formattedPrice = tour.startingPrice?.let {
-                NumberFormat.getCurrencyInstance(Locale.forLanguageTag("vi-VN")).format(it)
-            } ?: "Liên hệ"
-
-            Row(
-                Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Từ: $formattedPrice",
-                    fontWeight = FontWeight.Bold,
-                    color = OceanNavy
-                )
-                Text(
-                    text = "Xem chi tiết →",
                     color = OceanTeal,
-                    style = MaterialTheme.typography.labelLarge
                 )
             }
+            PassengerIcon(PassengerGlyph.ARROW)
         }
     }
 }

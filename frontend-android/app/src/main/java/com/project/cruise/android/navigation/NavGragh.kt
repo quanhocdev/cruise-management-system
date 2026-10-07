@@ -279,9 +279,6 @@ fun NavGraph() {
                     navController.navigate(Routes.GUEST) {
                         popUpTo(Routes.PASSENGER_TOURS) { inclusive = true }
                     }
-                },
-                onNotificationClick = {
-                    // Xử lý chuyển sang trang thông báo nếu có
                 }
             )
         }
@@ -333,16 +330,8 @@ fun NavGraph() {
                 onMyBookingsClick = {
                     navController.navigate(Routes.PASSENGER_BOOKINGS)
                 },
-                onLogout = {
-                    navController.navigate(Routes.GUEST) {
-                        popUpTo(Routes.PASSENGER_TOURS) { inclusive = true }
-                    }
-                },
                 onHomeClick = {
                     // Đang ở trang chủ rồi nên giữ nguyên hoặc làm mới
-                },
-                onNotificationClick = {
-                    // Chuyển sang màn hình thông báo sau
                 }
             )
         }
@@ -429,7 +418,16 @@ fun NavGraph() {
                 onBookingClick = { bookingId ->
                     navController.navigate("passenger_bookings/$bookingId")
                 },
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onBrowseTours = {
+                    navController.navigate(Routes.PASSENGER_TOURS) {
+                        popUpTo(Routes.PASSENGER_TOURS) { inclusive = false }
+                        launchSingleTop = true
+                    }
+                },
+                onAccount = {
+                    navController.navigate(Routes.PASSENGER_PROFILE) { launchSingleTop = true }
+                }
             )
         }
 

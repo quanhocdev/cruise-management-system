@@ -1,0 +1,10 @@
+// Opt-in UI checks while the older, unused passenger tests are being migrated.
+allprojects {
+    afterEvaluate { project ->
+        if (project.path == ':app') {
+            def uiTests = project.file('src/androidTest/java/com/project/cruise/android/passengerpolish')
+            project.extensions.getByName('kotlin').sourceSets.getByName('androidTest').kotlin.setSrcDirs([uiTests])
+            project.android.sourceSets.getByName('androidTest').java.setSrcDirs([uiTests])
+        }
+    }
+}
