@@ -1,6 +1,7 @@
 package com.project.booking.controller.finance;
 
 import com.project.booking.dto.finance.CheckoutPreviewResponse;
+import com.project.booking.dto.finance.CheckoutResponse;
 import com.project.booking.service.finance.CheckoutService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,5 +22,13 @@ public class CheckoutController {
 
         return ResponseEntity.ok(
                 checkoutService.getCheckoutPreview(bookingId));
+    }
+
+    @PostMapping("/{bookingId}/checkout")
+    public ResponseEntity<CheckoutResponse> confirmCheckout(
+            @PathVariable Long bookingId) {
+
+        return ResponseEntity.ok(
+                checkoutService.confirmCheckout(bookingId));
     }
 }

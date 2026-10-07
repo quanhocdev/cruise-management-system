@@ -3,6 +3,8 @@ package com.project.booking.service.finance;
 import com.project.booking.dto.finance.CheckoutPreviewResponse;
 import com.project.booking.dto.finance.CheckoutPreviewResponse.PassengerCheckoutPreview;
 import com.project.booking.dto.finance.CheckoutPreviewResponse.UsageItem;
+import com.project.booking.dto.finance.CheckoutResponse;
+import com.project.booking.mapper.CheckoutMapper;
 import com.project.booking.mapper.CheckoutPreviewMapper;
 import com.project.booking.model.Bill;
 import com.project.booking.model.BillItem;
@@ -44,6 +46,7 @@ public class CheckoutServiceImpl implements CheckoutService {
     private final BillRepository billRepository;
     private final BillItemRepository billItemRepository;
     private final CheckoutPreviewMapper checkoutPreviewMapper;
+    private final CheckoutMapper checkoutMapper;
 
     public CheckoutServiceImpl(
             BookingRepository bookingRepository,
@@ -54,7 +57,8 @@ public class CheckoutServiceImpl implements CheckoutService {
             ProductUsageRepository productUsageRepository,
             BillRepository billRepository,
             BillItemRepository billItemRepository,
-            CheckoutPreviewMapper checkoutPreviewMapper) {
+            CheckoutPreviewMapper checkoutPreviewMapper,
+            CheckoutMapper checkoutMapper) {
 
         this.bookingRepository = bookingRepository;
         this.bookingPassengerRepository = bookingPassengerRepository;
@@ -65,6 +69,7 @@ public class CheckoutServiceImpl implements CheckoutService {
         this.billRepository = billRepository;
         this.billItemRepository = billItemRepository;
         this.checkoutPreviewMapper = checkoutPreviewMapper;
+        this.checkoutMapper = checkoutMapper;
     }
 
     @Override
@@ -94,7 +99,7 @@ public class CheckoutServiceImpl implements CheckoutService {
 
     @Override
     @Transactional
-    public Bill confirmCheckout(Long bookingId) {
+    public CheckoutResponse confirmCheckout(Long bookingId) {
 
         Booking booking = getBooking(bookingId);
 
@@ -193,7 +198,12 @@ public class CheckoutServiceImpl implements CheckoutService {
 
         savedBill.setTotalAmount(grandTotal);
 
-        return billRepository.save(savedBill);
+        Bill finalBill = billRepository.save(savedBill);
+
+        List<BillItem> items = billItemRepository
+                .findAllByBill_IdOrderByIdAsc(finalBill.getId());
+
+        return checkoutMapper.toResponse(finalBill, items);
     }
 
     private PassengerCheckoutPreview buildPassengerPreview(
