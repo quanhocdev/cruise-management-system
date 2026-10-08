@@ -1,5 +1,6 @@
 package com.project.booking.service.onboard;
 
+import com.project.booking.dto.onboard.ActivityCruiseUsageManagementResponse;
 import com.project.booking.dto.onboard.ActivityCruiseUsageRequest;
 import com.project.booking.dto.onboard.ActivityCruiseUsageResponse;
 
@@ -14,4 +15,6 @@ public interface ActivityCruiseUsageService {
                         Long bookingPassengerId);
 
         List<ActivityCruiseUsageResponse> getByUserId(Long userId);
+
+        List<ActivityCruiseUsageManagementResponse> getManagementUsages();
 }

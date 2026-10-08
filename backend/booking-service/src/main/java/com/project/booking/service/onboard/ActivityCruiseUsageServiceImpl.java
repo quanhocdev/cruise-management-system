@@ -1,8 +1,12 @@
 package com.project.booking.service.onboard;
 
 import com.project.booking.client.ActivityCruiseClient;
+import com.project.booking.client.ActivityCruiseManagementClient;
+import com.project.booking.dto.onboard.ActivityCruiseUsageManagementInfo;
+import com.project.booking.dto.onboard.ActivityCruiseUsageManagementResponse;
 import com.project.booking.dto.onboard.ActivityCruiseUsageRequest;
 import com.project.booking.dto.onboard.ActivityCruiseUsageResponse;
+import com.project.booking.mapper.ActivityCruiseUsageManagementMapper;
 import com.project.booking.mapper.ActivityCruiseUsageMapper;
 import com.project.booking.model.ActivityCruiseUsage;
 import com.project.booking.model.BenefitConsumption;
@@ -12,9 +16,13 @@ import com.project.booking.repository.ActivityCruiseUsageRepository;
 import com.project.booking.service.BenefitConsumptionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class ActivityCruiseUsageServiceImpl
@@ -22,7 +30,9 @@ public class ActivityCruiseUsageServiceImpl
 
         private final ActivityCruiseUsageRepository activityCruiseUsageRepository;
         private final ActivityCruiseUsageMapper activityCruiseUsageMapper;
+        private final ActivityCruiseUsageManagementMapper activityCruiseUsageManagementMapper;
         private final ActivityCruiseClient activityCruiseClient;
+        private final ActivityCruiseManagementClient activityCruiseManagementClient;
         private final BenefitConsumptionService benefitConsumptionService;
         private final ActivityCruiseValidator activityCruiseValidator;
         private final ActivityPricingCalculator activityPricingCalculator;
@@ -30,14 +40,18 @@ public class ActivityCruiseUsageServiceImpl
         public ActivityCruiseUsageServiceImpl(
                         ActivityCruiseUsageRepository activityCruiseUsageRepository,
                         ActivityCruiseUsageMapper activityCruiseUsageMapper,
+                        ActivityCruiseUsageManagementMapper activityCruiseUsageManagementMapper,
                         ActivityCruiseClient activityCruiseClient,
+                        ActivityCruiseManagementClient activityCruiseManagementClient,
                         BenefitConsumptionService benefitConsumptionService,
                         ActivityCruiseValidator activityCruiseValidator,
                         ActivityPricingCalculator activityPricingCalculator) {
 
                 this.activityCruiseUsageRepository = activityCruiseUsageRepository;
                 this.activityCruiseUsageMapper = activityCruiseUsageMapper;
+                this.activityCruiseUsageManagementMapper = activityCruiseUsageManagementMapper;
                 this.activityCruiseClient = activityCruiseClient;
+                this.activityCruiseManagementClient = activityCruiseManagementClient;
                 this.benefitConsumptionService = benefitConsumptionService;
                 this.activityCruiseValidator = activityCruiseValidator;
                 this.activityPricingCalculator = activityPricingCalculator;
@@ -86,7 +100,9 @@ public class ActivityCruiseUsageServiceImpl
                 }
 
                 // 10 -> 15. Tính tiền
-                var pricingResult = activityPricingCalculator.calculate(activityInfo, usedBenefitQuantity);
+                var pricingResult = activityPricingCalculator.calculate(
+                                activityInfo,
+                                usedBenefitQuantity);
 
                 // 16. Cập nhật lượt benefit đã dùng
                 if (benefitConsumption != null) {
@@ -133,6 +149,39 @@ public class ActivityCruiseUsageServiceImpl
                                                 userId)
                                 .stream()
                                 .map(activityCruiseUsageMapper::toResponse)
+                                .toList();
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public List<ActivityCruiseUsageManagementResponse> getManagementUsages() {
+
+                List<ActivityCruiseUsage> usages = activityCruiseUsageRepository
+                                .findAllByOrderByUsedAtDesc();
+
+                if (usages.isEmpty()) {
+                        return List.of();
+                }
+
+                List<UUID> activityCruiseTourIds = usages.stream()
+                                .map(ActivityCruiseUsage::getActivityCruiseTourId)
+                                .distinct()
+                                .toList();
+
+                List<ActivityCruiseUsageManagementInfo> activityInfos = activityCruiseManagementClient
+                                .getActivityCruiseUsageInfo(
+                                                activityCruiseTourIds);
+
+                Map<UUID, ActivityCruiseUsageManagementInfo> activityInfoMap = activityInfos.stream()
+                                .collect(Collectors.toMap(
+                                                ActivityCruiseUsageManagementInfo::activityCruiseTourId,
+                                                Function.identity()));
+
+                return usages.stream()
+                                .map(usage -> activityCruiseUsageManagementMapper.toResponse(
+                                                usage,
+                                                activityInfoMap.get(
+                                                                usage.getActivityCruiseTourId())))
                                 .toList();
         }
 }

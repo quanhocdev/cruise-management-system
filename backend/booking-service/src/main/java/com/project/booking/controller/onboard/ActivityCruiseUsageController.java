@@ -1,5 +1,6 @@
 package com.project.booking.controller.onboard;
 
+import com.project.booking.dto.onboard.ActivityCruiseUsageManagementResponse;
 import com.project.booking.dto.onboard.ActivityCruiseUsageRequest;
 import com.project.booking.dto.onboard.ActivityCruiseUsageResponse;
 import com.project.booking.service.onboard.ActivityCruiseUsageService;
@@ -33,6 +34,14 @@ public class ActivityCruiseUsageController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(activityCruiseUsageService.create(request));
+    }
+
+    @GetMapping
+    @PreAuthorize("hasRole('ONBOARD')")
+    public ResponseEntity<List<ActivityCruiseUsageManagementResponse>> getManagementUsages() {
+
+        return ResponseEntity.ok(
+                activityCruiseUsageService.getManagementUsages());
     }
 
     @GetMapping("/booking-passenger/{bookingPassengerId}")
