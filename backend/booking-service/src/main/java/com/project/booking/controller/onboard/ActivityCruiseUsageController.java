@@ -1,4 +1,4 @@
-package com.project.booking.controller.shore;
+package com.project.booking.controller.onboard;
 
 import com.project.booking.dto.onboard.ActivityCruiseUsageRequest;
 import com.project.booking.dto.onboard.ActivityCruiseUsageResponse;

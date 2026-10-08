@@ -1,10 +1,13 @@
 package com.project.tour.controller.internal;
 
+import com.project.tour.dto.internal.ActivityCruiseUsageBatchRequest;
 import com.project.tour.dto.internal.ActivityCruiseUsageInfo;
+import com.project.tour.dto.internal.ActivityCruiseUsageManagementInfo;
 import com.project.tour.service.internal.ActivityCruiseTourInternalService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -28,5 +31,15 @@ public class ActivityCruiseTourInternalController {
                 activityCruiseTourInternalService.getActivityCruiseUsageInfo(
                         activityCruiseTourId,
                         tourPackageId));
+    }
+
+    @PostMapping("/usage-info/batch")
+    public ResponseEntity<List<ActivityCruiseUsageManagementInfo>> getActivityCruiseUsageManagementInfo(
+            @RequestBody ActivityCruiseUsageBatchRequest request) {
+
+        return ResponseEntity.ok(
+                activityCruiseTourInternalService
+                        .getActivityCruiseUsageManagementInfo(
+                                request.activityCruiseTourIds()));
     }
 }
