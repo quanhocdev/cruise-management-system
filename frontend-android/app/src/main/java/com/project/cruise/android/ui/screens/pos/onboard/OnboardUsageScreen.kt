@@ -1,4 +1,4 @@
-package com.project.cruise.android.ui.screens.pos
+package com.project.cruise.android.ui.screens.pos.onboard
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,9 +12,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.project.cruise.android.data.dto.onboard.ActivityCruiseTourResponse
-import com.project.cruise.android.viewmodel.OnboardUsageViewModel
+import com.project.cruise.android.viewmodel.onboard.OnboardUsageViewModel
 import android.media.AudioManager
 import android.media.ToneGenerator
+import kotlinx.coroutines.delay
 
 @Composable
 fun OnboardUsageScreen(
@@ -43,7 +44,7 @@ fun OnboardUsageScreen(
 
             toneGenerator.release()
 
-            kotlinx.coroutines.delay(2000)
+            delay(2000)
 
             viewModel.clearSuccess()
         }

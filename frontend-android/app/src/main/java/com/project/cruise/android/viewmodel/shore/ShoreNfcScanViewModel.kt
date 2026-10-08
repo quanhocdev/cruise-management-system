@@ -1,4 +1,4 @@
-package com.project.cruise.android.viewmodel
+package com.project.cruise.android.viewmodel.shore
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel

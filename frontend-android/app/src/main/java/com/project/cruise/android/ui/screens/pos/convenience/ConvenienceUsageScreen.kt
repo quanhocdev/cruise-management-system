@@ -1,4 +1,4 @@
-package com.project.cruise.android.ui.screens.pos
+package com.project.cruise.android.ui.screens.pos.convenience
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,9 +13,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.project.cruise.android.data.dto.convenience.ProductTourResponse
 import com.project.cruise.android.data.dto.convenience.ServiceTourResponse
-import com.project.cruise.android.viewmodel.ConvenienceUsageViewModel
+import com.project.cruise.android.viewmodel.convenience.ConvenienceUsageViewModel
 import android.media.AudioManager
 import android.media.ToneGenerator
+import kotlinx.coroutines.delay
 
 @Composable
 fun ConvenienceUsageScreen(
@@ -43,7 +44,7 @@ fun ConvenienceUsageScreen(
             )
 
             toneGenerator.release()
-                kotlinx.coroutines.delay(2000)
+            delay(2000)
                 viewModel.clearSuccess() } }
 
     var selectedType by remember {

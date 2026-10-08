@@ -1,8 +1,8 @@
-package com.project.cruise.android.ui.screens.pos
+package com.project.cruise.android.ui.screens.pos.onboard
 
 import android.app.Activity
-import android.media.AudioManager
 import android.media.ToneGenerator
+import android.media.AudioManager
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import androidx.compose.foundation.layout.Arrangement
@@ -26,13 +26,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.project.cruise.android.data.dto.nfc.NfcResolveResponse
-import com.project.cruise.android.viewmodel.ShoreNfcScanViewModel
+import com.project.cruise.android.viewmodel.onboard.OnboardNfcScanViewModel
 
 @Composable
-fun ShoreNfcScanScreen(
+fun OnboardNfcScanScreen(
     onBackClick: () -> Unit,
     onResolved: (NfcResolveResponse, String) -> Unit,
-    viewModel: ShoreNfcScanViewModel = viewModel()
+    viewModel: OnboardNfcScanViewModel = viewModel()
 ) {
     val context = LocalContext.current
     val activity = context as? Activity
@@ -58,10 +58,7 @@ fun ShoreNfcScanScreen(
                         AudioManager.STREAM_NOTIFICATION,
                         100
                     ).apply {
-                        startTone(
-                            ToneGenerator.TONE_PROP_BEEP,
-                            150
-                        )
+                        startTone(ToneGenerator.TONE_PROP_BEEP, 150)
                         release()
                     }
 
@@ -83,7 +80,6 @@ fun ShoreNfcScanScreen(
             onDispose {
                 nfcAdapter.disableReaderMode(activity)
             }
-
         } else {
             onDispose { }
         }
@@ -118,7 +114,6 @@ fun ShoreNfcScanScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         when {
-
             nfcAdapter == null -> {
                 Text(
                     text = "Thiết bị không hỗ trợ NFC.",

@@ -1,6 +1,5 @@
 package com.project.cruise.android.navigation
 
-import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -17,9 +16,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import androidx.navigation.navDeepLink
 import android.net.Uri
-import com.project.cruise.android.ui.screens.pos.ConvenienceNfcScanScreen
+import com.project.cruise.android.ui.screens.pos.convenience.ConvenienceNfcScanScreen
 import com.project.cruise.android.ui.screens.passenger.MyBookingsScreen
 import com.project.cruise.android.ui.screens.passenger.MyBookingDetailScreen
 import com.project.cruise.android.ui.screens.TourPublicScreen
@@ -40,8 +38,8 @@ import com.project.cruise.android.ui.screens.auth.LoginScreen
 import com.project.cruise.android.ui.screens.auth.OtpScreen
 import com.project.cruise.android.ui.screens.auth.RegisterScreen
 import com.project.cruise.android.ui.screens.passenger.Dashboard
-import com.project.cruise.android.ui.screens.pos.OnboardNfcScanScreen
-import com.project.cruise.android.ui.screens.pos.OnboardUsageScreen
+import com.project.cruise.android.ui.screens.pos.onboard.OnboardNfcScanScreen
+import com.project.cruise.android.ui.screens.pos.onboard.OnboardUsageScreen
 import com.project.cruise.android.viewmodel.auth.AuthViewModel
 import com.project.cruise.android.viewmodel.auth.AuthViewModelFactory
 import com.project.cruise.android.viewmodel.auth.LoginState
@@ -58,9 +56,9 @@ import com.project.cruise.android.ui.screens.pos.NfcScanScreen
 import com.project.cruise.android.ui.screens.pos.PosHistoryScreen
 import com.project.cruise.android.ui.screens.pos.PosIdentityScreen
 import com.project.cruise.android.data.repository.PosIdentityRepository
-import com.project.cruise.android.ui.screens.pos.ConvenienceUsageScreen
-import com.project.cruise.android.ui.screens.pos.ShoreNfcScanScreen
-import com.project.cruise.android.ui.screens.pos.ShoreUsageScreen
+import com.project.cruise.android.ui.screens.pos.convenience.ConvenienceUsageScreen
+import com.project.cruise.android.ui.screens.pos.shore.ShoreNfcScanScreen
+import com.project.cruise.android.ui.screens.pos.shore.ShoreUsageScreen
 import com.project.cruise.android.viewmodel.pos.PosIdentityViewModel
 import com.project.cruise.android.viewmodel.pos.PosIdentityViewModelFactory
 object Routes {

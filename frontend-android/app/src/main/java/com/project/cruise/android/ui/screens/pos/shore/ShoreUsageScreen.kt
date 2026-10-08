@@ -1,4 +1,4 @@
-package com.project.cruise.android.ui.screens.pos
+package com.project.cruise.android.ui.screens.pos.shore
 
 import android.media.AudioManager
 import android.media.ToneGenerator
@@ -34,7 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.project.cruise.android.data.dto.shore.ActivityVisitTourResponse
-import com.project.cruise.android.viewmodel.ShoreUsageViewModel
+import com.project.cruise.android.viewmodel.shore.ShoreUsageViewModel
 import kotlinx.coroutines.delay
 
 @Composable

@@ -1,14 +1,10 @@
-package com.project.cruise.android.ui.screens.pos
+package com.project.cruise.android.ui.screens.pos.shore
 
 import android.app.Activity
-import android.media.ToneGenerator
 import android.media.AudioManager
+import android.media.ToneGenerator
 import android.nfc.NfcAdapter
 import android.nfc.Tag
-import android.nfc.tech.NfcA
-import android.nfc.tech.NfcB
-import android.nfc.tech.NfcF
-import android.nfc.tech.NfcV
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -30,13 +26,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.project.cruise.android.data.dto.nfc.NfcResolveResponse
-import com.project.cruise.android.viewmodel.OnboardNfcScanViewModel
+import com.project.cruise.android.viewmodel.shore.ShoreNfcScanViewModel
 
 @Composable
-fun OnboardNfcScanScreen(
+fun ShoreNfcScanScreen(
     onBackClick: () -> Unit,
     onResolved: (NfcResolveResponse, String) -> Unit,
-    viewModel: OnboardNfcScanViewModel = viewModel()
+    viewModel: ShoreNfcScanViewModel = viewModel()
 ) {
     val context = LocalContext.current
     val activity = context as? Activity
@@ -62,7 +58,10 @@ fun OnboardNfcScanScreen(
                         AudioManager.STREAM_NOTIFICATION,
                         100
                     ).apply {
-                        startTone(ToneGenerator.TONE_PROP_BEEP, 150)
+                        startTone(
+                            ToneGenerator.TONE_PROP_BEEP,
+                            150
+                        )
                         release()
                     }
 
@@ -84,6 +83,7 @@ fun OnboardNfcScanScreen(
             onDispose {
                 nfcAdapter.disableReaderMode(activity)
             }
+
         } else {
             onDispose { }
         }
@@ -118,6 +118,7 @@ fun OnboardNfcScanScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         when {
+
             nfcAdapter == null -> {
                 Text(
                     text = "Thiết bị không hỗ trợ NFC.",

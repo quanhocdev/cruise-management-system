@@ -1,7 +1,10 @@
-package com.project.cruise.android.ui.screens.pos
+package com.project.cruise.android.ui.screens.pos.onboard
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.project.cruise.android.ui.screens.pos.PosDashboardAction
+import com.project.cruise.android.ui.screens.pos.PosRole
+import com.project.cruise.android.ui.screens.pos.RolePosDashboard
 
 @Composable
 fun OnboardPosDashboardScreen(

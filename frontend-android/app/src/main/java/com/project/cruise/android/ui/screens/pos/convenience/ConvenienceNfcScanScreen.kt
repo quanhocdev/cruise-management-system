@@ -1,4 +1,4 @@
-package com.project.cruise.android.ui.screens.pos
+package com.project.cruise.android.ui.screens.pos.convenience
 
 import android.app.Activity
 import android.content.Context
@@ -22,7 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.project.cruise.android.data.dto.nfc.NfcResolveResponse
-import com.project.cruise.android.viewmodel.ConvenienceNfcScanViewModel
+import com.project.cruise.android.viewmodel.convenience.ConvenienceNfcScanViewModel
 
 @Composable
 fun ConvenienceNfcScanScreen(
