@@ -1,22 +1,35 @@
 package com.project.cruise.android.ui.screens.pos.convenience
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.project.cruise.android.data.dto.convenience.ProductTourResponse
 import com.project.cruise.android.data.dto.convenience.ServiceTourResponse
+import com.project.cruise.android.ui.components.OptionalInfoText
+import com.project.cruise.android.ui.components.QuantityStepper
+import com.project.cruise.android.ui.components.SelectableCard
+import com.project.cruise.android.ui.components.SuccessSoundEffect
+import com.project.cruise.android.ui.components.usage.SectionTitle
+import com.project.cruise.android.ui.components.usage.SelectableList
+import com.project.cruise.android.ui.components.usage.UsageScreenScaffold
 import com.project.cruise.android.viewmodel.convenience.ConvenienceUsageViewModel
-import android.media.AudioManager
-import android.media.ToneGenerator
-import kotlinx.coroutines.delay
 
 @Composable
 fun ConvenienceUsageScreen(
@@ -31,37 +44,14 @@ fun ConvenienceUsageScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(uiState.successMessage) {
-        if (uiState.successMessage != null) {
-            val toneGenerator = ToneGenerator(
-                AudioManager.STREAM_NOTIFICATION,
-                100
-            )
+    var selectedType by remember { mutableStateOf(ConvenienceUsageType.PRODUCT) }
+    var selectedProduct by remember { mutableStateOf<ProductTourResponse?>(null) }
+    var selectedService by remember { mutableStateOf<ServiceTourResponse?>(null) }
+    var quantity by remember { mutableIntStateOf(1) }
 
-            toneGenerator.startTone(
-                ToneGenerator.TONE_PROP_ACK,
-                200
-            )
+    val isProduct = selectedType == ConvenienceUsageType.PRODUCT
 
-            toneGenerator.release()
-            delay(2000)
-                viewModel.clearSuccess() } }
-
-    var selectedType by remember {
-        mutableStateOf(ConvenienceUsageType.PRODUCT)
-    }
-
-    var selectedProduct by remember {
-        mutableStateOf<ProductTourResponse?>(null)
-    }
-
-    var selectedService by remember {
-        mutableStateOf<ServiceTourResponse?>(null)
-    }
-
-    var quantity by remember {
-        mutableIntStateOf(1)
-    }
+    SuccessSoundEffect(uiState.successMessage) { viewModel.clearSuccess() }
 
     LaunchedEffect(tourId) {
         viewModel.loadConvenienceTours(tourId)
@@ -74,82 +64,44 @@ fun ConvenienceUsageScreen(
         viewModel.clearError()
     }
 
-    val isProduct =
-        selectedType == ConvenienceUsageType.PRODUCT
+    val hasSelection = if (isProduct) selectedProduct != null else selectedService != null
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(20.dp)
-    ) {
-
-        TextButton(
-            onClick = onBackClick,
-            enabled = !uiState.isSubmitting
-        ) {
-            Text("← Quay lại")
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = "Tiện ích hành khách",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Card(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text(
-                    text = passengerName.ifBlank {
-                        "Không có tên hành khách"
-                    },
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = "Booking #$bookingId",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-                Text(
-                    text = "Booking Passenger #$bookingPassengerId",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+    UsageScreenScaffold(
+        title = "Tiện ích hành khách",
+        passengerName = passengerName,
+        bookingId = bookingId,
+        bookingPassengerId = bookingPassengerId,
+        isSubmitting = uiState.isSubmitting,
+        errorMessage = uiState.errorMessage,
+        successMessage = uiState.successMessage,
+        confirmEnabled = hasSelection && !uiState.isLoading,
+        onConfirm = {
+            if (isProduct) {
+                selectedProduct?.let { product ->
+                    viewModel.createProductUsage(
+                        nfcCardUid = nfcCardUid,
+                        productTourId = product.id,
+                        quantity = quantity
+                    )
+                }
+            } else {
+                selectedService?.let { service ->
+                    viewModel.createServiceUsage(
+                        nfcCardUid = nfcCardUid,
+                        serviceTourId = service.id
+                    )
+                }
             }
-        }
+        },
+        onBackClick = onBackClick
+    ) {
+        SectionTitle("Loại tiện ích")
 
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Text(
-            text = "Loại tiện ích",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        Row(modifier = Modifier.fillMaxWidth()) {
             FilterChip(
                 selected = isProduct,
-                onClick = {
-                    selectedType = ConvenienceUsageType.PRODUCT
-                },
-                label = {
-                    Text("Sản phẩm")
-                },
+                onClick = { selectedType = ConvenienceUsageType.PRODUCT },
+                label = { Text("Sản phẩm") },
                 modifier = Modifier.weight(1f)
             )
 
@@ -157,242 +109,54 @@ fun ConvenienceUsageScreen(
 
             FilterChip(
                 selected = !isProduct,
-                onClick = {
-                    selectedType = ConvenienceUsageType.SERVICE
-                },
-                label = {
-                    Text("Dịch vụ")
-                },
+                onClick = { selectedType = ConvenienceUsageType.SERVICE },
+                label = { Text("Dịch vụ") },
                 modifier = Modifier.weight(1f)
             )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = if (isProduct) {
-                "Chọn sản phẩm"
-            } else {
-                "Chọn dịch vụ"
-            },
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
-        )
+        SectionTitle(if (isProduct) "Chọn sản phẩm" else "Chọn dịch vụ")
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        if (uiState.isLoading) {
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
+        if (isProduct) {
+            SelectableList(
+                items = uiState.products,
+                isLoading = uiState.isLoading,
+                emptyText = "Tour này không có sản phẩm tiện ích.",
+                key = { it.id }
+            ) { product ->
+                ConvenienceProductCard(
+                    product = product,
+                    selected = selectedProduct?.id == product.id,
+                    onClick = { selectedProduct = product }
+                )
             }
-
         } else {
-
-            if (isProduct) {
-
-                if (uiState.products.isEmpty()) {
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                    ) {
-                        Text(
-                            text = "Tour này không có sản phẩm tiện ích.",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-
-                } else {
-
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(
-                            items = uiState.products,
-                            key = { it.id }
-                        ) { product ->
-
-                            ConvenienceProductCard(
-                                product = product,
-                                selected =
-                                    selectedProduct?.id == product.id,
-                                onClick = {
-                                    selectedProduct = product
-                                }
-                            )
-                        }
-                    }
-                }
-
-            } else {
-
-                if (uiState.services.isEmpty()) {
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                    ) {
-                        Text(
-                            text = "Tour này không có dịch vụ tiện ích.",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-
-                } else {
-
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(
-                            items = uiState.services,
-                            key = { it.id }
-                        ) { service ->
-
-                            ConvenienceServiceCard(
-                                service = service,
-                                selected =
-                                    selectedService?.id == service.id,
-                                onClick = {
-                                    selectedService = service
-                                }
-                            )
-                        }
-                    }
-                }
+            SelectableList(
+                items = uiState.services,
+                isLoading = uiState.isLoading,
+                emptyText = "Tour này không có dịch vụ tiện ích.",
+                key = { it.id }
+            ) { service ->
+                ConvenienceServiceCard(
+                    service = service,
+                    selected = selectedService?.id == service.id,
+                    onClick = { selectedService = service }
+                )
             }
         }
 
-        if (
-            isProduct &&
-            selectedProduct != null
-        ) {
-
+        if (isProduct && selectedProduct != null) {
             Spacer(modifier = Modifier.height(12.dp))
 
-            Text(
-                text = "Số lượng",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
+            SectionTitle("Số lượng")
+
+            QuantityStepper(
+                quantity = quantity,
+                onQuantityChange = { quantity = it },
+                enabled = !uiState.isSubmitting
             )
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
-
-                OutlinedButton(
-                    onClick = {
-                        if (quantity > 1) {
-                            quantity--
-                        }
-                    },
-                    enabled = !uiState.isSubmitting
-                ) {
-                    Text("−")
-                }
-
-                Text(
-                    text = quantity.toString(),
-                    modifier = Modifier.padding(
-                        horizontal = 24.dp,
-                        vertical = 10.dp
-                    ),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-
-                OutlinedButton(
-                    onClick = {
-                        quantity++
-                    },
-                    enabled = !uiState.isSubmitting
-                ) {
-                    Text("+")
-                }
-            }
-        }
-
-        uiState.errorMessage?.let { message ->
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = message,
-                color = MaterialTheme.colorScheme.error
-            )
-        }
-
-        uiState.successMessage?.let { message ->
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = message,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold
-            )
-        }
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Button(
-            onClick = {
-
-                if (isProduct) {
-
-                    val product = selectedProduct
-                        ?: return@Button
-
-                    viewModel.createProductUsage(
-                        nfcCardUid = nfcCardUid,
-                        productTourId = product.id,
-                        quantity = quantity
-                    )
-
-                } else {
-
-                    val service = selectedService
-                        ?: return@Button
-
-                    viewModel.createServiceUsage(
-                        nfcCardUid = nfcCardUid,
-                        serviceTourId = service.id
-                    )
-                }
-            },
-            enabled =
-                if (isProduct) {
-                    selectedProduct != null
-                } else {
-                    selectedService != null
-                } &&
-                        !uiState.isLoading &&
-                        !uiState.isSubmitting,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            if (uiState.isSubmitting) {
-
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    strokeWidth = 2.dp
-                )
-
-            } else {
-                Text("Xác nhận")
-            }
         }
     }
 }
@@ -403,54 +167,18 @@ private fun ConvenienceProductCard(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        colors = if (selected) {
-            CardDefaults.cardColors(
-                containerColor =
-                    MaterialTheme.colorScheme.primaryContainer
-            )
-        } else {
-            CardDefaults.cardColors()
-        }
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
+    SelectableCard(selected = selected, onClick = onClick) {
+        Text(
+            text = product.productName ?: "Không có tên sản phẩm",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
 
-            Text(
-                text = product.productName
-                    ?: "Không có tên sản phẩm",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-
-            product.productDescription
-                ?.takeIf { it.isNotBlank() }
-                ?.let { description ->
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    Text(
-                        text = description,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-            product.quantity?.let { quantity ->
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = "Số lượng cấu hình: $quantity",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
+        OptionalInfoText(
+            value = product.productDescription,
+            style = MaterialTheme.typography.bodyMedium
+        )
+        OptionalInfoText(product.quantity, prefix = "Số lượng cấu hình: ", topSpace = 8.dp)
     }
 }
 
@@ -460,66 +188,19 @@ private fun ConvenienceServiceCard(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        colors = if (selected) {
-            CardDefaults.cardColors(
-                containerColor =
-                    MaterialTheme.colorScheme.primaryContainer
-            )
-        } else {
-            CardDefaults.cardColors()
-        }
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
+    SelectableCard(selected = selected, onClick = onClick) {
+        Text(
+            text = service.serviceName ?: "Không có tên dịch vụ",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
 
-            Text(
-                text = service.serviceName
-                    ?: "Không có tên dịch vụ",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-
-            service.serviceDescription
-                ?.takeIf { it.isNotBlank() }
-                ?.let { description ->
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    Text(
-                        text = description,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-            service.servicePrice
-                ?.takeIf { it.isNotBlank() }
-                ?.let { price ->
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        text = price,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-
-            service.durationMinutes?.let { duration ->
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = "Thời lượng: $duration phút",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
+        OptionalInfoText(
+            value = service.serviceDescription,
+            style = MaterialTheme.typography.bodyMedium
+        )
+        OptionalInfoText(service.servicePrice, topSpace = 8.dp, emphasized = true)
+        OptionalInfoText(service.durationMinutes, prefix = "Thời lượng: ", suffix = " phút")
     }
 }
 

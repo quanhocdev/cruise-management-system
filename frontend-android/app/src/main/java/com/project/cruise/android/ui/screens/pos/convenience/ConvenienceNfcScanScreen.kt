@@ -1,18 +1,22 @@
 package com.project.cruise.android.ui.screens.pos.convenience
 
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
 import android.content.Intent
-import android.media.AudioManager
-import android.media.ToneGenerator
-import android.nfc.NfcAdapter
 import android.provider.Settings
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,6 +26,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.project.cruise.android.data.dto.nfc.NfcResolveResponse
+import com.project.cruise.android.ui.components.nfc.NfcReaderEffect
+import com.project.cruise.android.ui.components.nfc.rememberNfcAdapter
 import com.project.cruise.android.viewmodel.convenience.ConvenienceNfcScanViewModel
 
 @Composable
@@ -31,68 +37,22 @@ fun ConvenienceNfcScanScreen(
     viewModel: ConvenienceNfcScanViewModel = viewModel()
 ) {
     val context = LocalContext.current
-
-    val activity = remember(context) {
-        context.findActivity()
-    }
-
-    val adapter = remember(context) {
-        NfcAdapter.getDefaultAdapter(context)
-    }
-
+    val adapter = rememberNfcAdapter()
     val uiState by viewModel.uiState.collectAsState()
 
-    // Luôn lấy giá trị isResolving mới nhất bên trong callback NFC.
-    val isResolving by rememberUpdatedState(uiState.isResolving)
-
-    DisposableEffect(activity, adapter) {
-
-        if (activity != null && adapter != null && adapter.isEnabled) {
-
-            adapter.enableReaderMode(
-                activity,
-                { tag ->
-
-                    if (isResolving) {
-                        return@enableReaderMode
-                    }
-
-                    val uid = tag.id.joinToString("") { byte ->
-                        "%02X".format(byte.toInt() and 0xFF)
-                    }
-
-                    // NFC đã được điện thoại đọc thành công.
-                    playNfcSuccessSound()
-
-                    // Gửi UID lên backend để xác định hành khách.
-                    viewModel.resolveNfc(uid)
-                },
-                NfcAdapter.FLAG_READER_NFC_A or
-                        NfcAdapter.FLAG_READER_NFC_B or
-                        NfcAdapter.FLAG_READER_NFC_F or
-                        NfcAdapter.FLAG_READER_NFC_V or
-                        NfcAdapter.FLAG_READER_NO_PLATFORM_SOUNDS,
-                null
-            )
-        }
-
-        onDispose {
-            if (activity != null && adapter != null) {
-                adapter.disableReaderMode(activity)
-            }
-        }
-    }
+    // Đọc thẻ, phát bíp, bỏ qua khi đang xác thực; gửi UID lên backend để xác định hành khách.
+    NfcReaderEffect(
+        adapter = adapter,
+        enabled = !uiState.isResolving,
+        onUidRead = { uid -> viewModel.resolveNfc(uid) }
+    )
 
     LaunchedEffect(uiState.resolved, uiState.nfcCardUid) {
-
         val response = uiState.resolved
         val nfcCardUid = uiState.nfcCardUid
 
         if (response != null && !nfcCardUid.isNullOrBlank()) {
-            onResolved(
-                response,
-                nfcCardUid
-            )
+            onResolved(response, nfcCardUid)
         }
     }
 
@@ -111,9 +71,7 @@ fun ConvenienceNfcScanScreen(
             Text("← Quay lại POS")
         }
 
-        Spacer(
-            modifier = Modifier.weight(1f)
-        )
+        Spacer(modifier = Modifier.weight(1f))
 
         Text(
             text = "Quét NFC hành khách",
@@ -136,9 +94,7 @@ fun ConvenienceNfcScanScreen(
                     "Đưa thẻ NFC của hành khách sát mặt sau điện thoại."
             },
             modifier = Modifier.padding(top = 12.dp),
-            color = if (
-                adapter == null || !adapter.isEnabled
-            ) {
+            color = if (adapter == null || !adapter.isEnabled) {
                 MaterialTheme.colorScheme.error
             } else {
                 MaterialTheme.colorScheme.onSurfaceVariant
@@ -149,10 +105,7 @@ fun ConvenienceNfcScanScreen(
         Box(
             modifier = Modifier
                 .padding(top = 40.dp)
-                .background(
-                    Color(0xFFEDE9FE),
-                    CircleShape
-                )
+                .background(Color(0xFFEDE9FE), CircleShape)
                 .padding(56.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -182,9 +135,7 @@ fun ConvenienceNfcScanScreen(
         if (adapter != null && !adapter.isEnabled) {
             TextButton(
                 onClick = {
-                    context.startActivity(
-                        Intent(Settings.ACTION_NFC_SETTINGS)
-                    )
+                    context.startActivity(Intent(Settings.ACTION_NFC_SETTINGS))
                 }
             ) {
                 Text("Mở cài đặt NFC")
@@ -200,9 +151,7 @@ fun ConvenienceNfcScanScreen(
             )
         }
 
-        Spacer(
-            modifier = Modifier.weight(1f)
-        )
+        Spacer(modifier = Modifier.weight(1f))
 
         Text(
             text = "NFC được dùng để xác định hành khách. Sau đó nhân viên sẽ chọn sản phẩm hoặc dịch vụ tiện ích.",
@@ -211,29 +160,4 @@ fun ConvenienceNfcScanScreen(
             textAlign = TextAlign.Center
         )
     }
-}
-
-/**
- * Phát một tiếng beep ngắn khi điện thoại đọc được NFC tag.
- *
- * Không cần thêm file âm thanh vào res/raw.
- */
-private fun playNfcSuccessSound() {
-    val toneGenerator = ToneGenerator(
-        AudioManager.STREAM_NOTIFICATION,
-        80
-    )
-
-    toneGenerator.startTone(
-        ToneGenerator.TONE_PROP_BEEP,
-        120
-    )
-
-    toneGenerator.release()
-}
-
-private tailrec fun Context.findActivity(): Activity? = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.findActivity()
-    else -> null
 }
