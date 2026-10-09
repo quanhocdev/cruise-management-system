@@ -8,6 +8,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Sparkles,
+  History,
+  Wrench,
 } from "lucide-react";
 
 import "../../styles/convenience/ConvenienceSidebar.css";
@@ -33,6 +35,16 @@ const menuItems = [
     icon: ClipboardList,
     path: "/convenience/tour-config",
   },
+  {
+    label: "Lịch sử sản phẩm",
+    icon: History,
+    path: "/convenience/product-usage-history",
+  },
+  {
+    label: "Lịch sử dịch vụ",
+    icon: Wrench,
+    path: "/convenience/service-usage-history",
+  },
 ];
 
 function ConvenienceSidebar() {
@@ -40,10 +52,6 @@ function ConvenienceSidebar() {
 
   return (
     <aside className={`convenience-sidebar ${collapsed ? "collapsed" : ""}`}>
-      {/* =====================================================
-          TOP
-          ===================================================== */}
-
       <div className="convenience-sidebar-top">
         <div className="convenience-sidebar-brand">
           <Sparkles size={24} />
@@ -60,10 +68,6 @@ function ConvenienceSidebar() {
           {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
         </button>
       </div>
-
-      {/* =====================================================
-          MENU
-          ===================================================== */}
 
       <nav className="convenience-sidebar-menu">
         {menuItems.map((item) => {
@@ -85,10 +89,6 @@ function ConvenienceSidebar() {
           );
         })}
       </nav>
-
-      {/* =====================================================
-          BOTTOM
-          ===================================================== */}
 
       {!collapsed && (
         <div className="convenience-sidebar-bottom">

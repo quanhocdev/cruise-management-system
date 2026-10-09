@@ -1,5 +1,6 @@
 // src/modules/convenience/components/usage-history/UsageHistoryTable.jsx
 import { Package, Loader2, Wrench } from "lucide-react";
+import "./UsageHistoryTable.css";
 
 const formatDateTime = (value) => {
   if (!value) return "—";
