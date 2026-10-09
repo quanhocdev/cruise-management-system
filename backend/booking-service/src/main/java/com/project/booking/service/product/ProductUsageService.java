@@ -1,4 +1,4 @@
-package com.project.booking.service;
+package com.project.booking.service.product;
 
 import com.project.booking.dto.convenience.product.ProductUsageRequest;
 import com.project.booking.dto.convenience.product.ProductUsageResponse;
