@@ -11,21 +11,23 @@ import java.util.UUID;
 
 @Repository
 public interface ProductUsageRepository
-                extends JpaRepository<ProductUsage, Long> {
+    extends JpaRepository<ProductUsage, Long> {
 
-        List<ProductUsage> findAllByBookingPassenger_IdOrderByUsedAtDesc(
-                        Long bookingPassengerId);
+  List<ProductUsage> findAllByBookingPassenger_IdOrderByUsedAtDesc(
+      Long bookingPassengerId);
 
-        List<ProductUsage> findAllByBookingPassenger_Booking_CreatedByUserIdOrderByUsedAtDesc(
-                        Long userId);
+  List<ProductUsage> findAllByBookingPassenger_Booking_CreatedByUserIdOrderByUsedAtDesc(
+      Long userId);
 
-        @Query("""
-                        SELECT COALESCE(SUM(pu.quantity), 0)
-                        FROM ProductUsage pu
-                        WHERE pu.bookingPassenger.booking.id = :bookingId
-                          AND pu.productTourId = :productTourId
-                        """)
-        long sumUsedQuantityByBookingIdAndProductTourId(
-                        @Param("bookingId") Long bookingId,
-                        @Param("productTourId") UUID productTourId);
+  @Query("""
+      SELECT COALESCE(SUM(pu.quantity), 0)
+      FROM ProductUsage pu
+      WHERE pu.bookingPassenger.booking.id = :bookingId
+        AND pu.productTourId = :productTourId
+      """)
+  long sumUsedQuantityByBookingIdAndProductTourId(
+      @Param("bookingId") Long bookingId,
+      @Param("productTourId") UUID productTourId);
+
+  List<ProductUsage> findAllByOrderByUsedAtDesc();
 }

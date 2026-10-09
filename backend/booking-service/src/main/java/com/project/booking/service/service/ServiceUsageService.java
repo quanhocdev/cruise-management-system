@@ -1,5 +1,6 @@
 package com.project.booking.service.service;
 
+import com.project.booking.dto.convenience.service.ServiceUsageManagementResponse;
 import com.project.booking.dto.convenience.service.ServiceUsageRequest;
 import com.project.booking.dto.convenience.service.ServiceUsageResponse;
 
@@ -14,4 +15,6 @@ public interface ServiceUsageService {
                         Long bookingPassengerId);
 
         List<ServiceUsageResponse> getByUserId(Long userId);
+
+        List<ServiceUsageManagementResponse> getManagementUsages();
 }
