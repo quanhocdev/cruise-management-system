@@ -1,14 +1,18 @@
 package com.project.booking.controller.shore;
 
 import com.project.booking.dto.onboard.ActivityVisitUsageRequest;
+import com.project.booking.dto.shore.ActivityVisitUsageManagementResponse;
 import com.project.booking.dto.shore.ActivityVisitUsageResponse;
 import com.project.booking.service.shore.ActivityVisitUsageService;
 
 import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/shore/activity-visit-usages")
@@ -30,5 +34,13 @@ public class ActivityVisitUsageController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(activityVisitUsageService.create(request));
+    }
+
+    @GetMapping
+    @PreAuthorize("hasRole('SHORE')")
+    public ResponseEntity<List<ActivityVisitUsageManagementResponse>> getManagementUsages() {
+
+        return ResponseEntity.ok(
+                activityVisitUsageService.getManagementUsages());
     }
 }

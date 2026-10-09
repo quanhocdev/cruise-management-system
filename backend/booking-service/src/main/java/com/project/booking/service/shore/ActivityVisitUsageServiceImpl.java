@@ -18,7 +18,15 @@ import com.project.booking.service.shore.ActivityVisitUsageCalculator.UsageAmoun
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.project.booking.client.VisitTourManagementClient;
+import com.project.booking.dto.shore.ActivityVisitUsageManagementInfo;
+import com.project.booking.dto.shore.ActivityVisitUsageManagementResponse;
+import com.project.booking.mapper.ActivityVisitUsageManagementMapper;
 
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -34,6 +42,8 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
         private final ActivityVisitUsageValidator validator;
         private final ActivityVisitUsageCalculator calculator;
         private final BenefitConsumptionService benefitConsumptionService;
+        private final VisitTourManagementClient visitTourManagementClient;
+        private final ActivityVisitUsageManagementMapper activityVisitUsageManagementMapper;
 
         public ActivityVisitUsageServiceImpl(
                         ActivityVisitUsageRepository activityVisitUsageRepository,
@@ -42,7 +52,9 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
                         BookingPassengerRepository bookingPassengerRepository,
                         ActivityVisitUsageValidator validator,
                         ActivityVisitUsageCalculator calculator,
-                        BenefitConsumptionService benefitConsumptionService) {
+                        BenefitConsumptionService benefitConsumptionService,
+                        VisitTourManagementClient visitTourManagementClient,
+                        ActivityVisitUsageManagementMapper activityVisitUsageManagementMapper) {
 
                 this.activityVisitUsageRepository = activityVisitUsageRepository;
                 this.activityVisitUsageMapper = activityVisitUsageMapper;
@@ -51,6 +63,8 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
                 this.validator = validator;
                 this.calculator = calculator;
                 this.benefitConsumptionService = benefitConsumptionService;
+                this.visitTourManagementClient = visitTourManagementClient;
+                this.activityVisitUsageManagementMapper = activityVisitUsageManagementMapper;
         }
 
         @Override
@@ -161,4 +175,37 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
 
                 return usage;
         }
+
+        @Override
+        @Transactional(readOnly = true)
+        public List<ActivityVisitUsageManagementResponse> getManagementUsages() {
+
+                List<ActivityVisitUsage> usages = activityVisitUsageRepository
+                                .findAllByOrderByUsedAtDesc();
+
+                if (usages.isEmpty()) {
+                        return List.of();
+                }
+
+                List<UUID> visitTourIds = usages.stream()
+                                .map(ActivityVisitUsage::getVisitTourId)
+                                .distinct()
+                                .toList();
+
+                List<ActivityVisitUsageManagementInfo> visitInfos = visitTourManagementClient
+                                .getVisitTourUsageInfo(visitTourIds);
+
+                Map<UUID, ActivityVisitUsageManagementInfo> visitInfoMap = visitInfos.stream()
+                                .collect(Collectors.toMap(
+                                                ActivityVisitUsageManagementInfo::visitTourId,
+                                                Function.identity(),
+                                                (first, second) -> first));
+
+                return usages.stream()
+                                .map(usage -> activityVisitUsageManagementMapper.toResponse(
+                                                usage,
+                                                visitInfoMap.get(usage.getVisitTourId())))
+                                .toList();
+        }
+
 }
