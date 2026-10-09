@@ -1,9 +1,9 @@
 package com.project.booking.controller.convenience;
 
+import com.project.booking.dto.convenience.service.ServiceUsageManagementResponse;
 import com.project.booking.dto.convenience.service.ServiceUsageRequest;
 import com.project.booking.dto.convenience.service.ServiceUsageResponse;
 import com.project.booking.service.service.ServiceUsageService;
-
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,15 +18,14 @@ public class ServiceUsageController {
 
     private final ServiceUsageService serviceUsageService;
 
-    public ServiceUsageController(
-            ServiceUsageService serviceUsageService) {
+    public ServiceUsageController(ServiceUsageService serviceUsageService) {
         this.serviceUsageService = serviceUsageService;
     }
 
     /**
-     * Convenience scan NFC để:
-     * - Check-in nếu passenger chưa sử dụng service
-     * - Check-out nếu passenger đang sử dụng service
+     * Convenience quẹt NFC:
+     * - Check-in nếu passenger chưa sử dụng service.
+     * - Check-out nếu passenger đang sử dụng service.
      */
     @PostMapping
     @PreAuthorize("hasRole('CONVENIENCE')")
@@ -38,10 +37,13 @@ public class ServiceUsageController {
                 .body(serviceUsageService.scan(request));
     }
 
-    /**
-     * Convenience xem lịch sử sử dụng service
-     * của một booking passenger cụ thể.
-     */
+    @GetMapping
+    @PreAuthorize("hasRole('CONVENIENCE')")
+    public ResponseEntity<List<ServiceUsageManagementResponse>> getManagementUsages() {
+        return ResponseEntity.ok(
+                serviceUsageService.getManagementUsages());
+    }
+
     @GetMapping("/booking-passenger/{bookingPassengerId}")
     @PreAuthorize("hasRole('CONVENIENCE')")
     public ResponseEntity<List<ServiceUsageResponse>> getByBookingPassenger(

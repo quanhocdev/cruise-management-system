@@ -14,7 +14,12 @@ import com.project.booking.service.BenefitConsumptionService;
 import com.project.common.event.ProductUsedEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import com.project.booking.client.ProductTourManagementClient;
+import com.project.booking.client.ProductTourManagementClient.ProductUsageManagementInfo;
+import com.project.booking.dto.convenience.product.ProductUsageManagementResponse;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,6 +35,7 @@ public class ProductUsageServiceImpl implements ProductUsageService {
         private final ProductUsedEventProducer productUsedEventProducer;
         private final ProductValidator productValidator;
         private final ProductPricingCalculator productPricingCalculator;
+        private final ProductTourManagementClient productTourManagementClient;
 
         public ProductUsageServiceImpl(
                         ProductUsageRepository productUsageRepository,
@@ -38,7 +44,8 @@ public class ProductUsageServiceImpl implements ProductUsageService {
                         BenefitConsumptionService benefitConsumptionService,
                         ProductUsedEventProducer productUsedEventProducer,
                         ProductValidator productValidator,
-                        ProductPricingCalculator productPricingCalculator) {
+                        ProductPricingCalculator productPricingCalculator,
+                        ProductTourManagementClient productTourManagementClient) {
 
                 this.productUsageRepository = productUsageRepository;
                 this.productUsageMapper = productUsageMapper;
@@ -47,6 +54,7 @@ public class ProductUsageServiceImpl implements ProductUsageService {
                 this.productUsedEventProducer = productUsedEventProducer;
                 this.productValidator = productValidator;
                 this.productPricingCalculator = productPricingCalculator;
+                this.productTourManagementClient = productTourManagementClient;
         }
 
         @Override
@@ -141,6 +149,39 @@ public class ProductUsageServiceImpl implements ProductUsageService {
                                 .findAllByBookingPassenger_Booking_CreatedByUserIdOrderByUsedAtDesc(userId)
                                 .stream()
                                 .map(productUsageMapper::toResponse)
+                                .toList();
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public List<ProductUsageManagementResponse> getManagementUsages() {
+
+                List<ProductUsage> usages = productUsageRepository
+                                .findAllByOrderByUsedAtDesc();
+
+                if (usages.isEmpty()) {
+                        return List.of();
+                }
+
+                List<UUID> productTourIds = usages.stream()
+                                .map(ProductUsage::getProductTourId)
+                                .filter(java.util.Objects::nonNull)
+                                .distinct()
+                                .toList();
+
+                List<ProductUsageManagementInfo> productInfos = productTourManagementClient
+                                .getProductUsageInfo(productTourIds);
+
+                Map<UUID, ProductUsageManagementInfo> productInfoMap = productInfos.stream()
+                                .collect(Collectors.toMap(
+                                                ProductUsageManagementInfo::productTourId,
+                                                Function.identity(),
+                                                (first, second) -> first));
+
+                return usages.stream()
+                                .map(usage -> productUsageMapper.toManagementResponse(
+                                                usage,
+                                                productInfoMap.get(usage.getProductTourId())))
                                 .toList();
         }
 }

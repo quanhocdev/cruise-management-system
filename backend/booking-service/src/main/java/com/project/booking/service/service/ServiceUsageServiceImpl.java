@@ -12,7 +12,13 @@ import com.project.booking.model.ServiceUsage;
 import com.project.booking.repository.ServiceUsageRepository;
 import com.project.booking.service.BenefitConsumptionService;
 import org.springframework.transaction.annotation.Transactional;
+import com.project.booking.client.ServiceTourManagementClient;
+import com.project.booking.client.ServiceTourManagementClient.ServiceUsageManagementInfo;
+import com.project.booking.dto.convenience.service.ServiceUsageManagementResponse;
 
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -26,6 +32,7 @@ public class ServiceUsageServiceImpl implements ServiceUsageService {
     private final BenefitConsumptionService benefitConsumptionService;
     private final ServiceValidator serviceValidator;
     private final ServicePricingCalculator servicePricingCalculator;
+    private final ServiceTourManagementClient serviceTourManagementClient;
 
     public ServiceUsageServiceImpl(
             ServiceUsageRepository serviceUsageRepository,
@@ -33,7 +40,8 @@ public class ServiceUsageServiceImpl implements ServiceUsageService {
             ServiceTourClient serviceTourClient,
             BenefitConsumptionService benefitConsumptionService,
             ServiceValidator serviceValidator,
-            ServicePricingCalculator servicePricingCalculator) {
+            ServicePricingCalculator servicePricingCalculator,
+            ServiceTourManagementClient serviceTourManagementClient) {
 
         this.serviceUsageRepository = serviceUsageRepository;
         this.serviceUsageMapper = serviceUsageMapper;
@@ -41,6 +49,7 @@ public class ServiceUsageServiceImpl implements ServiceUsageService {
         this.benefitConsumptionService = benefitConsumptionService;
         this.serviceValidator = serviceValidator;
         this.servicePricingCalculator = servicePricingCalculator;
+        this.serviceTourManagementClient = serviceTourManagementClient;
     }
 
     @Override
@@ -155,4 +164,37 @@ public class ServiceUsageServiceImpl implements ServiceUsageService {
                 .map(serviceUsageMapper::toResponse)
                 .toList();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ServiceUsageManagementResponse> getManagementUsages() {
+
+        List<ServiceUsage> usages = serviceUsageRepository
+                .findAllByOrderByUsedAtDesc();
+
+        if (usages.isEmpty()) {
+            return List.of();
+        }
+
+        List<UUID> serviceTourIds = usages.stream()
+                .map(ServiceUsage::getServiceTourId)
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .toList();
+
+        List<ServiceUsageManagementInfo> serviceInfos = serviceTourManagementClient.getServiceUsageInfo(serviceTourIds);
+
+        Map<UUID, ServiceUsageManagementInfo> serviceInfoMap = serviceInfos.stream()
+                .collect(Collectors.toMap(
+                        ServiceUsageManagementInfo::serviceTourId,
+                        Function.identity(),
+                        (first, second) -> first));
+
+        return usages.stream()
+                .map(usage -> serviceUsageMapper.toManagementResponse(
+                        usage,
+                        serviceInfoMap.get(usage.getServiceTourId())))
+                .toList();
+    }
+
 }
