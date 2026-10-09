@@ -67,6 +67,7 @@ import ActivityCruiseUsage from "./modules/onboard/pages/ActivityCruiseUsage";
 import ShoreLayout from "./layouts/ShoreLayout";
 import ShoreDashboard from "./modules/shore/pages/Dashboard";
 import ActivityVisitTour from "./modules/shore/pages/ActivityVisitTour";
+import ActivityVisitUsage from "./modules/shore/pages/ActivityVisitUsage";
 
 // Finance imports
 import FinanceLayout from "./layouts/FinanceLayout";
@@ -290,10 +291,7 @@ export default function App() {
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
 
-          {/* =====================================================
-              SHORE ROUTES
-              ===================================================== */}
-
+          {/* SHORE ROUTES */}
           <Route
             path="/shore"
             element={
@@ -305,6 +303,11 @@ export default function App() {
             <Route path="dashboard" element={<ShoreDashboard />} />
 
             <Route path="tours" element={<ActivityVisitTour />} />
+
+            <Route
+              path="activity-visit-usages"
+              element={<ActivityVisitUsage />}
+            />
 
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
