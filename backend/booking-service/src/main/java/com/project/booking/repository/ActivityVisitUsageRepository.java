@@ -1,3 +1,4 @@
+
 package com.project.booking.repository;
 
 import com.project.booking.model.ActivityVisitUsage;
@@ -9,13 +10,15 @@ import java.util.UUID;
 
 @Repository
 public interface ActivityVisitUsageRepository
-        extends JpaRepository<ActivityVisitUsage, Long> {
+                extends JpaRepository<ActivityVisitUsage, Long> {
 
-    long countByVisitTourId(UUID visitTourId);
+        long countByVisitTourId(UUID visitTourId);
 
-    List<ActivityVisitUsage> findAllByBookingPassengerIdOrderByUsedAtDesc(
-            Long bookingPassengerId);
+        List<ActivityVisitUsage> findAllByBookingPassengerIdOrderByUsedAtDesc(
+                        Long bookingPassengerId);
 
-    List<ActivityVisitUsage> findAllByBookingPassenger_Booking_CreatedByUserIdOrderByUsedAtDesc(
-            Long userId);
+        List<ActivityVisitUsage> findAllByBookingPassenger_Booking_CreatedByUserIdOrderByUsedAtDesc(
+                        Long userId);
+
+        List<ActivityVisitUsage> findAllByOrderByUsedAtDesc();
 }
