@@ -2,7 +2,8 @@ package com.project.booking.controller.convenience;
 
 import com.project.booking.dto.convenience.service.ServiceUsageRequest;
 import com.project.booking.dto.convenience.service.ServiceUsageResponse;
-import com.project.booking.service.ServiceUsageService;
+import com.project.booking.service.service.ServiceUsageService;
+
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
