@@ -70,11 +70,11 @@ const FinanceCheckout = () => {
 
   const handlePayment = async () => {
     const paymentUrl = await confirmPayment();
+
     if (paymentUrl) {
-      window.location.href = paymentUrl;
+      window.open(paymentUrl, "_blank", "noopener,noreferrer");
     }
   };
-
   return (
     <div className="finance-page">
       <div className="finance-page__header">

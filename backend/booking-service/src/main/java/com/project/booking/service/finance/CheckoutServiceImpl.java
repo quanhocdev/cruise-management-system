@@ -97,36 +97,69 @@ public class CheckoutServiceImpl implements CheckoutService {
 
                 Booking booking = getBooking(bookingId);
 
-                List<BookingPassenger> bookingPassengers = bookingPassengerRepository
-                                .findAllByBooking_IdOrderByIdAsc(bookingId);
+                // 1. Tìm hóa đơn hiện có của booking.
+                List<Bill> existingBills = billRepository
+                                .findAllByBooking_IdOrderByCreatedAtDesc(bookingId);
 
-                // 1. Tạo Bill với trạng thái chờ thanh toán
-                Bill bill = new Bill();
-                bill.setBooking(booking);
-                bill.setBillCode(billCodeGenerator.generate());
-                bill.setTotalAmount(BigDecimal.ZERO);
-                bill.setStatus(BillStatus.PENDING_PAYMENT);
+                Bill bill = existingBills.stream()
+                                .filter(b -> b.getStatus() == BillStatus.PENDING_PAYMENT)
+                                .findFirst()
+                                .orElse(null);
 
-                Bill savedBill = billRepository.save(bill);
+                List<BillItem> items;
+                Bill finalBill;
 
-                // 2. Tạo BillItem cho toàn bộ usage của các passenger
-                List<BillItem> items = new ArrayList<>();
+                if (bill != null) {
+                        // 2. Đã có hóa đơn chờ thanh toán: dùng lại hóa đơn và BillItem.
+                        finalBill = bill;
 
-                for (BookingPassenger bookingPassenger : bookingPassengers) {
-                        items.addAll(buildBillItems(savedBill, bookingPassenger.getId()));
+                        items = billItemRepository
+                                        .findAllByBill_IdOrderByIdAsc(finalBill.getId());
+
+                } else {
+                        // 3. Không có hóa đơn chờ thanh toán: kiểm tra hóa đơn đã thanh toán.
+                        boolean alreadyPaid = existingBills.stream()
+                                        .anyMatch(b -> b.getStatus() == BillStatus.PAID);
+
+                        if (alreadyPaid) {
+                                throw new ResponseStatusException(
+                                                HttpStatus.CONFLICT,
+                                                "Booking này đã có hóa đơn thanh toán thành công.");
+                        }
+
+                        // 4. Chưa có hóa đơn phù hợp: tạo hóa đơn mới.
+                        List<BookingPassenger> bookingPassengers = bookingPassengerRepository
+                                        .findAllByBooking_IdOrderByIdAsc(bookingId);
+
+                        Bill newBill = new Bill();
+                        newBill.setBooking(booking);
+                        newBill.setBillCode(billCodeGenerator.generate());
+                        newBill.setTotalAmount(BigDecimal.ZERO);
+                        newBill.setStatus(BillStatus.PENDING_PAYMENT);
+
+                        Bill savedBill = billRepository.save(newBill);
+
+                        items = new ArrayList<>();
+
+                        for (BookingPassenger passenger : bookingPassengers) {
+                                items.addAll(buildBillItems(savedBill, passenger.getId()));
+                        }
+
+                        billItemRepository.saveAll(items);
+
+                        BigDecimal grandTotal = items.stream()
+                                        .map(BillItem::getFinalAmount)
+                                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                        savedBill.setTotalAmount(grandTotal);
+                        finalBill = billRepository.save(savedBill);
+
+                        // Lấy lại các BillItem đã lưu để trả response.
+                        items = billItemRepository
+                                        .findAllByBill_IdOrderByIdAsc(finalBill.getId());
                 }
 
-                billItemRepository.saveAll(items);
-
-                // 3. Cập nhật tổng tiền hóa đơn
-                BigDecimal grandTotal = items.stream()
-                                .map(BillItem::getFinalAmount)
-                                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-                savedBill.setTotalAmount(grandTotal);
-                Bill finalBill = billRepository.save(savedBill);
-
-                // 4. Gọi payment-service tạo Payment và lấy VNPay paymentUrl
+                // 5. Tạo hoặc tái sử dụng Payment và lấy URL VNPay.
                 BillPaymentRequest paymentRequest = new BillPaymentRequest(
                                 finalBill.getId(),
                                 booking.getCreatedByUserId(),
@@ -134,10 +167,7 @@ public class CheckoutServiceImpl implements CheckoutService {
 
                 BillPaymentResponse paymentResponse = paymentCheckoutService.createPayment(paymentRequest);
 
-                List<BillItem> savedItems = billItemRepository
-                                .findAllByBill_IdOrderByIdAsc(finalBill.getId());
-
-                CheckoutResponse checkoutResponse = checkoutMapper.toResponse(finalBill, savedItems);
+                CheckoutResponse checkoutResponse = checkoutMapper.toResponse(finalBill, items);
 
                 return new CheckoutResponse(
                                 checkoutResponse.billId(),
