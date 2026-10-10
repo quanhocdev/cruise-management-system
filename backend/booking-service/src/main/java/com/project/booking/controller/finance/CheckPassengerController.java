@@ -1,7 +1,8 @@
 package com.project.booking.controller.finance;
 
 import com.project.booking.dto.finance.PassengerCheckInRequest;
-import com.project.booking.service.finance.CheckPassengerService;
+import com.project.booking.service.finance.checkin.CheckPassengerService;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

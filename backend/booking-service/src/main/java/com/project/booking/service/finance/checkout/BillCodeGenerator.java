@@ -1,4 +1,4 @@
-package com.project.booking.service.finance;
+package com.project.booking.service.finance.checkout;
 
 import org.springframework.stereotype.Component;
 

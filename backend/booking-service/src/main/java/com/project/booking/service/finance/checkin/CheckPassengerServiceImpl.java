@@ -1,9 +1,10 @@
-package com.project.booking.service.finance;
+package com.project.booking.service.finance.checkin;
 
 import com.project.booking.dto.finance.PassengerCheckInRequest;
 import com.project.booking.model.BookingPassenger;
 import com.project.booking.model.enums.BookingPassengerStatus;
 import com.project.booking.repository.BookingPassengerRepository;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

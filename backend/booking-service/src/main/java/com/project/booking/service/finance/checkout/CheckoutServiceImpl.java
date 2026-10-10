@@ -1,5 +1,5 @@
 
-package com.project.booking.service.finance;
+package com.project.booking.service.finance.checkout;
 
 import com.project.booking.dto.finance.CheckoutPreviewResponse;
 import com.project.booking.dto.finance.CheckoutPreviewResponse.PassengerCheckoutPreview;
@@ -18,7 +18,8 @@ import com.project.booking.repository.BillRepository;
 import com.project.booking.repository.BookingPassengerRepository;
 import com.project.booking.repository.BookingRepository;
 import com.project.booking.service.PaymentCheckoutService;
-import com.project.booking.service.finance.PassengerUsageReader.PassengerUsages;
+import com.project.booking.service.finance.checkout.PassengerUsageReader.PassengerUsages;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

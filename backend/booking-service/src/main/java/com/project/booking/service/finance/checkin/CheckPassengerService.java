@@ -1,4 +1,4 @@
-package com.project.booking.service.finance;
+package com.project.booking.service.finance.checkin;
 
 import com.project.booking.dto.finance.PassengerCheckInRequest;
 
