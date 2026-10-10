@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import com.project.common.event.BillPaymentSuccessEvent;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
@@ -137,15 +138,31 @@ public class PaymentServiceImpl implements PaymentService {
             payment.setUpdatedAt(Instant.now());
             Payment saved = repository.save(payment);
 
-            // Gửi sự kiện sang Kafka khi thanh toán thành công đơn booking
-            if (success && saved.getReferenceType() == PaymentReferenceType.BOOKING) {
-                PaymentSuccessEvent event = new PaymentSuccessEvent(
-                        saved.getReferenceId(),
-                        saved.getId(),
-                        saved.getPayerId(),
-                        saved.getStatus().name(),
-                        saved.getPaidAt());
-                kafkaTemplate.send("payment-success-topic", event);
+            // Gửi sự kiện sang Kafka khi thanh toán và checkout thành công đơn booking
+
+            if (success) {
+                if (saved.getReferenceType() == PaymentReferenceType.BOOKING) {
+                    // Luồng thanh toán booking hiện tại: giữ nguyên.
+                    PaymentSuccessEvent event = new PaymentSuccessEvent(
+                            saved.getReferenceId(),
+                            saved.getId(),
+                            saved.getPayerId(),
+                            saved.getStatus().name(),
+                            saved.getPaidAt());
+
+                    kafkaTemplate.send("payment-success-topic", event);
+
+                } else if (saved.getReferenceType() == PaymentReferenceType.BILL) {
+                    // Luồng thanh toán hóa đơn checkout.
+                    BillPaymentSuccessEvent event = new BillPaymentSuccessEvent(
+                            saved.getReferenceId(),
+                            saved.getId(),
+                            saved.getPayerId(),
+                            saved.getStatus().name(),
+                            saved.getPaidAt());
+
+                    kafkaTemplate.send("bill-payment-success-topic", event);
+                }
             }
 
             return saved;
