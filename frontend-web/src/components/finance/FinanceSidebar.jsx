@@ -8,7 +8,8 @@ import {
   DoorOpen,
   CreditCard,
   TicketCheck,
-  QrCode, // Thêm icon quét QR cho quầy lễ tân
+  QrCode,
+  Banknote,
   ChevronLeft,
   ChevronRight,
   X,
@@ -17,11 +18,21 @@ import {
 import "../../styles/onboard/OnboardSidebar.css";
 
 const menuItems = [
-  { label: "Dashboard", icon: LayoutDashboard, path: "/finance", end: true },
+  {
+    label: "Dashboard",
+    icon: LayoutDashboard,
+    path: "/finance",
+    end: true,
+  },
   {
     label: "Quầy Check-in POS",
     icon: QrCode,
-    path: "/finance/check-in", // Đường dẫn trang nhận WebSocket từ máy POS
+    path: "/finance/check-in",
+  },
+  {
+    label: "Quầy Thanh toán",
+    icon: Banknote,
+    path: "/finance/checkout",
   },
   {
     label: "Quản lý Đơn đặt Tour",
@@ -33,8 +44,16 @@ const menuItems = [
     icon: CalendarDays,
     path: "/finance/tours-schedule",
   },
-  { label: "Danh sách phòng", icon: DoorOpen, path: "/finance/rooms" },
-  { label: "Danh sách vòng NFC", icon: CreditCard, path: "/finance/nfc-cards" },
+  {
+    label: "Danh sách phòng",
+    icon: DoorOpen,
+    path: "/finance/rooms",
+  },
+  {
+    label: "Danh sách vòng NFC",
+    icon: CreditCard,
+    path: "/finance/nfc-cards",
+  },
 ];
 
 function FinanceSidebar({ mobileOpen, onCloseMobile }) {
@@ -52,6 +71,7 @@ function FinanceSidebar({ mobileOpen, onCloseMobile }) {
           <div className="onboard-brand-icon">
             <Ship size={22} />
           </div>
+
           {isExpanded && (
             <div className="onboard-brand-text">
               <strong>Cruise</strong>
@@ -86,6 +106,7 @@ function FinanceSidebar({ mobileOpen, onCloseMobile }) {
 
         {menuItems.map((item) => {
           const Icon = item.icon;
+
           return (
             <NavLink
               key={item.path}
@@ -98,6 +119,7 @@ function FinanceSidebar({ mobileOpen, onCloseMobile }) {
               title={collapsed && !mobileOpen ? item.label : undefined}
             >
               <Icon size={19} className="onboard-nav-icon" />
+
               {isExpanded && <span>{item.label}</span>}
             </NavLink>
           );
@@ -107,6 +129,7 @@ function FinanceSidebar({ mobileOpen, onCloseMobile }) {
       <div className="onboard-sidebar-bottom">
         <div className="onboard-sidebar-status">
           <span className="onboard-status-dot" title="Đã kết nối" />
+
           {isExpanded && (
             <div>
               <strong>Hệ thống hoạt động</strong>

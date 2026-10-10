@@ -1,0 +1,11 @@
+package com.project.booking.service.finance;
+
+import com.project.booking.dto.finance.CheckoutPreviewResponse;
+import com.project.booking.dto.finance.CheckoutResponse;
+
+public interface CheckoutService {
+
+    CheckoutPreviewResponse getCheckoutPreview(Long bookingId);
+
+    CheckoutResponse confirmCheckout(Long bookingId);
+}

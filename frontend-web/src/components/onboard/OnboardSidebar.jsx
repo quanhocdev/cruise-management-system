@@ -33,6 +33,11 @@ const menuItems = [
     path: "/onboard/activity-cruise",
   },
   {
+    label: "Lịch sử sử dụng",
+    icon: ListChecks,
+    path: "/onboard/activity-cruise-usages",
+  },
+  {
     label: "Lịch trình",
     icon: CalendarDays,
     path: "/onboard/schedules",
@@ -104,9 +109,7 @@ function OnboardSidebar({ mobileOpen, onCloseMobile }) {
       {/* NAVIGATION MENU */}
       <nav className="onboard-sidebar-menu">
         {isExpanded && (
-          <div className="onboard-sidebar-section-title">
-            QUẢN LÝ TRÊN TÀU
-          </div>
+          <div className="onboard-sidebar-section-title">QUẢN LÝ TRÊN TÀU</div>
         )}
 
         {menuItems.map((item) => {

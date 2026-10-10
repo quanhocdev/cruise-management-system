@@ -3,7 +3,7 @@ package com.project.tour.service.passenger;
 import com.project.tour.model.shore.VisitTour;
 import com.project.tour.model.onboard.ActivityCruiseTour;
 import com.project.tour.repository.cruise.CruiseAreaRepository;
-import com.project.tour.repository.onboard.ActivityCruiseTourAssignmentRepository;
+import com.project.tour.repository.onboard.ActivityCruiseTourRepository;
 import com.project.tour.repository.shore.VisitTourRepository;
 import com.project.tour.repository.tour.schedule.ScheduleStopRepository;
 
@@ -22,7 +22,7 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class PassengerTripActivities {
 
-        private final ActivityCruiseTourAssignmentRepository onboard;
+        private final ActivityCruiseTourRepository onboard;
         private final VisitTourRepository shore;
         private final CruiseAreaRepository areas;
         private final ScheduleStopRepository stops;
@@ -36,7 +36,7 @@ public class PassengerTripActivities {
                         "CANCELLED");
 
         public PassengerTripActivities(
-                        ActivityCruiseTourAssignmentRepository onboard,
+                        ActivityCruiseTourRepository onboard,
                         VisitTourRepository shore,
                         CruiseAreaRepository areas,
                         ScheduleStopRepository stops) {
@@ -51,10 +51,7 @@ public class PassengerTripActivities {
 
                 List<Activity> result = new ArrayList<>();
 
-                // =====================================================
                 // ONBOARD ACTIVITIES
-                // =====================================================
-
                 for (ActivityCruiseTour a : onboard.findAllByTourIdOrderByCreatedAtAsc(tourId)) {
 
                         if (!visible(
@@ -83,10 +80,7 @@ public class PassengerTripActivities {
                                         a.getStatus() != null ? a.getStatus().name() : null));
                 }
 
-                // =====================================================
                 // SHORE ACTIVITIES
-                // =====================================================
-
                 for (VisitTour a : shore.findAllByTourIdOrderByStartTimeAsc(tourId)) {
 
                         if (!visible(
@@ -117,10 +111,7 @@ public class PassengerTripActivities {
                                         a.getStatus() != null ? a.getStatus().name() : null));
                 }
 
-                // =====================================================
                 // SORT
-                // =====================================================
-
                 result.sort(
                                 Comparator.comparing(
                                                 Activity::startTime,
@@ -142,8 +133,6 @@ public class PassengerTripActivities {
                                 && !name.isBlank();
         }
 
-        // These are synchronized descriptions,
-        // not live registration/seat counts.
         public record Activity(
                         UUID id,
                         String type,

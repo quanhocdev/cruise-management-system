@@ -23,7 +23,7 @@ import com.project.tour.model.convenience.product.ProductTour;
 import com.project.tour.model.convenience.service.ServiceTour;
 import com.project.tour.repository.convenience.ProductTourRepository;
 import com.project.tour.repository.convenience.ServiceTourRepository;
-import com.project.tour.repository.onboard.ActivityCruiseTourAssignmentRepository;
+import com.project.tour.repository.onboard.ActivityCruiseTourRepository;
 import com.project.tour.repository.shore.VisitTourRepository;
 
 import java.math.BigDecimal;
@@ -45,7 +45,7 @@ public class PublicTourService {
 
         private final VisitTourRepository visitTourRepository;
 
-        private final ActivityCruiseTourAssignmentRepository activityCruiseTourAssignmentRepository;
+        private final ActivityCruiseTourRepository activityCruiseTourAssignmentRepository;
 
         private final ProductTourRepository productTourRepository;
         private final ServiceTourRepository serviceTourRepository;
@@ -57,7 +57,7 @@ public class PublicTourService {
                         ScheduleRepository scheduleRepository,
                         ScheduleStopRepository scheduleStopRepository,
                         VisitTourRepository visitTourRepository,
-                        ActivityCruiseTourAssignmentRepository activityCruiseTourAssignmentRepository,
+                        ActivityCruiseTourRepository activityCruiseTourAssignmentRepository,
                         ProductTourRepository productTourRepository,
                         ServiceTourRepository serviceTourRepository) {
 

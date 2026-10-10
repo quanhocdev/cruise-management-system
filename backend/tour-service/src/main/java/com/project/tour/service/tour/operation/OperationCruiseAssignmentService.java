@@ -8,7 +8,7 @@ import com.project.tour.model.convenience.service.ServiceTour;
 import com.project.tour.model.onboard.ActivityCruiseTour;
 import com.project.tour.repository.convenience.ProductTourRepository;
 import com.project.tour.repository.convenience.ServiceTourRepository;
-import com.project.tour.repository.onboard.ActivityCruiseTourAssignmentRepository;
+import com.project.tour.repository.onboard.ActivityCruiseTourRepository;
 import com.project.tour.repository.shore.VisitTourRepository;
 import com.project.tour.repository.tour.schedule.ScheduleRepository;
 
@@ -25,13 +25,13 @@ public class OperationCruiseAssignmentService {
 
         private final ProductTourRepository productTourRepository;
         private final ServiceTourRepository serviceTourRepository;
-        private final ActivityCruiseTourAssignmentRepository activityCruiseTourRepository;
+        private final ActivityCruiseTourRepository activityCruiseTourRepository;
         private final VisitTourRepository visitTourRepository;
 
         public OperationCruiseAssignmentService(
                         ProductTourRepository productTourRepository,
                         ServiceTourRepository serviceTourRepository,
-                        ActivityCruiseTourAssignmentRepository activityCruiseTourRepository,
+                        ActivityCruiseTourRepository activityCruiseTourRepository,
                         VisitTourRepository visitTourRepository) {
 
                 this.productTourRepository = productTourRepository;

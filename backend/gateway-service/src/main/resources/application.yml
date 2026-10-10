@@ -17,159 +17,129 @@ spring:
       server:
         webflux:
           routes:
-            # ==========================
-            # AUTH SERVICE
-            # ==========================
 
+            # AUTH SERVICE
             - id: auth-service
               uri: ${AUTH_SERVICE_URL:http://auth-service:8081}
               predicates:
                 - Path=/api/auth/**,/api/admin/staff/**
 
-            # ==========================
             # PAYMENT SERVICE
-            # ==========================
-
             - id: payment-service
               uri: ${PAYMENT_SERVICE_URL:http://payment-service:8085}
               predicates:
                 - Path=/api/v1/payments/**,/api/passenger/payments/**
 
-            # ==========================
             # NOTIFICATION SERVICE
-            # ==========================
-
             - id: notification-service
               uri: ${NOTIFICATION_SERVICE_URL:http://notification-service:8086}
               predicates:
                 - Path=/api/v1/notifications/**
 
-            # ==========================
             # FEEDBACK SERVICE
-            # ==========================
-
             - id: feedback-service
               uri: ${FEEDBACK_SERVICE_URL:http://feedback-service:8089}
               predicates:
                 - Path=/api/v1/feedbacks/**,/api/admin/feedbacks/**
 
-            # ==========================
             # TOUR SERVICE - ADMIN
-            # ==========================
-
             - id: tour-admin-service
               uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
               predicates:
                 - Path=/api/admin/**
 
-            # ==========================
             # TOUR SERVICE - SCHEDULER
-            # ==========================
-
             - id: tour-scheduler-service
               uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
               predicates:
                 - Path=/api/scheduler/**
 
-            # ==========================
             # TOUR SERVICE - OPERATION
-            # ==========================
-
             - id: tour-operation-service
               uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
               predicates:
                 - Path=/api/operation/**
 
-            # ==========================
             # BOOKING SERVICE - WEBSOCKET
-            # ==========================
-
             - id: booking-websocket
               uri: ws://booking-service:8082
               predicates:
                 - Path=/ws-booking/**
                 - Header=Upgrade,websocket
 
-            # ==========================
             # BOOKING SERVICE - SOCKJS HTTP
-            # ==========================
-
             - id: booking-sockjs
               uri: http://booking-service:8082
               predicates:
                 - Path=/ws-booking/**
 
-            # ==========================
             # BOOKING SERVICE - FINANCE
-            # ==========================
-
             - id: booking-finance-service
               uri: ${BOOKING_SERVICE_URL:http://booking-service:8082}
               predicates:
                 - Path=/api/finance/scan,/api/finance/bookings,/api/finance/bookings/**,/api/finance/check-passenger/**
 
-            # ==========================
             # TOUR SERVICE - FINANCE
-            # ==========================
-
             - id: tour-finance-service
               uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
               predicates:
                 - Path=/api/finance/**
 
-            # ==========================
             # TOUR SERVICE - PUBLIC
-            # ==========================
-
             - id: tour-public-service
               uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
               predicates:
                 - Path=/api/public/**
 
-            # ==========================
-            # TOUR SERVICE - CONVENIENCE
-            # ==========================
-            # Product / Service / ProductTour / ServiceTour
-            # đã được merge vào tour-service
+            # BOOKING SERVICE - CONVENIENCE NFC
+            - id: booking-convenience-nfc
+              uri: ${BOOKING_SERVICE_URL:http://booking-service:8082}
+              predicates:
+                - Path=/api/convenience/nfc/**
 
+            # BOOKING SERVICE - CONVENIENCE USAGE
+            - id: booking-convenience-service
+              uri: ${BOOKING_SERVICE_URL:http://booking-service:8082}
+              predicates:
+                - Path=/api/convenience/product-usages/**,/api/convenience/service-usages/**
+
+            # TOUR SERVICE - CONVENIENCE MASTER / TOUR
             - id: tour-convenience-service
               uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
               predicates:
-                - Path=/api/convenience/**
+                - Path=/api/convenience/products/**,/api/convenience/services/**,/api/convenience/product-tours/**,/api/convenience/service-tours/**
 
-            # ==========================
+            # BOOKING SERVICE - ONBOARD NFC / USAGE
+            - id: booking-onboard-service
+              uri: ${BOOKING_SERVICE_URL:http://booking-service:8082}
+              predicates:
+                - Path=/api/onboard/nfc/**,/api/onboard/activity-cruise-usages/**
+
             # TOUR SERVICE - ACTIVITY CRUISE
-            # ==========================
-            # Activity Cruise đã được merge vào tour-service
-
             - id: tour-activity-cruise-service
               uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
               predicates:
                 - Path=/api/onboard/**
 
-            # ==========================
-            # TOUR SERVICE - ACTIVITY VISIT
-            # ==========================
-            # Activity Visit đã được merge vào tour-service
+            # BOOKING SERVICE - SHORE NFC / USAGE
+            - id: booking-shore-service
+              uri: ${BOOKING_SERVICE_URL:http://booking-service:8082}
+              predicates:
+                - Path=/api/shore/nfc/**,/api/shore/activity-visit-usages/**
 
+            # TOUR SERVICE - ACTIVITY VISIT
             - id: tour-activity-visit-service
               uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
               predicates:
                 - Path=/api/shore/**
 
-            # ==========================
             # TOUR SERVICE - PASSENGER
-            # ==========================
-
             - id: tour-passenger-service
               uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
               predicates:
                 - Path=/api/passenger/**
 
-            # ==========================
             # BOOKING SERVICE - PASSENGER
-            # ==========================
-
             - id: booking-service
               uri: ${BOOKING_SERVICE_URL:http://booking-service:8082}
               predicates:

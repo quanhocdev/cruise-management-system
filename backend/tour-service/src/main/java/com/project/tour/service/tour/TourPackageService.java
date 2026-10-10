@@ -2,6 +2,7 @@ package com.project.tour.service.tour;
 
 import com.project.common.event.TourPackageSyncedEvent;
 import com.project.tour.dto.admin.roomtype.RoomTypeResponse;
+import com.project.tour.dto.internal.BookingPackageInfo;
 import com.project.tour.dto.operation.packages.TourPackageRequest;
 import com.project.tour.dto.operation.packages.TourPackageResponse;
 import com.project.tour.exception.AppException;
@@ -264,7 +265,7 @@ public class TourPackageService {
     }
 
     @Transactional(readOnly = true)
-    public Integer getPackageRoomCapacity(UUID tourPackageId) {
+    public BookingPackageInfo getBookingPackageInfo(UUID tourPackageId) {
 
         TourPackage tourPackage = tourPackageRepository.findById(tourPackageId)
                 .orElseThrow(() -> new AppException(
@@ -288,6 +289,9 @@ public class TourPackageService {
                     HttpStatus.BAD_REQUEST);
         }
 
-        return roomType.getCapacity();
+        return new BookingPackageInfo(
+                tourPackage.getId(),
+                tourPackage.getPrice(),
+                roomType.getCapacity());
     }
 }

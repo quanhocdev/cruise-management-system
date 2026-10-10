@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   ClipboardList,
   Ship,
+  History,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -27,6 +28,11 @@ const MENU_SECTIONS = [
         icon: ClipboardList,
         path: "/shore/tours",
         extraPaths: ["/shore/visit-tour-configuration"],
+      },
+      {
+        label: "Lịch sử sử dụng",
+        icon: History,
+        path: "/shore/activity-visit-usages",
       },
     ],
   },
@@ -90,7 +96,11 @@ function ShoreSidebar() {
               const isCustomActive =
                 location.pathname === item.path ||
                 (item.extraPaths &&
-                  item.extraPaths.some((p) => location.pathname.startsWith(p)));
+                  item.extraPaths.some(
+                    (path) =>
+                      location.pathname === path ||
+                      location.pathname.startsWith(`${path}/`),
+                  ));
 
               return (
                 <NavLink

@@ -1,0 +1,503 @@
+/* =====================================================
+   PAGE
+===================================================== */
+
+.activity-visit-usage-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 28px;
+  min-width: 0;
+  color: #172033;
+}
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.activity-visit-usage-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.activity-visit-usage-page__heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.activity-visit-usage-page__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  color: #087f8c;
+  background: #dff6f5;
+  border-radius: 14px;
+}
+
+.activity-visit-usage-page__title {
+  margin: 0;
+  color: #172033;
+  font-size: 25px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.activity-visit-usage-page__subtitle {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.activity-visit-usage-page__refresh {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-shrink: 0;
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid #dbe3ec;
+  border-radius: 10px;
+  color: #334155;
+  background: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.activity-visit-usage-page__refresh:hover:not(:disabled) {
+  color: #087f8c;
+  border-color: #8bd5d5;
+  background: #f0fdfa;
+}
+
+.activity-visit-usage-page__refresh:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.activity-visit-usage-page__refresh-icon--spinning {
+  animation: activity-visit-usage-spin 1s linear infinite;
+}
+
+@keyframes activity-visit-usage-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =====================================================
+   ERROR
+===================================================== */
+
+.activity-visit-usage-page__error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  color: #b91c1c;
+  background: #fef2f2;
+  font-size: 14px;
+}
+
+/* =====================================================
+   MAIN SECTION
+===================================================== */
+
+.activity-visit-usage-page__section {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 3px 12px rgb(15 23 42 / 4%);
+}
+
+.activity-visit-usage-page__section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 24px;
+  border-bottom: 1px solid #edf1f5;
+}
+
+.activity-visit-usage-page__section-title {
+  margin: 0;
+  color: #172033;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.activity-visit-usage-page__section-description {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.activity-visit-usage-page__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 10px;
+  color: #087f8c;
+  background: #dff6f5;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* =====================================================
+   FILTER
+===================================================== */
+
+.activity-visit-usage-filter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 24px;
+  border-bottom: 1px solid #edf1f5;
+}
+
+.activity-visit-usage-filter__search {
+  position: relative;
+  flex: 1;
+  min-width: 180px;
+}
+
+.activity-visit-usage-filter__search-icon {
+  position: absolute;
+  top: 50%;
+  left: 13px;
+  color: #94a3b8;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.activity-visit-usage-filter__search-input {
+  width: 100%;
+  height: 42px;
+  box-sizing: border-box;
+  padding: 0 14px 0 42px;
+  border: 1px solid #dbe3ec;
+  border-radius: 10px;
+  outline: none;
+  color: #172033;
+  background: #ffffff;
+  font: inherit;
+  font-size: 14px;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.activity-visit-usage-filter__search-input::placeholder {
+  color: #94a3b8;
+}
+
+.activity-visit-usage-filter__search-input:focus {
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgb(13 148 136 / 12%);
+}
+
+.activity-visit-usage-filter__status {
+  width: 210px;
+  max-width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid #dbe3ec;
+  border-radius: 10px;
+  outline: none;
+  color: #334155;
+  background: #ffffff;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.activity-visit-usage-filter__status:focus {
+  border-color: #0d9488;
+}
+
+.activity-visit-usage-filter__reset {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  flex-shrink: 0;
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid #dbe3ec;
+  border-radius: 10px;
+  color: #475569;
+  background: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.activity-visit-usage-filter__reset:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+/* =====================================================
+   TABLE
+===================================================== */
+
+.activity-visit-usage-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.activity-visit-usage-table {
+  width: 100%;
+  min-width: 1250px;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: left;
+  font-size: 13px;
+}
+
+.activity-visit-usage-table thead th {
+  padding: 14px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  color: #64748b;
+  background: #f8fafc;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.activity-visit-usage-table tbody td {
+  padding: 16px;
+  border-bottom: 1px solid #edf1f5;
+  color: #475569;
+  vertical-align: middle;
+}
+
+.activity-visit-usage-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.activity-visit-usage-table tbody tr:hover {
+  background: #f8fdfd;
+}
+
+/* PASSENGER */
+
+.activity-visit-usage-table__passenger,
+.activity-visit-usage-table__activity,
+.activity-visit-usage-table__time {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.activity-visit-usage-table__passenger strong,
+.activity-visit-usage-table__activity strong {
+  color: #1e293b;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.activity-visit-usage-table__passenger span,
+.activity-visit-usage-table__activity span {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+/* BOOKING */
+
+.activity-visit-usage-table__booking-code {
+  display: inline-block;
+  padding: 5px 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  color: #334155;
+  background: #f8fafc;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ACTIVITY TIME */
+
+.activity-visit-usage-table__time {
+  min-width: 145px;
+  white-space: nowrap;
+}
+
+/* STATUS */
+
+.activity-visit-usage-table__status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.activity-visit-usage-table__status--waiting_config {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.activity-visit-usage-table__status--configured {
+  color: #1d4ed8;
+  background: #dbeafe;
+}
+
+.activity-visit-usage-table__status--not_started {
+  color: #475569;
+  background: #e2e8f0;
+}
+
+.activity-visit-usage-table__status--in_progress {
+  color: #047857;
+  background: #d1fae5;
+}
+
+.activity-visit-usage-table__status--completed {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.activity-visit-usage-table__status--delayed {
+  color: #9a3412;
+  background: #ffedd5;
+}
+
+.activity-visit-usage-table__status--cancelled {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+.activity-visit-usage-table__status--unknown {
+  color: #475569;
+  background: #f1f5f9;
+}
+
+/* NUMBERS AND MONEY */
+
+.activity-visit-usage-table__number {
+  text-align: center;
+  font-weight: 600;
+}
+
+.activity-visit-usage-table__money {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.activity-visit-usage-table__money--final {
+  color: #087f8c !important;
+  font-weight: 700;
+}
+
+/* LOADING AND EMPTY */
+
+.activity-visit-usage-table__loading,
+.activity-visit-usage-table__empty {
+  height: 160px;
+  color: #94a3b8 !important;
+  text-align: center;
+}
+
+.activity-visit-usage-table__loading > span,
+.activity-visit-usage-table__empty > span {
+  display: inline-block;
+  margin-left: 10px;
+  vertical-align: middle;
+}
+
+.activity-visit-usage-table__loading-icon {
+  display: inline-block;
+  color: #0d9488;
+  vertical-align: middle;
+  animation: activity-visit-usage-spin 1s linear infinite;
+}
+
+.activity-visit-usage-table__empty svg {
+  display: inline-block;
+  vertical-align: middle;
+  color: #94a3b8;
+}
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 768px) {
+  .activity-visit-usage-page {
+    gap: 18px;
+    padding: 16px;
+  }
+
+  .activity-visit-usage-page__header {
+    align-items: flex-start;
+  }
+
+  .activity-visit-usage-page__title {
+    font-size: 20px;
+  }
+
+  .activity-visit-usage-page__subtitle {
+    font-size: 13px;
+  }
+
+  .activity-visit-usage-page__refresh {
+    padding: 0 11px;
+  }
+
+  .activity-visit-usage-page__refresh span {
+    display: none;
+  }
+
+  .activity-visit-usage-page__section-header {
+    padding: 18px 16px;
+  }
+
+  .activity-visit-usage-filter {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 16px;
+  }
+
+  .activity-visit-usage-filter__search {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .activity-visit-usage-filter__status {
+    width: 100%;
+  }
+
+  .activity-visit-usage-filter__reset {
+    align-self: flex-start;
+  }
+}

@@ -1,0 +1,242 @@
+/* src/modules/convenience/components/usage-history/UsageHistoryTable.css */
+
+.usage-history-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.usage-history-table {
+  width: 100%;
+  min-width: 1050px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+  color: #374151;
+}
+
+.usage-history-table thead {
+  background: #f8fafc;
+}
+
+.usage-history-table th {
+  padding: 15px 16px;
+  text-align: left;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.035em;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.usage-history-table td {
+  padding: 15px 16px;
+  vertical-align: middle;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.usage-history-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.usage-history-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.usage-history-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+/* Passenger */
+
+.usage-history-table__passenger {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 125px;
+}
+
+.usage-history-table__passenger strong {
+  color: #111827;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.usage-history-table__passenger span {
+  color: #94a3b8;
+  font-size: 11px;
+}
+
+/* Booking */
+
+.usage-history-table__booking-code {
+  display: inline-block;
+  color: #2563eb;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Product / service */
+
+.usage-history-table__item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 130px;
+}
+
+.usage-history-table__item strong {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.usage-history-table__active,
+.usage-history-table__inactive {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 3px 7px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.usage-history-table__active {
+  color: #15803d;
+  background: #dcfce7;
+}
+
+.usage-history-table__inactive {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+/* Status */
+
+.usage-history-table__status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  background: #f1f5f9;
+}
+
+.usage-history-table__status--waiting-config,
+.usage-history-table__status--approval-pending,
+.usage-history-table__status--waiting {
+  color: #a16207;
+  background: #fef3c7;
+}
+
+.usage-history-table__status--configured,
+.usage-history-table__status--approved,
+.usage-history-table__status--ready,
+.usage-history-table__status--open {
+  color: #1d4ed8;
+  background: #dbeafe;
+}
+
+.usage-history-table__status--not-started,
+.usage-history-table__status--not-open,
+.usage-history-table__status--draft {
+  color: #64748b;
+  background: #f1f5f9;
+}
+
+.usage-history-table__status--in-progress {
+  color: #7e22ce;
+  background: #f3e8ff;
+}
+
+.usage-history-table__status--completed,
+.usage-history-table__status--closed {
+  color: #15803d;
+  background: #dcfce7;
+}
+
+.usage-history-table__status--cancelled {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+/* Numbers and money */
+
+.usage-history-table__number {
+  text-align: center;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.usage-history-table__money {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.usage-history-table__money--final {
+  color: #0f766e;
+  font-weight: 700;
+}
+
+/* Service times */
+
+.usage-history-table__time {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 145px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* Loading / empty */
+
+.usage-history-table__loading,
+.usage-history-table__empty {
+  height: 160px;
+  text-align: center !important;
+  color: #94a3b8;
+}
+
+.usage-history-table__loading > *,
+.usage-history-table__empty > * {
+  vertical-align: middle;
+}
+
+.usage-history-table__loading-icon {
+  margin-right: 9px;
+  vertical-align: middle;
+  animation: usage-history-spin 1s linear infinite;
+}
+
+.usage-history-table__empty svg {
+  display: block;
+  margin: 0 auto 10px;
+  color: #cbd5e1;
+}
+
+.usage-history-table__empty span {
+  display: block;
+}
+
+@keyframes usage-history-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .usage-history-table th,
+  .usage-history-table td {
+    padding: 12px;
+  }
+}

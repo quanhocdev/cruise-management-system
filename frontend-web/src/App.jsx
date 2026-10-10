@@ -55,17 +55,21 @@ import ConvenienceDashboard from "./modules/convenience/pages/Dashboard";
 import ConvenienceProducts from "./modules/convenience/pages/ConvenienceProducts";
 import ConvenienceServices from "./modules/convenience/pages/ConvenienceServices";
 import ConvenienceTourConfigPage from "./modules/convenience/pages/ConvenienceTourConfigPage";
+import ProductUsageHistory from "./modules/convenience/pages/ProductUsageHistory";
+import ServiceUsageHistory from "./modules/convenience/pages/ServiceUsageHistory";
 
 // Onboard imports
 import OnboardLayout from "./layouts/OnboardLayout";
 import OnboardDashboard from "./modules/onboard/pages/Dashboard";
 import OnboardActivityCruiseTour from "./modules/onboard/pages/ActivityCruiseTour";
 import ActivityCruise from "./modules/onboard/pages/ActivityCruise";
+import ActivityCruiseUsage from "./modules/onboard/pages/ActivityCruiseUsage";
 
 // Shore imports
 import ShoreLayout from "./layouts/ShoreLayout";
 import ShoreDashboard from "./modules/shore/pages/Dashboard";
 import ActivityVisitTour from "./modules/shore/pages/ActivityVisitTour";
+import ActivityVisitUsage from "./modules/shore/pages/ActivityVisitUsage";
 
 // Finance imports
 import FinanceLayout from "./layouts/FinanceLayout";
@@ -76,6 +80,7 @@ import FinanceNfcCards from "./modules/finance/pages/FinanceNfcCards";
 import FinanceBookings from "./modules/finance/pages/FinanceBookings";
 import FinanceBookingPassengers from "./modules/finance/pages/FinanceBookingPassengers";
 import FinanceCheckIn from "./modules/finance/pages/FinanceCheckIn";
+import FinanceCheckout from "./modules/finance/pages/FinanceCheckout";
 
 export default function App() {
   return (
@@ -261,6 +266,11 @@ export default function App() {
             />
 
             <Route
+              path="activity-cruise-usages"
+              element={<ActivityCruiseUsage />}
+            />
+
+            <Route
               path="schedules"
               element={<div>Trang Lịch trình (Đang phát triển)</div>}
             />
@@ -283,10 +293,7 @@ export default function App() {
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
 
-          {/* =====================================================
-              SHORE ROUTES
-              ===================================================== */}
-
+          {/* SHORE ROUTES */}
           <Route
             path="/shore"
             element={
@@ -299,12 +306,17 @@ export default function App() {
 
             <Route path="tours" element={<ActivityVisitTour />} />
 
+            <Route
+              path="activity-visit-usages"
+              element={<ActivityVisitUsage />}
+            />
+
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
 
           {/* =====================================================
-              CONVENIENCE ROUTES
-              ===================================================== */}
+    CONVENIENCE ROUTES
+    ===================================================== */}
 
           <Route
             path="/convenience"
@@ -321,6 +333,16 @@ export default function App() {
             <Route path="services" element={<ConvenienceServices />} />
 
             <Route path="tour-config" element={<ConvenienceTourConfigPage />} />
+
+            <Route
+              path="product-usage-history"
+              element={<ProductUsageHistory />}
+            />
+
+            <Route
+              path="service-usage-history"
+              element={<ServiceUsageHistory />}
+            />
 
             <Route index element={<Navigate to="dashboard" replace />} />
           </Route>
@@ -340,6 +362,7 @@ export default function App() {
             <Route path="dashboard" element={<FinanceDashboard />} />
 
             <Route path="check-in" element={<FinanceCheckIn />} />
+            <Route path="checkout" element={<FinanceCheckout />} />
             <Route path="tours-schedule" element={<FinanceTourSchedule />} />
 
             <Route path="bookings" element={<FinanceBookings />} />

@@ -22,315 +22,376 @@ import java.util.UUID;
 @Transactional
 public class ProductTourService {
 
-    private final ProductTourRepository productTourRepository;
-    private final ProductRepository productRepository;
-    private final ProductTourMapper mapper;
+        private final ProductTourRepository productTourRepository;
+        private final ProductRepository productRepository;
+        private final ProductTourMapper mapper;
 
-    public ProductTourService(
-            ProductTourRepository productTourRepository,
-            ProductRepository productRepository,
-            ProductTourMapper mapper) {
+        public ProductTourService(
+                        ProductTourRepository productTourRepository,
+                        ProductRepository productRepository,
+                        ProductTourMapper mapper) {
 
-        this.productTourRepository = productTourRepository;
-        this.productRepository = productRepository;
-        this.mapper = mapper;
-    }
-
-    // =====================================================
-    // CREATE PRODUCT TOUR
-    // =====================================================
-
-    /**
-     * Tạo ProductTour cho một Tour + Cruise Area.
-     *
-     * Trạng thái ban đầu:
-     * WAITING_CONFIG
-     */
-    public void createProductTourFromEvent(
-            UUID tourId,
-            UUID cruiseAreaId) {
-
-        boolean exists = productTourRepository
-                .findByTourIdAndCruiseAreaId(
-                        tourId,
-                        cruiseAreaId)
-                .isPresent();
-
-        if (exists) {
-            return;
+                this.productTourRepository = productTourRepository;
+                this.productRepository = productRepository;
+                this.mapper = mapper;
         }
 
-        ProductTour productTour = new ProductTour();
+        // =====================================================
+        // CREATE PRODUCT TOUR
+        // =====================================================
 
-        productTour.setTourId(tourId);
-        productTour.setCruiseAreaId(cruiseAreaId);
-        productTour.setStatus(
-                ProductTourStatus.WAITING_CONFIG);
-
-        productTourRepository.save(productTour);
-    }
-
-    // =====================================================
-    // GET ALL
-    // =====================================================
-
-    @Transactional(readOnly = true)
-    public List<ProductTourResponse> getAllAssignments() {
-
-        return productTourRepository
-                .findAll()
-                .stream()
-                .map(mapper::toProductTourResponse)
-                .toList();
-    }
-
-    // =====================================================
-    // GET PENDING CONFIG
-    // =====================================================
-
-    @Transactional(readOnly = true)
-    public List<ProductTourResponse> getPendingConfig() {
-
-        return productTourRepository
-                .findConfigurable(
-                        List.of(
-                                ProductTourStatus.WAITING_CONFIG))
-                .stream()
-                .map(mapper::toProductTourResponse)
-                .toList();
-    }
-
-    // =====================================================
-    // GET BY TOUR
-    // =====================================================
-
-    @Transactional(readOnly = true)
-    public List<ProductTourResponse> getByTour(
-            UUID tourId) {
-
-        return productTourRepository
-                .findAllByTourIdOrderByCreatedAtAsc(tourId)
-                .stream()
-                .map(mapper::toProductTourResponse)
-                .toList();
-    }
-
-    // =====================================================
-    // CONFIGURE
-    // =====================================================
-
-    /**
-     * Cấu hình ProductTour lần đầu.
-     *
-     * WAITING_CONFIG
-     * ↓
-     * WAITING_CONFIG
-     *
-     * Lưu cấu hình nhưng CHƯA hoàn tất cấu hình.
-     */
-    public ProductTourResponse configure(
-            UUID productTourId,
-            ProductTourConfigRequest request) {
-
-        ProductTour productTour = findProductTour(productTourId);
-
-        if (productTour.getStatus() != ProductTourStatus.WAITING_CONFIG) {
-
-            throw new AppException(
-                    "Product tour is not waiting for configuration",
-                    HttpStatus.BAD_REQUEST);
-        }
-
-        Product product = getActiveProduct(
-                request.productId());
-
-        validateQuantity(
-                product,
-                request.quantity());
-
-        productTour.setProduct(product);
-        productTour.setQuantity(
-                request.quantity());
-
-        /*
-         * Không đổi status ở đây.
+        /**
+         * Tạo ProductTour cho một Tour + Cruise Area.
          *
-         * Vẫn là WAITING_CONFIG.
+         * Trạng thái ban đầu:
+         * WAITING_CONFIG
          */
-        ProductTour saved = productTourRepository.save(productTour);
+        public void createProductTourFromEvent(
+                        UUID tourId,
+                        UUID cruiseAreaId) {
 
-        return mapper.toProductTourResponse(saved);
-    }
+                boolean exists = productTourRepository
+                                .findByTourIdAndCruiseAreaId(
+                                                tourId,
+                                                cruiseAreaId)
+                                .isPresent();
 
-    // =====================================================
-    // UPDATE CONFIG
-    // =====================================================
+                if (exists) {
+                        return;
+                }
 
-    /**
-     * Cập nhật ProductTour khi vẫn đang
-     * trong giai đoạn WAITING_CONFIG.
-     */
-    public ProductTourResponse updateConfig(
-            UUID productTourId,
-            ProductTourConfigRequest request) {
+                ProductTour productTour = new ProductTour();
 
-        ProductTour productTour = findProductTour(productTourId);
+                productTour.setTourId(tourId);
+                productTour.setCruiseAreaId(cruiseAreaId);
+                productTour.setStatus(
+                                ProductTourStatus.WAITING_CONFIG);
 
-        if (productTour.getStatus() != ProductTourStatus.WAITING_CONFIG) {
-
-            throw new AppException(
-                    "Product tour configuration has already been completed and cannot be modified",
-                    HttpStatus.CONFLICT);
+                productTourRepository.save(productTour);
         }
 
-        Product product = getActiveProduct(
-                request.productId());
+        // =====================================================
+        // GET ALL
+        // =====================================================
 
-        validateQuantity(
-                product,
-                request.quantity());
+        @Transactional(readOnly = true)
+        public List<ProductTourResponse> getAllAssignments() {
 
-        productTour.setProduct(product);
-        productTour.setQuantity(
-                request.quantity());
-
-        ProductTour saved = productTourRepository.save(productTour);
-
-        return mapper.toProductTourResponse(saved);
-    }
-
-    // =====================================================
-    // COMPLETE CONFIGURATION
-    // =====================================================
-
-    /**
-     * Hoàn tất cấu hình toàn bộ ProductTour
-     * của một Tour.
-     *
-     * WAITING_CONFIG
-     * ↓
-     * CONFIGURED
-     */
-    public void completeConfiguration(
-            UUID tourId) {
-
-        List<ProductTour> productTours = productTourRepository
-                .findAllByTourIdOrderByCreatedAtAsc(
-                        tourId);
-
-        if (productTours.isEmpty()) {
-
-            throw new AppException(
-                    "No product tour configuration found for tour",
-                    HttpStatus.NOT_FOUND);
+                return productTourRepository
+                                .findAll()
+                                .stream()
+                                .map(mapper::toProductTourResponse)
+                                .toList();
         }
 
-        /*
-         * Kiểm tra tất cả phải đang WAITING_CONFIG
-         * và đã có product + quantity.
+        // =====================================================
+        // GET PENDING CONFIG
+        // =====================================================
+
+        @Transactional(readOnly = true)
+        public List<ProductTourResponse> getPendingConfig() {
+
+                return productTourRepository
+                                .findConfigurable(
+                                                List.of(
+                                                                ProductTourStatus.WAITING_CONFIG))
+                                .stream()
+                                .map(mapper::toProductTourResponse)
+                                .toList();
+        }
+
+        // =====================================================
+        // GET BY TOUR
+        // =====================================================
+
+        @Transactional(readOnly = true)
+        public List<ProductTourResponse> getByTour(
+                        UUID tourId) {
+
+                return productTourRepository
+                                .findAllByTourIdOrderByCreatedAtAsc(tourId)
+                                .stream()
+                                .map(mapper::toProductTourResponse)
+                                .toList();
+        }
+
+        // =====================================================
+        // CONFIGURE
+        // =====================================================
+
+        /**
+         * Cấu hình ProductTour lần đầu.
+         *
+         * WAITING_CONFIG
+         * ↓
+         * WAITING_CONFIG
+         *
+         * Lưu cấu hình nhưng CHƯA hoàn tất cấu hình.
          */
-        for (ProductTour productTour : productTours) {
+        public ProductTourResponse configure(
+                        UUID productTourId,
+                        ProductTourConfigRequest request) {
 
-            if (productTour.getStatus() != ProductTourStatus.WAITING_CONFIG) {
+                ProductTour productTour = findProductTour(productTourId);
 
-                throw new AppException(
-                        "Product tour configuration has already been completed or is not in a valid state",
-                        HttpStatus.CONFLICT);
-            }
+                if (productTour.getStatus() != ProductTourStatus.WAITING_CONFIG) {
 
-            if (productTour.getProduct() == null) {
+                        throw new AppException(
+                                        "Product tour is not waiting for configuration",
+                                        HttpStatus.BAD_REQUEST);
+                }
 
-                throw new AppException(
-                        "Product configuration is missing",
-                        HttpStatus.BAD_REQUEST);
-            }
+                Product product = getActiveProduct(
+                                request.productId());
 
-            if (productTour.getQuantity() == null
-                    || productTour.getQuantity() <= 0) {
+                validateQuantity(request.quantity());
 
-                throw new AppException(
-                        "Product quantity is invalid",
-                        HttpStatus.BAD_REQUEST);
-            }
+                // Trừ stock trước khi gán ProductTour
+                int updatedRows = productRepository.decreaseStock(
+                                product.getId(),
+                                request.quantity());
+
+                if (updatedRows == 0) {
+                        throw new AppException(
+                                        "Requested quantity exceeds product stock",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                productTour.setProduct(product);
+                productTour.setQuantity(request.quantity());
+
+                ProductTour saved = productTourRepository.save(productTour);
+
+                return mapper.toProductTourResponse(saved);
         }
 
-        /*
-         * Tất cả hợp lệ → chuyển sang CONFIGURED.
+        // =====================================================
+        // UPDATE CONFIG
+        // =====================================================
+        public ProductTourResponse updateConfig(
+                        UUID productTourId,
+                        ProductTourConfigRequest request) {
+
+                ProductTour productTour = findProductTour(productTourId);
+
+                if (productTour.getStatus() != ProductTourStatus.WAITING_CONFIG) {
+
+                        throw new AppException(
+                                        "Product tour configuration has already been completed and cannot be modified",
+                                        HttpStatus.CONFLICT);
+                }
+
+                Product newProduct = getActiveProduct(
+                                request.productId());
+
+                validateQuantity(request.quantity());
+
+                Product oldProduct = productTour.getProduct();
+                Integer oldQuantity = productTour.getQuantity();
+
+                /*
+                 * Nếu chưa từng cấu hình thì xử lý giống configure().
+                 */
+                if (oldProduct == null || oldQuantity == null) {
+
+                        int updatedRows = productRepository.decreaseStock(
+                                        newProduct.getId(),
+                                        request.quantity());
+
+                        if (updatedRows == 0) {
+                                throw new AppException(
+                                                "Requested quantity exceeds product stock",
+                                                HttpStatus.BAD_REQUEST);
+                        }
+
+                } else {
+
+                        if (oldProduct.getId().equals(newProduct.getId())) {
+
+                                productRepository.increaseStock(
+                                                oldProduct.getId(),
+                                                oldQuantity);
+
+                                int updatedRows = productRepository.decreaseStock(
+                                                newProduct.getId(),
+                                                request.quantity());
+
+                                if (updatedRows == 0) {
+                                        throw new AppException(
+                                                        "Requested quantity exceeds product stock",
+                                                        HttpStatus.BAD_REQUEST);
+                                }
+
+                        } else {
+
+                                productRepository.increaseStock(
+                                                oldProduct.getId(),
+                                                oldQuantity);
+
+                                int updatedRows = productRepository.decreaseStock(
+                                                newProduct.getId(),
+                                                request.quantity());
+
+                                if (updatedRows == 0) {
+
+                                        throw new AppException(
+                                                        "Requested quantity exceeds new product stock",
+                                                        HttpStatus.BAD_REQUEST);
+                                }
+                        }
+                }
+
+                productTour.setProduct(newProduct);
+                productTour.setQuantity(request.quantity());
+
+                ProductTour saved = productTourRepository.save(productTour);
+
+                return mapper.toProductTourResponse(saved);
+        }
+
+        // =====================================================
+        // COMPLETE CONFIGURATION
+        // =====================================================
+
+        /**
+         * Hoàn tất cấu hình toàn bộ ProductTour
+         * của một Tour.
+         *
+         * WAITING_CONFIG
+         * ↓
+         * CONFIGURED
          */
-        for (ProductTour productTour : productTours) {
+        public void completeConfiguration(
+                        UUID tourId) {
 
-            productTour.setStatus(
-                    ProductTourStatus.CONFIGURED);
+                List<ProductTour> productTours = productTourRepository
+                                .findAllByTourIdOrderByCreatedAtAsc(
+                                                tourId);
+
+                if (productTours.isEmpty()) {
+
+                        throw new AppException(
+                                        "No product tour configuration found for tour",
+                                        HttpStatus.NOT_FOUND);
+                }
+
+                /*
+                 * Kiểm tra tất cả phải đang WAITING_CONFIG
+                 * và đã có product + quantity.
+                 */
+                for (ProductTour productTour : productTours) {
+
+                        if (productTour.getStatus() != ProductTourStatus.WAITING_CONFIG) {
+
+                                throw new AppException(
+                                                "Product tour configuration has already been completed or is not in a valid state",
+                                                HttpStatus.CONFLICT);
+                        }
+
+                        if (productTour.getProduct() == null) {
+
+                                throw new AppException(
+                                                "Product configuration is missing",
+                                                HttpStatus.BAD_REQUEST);
+                        }
+
+                        if (productTour.getQuantity() == null
+                                        || productTour.getQuantity() <= 0) {
+
+                                throw new AppException(
+                                                "Product quantity is invalid",
+                                                HttpStatus.BAD_REQUEST);
+                        }
+                }
+
+                /*
+                 * Tất cả hợp lệ → chuyển sang CONFIGURED.
+                 */
+                for (ProductTour productTour : productTours) {
+
+                        productTour.setStatus(
+                                        ProductTourStatus.CONFIGURED);
+                }
+
+                productTourRepository.saveAll(productTours);
         }
 
-        productTourRepository.saveAll(productTours);
-    }
+        // =====================================================
+        // FIND PRODUCT
+        // =====================================================
 
-    // =====================================================
-    // FIND PRODUCT
-    // =====================================================
+        private Product getActiveProduct(
+                        UUID productId) {
 
-    private Product getActiveProduct(
-            UUID productId) {
+                Product product = productRepository
+                                .findById(productId)
+                                .orElseThrow(() -> new AppException(
+                                                "Product not found",
+                                                HttpStatus.NOT_FOUND));
 
-        Product product = productRepository
-                .findById(productId)
-                .orElseThrow(() -> new AppException(
-                        "Product not found",
-                        HttpStatus.NOT_FOUND));
+                if (product.getStatus() != ProductStatus.ACTIVE) {
 
-        if (product.getStatus() != ProductStatus.ACTIVE) {
+                        throw new AppException(
+                                        "Product is not active",
+                                        HttpStatus.BAD_REQUEST);
+                }
 
-            throw new AppException(
-                    "Product is not active",
-                    HttpStatus.BAD_REQUEST);
+                return product;
         }
 
-        return product;
-    }
+        // VALIDATE QUANTITY
+        private void validateQuantity(Integer quantity) {
 
-    // =====================================================
-    // VALIDATE QUANTITY
-    // =====================================================
+                if (quantity == null || quantity <= 0) {
 
-    private void validateQuantity(
-            Product product,
-            Integer quantity) {
-
-        if (quantity == null
-                || quantity <= 0) {
-
-            throw new AppException(
-                    "Quantity must be greater than 0",
-                    HttpStatus.BAD_REQUEST);
+                        throw new AppException(
+                                        "Quantity must be greater than 0",
+                                        HttpStatus.BAD_REQUEST);
+                }
         }
 
-        if (product.getStockQuantity() == null) {
+        // FIND PRODUCT TOUR
+        private ProductTour findProductTour(
+                        UUID productTourId) {
 
-            throw new AppException(
-                    "Product stock quantity is invalid",
-                    HttpStatus.BAD_REQUEST);
+                return productTourRepository
+                                .findById(productTourId)
+                                .orElseThrow(() -> new AppException(
+                                                "Product tour not found",
+                                                HttpStatus.NOT_FOUND));
         }
 
-        if (quantity > product.getStockQuantity()) {
+        @Transactional
+        public void consumeQuantity(
+                        UUID productTourId,
+                        Integer quantity) {
 
-            throw new AppException(
-                    "Requested quantity exceeds product stock",
-                    HttpStatus.BAD_REQUEST);
+                if (quantity == null || quantity <= 0) {
+                        throw new AppException(
+                                        "Quantity must be greater than 0",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                int updatedRows = productTourRepository.decreaseQuantity(
+                                productTourId,
+                                quantity);
+
+                if (updatedRows == 0) {
+
+                        throw new AppException(
+                                        "ProductTour does not have enough quantity",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                ProductTour productTour = productTourRepository
+                                .findById(productTourId)
+                                .orElseThrow(() -> new AppException(
+                                                "Product tour not found",
+                                                HttpStatus.NOT_FOUND));
+
+                if (productTour.getQuantity() == 0) {
+                        productTour.setStatus(ProductTourStatus.OUT_OF_STOCK);
+                        productTourRepository.save(productTour);
+                }
         }
-    }
-
-    // =====================================================
-    // FIND PRODUCT TOUR
-    // =====================================================
-
-    private ProductTour findProductTour(
-            UUID productTourId) {
-
-        return productTourRepository
-                .findById(productTourId)
-                .orElseThrow(() -> new AppException(
-                        "Product tour not found",
-                        HttpStatus.NOT_FOUND));
-    }
 }

@@ -2,7 +2,7 @@ package com.project.tour.service.tour.operation;
 
 import com.project.tour.dto.operation.configured.AssignmentActivityCruiseResponse;
 import com.project.tour.mapper.operation.configured.AssignmentActivityCruiseMapper;
-import com.project.tour.repository.onboard.ActivityCruiseTourAssignmentRepository;
+import com.project.tour.repository.onboard.ActivityCruiseTourRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,10 +14,10 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class OperationActivityCruiseTourService {
 
-        private final ActivityCruiseTourAssignmentRepository assignmentRepository;
+        private final ActivityCruiseTourRepository assignmentRepository;
 
         public OperationActivityCruiseTourService(
-                        ActivityCruiseTourAssignmentRepository assignmentRepository) {
+                        ActivityCruiseTourRepository assignmentRepository) {
 
                 this.assignmentRepository = assignmentRepository;
         }
