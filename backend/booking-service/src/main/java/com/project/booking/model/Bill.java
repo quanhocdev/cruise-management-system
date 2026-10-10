@@ -1,5 +1,7 @@
+
 package com.project.booking.model;
 
+import com.project.booking.model.enums.BillStatus;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -25,6 +27,10 @@ public class Bill {
     @Column(name = "total_amount", nullable = false, precision = 19, scale = 2)
     private BigDecimal totalAmount;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 30)
+    private BillStatus status = BillStatus.PENDING_PAYMENT;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -36,6 +42,10 @@ public class Bill {
         LocalDateTime now = LocalDateTime.now();
         createdAt = now;
         updatedAt = now;
+
+        if (status == null) {
+            status = BillStatus.PENDING_PAYMENT;
+        }
     }
 
     @PreUpdate
@@ -73,6 +83,14 @@ public class Bill {
 
     public void setTotalAmount(BigDecimal totalAmount) {
         this.totalAmount = totalAmount;
+    }
+
+    public BillStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(BillStatus status) {
+        this.status = status;
     }
 
     public LocalDateTime getCreatedAt() {
