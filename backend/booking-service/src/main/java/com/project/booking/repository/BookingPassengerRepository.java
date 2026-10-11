@@ -9,20 +9,22 @@ import java.util.Optional;
 
 public interface BookingPassengerRepository extends JpaRepository<BookingPassenger, Long> {
 
-    List<BookingPassenger> findAllByBooking_IdOrderByIdAsc(Long bookingId);
+        List<BookingPassenger> findAllByBooking_IdOrderByIdAsc(Long bookingId);
 
-    List<BookingPassenger> findByBooking_CreatedByUserId(Long userId);
+        List<BookingPassenger> findByBooking_CreatedByUserId(Long userId);
 
-    // Kiểm tra xem hành khách này có đang thuộc bất kỳ đơn hàng CONFIRMED nào không
-    boolean existsByPassenger_IdAndBooking_Status(
-            Long passengerId,
-            BookingStatus status);
+        // Kiểm tra xem hành khách này có đang thuộc bất kỳ đơn hàng CONFIRMED nào không
+        boolean existsByPassenger_IdAndBooking_Status(
+                        Long passengerId,
+                        BookingStatus status);
 
-    // Tìm bản ghi liên kết giữa booking và passenger cụ thể
-    Optional<BookingPassenger> findByBooking_IdAndPassenger_Id(
-            Long bookingId,
-            Long passengerId);
+        // Tìm bản ghi liên kết giữa booking và passenger cụ thể
+        Optional<BookingPassenger> findByBooking_IdAndPassenger_Id(
+                        Long bookingId,
+                        Long passengerId);
 
-    // Tìm hành khách trong booking thông qua NFC card
-    Optional<BookingPassenger> findByNfcCardUid(String nfcCardUid);
+        // Tìm hành khách trong booking thông qua NFC card
+        Optional<BookingPassenger> findByNfcCardUid(String nfcCardUid);
+
+        List<BookingPassenger> findAllByBooking_Id(Long bookingId);
 }
