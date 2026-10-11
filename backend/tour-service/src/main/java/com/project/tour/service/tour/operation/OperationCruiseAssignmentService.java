@@ -10,7 +10,6 @@ import com.project.tour.repository.convenience.ProductTourRepository;
 import com.project.tour.repository.convenience.ServiceTourRepository;
 import com.project.tour.repository.onboard.ActivityCruiseTourRepository;
 import com.project.tour.repository.shore.VisitTourRepository;
-import com.project.tour.repository.tour.schedule.ScheduleRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
