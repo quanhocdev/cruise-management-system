@@ -16,6 +16,8 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import com.project.common.event.BillPaidEvent;
+import com.project.notification.util.CheckoutInvoicePdfGenerator;
 
 @Service
 public class NotificationBookingService {
@@ -232,4 +234,131 @@ public class NotificationBookingService {
 
         return value.replaceAll("[^a-zA-Z0-9_-]", "_");
     }
+
+    /**
+     * Lưu thông báo checkout và gửi email kèm PDF hóa đơn chi tiết.
+     * Không ảnh hưởng luồng email xác nhận booking hiện tại.
+     */
+    public void sendCheckoutInvoiceEmail(BillPaidEvent event) {
+        if (event == null || event.billId() == null) {
+            throw new IllegalArgumentException(
+                    "BillPaidEvent hoặc billId không được null");
+        }
+
+        NotificationBooking notification = new NotificationBooking();
+        notification.setRecipientUserId(event.recipientUserId());
+        notification.setRecipientEmail(event.recipientEmail());
+        notification.setRecipientName(event.recipientName());
+
+        notification.setType(NotificationType.BILL_PAID);
+        notification.setReferenceType("BILL");
+        notification.setReferenceId(event.billId());
+
+        notification.setTitle(
+                "Hóa đơn checkout đã thanh toán - " + safe(event.billCode()));
+
+        notification.setMessage(
+                "Xin chào " + safe(event.recipientName())
+                        + ", hóa đơn " + safe(event.billCode())
+                        + " cho booking " + safe(event.bookingCode())
+                        + " đã được thanh toán thành công. "
+                        + "Tổng thanh toán: "
+                        + (event.totalAmount() == null
+                                ? "0"
+                                : String.format(
+                                        java.util.Locale.US,
+                                        "%,.0f",
+                                        event.totalAmount()))
+                        + " VND. Hóa đơn chi tiết được đính kèm trong email.");
+
+        // Nếu chức năng gửi email đang tắt, vẫn lưu thông báo.
+        if (!enabled) {
+            notification.setEmailStatus(EmailStatus.NOT_REQUESTED);
+            repository.save(notification);
+            return;
+        }
+
+        if (event.recipientEmail() == null
+                || event.recipientEmail().isBlank()) {
+            notification.setEmailStatus(EmailStatus.FAILED);
+            repository.save(notification);
+            System.err.println(
+                    ">>> [CHECKOUT EMAIL] Thiếu email người nhận, billId="
+                            + event.billId());
+            return;
+        }
+
+        try {
+            byte[] pdfBytes = CheckoutInvoicePdfGenerator.generate(event);
+
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+            if (from != null && !from.isBlank()) {
+                helper.setFrom(from);
+            }
+
+            helper.setTo(event.recipientEmail());
+            helper.setSubject(notification.getTitle());
+
+            String html = "<div style='font-family:Arial,sans-serif;"
+                    + "line-height:1.7;color:#333'>"
+                    + "<h2>Thanh toán checkout thành công!</h2>"
+                    + "<p>Xin chào <b>" + safe(event.recipientName()) + "</b>,</p>"
+                    + "<p>Cảm ơn bạn đã sử dụng dịch vụ của Cruise System.</p>"
+                    + "<p>Hóa đơn checkout của bạn đã được thanh toán thành công.</p>"
+                    + "<div style='padding:16px;background:#f5f7fa;border-radius:8px'>"
+                    + "<p><b>Mã hóa đơn:</b> "
+                    + safe(event.billCode()) + "</p>"
+                    + "<p><b>Mã booking:</b> "
+                    + safe(event.bookingCode()) + "</p>"
+                    + "<p><b>Số hành khách:</b> "
+                    + (event.numberPassengers() == null
+                            ? 0
+                            : event.numberPassengers())
+                    + "</p>"
+                    + "<p><b>Tổng thanh toán:</b> "
+                    + (event.totalAmount() == null
+                            ? "0"
+                            : String.format(
+                                    java.util.Locale.US,
+                                    "%,.0f",
+                                    event.totalAmount()))
+                    + " VND</p>"
+                    + "<p><b>Trạng thái:</b> "
+                    + safe(event.billStatus()) + "</p>"
+                    + "</div>"
+                    + "<p>Vui lòng xem file PDF đính kèm để kiểm tra toàn bộ "
+                    + "chi tiết dịch vụ, số lượng, đơn giá, giảm giá và thành tiền.</p>"
+                    + "<p>Trân trọng,<br><b>Cruise System Team</b></p>"
+                    + "</div>";
+
+            helper.setText(html, true);
+
+            helper.addAttachment(
+                    "Hoa-don-checkout-" + safeFilename(event.billCode()) + ".pdf",
+                    new ByteArrayResource(pdfBytes),
+                    "application/pdf");
+
+            mailSender.send(mimeMessage);
+
+            notification.setEmailStatus(EmailStatus.SENT);
+
+            System.out.println(
+                    ">>> [CHECKOUT EMAIL] Đã gửi hóa đơn: billId="
+                            + event.billId()
+                            + ", email=" + event.recipientEmail());
+
+        } catch (MessagingException | RuntimeException ex) {
+            notification.setEmailStatus(EmailStatus.FAILED);
+            System.err.println(
+                    ">>> [CHECKOUT EMAIL] Gửi thất bại, billId="
+                            + event.billId()
+                            + ": " + ex.getMessage());
+            ex.printStackTrace();
+        }
+
+        repository.save(notification);
+    }
+
 }
