@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.UUID;
+import java.util.List;
 
 @Service
 @Transactional
@@ -123,6 +124,52 @@ public class NfcCardService {
                         + " changed from AVAILABLE to ASSIGNED");
 
         return nfcCardMapper.toResponse(saved);
+    }
+
+    @Transactional
+    public void releaseAssignedCards(List<String> cardUids) {
+        if (cardUids == null || cardUids.isEmpty()) {
+            System.out.println("[NFC RELEASE] Không có thẻ NFC cần trả.");
+            return;
+        }
+
+        for (String cardUid : cardUids) {
+            if (cardUid == null || cardUid.isBlank()) {
+                continue;
+            }
+
+            String normalizedUid = cardUid.trim();
+
+            NfcCard card = nfcCardRepository
+                    .findByCardUidForUpdate(normalizedUid)
+                    .orElse(null);
+
+            if (card == null) {
+                System.out.println(
+                        "[NFC RELEASE] Không tìm thấy thẻ: " + normalizedUid);
+                continue;
+            }
+
+            if (card.getStatus() == NfcCardStatus.AVAILABLE) {
+                System.out.println(
+                        "[NFC RELEASE] Thẻ đã AVAILABLE: " + normalizedUid);
+                continue;
+            }
+
+            if (card.getStatus() != NfcCardStatus.ASSIGNED) {
+                System.out.println(
+                        "[NFC RELEASE] Bỏ qua thẻ " + normalizedUid
+                                + ", trạng thái hiện tại: " + card.getStatus());
+                continue;
+            }
+
+            card.setStatus(NfcCardStatus.AVAILABLE);
+            nfcCardRepository.save(card);
+
+            System.out.println(
+                    "[NFC RELEASE] Thẻ " + normalizedUid
+                            + " đã chuyển ASSIGNED -> AVAILABLE");
+        }
     }
 
 }
