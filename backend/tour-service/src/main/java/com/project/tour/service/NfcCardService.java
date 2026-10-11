@@ -8,7 +8,8 @@ import com.project.tour.model.enums.NfcCardStatus;
 import com.project.tour.repository.NfcCardRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.UUID;
 
@@ -91,4 +92,37 @@ public class NfcCardService {
                 .map(nfcCardMapper::toResponse)
                 .toList();
     }
+
+    public NfcCardResponse assignCard(String cardUid) {
+        if (cardUid == null || cardUid.isBlank()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "NFC card UID must not be blank");
+        }
+
+        String normalizedUid = cardUid.trim();
+
+        NfcCard card = nfcCardRepository.findByCardUidForUpdate(normalizedUid)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "NFC card not found: " + normalizedUid));
+
+        if (card.getStatus() != NfcCardStatus.AVAILABLE) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "NFC card is not available. Current status: "
+                            + card.getStatus());
+        }
+
+        card.setStatus(NfcCardStatus.ASSIGNED);
+
+        NfcCard saved = nfcCardRepository.save(card);
+
+        System.out.println(
+                "[NFC] Card " + normalizedUid
+                        + " changed from AVAILABLE to ASSIGNED");
+
+        return nfcCardMapper.toResponse(saved);
+    }
+
 }
