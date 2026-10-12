@@ -141,12 +141,6 @@ public class ProductTourAssignmentService {
                                 .toList();
         }
 
-        /**
-         * Xóa phân công Product.
-         *
-         * Chỉ xóa ProductTour trong DB của tour-service.
-         * KHÔNG bắn Kafka.
-         */
         @Transactional
         public void deleteAssignment(
                         UUID tourId,

@@ -1,7 +1,7 @@
-package com.project.tour.controller.operation;
+package com.project.tour.controller.operation.configuration;
 
-import com.project.tour.dto.operation.configured.AssignmentActivityCruiseResponse;
-import com.project.tour.service.operation.OperationActivityCruiseTourService;
+import com.project.tour.dto.operation.configured.AssignmentActivityVisitResponse;
+import com.project.tour.service.operation.OperationActivityVisitTourService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,13 +10,13 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/operation/activity-cruise-tours")
-public class OperationActivityCruiseTourController {
+@RequestMapping("/api/operation/activity-visit-tours")
+public class OperationActivityVisitTourController {
 
-    private final OperationActivityCruiseTourService operationService;
+    private final OperationActivityVisitTourService operationService;
 
-    public OperationActivityCruiseTourController(
-            OperationActivityCruiseTourService operationService) {
+    public OperationActivityVisitTourController(
+            OperationActivityVisitTourService operationService) {
 
         this.operationService = operationService;
     }
@@ -26,7 +26,7 @@ public class OperationActivityCruiseTourController {
     // =========================================================
 
     @GetMapping
-    public ResponseEntity<List<AssignmentActivityCruiseResponse>> getAll() {
+    public ResponseEntity<List<AssignmentActivityVisitResponse>> getAll() {
 
         return ResponseEntity.ok(
                 operationService.getAll());
@@ -37,7 +37,7 @@ public class OperationActivityCruiseTourController {
     // =========================================================
 
     @GetMapping("/tour/{tourId}")
-    public ResponseEntity<List<AssignmentActivityCruiseResponse>> getByTourId(
+    public ResponseEntity<List<AssignmentActivityVisitResponse>> getByTourId(
             @PathVariable UUID tourId) {
 
         return ResponseEntity.ok(

@@ -10,11 +10,9 @@ import com.project.tour.model.scheduler.Tour;
 import com.project.tour.repository.convenience.ServiceTourRepository;
 import com.project.tour.repository.cruise.CruiseAreaRepository;
 import com.project.tour.repository.tour.TourRepository;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.UUID;
 
@@ -42,29 +40,20 @@ public class ServiceTourAssignmentService {
         public ServiceTourAssignmentResponse assign(
                         ServiceTourAssignmentRequest request) {
 
-                // =====================================================
                 // 1. Kiểm tra Tour
-                // =====================================================
-
                 Tour tour = tourRepository.findById(request.tourId())
                                 .orElseThrow(() -> new AppException(
                                                 "Tour not found",
                                                 HttpStatus.NOT_FOUND));
 
-                // =====================================================
                 // 2. Kiểm tra CruiseArea
-                // =====================================================
-
                 CruiseArea cruiseArea = cruiseAreaRepository.findById(
                                 request.cruiseAreaId())
                                 .orElseThrow(() -> new AppException(
                                                 "Cruise area not found",
                                                 HttpStatus.NOT_FOUND));
 
-                // =====================================================
                 // 3. Validate CruiseArea
-                // =====================================================
-
                 if (cruiseArea.getStatus() == null) {
                         throw new AppException(
                                         "Cruise area status is invalid",
@@ -77,20 +66,14 @@ public class ServiceTourAssignmentService {
                                         HttpStatus.BAD_REQUEST);
                 }
 
-                // =====================================================
                 // 4. Tour phải được gán Cruise
-                // =====================================================
-
                 if (tour.getCruise() == null) {
                         throw new AppException(
                                         "Tour has not been assigned to a cruise",
                                         HttpStatus.BAD_REQUEST);
                 }
 
-                // =====================================================
                 // 5. CruiseArea phải thuộc cùng Cruise với Tour
-                // =====================================================
-
                 if (!tour.getCruise().getId()
                                 .equals(cruiseArea.getCruiseDeck().getCruise().getId())) {
 
@@ -99,10 +82,7 @@ public class ServiceTourAssignmentService {
                                         HttpStatus.BAD_REQUEST);
                 }
 
-                // =====================================================
                 // 6. Chống phân công trùng
-                // =====================================================
-
                 ServiceTour serviceTour = serviceTourRepository
                                 .findByTourIdAndCruiseAreaId(
                                                 request.tourId(),
@@ -122,10 +102,7 @@ public class ServiceTourAssignmentService {
                                                         newServiceTour);
                                 });
 
-                // =====================================================
                 // 7. Trả response
-                // =====================================================
-
                 return assignmentMapper.toResponse(
                                 serviceTour,
                                 tour,
@@ -161,12 +138,6 @@ public class ServiceTourAssignmentService {
                                 .toList();
         }
 
-        /**
-         * Xóa phân công Service.
-         *
-         * Chỉ xóa ServiceTour trong DB của tour-service.
-         * Không bắn Kafka.
-         */
         @Transactional
         public void deleteAssignment(
                         UUID tourId,

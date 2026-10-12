@@ -22,10 +22,7 @@ public class OperationActivityVisitTourService {
                 this.visitTourRepository = visitTourRepository;
         }
 
-        // =========================================================
         // GET ALL
-        // =========================================================
-
         @Transactional(readOnly = true)
         public List<AssignmentActivityVisitResponse> getAll() {
 
@@ -36,10 +33,7 @@ public class OperationActivityVisitTourService {
                                 .toList();
         }
 
-        // =========================================================
         // GET BY TOUR
-        // =========================================================
-
         @Transactional(readOnly = true)
         public List<AssignmentActivityVisitResponse> getByTourId(
                         UUID tourId) {

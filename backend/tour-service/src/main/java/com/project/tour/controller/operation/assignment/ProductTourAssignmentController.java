@@ -1,4 +1,4 @@
-package com.project.tour.controller.operation;
+package com.project.tour.controller.operation.assignment;
 
 import com.project.tour.dto.operation.assignment.product.ProductTourAssignmentRequest;
 import com.project.tour.dto.operation.assignment.product.ProductTourAssignmentResponse;
