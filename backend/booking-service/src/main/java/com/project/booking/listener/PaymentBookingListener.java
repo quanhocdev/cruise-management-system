@@ -1,7 +1,8 @@
 package com.project.booking.listener;
 
+import com.project.booking.service.passenger.BookingService;
 import com.project.common.event.PaymentSuccessEvent;
-import com.project.booking.service.BookingService;
+
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 

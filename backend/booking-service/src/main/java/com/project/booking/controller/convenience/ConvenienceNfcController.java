@@ -2,7 +2,7 @@ package com.project.booking.controller.convenience;
 
 import com.project.booking.dto.nfc.NfcResolveRequest;
 import com.project.booking.dto.nfc.NfcResolveResponse;
-import com.project.booking.service.ScanNfcService;
+import com.project.booking.service.nfc.ScanNfcService;
 
 import jakarta.validation.Valid;
 

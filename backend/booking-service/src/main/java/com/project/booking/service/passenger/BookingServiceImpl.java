@@ -1,4 +1,4 @@
-package com.project.booking.service;
+package com.project.booking.service.passenger;
 
 import com.project.common.dto.UploadResult;
 import com.project.common.event.BookingConfirmedEvent;

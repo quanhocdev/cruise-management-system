@@ -2,7 +2,8 @@ package com.project.booking.controller.onboard;
 
 import com.project.booking.dto.nfc.NfcResolveRequest;
 import com.project.booking.dto.nfc.NfcResolveResponse;
-import com.project.booking.service.ScanNfcService;
+import com.project.booking.service.nfc.ScanNfcService;
+
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

@@ -2,7 +2,8 @@ package com.project.booking.controller;
 
 import com.project.booking.dto.booking.BookingResponse;
 import com.project.booking.dto.booking.CreateBookingRequest;
-import com.project.booking.service.BookingService;
+import com.project.booking.service.passenger.BookingService;
+
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
