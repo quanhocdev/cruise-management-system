@@ -1,4 +1,4 @@
-package com.project.tour.service.tour.schedule.stop;
+package com.project.tour.service.scheduler.stop;
 
 import com.project.tour.dto.scheduler.stop.CreateScheduleStopRequest;
 import com.project.tour.dto.scheduler.stop.ScheduleStopResponse;

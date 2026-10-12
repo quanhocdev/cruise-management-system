@@ -1,7 +1,7 @@
 package com.project.tour.controller.operation;
 
 import com.project.tour.dto.operation.configured.AssignmentActivityCruiseResponse;
-import com.project.tour.service.tour.operation.OperationActivityCruiseTourService;
+import com.project.tour.service.operation.OperationActivityCruiseTourService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

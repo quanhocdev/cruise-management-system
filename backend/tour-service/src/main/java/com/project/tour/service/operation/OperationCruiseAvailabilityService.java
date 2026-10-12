@@ -1,4 +1,4 @@
-package com.project.tour.service.tour.operation;
+package com.project.tour.service.operation;
 
 import com.project.tour.dto.admin.cruise.CruiseAvailabilityResponse;
 import com.project.tour.exception.AppException;

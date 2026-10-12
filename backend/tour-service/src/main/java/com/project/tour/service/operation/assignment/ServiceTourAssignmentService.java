@@ -1,15 +1,14 @@
-package com.project.tour.service.tour.operation.assignment;
+package com.project.tour.service.operation.assignment;
 
-import com.project.tour.dto.operation.assignment.activitycruise.ActivityCruiseTourAssignmentRequest;
-import com.project.tour.dto.operation.assignment.activitycruise.ActivityCruiseTourAssignmentResponse;
+import com.project.tour.dto.operation.assignment.service.ServiceTourAssignmentRequest;
+import com.project.tour.dto.operation.assignment.service.ServiceTourAssignmentResponse;
 import com.project.tour.exception.AppException;
-import com.project.tour.mapper.operation.assignment.ActivityCruiseTourAssignmentMapper;
+import com.project.tour.mapper.operation.assignment.ServiceTourAssignmentMapper;
 import com.project.tour.model.admin.CruiseArea;
-import com.project.tour.model.onboard.ActivityCruiseTour;
-import com.project.tour.model.onboard.enums.ActivityCruiseTourStatus;
+import com.project.tour.model.convenience.service.ServiceTour;
 import com.project.tour.model.scheduler.Tour;
+import com.project.tour.repository.convenience.ServiceTourRepository;
 import com.project.tour.repository.cruise.CruiseAreaRepository;
-import com.project.tour.repository.onboard.ActivityCruiseTourRepository;
 import com.project.tour.repository.tour.TourRepository;
 
 import org.springframework.http.HttpStatus;
@@ -21,27 +20,30 @@ import java.util.UUID;
 
 @Service
 @Transactional
-public class ActivityCruiseTourAssignmentService {
+public class ServiceTourAssignmentService {
 
-        private final ActivityCruiseTourRepository assignmentRepository;
+        private final ServiceTourRepository serviceTourRepository;
         private final TourRepository tourRepository;
         private final CruiseAreaRepository cruiseAreaRepository;
+        private final ServiceTourAssignmentMapper assignmentMapper;
 
-        public ActivityCruiseTourAssignmentService(
-                        ActivityCruiseTourRepository assignmentRepository,
+        public ServiceTourAssignmentService(
+                        ServiceTourRepository serviceTourRepository,
                         TourRepository tourRepository,
-                        CruiseAreaRepository cruiseAreaRepository) {
+                        CruiseAreaRepository cruiseAreaRepository,
+                        ServiceTourAssignmentMapper assignmentMapper) {
 
-                this.assignmentRepository = assignmentRepository;
+                this.serviceTourRepository = serviceTourRepository;
                 this.tourRepository = tourRepository;
                 this.cruiseAreaRepository = cruiseAreaRepository;
+                this.assignmentMapper = assignmentMapper;
         }
 
-        public ActivityCruiseTourAssignmentResponse assign(
-                        ActivityCruiseTourAssignmentRequest request) {
+        public ServiceTourAssignmentResponse assign(
+                        ServiceTourAssignmentRequest request) {
 
                 // =====================================================
-                // 1. KIỂM TRA TOUR
+                // 1. Kiểm tra Tour
                 // =====================================================
 
                 Tour tour = tourRepository.findById(request.tourId())
@@ -50,17 +52,17 @@ public class ActivityCruiseTourAssignmentService {
                                                 HttpStatus.NOT_FOUND));
 
                 // =====================================================
-                // 2. KIỂM TRA CRUISE AREA
+                // 2. Kiểm tra CruiseArea
                 // =====================================================
 
-                CruiseArea cruiseArea = cruiseAreaRepository
-                                .findById(request.cruiseAreaId())
+                CruiseArea cruiseArea = cruiseAreaRepository.findById(
+                                request.cruiseAreaId())
                                 .orElseThrow(() -> new AppException(
                                                 "Cruise area not found",
                                                 HttpStatus.NOT_FOUND));
 
                 // =====================================================
-                // 3. VALIDATE CRUISE AREA
+                // 3. Validate CruiseArea
                 // =====================================================
 
                 if (cruiseArea.getStatus() == null) {
@@ -76,7 +78,7 @@ public class ActivityCruiseTourAssignmentService {
                 }
 
                 // =====================================================
-                // 4. TOUR PHẢI ĐƯỢC GÁN CRUISE
+                // 4. Tour phải được gán Cruise
                 // =====================================================
 
                 if (tour.getCruise() == null) {
@@ -86,7 +88,7 @@ public class ActivityCruiseTourAssignmentService {
                 }
 
                 // =====================================================
-                // 5. CRUISE AREA PHẢI THUỘC CÙNG CRUISE
+                // 5. CruiseArea phải thuộc cùng Cruise với Tour
                 // =====================================================
 
                 if (!tour.getCruise().getId()
@@ -98,120 +100,89 @@ public class ActivityCruiseTourAssignmentService {
                 }
 
                 // =====================================================
-                // 6. CHỐNG PHÂN CÔNG TRÙNG
+                // 6. Chống phân công trùng
                 // =====================================================
 
-                ActivityCruiseTour assignment = assignmentRepository
+                ServiceTour serviceTour = serviceTourRepository
                                 .findByTourIdAndCruiseAreaId(
                                                 request.tourId(),
                                                 request.cruiseAreaId())
                                 .orElseGet(() -> {
 
-                                        ActivityCruiseTour newAssignment = new ActivityCruiseTour();
+                                        ServiceTour newServiceTour = new ServiceTour();
 
-                                        newAssignment.setTourId(
+                                        newServiceTour.setTourId(
                                                         request.tourId());
 
-                                        newAssignment.setCruiseAreaId(
+                                        newServiceTour.setCruiseAreaId(
                                                         request.cruiseAreaId());
 
-                                        newAssignment.setStatus(
-                                                        ActivityCruiseTourStatus.WAITING_CONFIG);
-
-                                        return assignmentRepository.save(
-                                                        newAssignment);
+                                        // Entity mặc định WAITING_CONFIG.
+                                        return serviceTourRepository.save(
+                                                        newServiceTour);
                                 });
 
                 // =====================================================
-                // 7. TRẢ RESPONSE
+                // 7. Trả response
                 // =====================================================
 
-                return ActivityCruiseTourAssignmentMapper.toResponse(
-                                assignment,
+                return assignmentMapper.toResponse(
+                                serviceTour,
                                 tour,
                                 cruiseArea);
         }
 
         /**
-         * Lấy toàn bộ phân công Activity Cruise của một Tour.
+         * Lấy toàn bộ phân công Service của một Tour.
          */
         @Transactional(readOnly = true)
-        public List<ActivityCruiseTourAssignmentResponse> getByTour(
+        public List<ServiceTourAssignmentResponse> getByTour(
                         UUID tourId) {
-
-                // =====================================================
-                // 1. KIỂM TRA TOUR
-                // =====================================================
 
                 Tour tour = tourRepository.findById(tourId)
                                 .orElseThrow(() -> new AppException(
                                                 "Tour not found",
                                                 HttpStatus.NOT_FOUND));
 
-                // =====================================================
-                // 2. LẤY ASSIGNMENT
-                // =====================================================
-
-                return assignmentRepository
+                return serviceTourRepository
                                 .findAllByTourIdOrderByCreatedAtAsc(tourId)
                                 .stream()
-                                .map(assignment -> {
+                                .map(serviceTour -> {
 
                                         CruiseArea cruiseArea = cruiseAreaRepository
-                                                        .findById(
-                                                                        assignment.getCruiseAreaId())
+                                                        .findById(serviceTour.getCruiseAreaId())
                                                         .orElse(null);
 
-                                        return ActivityCruiseTourAssignmentMapper.toResponse(
-                                                        assignment,
+                                        return assignmentMapper.toResponse(
+                                                        serviceTour,
                                                         tour,
                                                         cruiseArea);
                                 })
                                 .toList();
         }
 
+        /**
+         * Xóa phân công Service.
+         *
+         * Chỉ xóa ServiceTour trong DB của tour-service.
+         * Không bắn Kafka.
+         */
+        @Transactional
         public void deleteAssignment(
                         UUID tourId,
                         UUID cruiseAreaId) {
 
-                // =====================================================
-                // 1. KIỂM TRA TOUR
-                // =====================================================
-
-                if (!tourRepository.existsById(tourId)) {
-                        throw new AppException(
-                                        "Tour not found",
-                                        HttpStatus.NOT_FOUND);
-                }
-
-                // =====================================================
-                // 2. KIỂM TRA CRUISE AREA
-                // =====================================================
-
-                if (!cruiseAreaRepository.existsById(cruiseAreaId)) {
-                        throw new AppException(
-                                        "Cruise area not found",
-                                        HttpStatus.NOT_FOUND);
-                }
-
-                // =====================================================
-                // 3. KIỂM TRA ASSIGNMENT
-                // =====================================================
-
-                if (!assignmentRepository.existsByTourIdAndCruiseAreaId(
-                                tourId,
-                                cruiseAreaId)) {
+                if (!serviceTourRepository
+                                .existsByTourIdAndCruiseAreaId(
+                                                tourId,
+                                                cruiseAreaId)) {
 
                         throw new AppException(
                                         "Assignment not found",
                                         HttpStatus.NOT_FOUND);
                 }
 
-                // =====================================================
-                // 4. XÓA
-                // =====================================================
-
-                assignmentRepository.deleteByTourIdAndCruiseAreaId(
+                serviceTourRepository.deleteByTourIdAndCruiseAreaId(
                                 tourId,
                                 cruiseAreaId);
         }

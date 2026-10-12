@@ -3,7 +3,7 @@ package com.project.tour.controller.scheduler;
 import com.project.tour.dto.scheduler.schedule.CreateScheduleRequest;
 import com.project.tour.dto.scheduler.schedule.ScheduleResponse;
 import com.project.tour.dto.scheduler.schedule.UpdateScheduleRequest;
-import com.project.tour.service.tour.schedule.ScheduleService;
+import com.project.tour.service.scheduler.ScheduleService;
 
 import jakarta.validation.Valid;
 

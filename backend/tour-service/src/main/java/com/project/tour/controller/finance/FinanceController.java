@@ -11,14 +11,14 @@ import com.project.tour.dto.scheduler.schedule.ScheduleResponse;
 import com.project.tour.dto.scheduler.stop.ScheduleStopResponse;
 import com.project.tour.dto.scheduler.tour.TourResponse;
 import com.project.tour.service.tour.TourService;
-import com.project.tour.service.tour.schedule.ScheduleService;
-import com.project.tour.service.tour.schedule.stop.ScheduleStopService;
-import com.project.tour.service.room.RoomService;
-import com.project.tour.service.room.RoomTypeService;
 import com.project.tour.service.NfcCardService;
 import com.project.tour.service.admin.cruise.CruiseAreaService;
 import com.project.tour.service.admin.cruise.CruiseDeckService;
 import com.project.tour.service.admin.cruise.CruiseService;
+import com.project.tour.service.admin.room.RoomService;
+import com.project.tour.service.admin.room.RoomTypeService;
+import com.project.tour.service.scheduler.ScheduleService;
+import com.project.tour.service.scheduler.stop.ScheduleStopService;
 
 import java.util.Map;
 import org.springframework.http.ResponseEntity;

@@ -3,9 +3,9 @@ package com.project.tour.controller.operation;
 import com.project.tour.dto.admin.cruise.CruiseAvailabilityResponse;
 import com.project.tour.dto.operation.assignment.OperationCruiseLayoutResponse;
 import com.project.tour.dto.scheduler.tour.TourResponse;
-import com.project.tour.service.tour.operation.ApprovalTourService;
-import com.project.tour.service.tour.operation.assignment.TourCruiseAssignmentService;
-import com.project.tour.service.tour.operation.assignment.TourLayoutService;
+import com.project.tour.service.operation.ApprovalTourService;
+import com.project.tour.service.operation.assignment.TourCruiseAssignmentService;
+import com.project.tour.service.operation.assignment.TourLayoutService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

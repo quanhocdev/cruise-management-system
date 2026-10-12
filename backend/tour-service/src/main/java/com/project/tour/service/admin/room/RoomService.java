@@ -1,4 +1,4 @@
-package com.project.tour.service.room;
+package com.project.tour.service.admin.room;
 
 import com.project.tour.dto.admin.room.CreateRoomRequest;
 import com.project.tour.dto.admin.room.RoomResponse;

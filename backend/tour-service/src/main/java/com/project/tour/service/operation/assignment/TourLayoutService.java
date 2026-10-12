@@ -1,4 +1,4 @@
-package com.project.tour.service.tour.operation.assignment;
+package com.project.tour.service.operation.assignment;
 
 import com.project.tour.dto.operation.assignment.OperationCruiseLayoutResponse;
 import com.project.tour.exception.AppException;

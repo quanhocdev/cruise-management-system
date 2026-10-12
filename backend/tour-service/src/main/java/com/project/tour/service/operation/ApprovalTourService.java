@@ -1,4 +1,4 @@
-package com.project.tour.service.tour.operation;
+package com.project.tour.service.operation;
 
 import com.project.common.event.TourApprovedEvent;
 import com.project.common.event.TourAssignmentEvent;
