@@ -2,7 +2,8 @@ package com.project.booking.controller.finance;
 
 import com.project.booking.dto.booking.BookingSummaryResponse;
 import com.project.booking.dto.passenger.BookingPassengerDetailResponse;
-import com.project.booking.service.finance.FinanceBookingService;
+import com.project.booking.service.finance.booking.FinanceBookingService;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,10 +25,7 @@ public class BookingFinanceController {
     public ResponseEntity<List<BookingSummaryResponse>> getBookingsByTour(
             @RequestParam UUID tourId) {
 
-        System.out.println("========================================");
         System.out.println("[FINANCE] GET /api/finance/bookings");
-        System.out.println("[FINANCE] tourId = " + tourId);
-        System.out.println("========================================");
 
         List<BookingSummaryResponse> result = financeBookingService.getBookingsByTourId(tourId);
 
@@ -40,10 +38,8 @@ public class BookingFinanceController {
     public ResponseEntity<List<BookingPassengerDetailResponse>> getPassengersByBooking(
             @PathVariable Long bookingId) {
 
-        System.out.println("========================================");
         System.out.println("[FINANCE] GET passengers");
         System.out.println("[FINANCE] bookingId = " + bookingId);
-        System.out.println("========================================");
 
         return ResponseEntity.ok(
                 financeBookingService.getPassengersByBookingId(bookingId));

@@ -1,4 +1,4 @@
-package com.project.booking.service.finance;
+package com.project.booking.service.finance.booking;
 
 import com.project.booking.dto.booking.BookingSummaryResponse;
 import com.project.booking.dto.passenger.BookingPassengerDetailResponse;

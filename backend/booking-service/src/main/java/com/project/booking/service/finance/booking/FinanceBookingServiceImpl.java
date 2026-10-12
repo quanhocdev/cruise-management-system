@@ -1,4 +1,4 @@
-package com.project.booking.service.finance;
+package com.project.booking.service.finance.booking;
 
 import com.project.booking.dto.booking.BookingSummaryResponse;
 import com.project.booking.dto.passenger.BookingPassengerDetailResponse;
@@ -37,19 +37,7 @@ public class FinanceBookingServiceImpl implements FinanceBookingService {
         @Override
         public List<BookingSummaryResponse> getBookingsByTourId(UUID tourId) {
 
-                System.out.println("[FINANCE SERVICE] getBookingsByTourId()");
-                System.out.println("[FINANCE SERVICE] tourId = " + tourId);
-
-                System.out.println("[FINANCE SERVICE] Calling repository...");
-
                 List<Booking> bookings = bookingRepository.findAllByTourId(tourId);
-
-                System.out.println(
-                                "[FINANCE SERVICE] Repository returned "
-                                                + bookings.size()
-                                                + " booking(s)");
-
-                System.out.println("[FINANCE SERVICE] Mapping bookings...");
 
                 List<BookingSummaryResponse> result = bookings.stream()
                                 .map(booking -> {
