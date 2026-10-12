@@ -1,4 +1,4 @@
-package com.project.tour.service.operation;
+package com.project.tour.service.operation.configuration;
 
 import com.project.tour.dto.operation.configured.AssignmentActivityVisitResponse;
 import com.project.tour.mapper.operation.configured.AssignmentActivityVisitMapper;

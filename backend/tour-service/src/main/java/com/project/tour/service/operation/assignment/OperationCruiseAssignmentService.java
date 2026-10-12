@@ -1,4 +1,4 @@
-package com.project.tour.service.operation;
+package com.project.tour.service.operation.assignment;
 
 import com.project.common.event.TourAssignmentEvent;
 import com.project.common.event.enums.TourAssignmentType;
@@ -56,10 +56,7 @@ public class OperationCruiseAssignmentService {
                                                         TourAssignmentType.PRODUCT));
                 }
 
-                // =====================================================
                 // SERVICE
-                // =====================================================
-
                 List<ServiceTour> serviceTours = serviceTourRepository
                                 .findAllByTourIdOrderByCreatedAtAsc(tourId);
 
@@ -72,10 +69,7 @@ public class OperationCruiseAssignmentService {
                                                         TourAssignmentType.SERVICE));
                 }
 
-                // =====================================================
                 // ACTIVITY CRUISE
-                // =====================================================
-
                 List<ActivityCruiseTour> activityCruiseTours = activityCruiseTourRepository
                                 .findAllByTourIdOrderByCreatedAtAsc(tourId);
 
@@ -88,10 +82,7 @@ public class OperationCruiseAssignmentService {
                                                         TourAssignmentType.ACTIVITY_CRUISE));
                 }
 
-                // =====================================================
                 // ACTIVITY VISIT
-                // =====================================================
-
                 List<VisitTour> visitTours = visitTourRepository
                                 .findAllByTourIdOrderByStartTimeAsc(tourId);
 

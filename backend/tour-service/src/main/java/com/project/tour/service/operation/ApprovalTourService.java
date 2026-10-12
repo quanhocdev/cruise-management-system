@@ -16,12 +16,10 @@ import com.project.tour.model.scheduler.ScheduleStop;
 import com.project.tour.model.scheduler.Tour;
 import com.project.tour.repository.cruise.CruiseAreaRepository;
 import com.project.tour.repository.cruise.CruiseDeckRepository;
-import com.project.tour.repository.room.RoomRepository;
-import com.project.tour.repository.tour.TourPackageRepository;
 import com.project.tour.repository.tour.TourRepository;
 import com.project.tour.repository.tour.schedule.ScheduleRepository;
 import com.project.tour.repository.tour.schedule.ScheduleStopRepository;
-import com.project.tour.service.redis.TourRedisService;
+import com.project.tour.service.operation.assignment.OperationCruiseAssignmentService;
 import com.project.tour.service.shore.VisitTourService;
 
 import java.util.Map;
@@ -42,45 +40,34 @@ public class ApprovalTourService {
         private static final String TOUR_MASTER_SYNC_TOPIC = "tour-master-sync-topic";
 
         private final TourRepository tourRepository;
-        private final TourPackageRepository tourPackageRepository;
-        private final RoomRepository roomRepository;
         private final CruiseDeckRepository cruiseDeckRepository;
         private final CruiseAreaRepository cruiseAreaRepository;
         private final ScheduleRepository scheduleRepository;
         private final ScheduleStopRepository scheduleStopRepository;
         private final OperationCruiseAssignmentService cruiseAssignmentService;
         private final KafkaTemplate<String, Object> kafkaTemplate;
-        private final TourRedisService tourRedisService;
         private final VisitTourService visitTourService;
 
         public ApprovalTourService(
                         TourRepository tourRepository,
-                        TourPackageRepository tourPackageRepository,
-                        RoomRepository roomRepository,
                         CruiseDeckRepository cruiseDeckRepository,
                         CruiseAreaRepository cruiseAreaRepository,
                         ScheduleRepository scheduleRepository,
                         ScheduleStopRepository scheduleStopRepository,
                         OperationCruiseAssignmentService cruiseAssignmentService,
                         KafkaTemplate<String, Object> kafkaTemplate,
-                        TourRedisService tourRedisService,
                         VisitTourService visitTourService) {
                 this.tourRepository = tourRepository;
-                this.tourPackageRepository = tourPackageRepository;
-                this.roomRepository = roomRepository;
                 this.cruiseDeckRepository = cruiseDeckRepository;
                 this.cruiseAreaRepository = cruiseAreaRepository;
                 this.scheduleRepository = scheduleRepository;
                 this.scheduleStopRepository = scheduleStopRepository;
                 this.cruiseAssignmentService = cruiseAssignmentService;
                 this.kafkaTemplate = kafkaTemplate;
-                this.tourRedisService = tourRedisService;
                 this.visitTourService = visitTourService;
         }
 
-        // =========================================================
         // GET TOURS CHỜ DUYỆT
-        // =========================================================
         @Transactional(readOnly = true)
         public List<TourResponse> getPendingTours() {
                 return tourRepository

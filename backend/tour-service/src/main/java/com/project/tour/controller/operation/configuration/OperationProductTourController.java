@@ -1,7 +1,7 @@
 package com.project.tour.controller.operation.configuration;
 
 import com.project.tour.dto.operation.configured.AssignmentProductResponse;
-import com.project.tour.service.operation.OperationProductTourService;
+import com.project.tour.service.operation.configuration.OperationProductTourService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
