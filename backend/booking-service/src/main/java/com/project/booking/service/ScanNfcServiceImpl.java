@@ -13,11 +13,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional(readOnly = true)
-public class ConvenienceNfcServiceImpl implements ConvenienceNfcService {
+public class ScanNfcServiceImpl implements ScanNfcService {
 
         private final BookingPassengerRepository bookingPassengerRepository;
 
-        public ConvenienceNfcServiceImpl(
+        public ScanNfcServiceImpl(
                         BookingPassengerRepository bookingPassengerRepository) {
 
                 this.bookingPassengerRepository = bookingPassengerRepository;

@@ -2,7 +2,7 @@ package com.project.booking.controller.onboard;
 
 import com.project.booking.dto.nfc.NfcResolveRequest;
 import com.project.booking.dto.nfc.NfcResolveResponse;
-import com.project.booking.service.ConvenienceNfcService;
+import com.project.booking.service.ScanNfcService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/onboard/nfc")
 public class OnboardNfcController {
 
-    private final ConvenienceNfcService convenienceNfcService;
+    private final ScanNfcService convenienceNfcService;
 
     public OnboardNfcController(
-            ConvenienceNfcService convenienceNfcService) {
+            ScanNfcService convenienceNfcService) {
 
         this.convenienceNfcService = convenienceNfcService;
     }

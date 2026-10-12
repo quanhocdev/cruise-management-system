@@ -2,7 +2,8 @@ package com.project.booking.controller;
 
 import com.project.booking.dto.passenger.PassengerRequest;
 import com.project.booking.dto.passenger.PassengerResponse;
-import com.project.booking.service.PassengerService;
+import com.project.booking.service.passenger.PassengerService;
+
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

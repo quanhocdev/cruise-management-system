@@ -1,4 +1,4 @@
-package com.project.booking.service.service;
+package com.project.booking.service.convenience.service;
 
 import com.project.booking.dto.convenience.service.ServiceUsageManagementResponse;
 import com.project.booking.dto.convenience.service.ServiceUsageRequest;

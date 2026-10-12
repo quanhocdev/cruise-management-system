@@ -1,4 +1,4 @@
-package com.project.booking.service;
+package com.project.booking.service.passenger;
 
 import com.project.common.dto.UploadResult;
 import com.project.common.service.file.FileStorageService;
@@ -10,6 +10,7 @@ import com.project.booking.model.Passenger;
 import com.project.booking.model.enums.BookingStatus;
 import com.project.booking.repository.BookingPassengerRepository;
 import com.project.booking.repository.PassengerRepository;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

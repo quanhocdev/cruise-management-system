@@ -1,7 +1,7 @@
 package com.project.booking.controller.convenience;
 
 import com.project.booking.dto.convenience.product.ProductUsageResponse;
-import com.project.booking.service.product.ProductUsageService;
+import com.project.booking.service.convenience.product.ProductUsageService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;

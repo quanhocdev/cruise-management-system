@@ -1,4 +1,4 @@
-package com.project.booking.service.product;
+package com.project.booking.service.convenience.product;
 
 import com.project.booking.client.TourProductClient;
 import com.project.booking.model.Booking;
