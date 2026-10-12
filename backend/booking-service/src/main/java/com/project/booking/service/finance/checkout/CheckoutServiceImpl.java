@@ -17,7 +17,7 @@ import com.project.booking.repository.BillItemRepository;
 import com.project.booking.repository.BillRepository;
 import com.project.booking.repository.BookingPassengerRepository;
 import com.project.booking.repository.BookingRepository;
-import com.project.booking.service.PaymentCheckoutService;
+import com.project.booking.service.finance.bill.PaymentCheckoutService;
 import com.project.booking.service.finance.checkout.PassengerUsageReader.PassengerUsages;
 
 import org.springframework.http.HttpStatus;

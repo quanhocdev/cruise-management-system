@@ -12,7 +12,7 @@ import com.project.booking.model.Booking;
 import com.project.booking.model.BookingPassenger;
 import com.project.booking.repository.ActivityVisitUsageRepository;
 import com.project.booking.repository.BookingPassengerRepository;
-import com.project.booking.service.BenefitConsumptionService;
+import com.project.booking.service.common.benefit.BenefitConsumptionService;
 import com.project.booking.service.shore.ActivityVisitUsageCalculator.UsageAmount;
 
 import org.springframework.http.HttpStatus;

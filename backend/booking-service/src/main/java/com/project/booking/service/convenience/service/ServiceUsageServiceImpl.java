@@ -10,7 +10,8 @@ import com.project.booking.model.Booking;
 import com.project.booking.model.BookingPassenger;
 import com.project.booking.model.ServiceUsage;
 import com.project.booking.repository.ServiceUsageRepository;
-import com.project.booking.service.BenefitConsumptionService;
+import com.project.booking.service.common.benefit.BenefitConsumptionService;
+
 import org.springframework.transaction.annotation.Transactional;
 import com.project.booking.client.ServiceTourManagementClient;
 import com.project.booking.client.ServiceTourManagementClient.ServiceUsageManagementInfo;

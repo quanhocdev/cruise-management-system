@@ -10,7 +10,7 @@ import com.project.booking.model.Booking;
 import com.project.booking.model.BookingPassenger;
 import com.project.booking.model.ProductUsage;
 import com.project.booking.repository.ProductUsageRepository;
-import com.project.booking.service.BenefitConsumptionService;
+import com.project.booking.service.common.benefit.BenefitConsumptionService;
 import com.project.common.event.ProductUsedEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,8 +1,9 @@
-package com.project.booking.service;
+package com.project.booking.service.finance.bill;
 
 import com.project.booking.client.PaymentClient;
 import com.project.booking.dto.payment.BillPaymentRequest;
 import com.project.booking.dto.payment.BillPaymentResponse;
+
 import org.springframework.stereotype.Service;
 
 @Service

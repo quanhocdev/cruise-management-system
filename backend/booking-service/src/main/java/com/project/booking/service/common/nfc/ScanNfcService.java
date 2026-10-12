@@ -1,4 +1,4 @@
-package com.project.booking.service.nfc;
+package com.project.booking.service.common.nfc;
 
 import com.project.booking.dto.nfc.NfcResolveRequest;
 import com.project.booking.dto.nfc.NfcResolveResponse;

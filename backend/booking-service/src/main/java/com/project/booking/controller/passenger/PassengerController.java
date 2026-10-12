@@ -1,4 +1,4 @@
-package com.project.booking.controller;
+package com.project.booking.controller.passenger;
 
 import com.project.booking.dto.passenger.PassengerRequest;
 import com.project.booking.dto.passenger.PassengerResponse;
