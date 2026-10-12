@@ -1,7 +1,7 @@
 package com.project.tour.controller.admin.port.scheduler;
 
 import com.project.tour.dto.admin.port.PortResponse;
-import com.project.tour.service.port.PortService;
+import com.project.tour.service.admin.port.PortService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

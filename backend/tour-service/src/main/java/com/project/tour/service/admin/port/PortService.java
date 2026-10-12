@@ -1,4 +1,4 @@
-package com.project.tour.service.port;
+package com.project.tour.service.admin.port;
 
 import com.project.common.dto.location.AddressResponse;
 import com.project.common.service.location.GeocodingService;

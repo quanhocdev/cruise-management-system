@@ -3,7 +3,7 @@ package com.project.tour.controller.admin.cruise;
 import com.project.tour.dto.admin.cruise.CreateCruiseRequest;
 import com.project.tour.dto.admin.cruise.CruiseResponse;
 import com.project.tour.dto.admin.cruise.UpdateCruiseRequest;
-import com.project.tour.service.cruise.CruiseService;
+import com.project.tour.service.admin.cruise.CruiseService;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

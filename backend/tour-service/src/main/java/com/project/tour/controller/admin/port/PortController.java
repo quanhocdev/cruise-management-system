@@ -3,7 +3,7 @@ package com.project.tour.controller.admin.port;
 import com.project.tour.dto.admin.port.CreatePortRequest;
 import com.project.tour.dto.admin.port.PortResponse;
 import com.project.tour.dto.admin.port.UpdatePortRequest;
-import com.project.tour.service.port.PortService;
+import com.project.tour.service.admin.port.PortService;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

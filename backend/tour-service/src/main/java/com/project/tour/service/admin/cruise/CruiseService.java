@@ -1,4 +1,4 @@
-package com.project.tour.service.cruise;
+package com.project.tour.service.admin.cruise;
 
 import com.project.common.dto.UploadResult;
 import com.project.common.service.file.FileStorageService;

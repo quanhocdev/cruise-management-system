@@ -1,4 +1,4 @@
-package com.project.tour.service.policy;
+package com.project.tour.service.admin.policy;
 
 import com.project.tour.dto.admin.policy.booking.BookingPolicyResponse;
 import com.project.tour.dto.admin.policy.booking.CreateBookingPolicyRequest;

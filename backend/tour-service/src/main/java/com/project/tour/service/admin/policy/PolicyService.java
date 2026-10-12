@@ -1,4 +1,4 @@
-package com.project.tour.service.policy;
+package com.project.tour.service.admin.policy;
 
 import com.project.tour.dto.admin.policy.CreatePolicyRequest;
 import com.project.tour.dto.admin.policy.PolicyResponse;

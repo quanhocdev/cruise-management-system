@@ -1,4 +1,3 @@
-
 package com.project.tour.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -9,7 +8,6 @@ import com.project.tour.exception.ForecastUnavailableException;
 import com.project.tour.exception.WeatherApiException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;

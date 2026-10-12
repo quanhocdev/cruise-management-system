@@ -3,7 +3,7 @@ package com.project.tour.controller.admin.cruise;
 import com.project.tour.dto.admin.cruise.area.CreateCruiseAreaRequest;
 import com.project.tour.dto.admin.cruise.area.CruiseAreaResponse;
 import com.project.tour.dto.admin.cruise.area.UpdateCruiseAreaRequest;
-import com.project.tour.service.cruise.CruiseAreaService;
+import com.project.tour.service.admin.cruise.CruiseAreaService;
 
 import jakarta.validation.Valid;
 
