@@ -1,6 +1,8 @@
+
 package com.project.tour.controller;
 
 import com.project.tour.dto.weather.WeatherResponse;
+import com.project.tour.exception.ForecastUnavailableException;
 import com.project.tour.exception.WeatherApiException;
 import com.project.tour.service.WeatherService;
 import org.springframework.http.HttpStatus;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 @RestController
@@ -25,22 +28,38 @@ public class WeatherController {
     @GetMapping
     public ResponseEntity<?> getWeather(
             @RequestParam double latitude,
-            @RequestParam double longitude) {
+            @RequestParam double longitude,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate) {
+
         try {
             WeatherResponse response = weatherService.getWeather(
                     latitude,
-                    longitude);
+                    longitude,
+                    startDate,
+                    endDate);
 
             return ResponseEntity.ok(response);
 
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body(
-                    Map.of("error", ex.getMessage()));
+                    Map.of(
+                            "code", "INVALID_REQUEST",
+                            "message", ex.getMessage()));
+
+        } catch (ForecastUnavailableException ex) {
+            return ResponseEntity.status(
+                    HttpStatus.UNPROCESSABLE_ENTITY).body(
+                            Map.of(
+                                    "code", "FORECAST_UNAVAILABLE",
+                                    "message", ex.getMessage()));
 
         } catch (WeatherApiException ex) {
             return ResponseEntity.status(
                     HttpStatus.BAD_GATEWAY).body(
-                            Map.of("error", ex.getMessage()));
+                            Map.of(
+                                    "code", "WEATHER_PROVIDER_ERROR",
+                                    "message", ex.getMessage()));
         }
     }
 }
