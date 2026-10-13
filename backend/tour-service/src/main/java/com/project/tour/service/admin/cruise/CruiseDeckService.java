@@ -102,11 +102,7 @@ public class CruiseDeckService {
                                         HttpStatus.BAD_REQUEST);
                 }
 
-                /*
-                 * =================================================
-                 * 4. NẾU ĐÃ ĐỦ TẦNG
-                 * =================================================
-                 */
+                // 4. NẾU ĐÃ ĐỦ TẦNG
 
                 if (totalDecks == currentMaxDeck) {
 
@@ -117,11 +113,7 @@ public class CruiseDeckService {
                                         .toList();
                 }
 
-                /*
-                 * =================================================
-                 * 5. TẠO CÁC TẦNG CÒN THIẾU
-                 * =================================================
-                 */
+                // 5. TẠO CÁC TẦNG CÒN THIẾU
 
                 List<CruiseDeck> decksToCreate = new ArrayList<>();
 
@@ -145,11 +137,7 @@ public class CruiseDeckService {
                 List<CruiseDeck> savedDecks = cruiseDeckRepository.saveAll(
                                 decksToCreate);
 
-                /*
-                 * =================================================
-                 * 7. TRẢ VỀ RESPONSE
-                 * =================================================
-                 */
+                // 7. TRẢ VỀ RESPONSE
 
                 return savedDecks
                                 .stream()
