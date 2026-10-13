@@ -2,16 +2,26 @@ FROM maven:3.9.6-eclipse-temurin-17
 
 WORKDIR /app
 
-# 1. Copy và cài đặt module common trước
-COPY common/pom.xml ./common/pom.xml
-COPY common/src ./common/src
-RUN mvn -f common/pom.xml clean install -DskipTests
+# 1. Copy SeaRoute source code from the Git submodule
+COPY third-party/searoute/ ./third-party/searoute/
 
-# 2. Copy pom và src của tour-service
-COPY tour-service/pom.xml ./tour-service/pom.xml
-COPY tour-service/src ./tour-service/src
+# 2. Build and install SeaRoute Maven modules
+RUN mvn -f ./third-party/searoute/pom.xml clean install -DskipTests
 
+# 3. Copy and install the shared common module
+COPY backend/common/pom.xml ./common/pom.xml
+COPY backend/common/src ./common/src
+
+RUN mvn -f ./common/pom.xml clean install -DskipTests
+
+# 4. Copy the tour-service project
+COPY backend/tour-service/pom.xml ./tour-service/pom.xml
+COPY backend/tour-service/src ./tour-service/src
+
+# 5. Copy SeaRoute map data to the fallback path
+COPY third-party/searoute/modules/core/src/main/resources/marnet/ ./tour-service/marnet/
+
+# 6. Run tour-service
 WORKDIR /app/tour-service
 
-# 3. Build và chạy trực tiếp không dùng go-offline
 CMD ["mvn", "spring-boot:run"]

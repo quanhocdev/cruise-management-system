@@ -1,0 +1,3 @@
+[submodule "third-party/searoute"]
+	path = third-party/searoute
+	url = https://github.com/eurostat/searoute.git
