@@ -1,4 +1,4 @@
-package com.project.tour.service.tour;
+package com.project.tour.service.scheduler;
 
 import com.project.tour.exception.AppException;
 import com.project.tour.model.enums.tour.TourStatusTrip;
@@ -10,10 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class TourStatusValidator {
 
-    // =====================================================
     // UPDATE TOUR
-    // =====================================================
-
     public void validateCanUpdate(Tour tour) {
         validateTour(tour);
 
@@ -30,10 +27,7 @@ public class TourStatusValidator {
                 HttpStatus.BAD_REQUEST);
     }
 
-    // =====================================================
     // DELETE TOUR
-    // =====================================================
-
     public void validateCanDelete(Tour tour) {
 
         validateTour(tour);
@@ -46,10 +40,7 @@ public class TourStatusValidator {
         }
     }
 
-    // =====================================================
     // SUBMIT FOR APPROVAL
-    // =====================================================
-
     public void validateCanSubmitForApproval(Tour tour) {
 
         validateTour(tour);
@@ -62,29 +53,13 @@ public class TourStatusValidator {
         }
     }
 
-    // =====================================================
     // MANAGE SCHEDULE
-    // =====================================================
-
     public void validateCanManageSchedule(Tour tour) {
 
         validateTour(tour);
 
         TourStatusTrip status = tour.getStatusTrip();
 
-        /*
-         * Scheduler được quản lý Schedule trong các trạng thái:
-         *
-         * DRAFT
-         * APPROVAL_PENDING
-         * APPROVED
-         * IN_PROGRESS
-         *
-         * Không được quản lý Schedule khi:
-         *
-         * COMPLETED
-         * CANCELLED
-         */
         if (status != TourStatusTrip.DRAFT
                 && status != TourStatusTrip.APPROVED
                 && status != TourStatusTrip.IN_PROGRESS) {
@@ -95,10 +70,7 @@ public class TourStatusValidator {
         }
     }
 
-    // =====================================================
     // COMMON VALIDATION
-    // =====================================================
-
     private void validateTour(Tour tour) {
 
         if (tour == null) {

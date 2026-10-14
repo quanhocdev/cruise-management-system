@@ -1,4 +1,4 @@
-package com.project.tour.service.tour;
+package com.project.tour.service.scheduler;
 
 import com.project.tour.dto.scheduler.tour.CreateTourRequest;
 import com.project.tour.dto.scheduler.tour.TourResponse;
@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.project.tour.service.redis.TourRedisService;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -42,10 +43,7 @@ public class TourService {
                 this.tourPackageRepository = tourPackageRepository;
         }
 
-        // =====================================================
         // CREATE
-        // =====================================================
-
         public TourResponse createTour(
                         CreateTourRequest request) {
 
@@ -63,10 +61,7 @@ public class TourService {
                 return TourMapper.toResponse(savedTour);
         }
 
-        // =====================================================
         // GET BY ID
-        // =====================================================
-
         @Transactional(readOnly = true)
         public TourResponse getTourById(
                         UUID id) {
@@ -76,10 +71,7 @@ public class TourService {
                 return TourMapper.toResponse(tour);
         }
 
-        // =====================================================
         // GET BY CODE
-        // =====================================================
-
         @Transactional(readOnly = true)
         public TourResponse getTourByCode(
                         String code) {
@@ -93,10 +85,7 @@ public class TourService {
                 return TourMapper.toResponse(tour);
         }
 
-        // =====================================================
         // GET TOURS
-        // =====================================================
-
         @Transactional(readOnly = true)
         public List<TourResponse> getTours(
                         UUID cruiseId,
@@ -104,41 +93,26 @@ public class TourService {
 
                 List<Tour> tours;
 
-                /*
-                 * Không có cruiseId + không có statusTrip
-                 * -> lấy tất cả tour.
-                 */
+                // Không có cruiseId + không có statusTrip -> lấy tất cả tour.
                 if (cruiseId == null && statusTrip == null) {
-
                         tours = tourRepository
                                         .findAllByOrderByNameAsc();
 
-                        /*
-                         * Có cruiseId + không có statusTrip
-                         * -> lấy tour theo cruise.
-                         */
+                        // Có cruiseId + không có statusTrip -> lấy tour theo cruise.
                 } else if (cruiseId != null && statusTrip == null) {
-
                         tours = tourRepository
                                         .findAllByCruise_IdOrderByNameAsc(
                                                         cruiseId);
 
-                        /*
-                         * Không có cruiseId + có statusTrip
-                         * -> lọc theo trạng thái tour.
-                         */
+                        // Không có cruiseId + có statusTrip -> lọc theo trạng thái tour.
                 } else if (cruiseId == null && statusTrip != null) {
-
                         tours = tourRepository
                                         .findAllByStatusTripOrderByNameAsc(
                                                         statusTrip);
 
-                        /*
-                         * Có cả cruiseId + statusTrip
-                         * -> lọc theo cả hai điều kiện.
-                         */
-                } else {
+                        // Có cruiseId + statusTrip -> lọc theo cả hai điều kiện.
 
+                } else {
                         tours = tourRepository
                                         .findAllByCruise_IdAndStatusTripOrderByNameAsc(
                                                         cruiseId,
@@ -151,10 +125,7 @@ public class TourService {
                                 .toList();
         }
 
-        // =====================================================
         // UPDATE
-        // =====================================================
-
         public TourResponse updateTour(
                         UUID id,
                         UpdateTourRequest request) {
@@ -186,11 +157,7 @@ public class TourService {
                 return TourMapper.toResponse(updatedTour);
         }
 
-        // =====================================================
         // DELETE
-        // =====================================================
-
-        // Trong deleteTour(UUID id) của TourService.java:
         public void deleteTour(UUID id) {
                 Tour tour = findById(id);
 
@@ -205,10 +172,8 @@ public class TourService {
 
                 tourRepository.delete(tour);
         }
-        // =====================================================
-        // FIND
-        // =====================================================
 
+        // FIND
         private Tour findById(
                         UUID id) {
 
@@ -219,10 +184,7 @@ public class TourService {
                                                 HttpStatus.NOT_FOUND));
         }
 
-        // =====================================================
         // SUBMIT FOR APPROVAL
-        // =====================================================
-
         public TourResponse submitForApproval(UUID id) {
 
                 Tour tour = findById(id);
@@ -236,10 +198,7 @@ public class TourService {
                 return TourMapper.toResponse(updatedTour);
         }
 
-        // =====================================================
         // VALIDATION
-        // =====================================================
-
         private void validateDates(
                         LocalDate dayStart,
                         LocalDate dayEnd) {

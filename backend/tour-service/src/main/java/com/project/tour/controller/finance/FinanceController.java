@@ -10,7 +10,6 @@ import com.project.tour.dto.admin.roomtype.RoomTypeResponse;
 import com.project.tour.dto.scheduler.schedule.ScheduleResponse;
 import com.project.tour.dto.scheduler.stop.ScheduleStopResponse;
 import com.project.tour.dto.scheduler.tour.TourResponse;
-import com.project.tour.service.tour.TourService;
 import com.project.tour.service.NfcCardService;
 import com.project.tour.service.admin.cruise.CruiseAreaService;
 import com.project.tour.service.admin.cruise.CruiseDeckService;
@@ -18,8 +17,8 @@ import com.project.tour.service.admin.cruise.CruiseService;
 import com.project.tour.service.admin.room.RoomService;
 import com.project.tour.service.admin.room.RoomTypeService;
 import com.project.tour.service.scheduler.ScheduleService;
+import com.project.tour.service.scheduler.TourService;
 import com.project.tour.service.scheduler.stop.ScheduleStopService;
-
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -134,19 +133,15 @@ public class FinanceController {
             @PathVariable UUID tourPackageId,
             @RequestParam(required = false) Long bookingId) {
 
-        System.out.println("========================================");
         System.out.println("[TOUR-FINANCE] GET available-rooms for tourPackageId = " + tourPackageId);
         System.out.println("[TOUR-FINANCE] bookingId = " + bookingId);
-        System.out.println("========================================");
 
         try {
             List<RoomResponse> availableRooms = roomService.getAvailableRoomsForBooking(bookingId, tourPackageId);
             return ResponseEntity.ok(availableRooms);
         } catch (Exception e) {
-            // IN TRỌN VÉN LỖI RA CONSOLE ĐỂ XEM NÓ BỊ Ở ĐÂU
-            System.err.println("================ LỖI 500 CHI TIẾT ================");
+            // IN LỖI RA CONSOLE
             e.printStackTrace();
-            System.err.println("==================================================");
 
             // Trả về message lỗi chi tiết luôn cho Frontend dễ debug
             return ResponseEntity.status(500).body(Map.of(
@@ -161,10 +156,7 @@ public class FinanceController {
     @GetMapping("/available-wristbands") // Bỏ phần /tours/{tourId} đi cho đúng thực tế
     public ResponseEntity<List<NfcCardResponse>> getAllAvailableWristbands() {
 
-        System.out.println("========================================");
         System.out.println("[TOUR-FINANCE] GET all available-wristbands");
-        System.out.println("========================================");
-
         List<NfcCardResponse> availableCards = nfcCardService.getAllAvailableCards();
         return ResponseEntity.ok(availableCards);
     }

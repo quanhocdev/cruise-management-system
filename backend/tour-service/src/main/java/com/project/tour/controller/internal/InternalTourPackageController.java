@@ -1,7 +1,7 @@
 package com.project.tour.controller.internal;
 
 import com.project.tour.dto.internal.BookingPackageInfo;
-import com.project.tour.service.tour.TourPackageService;
+import com.project.tour.service.operation.TourPackageService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,8 +25,7 @@ public class InternalTourPackageController {
     public ResponseEntity<BookingPackageInfo> getBookingPackageInfo(
             @PathVariable UUID tourPackageId) {
 
-        BookingPackageInfo info =
-                tourPackageService.getBookingPackageInfo(tourPackageId);
+        BookingPackageInfo info = tourPackageService.getBookingPackageInfo(tourPackageId);
 
         return ResponseEntity.ok(info);
     }
