@@ -3,9 +3,9 @@ package com.project.tour.controller.operation;
 import com.project.tour.dto.admin.cruise.CruiseAvailabilityResponse;
 import com.project.tour.dto.operation.assignment.OperationCruiseLayoutResponse;
 import com.project.tour.dto.scheduler.tour.TourResponse;
-import com.project.tour.service.tour.operation.ApprovalTourService;
-import com.project.tour.service.tour.operation.assignment.TourCruiseAssignmentService;
-import com.project.tour.service.tour.operation.assignment.TourLayoutService;
+import com.project.tour.service.operation.ApprovalTourService;
+import com.project.tour.service.operation.assignment.TourCruiseAssignmentService;
+import com.project.tour.service.operation.assignment.TourLayoutService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,35 +31,27 @@ public class OperationTourController {
                 this.tourLayoutService = tourLayoutService;
         }
 
-        // =====================================================
         // GET TOURS WAITING FOR APPROVAL
-        // =====================================================
         @GetMapping("/pending")
         public ResponseEntity<List<TourResponse>> getPendingTours() {
                 return ResponseEntity.ok(operationTourService.getPendingTours());
         }
 
-        // =====================================================
         // GET AVAILABLE CRUISES
-        // =====================================================
         @GetMapping("/{id}/available-cruises")
         public ResponseEntity<List<CruiseAvailabilityResponse>> getAvailableCruises(
                         @PathVariable UUID id) {
                 return ResponseEntity.ok(tourCruiseAssignmentService.getAvailableCruises(id));
         }
 
-        // =====================================================
         // GET CRUISE LAYOUT
-        // =====================================================
         @GetMapping("/{id}/cruise-layout")
         public ResponseEntity<List<OperationCruiseLayoutResponse>> getCruiseLayout(
                         @PathVariable UUID id) {
                 return ResponseEntity.ok(tourLayoutService.getCruiseLayout(id));
         }
 
-        // =====================================================
         // GÁN DU THUYỀN CHO TOUR
-        // =====================================================
         @PostMapping("/{id}/assign-cruise")
         public ResponseEntity<TourResponse> assignCruise(
                         @PathVariable UUID id,
@@ -68,9 +60,7 @@ public class OperationTourController {
                                 tourCruiseAssignmentService.assignCruise(id, cruiseId));
         }
 
-        // =====================================================
         // 2. DUYỆT TOUR (Chỉ gọi sau khi đã gán du thuyền + phân công xong)
-        // =====================================================
         @PostMapping("/{id}/approve")
         public ResponseEntity<TourResponse> approveTour(
                         @PathVariable UUID id) {
@@ -79,9 +69,7 @@ public class OperationTourController {
                                 operationTourService.approveTour(id));
         }
 
-        // =====================================================
         // GET APPROVED TOURS
-        // =====================================================
         @GetMapping("/approved")
         public ResponseEntity<List<TourResponse>> getApprovedTours() {
                 return ResponseEntity.ok(operationTourService.getApprovedTours());

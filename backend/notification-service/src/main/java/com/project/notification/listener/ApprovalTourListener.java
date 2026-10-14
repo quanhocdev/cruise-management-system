@@ -1,7 +1,6 @@
 package com.project.notification.listener;
 
 import com.project.common.event.TourApprovedEvent;
-import com.project.common.event.TourAssignmentEvent;
 import com.project.notification.service.NotificationApprovalTourService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

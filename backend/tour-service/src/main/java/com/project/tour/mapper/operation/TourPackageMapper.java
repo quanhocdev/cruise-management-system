@@ -22,7 +22,15 @@ public class TourPackageMapper {
                 benefit.getDiscountPercent());
     }
 
-    public static TourPackageResponse toResponse(TourPackage tourPackage, List<PackageBenefit> benefits) {
+    /**
+     * @param roomCapacity capacity của RoomType, do caller lấy từ DB (không có giá
+     *                     trị mặc định)
+     */
+    public static TourPackageResponse toResponse(
+            TourPackage tourPackage,
+            List<PackageBenefit> benefits,
+            Integer roomCapacity) {
+
         if (tourPackage == null) {
             return null;
         }
@@ -30,11 +38,6 @@ public class TourPackageMapper {
         List<PackageBenefitResponse> benefitResponses = benefits != null
                 ? benefits.stream().map(TourPackageMapper::toBenefitResponse).toList()
                 : List.of();
-
-        // Lấy capacity từ RoomType thay cho maxPassengers cũ
-        Integer roomCapacity = (tourPackage.getRoomType() != null && tourPackage.getRoomType().getCapacity() != null)
-                ? tourPackage.getRoomType().getCapacity()
-                : 2;
 
         return new TourPackageResponse(
                 tourPackage.getId(),

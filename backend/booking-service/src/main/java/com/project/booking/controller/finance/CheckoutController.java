@@ -2,7 +2,8 @@ package com.project.booking.controller.finance;
 
 import com.project.booking.dto.finance.CheckoutPreviewResponse;
 import com.project.booking.dto.finance.CheckoutResponse;
-import com.project.booking.service.finance.CheckoutService;
+import com.project.booking.service.finance.checkout.CheckoutService;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

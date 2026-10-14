@@ -17,7 +17,6 @@ spring:
       server:
         webflux:
           routes:
-
             # AUTH SERVICE
             - id: auth-service
               uri: ${AUTH_SERVICE_URL:http://auth-service:8081}
@@ -90,6 +89,12 @@ spring:
               uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
               predicates:
                 - Path=/api/public/**
+
+            # TOUR SERVICE - ROUTE PREVIEW
+            - id: tour-route-preview-service
+              uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
+              predicates:
+                - Path=/api/tours/routes/**
 
             # BOOKING SERVICE - CONVENIENCE NFC
             - id: booking-convenience-nfc

@@ -2,7 +2,8 @@ package com.project.booking.controller.shore;
 
 import com.project.booking.dto.nfc.NfcResolveRequest;
 import com.project.booking.dto.nfc.NfcResolveResponse;
-import com.project.booking.service.ConvenienceNfcService;
+import com.project.booking.service.common.nfc.ScanNfcService;
+
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -12,10 +13,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/shore/nfc")
 public class ShoreNfcController {
 
-    private final ConvenienceNfcService convenienceNfcService;
+    private final ScanNfcService convenienceNfcService;
 
     public ShoreNfcController(
-            ConvenienceNfcService convenienceNfcService) {
+            ScanNfcService convenienceNfcService) {
 
         this.convenienceNfcService = convenienceNfcService;
     }

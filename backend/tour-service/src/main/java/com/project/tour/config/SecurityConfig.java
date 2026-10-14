@@ -54,6 +54,8 @@ public class SecurityConfig {
                                 "/api/public/**")
                         .permitAll()
 
+                        .requestMatchers("/api/tours/routes/**").authenticated()
+
                         // Admin
                         .requestMatchers("/api/admin/**")
                         .hasRole("ADMIN")

@@ -1,0 +1,83 @@
+package com.project.tour.service.scheduler;
+
+import com.project.tour.exception.AppException;
+import com.project.tour.model.enums.tour.TourStatusTrip;
+import com.project.tour.model.scheduler.Tour;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+
+@Component
+public class TourStatusValidator {
+
+    // UPDATE TOUR
+    public void validateCanUpdate(Tour tour) {
+        validateTour(tour);
+
+        TourStatusTrip status = tour.getStatusTrip();
+
+        // Cho phép update nếu là DRAFT, hoặc nếu là APPROVED nhưng chưa có ai đặt vé
+        if (status == TourStatusTrip.DRAFT) {
+            return; // Hợp lệ
+        }
+
+        // Các trạng thái khác (IN_PROGRESS, COMPLETED, CANCELLED...) thì cấm tuyệt đối
+        throw new AppException(
+                "Tour chỉ được chỉnh sửa khi ở trạng thái DRAFT hoặc APPROVED (chưa có người đặt)",
+                HttpStatus.BAD_REQUEST);
+    }
+
+    // DELETE TOUR
+    public void validateCanDelete(Tour tour) {
+
+        validateTour(tour);
+
+        if (tour.getStatusTrip() != TourStatusTrip.DRAFT) {
+
+            throw new AppException(
+                    "Tour chỉ được xóa khi đang ở trạng thái DRAFT",
+                    HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    // SUBMIT FOR APPROVAL
+    public void validateCanSubmitForApproval(Tour tour) {
+
+        validateTour(tour);
+
+        if (tour.getStatusTrip() != TourStatusTrip.DRAFT) {
+
+            throw new AppException(
+                    "Chỉ Tour ở trạng thái DRAFT mới được gửi duyệt",
+                    HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    // MANAGE SCHEDULE
+    public void validateCanManageSchedule(Tour tour) {
+
+        validateTour(tour);
+
+        TourStatusTrip status = tour.getStatusTrip();
+
+        if (status != TourStatusTrip.DRAFT
+                && status != TourStatusTrip.APPROVED
+                && status != TourStatusTrip.IN_PROGRESS) {
+
+            throw new AppException(
+                    "Không thể quản lý lịch trình khi Tour đang chờ duyệt, đã hoàn thành hoặc bị hủy",
+                    HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    // COMMON VALIDATION
+    private void validateTour(Tour tour) {
+
+        if (tour == null) {
+
+            throw new AppException(
+                    "Tour not found",
+                    HttpStatus.NOT_FOUND);
+        }
+    }
+}

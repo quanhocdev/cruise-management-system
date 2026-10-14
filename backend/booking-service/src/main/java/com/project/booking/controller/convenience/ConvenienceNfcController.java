@@ -2,7 +2,7 @@ package com.project.booking.controller.convenience;
 
 import com.project.booking.dto.nfc.NfcResolveRequest;
 import com.project.booking.dto.nfc.NfcResolveResponse;
-import com.project.booking.service.ConvenienceNfcService;
+import com.project.booking.service.common.nfc.ScanNfcService;
 
 import jakarta.validation.Valid;
 
@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/convenience/nfc")
 public class ConvenienceNfcController {
 
-    private final ConvenienceNfcService convenienceNfcService;
+    private final ScanNfcService convenienceNfcService;
 
     public ConvenienceNfcController(
-            ConvenienceNfcService convenienceNfcService) {
+            ScanNfcService convenienceNfcService) {
 
         this.convenienceNfcService = convenienceNfcService;
     }

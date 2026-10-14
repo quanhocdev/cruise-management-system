@@ -296,8 +296,9 @@ services:
   # Tour Service
   tour-service:
     build:
-      context: ./backend
-      dockerfile: tour-service/Dockerfile.dev
+      context: .
+      dockerfile: backend/tour-service/Dockerfile.dev
+
     container_name: tour-service
     restart: always
     ports:

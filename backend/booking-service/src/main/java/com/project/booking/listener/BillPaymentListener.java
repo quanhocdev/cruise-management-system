@@ -1,7 +1,7 @@
 
 package com.project.booking.listener;
 
-import com.project.booking.service.finance.BillPaymentResultService;
+import com.project.booking.service.finance.bill.BillPaymentResultService;
 import com.project.common.event.BillPaymentSuccessEvent;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;

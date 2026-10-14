@@ -8,9 +8,11 @@ import com.project.tour.model.enums.NfcCardStatus;
 import com.project.tour.repository.NfcCardRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.UUID;
+import java.util.List;
 
 @Service
 @Transactional
@@ -91,4 +93,83 @@ public class NfcCardService {
                 .map(nfcCardMapper::toResponse)
                 .toList();
     }
+
+    public NfcCardResponse assignCard(String cardUid) {
+        if (cardUid == null || cardUid.isBlank()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "NFC card UID must not be blank");
+        }
+
+        String normalizedUid = cardUid.trim();
+
+        NfcCard card = nfcCardRepository.findByCardUidForUpdate(normalizedUid)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "NFC card not found: " + normalizedUid));
+
+        if (card.getStatus() != NfcCardStatus.AVAILABLE) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "NFC card is not available. Current status: "
+                            + card.getStatus());
+        }
+
+        card.setStatus(NfcCardStatus.ASSIGNED);
+
+        NfcCard saved = nfcCardRepository.save(card);
+
+        System.out.println(
+                "[NFC] Card " + normalizedUid
+                        + " changed from AVAILABLE to ASSIGNED");
+
+        return nfcCardMapper.toResponse(saved);
+    }
+
+    @Transactional
+    public void releaseAssignedCards(List<String> cardUids) {
+        if (cardUids == null || cardUids.isEmpty()) {
+            System.out.println("[NFC RELEASE] Không có thẻ NFC cần trả.");
+            return;
+        }
+
+        for (String cardUid : cardUids) {
+            if (cardUid == null || cardUid.isBlank()) {
+                continue;
+            }
+
+            String normalizedUid = cardUid.trim();
+
+            NfcCard card = nfcCardRepository
+                    .findByCardUidForUpdate(normalizedUid)
+                    .orElse(null);
+
+            if (card == null) {
+                System.out.println(
+                        "[NFC RELEASE] Không tìm thấy thẻ: " + normalizedUid);
+                continue;
+            }
+
+            if (card.getStatus() == NfcCardStatus.AVAILABLE) {
+                System.out.println(
+                        "[NFC RELEASE] Thẻ đã AVAILABLE: " + normalizedUid);
+                continue;
+            }
+
+            if (card.getStatus() != NfcCardStatus.ASSIGNED) {
+                System.out.println(
+                        "[NFC RELEASE] Bỏ qua thẻ " + normalizedUid
+                                + ", trạng thái hiện tại: " + card.getStatus());
+                continue;
+            }
+
+            card.setStatus(NfcCardStatus.AVAILABLE);
+            nfcCardRepository.save(card);
+
+            System.out.println(
+                    "[NFC RELEASE] Thẻ " + normalizedUid
+                            + " đã chuyển ASSIGNED -> AVAILABLE");
+        }
+    }
+
 }

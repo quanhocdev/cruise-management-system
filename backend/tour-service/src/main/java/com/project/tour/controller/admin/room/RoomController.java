@@ -3,7 +3,7 @@ package com.project.tour.controller.admin.room;
 import com.project.tour.dto.admin.room.CreateRoomRequest;
 import com.project.tour.dto.admin.room.RoomResponse;
 import com.project.tour.dto.admin.room.UpdateRoomRequest;
-import com.project.tour.service.room.RoomService;
+import com.project.tour.service.admin.room.RoomService;
 
 import jakarta.validation.Valid;
 

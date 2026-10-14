@@ -3,7 +3,8 @@ package com.project.tour.controller.admin.policy;
 import com.project.tour.dto.admin.policy.cancel.CancelPolicyResponse;
 import com.project.tour.dto.admin.policy.cancel.CreateCancelPolicyRequest;
 import com.project.tour.dto.admin.policy.cancel.UpdateCancelPolicyRequest;
-import com.project.tour.service.policy.CancelPolicyService;
+import com.project.tour.service.admin.policy.CancelPolicyService;
+
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

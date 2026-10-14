@@ -13,7 +13,8 @@ import com.project.booking.model.BenefitConsumption;
 import com.project.booking.model.Booking;
 import com.project.booking.model.BookingPassenger;
 import com.project.booking.repository.ActivityCruiseUsageRepository;
-import com.project.booking.service.BenefitConsumptionService;
+import com.project.booking.service.common.benefit.BenefitConsumptionService;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
