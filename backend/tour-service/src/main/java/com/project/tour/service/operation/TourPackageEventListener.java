@@ -1,6 +1,7 @@
-package com.project.tour.service.tour;
+package com.project.tour.service.operation;
 
 import com.project.tour.service.redis.TourRedisService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;

@@ -1,4 +1,4 @@
-package com.project.tour.service.tour;
+package com.project.tour.service.operation;
 
 import com.project.tour.model.enums.RoomStatus;
 import com.project.tour.repository.room.RoomRepository;
