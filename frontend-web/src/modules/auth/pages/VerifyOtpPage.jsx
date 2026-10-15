@@ -1,3 +1,5 @@
+// src/modules/auth/pages/VerifyOtpPage.jsx
+
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import api from "../../../api/axios";

@@ -1,3 +1,4 @@
+
 package com.project.auth.service.redis;
 
 import java.time.Duration;
@@ -14,6 +15,10 @@ public class RedisServiceImpl implements RedisService {
         this.redisTemplate = redisTemplate;
     }
 
+    // =========================
+    // LOCAL REGISTER OTP
+    // =========================
+
     @Override
     public void saveOtp(Long userId, String otp) {
         String key = "otp:register:" + userId;
@@ -24,16 +29,35 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public String getOtp(Long userId) {
-        String key = "otp:register:" + userId;
-
         return redisTemplate.opsForValue()
-                .get(key);
+                .get("otp:register:" + userId);
     }
 
     @Override
     public void deleteOtp(Long userId) {
-        String key = "otp:register:" + userId;
+        redisTemplate.delete("otp:register:" + userId);
+    }
 
-        redisTemplate.delete(key);
+    // =========================
+    // GOOGLE LOGIN OTP
+    // =========================
+
+    @Override
+    public void saveGoogleLoginOtp(Long userId, String otp) {
+        String key = "otp:google-login:" + userId;
+
+        redisTemplate.opsForValue()
+                .set(key, otp, Duration.ofMinutes(5));
+    }
+
+    @Override
+    public String getGoogleLoginOtp(Long userId) {
+        return redisTemplate.opsForValue()
+                .get("otp:google-login:" + userId);
+    }
+
+    @Override
+    public void deleteGoogleLoginOtp(Long userId) {
+        redisTemplate.delete("otp:google-login:" + userId);
     }
 }

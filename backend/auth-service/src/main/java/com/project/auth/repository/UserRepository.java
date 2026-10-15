@@ -21,6 +21,8 @@ public interface UserRepository extends JpaRepository<Users, Long> {
 
     Boolean existsByEmail(String email);
 
+    Optional<Users> findByEmail(String email);
+
     @Query("SELECT u FROM Users u WHERE u.role.name NOT IN ('PASSENGER', 'GUEST')")
     List<Users> findAllStaff();
 }
