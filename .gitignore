@@ -48,3 +48,10 @@ android/local.properties
 android/captures/
 android/.externalNativeBuild/
 android/.cxx/
+
+
+# Firebase Admin SDK private credentials
+/secrets/
+*firebase-admin*.json
+
+/frontend-android/app/google-services.json

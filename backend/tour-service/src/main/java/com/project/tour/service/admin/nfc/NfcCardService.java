@@ -1,4 +1,4 @@
-package com.project.tour.service;
+package com.project.tour.service.admin.nfc;
 
 import com.project.tour.dto.admin.nfc.NfcCardRequest;
 import com.project.tour.dto.admin.nfc.NfcCardResponse;
@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.UUID;
-import java.util.List;
 
 @Service
 @Transactional

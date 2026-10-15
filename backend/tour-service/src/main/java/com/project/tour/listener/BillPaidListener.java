@@ -1,7 +1,7 @@
 package com.project.tour.listener;
 
 import com.project.common.event.BillPaidEvent;
-import com.project.tour.service.NfcCardService;
+import com.project.tour.service.admin.nfc.NfcCardService;
 
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
