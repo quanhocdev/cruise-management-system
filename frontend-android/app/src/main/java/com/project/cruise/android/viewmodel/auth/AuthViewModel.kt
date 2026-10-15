@@ -10,10 +10,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-// =====================================================
-// LOGIN STATE
-// =====================================================
-
 sealed class LoginState {
 
     object Idle : LoginState()
@@ -28,11 +24,6 @@ sealed class LoginState {
         val message: String
     ) : LoginState()
 }
-
-
-// =====================================================
-// REGISTER STATE
-// =====================================================
 
 sealed class RegisterState {
 
@@ -49,10 +40,6 @@ sealed class RegisterState {
     ) : RegisterState()
 }
 
-
-// =====================================================
-// VERIFY OTP STATE
-// =====================================================
 
 sealed class VerifyOtpState {
 
@@ -97,10 +84,6 @@ sealed class SessionState {
     object Unauthenticated : SessionState()
 }
 
-// =====================================================
-// AUTH VIEW MODEL
-// =====================================================
-
 class AuthViewModel(
     private val repository: AuthRepository
 ) : ViewModel() {
@@ -134,10 +117,6 @@ class AuthViewModel(
                 }
         }
     }
-
-    // =====================================================
-    // LOGIN
-    // =====================================================
 
     private val _loginState =
         MutableStateFlow<LoginState>(LoginState.Idle)
@@ -233,11 +212,6 @@ class AuthViewModel(
         _posLoginState.value = PosLoginState.Idle
     }
 
-
-    // =====================================================
-    // REGISTER
-    // =====================================================
-
     private val _registerState =
         MutableStateFlow<RegisterState>(RegisterState.Idle)
 
@@ -298,11 +272,6 @@ class AuthViewModel(
         _registerState.value =
             RegisterState.Idle
     }
-
-
-    // =====================================================
-    // VERIFY EMAIL / OTP
-    // =====================================================
 
     private val _verifyOtpState =
         MutableStateFlow<VerifyOtpState>(
@@ -400,10 +369,6 @@ class AuthViewModel(
     fun resetMeState() {
         _meState.value = MeState.Idle
     }
-    // =====================================================
-    // LOGOUT
-    // =====================================================
-
     fun logout(onLogoutSuccess: () -> Unit) {
         viewModelScope.launch {
             // 1. Xóa token lưu trong SharedPreferences / DataStore

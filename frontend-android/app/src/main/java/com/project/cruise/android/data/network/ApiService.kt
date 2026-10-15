@@ -32,6 +32,10 @@ import com.project.cruise.android.data.dto.onboard.ActivityCruiseTourResponse
 import com.project.cruise.android.data.dto.onboard.ActivityCruiseUsageRequest
 import com.project.cruise.android.data.dto.onboard.ActivityCruiseUsageResponse
 
+import com.project.cruise.android.data.dto.auth.GoogleLoginRequest
+import com.project.cruise.android.data.dto.auth.GoogleLoginResponse
+import com.project.cruise.android.data.dto.auth.GoogleVerifyOtpRequest
+
 
 interface ApiService {
 
@@ -40,6 +44,18 @@ interface ApiService {
     suspend fun login(
         @Body request: LoginRequest
     ): JwtResponse
+
+
+    @POST("api/auth/google/login")
+    suspend fun googleLogin(
+        @Body request: GoogleLoginRequest
+    ): GoogleLoginResponse
+
+    @POST("api/auth/google/verify-otp")
+    suspend fun verifyGoogleOtp(
+        @Body request: GoogleVerifyOtpRequest
+    ): JwtResponse
+
 
     @POST("api/auth/register")
     suspend fun register(
