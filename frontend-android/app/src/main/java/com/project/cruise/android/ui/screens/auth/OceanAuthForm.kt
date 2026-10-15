@@ -59,7 +59,8 @@ internal fun OceanAuthForm(
     onBack: () -> Unit,
     onSubmit: (String, String, String) -> Unit,
     loading: Boolean,
-    error: String?
+    error: String?,
+    onGoogleLogin: (() -> Unit)? = null
 ) {
     var username by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
@@ -134,6 +135,24 @@ internal fun OceanAuthForm(
                             enabled = username.isNotBlank() && password.isNotBlank() && (!register || email.isNotBlank()),
                             loading = loading
                         )
+                        if (!register && onGoogleLogin != null) {
+                            FilledTonalButton(
+                                onClick = onGoogleLogin,
+                                enabled = !loading,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 52.dp),
+                                shape = RoundedCornerShape(18.dp),
+                                colors = ButtonDefaults.filledTonalButtonColors(
+                                    containerColor = OceanMint
+                                )
+                            ) {
+                                Text(
+                                    text = "Tiếp tục với Google",
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
                     }
                 }
                 Text(
