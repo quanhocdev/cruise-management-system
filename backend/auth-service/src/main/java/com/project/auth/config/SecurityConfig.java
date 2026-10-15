@@ -62,6 +62,8 @@ public class SecurityConfig {
                                                                 "/api/auth/login",
                                                                 "/api/auth/verify-email",
                                                                 "/api/auth/refresh",
+                                                                "/api/auth/google/login",
+                                                                "/api/auth/google/verify-otp",
 
                                                                 // Staff activation
                                                                 "/api/auth/activate/verify",
