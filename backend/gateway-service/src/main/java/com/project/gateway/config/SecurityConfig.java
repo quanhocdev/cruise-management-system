@@ -30,6 +30,10 @@ public class SecurityConfig {
                         "/api/auth/verify-email",
                         "/api/auth/logout",
 
+                        // Google Login
+                        "/api/auth/google/login",
+                        "/api/auth/google/verify-otp",
+
                         // VNPay redirects the browser and calls IPN without JWT
                         "/api/v1/payments/vnpay/return",
                         "/api/v1/payments/vnpay/ipn",
