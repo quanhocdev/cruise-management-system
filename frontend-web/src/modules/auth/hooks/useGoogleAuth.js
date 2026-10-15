@@ -51,6 +51,7 @@ export default function useGoogleAuth() {
           state: {
             userId: result.userId,
             email: firebaseUser.email || "",
+            from: location.state?.from,
           },
         });
 

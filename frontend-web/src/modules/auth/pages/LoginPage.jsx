@@ -2,42 +2,43 @@
 
 import { useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
-import { useNavigate, useLocation } from "react-router-dom"; // Gộp chung vào đây
+import { useNavigate, useLocation } from "react-router-dom";
 import { getRedirectPathByRole } from "../../../routes/roleRoutes";
+import useGoogleAuth from "../hooks/useGoogleAuth";
 
 import { Container, Card, Form, Button, Alert, Spinner } from "react-bootstrap";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+
+  const { loginWithGoogle, googleLoading, googleError } = useGoogleAuth();
+
+  const getTargetPath = (role) => {
+    const fromPath = location.state?.from;
+
+    if (role === "PASSENGER" && fromPath) {
+      return `${fromPath.pathname}${fromPath.search || ""}`;
+    }
+
+    return role === "PASSENGER" ? "/" : getRedirectPathByRole(role);
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setError("");
     setLoading(true);
 
     try {
       const role = await login(username, password);
 
-      const fromPath = location.state?.from;
-
-      let targetPath;
-      if (role === "PASSENGER" && fromPath) {
-        // Trường hợp 1: Có ngữ cảnh đặt tour từ trước (bấm từ chi tiết tour)
-        targetPath = `${fromPath.pathname}${fromPath.search || ""}`;
-      } else {
-        // Trường hợp 2: Đăng nhập tự do từ Header (hoặc không phải passenger)
-        // Cho về trang TourPublic (trang chủ) thay vì Dashboard nếu là Passenger
-        targetPath = role === "PASSENGER" ? "/" : getRedirectPathByRole(role);
-      }
-
-      navigate(targetPath, {
+      navigate(getTargetPath(role), {
         replace: true,
       });
     } catch (err) {
@@ -46,6 +47,12 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
+  const handleGoogleLogin = async () => {
+    setError("");
+    await loginWithGoogle();
+  };
+
   return (
     <div className="bg-light min-vh-100 d-flex align-items-center justify-content-center py-5">
       <Container>
@@ -53,7 +60,6 @@ export default function LoginPage() {
           <div className="col-12 col-sm-10 col-md-8 col-lg-5 col-xl-4">
             <Card className="shadow-lg border-0 rounded-4">
               <Card.Body className="p-4 p-sm-5">
-                {/* Header */}
                 <div className="text-center mb-4">
                   <div
                     className="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
@@ -72,7 +78,6 @@ export default function LoginPage() {
                   </p>
                 </div>
 
-                {/* Error */}
                 {error && (
                   <Alert
                     variant="danger"
@@ -83,28 +88,30 @@ export default function LoginPage() {
                   </Alert>
                 )}
 
+                {googleError && <Alert variant="danger">{googleError}</Alert>}
+
                 <Form onSubmit={handleSubmit}>
                   <Form.Group className="mb-3">
                     <Form.Label>Tài khoản</Form.Label>
-
                     <Form.Control
                       type="text"
                       placeholder="Nhập username"
                       value={username}
-                      onChange={(e) => setUsername(e.target.value)}
+                      onChange={(event) => setUsername(event.target.value)}
                       required
+                      autoComplete="username"
                     />
                   </Form.Group>
 
                   <Form.Group className="mb-4">
                     <Form.Label>Mật khẩu</Form.Label>
-
                     <Form.Control
                       type="password"
                       placeholder="Nhập mật khẩu"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(event) => setPassword(event.target.value)}
                       required
+                      autoComplete="current-password"
                     />
                   </Form.Group>
 
@@ -112,7 +119,7 @@ export default function LoginPage() {
                     type="submit"
                     variant="primary"
                     className="w-100"
-                    disabled={loading}
+                    disabled={loading || googleLoading}
                   >
                     {loading ? (
                       <>
@@ -124,6 +131,32 @@ export default function LoginPage() {
                     )}
                   </Button>
                 </Form>
+
+                <div className="d-flex align-items-center my-4">
+                  <hr className="flex-grow-1" />
+                  <span className="px-3 text-muted small">HOẶC</span>
+                  <hr className="flex-grow-1" />
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline-dark"
+                  className="w-100 d-flex align-items-center justify-content-center gap-2"
+                  disabled={loading || googleLoading}
+                  onClick={handleGoogleLogin}
+                >
+                  {googleLoading ? (
+                    <>
+                      <Spinner size="sm" />
+                      Đang đăng nhập Google...
+                    </>
+                  ) : (
+                    <>
+                      <span className="fw-bold">G</span>
+                      Tiếp tục với Google
+                    </>
+                  )}
+                </Button>
               </Card.Body>
             </Card>
           </div>

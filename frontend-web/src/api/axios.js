@@ -47,8 +47,11 @@ api.interceptors.response.use(
       url.includes("/public/") ||
       url.includes("/auth/me") ||
       url.includes("/auth/login") ||
+      url.includes("/auth/google/login") ||
+      url.includes("/auth/google/verify-otp") ||
       url.includes("/auth/register") ||
       url.includes("/auth/activate") ||
+      url.includes("/auth/verify-email") ||
       url.includes("/auth/verify-otp") ||
       url.includes("/auth/resend-otp")
     ) {
