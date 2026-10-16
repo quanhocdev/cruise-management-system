@@ -8,12 +8,9 @@ plugins {
     id("com.google.gms.google-services")
 
 }
-
-val localProperties = Properties()
-val localPropertiesFile = rootProject.file("local.properties")
-
-if (localPropertiesFile.exists()) {
-    localProperties.load(localPropertiesFile.inputStream())
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) load(file.inputStream())
 }
 
 android {
@@ -43,6 +40,11 @@ android {
             "String",
             "POS_API_KEY",
             "\"${localProperties.getProperty("POS_API_KEY") ?: ""}\""
+        )
+        buildConfigField(
+            "String",
+            "DIALOGFLOW_PROJECT_ID",
+            "\"${localProperties.getProperty("DIALOGFLOW_PROJECT_ID") ?: "tour-bot-project-511616"}\""
         )
     }
 

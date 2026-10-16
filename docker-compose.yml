@@ -319,6 +319,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-tour:5432/${TOUR_DB_NAME:-tour_service_db}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      DIALOGFLOW_PROJECT_ID: ${DIALOGFLOW_PROJECT_ID}
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       NOMINATIM_URL: ${NOMINATIM_URL:-https://nominatim.openstreetmap.org}
     depends_on:

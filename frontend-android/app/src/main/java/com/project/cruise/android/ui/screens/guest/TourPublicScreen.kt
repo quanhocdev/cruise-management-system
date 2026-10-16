@@ -15,9 +15,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.project.cruise.android.data.dto.tour.PublicTourSummaryResponse
 import com.project.cruise.android.ui.components.OceanBottomBar
+import com.project.cruise.android.ui.components.PublicTourChatFloatingWidget
 import com.project.cruise.android.ui.theme.*
 import com.project.cruise.android.viewmodel.auth.AuthViewModel
 import com.project.cruise.android.viewmodel.auth.MeState
+import com.project.cruise.android.viewmodel.chat.ChatViewModel
 import com.project.cruise.android.viewmodel.tour.TourListState
 import com.project.cruise.android.viewmodel.tour.TourViewModel
 import java.text.NumberFormat
@@ -27,6 +29,7 @@ import java.util.Locale
 fun TourPublicScreen(
     viewModel: TourViewModel,
     authViewModel: AuthViewModel,
+    chatViewModel: ChatViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
     onTourClick: (String) -> Unit,
     onLoginClick: () -> Unit,
     onUserClick: () -> Unit,
@@ -58,7 +61,12 @@ fun TourPublicScreen(
         },
         containerColor = Color.Transparent
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
+        // Sử dụng Box bọc ngoài để chồng lớp nội dung trang chủ và lớp Floating Chat nổi lên nhau
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
             OceanPage {
                 Text(
                     "Khám Phá Tour",
@@ -108,6 +116,9 @@ fun TourPublicScreen(
                     }
                 }
             }
+
+            // Gắn component khung chat nổi nằm đè lên góc phải dưới trang chủ
+            PublicTourChatFloatingWidget(chatViewModel = chatViewModel)
         }
     }
 }

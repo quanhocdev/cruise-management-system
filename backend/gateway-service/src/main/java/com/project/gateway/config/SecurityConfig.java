@@ -30,6 +30,10 @@ public class SecurityConfig {
                         "/api/auth/verify-email",
                         "/api/auth/logout",
 
+                        // Webhook endpoints
+                        "/api/webhook/**",
+                        "/api/chat/**",
+
                         // Google Login
                         "/api/auth/google/login",
                         "/api/auth/google/verify-otp",

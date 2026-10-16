@@ -54,8 +54,11 @@ public class SecurityConfig {
                                 "/api/public/**")
                         .permitAll()
 
-                        .requestMatchers("/api/tours/routes/**").authenticated()
+                        // Webhook endpoints
+                        .requestMatchers("/api/webhook/**").permitAll()
+                        .requestMatchers("/api/chat/**").authenticated()
 
+                        .requestMatchers("/api/tours/routes/**").authenticated()
                         // Admin
                         .requestMatchers("/api/admin/**")
                         .hasRole("ADMIN")
