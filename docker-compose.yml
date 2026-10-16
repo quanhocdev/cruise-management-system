@@ -313,6 +313,7 @@ services:
       - ./backend/tour-service/src:/app/tour-service/src
       - ./backend/common/src:/app/common/src
       - /app/tour-service/target
+      - "${APPDATA}/gcloud/application_default_credentials.json:/var/secrets/google/application_default_credentials.json:ro"
     env_file:
       - .env
     environment:
@@ -320,6 +321,7 @@ services:
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       DIALOGFLOW_PROJECT_ID: ${DIALOGFLOW_PROJECT_ID}
+      GOOGLE_APPLICATION_CREDENTIALS: /var/secrets/google/application_default_credentials.json
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       NOMINATIM_URL: ${NOMINATIM_URL:-https://nominatim.openstreetmap.org}
     depends_on:

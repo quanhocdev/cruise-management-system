@@ -11,7 +11,8 @@ import jakarta.annotation.PreDestroy;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.UUID;
 
@@ -20,6 +21,7 @@ public class DialogflowClientService {
 
     private final String projectId;
     private final SessionsClient sessionsClient;
+    private static final Logger log = LoggerFactory.getLogger(DialogflowClientService.class);
 
     public DialogflowClientService(
             @Value("${google.cloud.dialogflow.project-id}") String projectId) throws IOException {
@@ -62,11 +64,21 @@ public class DialogflowClientService {
 
         String fulfillmentText = queryResult.getFulfillmentText();
 
+        log.info("Dialogflow query: {}", queryResult.getQueryText());
+        log.info("Dialogflow intent: {}",
+                queryResult.getIntent().getDisplayName());
+        log.info("Dialogflow fulfillmentText: [{}]", fulfillmentText);
+        log.info("Dialogflow fulfillmentMessages: {}",
+                queryResult.getFulfillmentMessagesList());
+        log.info("Dialogflow webhookPayload: {}",
+                queryResult.getWebhookPayload());
+        log.info("Dialogflow diagnosticInfo: {}",
+                queryResult.getDiagnosticInfo());
+
         if (fulfillmentText == null || fulfillmentText.isBlank()) {
             fulfillmentText = "Dạ, tôi chưa tìm được câu trả lời phù hợp. "
                     + "Bạn có thể diễn đạt câu hỏi theo cách khác không ạ?";
         }
-
         return new DialogflowResult(
                 fulfillmentText,
                 effectiveSessionId,
