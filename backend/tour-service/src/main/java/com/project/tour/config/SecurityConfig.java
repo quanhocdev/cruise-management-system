@@ -18,7 +18,8 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
-
+import org.springframework.core.annotation.Order;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,6 +29,24 @@ import java.util.List;
 public class SecurityConfig {
 
     @Bean
+    @Order(1)
+    public SecurityFilterChain webhookSecurityFilterChain(
+            HttpSecurity http) throws Exception {
+
+        return http
+                .securityMatcher(
+                        PathPatternRequestMatcher.withDefaults()
+                                .matcher("/api/webhook/**"))
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(authorize -> authorize
+                        .anyRequest().permitAll())
+                .build();
+    }
+
+    @Bean
+    @Order(2)
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
             BearerTokenResolver bearerTokenResolver,
