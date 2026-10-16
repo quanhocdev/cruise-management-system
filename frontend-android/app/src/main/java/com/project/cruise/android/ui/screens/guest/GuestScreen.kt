@@ -1,4 +1,4 @@
-package com.project.cruise.android.ui.screens
+package com.project.cruise.android.ui.screens.guest
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

@@ -12,9 +12,9 @@ import androidx.navigation.navArgument
 import com.project.cruise.android.data.network.ApiService
 import com.project.cruise.android.data.repository.BookingRepository
 import com.project.cruise.android.data.repository.TourRepository
-import com.project.cruise.android.ui.screens.ProfileScreen
-import com.project.cruise.android.ui.screens.TourDetailPublicScreen
-import com.project.cruise.android.ui.screens.TourPublicScreen
+import com.project.cruise.android.ui.screens.passenger.ProfileScreen
+import com.project.cruise.android.ui.screens.guest.TourDetailPublicScreen
+import com.project.cruise.android.ui.screens.guest.TourPublicScreen
 import com.project.cruise.android.ui.screens.passenger.Dashboard
 import com.project.cruise.android.ui.screens.passenger.MyBookingDetailScreen
 import com.project.cruise.android.ui.screens.passenger.MyBookingsScreen

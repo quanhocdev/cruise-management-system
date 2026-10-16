@@ -130,7 +130,11 @@ fun LoginScreen(
         error = errorMessage ?: googleError,
         onGoogleLogin = {
             googleError = null
-            launcher.launch(googleSignInClient.signInIntent)
+
+            googleSignInClient.signOut()
+                .addOnCompleteListener {
+                    launcher.launch(googleSignInClient.signInIntent)
+                }
         }
     )
 }

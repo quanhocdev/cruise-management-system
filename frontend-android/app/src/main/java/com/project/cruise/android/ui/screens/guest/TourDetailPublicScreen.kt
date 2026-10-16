@@ -1,4 +1,4 @@
-package com.project.cruise.android.ui.screens
+package com.project.cruise.android.ui.screens.guest
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape

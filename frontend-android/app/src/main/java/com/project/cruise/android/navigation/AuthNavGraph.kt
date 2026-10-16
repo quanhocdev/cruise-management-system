@@ -14,7 +14,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.project.cruise.android.ui.screens.GuestScreen
+import com.project.cruise.android.ui.screens.guest.GuestScreen
 import com.project.cruise.android.ui.screens.auth.LoginScreen
 import com.project.cruise.android.ui.screens.auth.OtpScreen
 import com.project.cruise.android.ui.screens.auth.RegisterScreen

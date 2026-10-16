@@ -2,7 +2,7 @@ package com.project.cruise.android.ui.screens.auth
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.project.cruise.android.ui.screens.GuestScreen
+import com.project.cruise.android.ui.screens.guest.GuestScreen
 
 @Preview(name = "Welcome · 360dp", widthDp = 360, heightDp = 800, showBackground = true)
 @Composable
