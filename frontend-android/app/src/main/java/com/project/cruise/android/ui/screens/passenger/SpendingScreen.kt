@@ -40,6 +40,19 @@ fun SpendingContent(state: SpendingState, onBack: () -> Unit, onRefresh: () -> U
                     TextButton(onClick = onRefresh, enabled = !state.loading) { Text("Làm mới") }
                 }
             }
+            item {
+                PassengerCard {
+                    val limit = summary.creditLimit
+                    if (limit == null) {
+                        Text("Hạn mức: Chưa cấu hình", fontWeight = FontWeight.SemiBold)
+                        Text("Vui lòng liên hệ bộ phận tài chính trước khi sử dụng dịch vụ có phát sinh phí.")
+                    } else {
+                        Text("Hạn mức: ${money.format(limit)}", fontWeight = FontWeight.SemiBold)
+                        Text("Còn lại: ${money.format((limit - summary.totalCharges).max(BigDecimal.ZERO))}")
+                        if (summary.totalCharges >= limit) Text("Đã hết hạn mức cho khoản có phí.")
+                    }
+                }
+            }
             if (summary.items.isEmpty()) item {
                 PassengerEmpty("Chưa có phát sinh", "Các lượt sử dụng được nhân viên xác nhận sẽ hiển thị tại đây.")
             }

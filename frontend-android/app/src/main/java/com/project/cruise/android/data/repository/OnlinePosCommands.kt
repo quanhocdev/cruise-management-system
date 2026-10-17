@@ -38,6 +38,10 @@ class OnlinePosCommands(context: Context) {
             } catch (ex: HttpException) {
                 // Validation/auth failures have no committed command; ambiguous failures keep the key.
                 if (ex.code() in setOf(400, 401, 403, 404, 422)) keys.complete(actor, operation)
+                if (ex.code() == 422) {
+                    val body = runCatching { ex.response()?.errorBody()?.source()?.peek()?.readUtf8() }.getOrNull()
+                    PosCommandErrors.message(body)?.let { throw IllegalStateException(it, ex) }
+                }
                 throw ex
             }
         }
