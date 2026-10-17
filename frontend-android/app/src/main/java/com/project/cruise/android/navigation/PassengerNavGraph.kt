@@ -25,6 +25,12 @@ import com.project.cruise.android.viewmodel.passenger.BookingViewModelFactory
 import com.project.cruise.android.viewmodel.tour.TourViewModel
 import com.project.cruise.android.viewmodel.tour.TourViewModelFactory
 
+
+import com.project.cruise.android.ui.screens.passenger.CreateBookingScreen
+import com.project.cruise.android.data.repository.PassengerBookingRepository
+import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModel
+import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModelFactory
+
 fun NavGraphBuilder.passengerGraph(
     navController: NavHostController,
     authViewModel: AuthViewModel,
@@ -45,9 +51,6 @@ fun NavGraphBuilder.passengerGraph(
                 navController.navigate(Routes.GUEST) {
                     popUpTo(Routes.PASSENGER_TOURS) { inclusive = true }
                 }
-            },
-            onNotificationClick = {
-                // TODO: chuyển sang trang thông báo
             }
         )
     }
@@ -81,17 +84,7 @@ fun NavGraphBuilder.passengerGraph(
             onLoginClick = { navController.navigate(Routes.GUEST) },       // Chưa đăng nhập -> Guest
             onUserClick = { navController.navigate(Routes.PASSENGER_PROFILE) }, // Đã đăng nhập -> Profile
             onMyBookingsClick = { navController.navigate(Routes.PASSENGER_BOOKINGS) },
-            onLogout = {
-                navController.navigate(Routes.GUEST) {
-                    popUpTo(Routes.PASSENGER_TOURS) { inclusive = true }
-                }
-            },
-            onHomeClick = {
-                // Đang ở trang chủ rồi
-            },
-            onNotificationClick = {
-                // TODO: chuyển sang màn hình thông báo
-            }
+            onHomeClick = {}
         )
     }
 
@@ -119,6 +112,41 @@ fun NavGraphBuilder.passengerGraph(
         )
     }
 
+        composable(
+            route = Routes.PASSENGER_CREATE_BOOKING,
+            arguments = listOf(
+                navArgument("tourId") { type = NavType.StringType },
+                navArgument("packageId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val tourId = backStackEntry.arguments?.getString("tourId") ?: return@composable
+            val packageId = backStackEntry.arguments?.getString("packageId") ?: return@composable
+            val bookingViewModel: PassengerBookingViewModel = viewModel(
+                viewModelStoreOwner = backStackEntry,
+                factory = PassengerBookingViewModelFactory(
+                    PassengerBookingRepository(apiService),
+                    tourId,
+                    packageId
+                )
+            )
+            val bookingState by bookingViewModel.state.collectAsState()
+
+            CreateBookingScreen(
+                state = bookingState,
+                onDraftChange = bookingViewModel::edit,
+                onSubmit = bookingViewModel::submit,
+                onRetry = bookingViewModel::refreshPackage,
+                onBack = { navController.popBackStack() },
+                onDone = {
+                    navController.navigate(Routes.PASSENGER_BOOKINGS) {
+                        popUpTo(Routes.PASSENGER_CREATE_BOOKING) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
+
+
     // ----- BOOKINGS LIST -----
     composable(Routes.PASSENGER_BOOKINGS) {
         val bookingRepo = remember(apiService) { BookingRepository(apiService) }
@@ -130,7 +158,9 @@ fun NavGraphBuilder.passengerGraph(
             onBookingClick = { bookingId ->
                 navController.navigate(Routes.passengerBookingDetail(bookingId))
             },
-            onBack = { navController.popBackStack() }
+            onBack = { navController.popBackStack() },
+            onBrowseTours = { navController.navigate(Routes.PASSENGER_TOURS) },
+            onAccount = { navController.navigate(Routes.PASSENGER_PROFILE) }
         )
     }
 
@@ -147,7 +177,15 @@ fun NavGraphBuilder.passengerGraph(
         MyBookingDetailScreen(
             bookingId = bookingId,
             viewModel = bookingViewModel,
-            onBack = { navController.popBackStack() }
+            onBack = { navController.popBackStack() },
+            onSpending = { navController.navigate("passenger_spending/$bookingId") }
         )
     }
+    composable("passenger_spending/{bookingId}", arguments = listOf(navArgument("bookingId") { type = NavType.LongType })) { entry ->
+        val bookingId = entry.arguments?.getLong("bookingId") ?: return@composable
+        val spending: com.project.cruise.android.viewmodel.passenger.SpendingViewModel = viewModel(
+            factory = com.project.cruise.android.viewmodel.passenger.SpendingViewModel.Factory(apiService, bookingId))
+        com.project.cruise.android.ui.screens.passenger.SpendingScreen(spending) { navController.popBackStack() }
+    }
+
 }

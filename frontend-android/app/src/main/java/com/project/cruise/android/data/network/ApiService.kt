@@ -18,7 +18,9 @@ import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 import com.project.cruise.android.data.dto.convenience.ProductUsageRequest
@@ -32,8 +34,16 @@ import com.project.cruise.android.data.dto.onboard.ActivityCruiseTourResponse
 import com.project.cruise.android.data.dto.onboard.ActivityCruiseUsageRequest
 import com.project.cruise.android.data.dto.onboard.ActivityCruiseUsageResponse
 
+import okhttp3.MultipartBody
 
 interface ApiService {
+
+    @GET("api/passengers/bookings/{id}/spending")
+    suspend fun getBookingSpending(
+        @Path("id") id: Long,
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 20
+    ): com.project.cruise.android.data.dto.booking.SpendingSummary
 
 
     @POST("api/auth/login")
@@ -132,5 +142,10 @@ interface ApiService {
     suspend fun createActivityCruiseUsage(
         @Body request: ActivityCruiseUsageRequest
     ): ActivityCruiseUsageResponse
+    @Multipart
+    @POST("api/passengers/bookings")
+    suspend fun createPassengerBooking(
+        @Part parts: List<MultipartBody.Part>
+    ): BookingResponse
 }
 

@@ -63,6 +63,7 @@ fun NavGraphBuilder.posGraph(
         val role = entry.posRole() ?: return@composable
         PosDashboardScreen(
             role = role,
+            username = (authViewModel.sessionState.value as? com.project.cruise.android.viewmodel.auth.SessionState.Authenticated)?.username.orEmpty(),
             onLogoutClick = {
                 authViewModel.logout {
                     navController.navigate(Routes.GUEST) {

@@ -44,6 +44,7 @@ class PosTransactionQueue(context: Context) {
     fun observePendingCount(role: String) = dao.observePendingCountForRole(role)
     fun observeAll() = dao.observeAll()
     fun observeAll(role: String) = dao.observeAllForRole(role)
+    suspend fun findByLocalId(localId: String) = dao.findByLocalId(localId)
 
     companion object {
         private const val UNIQUE_WORK_NAME = "pos-transaction-sync"

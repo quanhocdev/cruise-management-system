@@ -8,6 +8,7 @@ import com.project.cruise.android.ui.screens.pos.shore.ShorePosDashboardScreen
 @Composable
 fun PosDashboardScreen(
     role: PosRole,
+    username: String,
     onLogoutClick: () -> Unit,
     onQrClick: () -> Unit,
     onNfcClick: () -> Unit,
@@ -16,16 +17,16 @@ fun PosDashboardScreen(
 ) {
     when (role) {
         PosRole.FINANCE -> FinancePosDashboardScreen(
-            onLogoutClick, onQrClick, onNfcClick, onManualClick, onHistoryClick
+            username, onLogoutClick, onQrClick, onNfcClick, onManualClick, onHistoryClick
         )
         PosRole.CONVENIENCE -> ConveniencePosDashboardScreen(
-            onLogoutClick, onNfcClick, onHistoryClick
+            username, onLogoutClick, onNfcClick, onHistoryClick
         )
         PosRole.ONBOARD -> OnboardPosDashboardScreen(
-            onLogoutClick, onNfcClick, onHistoryClick
+            username, onLogoutClick, onQrClick, onManualClick, onHistoryClick, onNfcClick
         )
         PosRole.SHORE -> ShorePosDashboardScreen(
-            onLogoutClick, onNfcClick, onHistoryClick
+            username, onLogoutClick, onQrClick, onManualClick, onHistoryClick, onNfcClick
         )
     }
 }
