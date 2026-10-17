@@ -18,6 +18,8 @@ import com.project.booking.service.shore.ActivityVisitUsageCalculator.UsageAmoun
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.project.booking.service.account.OnboardAccountService;
+import com.project.booking.service.account.UsageCapacityLock;
 import com.project.booking.client.VisitTourManagementClient;
 import com.project.booking.dto.shore.ActivityVisitUsageManagementInfo;
 import com.project.booking.dto.shore.ActivityVisitUsageManagementResponse;
@@ -35,6 +37,8 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
 
         private static final int DEFAULT_QUANTITY = 1;
 
+        private final OnboardAccountService accounts;
+        private final UsageCapacityLock capacityLock;
         private final ActivityVisitUsageRepository activityVisitUsageRepository;
         private final ActivityVisitUsageMapper activityVisitUsageMapper;
         private final VisitTourClient visitTourClient;
@@ -54,8 +58,10 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
                         ActivityVisitUsageCalculator calculator,
                         BenefitConsumptionService benefitConsumptionService,
                         VisitTourManagementClient visitTourManagementClient,
-                        ActivityVisitUsageManagementMapper activityVisitUsageManagementMapper) {
+                        ActivityVisitUsageManagementMapper activityVisitUsageManagementMapper, OnboardAccountService accounts, UsageCapacityLock capacityLock) {
 
+                this.accounts = accounts;
+                this.capacityLock = capacityLock;
                 this.activityVisitUsageRepository = activityVisitUsageRepository;
                 this.activityVisitUsageMapper = activityVisitUsageMapper;
                 this.visitTourClient = visitTourClient;
@@ -88,6 +94,9 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
                                 booking.getTourPackageId());
 
                 validator.validateVisitTour(booking, visitInfo, now);
+
+                accounts.lockForUsage(booking);
+                capacityLock.acquire("SHORE", request.visitTourId());
 
                 // 3. Sức chứa
                 long currentPassengerCount = activityVisitUsageRepository
@@ -131,6 +140,8 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
                 // 7. Lưu usage
                 ActivityVisitUsage savedUsage = activityVisitUsageRepository.save(
                                 buildUsage(bookingPassenger, request, amount, now));
+                accounts.recordCharge(bookingPassenger, "SHORE", savedUsage.getId(), savedUsage.getFinalAmount(),
+                        1, visitInfo.packageBenefitId(), amount.freeQuantity(), request.clientRequestId());
 
                 return activityVisitUsageMapper.toResponse(savedUsage);
         }

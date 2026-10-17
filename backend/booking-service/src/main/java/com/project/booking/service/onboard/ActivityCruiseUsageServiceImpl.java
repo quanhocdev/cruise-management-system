@@ -17,6 +17,8 @@ import com.project.booking.service.common.benefit.BenefitConsumptionService;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.project.booking.service.account.OnboardAccountService;
+import com.project.booking.service.account.UsageCapacityLock;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,6 +31,8 @@ import java.util.stream.Collectors;
 public class ActivityCruiseUsageServiceImpl
                 implements ActivityCruiseUsageService {
 
+        private final OnboardAccountService accounts;
+        private final UsageCapacityLock capacityLock;
         private final ActivityCruiseUsageRepository activityCruiseUsageRepository;
         private final ActivityCruiseUsageMapper activityCruiseUsageMapper;
         private final ActivityCruiseUsageManagementMapper activityCruiseUsageManagementMapper;
@@ -46,8 +50,10 @@ public class ActivityCruiseUsageServiceImpl
                         ActivityCruiseManagementClient activityCruiseManagementClient,
                         BenefitConsumptionService benefitConsumptionService,
                         ActivityCruiseValidator activityCruiseValidator,
-                        ActivityPricingCalculator activityPricingCalculator) {
+                        ActivityPricingCalculator activityPricingCalculator, OnboardAccountService accounts, UsageCapacityLock capacityLock) {
 
+                this.accounts = accounts;
+                this.capacityLock = capacityLock;
                 this.activityCruiseUsageRepository = activityCruiseUsageRepository;
                 this.activityCruiseUsageMapper = activityCruiseUsageMapper;
                 this.activityCruiseUsageManagementMapper = activityCruiseUsageManagementMapper;
@@ -74,6 +80,9 @@ public class ActivityCruiseUsageServiceImpl
                                 .getActivityCruiseUsageInfo(
                                                 request.activityCruiseTourId(),
                                                 booking.getTourPackageId());
+
+                accounts.lockForUsage(booking);
+                capacityLock.acquire("ACTIVITY", request.activityCruiseTourId());
 
                 // 3 -> 7. Validate nghiệp vụ
                 activityCruiseValidator.validateBookingAndActivity(
@@ -123,6 +132,8 @@ public class ActivityCruiseUsageServiceImpl
                 usage.setUsedAt(LocalDateTime.now());
 
                 ActivityCruiseUsage savedUsage = activityCruiseUsageRepository.save(usage);
+                accounts.recordCharge(bookingPassenger, "ACTIVITY", savedUsage.getId(), savedUsage.getFinalAmount(),
+                        1, packageBenefitId, pricingResult.freeQuantityThisUsage(), request.clientRequestId());
 
                 return activityCruiseUsageMapper.toResponse(savedUsage);
         }

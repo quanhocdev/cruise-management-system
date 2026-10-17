@@ -16,6 +16,7 @@ import com.project.common.event.BillPaymentSuccessEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.project.booking.service.account.OnboardAccountService;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -31,12 +32,14 @@ public class BillPaymentResultService {
         private final BillItemRepository billItemRepository;
         private final BookingPassengerRepository bookingPassengerRepository;
         private final KafkaTemplate<String, Object> kafkaTemplate;
+        private final OnboardAccountService accounts;
 
         public BillPaymentResultService(
                         BillRepository billRepository,
                         BillItemRepository billItemRepository,
                         BookingPassengerRepository bookingPassengerRepository,
-                        KafkaTemplate<String, Object> kafkaTemplate) {
+                        KafkaTemplate<String, Object> kafkaTemplate, OnboardAccountService accounts) {
+                this.accounts = accounts;
                 this.billRepository = billRepository;
                 this.billItemRepository = billItemRepository;
                 this.bookingPassengerRepository = bookingPassengerRepository;
@@ -92,6 +95,7 @@ public class BillPaymentResultService {
                 // Đánh dấu hóa đơn đã thanh toán.
                 bill.setStatus(BillStatus.PAID);
                 billRepository.save(bill);
+                accounts.markClosed(bookingId);
 
                 BillPaidEvent paidEvent = new BillPaidEvent(
                                 bill.getId(),

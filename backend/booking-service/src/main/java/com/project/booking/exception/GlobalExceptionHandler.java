@@ -38,6 +38,9 @@ public class GlobalExceptionHandler {
                 response.setStatus(status.value());
                 response.setError(status.getReasonPhrase());
                 response.setMessage(exception.getMessage());
+                if (exception instanceof com.project.booking.service.command.CommandException command) {
+                    response.setCode(command.getCode());
+                }
                 response.setPath(request.getRequestURI());
                 response.setValidationErrors(null);
 

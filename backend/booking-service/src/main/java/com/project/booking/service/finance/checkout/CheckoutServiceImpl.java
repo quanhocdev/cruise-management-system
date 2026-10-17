@@ -23,6 +23,7 @@ import com.project.booking.service.finance.checkout.PassengerUsageReader.Passeng
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.project.booking.service.account.OnboardAccountService;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
@@ -33,7 +34,8 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class CheckoutServiceImpl implements CheckoutService {
 
-        private final BookingRepository bookingRepository;
+        private final OnboardAccountService accounts;
+    private final BookingRepository bookingRepository;
         private final BookingPassengerRepository bookingPassengerRepository;
         private final BillRepository billRepository;
         private final BillItemRepository billItemRepository;
@@ -54,9 +56,10 @@ public class CheckoutServiceImpl implements CheckoutService {
                         PaymentCheckoutService paymentCheckoutService,
                         PassengerUsageReader passengerUsageReader,
                         PassengerCheckoutPreviewBuilder passengerCheckoutPreviewBuilder,
-                        BillCodeGenerator billCodeGenerator) {
+                        BillCodeGenerator billCodeGenerator, OnboardAccountService accounts) {
 
-                this.bookingRepository = bookingRepository;
+                this.accounts = accounts;
+        this.bookingRepository = bookingRepository;
                 this.bookingPassengerRepository = bookingPassengerRepository;
                 this.billRepository = billRepository;
                 this.billItemRepository = billItemRepository;
@@ -97,6 +100,7 @@ public class CheckoutServiceImpl implements CheckoutService {
         public CheckoutResponse confirmCheckout(Long bookingId) {
 
                 Booking booking = getBooking(bookingId);
+                accounts.beginSettlement(booking);
 
                 // 1. Tìm hóa đơn hiện có của booking.
                 List<Bill> existingBills = billRepository
