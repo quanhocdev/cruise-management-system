@@ -12,30 +12,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class ChatService {
 
     private final DialogflowClientService dialogflowClientService;
+    private final DialogflowSuggestionService dialogflowSuggestionService;
 
-    private static final List<String> HOTLINE_SUGGESTIONS = List.of(
-            "Liên hệ hotline",
-            "Tôi muốn gặp tư vấn viên",
-            "Cho tôi xin thông tin liên hệ");
-
-    private static final List<String> BOOKING_SUGGESTIONS = List.of(
-            "Hướng dẫn đặt tour",
-            "Quy trình đặt tour như thế nào?",
-            "Tôi muốn biết cách đặt tour");
-
-    private static final List<String> SYSTEM_SUGGESTIONS = List.of(
-            "Giới thiệu hệ thống",
-            "Hệ thống Cruise có những chức năng gì?",
-            "Tôi muốn tìm hiểu về hệ thống");
-
-    public ChatService(DialogflowClientService dialogflowClientService) {
+    public ChatService(
+            DialogflowClientService dialogflowClientService,
+            DialogflowSuggestionService dialogflowSuggestionService) {
         this.dialogflowClientService = dialogflowClientService;
+        this.dialogflowSuggestionService = dialogflowSuggestionService;
     }
 
     public ChatWelcomeResponse openChat(ChatSessionRequest request) {
@@ -45,10 +33,7 @@ public class ChatService {
             DialogflowClientService.DialogflowResult result = dialogflowClientService.detectWelcomeIntent(
                     requestedSessionId);
 
-            List<String> suggestions = List.of(
-                    pickRandom(HOTLINE_SUGGESTIONS),
-                    pickRandom(BOOKING_SUGGESTIONS),
-                    pickRandom(SYSTEM_SUGGESTIONS));
+            List<String> suggestions = dialogflowSuggestionService.getRandomSuggestions();
 
             return new ChatWelcomeResponse(
                     result.message(),
@@ -60,6 +45,12 @@ public class ChatService {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Thông tin phiên hội thoại không hợp lệ");
+
+        } catch (IllegalStateException ex) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_GATEWAY,
+                    "Không thể tải câu gợi ý từ cấu hình Dialogflow");
+
         } catch (ApiException ex) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_GATEWAY,
@@ -90,15 +81,11 @@ public class ChatService {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Thông tin phiên hội thoại không hợp lệ");
+
         } catch (ApiException ex) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_GATEWAY,
                     "Không thể kết nối đến dịch vụ chatbot");
         }
-    }
-
-    private String pickRandom(List<String> suggestions) {
-        int index = ThreadLocalRandom.current().nextInt(suggestions.size());
-        return suggestions.get(index);
     }
 }

@@ -37,7 +37,8 @@ import com.project.cruise.android.data.dto.auth.GoogleLoginResponse
 import com.project.cruise.android.data.dto.auth.GoogleVerifyOtpRequest
 import com.project.cruise.android.data.dto.chat.ChatMessageRequest
 import com.project.cruise.android.data.dto.chat.ChatMessageResponse
-
+import com.project.cruise.android.data.dto.chat.ChatSessionRequest
+import com.project.cruise.android.data.dto.chat.ChatWelcomeResponse
 interface ApiService {
 
 
@@ -154,5 +155,9 @@ interface ApiService {
     suspend fun sendChatMessage(
         @Body request: ChatMessageRequest
     ): ChatMessageResponse
+    @POST("api/chat/welcome")
+    suspend fun openChat(
+        @Body request: ChatSessionRequest
+    ): ChatWelcomeResponse
 }
 

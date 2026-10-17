@@ -4,6 +4,7 @@ package com.project.cruise.android.viewmodel.chat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.project.cruise.android.data.dto.chat.ChatMessageRequest
+import com.project.cruise.android.data.dto.chat.ChatSessionRequest
 import com.project.cruise.android.data.network.ApiService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,35 +33,19 @@ class ChatViewModel(
     private val _inputText = MutableStateFlow("")
     val inputText: StateFlow<String> = _inputText.asStateFlow()
 
-    private var hasLoadedWelcome = false
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    // Giữ cùng sessionId trong suốt phiên chat của ViewModel.
-    private val sessionId = UUID.randomUUID().toString()
+    private var hasLoadedWelcome = false
+    private var isLoadingWelcome = false
+
+    private var sessionId = UUID.randomUUID().toString()
 
     fun setChatOpen(isOpen: Boolean) {
         _isChatOpen.value = isOpen
 
-        if (isOpen && !hasLoadedWelcome) {
-            hasLoadedWelcome = true
-
-            _messages.update { currentMessages ->
-                if (currentMessages.isEmpty()) {
-                    listOf(
-                        ChatMessage(
-                            text = "Dạ chào quý khách! Mình là trợ lý ảo du lịch Cruise. Tôi có thể hỗ trợ gì cho bạn hôm nay ạ?",
-                            isUser = false,
-                            suggestions = listOf(
-                                "Giới thiệu hệ thống",
-                                "Liên hệ hotline",
-                                "Hướng dẫn đặt tour",
-                                "Tour giá từ 10 triệu"
-                            )
-                        )
-                    )
-                } else {
-                    currentMessages
-                }
-            }
+        if (isOpen && !hasLoadedWelcome && !isLoadingWelcome) {
+            loadWelcome()
         }
     }
 
@@ -68,11 +53,51 @@ class ChatViewModel(
         _inputText.value = text
     }
 
+    private fun loadWelcome() {
+        viewModelScope.launch {
+            isLoadingWelcome = true
+            _isLoading.value = true
+
+            try {
+                val response = apiService.openChat(
+                    ChatSessionRequest(sessionId = sessionId)
+                )
+
+                sessionId = response.sessionId
+
+                _messages.update { current ->
+                    current + ChatMessage(
+                        text = response.message,
+                        isUser = false,
+                        suggestions = response.suggestions
+                    )
+                }
+
+                // Chỉ đánh dấu thành công sau khi backend trả lời.
+                hasLoadedWelcome = true
+
+            } catch (e: Exception) {
+                _messages.update {
+                    it + ChatMessage(
+                        text = "Dạ, hiện tại chưa thể kết nối với trợ lý du lịch. "
+                                + "Bạn vui lòng đóng khung chat rồi mở lại để thử lại nhé.",
+                        isUser = false
+                    )
+                }
+            } finally {
+                isLoadingWelcome = false
+                _isLoading.value = false
+            }
+        }
+    }
+
     fun sendMessage(text: String) {
         val message = text.trim()
-        if (message.isBlank()) return
 
-        // Tránh gửi câu hỏi rỗng; thêm câu hỏi của người dùng lên giao diện ngay.
+        if (message.isBlank() || _isLoading.value) return
+
+        _isLoading.value = true
+
         _messages.update {
             it + ChatMessage(
                 text = message,
@@ -91,33 +116,29 @@ class ChatViewModel(
                     )
                 )
 
+                sessionId = response.sessionId
+
                 _messages.update {
                     it + ChatMessage(
-                        text = response.message.ifBlank {
-                            "Dạ, hệ thống chưa có câu trả lời cho yêu cầu này."
-                        },
-                        isUser = false,
-                        suggestions = listOf(
-                            "Giới thiệu hệ thống",
-                            "Hướng dẫn đặt tour",
-                            "Liên hệ hotline"
-                        )
-                    )
-                }
-            } catch (e: Exception) {
-                _messages.update {
-                    it + ChatMessage(
-                        text = "Dạ, hiện tại chưa thể kết nối với trợ lý du lịch. Bạn vui lòng thử lại sau nhé."
-                            .plus(
-                                if (e is retrofit2.HttpException) {
-                                    " (HTTP ${e.code()})"
-                                } else {
-                                    ""
-                                }
-                            ),
+                        text = response.message,
                         isUser = false
                     )
                 }
+            } catch (e: Exception) {
+                val errorText = if (e is retrofit2.HttpException) {
+                    "Dạ, hệ thống phản hồi lỗi HTTP ${e.code()}. Bạn vui lòng thử lại nhé."
+                } else {
+                    "Dạ, hiện tại chưa thể kết nối với trợ lý du lịch. Bạn vui lòng thử lại nhé."
+                }
+
+                _messages.update {
+                    it + ChatMessage(
+                        text = errorText,
+                        isUser = false
+                    )
+                }
+            } finally {
+                _isLoading.value = false
             }
         }
     }

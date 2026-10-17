@@ -30,6 +30,8 @@ fun PublicTourChatFloatingWidget(
     val messages by chatViewModel.messages.collectAsState()
     val inputText by chatViewModel.inputText.collectAsState()
 
+    val isLoading by chatViewModel.isLoading.collectAsState()
+
     // Lớp nền mờ khi mở khung chat
     if (isOpen) {
         Box(
@@ -119,12 +121,7 @@ fun PublicTourChatFloatingWidget(
                                         msg.suggestions.forEach { suggestion ->
                                             OutlinedButton(
                                                 onClick = {
-                                                    // Tính năng điền sẵn input nếu là gợi ý có tham số
-                                                    if (suggestion.contains("giá từ", ignoreCase = true)) {
-                                                        chatViewModel.updateInputText("Tour giá từ 10 triệu")
-                                                    } else {
-                                                        chatViewModel.sendMessage(suggestion)
-                                                    }
+                                                    chatViewModel.sendMessage(suggestion)
                                                 },
                                                 modifier = Modifier.height(32.dp),
                                                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
@@ -136,6 +133,13 @@ fun PublicTourChatFloatingWidget(
                                 }
                             }
                         }
+                    }
+                    if (isLoading) {
+                        Text(
+                            text = "Trợ lý đang trả lời...",
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                        )
                     }
 
                     // Ô nhập văn bản và nút Gửi
