@@ -1,12 +1,10 @@
+
 package com.project.cruise.android.viewmodel.chat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.project.cruise.android.data.dto.chat.DialogflowDetectIntentRequest
-import com.project.cruise.android.data.dto.chat.EventInput
-import com.project.cruise.android.data.dto.chat.QueryInput
-import com.project.cruise.android.data.dto.chat.TextInput
-import com.project.cruise.android.data.remote.DialogflowApiService
+import com.project.cruise.android.data.dto.chat.ChatMessageRequest
+import com.project.cruise.android.data.network.ApiService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,8 +20,7 @@ data class ChatMessage(
 )
 
 class ChatViewModel(
-    // Inject DialogflowApiService của bạn vào đây (hoặc khởi tạo trực tiếp)
-    private val dialogflowApiService: DialogflowApiService? = null
+    private val apiService: ApiService
 ) : ViewModel() {
 
     private val _isChatOpen = MutableStateFlow(false)
@@ -36,15 +33,34 @@ class ChatViewModel(
     val inputText: StateFlow<String> = _inputText.asStateFlow()
 
     private var hasLoadedWelcome = false
-    private val projectId = com.project.cruise.android.BuildConfig.DIALOGFLOW_PROJECT_ID
-    private val sessionId = UUID.randomUUID().toString() // Mã định danh phiên chat duy nhất cho mỗi user mở app
-    private val bearerToken = "Bearer YOUR_GOOGLE_ACCESS_TOKEN" // Token lấy từ Service Account Google Cloud
+
+    // Giữ cùng sessionId trong suốt phiên chat của ViewModel.
+    private val sessionId = UUID.randomUUID().toString()
 
     fun setChatOpen(isOpen: Boolean) {
         _isChatOpen.value = isOpen
+
         if (isOpen && !hasLoadedWelcome) {
             hasLoadedWelcome = true
-            triggerWelcomeEvent()
+
+            _messages.update { currentMessages ->
+                if (currentMessages.isEmpty()) {
+                    listOf(
+                        ChatMessage(
+                            text = "Dạ chào quý khách! Mình là trợ lý ảo du lịch Cruise. Tôi có thể hỗ trợ gì cho bạn hôm nay ạ?",
+                            isUser = false,
+                            suggestions = listOf(
+                                "Giới thiệu hệ thống",
+                                "Liên hệ hotline",
+                                "Hướng dẫn đặt tour",
+                                "Tour giá từ 10 triệu"
+                            )
+                        )
+                    )
+                } else {
+                    currentMessages
+                }
+            }
         }
     }
 
@@ -52,70 +68,56 @@ class ChatViewModel(
         _inputText.value = text
     }
 
-    private fun triggerWelcomeEvent() {
-        viewModelScope.launch {
-            try {
-                val request = DialogflowDetectIntentRequest(
-                    queryInput = QueryInput(
-                        event = EventInput(name = "WELCOME", languageCode = "vi")
-                    )
-                )
-
-                // Gọi thật lên Dialogflow Cloud
-                val response = dialogflowApiService?.detectIntent(projectId, sessionId, bearerToken, request)
-                val fulfillmentText = response?.queryResult?.fulfillmentText ?: "Dạ chào quý khách! Tôi có thể hỗ trợ gì cho bạn ạ?"
-
-                val welcomeMsg = ChatMessage(
-                    text = fulfillmentText,
-                    isUser = false,
-                    suggestions = listOf("Giới thiệu hệ thống", "Liên hệ hotline", "Hướng dẫn đặt tour", "Tour giá từ 10 triệu")
-                )
-                _messages.value = listOf(welcomeMsg)
-
-            } catch (e: Exception) {
-                // Fallback nếu mạng lỗi hoặc chưa cấu hình token
-                val fallbackMsg = ChatMessage(
-                    text = "Dạ chào quý khách! Mình là trợ lý ảo du lịch Cruise. Tôi có thể hỗ trợ gì cho bạn hôm nay ạ?",
-                    isUser = false,
-                    suggestions = listOf("Giới thiệu hệ thống", "Liên hệ hotline", "Hướng dẫn đặt tour", "Tour giá từ 10 triệu")
-                )
-                _messages.value = listOf(fallbackMsg)
-            }
-        }
-    }
-
     fun sendMessage(text: String) {
-        if (text.isBlank()) return
+        val message = text.trim()
+        if (message.isBlank()) return
 
-        val userMsg = ChatMessage(text = text, isUser = true)
-        _messages.update { it + userMsg }
+        // Tránh gửi câu hỏi rỗng; thêm câu hỏi của người dùng lên giao diện ngay.
+        _messages.update {
+            it + ChatMessage(
+                text = message,
+                isUser = true
+            )
+        }
+
         _inputText.value = ""
 
         viewModelScope.launch {
             try {
-                val request = DialogflowDetectIntentRequest(
-                    queryInput = QueryInput(
-                        text = TextInput(text = text, languageCode = "vi")
+                val response = apiService.sendChatMessage(
+                    ChatMessageRequest(
+                        message = message,
+                        sessionId = sessionId
                     )
                 )
 
-                // Gửi text thực tế lên Dialogflow Cloud
-                val response = dialogflowApiService?.detectIntent(projectId, sessionId, bearerToken, request)
-                val botReplyText = response?.queryResult?.fulfillmentText ?: "Dạ hệ thống đã ghi nhận yêu cầu của bạn."
-
-                val botReply = ChatMessage(
-                    text = botReplyText,
-                    isUser = false,
-                    suggestions = listOf("Giới thiệu hệ thống", "Hướng dẫn đặt tour", "Liên hệ hotline")
-                )
-                _messages.update { it + botReply }
-
+                _messages.update {
+                    it + ChatMessage(
+                        text = response.message.ifBlank {
+                            "Dạ, hệ thống chưa có câu trả lời cho yêu cầu này."
+                        },
+                        isUser = false,
+                        suggestions = listOf(
+                            "Giới thiệu hệ thống",
+                            "Hướng dẫn đặt tour",
+                            "Liên hệ hotline"
+                        )
+                    )
+                }
             } catch (e: Exception) {
-                val errorReply = ChatMessage(
-                    text = "Dạ hệ thống đang gặp gián đoạn kết nối, bạn thử lại sau nhé!",
-                    isUser = false
-                )
-                _messages.update { it + errorReply }
+                _messages.update {
+                    it + ChatMessage(
+                        text = "Dạ, hiện tại chưa thể kết nối với trợ lý du lịch. Bạn vui lòng thử lại sau nhé."
+                            .plus(
+                                if (e is retrofit2.HttpException) {
+                                    " (HTTP ${e.code()})"
+                                } else {
+                                    ""
+                                }
+                            ),
+                        isUser = false
+                    )
+                }
             }
         }
     }

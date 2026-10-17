@@ -35,7 +35,8 @@ import com.project.cruise.android.data.dto.onboard.ActivityCruiseUsageResponse
 import com.project.cruise.android.data.dto.auth.GoogleLoginRequest
 import com.project.cruise.android.data.dto.auth.GoogleLoginResponse
 import com.project.cruise.android.data.dto.auth.GoogleVerifyOtpRequest
-
+import com.project.cruise.android.data.dto.chat.ChatMessageRequest
+import com.project.cruise.android.data.dto.chat.ChatMessageResponse
 
 interface ApiService {
 
@@ -148,5 +149,10 @@ interface ApiService {
     suspend fun createActivityCruiseUsage(
         @Body request: ActivityCruiseUsageRequest
     ): ActivityCruiseUsageResponse
+
+    @POST("api/chat/message")
+    suspend fun sendChatMessage(
+        @Body request: ChatMessageRequest
+    ): ChatMessageResponse
 }
 

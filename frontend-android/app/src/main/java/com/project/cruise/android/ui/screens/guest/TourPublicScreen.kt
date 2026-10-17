@@ -29,7 +29,7 @@ import java.util.Locale
 fun TourPublicScreen(
     viewModel: TourViewModel,
     authViewModel: AuthViewModel,
-    chatViewModel: ChatViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    chatViewModel: ChatViewModel,
     onTourClick: (String) -> Unit,
     onLoginClick: () -> Unit,
     onUserClick: () -> Unit,

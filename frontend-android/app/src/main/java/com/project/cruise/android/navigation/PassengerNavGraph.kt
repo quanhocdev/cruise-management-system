@@ -24,6 +24,8 @@ import com.project.cruise.android.viewmodel.passenger.BookingViewModel
 import com.project.cruise.android.viewmodel.passenger.BookingViewModelFactory
 import com.project.cruise.android.viewmodel.tour.TourViewModel
 import com.project.cruise.android.viewmodel.tour.TourViewModelFactory
+import com.project.cruise.android.viewmodel.chat.ChatViewModel
+import com.project.cruise.android.viewmodel.chat.ChatViewModelFactory
 
 fun NavGraphBuilder.passengerGraph(
     navController: NavHostController,
@@ -68,32 +70,48 @@ fun NavGraphBuilder.passengerGraph(
     }
 
     // ----- TOURS (PUBLIC - MÀN HÌNH CHÍNH) -----
+
     composable(Routes.PASSENGER_TOURS) {
-        val tourRepo = remember(apiService) { TourRepository(apiService) }
-        val tourViewModel: TourViewModel = viewModel(factory = TourViewModelFactory(tourRepo))
+        val tourRepo = remember(apiService) {
+            TourRepository(apiService)
+        }
+
+        val tourViewModel: TourViewModel = viewModel(
+            factory = TourViewModelFactory(tourRepo)
+        )
+
+        val chatViewModel: ChatViewModel = viewModel(
+            factory = ChatViewModelFactory(apiService)
+        )
 
         TourPublicScreen(
             viewModel = tourViewModel,
             authViewModel = authViewModel,
+            chatViewModel = chatViewModel,
             onTourClick = { tourId ->
                 navController.navigate(Routes.passengerTourDetail(tourId))
             },
-            onLoginClick = { navController.navigate(Routes.GUEST) },       // Chưa đăng nhập -> Guest
-            onUserClick = { navController.navigate(Routes.PASSENGER_PROFILE) }, // Đã đăng nhập -> Profile
-            onMyBookingsClick = { navController.navigate(Routes.PASSENGER_BOOKINGS) },
+            onLoginClick = {
+                navController.navigate(Routes.GUEST)
+            },
+            onUserClick = {
+                navController.navigate(Routes.PASSENGER_PROFILE)
+            },
+            onMyBookingsClick = {
+                navController.navigate(Routes.PASSENGER_BOOKINGS)
+            },
             onLogout = {
                 navController.navigate(Routes.GUEST) {
-                    popUpTo(Routes.PASSENGER_TOURS) { inclusive = true }
+                    popUpTo(Routes.PASSENGER_TOURS) {
+                        inclusive = true
+                    }
                 }
             },
-            onHomeClick = {
-                // Đang ở trang chủ rồi
-            },
-            onNotificationClick = {
-                // TODO: chuyển sang màn hình thông báo
-            }
+            onHomeClick = {},
+            onNotificationClick = {}
         )
     }
+
 
     // ----- TOUR DETAIL (PUBLIC) -----
     composable(

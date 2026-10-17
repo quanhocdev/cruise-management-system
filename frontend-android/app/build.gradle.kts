@@ -41,11 +41,6 @@ android {
             "POS_API_KEY",
             "\"${localProperties.getProperty("POS_API_KEY") ?: ""}\""
         )
-        buildConfigField(
-            "String",
-            "DIALOGFLOW_PROJECT_ID",
-            "\"${localProperties.getProperty("DIALOGFLOW_PROJECT_ID") ?: "tour-bot-project-511616"}\""
-        )
     }
 
     buildTypes {
