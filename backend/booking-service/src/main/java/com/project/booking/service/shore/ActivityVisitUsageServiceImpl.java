@@ -130,6 +130,8 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
                                 benefitQuantity,
                                 usedBenefitQuantity);
 
+                accounts.authorizeCharge(booking, amount.finalAmount());
+
                 // 6. Trừ lượt benefit đã dùng
                 if (benefitConsumption != null) {
                         benefitConsumptionService.consume(

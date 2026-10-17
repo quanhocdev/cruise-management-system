@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 
 /** Captures new usages in an append-only journal without replacing legacy Bill calculation. */
 @Service
@@ -48,6 +49,31 @@ public class OnboardAccountService {
         openForCheckIn(booking);
         return jdbc.queryForObject("SELECT status FROM booking.onboard_accounts WHERE booking_id=? FOR UPDATE",
                 String.class, booking.getId());
+    }
+
+    /** Must run before saving usage, in the same transaction as quota and journal writes. */
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void authorizeCharge(Booking booking, BigDecimal amount) {
+        if (amount == null || amount.signum() < 0) throw new IllegalArgumentException("Invalid charge amount");
+        lockForUsage(booking);
+        if (amount.signum() == 0) return;
+        // Accounts opened before a tour policy existed can adopt its first configured limit.
+        jdbc.update("""
+            UPDATE booking.onboard_accounts a SET credit_limit=p.credit_limit, updated_at=CURRENT_TIMESTAMP
+            FROM booking.tour_spending_policies p
+            WHERE a.booking_id=? AND a.credit_limit IS NULL AND p.tour_id=a.tour_id
+            """, booking.getId());
+        BigDecimal limit = jdbc.queryForObject("SELECT credit_limit FROM booking.onboard_accounts WHERE booking_id=?",
+                BigDecimal.class, booking.getId());
+        if (limit == null) {
+            throw new CommandException("CREDIT_LIMIT_NOT_CONFIGURED",
+                    "Chưa cấu hình hạn mức chi tiêu. Vui lòng liên hệ bộ phận tài chính.", HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+        BigDecimal balance = jdbc.queryForObject(UsageLedgerSql.BALANCE, BigDecimal.class, booking.getId(), booking.getId());
+        if (balance.add(amount.setScale(2, RoundingMode.HALF_UP)).compareTo(limit) > 0) {
+            throw new CommandException("CREDIT_LIMIT_EXCEEDED",
+                    "Khoản phí vượt hạn mức chi tiêu còn lại. Vui lòng liên hệ bộ phận tài chính.", HttpStatus.UNPROCESSABLE_ENTITY);
+        }
     }
 
     @Transactional

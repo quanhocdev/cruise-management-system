@@ -114,6 +114,8 @@ public class ActivityCruiseUsageServiceImpl
                                 activityInfo,
                                 usedBenefitQuantity);
 
+                accounts.authorizeCharge(booking, pricingResult.finalAmount());
+
                 // 16. Cập nhật lượt benefit đã dùng
                 if (benefitConsumption != null) {
                         benefitConsumptionService.consume(

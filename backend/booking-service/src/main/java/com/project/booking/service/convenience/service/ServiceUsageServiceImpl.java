@@ -133,6 +133,8 @@ public class ServiceUsageServiceImpl implements ServiceUsageService {
                                 serviceInfo,
                                 usedBenefitQuantity);
 
+                accounts.authorizeCharge(booking, pricingResult.finalAmount());
+
                 // 17. Cập nhật lượt benefit đã dùng
                 if (benefitConsumption != null && pricingResult.freeUsage() > 0) {
                         benefitConsumptionService.consume(

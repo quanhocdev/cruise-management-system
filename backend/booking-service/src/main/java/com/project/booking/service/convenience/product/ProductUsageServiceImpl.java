@@ -106,6 +106,8 @@ public class ProductUsageServiceImpl implements ProductUsageService {
                                 usedBenefitQuantity,
                                 request.quantity());
 
+                accounts.authorizeCharge(booking, pricingResult.finalAmount());
+
                 // 14. Cập nhật lượt benefit đã dùng
                 if (benefitConsumption != null && pricingResult.freeQuantityThisUsage() > 0) {
                         benefitConsumptionService.consume(
