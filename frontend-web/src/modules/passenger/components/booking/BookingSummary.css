@@ -1,0 +1,102 @@
+.booking-summary {
+  padding: 1.5rem;
+  background: #fff;
+  border: 1px solid var(--td-line, #dde4ea);
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px rgba(15, 43, 70, 0.08);
+}
+
+@media (min-width: 992px) {
+  .booking-summary {
+    position: sticky;
+    top: 1.5rem;
+  }
+}
+
+.booking-summary__title {
+  margin: 0 0 1rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--td-ink, #0f2b46);
+}
+
+.booking-summary__tour {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--td-ink, #0f2b46);
+}
+.booking-summary__code {
+  margin: 0.15rem 0 1rem;
+  font-size: 0.82rem;
+  color: var(--td-muted, #5b6b7c);
+}
+
+.booking-summary__list {
+  margin: 0;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--td-line, #dde4ea);
+}
+.booking-summary__list > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.4rem 0;
+  font-size: 0.92rem;
+}
+.booking-summary__list dt {
+  font-weight: 400;
+  color: var(--td-muted, #5b6b7c);
+}
+.booking-summary__list dd {
+  margin: 0;
+  text-align: right;
+  font-weight: 600;
+  color: var(--td-ink, #0f2b46);
+}
+.booking-summary__list dd.is-accent {
+  color: var(--td-accent, #12808a);
+}
+
+.booking-summary__total {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-bottom: 1.25rem;
+  padding: 1rem 0 0;
+  border-top: 1px solid var(--td-line, #dde4ea);
+}
+.booking-summary__total span {
+  font-size: 0.85rem;
+  color: var(--td-muted, #5b6b7c);
+}
+.booking-summary__total strong {
+  font-size: 1.7rem;
+  line-height: 1.2;
+  color: var(--td-ink, #0f2b46);
+}
+
+.booking-summary__warning {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #8a3320;
+}
+
+.booking-summary .booking-summary__submit {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--td-accent, #12808a);
+  border: 0;
+  border-radius: 0.65rem;
+}
+.booking-summary .booking-summary__submit:hover:not(:disabled),
+.booking-summary .booking-summary__submit:focus-visible {
+  background: var(--td-accent-dark, #0d636b);
+}
+.booking-summary .booking-summary__submit:disabled {
+  color: #7b8794;
+  background: #e3e8ed;
+}
