@@ -74,8 +74,23 @@ fun NavGraphBuilder.posGraph(
             onQrClick = { navController.navigate(Routes.posQrScan(role)) },
             onNfcClick = { navController.navigate(Routes.posNfcScan(role)) },
             onManualClick = { navController.navigate(Routes.posManualEntry(role)) },
-            onHistoryClick = { navController.navigate(Routes.posHistory(role)) }
+            onHistoryClick = { navController.navigate(Routes.posHistory(role)) },
+            onSpendingClick = { navController.navigate(Routes.FINANCE_SPENDING) }
         )
+    }
+
+    composable(Routes.FINANCE_SPENDING) {
+        val session by authViewModel.sessionState.collectAsState()
+        val role = (session as? com.project.cruise.android.viewmodel.auth.SessionState.Authenticated)?.role
+        if (PosRole.fromApiRole(role) != PosRole.FINANCE) {
+            LaunchedEffect(role) { navController.popBackStack() }
+            return@composable
+        }
+        val context = LocalContext.current
+        val source = remember(context) { com.project.cruise.android.data.repository.FinanceSpendingRepository(context) }
+        val model: com.project.cruise.android.viewmodel.pos.FinanceSpendingViewModel = viewModel(
+            factory=com.project.cruise.android.viewmodel.pos.FinanceSpendingViewModel.Factory(source))
+        com.project.cruise.android.ui.screens.pos.FinanceSpendingScreen(model) { navController.popBackStack() }
     }
 
     // ----- QR SCAN -----

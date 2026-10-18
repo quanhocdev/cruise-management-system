@@ -9,7 +9,8 @@ fun FinancePosDashboardScreen(
     onQrClick: () -> Unit,
     onNfcClick: () -> Unit,
     onManualClick: () -> Unit,
-    onHistoryClick: () -> Unit
+    onHistoryClick: () -> Unit,
+    onSpendingClick: () -> Unit = {}
 ) {
     RolePosDashboard(
         username = username,
@@ -33,7 +34,8 @@ fun FinancePosDashboardScreen(
                 "Dùng khi không đọc được QR",
                 "123",
                 onManualClick
-            )
+            ),
+            PosDashboardAction("Hạn mức chi tiêu", "Tra cứu booking và quản lý hạn mức", "123", onSpendingClick)
         ),
         notice = "Gửi mã booking để tiếp tục thủ tục tại quầy lễ tân. Gửi mã thành công chưa phải hoàn tất check-in.",
         onLogoutClick = onLogoutClick,

@@ -38,6 +38,15 @@ import okhttp3.MultipartBody
 
 interface ApiService {
 
+    @GET("api/finance/bookings/spending-account")
+    suspend fun getFinanceSpending(@Query("bookingCode") code: String): com.project.cruise.android.data.dto.booking.FinanceSpendingAccount
+
+    @retrofit2.http.PUT("api/finance/bookings/{id}/spending-limit")
+    suspend fun setSpendingLimit(@Path("id") id: Long, @Body request: com.project.cruise.android.data.dto.booking.SpendingLimitRequest): com.project.cruise.android.data.dto.booking.SpendingLimitResult
+
+    @POST("api/finance/bookings/{id}/ledger-history")
+    suspend fun importLedgerHistory(@Path("id") id: Long, @Body request: com.project.cruise.android.data.dto.booking.LedgerHistoryRequest): com.project.cruise.android.data.dto.booking.LedgerHistoryResult
+
     @GET("api/passengers/bookings/{id}/spending")
     suspend fun getBookingSpending(
         @Path("id") id: Long,
