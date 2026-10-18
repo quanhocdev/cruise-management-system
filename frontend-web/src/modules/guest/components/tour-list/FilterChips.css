@@ -1,0 +1,60 @@
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
+  padding: 0.4rem 0.95rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--td-ink, #0f2b46);
+  background: #fff;
+  border: 1px solid var(--td-line, #dde4ea);
+  border-radius: 50rem;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+.filter-chip:hover {
+  border-color: var(--td-accent, #12808a);
+  color: var(--td-accent, #12808a);
+}
+.filter-chip:focus-visible {
+  outline: 3px solid rgba(18, 128, 138, 0.35);
+  outline-offset: 2px;
+}
+
+.filter-chip__count {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--td-muted, #5b6b7c);
+}
+
+.filter-chip.is-active {
+  font-weight: 600;
+  color: #fff;
+  background: var(--td-accent, #12808a);
+  border-color: var(--td-accent, #12808a);
+}
+.filter-chip.is-active .filter-chip__count {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+@media (max-width: 575.98px) {
+  .filter-chips {
+    flex-wrap: nowrap;
+    padding-bottom: 0.25rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .filter-chips::-webkit-scrollbar {
+    display: none;
+  }
+}
