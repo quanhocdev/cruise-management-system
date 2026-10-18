@@ -28,6 +28,7 @@ public record CheckoutPreviewResponse(
             BigDecimal unitPrice,
             BigDecimal discountAmount,
             BigDecimal finalAmount,
-            LocalDateTime usedAt) {
+            LocalDateTime usedAt,
+            BigDecimal adjustmentAmount) {
     }
 }

@@ -19,7 +19,8 @@ public class SpendingSummaryService {
     private static final String LINES = UsageLedgerSql.SCOPED;
 
     public record Line(String type, Long usageId, Long bookingPassengerId, UUID targetId, int quantity,
-                       BigDecimal unitPrice, BigDecimal discountAmount, BigDecimal finalAmount, LocalDateTime usedAt) {}
+                       BigDecimal unitPrice, BigDecimal discountAmount, BigDecimal finalAmount, LocalDateTime usedAt,
+                       BigDecimal adjustmentAmount) {}
     public record Summary(Long bookingId, String currency, String accountStatus, BigDecimal creditLimit,
                           BigDecimal totalCharges, BigDecimal capturedLedgerTotal, boolean ledgerComplete,
                           long totalItems, int page, int size, List<Line> items) {}
@@ -60,11 +61,16 @@ public class SpendingSummaryService {
                       )
                     )
                     """, Boolean.class, bookingId, bookingId));
-        var lines = jdbc.query(LINES + "SELECT * FROM scoped ORDER BY used_at DESC, type, id DESC LIMIT ? OFFSET ?",
+        BigDecimal adjustmentTotal = jdbc.queryForObject("SELECT COALESCE(sum(amount),0) FROM booking.ledger_entries WHERE booking_id=? AND entry_type IN ('VOID','REFUND')", BigDecimal.class, bookingId);
+        var lines = jdbc.query(LINES + """
+                SELECT u.*, COALESCE((SELECT sum(e.amount) FROM booking.ledger_entries e
+                  WHERE e.booking_id=? AND e.source_type=u.type AND e.source_usage_id=u.id AND e.entry_type IN ('VOID','REFUND')),0) AS adjustment
+                FROM scoped u ORDER BY used_at DESC, type, id DESC LIMIT ? OFFSET ?
+                """,
                 (row, n) -> new Line(row.getString("type"), row.getLong("id"), row.getLong("booking_passenger_id"),
                         row.getObject("target_id", UUID.class), row.getInt("quantity"), row.getBigDecimal("unit_price"),
-                        row.getBigDecimal("discount_amount"), row.getBigDecimal("final_amount"),
-                        row.getObject("used_at", LocalDateTime.class)), bookingId, size, (long)page * size);
-        return new Summary(bookingId, "VND", status, limit, total, journalTotal, complete, totalItems, page, size, lines);
+                        row.getBigDecimal("discount_amount"), row.getBigDecimal("final_amount").add(row.getBigDecimal("adjustment")),
+                        row.getObject("used_at", LocalDateTime.class), row.getBigDecimal("adjustment")), bookingId, bookingId, size, (long)page * size);
+        return new Summary(bookingId, "VND", status, limit, total.add(adjustmentTotal), journalTotal.add(adjustmentTotal), complete, totalItems, page, size, lines);
     }
 }

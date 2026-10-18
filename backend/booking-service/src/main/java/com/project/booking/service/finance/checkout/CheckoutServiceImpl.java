@@ -35,6 +35,7 @@ import java.util.List;
 public class CheckoutServiceImpl implements CheckoutService {
 
         private final OnboardAccountService accounts;
+        private final com.project.booking.service.account.LedgerAdjustmentReader adjustments;
     private final BookingRepository bookingRepository;
         private final BookingPassengerRepository bookingPassengerRepository;
         private final BillRepository billRepository;
@@ -56,9 +57,11 @@ public class CheckoutServiceImpl implements CheckoutService {
                         PaymentCheckoutService paymentCheckoutService,
                         PassengerUsageReader passengerUsageReader,
                         PassengerCheckoutPreviewBuilder passengerCheckoutPreviewBuilder,
-                        BillCodeGenerator billCodeGenerator, OnboardAccountService accounts) {
+                        BillCodeGenerator billCodeGenerator, OnboardAccountService accounts,
+                        com.project.booking.service.account.LedgerAdjustmentReader adjustments) {
 
                 this.accounts = accounts;
+                this.adjustments = adjustments;
         this.bookingRepository = bookingRepository;
                 this.bookingPassengerRepository = bookingPassengerRepository;
                 this.billRepository = billRepository;
@@ -72,6 +75,7 @@ public class CheckoutServiceImpl implements CheckoutService {
         }
 
         @Override
+        @Transactional(readOnly = true, isolation = org.springframework.transaction.annotation.Isolation.REPEATABLE_READ)
         public CheckoutPreviewResponse getCheckoutPreview(Long bookingId) {
 
                 Booking booking = getBooking(bookingId);
@@ -214,6 +218,7 @@ public class CheckoutServiceImpl implements CheckoutService {
                                                 billItemMapper.fromProduct(
                                                                 bill, bookingPassengerId, usage)));
 
+                items.addAll(adjustments.billItems(bill, bookingPassengerId));
                 return items;
         }
 

@@ -54,6 +54,9 @@ public class SecurityConfig {
                                 "/ws-booking/**")
                         .permitAll()
 
+                        .requestMatchers("/api/finance/bookings/ledger", "/api/finance/bookings/ledger/*/corrections")
+                        .hasAnyRole("FINANCE", "ADMIN")
+
                         // Admin
                         .requestMatchers("/api/admin/**")
                         .hasRole("ADMIN")
