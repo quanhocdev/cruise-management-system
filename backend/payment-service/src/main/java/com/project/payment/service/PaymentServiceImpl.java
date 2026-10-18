@@ -115,7 +115,7 @@ public class PaymentServiceImpl implements PaymentService {
         } catch (PaymentException ex) {
             return new VnPayIpnResponse("04", "Invalid amount");
         }
-        if (payment.getStatus() == PaymentStatus.SUCCESS)
+        if (payment.getStatus() == PaymentStatus.SUCCESS || payment.getStatus() == PaymentStatus.REFUNDED)
             return new VnPayIpnResponse("02", "Order already confirmed");
         try {
             applyResult(payment, params);
@@ -128,7 +128,7 @@ public class PaymentServiceImpl implements PaymentService {
     private Payment applyResult(Payment payment, Map<String, String> params) {
         boolean success = "00".equals(params.get("vnp_ResponseCode"))
                 && "00".equals(params.getOrDefault("vnp_TransactionStatus", "00"));
-        if (payment.getStatus() != PaymentStatus.SUCCESS) {
+        if (payment.getStatus() != PaymentStatus.SUCCESS && payment.getStatus() != PaymentStatus.REFUNDED) {
             PaymentStatus previousStatus = payment.getStatus();
             payment.setStatus(success ? PaymentStatus.SUCCESS : PaymentStatus.FAILED);
             if (success)
@@ -175,7 +175,8 @@ public class PaymentServiceImpl implements PaymentService {
         if (txnRef == null)
             throw new PaymentException("Missing VNPay transaction reference");
         try {
-            return find(Long.parseLong(txnRef));
+            return repository.findForUpdate(Long.parseLong(txnRef))
+                    .orElseThrow(() -> new PaymentException("Payment not found"));
         } catch (NumberFormatException ex) {
             throw new PaymentException("Invalid VNPay transaction reference");
         }
