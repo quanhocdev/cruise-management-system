@@ -75,8 +75,23 @@ fun NavGraphBuilder.posGraph(
             onNfcClick = { navController.navigate(Routes.posNfcScan(role)) },
             onManualClick = { navController.navigate(Routes.posManualEntry(role)) },
             onHistoryClick = { navController.navigate(Routes.posHistory(role)) },
-            onSpendingClick = { navController.navigate(Routes.FINANCE_SPENDING) }
+            onSpendingClick = { navController.navigate(Routes.FINANCE_SPENDING) },
+            onCorrectionClick = { navController.navigate(Routes.POS_CORRECTIONS) }
         )
+    }
+
+    composable(Routes.POS_CORRECTIONS) {
+        val session by authViewModel.sessionState.collectAsState()
+        val role = PosRole.fromApiRole((session as? com.project.cruise.android.viewmodel.auth.SessionState.Authenticated)?.role)
+        if (role != PosRole.FINANCE && role != PosRole.CONVENIENCE) {
+            LaunchedEffect(role) { navController.popBackStack() }
+            return@composable
+        }
+        val context = LocalContext.current
+        val source = remember(context,role) { com.project.cruise.android.data.repository.LedgerCorrectionRepository(context,role==PosRole.FINANCE) }
+        val model: com.project.cruise.android.viewmodel.pos.LedgerCorrectionViewModel = viewModel(
+            key="corrections-${role.name}",factory=com.project.cruise.android.viewmodel.pos.LedgerCorrectionViewModel.Factory(source))
+        com.project.cruise.android.ui.screens.pos.LedgerCorrectionScreen(model,role) { navController.popBackStack() }
     }
 
     composable(Routes.FINANCE_SPENDING) {

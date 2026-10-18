@@ -71,6 +71,7 @@ fun SpendingContent(state: SpendingState, onBack: () -> Unit, onRefresh: () -> U
                     Text("Hành khách #${line.bookingPassengerId} · Số lượng ${line.quantity}")
                     Text(line.usedAt.replace('T', ' ').take(19), style = MaterialTheme.typography.bodySmall)
                     if (line.discountAmount > BigDecimal.ZERO) Text("Giảm trừ: ${money.format(line.discountAmount)}")
+                    line.adjustmentAmount?.takeIf { it.signum() < 0 }?.let { Text("Đã điều chỉnh: ${money.format(it)}") }
                     if (line.finalAmount.compareTo(BigDecimal.ZERO) == 0) Text("Không phát sinh thêm phí")
                 }
             }

@@ -38,6 +38,15 @@ import okhttp3.MultipartBody
 
 interface ApiService {
 
+    @GET("api/finance/bookings/ledger")
+    suspend fun getFinanceLedger(@Query("bookingCode") code: String, @Query("page") page: Int): com.project.cruise.android.data.dto.booking.LedgerPage
+    @GET("api/convenience/product-usages/ledger")
+    suspend fun getConvenienceLedger(@Query("bookingCode") code: String, @Query("page") page: Int): com.project.cruise.android.data.dto.booking.LedgerPage
+    @POST("api/finance/bookings/ledger/{id}/corrections")
+    suspend fun correctFinanceLedger(@Path("id") id: Long, @Body request: com.project.cruise.android.data.dto.booking.LedgerCorrectionRequest): com.project.cruise.android.data.dto.booking.LedgerCorrectionResult
+    @POST("api/convenience/product-usages/ledger/{id}/corrections")
+    suspend fun correctConvenienceLedger(@Path("id") id: Long, @Body request: com.project.cruise.android.data.dto.booking.LedgerCorrectionRequest): com.project.cruise.android.data.dto.booking.LedgerCorrectionResult
+
     @GET("api/finance/bookings/spending-account")
     suspend fun getFinanceSpending(@Query("bookingCode") code: String): com.project.cruise.android.data.dto.booking.FinanceSpendingAccount
 

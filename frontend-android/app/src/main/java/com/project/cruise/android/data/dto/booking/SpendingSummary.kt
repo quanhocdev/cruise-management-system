@@ -25,5 +25,6 @@ data class SpendingLine(
     val unitPrice: BigDecimal,
     val discountAmount: BigDecimal,
     val finalAmount: BigDecimal,
-    val usedAt: String
+    val usedAt: String,
+    val adjustmentAmount: BigDecimal? = null
 )
