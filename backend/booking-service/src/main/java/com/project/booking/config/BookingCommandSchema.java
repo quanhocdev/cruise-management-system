@@ -20,7 +20,8 @@ public class BookingCommandSchema {
                 new ClassPathResource("db/migration/V20261015_01__request_dedup.sql"),
                 new ClassPathResource("db/migration/V20261016_02__onboard_account.sql"),
                 new ClassPathResource("db/migration/V20261017_03__usage_capacity_lock.sql"),
-                new ClassPathResource("db/migration/V20261017_04__spending_limit_audit.sql")));
+                new ClassPathResource("db/migration/V20261017_04__spending_limit_audit.sql"),
+                new ClassPathResource("db/migration/V20261018_05__legacy_ledger_metadata.sql")));
         return initializer;
     }
 }
