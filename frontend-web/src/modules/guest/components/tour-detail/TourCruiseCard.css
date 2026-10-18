@@ -1,0 +1,56 @@
+.cruise-card {
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--td-line, #dde4ea);
+  border-radius: 1rem;
+}
+
+.cruise-card__media {
+  aspect-ratio: 16 / 10;
+  background: #e3e8ed;
+}
+.cruise-card__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cruise-card__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 0.9rem;
+  color: #7b8794;
+}
+
+.cruise-card__body {
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+.cruise-card__name {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--td-ink, #0f2b46);
+}
+.cruise-card__code {
+  margin: 0.15rem 0 0.75rem;
+  font-size: 0.82rem;
+  color: var(--td-muted, #5b6b7c);
+}
+.cruise-card__desc {
+  margin: 0 0 1rem;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--td-muted, #5b6b7c);
+}
+.cruise-card__capacity {
+  margin: 0;
+  padding-top: 0.9rem;
+  font-size: 0.9rem;
+  color: var(--td-muted, #5b6b7c);
+  border-top: 1px solid var(--td-line, #dde4ea);
+}
+.cruise-card__capacity strong {
+  color: var(--td-ink, #0f2b46);
+}

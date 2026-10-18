@@ -1,0 +1,41 @@
+.activities {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.activity {
+  display: flex;
+  flex-direction: column;
+  padding: 1.1rem 1.25rem;
+  background: var(--td-surface, #f3f6f9);
+  border-radius: 0.85rem;
+}
+.activity__name {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--td-ink, #0f2b46);
+}
+.activity__desc {
+  flex: 1;
+  margin: 0 0 0.9rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--td-muted, #5b6b7c);
+}
+.activity__price {
+  align-self: flex-start;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--td-accent-dark, #0d636b);
+  background: #fff;
+  border: 1px solid var(--td-line, #dde4ea);
+  border-radius: 50rem;
+}
+.activity__price.is-free {
+  color: #17784a;
+  background: #e3f4ea;
+  border-color: transparent;
+}
