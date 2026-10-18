@@ -40,6 +40,7 @@ object Routes {
     // =================================================
     const val POS_LOGIN = "pos_login"
     const val FINANCE_SPENDING = "finance_spending"
+    const val FINANCE_REFUNDS = "finance_refunds"
     const val POS_CORRECTIONS = "pos_corrections"
     const val POS_DASHBOARD = "pos_dashboard/{role}"
     const val POS_QR_SCAN = "pos_qr_scan/{role}"

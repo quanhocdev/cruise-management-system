@@ -76,8 +76,23 @@ fun NavGraphBuilder.posGraph(
             onManualClick = { navController.navigate(Routes.posManualEntry(role)) },
             onHistoryClick = { navController.navigate(Routes.posHistory(role)) },
             onSpendingClick = { navController.navigate(Routes.FINANCE_SPENDING) },
-            onCorrectionClick = { navController.navigate(Routes.POS_CORRECTIONS) }
+            onCorrectionClick = { navController.navigate(Routes.POS_CORRECTIONS) },
+            onRefundClick = { navController.navigate(Routes.FINANCE_REFUNDS) }
         )
+    }
+
+    composable(Routes.FINANCE_REFUNDS) {
+        val session by authViewModel.sessionState.collectAsState()
+        val role = (session as? com.project.cruise.android.viewmodel.auth.SessionState.Authenticated)?.role
+        if (PosRole.fromApiRole(role) != PosRole.FINANCE) {
+            LaunchedEffect(role) { navController.popBackStack() }
+            return@composable
+        }
+        val context = LocalContext.current
+        val source = remember(context) { com.project.cruise.android.data.repository.PaymentRefundRepository(context) }
+        val model: com.project.cruise.android.viewmodel.pos.PaymentRefundViewModel = viewModel(
+            factory=com.project.cruise.android.viewmodel.pos.PaymentRefundViewModel.Factory(source))
+        com.project.cruise.android.ui.screens.pos.PaymentRefundScreen(model) { navController.popBackStack() }
     }
 
     composable(Routes.POS_CORRECTIONS) {

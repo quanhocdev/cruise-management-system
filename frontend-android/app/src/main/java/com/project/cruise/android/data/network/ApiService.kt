@@ -38,6 +38,13 @@ import okhttp3.MultipartBody
 
 interface ApiService {
 
+    @GET("api/v1/payments")
+    suspend fun findRefundPayments(@Query("referenceId") referenceId: Long, @Query("referenceType") type: String): List<com.project.cruise.android.data.dto.booking.RefundPayment>
+    @GET("api/v1/payments/{id}/refunds")
+    suspend fun getPaymentRefunds(@Path("id") id: Long, @Query("page") page: Int = 0): com.project.cruise.android.data.dto.booking.PaymentRefundSummary
+    @POST("api/v1/payments/{id}/refunds")
+    suspend fun refundPayment(@Path("id") id: Long, @Body request: com.project.cruise.android.data.dto.booking.PaymentRefundRequest): com.project.cruise.android.data.dto.booking.PaymentRefundReceipt
+
     @GET("api/finance/bookings/ledger")
     suspend fun getFinanceLedger(@Query("bookingCode") code: String, @Query("page") page: Int): com.project.cruise.android.data.dto.booking.LedgerPage
     @GET("api/convenience/product-usages/ledger")
