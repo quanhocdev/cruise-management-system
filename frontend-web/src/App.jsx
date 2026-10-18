@@ -181,6 +181,10 @@ export default function App() {
               element={<PassengerBookingDetail />}
             />
             <Route path="payment/result" element={<PaymentResultPage />} />
+            <Route
+              path="dashboard"
+              element={<Navigate to="/tours" replace />}
+            />
             {/* Trỏ mặc định về danh sách bookings nếu vào /passenger */}
             <Route path="" element={<Navigate to="bookings" replace />} />
           </Route>

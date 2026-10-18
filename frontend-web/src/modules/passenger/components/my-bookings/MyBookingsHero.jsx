@@ -7,7 +7,7 @@ export default function MyBookingsHero({ totalCount }) {
   return (
     <section className="my-bookings-hero">
       <Container>
-        <Link to="/passenger/dashboard" className="my-bookings-hero__back">
+        <Link to="/tours" className="my-bookings-hero__back">
           <ArrowLeft size={16} /> Quay lại danh sách tour
         </Link>
 

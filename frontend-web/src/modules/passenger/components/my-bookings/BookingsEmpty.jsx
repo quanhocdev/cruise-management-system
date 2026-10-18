@@ -19,7 +19,7 @@ export default function BookingsEmpty({ hasAnyBooking, onReset }) {
         <>
           <h2>Bạn chưa có đơn vé nào</h2>
           <p>Chọn một hành trình du thuyền và đặt vé để bắt đầu.</p>
-          <Link to="/passenger/dashboard">Khám phá tour</Link>
+          <Link to="/tours">Khám phá tour</Link>
         </>
       )}
     </div>
