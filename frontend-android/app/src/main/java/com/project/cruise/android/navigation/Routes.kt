@@ -27,6 +27,8 @@ object Routes {
     const val PASSENGER_CREATE_BOOKING = "passenger_booking/{tourId}/{packageId}"
     const val PASSENGER_BOOKINGS = "passenger_bookings"
     const val PASSENGER_BOOKING_DETAIL = "passenger_bookings/{bookingId}"
+    const val PASSENGER_ACTIVITIES = "passenger_activities/{bookingId}"
+    const val POS_REGISTRATIONS = "pos_registrations"
     const val PASSENGER_PAYMENT_RESULT =
         "passenger_payment_result?paymentId={paymentId}&status={status}"
 
@@ -34,6 +36,7 @@ object Routes {
     fun passengerCreateBooking(tourId: String, packageId: Any) =
         "passenger_booking/$tourId/$packageId"
     fun passengerBookingDetail(bookingId: Any) = "passenger_bookings/$bookingId"
+    fun passengerActivities(bookingId: Long) = "passenger_activities/$bookingId"
 
     // =================================================
     // POS

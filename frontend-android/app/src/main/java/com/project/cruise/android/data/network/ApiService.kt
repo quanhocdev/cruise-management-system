@@ -38,6 +38,21 @@ import okhttp3.MultipartBody
 
 interface ApiService {
 
+    @GET("api/passengers/bookings/{id}/activities")
+    suspend fun getRegistrationCatalog(@Path("id") id: Long): com.project.cruise.android.data.dto.booking.RegistrationCatalog
+    @GET("api/passengers/bookings/{id}/registrations")
+    suspend fun getRegistrations(@Path("id") id: Long,@Query("page") page: Int=0): List<com.project.cruise.android.data.dto.booking.ActivityRegistration>
+    @POST("api/passengers/registrations")
+    suspend fun registerActivity(@Body request: com.project.cruise.android.data.dto.booking.RegisterActivityRequest): com.project.cruise.android.data.dto.booking.ActivityRegistration
+    @POST("api/passengers/registrations/{id}/cancel")
+    suspend fun cancelRegistration(@Path("id") id: Long,@Body request: com.project.cruise.android.data.dto.booking.RegistrationCommand): com.project.cruise.android.data.dto.booking.ActivityRegistration
+    @GET("api/{department}/{usage}/registrations")
+    suspend fun getStaffRegistrations(@Path("department") department: String,@Path("usage") usage: String,@Query("bookingCode") bookingCode: String,@Query("search") search: String,@Query("page") page: Int): List<com.project.cruise.android.data.dto.booking.ActivityRegistration>
+    @POST("api/{department}/{usage}/registrations/{id}/attend")
+    suspend fun attendRegistration(@Path("department") department: String,@Path("usage") usage: String,@Path("id") id: Long,@Body request: com.project.cruise.android.data.dto.booking.RegistrationAttendance): com.project.cruise.android.data.dto.booking.ActivityRegistration
+    @GET("api/v1/notifications/activities")
+    suspend fun getActivityNotices(@Query("page") page: Int=0): List<com.project.cruise.android.data.dto.booking.ActivityNotice>
+
     @GET("api/v1/payments")
     suspend fun findRefundPayments(@Query("referenceId") referenceId: Long, @Query("referenceType") type: String): List<com.project.cruise.android.data.dto.booking.RefundPayment>
     @GET("api/v1/payments/{id}/refunds")

@@ -77,8 +77,24 @@ fun NavGraphBuilder.posGraph(
             onHistoryClick = { navController.navigate(Routes.posHistory(role)) },
             onSpendingClick = { navController.navigate(Routes.FINANCE_SPENDING) },
             onCorrectionClick = { navController.navigate(Routes.POS_CORRECTIONS) },
-            onRefundClick = { navController.navigate(Routes.FINANCE_REFUNDS) }
+            onRefundClick = { navController.navigate(Routes.FINANCE_REFUNDS) },
+            onRegistrationsClick = { navController.navigate(Routes.POS_REGISTRATIONS) }
         )
+    }
+
+    composable(Routes.POS_REGISTRATIONS) {
+        val session by authViewModel.sessionState.collectAsState()
+        val role = PosRole.fromApiRole((session as? com.project.cruise.android.viewmodel.auth.SessionState.Authenticated)?.role)
+        if (role != PosRole.ONBOARD && role != PosRole.SHORE) {
+            LaunchedEffect(role) { navController.popBackStack() }
+            return@composable
+        }
+        val context = LocalContext.current
+        val source = remember(context) { com.project.cruise.android.data.repository.ActivityRegistrationRepository(context) }
+        val model: com.project.cruise.android.viewmodel.passenger.ActivityRegistrationViewModel = viewModel(
+            key = "registrations-${role.name}",
+            factory = com.project.cruise.android.viewmodel.passenger.ActivityRegistrationViewModel.Factory(source))
+        com.project.cruise.android.ui.screens.pos.RegistrationAttendanceScreen(role, model) { navController.popBackStack() }
     }
 
     composable(Routes.FINANCE_REFUNDS) {

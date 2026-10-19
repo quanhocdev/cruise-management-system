@@ -13,14 +13,14 @@ import com.project.cruise.android.ui.theme.*
 import com.project.cruise.android.viewmodel.passenger.*
 
 @Composable
-fun MyBookingDetailScreen(bookingId: Long, viewModel: BookingViewModel, onBack: () -> Unit, onSpending: (() -> Unit)? = null) {
+fun MyBookingDetailScreen(bookingId: Long, viewModel: BookingViewModel, onBack: () -> Unit, onSpending: (() -> Unit)? = null, onActivities: (() -> Unit)? = null) {
     val state by viewModel.bookingDetailState.collectAsState()
     LaunchedEffect(bookingId) { viewModel.fetchBookingDetail(bookingId) }
-    MyBookingDetailContent(state, onBack, { viewModel.fetchBookingDetail(bookingId) }, onSpending)
+    MyBookingDetailContent(state, onBack, { viewModel.fetchBookingDetail(bookingId) }, onSpending, onActivities)
 }
 
 @Composable
-fun MyBookingDetailContent(state: BookingDetailState, onBack: () -> Unit, onRetry: () -> Unit, onSpending: (() -> Unit)? = null) {
+fun MyBookingDetailContent(state: BookingDetailState, onBack: () -> Unit, onRetry: () -> Unit, onSpending: (() -> Unit)? = null, onActivities: (() -> Unit)? = null) {
     PassengerPage("Thông tin đặt chỗ", onBack = onBack) {
         when (state) {
             BookingDetailState.Idle,
@@ -72,6 +72,9 @@ fun MyBookingDetailContent(state: BookingDetailState, onBack: () -> Unit, onRetr
                             }
                         }
                     }
+                }
+                if (onActivities != null && booking.status == BookingStatus.CONFIRMED) item {
+                    Button(onClick = onActivities, modifier = Modifier.fillMaxWidth()) { Text("Đăng ký hoạt động & tham quan bờ") }
                 }
                 if (onSpending != null) item {
                     OutlinedButton(onClick = onSpending, modifier = Modifier.fillMaxWidth()) { Text("Xem chi tiêu trong chuyến") }

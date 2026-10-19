@@ -11,13 +11,15 @@ fun OnboardPosDashboardScreen(
     onQrClick: () -> Unit,
     onManualClick: () -> Unit,
     onHistoryClick: () -> Unit,
-    onNfcClick: () -> Unit = {}
+    onNfcClick: () -> Unit = {},
+    onRegistrationsClick: () -> Unit = {}
 ) {
     RolePosDashboard(
         username = username,
         role = PosRole.ONBOARD,
         accent = PosRole.ONBOARD.accent(),
         actions = listOf(
+            PosDashboardAction("Khách đăng ký hoạt động", "Tra cứu và xác nhận khách tham gia", "DS", onRegistrationsClick),
             PosDashboardAction("Quét NFC dịch vụ", "Nhận diện khách và ghi nhận lượt sử dụng", "NFC", onNfcClick),
             PosDashboardAction(
                 "Quét QR vé khách",
