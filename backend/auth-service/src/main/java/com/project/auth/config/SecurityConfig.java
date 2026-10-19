@@ -95,9 +95,7 @@ public class SecurityConfig {
                                                 .requestMatchers("/passenger/**")
                                                 .hasRole("PASSENGER")
 
-                                                // -------------------------------------------------
                                                 // REST APIs
-                                                // -------------------------------------------------
                                                 .requestMatchers("/admin/**")
                                                 .hasAuthority("SCOPE_ADMIN")
 
@@ -121,37 +119,13 @@ public class SecurityConfig {
                                 // OAUTH2 RESOURCE SERVER
                                 .oauth2ResourceServer(oauth2 -> oauth2
 
-                                                /*
-                                                 * Auth Service vẫn có thể nhận:
-                                                 *
-                                                 * Web:
-                                                 * Cookie accessToken
-                                                 *
-                                                 * Android:
-                                                 * Authorization: Bearer <token>
-                                                 */
                                                 .bearerTokenResolver(request -> {
 
-                                                        /*
-                                                         * REFRESH ENDPOINT
-                                                         * Không lấy accessToken cookie ở /api/auth/refresh.
-                                                         *
-                                                         * Vì accessToken có thể đã hết hạn.
-                                                         * Nếu lấy nó, Resource Server sẽ reject request
-                                                         * trước khi AuthController.refresh() được gọi.
-                                                         *
-                                                         * Refresh endpoint sẽ tự lấy refreshToken cookie
-                                                         * trong AuthController.
-                                                         */
                                                         if ("/api/auth/refresh".equals(request.getRequestURI())) {
                                                                 return null;
                                                         }
 
-                                                        /*
-                                                         * =====================================================
-                                                         * WEB - ACCESS TOKEN COOKIE
-                                                         * =====================================================
-                                                         */
+                                                        // WEB - ACCESS TOKEN COOKIE
                                                         if (request.getCookies() != null) {
 
                                                                 for (var cookie : request.getCookies()) {
@@ -162,11 +136,8 @@ public class SecurityConfig {
                                                                 }
                                                         }
 
-                                                        /*
-                                                         * =====================================================
-                                                         * ANDROID - AUTHORIZATION HEADER
-                                                         * =====================================================
-                                                         */
+                                                        // ANDROID - AUTHORIZATION HEADER
+
                                                         return new DefaultBearerTokenResolver()
                                                                         .resolve(request);
                                                 })
