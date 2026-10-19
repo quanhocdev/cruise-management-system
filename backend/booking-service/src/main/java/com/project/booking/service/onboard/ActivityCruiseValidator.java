@@ -32,6 +32,10 @@ public class ActivityCruiseValidator {
                         "Không tìm thấy hành khách với NFC card UID: " + nfcCardUid));
     }
 
+    public BookingPassenger validateAndGetPassenger(Long id) {
+        return bookingPassengerRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Không tìm thấy hành khách"));
+    }
+
     public void validateBookingAndActivity(Booking booking, ActivityCruiseClient.ActivityCruiseUsageInfo activityInfo,
             UUID activityCruiseTourId) {
         if (booking == null) {

@@ -77,8 +77,6 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
         @Transactional
         public ActivityVisitUsageResponse create(ActivityVisitUsageRequest request) {
 
-                LocalDateTime now = LocalDateTime.now();
-
                 // 1. Hành khách + booking
                 BookingPassenger bookingPassenger = bookingPassengerRepository
                                 .findByNfcCardUid(request.nfcCardUid())
@@ -86,6 +84,17 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
                                                 "Không tìm thấy hành khách với NFC card UID: " + request.nfcCardUid(),
                                                 HttpStatus.NOT_FOUND));
 
+                return createFor(bookingPassenger,request);
+        }
+
+        @Transactional
+        public ActivityVisitUsageResponse createForPassenger(Long passengerId,UUID targetId,UUID requestId) {
+                var passenger=bookingPassengerRepository.findById(passengerId).orElseThrow(() -> new AppException("Không tìm thấy hành khách",HttpStatus.NOT_FOUND));
+                return createFor(passenger,new ActivityVisitUsageRequest("MANUAL",targetId,requestId));
+        }
+
+        private ActivityVisitUsageResponse createFor(BookingPassenger bookingPassenger,ActivityVisitUsageRequest request) {
+                LocalDateTime now=LocalDateTime.now();
                 Booking booking = validator.validateBooking(bookingPassenger);
 
                 // 2. Thông tin VisitTour
@@ -103,6 +112,7 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
                                 .countByVisitTourId(request.visitTourId());
 
                 validator.validateCapacity(visitInfo.maxPassengers(), currentPassengerCount);
+                capacityLock.requireSeat("SHORE",request.visitTourId(),bookingPassenger.getId(),visitInfo.maxPassengers());
 
                 // 4. Benefit (lock row nếu có benefit)
                 int benefitQuantity = visitInfo.benefitQuantity() == null
@@ -144,6 +154,8 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
                                 buildUsage(bookingPassenger, request, amount, now));
                 accounts.recordCharge(bookingPassenger, "SHORE", savedUsage.getId(), savedUsage.getFinalAmount(),
                         1, visitInfo.packageBenefitId(), amount.freeQuantity(), request.clientRequestId());
+
+                capacityLock.recordAttendance("SHORE",request.visitTourId(),bookingPassenger.getId(),savedUsage.getId());
 
                 return activityVisitUsageMapper.toResponse(savedUsage);
         }

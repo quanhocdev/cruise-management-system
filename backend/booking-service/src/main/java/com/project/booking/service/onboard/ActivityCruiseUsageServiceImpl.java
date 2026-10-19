@@ -73,6 +73,16 @@ public class ActivityCruiseUsageServiceImpl
                 BookingPassenger bookingPassenger = activityCruiseValidator
                                 .validateAndGetPassenger(request.nfcCardUid());
 
+                return createFor(bookingPassenger,request);
+        }
+
+        @Transactional
+        public ActivityCruiseUsageResponse createForPassenger(Long passengerId,UUID targetId,UUID requestId) {
+                return createFor(activityCruiseValidator.validateAndGetPassenger(passengerId),new ActivityCruiseUsageRequest("MANUAL",targetId,requestId));
+        }
+
+        private ActivityCruiseUsageResponse createFor(BookingPassenger bookingPassenger,ActivityCruiseUsageRequest request) {
+
                 Booking booking = bookingPassenger.getBooking();
 
                 // 2. Lấy thông tin ActivityCruiseTour
@@ -89,6 +99,8 @@ public class ActivityCruiseUsageServiceImpl
                                 booking,
                                 activityInfo,
                                 request.activityCruiseTourId());
+
+                capacityLock.requireSeat("ACTIVITY",request.activityCruiseTourId(),bookingPassenger.getId(),activityInfo.maxPassengers());
 
                 // 8 & 9. Benefit + lock row
                 UUID packageBenefitId = activityInfo.packageBenefitId();
@@ -136,6 +148,8 @@ public class ActivityCruiseUsageServiceImpl
                 ActivityCruiseUsage savedUsage = activityCruiseUsageRepository.save(usage);
                 accounts.recordCharge(bookingPassenger, "ACTIVITY", savedUsage.getId(), savedUsage.getFinalAmount(),
                         1, packageBenefitId, pricingResult.freeQuantityThisUsage(), request.clientRequestId());
+
+                capacityLock.recordAttendance("ACTIVITY",request.activityCruiseTourId(),bookingPassenger.getId(),savedUsage.getId());
 
                 return activityCruiseUsageMapper.toResponse(savedUsage);
         }
