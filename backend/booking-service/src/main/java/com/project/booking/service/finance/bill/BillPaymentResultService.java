@@ -13,12 +13,8 @@ import com.project.common.event.BillPaidEvent;
 import com.project.common.event.BillPaidEvent.BillItemDto;
 import com.project.common.event.BillPaymentSuccessEvent;
 
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import com.project.booking.service.account.OnboardAccountService;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 import java.util.Objects;
@@ -26,28 +22,53 @@ import java.util.Objects;
 @Service
 public class BillPaymentResultService {
 
-        private static final String BILL_PAID_TOPIC = "bill-paid-topic";
-
         private final BillRepository billRepository;
         private final BillItemRepository billItemRepository;
         private final BookingPassengerRepository bookingPassengerRepository;
-        private final KafkaTemplate<String, Object> kafkaTemplate;
         private final OnboardAccountService accounts;
+        private final com.project.booking.client.PaymentClient payments;
+        private final org.springframework.transaction.support.TransactionTemplate transaction;
+        private final org.springframework.jdbc.core.JdbcTemplate jdbc;
+        private final com.project.booking.repository.BookingRepository bookings;
 
         public BillPaymentResultService(
                         BillRepository billRepository,
                         BillItemRepository billItemRepository,
                         BookingPassengerRepository bookingPassengerRepository,
-                        KafkaTemplate<String, Object> kafkaTemplate, OnboardAccountService accounts) {
+                        OnboardAccountService accounts,
+                        com.project.booking.client.PaymentClient payments,
+                        org.springframework.transaction.PlatformTransactionManager manager,
+                        org.springframework.jdbc.core.JdbcTemplate jdbc,
+                        com.project.booking.repository.BookingRepository bookings) {
+                this.bookings=bookings;
+                this.payments=payments;
+                this.transaction=new org.springframework.transaction.support.TransactionTemplate(manager);
+                this.jdbc=jdbc;
                 this.accounts = accounts;
                 this.billRepository = billRepository;
                 this.billItemRepository = billItemRepository;
                 this.bookingPassengerRepository = bookingPassengerRepository;
-                this.kafkaTemplate = kafkaTemplate;
         }
 
-        @Transactional
         public void processPaymentSuccess(BillPaymentSuccessEvent event) {
+                if(event==null || event.billId()==null || event.paymentId()==null || !"SUCCESS".equals(event.status()))
+                        throw new IllegalArgumentException("Invalid bill payment result");
+                // Verify at the payment service before holding database locks.
+                var verified=payments.getBillPayments(event.billId()).stream()
+                        .filter(p -> event.paymentId().equals(p.paymentId()) && "SUCCESS".equals(p.status()))
+                        .findFirst().orElseThrow(() -> new IllegalArgumentException("Payment not confirmed"));
+                transaction.executeWithoutResult(s -> {
+                    var bookingId=jdbc.queryForObject("SELECT booking_id FROM booking.bills WHERE id=?",Long.class,event.billId());
+                    accounts.lockAccount(bookings.findById(bookingId).orElseThrow());
+                    var bill=billRepository.findById(event.billId()).orElseThrow();
+                    if(!verified.billId().equals(bill.getId()) || !verified.payerId().equals(bill.getBooking().getCreatedByUserId())
+                            || !verified.payerId().equals(event.userId()) || verified.amount().compareTo(bill.getTotalAmount())!=0)
+                        throw new IllegalArgumentException("Bill payment correlation mismatch");
+                    complete(event);
+                });
+        }
+
+        private void complete(BillPaymentSuccessEvent event) {
                 if (event == null || event.billId() == null) {
                         throw new IllegalArgumentException(
                                         "Bill payment success event or bill ID must not be null");
@@ -117,40 +138,12 @@ public class BillPaymentResultService {
                                 nfcCardUids,
                                 items);
 
-                // Publish event sau khi transaction commit thành công.
-                TransactionSynchronizationManager.registerSynchronization(
-                                new TransactionSynchronization() {
-                                        @Override
-                                        public void afterCommit() {
-                                                kafkaTemplate.send(
-                                                                BILL_PAID_TOPIC,
-                                                                String.valueOf(bill.getId()),
-                                                                paidEvent).whenComplete((result, exception) -> {
-                                                                        if (exception != null) {
-                                                                                System.err.println(
-                                                                                                ">>> [BILL PAID EVENT] Gửi thất bại: billId="
-                                                                                                                + bill.getId()
-                                                                                                                + ", error="
-                                                                                                                + exception.getMessage());
-                                                                                return;
-                                                                        }
-
-                                                                        System.out.println(
-                                                                                        ">>> [BILL PAID EVENT] Đã gửi event: billId="
-                                                                                                        + bill.getId()
-                                                                                                        + ", bookingId="
-                                                                                                        + bookingId
-                                                                                                        + ", số thẻ NFC="
-                                                                                                        + nfcCardUids.size()
-                                                                                                        + ", số dòng hóa đơn="
-                                                                                                        + items.size());
-                                                                });
-                                        }
-                                });
-
-                System.out.println(
-                                ">>> [BILL PAYMENT] Bill ID " + bill.getId()
-                                                + " đã được cập nhật trạng thái PAID.");
+                try {
+                    String payload=new com.fasterxml.jackson.databind.ObjectMapper().findAndRegisterModules().writeValueAsString(paidEvent);
+                    jdbc.update("INSERT INTO booking.bill_paid_deliveries(bill_id,payload) VALUES (?,?) ON CONFLICT DO NOTHING",bill.getId(),payload);
+                } catch(com.fasterxml.jackson.core.JsonProcessingException e) {
+                    throw new IllegalStateException("Cannot persist bill receipt event",e);
+                }
         }
 
         private BillItemDto toBillItemDto(BillItem item) {

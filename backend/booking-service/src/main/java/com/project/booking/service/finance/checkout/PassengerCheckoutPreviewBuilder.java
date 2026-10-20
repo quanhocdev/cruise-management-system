@@ -30,13 +30,13 @@ public class PassengerCheckoutPreviewBuilder {
                 PassengerUsages usages = passengerUsageReader.read(bookingPassengerId);
 
                 List<UsageItem> activityVisitItems = usages.activityVisits().stream()
-                                .map(checkoutPreviewMapper::toUsageItem).toList();
+                                .map(checkoutPreviewMapper::toUsageItem).sorted(java.util.Comparator.comparing(UsageItem::usageId)).toList();
                 List<UsageItem> activityCruiseItems = usages.activityCruises().stream()
-                                .map(checkoutPreviewMapper::toUsageItem).toList();
+                                .map(checkoutPreviewMapper::toUsageItem).sorted(java.util.Comparator.comparing(UsageItem::usageId)).toList();
                 List<UsageItem> serviceItems = usages.services().stream()
-                                .map(checkoutPreviewMapper::toUsageItem).toList();
+                                .map(checkoutPreviewMapper::toUsageItem).sorted(java.util.Comparator.comparing(UsageItem::usageId)).toList();
                 List<UsageItem> productItems = usages.products().stream()
-                                .map(checkoutPreviewMapper::toUsageItem).toList();
+                                .map(checkoutPreviewMapper::toUsageItem).sorted(java.util.Comparator.comparing(UsageItem::usageId)).toList();
 
                 BigDecimal passengerTotal = calculateTotal(activityVisitItems)
                                 .add(calculateTotal(activityCruiseItems))
@@ -52,7 +52,7 @@ public class PassengerCheckoutPreviewBuilder {
                                 activityCruiseItems,
                                 serviceItems,
                                 productItems,
-                                passengerTotal);
+                                passengerTotal, bookingPassenger.getPassenger().getFullName());
         }
 
         private BigDecimal calculateTotal(List<UsageItem> usages) {

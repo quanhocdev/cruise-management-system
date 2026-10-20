@@ -12,6 +12,12 @@ public record CheckoutPreviewResponse(
         List<PassengerCheckoutPreview> passengers,
         BigDecimal grandTotal) {
 
+    @com.fasterxml.jackson.annotation.JsonProperty("previewVersion")
+    public String previewVersion() {
+        return com.project.booking.service.command.CanonicalPayload.hash(java.util.Map.of(
+                "bookingId", bookingId, "passengers", passengers, "total", grandTotal));
+    }
+
     public record PassengerCheckoutPreview(
             Long bookingPassengerId,
             Long passengerId,
@@ -19,7 +25,8 @@ public record CheckoutPreviewResponse(
             List<UsageItem> activityCruiseUsages,
             List<UsageItem> serviceUsages,
             List<UsageItem> productUsages,
-            BigDecimal passengerTotal) {
+            BigDecimal passengerTotal,
+            String passengerName) {
     }
 
     public record UsageItem(
