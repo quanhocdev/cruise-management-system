@@ -15,7 +15,6 @@ import "../../styles/shore/ShoreSidebar.css";
 
 const MENU_SECTIONS = [
   {
-    title: "QUẢN LÝ TOUR BỜ",
     items: [
       {
         label: "Dashboard",

@@ -1,31 +1,15 @@
-import { Outlet } from "react-router-dom";
-
-import ShoreHeader from "../components/shore/ShoreHeader";
-import ShoreSidebar from "../components/shore/ShoreSidebar";
-import ShoreFooter from "../components/shore/ShoreFooter";
-
-import "./ShoreLayout.css";
+// layouts/ShoreLayout.jsx
+import ManagementLayout from "../components/management/ManagementLayout";
+import { shoreConfig } from "../config/roles/shore.config";
+import { useShoreNotifications } from "../hooks/useShoreNotifications";
 
 function ShoreLayout() {
+  const notificationProps = useShoreNotifications();
   return (
-    <div className="shore-layout">
-      {/* SIDEBAR */}
-      <ShoreSidebar />
-
-      {/* MAIN AREA */}
-      <div className="shore-layout-main">
-        {/* HEADER */}
-        <ShoreHeader />
-
-        {/* CONTENT */}
-        <main className="shore-layout-content">
-          <Outlet />
-        </main>
-
-        {/* FOOTER */}
-        <ShoreFooter />
-      </div>
-    </div>
+    <ManagementLayout
+      config={shoreConfig}
+      notificationProps={notificationProps}
+    />
   );
 }
 
