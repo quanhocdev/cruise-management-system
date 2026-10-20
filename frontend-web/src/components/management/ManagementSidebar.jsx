@@ -1,15 +1,9 @@
 // components/management/ManagementSidebar.jsx
+// components/management/ManagementSidebar.jsx
 import { useLocation, NavLink } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { isPathActive } from "./utils";
 import "../../styles/management/sidebar.css";
-
-function isPathActive(pathname, item) {
-  if (pathname === item.path) return true;
-  if (!item.end && pathname.startsWith(`${item.path}/`)) return true;
-  return item.extraPaths?.some(
-    (p) => pathname === p || pathname.startsWith(`${p}/`),
-  );
-}
 
 function ManagementSidebar({
   config,
@@ -33,7 +27,7 @@ function ManagementSidebar({
           {!collapsed && (
             <div className="mgmt-sidebar-brand-text">
               <strong>{config.brand.title}</strong>
-              <span>{config.brand.subtitle}</span>
+              {config.brand.subtitle && <span>{config.brand.subtitle}</span>}
             </div>
           )}
         </div>
@@ -77,17 +71,26 @@ function ManagementSidebar({
         ))}
       </nav>
 
-      <div className="mgmt-sidebar-bottom">
-        <div className="mgmt-sidebar-status">
-          <span className="mgmt-status-dot" />
-          {!collapsed && (
-            <div>
-              <strong>Hệ thống hoạt động</strong>
-              <span>Đã kết nối</span>
-            </div>
-          )}
+      {config.status && (
+        <div className="mgmt-sidebar-bottom">
+          <div
+            className="mgmt-sidebar-status"
+            title={
+              collapsed
+                ? `${config.status.title} - ${config.status.subtitle}`
+                : undefined
+            }
+          >
+            <span className="mgmt-status-dot" />
+            {!collapsed && (
+              <div>
+                <strong>{config.status.title}</strong>
+                <span>{config.status.subtitle}</span>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </aside>
   );
 }

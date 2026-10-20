@@ -29,10 +29,27 @@
 }
 
 .mgmt-layout[data-theme="admin"] {
-  --mgmt-sidebar-bg: #1e1b4b;
-  --mgmt-accent: #4f46e5;
-  --mgmt-page-bg: #eef2ff;
-  --mgmt-notify-hover: #4f46e5;
+  --mgmt-sidebar-text: #cbd5e1;
+  --mgmt-accent: #2563eb;
+  --mgmt-page-bg: #f8fafc;
+  --mgmt-notify-hover: #2563eb;
+  --mgmt-content-padding: 24px;
+}
+
+@media (max-width: 992px) {
+  .mgmt-layout[data-theme="admin"] {
+    --mgmt-content-padding: 20px;
+  }
+}
+@media (max-width: 768px) {
+  .mgmt-layout[data-theme="admin"] {
+    --mgmt-content-padding: 16px;
+  }
+}
+@media (max-width: 480px) {
+  .mgmt-layout[data-theme="admin"] {
+    --mgmt-content-padding: 12px;
+  }
 }
 
 .mgmt-layout[data-theme="finance"] {

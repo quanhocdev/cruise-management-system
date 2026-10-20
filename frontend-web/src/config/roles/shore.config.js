@@ -10,9 +10,9 @@ export const shoreConfig = {
   },
   user: { name: "Shore Manager", role: "Quản lý tour bờ" },
   footerRight: "Shore Management",
+  status: { title: "Hệ thống hoạt động", subtitle: "Đã kết nối" },
   menu: [
     {
-      title: null, // đặt tiêu đề section nếu cần
       items: [
         {
           label: "Dashboard",
