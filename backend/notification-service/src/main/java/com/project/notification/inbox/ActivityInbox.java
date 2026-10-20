@@ -48,7 +48,8 @@ public class ActivityInbox {
         @Bean @DependsOn("entityManagerFactory")
         DataSourceInitializer activityInboxSchema(DataSource dataSource){
             var init=new DataSourceInitializer();init.setDataSource(dataSource);
-            init.setDatabasePopulator(new ResourceDatabasePopulator(new ClassPathResource("db/migration/V20261019_01__activity_inbox.sql")));return init;
+            init.setDatabasePopulator(new ResourceDatabasePopulator(new ClassPathResource("db/migration/V20261019_01__activity_inbox.sql"),
+                    new ClassPathResource("db/migration/V20261020_02__bill_receipt_events.sql")));return init;
         }
     }
 }
