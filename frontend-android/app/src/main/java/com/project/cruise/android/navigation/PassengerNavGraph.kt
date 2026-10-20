@@ -179,7 +179,8 @@ fun NavGraphBuilder.passengerGraph(
             viewModel = bookingViewModel,
             onBack = { navController.popBackStack() },
             onSpending = { navController.navigate("passenger_spending/$bookingId") },
-            onActivities = { navController.navigate(Routes.passengerActivities(bookingId)) }
+            onActivities = { navController.navigate(Routes.passengerActivities(bookingId)) },
+            onBill = { navController.navigate("passenger_bill/$bookingId") }
         )
     }
     composable(Routes.PASSENGER_ACTIVITIES, arguments = listOf(navArgument("bookingId") { type = NavType.LongType })) { entry ->
@@ -189,6 +190,14 @@ fun NavGraphBuilder.passengerGraph(
         val model: com.project.cruise.android.viewmodel.passenger.ActivityRegistrationViewModel = viewModel(
             factory = com.project.cruise.android.viewmodel.passenger.ActivityRegistrationViewModel.Factory(source))
         com.project.cruise.android.ui.screens.passenger.ActivityRegistrationScreen(bookingId, model) { navController.popBackStack() }
+    }
+    composable("passenger_bill/{bookingId}", arguments = listOf(navArgument("bookingId") { type = NavType.LongType })) { entry ->
+        val bookingId=entry.arguments?.getLong("bookingId")?:return@composable
+        val context=androidx.compose.ui.platform.LocalContext.current
+        val source=remember(context){com.project.cruise.android.data.repository.CheckoutRepository(context)}
+        val model:com.project.cruise.android.viewmodel.pos.CheckoutViewModel=viewModel(
+            factory=com.project.cruise.android.viewmodel.pos.CheckoutViewModel.Factory(source,false))
+        com.project.cruise.android.ui.screens.pos.CheckoutScreen(model,false,bookingId){navController.popBackStack()}
     }
     composable("passenger_spending/{bookingId}", arguments = listOf(navArgument("bookingId") { type = NavType.LongType })) { entry ->
         val bookingId = entry.arguments?.getLong("bookingId") ?: return@composable

@@ -78,8 +78,23 @@ fun NavGraphBuilder.posGraph(
             onSpendingClick = { navController.navigate(Routes.FINANCE_SPENDING) },
             onCorrectionClick = { navController.navigate(Routes.POS_CORRECTIONS) },
             onRefundClick = { navController.navigate(Routes.FINANCE_REFUNDS) },
-            onRegistrationsClick = { navController.navigate(Routes.POS_REGISTRATIONS) }
+            onRegistrationsClick = { navController.navigate(Routes.POS_REGISTRATIONS) },
+            onCheckoutClick = { navController.navigate("finance_checkout") }
         )
+    }
+
+    composable("finance_checkout") {
+        val session by authViewModel.sessionState.collectAsState()
+        val role = (session as? com.project.cruise.android.viewmodel.auth.SessionState.Authenticated)?.role
+        if (PosRole.fromApiRole(role) != PosRole.FINANCE) {
+            LaunchedEffect(role) { navController.popBackStack() }
+            return@composable
+        }
+        val context=LocalContext.current
+        val source=remember(context){com.project.cruise.android.data.repository.CheckoutRepository(context)}
+        val model: com.project.cruise.android.viewmodel.pos.CheckoutViewModel = viewModel(
+            factory=com.project.cruise.android.viewmodel.pos.CheckoutViewModel.Factory(source,true))
+        com.project.cruise.android.ui.screens.pos.CheckoutScreen(model,true){navController.popBackStack()}
     }
 
     composable(Routes.POS_REGISTRATIONS) {

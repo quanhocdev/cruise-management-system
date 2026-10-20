@@ -37,6 +37,16 @@ import com.project.cruise.android.data.dto.onboard.ActivityCruiseUsageResponse
 import okhttp3.MultipartBody
 
 interface ApiService {
+    @GET("api/{department}/bookings/{id}/bill")
+    suspend fun getServiceBill(@Path("department") department: String,@Path("id") id: Long): com.project.cruise.android.data.dto.booking.ServiceBill
+    @GET("api/finance/bookings/{id}/checkout-preview")
+    suspend fun getCheckoutPreview(@Path("id") id: Long): com.project.cruise.android.data.dto.booking.CheckoutPreview
+    @POST("api/finance/bookings/{id}/checkout")
+    suspend fun confirmCheckout(@Path("id") id: Long,@Body body: com.project.cruise.android.data.dto.booking.CheckoutConfirm): com.project.cruise.android.data.dto.booking.CheckoutSnapshot
+    @POST("api/finance/bookings/{id}/bill/payment")
+    suspend fun createBillPayment(@Path("id") id: Long,@Body body: com.project.cruise.android.data.dto.booking.BillPaymentCommand): com.project.cruise.android.data.dto.booking.ServiceBillPayment
+    @GET("api/{department}/bookings/{id}/bill/receipt")
+    suspend fun getBillReceipt(@Path("department") department: String,@Path("id") id: Long): okhttp3.ResponseBody
 
     @GET("api/passengers/bookings/{id}/activities")
     suspend fun getRegistrationCatalog(@Path("id") id: Long): com.project.cruise.android.data.dto.booking.RegistrationCatalog
