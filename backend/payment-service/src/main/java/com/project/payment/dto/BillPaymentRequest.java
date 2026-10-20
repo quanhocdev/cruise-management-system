@@ -5,5 +5,6 @@ import java.math.BigDecimal;
 public record BillPaymentRequest(
         Long billId,
         Long payerId,
-        BigDecimal amount) {
+        BigDecimal amount, java.util.UUID clientRequestId) {
+    public BillPaymentRequest(Long billId, Long payerId, BigDecimal amount) { this(billId, payerId, amount, null); }
 }

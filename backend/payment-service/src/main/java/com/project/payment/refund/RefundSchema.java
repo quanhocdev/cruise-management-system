@@ -15,7 +15,8 @@ public class RefundSchema {
         var initializer = new DataSourceInitializer();
         initializer.setDataSource(dataSource);
         initializer.setDatabasePopulator(new ResourceDatabasePopulator(
-                new ClassPathResource("db/migration/V20261019_01__payment_refunds.sql")));
+                new ClassPathResource("db/migration/V20261019_01__payment_refunds.sql"),
+                new ClassPathResource("db/migration/V20261019_02__bill_payment_requests.sql")));
         return initializer;
     }
 }

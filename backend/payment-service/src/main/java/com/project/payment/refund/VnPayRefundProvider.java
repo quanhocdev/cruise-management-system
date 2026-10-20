@@ -43,6 +43,41 @@ public class VnPayRefundProvider implements RefundProvider {
     @Override public Outcome submit(Refund refund) { return exchange(refund,false); }
     @Override public Outcome reconcile(Refund refund) { return exchange(refund,true); }
 
+    public Outcome queryPayment(com.project.payment.model.Payment payment) {
+        try {
+            config.requireCredentials();
+            var p=new LinkedHashMap<String,String>();
+            p.put("vnp_RequestId",UUID.randomUUID().toString().replace("-",""));
+            p.put("vnp_Version","2.1.0");p.put("vnp_Command","querydr");p.put("vnp_TmnCode",config.getTmnCode());
+            p.put("vnp_TxnRef",payment.getId().toString());p.put("vnp_TransactionDate",DATE.format(payment.getCreatedAt()));
+            p.put("vnp_CreateDate",DATE.format(Instant.now()));p.put("vnp_IpAddr",serverIp);
+            p.put("vnp_OrderInfo","Query payment "+payment.getId());p.put("vnp_SecureHash",sign(p,QUERY_FIELDS));
+            var request=HttpRequest.newBuilder(endpoint).timeout(Duration.ofSeconds(15)).header("Content-Type","application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json.writeValueAsString(p))).build();
+            var response=http.send(request,HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            if(response.statusCode()!=200 || response.body().length()>65536)return Outcome.unknown("PROVIDER_HTTP_ERROR");
+            return verifyPayment(payment,json.readValue(response.body(),new TypeReference<Map<String,String>>(){}));
+        } catch(InterruptedException e){Thread.currentThread().interrupt();return Outcome.unknown("PROVIDER_INTERRUPTED");}
+        catch(Exception e){return Outcome.unknown("PROVIDER_UNCONFIRMED");}
+    }
+
+    Outcome verifyPayment(com.project.payment.model.Payment payment,Map<String,String> p) {
+        String signature=p.get("vnp_SecureHash");
+        if(signature==null || !MessageDigest.isEqual(sign(p,RESPONSE_FIELDS+" vnp_PromotionCode vnp_PromotionAmount")
+                .getBytes(StandardCharsets.US_ASCII),signature.toLowerCase(Locale.ROOT).getBytes(StandardCharsets.US_ASCII)))
+            return Outcome.unknown("INVALID_PROVIDER_SIGNATURE");
+        if(!"querydr".equals(p.get("vnp_Command")) || !config.getTmnCode().equals(p.get("vnp_TmnCode"))
+                || !payment.getId().toString().equals(p.get("vnp_TxnRef")) || !"01".equals(p.get("vnp_TransactionType"))
+                || !payment.getAmount().movePointRight(2).toBigIntegerExact().toString().equals(p.get("vnp_Amount")))
+            return Outcome.unknown("PROVIDER_REFERENCE_MISMATCH");
+        if("00".equals(p.get("vnp_ResponseCode"))) {
+            String state=p.get("vnp_TransactionStatus"),number=p.get("vnp_TransactionNo");
+            if("00".equals(state) && number!=null && number.matches("[0-9]{1,15}"))return new Outcome("SUCCEEDED","00",number);
+            if("02".equals(state))return new Outcome("REJECTED","02",number);
+        }
+        return Outcome.unknown("PROVIDER_UNCONFIRMED");
+    }
+
     private Outcome exchange(Refund r, boolean query) {
         try {
             config.requireCredentials();
