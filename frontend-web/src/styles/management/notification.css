@@ -1,11 +1,10 @@
-/* Container chuông thông báo Shore */
-.shore-notification-container {
+/* notification.css */
+.mgmt-notification-container {
   position: relative;
   display: inline-block;
 }
 
-/* Nút quả chuông */
-.shore-notification-button {
+.mgmt-notification-button {
   position: relative;
   background: transparent;
   border: none;
@@ -21,13 +20,12 @@
     color 0.2s ease;
 }
 
-.shore-notification-button:hover {
+.mgmt-notification-button:hover {
   background-color: #f1f5f9;
-  color: #2563eb;
+  color: var(--mgmt-notify-hover);
 }
 
-/* Huy hiệu số đếm thông báo đỏ */
-.shore-notification-badge {
+.mgmt-notification-badge {
   position: absolute;
   top: 4px;
   right: 4px;
@@ -44,12 +42,12 @@
   padding: 0 4px;
 }
 
-/* Hộp thoại Dropdown danh sách */
-.shore-notification-dropdown {
+.mgmt-notification-dropdown {
   position: absolute;
   right: 0;
   top: 45px;
   width: 320px;
+  max-width: calc(100vw - 32px);
   background-color: #ffffff;
   border-radius: 8px;
   box-shadow:
@@ -59,11 +57,10 @@
   z-index: 1000;
   overflow: hidden;
   text-align: left;
-  animation: fadeInDropdown 0.15s ease-out;
+  animation: mgmtFadeInDropdown 0.15s ease-out;
 }
 
-/* Header của dropdown */
-.shore-notification-dropdown-header {
+.mgmt-notification-dropdown-header {
   padding: 12px 16px;
   font-weight: 600;
   font-size: 14px;
@@ -75,59 +72,55 @@
   align-items: center;
 }
 
-.shore-notification-dropdown-header span:last-child {
+.mgmt-notification-dropdown-header span:last-child {
   font-size: 12px;
-  color: #2563eb;
+  color: var(--mgmt-notify-hover);
   font-weight: 400;
 }
 
-/* Danh sách cuộn */
-.shore-notification-list {
+.mgmt-notification-list {
   max-height: 280px;
   overflow-y: auto;
 }
 
-/* Trạng thái trống */
-.shore-notification-empty {
+.mgmt-notification-empty {
   padding: 24px;
   text-align: center;
   color: #9ca3af;
   font-size: 13px;
 }
 
-/* Từng mục thông báo */
-.shore-notification-item {
+.mgmt-notification-item {
   padding: 12px 16px;
   border-bottom: 1px solid #f3f4f6;
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
 
-.shore-notification-item:hover {
+.mgmt-notification-item:hover {
   background-color: #eff6ff;
 }
 
-.shore-notification-item-title {
+.mgmt-notification-item-title {
   font-weight: 600;
   font-size: 13px;
   color: #1f2937;
   margin: 0 0 2px 0;
 }
 
-.shore-notification-item-message {
+.mgmt-notification-item-message {
   font-size: 12px;
   color: #4b5563;
   margin: 0 0 4px 0;
   line-height: 1.4;
 }
 
-.shore-notification-item-time {
+.mgmt-notification-item-time {
   font-size: 10px;
   color: #9ca3af;
 }
 
-/* Hiệu ứng chuyển động */
-@keyframes fadeInDropdown {
+@keyframes mgmtFadeInDropdown {
   from {
     opacity: 0;
     transform: translateY(-6px);

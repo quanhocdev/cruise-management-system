@@ -1,0 +1,42 @@
+/* themes.css */
+.mgmt-layout {
+  /* Sidebar */
+  --mgmt-sidebar-bg: #0f172a;
+  --mgmt-sidebar-text: #94a3b8;
+  --mgmt-sidebar-text-active: #ffffff;
+  --mgmt-sidebar-muted: #64748b;
+  --mgmt-sidebar-border: rgba(255, 255, 255, 0.08);
+
+  /* Màu nhấn: logo + link active */
+  --mgmt-accent: #0f766e;
+
+  /* Nền trang */
+  --mgmt-page-bg: #f0fdfa;
+
+  /* Header / Footer */
+  --mgmt-surface: #ffffff;
+  --mgmt-border: #e2e8f0;
+  --mgmt-text: #0f172a;
+  --mgmt-text-muted: #64748b;
+
+  /* Thông báo */
+  --mgmt-notify-hover: #2563eb;
+}
+
+.mgmt-layout[data-theme="shore"] {
+  --mgmt-accent: #0f766e;
+  --mgmt-page-bg: #f0fdfa;
+}
+
+.mgmt-layout[data-theme="admin"] {
+  --mgmt-sidebar-bg: #1e1b4b;
+  --mgmt-accent: #4f46e5;
+  --mgmt-page-bg: #eef2ff;
+  --mgmt-notify-hover: #4f46e5;
+}
+
+.mgmt-layout[data-theme="finance"] {
+  --mgmt-accent: #b45309;
+  --mgmt-page-bg: #fffbeb;
+  --mgmt-notify-hover: #b45309;
+}

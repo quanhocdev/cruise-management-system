@@ -1,116 +1,102 @@
-.shore-header {
+/* header.css */
+.mgmt-header {
   height: 72px;
-
   flex-shrink: 0;
-
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   padding: 0 24px;
-
-  background: #ffffff;
-
-  border-bottom: 1px solid #e2e8f0;
+  background: var(--mgmt-surface);
+  border-bottom: 1px solid var(--mgmt-border);
 }
 
-.shore-header-left,
-.shore-header-right {
+.mgmt-header-left,
+.mgmt-header-right {
   display: flex;
   align-items: center;
 }
 
-.shore-header-left {
+.mgmt-header-left {
   gap: 14px;
 }
 
-.shore-header-right {
+.mgmt-header-right {
   gap: 20px;
 }
 
-.shore-header-title {
+.mgmt-header-title {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.shore-header-title-main {
+.mgmt-header-title-main {
   font-size: 17px;
   font-weight: 700;
-
-  color: #0f172a;
+  color: var(--mgmt-text);
 }
 
-.shore-header-title-sub {
+.mgmt-header-title-sub {
   font-size: 12px;
-
-  color: #64748b;
+  color: var(--mgmt-text-muted);
 }
 
-.shore-mobile-menu {
+.mgmt-mobile-menu {
   display: none;
-
   width: 38px;
   height: 38px;
-
   align-items: center;
   justify-content: center;
-
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--mgmt-border);
   border-radius: 8px;
-
-  background: #ffffff;
-
+  background: var(--mgmt-surface);
   color: #334155;
-
   cursor: pointer;
 }
 
-.shore-mobile-menu:hover {
+.mgmt-mobile-menu:hover {
   background: #f1f5f9;
 }
 
-.shore-header-user {
+.mgmt-header-user {
   display: flex;
   align-items: center;
-
   gap: 10px;
-
   color: #475569;
 }
 
-.shore-header-user-info {
+.mgmt-header-user-info {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.shore-header-user-info strong {
+.mgmt-header-user-info strong {
   font-size: 13px;
-  color: #0f172a;
+  color: var(--mgmt-text);
 }
 
-.shore-header-user-info span {
+.mgmt-header-user-info span {
   font-size: 11px;
-  color: #64748b;
+  color: var(--mgmt-text-muted);
 }
 
 @media (max-width: 768px) {
-  .shore-header {
+  .mgmt-header {
     height: 64px;
     padding: 0 16px;
   }
 
-  .shore-mobile-menu {
+  .mgmt-mobile-menu {
     display: flex;
   }
 
-  .shore-header-title-sub,
-  .shore-header-user-info {
+  .mgmt-header-title-sub,
+  .mgmt-header-user-info {
     display: none;
   }
 
-  .shore-header-right {
+  .mgmt-header-right {
     gap: 10px;
   }
 }
