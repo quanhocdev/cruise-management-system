@@ -13,14 +13,14 @@ import com.project.cruise.android.ui.theme.*
 import com.project.cruise.android.viewmodel.passenger.*
 
 @Composable
-fun MyBookingDetailScreen(bookingId: Long, viewModel: BookingViewModel, onBack: () -> Unit, onSpending: (() -> Unit)? = null, onActivities: (() -> Unit)? = null, onBill: (() -> Unit)? = null, onFeedback: (() -> Unit)? = null) {
+fun MyBookingDetailScreen(bookingId: Long, viewModel: BookingViewModel, onBack: () -> Unit, onSpending: (() -> Unit)? = null, onActivities: (() -> Unit)? = null, onBill: (() -> Unit)? = null, onFeedback: (() -> Unit)? = null,notificationButton: @Composable () -> Unit = {}) {
     val state by viewModel.bookingDetailState.collectAsState()
     LaunchedEffect(bookingId) { viewModel.fetchBookingDetail(bookingId) }
-    MyBookingDetailContent(state, onBack, { viewModel.fetchBookingDetail(bookingId) }, onSpending, onActivities, onBill, onFeedback)
+    MyBookingDetailContent(state, onBack, { viewModel.fetchBookingDetail(bookingId) }, onSpending, onActivities, onBill, onFeedback, notificationButton)
 }
 
 @Composable
-fun MyBookingDetailContent(state: BookingDetailState, onBack: () -> Unit, onRetry: () -> Unit, onSpending: (() -> Unit)? = null, onActivities: (() -> Unit)? = null, onBill: (() -> Unit)? = null, onFeedback: (() -> Unit)? = null) {
+fun MyBookingDetailContent(state: BookingDetailState, onBack: () -> Unit, onRetry: () -> Unit, onSpending: (() -> Unit)? = null, onActivities: (() -> Unit)? = null, onBill: (() -> Unit)? = null, onFeedback: (() -> Unit)? = null,notificationButton: @Composable () -> Unit = {}) {
     PassengerPage("Thông tin đặt chỗ", onBack = onBack) {
         when (state) {
             BookingDetailState.Idle,
@@ -28,6 +28,7 @@ fun MyBookingDetailContent(state: BookingDetailState, onBack: () -> Unit, onRetr
             is BookingDetailState.Error -> item { PassengerError(state.message, onRetry) }
             is BookingDetailState.Success -> {
                 val booking = state.booking
+                item { notificationButton() }
                 item {
                     OceanBanner(
                         "MÃ BOOKING",

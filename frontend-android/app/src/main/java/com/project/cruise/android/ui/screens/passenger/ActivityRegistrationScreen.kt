@@ -10,12 +10,12 @@ import com.project.cruise.android.data.dto.booking.*
 import com.project.cruise.android.ui.components.*
 import com.project.cruise.android.ui.theme.OceanBanner
 import com.project.cruise.android.viewmodel.passenger.*
-import kotlinx.coroutines.delay
+
 
 @Composable
-fun ActivityRegistrationScreen(bookingId: Long,model: ActivityRegistrationViewModel,onBack: ()->Unit){
+fun ActivityRegistrationScreen(bookingId: Long,model: ActivityRegistrationViewModel,onBack: ()->Unit,notificationButton: @Composable ()->Unit = {}){
     val state by model.state.collectAsState()
-    LaunchedEffect(bookingId){model.load(bookingId);while(true){delay(60000);model.refreshNotices()}}
+    LaunchedEffect(bookingId){model.load(bookingId)}
     var guestId by rememberSaveable{mutableStateOf<Long?>(null)}
     var selected by remember{mutableStateOf<RegistrationChoice?>(null)}
     var cancelId by remember{mutableStateOf<Long?>(null)}
@@ -51,12 +51,7 @@ fun ActivityRegistrationScreen(bookingId: Long,model: ActivityRegistrationViewMo
             TextButton(onClick={model.load(bookingId,state.page-1)},enabled=!state.busy && state.page>0){Text("Trước")}
             TextButton(onClick={model.load(bookingId,state.page+1)},enabled=!state.busy && state.items.size==20){Text("Tiếp")}
         }}
-        item{PassengerSection("Thông báo hoạt động")}
-        state.notices.forEach{notice->item{PassengerCard{Text(notice.title,style=MaterialTheme.typography.titleMedium);Text(notice.message)}}}
-        item{Row{
-            TextButton(onClick={model.refreshNotices(state.noticePage-1)},enabled=state.noticePage>0){Text("Thông báo trước")}
-            TextButton(onClick={model.refreshNotices(state.noticePage+1)},enabled=state.notices.size==20){Text("Thông báo tiếp")}
-        }}
+        item{notificationButton()}
     }
     if(selected!=null && guest!=null)AlertDialog(onDismissRequest={if(!state.busy)selected=null},title={Text("Xác nhận giữ chỗ")},
         text={Text("${guest.name}\n${selected!!.target.name}\nChưa thu phí ở bước đăng ký.\n${state.error.orEmpty()}")},

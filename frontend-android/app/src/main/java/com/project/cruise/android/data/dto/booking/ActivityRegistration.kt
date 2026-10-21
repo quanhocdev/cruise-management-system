@@ -14,4 +14,7 @@ data class ActivityRegistration(val id: Long,val bookingPassengerId: Long,val pa
 data class RegisterActivityRequest(val bookingPassengerId: Long,val targetType: String,val targetId: String,val clientRequestId: String?=null)
 data class RegistrationCommand(val clientRequestId: String?=null)
 data class RegistrationAttendance(val reason: String,val clientRequestId: String?=null)
-data class ActivityNotice(val id: String,val title: String,val message: String,val createdAt: String)
+data class ActivityNotice(val id: String,val title: String,val message: String,val createdAt: String,
+    val priority: String = "NORMAL",val bookingId: Long? = null,val registrationId: Long? = null,val readAt: String? = null)
+data class ActivityUnreadCount(val unreadCount: Long)
+data class ActivityReadResult(val id: String,val readAt: String)

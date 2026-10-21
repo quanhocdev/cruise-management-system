@@ -14,7 +14,7 @@ import retrofit2.HttpException
 import java.time.LocalDateTime
 
 data class ActivityRegistrationState(val catalog: RegistrationCatalog?=null,val items: List<ActivityRegistration> = emptyList(),
-    val notices: List<ActivityNotice> = emptyList(),val noticePage: Int=0,val page: Int=0,val busy: Boolean=false,val error: String?=null,val message: String?=null)
+    val page: Int=0,val busy: Boolean=false,val error: String?=null,val message: String?=null)
 object RegistrationDraft {
     fun canRegister(choice: RegistrationChoice,guest: RegistrationGuest?,now: LocalDateTime=LocalDateTime.now()): Boolean =
         guest!=null && guest.status!="CHECKED_OUT" && choice.remainingSeats>0 && choice.target.status in listOf("CONFIGURED","NOT_STARTED") &&
@@ -32,7 +32,7 @@ class ActivityRegistrationViewModel(private val source: ActivityRegistrationSour
             try {
                 val items=source.mine(bookingId,page)
                 mutable.value=mutable.value.copy(items=items,catalog=source.catalog(bookingId),busy=false)
-                refreshNotices()
+
             }catch(ex: CancellationException){throw ex}
             catch(ex: Exception){mutable.value=mutable.value.copy(busy=false,error=error(ex))}
         }
@@ -51,7 +51,7 @@ class ActivityRegistrationViewModel(private val source: ActivityRegistrationSour
                 try {mutable.value=mutable.value.copy(items=source.mine(bookingId,0),catalog=source.catalog(bookingId),page=0)}
                 catch(ex: CancellationException){throw ex}
                 catch(ex: Exception){mutable.value=mutable.value.copy(message="$message Bấm cập nhật để lấy danh sách mới.")}
-                mutable.value=mutable.value.copy(busy=false);refreshNotices()
+                mutable.value=mutable.value.copy(busy=false)
             }catch(ex: CancellationException){throw ex}
             catch(ex: Exception){mutable.value=mutable.value.copy(busy=false,error=error(ex))}
         }
@@ -75,11 +75,6 @@ class ActivityRegistrationViewModel(private val source: ActivityRegistrationSour
             catch(ex: Exception){mutable.value=mutable.value.copy(busy=false,error=error(ex))}
         }
     }
-    fun refreshNotices(page: Int=mutable.value.noticePage){viewModelScope.launch {
-        try{mutable.value=mutable.value.copy(notices=source.notices(page),noticePage=page)}
-        catch(ex: CancellationException){throw ex}
-        catch(ex: Exception){ /* Keep the current inbox during a temporary connection failure. */ }
-    }}
     private fun error(ex: Exception): String {
         if(ex is HttpException){
             val message=runCatching{JsonParser().parse(ex.response()?.errorBody()?.string()).asJsonObject.get("message")?.asString}.getOrNull()

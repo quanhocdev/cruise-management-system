@@ -61,7 +61,11 @@ interface ApiService {
     @POST("api/{department}/{usage}/registrations/{id}/attend")
     suspend fun attendRegistration(@Path("department") department: String,@Path("usage") usage: String,@Path("id") id: Long,@Body request: com.project.cruise.android.data.dto.booking.RegistrationAttendance): com.project.cruise.android.data.dto.booking.ActivityRegistration
     @GET("api/v1/notifications/activities")
-    suspend fun getActivityNotices(@Query("page") page: Int=0): List<com.project.cruise.android.data.dto.booking.ActivityNotice>
+    suspend fun getActivityNotices(@Query("page") page: Int=0,@Query("unreadOnly") unreadOnly: Boolean=false): List<com.project.cruise.android.data.dto.booking.ActivityNotice>
+    @GET("api/v1/notifications/activities/unread-count")
+    suspend fun getActivityUnreadCount(): com.project.cruise.android.data.dto.booking.ActivityUnreadCount
+    @POST("api/v1/notifications/activities/{id}/read")
+    suspend fun readActivityNotice(@Path("id") id: String,@Body command: com.project.cruise.android.data.dto.booking.RegistrationCommand): com.project.cruise.android.data.dto.booking.ActivityReadResult
 
     @GET("api/v1/payments")
     suspend fun findRefundPayments(@Query("referenceId") referenceId: Long, @Query("referenceType") type: String): List<com.project.cruise.android.data.dto.booking.RefundPayment>

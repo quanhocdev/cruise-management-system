@@ -21,6 +21,7 @@ object Routes {
     const val PASSENGER_PROFILE = "passenger_profile"
     const val PASSENGER_DASHBOARD = "passenger_dashboard"
     const val PASSENGER_NOTIFICATIONS = "passenger_notifications"
+    const val PASSENGER_ACTIVITY_INBOX = "passenger_activity_inbox"
     const val PASSENGER_TOURS = "passenger_tours"
     const val PASSENGER_TOUR_DETAIL = "passenger_tours/{tourId}"
     const val PASSENGER_ROOMS = "passenger_rooms/{voyageId}"
