@@ -18,10 +18,9 @@
 .mgmt-layout-content {
   flex: 1;
   min-height: 0;
-  overflow-y: auto;
+  overflow-y: var(--mgmt-content-overflow, auto);
   padding: var(--mgmt-content-padding, 0);
 }
-
 /* Lớp phủ tối khi mở drawer trên mobile */
 .mgmt-backdrop {
   display: none;

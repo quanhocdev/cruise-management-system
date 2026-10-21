@@ -75,3 +75,16 @@
   --mgmt-page-bg: #fffbeb;
   --mgmt-notify-hover: #b45309;
 }
+.mgmt-layout[data-theme="operation"] {
+  --mgmt-sidebar-bg: #111827;
+  --mgmt-sidebar-text: #9ca3af;
+  --mgmt-sidebar-muted: #6b7280;
+  --mgmt-accent: #2563eb;
+  --mgmt-page-bg: #f5f7fb;
+  --mgmt-border: #e5e7eb;
+  --mgmt-text: #111827;
+  --mgmt-text-muted: #6b7280;
+  --mgmt-notify-hover: #2563eb;
+  --mgmt-content-overflow: hidden;
+  /* padding giữ mặc định 0 */
+}
