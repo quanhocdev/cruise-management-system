@@ -13,14 +13,14 @@ import com.project.cruise.android.ui.theme.*
 import com.project.cruise.android.viewmodel.passenger.*
 
 @Composable
-fun MyBookingDetailScreen(bookingId: Long, viewModel: BookingViewModel, onBack: () -> Unit, onSpending: (() -> Unit)? = null, onActivities: (() -> Unit)? = null, onBill: (() -> Unit)? = null) {
+fun MyBookingDetailScreen(bookingId: Long, viewModel: BookingViewModel, onBack: () -> Unit, onSpending: (() -> Unit)? = null, onActivities: (() -> Unit)? = null, onBill: (() -> Unit)? = null, onFeedback: (() -> Unit)? = null) {
     val state by viewModel.bookingDetailState.collectAsState()
     LaunchedEffect(bookingId) { viewModel.fetchBookingDetail(bookingId) }
-    MyBookingDetailContent(state, onBack, { viewModel.fetchBookingDetail(bookingId) }, onSpending, onActivities, onBill)
+    MyBookingDetailContent(state, onBack, { viewModel.fetchBookingDetail(bookingId) }, onSpending, onActivities, onBill, onFeedback)
 }
 
 @Composable
-fun MyBookingDetailContent(state: BookingDetailState, onBack: () -> Unit, onRetry: () -> Unit, onSpending: (() -> Unit)? = null, onActivities: (() -> Unit)? = null, onBill: (() -> Unit)? = null) {
+fun MyBookingDetailContent(state: BookingDetailState, onBack: () -> Unit, onRetry: () -> Unit, onSpending: (() -> Unit)? = null, onActivities: (() -> Unit)? = null, onBill: (() -> Unit)? = null, onFeedback: (() -> Unit)? = null) {
     PassengerPage("Thông tin đặt chỗ", onBack = onBack) {
         when (state) {
             BookingDetailState.Idle,
@@ -80,6 +80,7 @@ fun MyBookingDetailContent(state: BookingDetailState, onBack: () -> Unit, onRetr
                     OutlinedButton(onClick = onSpending, modifier = Modifier.fillMaxWidth()) { Text("Xem chi tiêu trong chuyến") }
                 }
                 if(onBill!=null) item { OutlinedButton(onClick=onBill,modifier=Modifier.fillMaxWidth()){Text("Bill dịch vụ & biên nhận")} }
+                if(onFeedback!=null) item { OutlinedButton(onClick=onFeedback,modifier=Modifier.fillMaxWidth()){Text("Xem đánh giá của tôi")} }
                 item { PassengerSection("Người liên hệ") }
                 item {
                     PassengerCard {

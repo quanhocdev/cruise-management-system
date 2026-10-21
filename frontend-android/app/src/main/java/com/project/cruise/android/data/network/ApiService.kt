@@ -197,5 +197,8 @@ interface ApiService {
     suspend fun createPassengerBooking(
         @Part parts: List<MultipartBody.Part>
     ): BookingResponse
+
+    @GET("api/v1/feedbacks/me")
+    suspend fun getMyFeedback(): List<com.project.cruise.android.data.dto.feedback.MyFeedback>
 }
 

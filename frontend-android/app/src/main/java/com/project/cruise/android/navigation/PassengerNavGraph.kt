@@ -180,7 +180,8 @@ fun NavGraphBuilder.passengerGraph(
             onBack = { navController.popBackStack() },
             onSpending = { navController.navigate("passenger_spending/$bookingId") },
             onActivities = { navController.navigate(Routes.passengerActivities(bookingId)) },
-            onBill = { navController.navigate("passenger_bill/$bookingId") }
+            onBill = { navController.navigate("passenger_bill/$bookingId") },
+            onFeedback = { navController.navigate("passenger_feedback/$bookingId") }
         )
     }
     composable(Routes.PASSENGER_ACTIVITIES, arguments = listOf(navArgument("bookingId") { type = NavType.LongType })) { entry ->
@@ -190,6 +191,13 @@ fun NavGraphBuilder.passengerGraph(
         val model: com.project.cruise.android.viewmodel.passenger.ActivityRegistrationViewModel = viewModel(
             factory = com.project.cruise.android.viewmodel.passenger.ActivityRegistrationViewModel.Factory(source))
         com.project.cruise.android.ui.screens.passenger.ActivityRegistrationScreen(bookingId, model) { navController.popBackStack() }
+    }
+    composable("passenger_feedback/{bookingId}", arguments = listOf(navArgument("bookingId") { type = NavType.LongType })) { entry ->
+        val bookingId = entry.arguments?.getLong("bookingId") ?: return@composable
+        val source = remember(apiService) { com.project.cruise.android.data.repository.FeedbackRepository(apiService) }
+        val model: com.project.cruise.android.viewmodel.passenger.FeedbackViewModel = viewModel(
+            factory = com.project.cruise.android.viewmodel.passenger.FeedbackViewModel.Factory(source))
+        com.project.cruise.android.ui.screens.passenger.MyFeedbackScreen(bookingId, model) { navController.popBackStack() }
     }
     composable("passenger_bill/{bookingId}", arguments = listOf(navArgument("bookingId") { type = NavType.LongType })) { entry ->
         val bookingId=entry.arguments?.getLong("bookingId")?:return@composable
