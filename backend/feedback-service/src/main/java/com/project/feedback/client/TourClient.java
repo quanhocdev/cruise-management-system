@@ -12,7 +12,7 @@ public class TourClient {
     private final RestClient client; private final String apiKey;
     public TourClient(RestClient.Builder builder, @Value("${tour-service.url}") String url,
                       @Value("${internal.api-key}") String apiKey) {
-        this.client = builder.baseUrl(url).build(); this.apiKey = apiKey;
+        this.client = builder.clone().baseUrl(url).build(); this.apiKey = apiKey;
     }
     public FeedbackTourContext context(UUID tourId) {
         try {

@@ -14,7 +14,8 @@ import java.util.*;
 public class Feedback {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
     @Column(name = "booking_id", nullable = false) private Long bookingId;
-    @Column(name = "passenger_voyage_id", nullable = false) private Long passengerVoyageId;
+    @Column(name = "passenger_voyage_id") private Long passengerVoyageId;
+    @Column(name = "booking_passenger_id") private Long bookingPassengerId;
     @Column(name = "reviewer_user_id", nullable = false) private Long reviewerUserId;
     @Column(name = "tour_id", nullable = false) private UUID tourId;
     @Column(name = "cruise_id", nullable = false) private UUID cruiseId;
@@ -36,6 +37,7 @@ public class Feedback {
     public Long getId() { return id; } public void setId(Long v) { id = v; }
     public Long getBookingId() { return bookingId; } public void setBookingId(Long v) { bookingId = v; }
     public Long getPassengerVoyageId() { return passengerVoyageId; } public void setPassengerVoyageId(Long v) { passengerVoyageId = v; }
+    public Long getBookingPassengerId() { return bookingPassengerId; } public void setBookingPassengerId(Long v) { bookingPassengerId = v; }
     public Long getReviewerUserId() { return reviewerUserId; } public void setReviewerUserId(Long v) { reviewerUserId = v; }
     public UUID getTourId() { return tourId; } public void setTourId(UUID v) { tourId = v; }
     public UUID getCruiseId() { return cruiseId; } public void setCruiseId(UUID v) { cruiseId = v; }

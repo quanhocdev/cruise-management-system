@@ -15,9 +15,12 @@ import java.util.*;
 @RequestMapping("/api/v1/feedbacks")
 public class FeedbackController {
     private final FeedbackService service;
-    public FeedbackController(FeedbackService service) { this.service = service; }
+    private final com.project.feedback.service.FeedbackCommands commands;
+    public FeedbackController(FeedbackService service, com.project.feedback.service.FeedbackCommands commands) {
+        this.service = service; this.commands = commands;
+    }
     @PostMapping ResponseEntity<FeedbackResponse> create(@Valid @RequestBody CreateFeedbackRequest request, @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(request, userId(jwt)));
+        return commands.create(request, userId(jwt));
     }
     @PutMapping("/{id}") FeedbackResponse update(@PathVariable Long id, @Valid @RequestBody UpdateFeedbackRequest request,
         @AuthenticationPrincipal Jwt jwt) { return service.update(id, request, userId(jwt)); }

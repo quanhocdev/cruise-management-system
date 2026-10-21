@@ -16,6 +16,9 @@ public class FeedbackSchemaMigration implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        new org.springframework.jdbc.datasource.init.ResourceDatabasePopulator(
+            new org.springframework.core.io.ClassPathResource("db/migration/V20261021_01__booking_passenger_feedback.sql"))
+            .execute(java.util.Objects.requireNonNull(jdbc.getDataSource()));
         jdbc.update("""
             update feedback.feedbacks
                set feedback_type = 'TRIP', target_type = 'TOUR', target_id = tour_id

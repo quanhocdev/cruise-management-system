@@ -20,10 +20,20 @@ public class FeedbackServiceImpl implements FeedbackService {
     }
     @Override @Transactional
     public FeedbackResponse create(CreateFeedbackRequest request, Long userId) {
-        FeedbackEligibility eligibility = bookingClient.eligibility(request.bookingId(), userId);
+        FeedbackEligibility eligibility = request.bookingPassengerId() == null
+            ? bookingClient.eligibility(request.bookingId(), userId)
+            : bookingClient.eligibility(request.bookingId(), userId, request.bookingPassengerId());
+        if (!Objects.equals(request.bookingId(), eligibility.bookingId()) || eligibility.tourId() == null)
+            throw new FeedbackException(HttpStatus.BAD_GATEWAY, "Booking service returned mismatched participation");
         if (!eligibility.participated())
             throw new FeedbackException(HttpStatus.FORBIDDEN, "Only passengers who completed the voyage can leave feedback");
+        if (eligibility.passengerVoyageId() == null && eligibility.bookingPassengerId() == null)
+            throw new FeedbackException(HttpStatus.CONFLICT, "Booking participation identity is unavailable");
+        if (request.bookingPassengerId() != null && !request.bookingPassengerId().equals(eligibility.bookingPassengerId()))
+            throw new FeedbackException(HttpStatus.BAD_GATEWAY, "Booking service returned a mismatched passenger");
         FeedbackTourContext tour = tourClient.context(eligibility.tourId());
+        if (!eligibility.tourId().equals(tour.tourId()))
+            throw new FeedbackException(HttpStatus.BAD_GATEWAY, "Tour service returned a mismatched tour");
         if (!tour.completed()) throw new FeedbackException(HttpStatus.CONFLICT, "Tour is not completed yet");
         if (tour.cruiseId() == null) throw new FeedbackException(HttpStatus.CONFLICT, "Tour has no assigned cruise");
         Target target = resolveTarget(request, tour.tourId());
@@ -32,6 +42,7 @@ public class FeedbackServiceImpl implements FeedbackService {
             throw new FeedbackException(HttpStatus.CONFLICT, "You already reviewed this target for this booking");
         Instant now = Instant.now(); Feedback f = new Feedback();
         f.setBookingId(request.bookingId()); f.setPassengerVoyageId(eligibility.passengerVoyageId());
+        f.setBookingPassengerId(eligibility.bookingPassengerId());
         f.setReviewerUserId(userId); f.setTourId(tour.tourId()); f.setCruiseId(tour.cruiseId());
         f.setFeedbackType(target.feedbackType()); f.setTargetType(target.targetType()); f.setTargetId(target.targetId());
         applyContent(f, request.rating(), request.content(), request.imageUrls());
@@ -123,6 +134,6 @@ public class FeedbackServiceImpl implements FeedbackService {
     private FeedbackResponse toResponse(Feedback f) { return new FeedbackResponse(f.getId(), f.getBookingId(), f.getPassengerVoyageId(),
         f.getReviewerUserId(), f.getTourId(), f.getCruiseId(), f.getFeedbackType(), f.getTargetType(), f.getTargetId(),
         f.getRating(), f.getContent(), List.copyOf(f.getImageUrls()),
-        f.getStatus(), f.getModerationReason(), f.getCreatedAt(), f.getUpdatedAt()); }
+        f.getStatus(), f.getModerationReason(), f.getCreatedAt(), f.getUpdatedAt(), f.getBookingPassengerId()); }
     private record Target(FeedbackType feedbackType, FeedbackTargetType targetType, UUID targetId) {}
 }
