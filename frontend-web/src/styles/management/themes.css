@@ -79,8 +79,9 @@
   --mgmt-content-padding: 24px;
 }
 
-/* ---------- Onboard ---------- */
-.mgmt-layout[data-theme="onboard"] {
+/* ---------- Onboard + Finance (cùng bộ màu teal) ---------- */
+.mgmt-layout[data-theme="onboard"],
+.mgmt-layout[data-theme="finance"] {
   --mgmt-accent: #0d9488;
   --mgmt-logo-bg: linear-gradient(135deg, #0d9488 0%, #06b6d4 100%);
   --mgmt-active-bg: linear-gradient(90deg, #0d9488 0%, #0f766e 100%);
@@ -107,13 +108,6 @@
   /* padding giữ mặc định 0 */
 }
 
-/* ---------- Finance (bản mẫu, sẽ thay bằng màu thật) ---------- */
-.mgmt-layout[data-theme="finance"] {
-  --mgmt-accent: #b45309;
-  --mgmt-page-bg: #fffbeb;
-  --mgmt-notify-hover: #b45309;
-}
-
 /* =========================================================
    3. RESPONSIVE (luôn đặt cuối file để ghi đè đúng)
    ========================================================= */
@@ -129,7 +123,8 @@
   .mgmt-layout[data-theme="admin"],
   .mgmt-layout[data-theme="convenience"],
   .mgmt-layout[data-theme="scheduler"],
-  .mgmt-layout[data-theme="onboard"] {
+  .mgmt-layout[data-theme="onboard"],
+  .mgmt-layout[data-theme="finance"] {
     --mgmt-content-padding: 16px;
   }
 }

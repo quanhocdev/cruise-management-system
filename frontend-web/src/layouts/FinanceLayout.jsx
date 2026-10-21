@@ -1,40 +1,20 @@
 // frontend-web/src/layouts/FinanceLayout.jsx
-import { useState } from "react";
-import { Outlet } from "react-router-dom";
+import ManagementLayout from "../components/management/ManagementLayout";
+import { financeConfig } from "../config/roles/finance.config";
 
-import FinanceHeader from "../components/finance/FinanceHeader";
-import FinanceSidebar from "../components/finance/FinanceSidebar";
-import FinanceFooter from "../components/finance/FinanceFooter";
-
-import "./FinanceLayout.css";
+// TODO: thay bằng useNotifications(financeNotificationService, ...) khi có socket
+const notificationProps = {
+  notifications: [],
+  unreadCount: 0,
+  title: "Thông báo Finance",
+};
 
 function FinanceLayout() {
-  const [mobileOpen, setMobileOpen] = useState(false);
-
   return (
-    <div className="finance-layout">
-      {mobileOpen && (
-        <div
-          className="finance-sidebar-overlay"
-          onClick={() => setMobileOpen(false)}
-        />
-      )}
-
-      <FinanceSidebar
-        mobileOpen={mobileOpen}
-        onCloseMobile={() => setMobileOpen(false)}
-      />
-
-      <div className="finance-layout-main">
-        <FinanceHeader onMenuClick={() => setMobileOpen((prev) => !prev)} />
-
-        <main className="finance-layout-content">
-          <Outlet />
-        </main>
-
-        <FinanceFooter />
-      </div>
-    </div>
+    <ManagementLayout
+      config={financeConfig}
+      notificationProps={notificationProps}
+    />
   );
 }
 
