@@ -36,7 +36,11 @@ function ManagementHeader({
       <div className="mgmt-header-right">
         {notificationProps && <NotificationBell {...notificationProps} />}
         <div className="mgmt-header-user">
-          <UserCircle size={32} />
+          {config.user.initials ? (
+            <div className="mgmt-avatar">{config.user.initials}</div>
+          ) : (
+            <UserCircle size={32} />
+          )}
           <div className="mgmt-header-user-info">
             <strong>{config.user.name}</strong>
             <span>{config.user.role}</span>

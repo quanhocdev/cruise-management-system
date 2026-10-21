@@ -98,7 +98,7 @@
 }
 
 .mgmt-notification-item:hover {
-  background-color: #eff6ff;
+  background-color: var(--mgmt-notify-item-hover, #eff6ff);
 }
 
 .mgmt-notification-item-title {

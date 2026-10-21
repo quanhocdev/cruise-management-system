@@ -1,10 +1,14 @@
 // layouts/ShoreLayout.jsx
 import ManagementLayout from "../components/management/ManagementLayout";
 import { shoreConfig } from "../config/roles/shore.config";
-import { useShoreNotifications } from "../hooks/useShoreNotifications";
+import { useNotifications } from "../hooks/useNotifications";
+import shoreNotificationService from "../modules/shore/services/shoreNotificationService";
 
 function ShoreLayout() {
-  const notificationProps = useShoreNotifications();
+  const notificationProps = useNotifications(
+    shoreNotificationService,
+    "Thông báo Shore",
+  );
   return (
     <ManagementLayout
       config={shoreConfig}

@@ -50,7 +50,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 9px;
-  background: var(--mgmt-accent);
+  background: var(--mgmt-logo-bg, var(--mgmt-accent));
   color: #ffffff;
   flex-shrink: 0;
 }
@@ -141,11 +141,11 @@
 
 .mgmt-sidebar-link:hover {
   background: rgba(255, 255, 255, 0.06);
-  color: var(--mgmt-sidebar-text-active);
+  color: var(--mgmt-sidebar-hover-text, var(--mgmt-sidebar-text-active));
 }
 
 .mgmt-sidebar-link.active {
-  background: var(--mgmt-accent);
+  background: var(--mgmt-active-bg, var(--mgmt-accent));
   color: #ffffff;
 }
 

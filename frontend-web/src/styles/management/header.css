@@ -76,9 +76,23 @@
   color: var(--mgmt-text);
 }
 
+.mgmt-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--mgmt-accent);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
 .mgmt-header-user-info span {
   font-size: 11px;
-  color: var(--mgmt-text-muted);
+  color: var(--mgmt-user-role, var(--mgmt-text-muted));
 }
 
 @media (max-width: 768px) {

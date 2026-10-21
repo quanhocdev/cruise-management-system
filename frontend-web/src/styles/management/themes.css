@@ -52,6 +52,24 @@
   }
 }
 
+.mgmt-layout[data-theme="onboard"] {
+  --mgmt-accent: #0d9488;
+  --mgmt-logo-bg: linear-gradient(135deg, #0d9488 0%, #06b6d4 100%);
+  --mgmt-active-bg: linear-gradient(90deg, #0d9488 0%, #0f766e 100%);
+  --mgmt-sidebar-hover-text: #2dd4bf;
+  --mgmt-page-bg: #f8fafc;
+  --mgmt-notify-hover: #0d9488;
+  --mgmt-notify-item-hover: #f0fdfa;
+  --mgmt-user-role: #0d9488;
+  --mgmt-content-padding: 24px;
+}
+
+@media (max-width: 768px) {
+  .mgmt-layout[data-theme="onboard"] {
+    --mgmt-content-padding: 16px;
+  }
+}
+
 .mgmt-layout[data-theme="finance"] {
   --mgmt-accent: #b45309;
   --mgmt-page-bg: #fffbeb;

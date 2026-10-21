@@ -17,3 +17,18 @@
     padding: 0 16px;
   }
 }
+
+.mgmt-footer-links {
+  display: flex;
+  gap: 16px;
+}
+
+.mgmt-footer-link {
+  color: var(--mgmt-text-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.mgmt-footer-link:hover {
+  color: var(--mgmt-accent);
+}

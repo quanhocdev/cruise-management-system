@@ -41,7 +41,10 @@ function ManagementLayout({ config, notificationProps, children }) {
           notificationProps={notificationProps}
         />
         <main className="mgmt-layout-content">{children ?? <Outlet />}</main>
-        <ManagementFooter rightText={config.footerRight} />
+        <ManagementFooter
+          rightText={config.footerRight}
+          links={config.footerLinks}
+        />
       </div>
     </div>
   );
