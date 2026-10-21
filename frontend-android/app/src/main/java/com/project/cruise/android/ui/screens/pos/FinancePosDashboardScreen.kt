@@ -13,7 +13,8 @@ fun FinancePosDashboardScreen(
     onSpendingClick: () -> Unit = {},
     onCorrectionClick: () -> Unit = {},
     onRefundClick: () -> Unit = {},
-    onCheckoutClick: () -> Unit = {}
+    onCheckoutClick: () -> Unit = {},
+    onReportClick: () -> Unit = {}
 ) {
     RolePosDashboard(
         username = username,
@@ -41,7 +42,8 @@ fun FinancePosDashboardScreen(
             PosDashboardAction("Hạn mức chi tiêu", "Tra cứu booking và quản lý hạn mức", "123", onSpendingClick),
             PosDashboardAction("Điều chỉnh chi tiêu", "Hủy hoặc hoàn khoản chi chưa quyết toán", "123", onCorrectionClick),
             PosDashboardAction("Hoàn tiền thanh toán", "Tra cứu và hoàn tiền vé qua VNPay", "123", onRefundClick),
-            PosDashboardAction("Quyết toán cuối chuyến", "Chốt bill dịch vụ, thanh toán và biên nhận", "123", onCheckoutClick)
+            PosDashboardAction("Quyết toán cuối chuyến", "Chốt bill dịch vụ, thanh toán và biên nhận", "123", onCheckoutClick),
+            PosDashboardAction("Thống kê chuyến", "Phát sinh, thu tiền và danh sách bill dịch vụ", "123", onReportClick)
         ),
         notice = "Gửi mã booking để tiếp tục thủ tục tại quầy lễ tân. Gửi mã thành công chưa phải hoàn tất check-in.",
         onLogoutClick = onLogoutClick,

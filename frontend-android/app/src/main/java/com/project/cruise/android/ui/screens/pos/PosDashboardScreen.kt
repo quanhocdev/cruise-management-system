@@ -18,11 +18,12 @@ fun PosDashboardScreen(
     onCorrectionClick: () -> Unit = {},
     onRefundClick: () -> Unit = {},
     onRegistrationsClick: () -> Unit = {},
-    onCheckoutClick: () -> Unit = {}
+    onCheckoutClick: () -> Unit = {},
+    onReportClick: () -> Unit = {}
 ) {
     when (role) {
         PosRole.FINANCE -> FinancePosDashboardScreen(
-            username, onLogoutClick, onQrClick, onNfcClick, onManualClick, onHistoryClick, onSpendingClick, onCorrectionClick, onRefundClick, onCheckoutClick
+            username, onLogoutClick, onQrClick, onNfcClick, onManualClick, onHistoryClick, onSpendingClick, onCorrectionClick, onRefundClick, onCheckoutClick, onReportClick
         )
         PosRole.CONVENIENCE -> ConveniencePosDashboardScreen(
             username, onLogoutClick, onNfcClick, onHistoryClick, onCorrectionClick

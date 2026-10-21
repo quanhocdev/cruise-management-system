@@ -123,6 +123,10 @@ interface ApiService {
     @GET("api/public/tours")
     suspend fun getPublicTours(): List<PublicTourSummaryResponse>
 
+    @GET("api/finance/bookings/reports/services")
+    suspend fun getFinanceReport(@Query("tourId") tourId:String,@Query("page") page:Int=0,@Query("size") size:Int=20,
+        @Query("status") status:String="ALL",@Query("sort") sort:String="newest"): com.project.cruise.android.data.dto.booking.FinanceReport
+
     @GET("api/public/tours/{id}")
     suspend fun getPublicTourDetail(
         @Path("id") id: String
