@@ -81,7 +81,7 @@ public class RegistrationService {
             insert into booking.activity_registrations(booking_id,booking_passenger_id,tour_id,target_type,target_id,name,starts_at,ends_at,listed_price,status)
             values (?,?,?,?,?,?,?,?,?,'CONFIRMED') returning id
             """,Long.class,b.getId(),passengerId,b.getTourId(),type,targetId,t.name(),t.startTime(),t.endTime(),t.price());
-        notify(b.getCreatedByUserId(),"Đăng ký thành công",p.getPassenger().getFullName()+" đã giữ chỗ: "+t.name()+" lúc "+t.startTime()+". Phí và quyền lợi được tính khi xác nhận tham gia.");
+        notify(b.getCreatedByUserId(),b.getId(),id,"NORMAL","Đăng ký thành công",p.getPassenger().getFullName()+" đã giữ chỗ: "+t.name()+" lúc "+t.startTime()+". Phí và quyền lợi được tính khi xác nhận tham gia.");
         return read(id);
     }
     @Transactional
@@ -93,7 +93,7 @@ public class RegistrationService {
         if(!item.status().equals("CONFIRMED") || current.startTime()==null || !LocalDateTime.now().isBefore(current.startTime().minusHours(cancellationHours)))
             throw fail("CANCELLATION_CLOSED","Đã hết hạn hủy tự động. Vui lòng liên hệ nhân viên.",HttpStatus.UNPROCESSABLE_ENTITY);
         jdbc.update("update booking.activity_registrations set status='CANCELLED',updated_at=CURRENT_TIMESTAMP where id=?",id);
-        notify(userId,"Đã hủy đăng ký",item.passengerName()+" đã hủy chỗ: "+item.name()+". Chưa phát sinh phí tham gia.");
+        notify(userId,b.getId(),id,"NORMAL","Đã hủy đăng ký",item.passengerName()+" đã hủy chỗ: "+item.name()+". Chưa phát sinh phí tham gia.");
         return read(id);
     }
     @Transactional
@@ -115,8 +115,9 @@ public class RegistrationService {
         if(code==null || code.isBlank()) throw fail("BOOKING_CODE_REQUIRED","Nhập mã booking",HttpStatus.BAD_REQUEST);
         return jdbc.query(SELECT+" where lower(b.booking_code)=lower(?) and r.target_type=? and position(lower(?) in lower(p.full_name))>0 order by r.starts_at,r.id limit 20 offset ?",this::map,code.trim(),type,search==null?"":search.trim(),(long)page*20);
     }
-    public void notify(long userId,String title,String message) {
-        jdbc.update("insert into booking.registration_notifications(id,recipient_id,title,message) values (?,?,?,?)",UUID.randomUUID(),userId,title,message);
+    public void notify(long userId,long bookingId,long registrationId,String priority,String title,String message) {
+        jdbc.update("insert into booking.registration_notifications(id,recipient_id,title,message,booking_id,registration_id,priority) values (?,?,?,?,?,?,?)",
+                UUID.randomUUID(),userId,title,message,bookingId,registrationId,priority);
     }
     public Item read(long id) { return jdbc.query(SELECT+" where r.id=?",this::map,id).stream().findFirst().orElseThrow(()->fail("REGISTRATION_NOT_FOUND","Không tìm thấy đăng ký",HttpStatus.NOT_FOUND)); }
     private BookingPassenger passenger(long id) {return passengers.findById(id).orElseThrow(()->fail("PASSENGER_NOT_FOUND","Không tìm thấy hành khách",HttpStatus.NOT_FOUND));}

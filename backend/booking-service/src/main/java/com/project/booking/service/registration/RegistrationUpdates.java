@@ -40,7 +40,7 @@ public class RegistrationUpdates {
                     boolean cancelled="CANCELLED".equals(target.status());
                     if(cancelled || !old.startTime().equals(target.startTime()) || !old.endTime().equals(target.endTime())){
                         jdbc.update("update booking.activity_registrations set starts_at=?,ends_at=?,status=?,updated_at=CURRENT_TIMESTAMP where id=?",target.startTime(),target.endTime(),cancelled?"CANCELLED":"CONFIRMED",id);
-                        service.notify(((Number)row.get("created_by_user_id")).longValue(),cancelled?"Hoạt động đã hủy":"Lịch hoạt động thay đổi",
+                        service.notify(((Number)row.get("created_by_user_id")).longValue(),((Number)row.get("booking_id")).longValue(),id,"URGENT",cancelled?"Hoạt động đã hủy":"Lịch hoạt động thay đổi",
                                 old.name()+(cancelled?" đã bị hủy. Chưa phát sinh phí tham gia.":" cập nhật thời gian: "+target.startTime()+" đến "+target.endTime()));
                     }
                 });
@@ -54,7 +54,12 @@ public class RegistrationUpdates {
         if(key.isBlank())return;
         for(var row:jdbc.queryForList("select * from booking.registration_notifications where delivered=false order by created_at limit 20")){
             try{
-                http.post().uri("/internal/activity-inbox").header("X-Internal-Api-Key",key).body(Map.of("clientRequestId",row.get("id"),"recipientId",row.get("recipient_id"),"title",row.get("title"),"message",row.get("message"))).retrieve().toBodilessEntity();
+                var payload=new LinkedHashMap<String,Object>();
+                payload.put("clientRequestId",row.get("id"));payload.put("recipientId",row.get("recipient_id"));
+                payload.put("title",row.get("title"));payload.put("message",row.get("message"));
+                payload.put("priority",row.get("priority"));payload.put("bookingId",row.get("booking_id"));
+                payload.put("registrationId",row.get("registration_id"));
+                http.post().uri("/internal/activity-inbox").header("X-Internal-Api-Key",key).body(payload).retrieve().toBodilessEntity();
                 jdbc.update("update booking.registration_notifications set delivered=true where id=?",row.get("id"));
             }catch(RuntimeException ignored){ break; }
         }
