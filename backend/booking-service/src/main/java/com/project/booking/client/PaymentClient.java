@@ -29,6 +29,12 @@ public class PaymentClient {
                 .body(new org.springframework.core.ParameterizedTypeReference<java.util.List<BillPaymentResponse>>() {});
     }
 
+    public java.util.List<com.project.booking.dto.payment.BillCollectionResponse> getBillCollections(java.util.List<Long> ids) {
+        return restClient.get().uri(uri->uri.path("/internal/payments/bill-collections")
+                .queryParam("billIds",ids.stream().map(String::valueOf).collect(java.util.stream.Collectors.joining(","))).build())
+            .retrieve().body(new org.springframework.core.ParameterizedTypeReference<java.util.List<com.project.booking.dto.payment.BillCollectionResponse>>() {});
+    }
+
     public org.springframework.http.ResponseEntity<BillPaymentResponse> createCommand(BillPaymentRequest request) {
         try {
             return restClient.post().uri("/internal/payments/bills").body(request).retrieve().toEntity(BillPaymentResponse.class);

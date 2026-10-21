@@ -4,7 +4,7 @@ package com.project.booking.service.account;
 final class UsageLedgerSql {
     private UsageLedgerSql() {}
 
-    static final String SCOPED = """
+    static final String ALL = """
         WITH usage_lines AS (
           SELECT 'PRODUCT' AS type, id, booking_passenger_id, product_tour_id AS target_id,
                  quantity, unit_price, discount_amount, final_amount, used_at FROM booking.product_usages
@@ -17,7 +17,11 @@ final class UsageLedgerSql {
           UNION ALL
           SELECT 'SHORE', id, booking_passenger_id, visit_tour_id, quantity,
                  unit_price, discount_amount, final_amount, used_at FROM booking.activity_visit_usages
-        ), scoped AS (
+        )
+        """;
+
+    static final String SCOPED = ALL + """
+        , scoped AS (
           SELECT u.* FROM usage_lines u JOIN booking.booking_passengers bp ON bp.id=u.booking_passenger_id
           WHERE bp.booking_id=?
         )
