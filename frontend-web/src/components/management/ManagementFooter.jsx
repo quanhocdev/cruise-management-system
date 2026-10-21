@@ -15,7 +15,7 @@ function ManagementFooter({ rightText, links }) {
           ))}
         </div>
       ) : (
-        <span>{rightText}</span>
+        <span className="mgmt-footer-role">{rightText}</span>
       )}
     </footer>
   );

@@ -33,7 +33,7 @@
 .mgmt-header-title-main {
   font-size: 17px;
   font-weight: 700;
-  color: var(--mgmt-text);
+  color: var(--mgmt-title-color, var(--mgmt-text));
 }
 
 .mgmt-header-title-sub {
@@ -62,7 +62,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #475569;
+  color: var(--mgmt-user-icon, #475569);
 }
 
 .mgmt-header-user-info {

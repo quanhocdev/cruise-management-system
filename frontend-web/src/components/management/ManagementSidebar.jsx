@@ -71,7 +71,7 @@ function ManagementSidebar({
         ))}
       </nav>
 
-      {config.status && (
+      {config.status && !(config.status.hideDot && collapsed) && (
         <div className="mgmt-sidebar-bottom">
           <div
             className="mgmt-sidebar-status"
@@ -81,7 +81,7 @@ function ManagementSidebar({
                 : undefined
             }
           >
-            <span className="mgmt-status-dot" />
+            {!config.status.hideDot && <span className="mgmt-status-dot" />}
             {!collapsed && (
               <div>
                 <strong>{config.status.title}</strong>

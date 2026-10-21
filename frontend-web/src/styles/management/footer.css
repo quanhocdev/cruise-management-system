@@ -32,3 +32,7 @@
 .mgmt-footer-link:hover {
   color: var(--mgmt-accent);
 }
+
+.mgmt-footer-role {
+  color: var(--mgmt-footer-role, inherit);
+}

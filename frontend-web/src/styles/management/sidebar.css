@@ -26,9 +26,14 @@
   border-bottom: 1px solid var(--mgmt-sidebar-border);
 }
 
+/* Thu gọn: logo ở trên, nút toggle ở dưới */
 .mgmt-sidebar.collapsed .mgmt-sidebar-header {
-  padding: 0 17px;
+  height: auto;
+  min-height: 72px;
+  flex-direction: column;
   justify-content: center;
+  gap: 6px;
+  padding: 12px 0;
 }
 
 .mgmt-sidebar-brand {
@@ -94,16 +99,12 @@
   color: var(--mgmt-sidebar-text-active);
 }
 
-/* Khi thu gọn, nút toggle nằm dưới logo cho đỡ chật */
-.mgmt-sidebar.collapsed .mgmt-sidebar-toggle {
-  display: none;
-}
-
 /* ===== NAVIGATION ===== */
 .mgmt-sidebar-nav {
   flex: 1;
   padding: 16px 10px;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .mgmt-sidebar-section-title {
@@ -242,7 +243,7 @@
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.35);
   }
 
-  /* Trong drawer không cần nút thu gọn */
+  /* Trong drawer không cần nút thu gọn (đóng bằng vùng tối hoặc chọn mục) */
   .mgmt-sidebar-toggle {
     display: none;
   }
