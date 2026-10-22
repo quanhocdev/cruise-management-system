@@ -23,13 +23,34 @@ public class FeedbackEligibilityController {
     public record Eligibility(Long bookingId, UUID tourId, Long passengerVoyageId,
                               boolean participated, Long bookingPassengerId) {}
 
+    public record Guest(Long bookingPassengerId, String name, boolean participated) {}
+    public record Guests(Long bookingId, UUID tourId, java.util.List<Guest> passengers) {}
+
+    @GetMapping("/{id}/feedback-passengers")
+    public Guests passengers(@PathVariable Long id, @RequestParam Long userId,
+            @RequestHeader(value = "X-Internal-Api-Key", defaultValue = "") String supplied) {
+        authorize(supplied);
+        var bookings = jdbc.queryForList("SELECT tour_id,status FROM booking.bookings WHERE id=? AND created_by_user_id=?",id,userId);
+        if (bookings.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        boolean confirmed="CONFIRMED".equals(bookings.get(0).get("status"));
+        var guests=jdbc.query("""
+            select bp.id,p.full_name,bp.status from booking.booking_passengers bp
+            join booking.passengers p on p.id=bp.passenger_id where bp.booking_id=? order by bp.id
+            """,(rs,n)->new Guest(rs.getLong("id"),rs.getString("full_name"),confirmed && "CHECKED_OUT".equals(rs.getString("status"))),id);
+        return new Guests(id,(UUID)bookings.get(0).get("tour_id"),guests);
+    }
+
+    private void authorize(String supplied) {
+        if (apiKey.isBlank() || !MessageDigest.isEqual(apiKey.getBytes(StandardCharsets.UTF_8),
+                supplied.getBytes(StandardCharsets.UTF_8)))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+    }
+
     @GetMapping("/{id}/feedback-eligibility")
     public Eligibility eligibility(@PathVariable Long id, @RequestParam Long userId,
             @RequestParam(required = false) Long bookingPassengerId,
             @RequestHeader(value = "X-Internal-Api-Key", defaultValue = "") String supplied) {
-        if (apiKey.isBlank() || !MessageDigest.isEqual(apiKey.getBytes(StandardCharsets.UTF_8),
-                supplied.getBytes(StandardCharsets.UTF_8)))
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        authorize(supplied);
         var bookings = jdbc.queryForList(
             "SELECT tour_id,status FROM booking.bookings WHERE id=? AND created_by_user_id=?", id, userId);
         if (bookings.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND);

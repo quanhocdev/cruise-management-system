@@ -36,7 +36,8 @@ public class BookingCommandSchema {
         initializer.setDatabasePopulator(new ResourceDatabasePopulator(
                 new ClassPathResource("db/migration/V20261019_06__activity_registration.sql"),
                 new ClassPathResource("db/migration/V20261019_07__checkout_snapshot.sql"),
-                new ClassPathResource("db/migration/V20261021_08__registration_notice_links.sql")));
+                new ClassPathResource("db/migration/V20261021_08__registration_notice_links.sql"),
+                new ClassPathResource("db/migration/V20261022_09__passenger_departures.sql")));
         return initializer;
     }
 }
