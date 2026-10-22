@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
 import com.project.payment.model.enums.PaymentReferenceType;
-
+import java.util.UUID;
 import java.util.List;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -68,14 +68,19 @@ public class PaymentController {
                 : forwardedFor;
     }
 
-    private Long userId(Jwt jwt) {
+    private UUID userId(Jwt jwt) {
         Object claim = jwt.getClaim("userId");
-        if (claim instanceof Number number)
-            return number.longValue();
+
+        if (claim == null) {
+            throw new com.project.payment.exception.PaymentException(
+                    "JWT userId claim is missing or invalid");
+        }
+
         try {
-            return Long.valueOf(String.valueOf(claim));
-        } catch (Exception ex) {
-            throw new com.project.payment.exception.PaymentException("JWT userId claim is missing or invalid");
+            return UUID.fromString(String.valueOf(claim));
+        } catch (IllegalArgumentException ex) {
+            throw new com.project.payment.exception.PaymentException(
+                    "JWT userId claim is missing or invalid");
         }
     }
 
