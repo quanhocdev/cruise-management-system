@@ -6,6 +6,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import com.project.cruise.android.data.dto.booking.ActivityRegistration
+import com.project.cruise.android.data.time.CruiseTime
 import com.project.cruise.android.ui.components.passengerMoney
 import com.project.cruise.android.viewmodel.passenger.*
 
@@ -19,6 +20,7 @@ fun RegistrationAttendanceScreen(role: PosRole,model: ActivityRegistrationViewMo
         PosTopBar("Khách đăng ký hoạt động",role,onBack,!state.busy)
         PosPanel{
             Text(if(role==PosRole.ONBOARD)"Hoạt động trên tàu" else "Chuyến tham quan bờ",style=MaterialTheme.typography.titleLarge)
+            Text(CruiseTime.label,style=MaterialTheme.typography.bodySmall)
             OutlinedTextField(code,{code=it},label={Text("Mã booking")},singleLine=true,enabled=!state.busy,modifier=Modifier.fillMaxWidth())
             OutlinedTextField(search,{search=it},label={Text("Tên khách (không bắt buộc)")},enabled=!state.busy,modifier=Modifier.fillMaxWidth())
             PosPrimaryButton("Tra cứu đăng ký",role,{model.staff(role.name,code,search)},!state.busy && code.isNotBlank())

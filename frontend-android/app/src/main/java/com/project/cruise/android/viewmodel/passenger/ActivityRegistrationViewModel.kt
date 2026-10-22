@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.gson.JsonParser
 import com.project.cruise.android.data.dto.booking.*
 import com.project.cruise.android.data.repository.ActivityRegistrationSource
+import com.project.cruise.android.data.time.CruiseTime
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,7 +17,7 @@ import java.time.LocalDateTime
 data class ActivityRegistrationState(val catalog: RegistrationCatalog?=null,val items: List<ActivityRegistration> = emptyList(),
     val page: Int=0,val busy: Boolean=false,val error: String?=null,val message: String?=null)
 object RegistrationDraft {
-    fun canRegister(choice: RegistrationChoice,guest: RegistrationGuest?,now: LocalDateTime=LocalDateTime.now()): Boolean =
+    fun canRegister(choice: RegistrationChoice,guest: RegistrationGuest?,now: LocalDateTime=CruiseTime.now()): Boolean =
         guest!=null && guest.status!="CHECKED_OUT" && choice.remainingSeats>0 && choice.target.status in listOf("CONFIGURED","NOT_STARTED") &&
             runCatching { LocalDateTime.parse(choice.target.startTime).isAfter(now) }.getOrDefault(false)
     fun status(value: String)=when(value){"CONFIRMED"->"Đã giữ chỗ";"CANCELLED"->"Đã hủy";"ATTENDED"->"Đã tham gia";else->"Đang cập nhật"}

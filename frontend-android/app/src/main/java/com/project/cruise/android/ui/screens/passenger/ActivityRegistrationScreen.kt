@@ -7,6 +7,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.project.cruise.android.data.dto.booking.*
+import com.project.cruise.android.data.time.CruiseTime
 import com.project.cruise.android.ui.components.*
 import com.project.cruise.android.ui.theme.OceanBanner
 import com.project.cruise.android.viewmodel.passenger.*
@@ -30,7 +31,7 @@ fun ActivityRegistrationScreen(bookingId: Long,model: ActivityRegistrationViewMo
         state.catalog?.let{catalog->
             item{PassengerSection("Chọn hành khách")}
             catalog.passengers.forEach{p->item{FilterChip(selected=p.id==guest?.id,onClick={guestId=p.id},enabled=!state.busy,label={Text(p.name)})}}
-            item{PassengerSection("Lịch hoạt động","Giá hiển thị là giá niêm yết. Quyền lợi trong gói được kiểm tra khi tham gia.")}
+            item{PassengerSection("Lịch hoạt động","${CruiseTime.label}. Giá hiển thị là giá niêm yết. Quyền lợi trong gói được kiểm tra khi tham gia.")}
             if(catalog.activities.isEmpty())item{Text("Chuyến này chưa có hoạt động mở đăng ký.")}
             catalog.activities.forEach{choice->item{PassengerCard{
                 Text(choice.target.name,style=MaterialTheme.typography.titleMedium)
