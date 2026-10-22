@@ -1,8 +1,11 @@
+
 package com.project.auth.dto;
+
+import java.util.UUID;
 
 public class RegisterResponse {
 
-    private Long id;
+    private UUID id;
     private String username;
     private String email;
     private String message;
@@ -14,18 +17,22 @@ public class RegisterResponse {
         this.message = message;
     }
 
-    public RegisterResponse(Long id, String username, String email, String message) {
+    public RegisterResponse(
+            UUID id,
+            String username,
+            String email,
+            String message) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.message = message;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

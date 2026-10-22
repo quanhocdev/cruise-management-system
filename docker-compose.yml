@@ -278,6 +278,7 @@ services:
       - ./backend/auth-service/src:/app/auth-service/src
       - ./backend/common/src:/app/common/src
       - /app/auth-service/target
+      - ./secrets/cruise-firebase-admin.json:/run/secrets/cruise-firebase-admin.json:ro
     env_file:
       - .env
     environment:
@@ -287,11 +288,15 @@ services:
       SPRING_DATA_REDIS_HOST: ${REDIS_HOST:-redis}
       SPRING_DATA_REDIS_PORT: ${REDIS_PORT:-6379}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/cruise-firebase-admin.json
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
     depends_on:
       postgres-auth:
         condition: service_healthy
       redis:
         condition: service_healthy
+      kafka:
+        condition: service_started
 
   # Tour Service
   tour-service:
@@ -308,12 +313,15 @@ services:
       - ./backend/tour-service/src:/app/tour-service/src
       - ./backend/common/src:/app/common/src
       - /app/tour-service/target
+      - "${APPDATA}/gcloud/application_default_credentials.json:/var/secrets/google/application_default_credentials.json:ro"
     env_file:
       - .env
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-tour:5432/${TOUR_DB_NAME:-tour_service_db}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      DIALOGFLOW_PROJECT_ID: ${DIALOGFLOW_PROJECT_ID}
+      GOOGLE_APPLICATION_CREDENTIALS: /var/secrets/google/application_default_credentials.json
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       NOMINATIM_URL: ${NOMINATIM_URL:-https://nominatim.openstreetmap.org}
     depends_on:

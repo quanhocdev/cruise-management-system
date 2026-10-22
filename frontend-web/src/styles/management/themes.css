@@ -1,0 +1,138 @@
+/* themes.css */
+
+/* =========================================================
+   1. BIẾN MẶC ĐỊNH
+   ========================================================= */
+.mgmt-layout {
+  /* Sidebar */
+  --mgmt-sidebar-bg: #0f172a;
+  --mgmt-sidebar-text: #94a3b8;
+  --mgmt-sidebar-text-active: #ffffff;
+  --mgmt-sidebar-muted: #64748b;
+  --mgmt-sidebar-border: rgba(255, 255, 255, 0.08);
+
+  /* Màu nhấn: logo + link active */
+  --mgmt-accent: #0f766e;
+
+  /* Nền trang */
+  --mgmt-page-bg: #f0fdfa;
+
+  /* Header / Footer */
+  --mgmt-surface: #ffffff;
+  --mgmt-border: #e2e8f0;
+  --mgmt-text: #0f172a;
+  --mgmt-text-muted: #64748b;
+
+  /* Thông báo */
+  --mgmt-notify-hover: #2563eb;
+}
+
+/* =========================================================
+   2. THEME TỪNG ROLE
+   ========================================================= */
+
+/* ---------- Shore ---------- */
+.mgmt-layout[data-theme="shore"] {
+  --mgmt-accent: #0f766e;
+  --mgmt-page-bg: #f0fdfa;
+}
+
+/* ---------- Admin ---------- */
+.mgmt-layout[data-theme="admin"] {
+  --mgmt-sidebar-text: #cbd5e1;
+  --mgmt-accent: #2563eb;
+  --mgmt-page-bg: #f8fafc;
+  --mgmt-notify-hover: #2563eb;
+  --mgmt-content-padding: 24px;
+}
+
+/* ---------- Convenience ---------- */
+.mgmt-layout[data-theme="convenience"] {
+  --mgmt-sidebar-bg: #1e1b4b;
+  --mgmt-sidebar-text: #c7d2fe;
+  --mgmt-sidebar-muted: #a5b4fc;
+  --mgmt-accent: #4338ca;
+  --mgmt-page-bg: #f8fafc;
+  --mgmt-text: #1e1b4b;
+  --mgmt-title-color: #3730a3;
+  --mgmt-user-icon: #4338ca;
+  --mgmt-footer-role: #4338ca;
+  --mgmt-notify-hover: #4338ca;
+  --mgmt-notify-item-hover: #eef2ff;
+  --mgmt-content-padding: 24px;
+}
+
+/* ---------- Scheduler ---------- */
+.mgmt-layout[data-theme="scheduler"] {
+  --mgmt-sidebar-bg: #134e4a;
+  --mgmt-sidebar-text: #ccfbf1;
+  --mgmt-sidebar-muted: #99f6e4;
+  --mgmt-accent: #0f766e;
+  --mgmt-page-bg: #f8fafc;
+  --mgmt-border: #d9eeee;
+  --mgmt-text: #134e4a;
+  --mgmt-title-color: #0f766e;
+  --mgmt-user-icon: #0f766e;
+  --mgmt-footer-role: #0f766e;
+  --mgmt-notify-hover: #0f766e;
+  --mgmt-notify-item-hover: #f0fdfa;
+  --mgmt-content-padding: 24px;
+}
+
+/* ---------- Onboard + Finance (cùng bộ màu teal) ---------- */
+.mgmt-layout[data-theme="onboard"],
+.mgmt-layout[data-theme="finance"] {
+  --mgmt-accent: #0d9488;
+  --mgmt-logo-bg: linear-gradient(135deg, #0d9488 0%, #06b6d4 100%);
+  --mgmt-active-bg: linear-gradient(90deg, #0d9488 0%, #0f766e 100%);
+  --mgmt-sidebar-hover-text: #2dd4bf;
+  --mgmt-page-bg: #f8fafc;
+  --mgmt-notify-hover: #0d9488;
+  --mgmt-notify-item-hover: #f0fdfa;
+  --mgmt-user-role: #0d9488;
+  --mgmt-content-padding: 24px;
+}
+
+/* ---------- Operation ---------- */
+.mgmt-layout[data-theme="operation"] {
+  --mgmt-sidebar-bg: #111827;
+  --mgmt-sidebar-text: #9ca3af;
+  --mgmt-sidebar-muted: #6b7280;
+  --mgmt-accent: #2563eb;
+  --mgmt-page-bg: #f5f7fb;
+  --mgmt-border: #e5e7eb;
+  --mgmt-text: #111827;
+  --mgmt-text-muted: #6b7280;
+  --mgmt-notify-hover: #2563eb;
+  --mgmt-content-overflow: hidden;
+  /* padding giữ mặc định 0 */
+}
+
+/* =========================================================
+   3. RESPONSIVE (luôn đặt cuối file để ghi đè đúng)
+   ========================================================= */
+@media (max-width: 992px) {
+  .mgmt-layout[data-theme="admin"],
+  .mgmt-layout[data-theme="convenience"],
+  .mgmt-layout[data-theme="scheduler"] {
+    --mgmt-content-padding: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .mgmt-layout[data-theme="admin"],
+  .mgmt-layout[data-theme="convenience"],
+  .mgmt-layout[data-theme="scheduler"],
+  .mgmt-layout[data-theme="onboard"],
+  .mgmt-layout[data-theme="finance"] {
+    --mgmt-content-padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .mgmt-layout[data-theme="admin"],
+  .mgmt-layout[data-theme="convenience"],
+  .mgmt-layout[data-theme="scheduler"] {
+    --mgmt-content-padding: 12px;
+  }
+}

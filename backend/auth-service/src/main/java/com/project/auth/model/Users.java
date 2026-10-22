@@ -12,7 +12,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.EnumType;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
+import java.util.UUID;
 import com.project.auth.model.enums.UserProvider;
 import com.project.auth.model.enums.UserStatus;
 
@@ -22,8 +22,8 @@ import java.time.LocalDateTime;
 @Table(name = "users")
 public class Users {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(name = "username", nullable = false, unique = true)
     private String username;
@@ -40,7 +40,6 @@ public class Users {
     @ManyToOne
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
-
 
     @Enumerated(EnumType.STRING)
     @Column(name = "provider", nullable = false)
@@ -76,11 +75,11 @@ public class Users {
         this.status = status;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

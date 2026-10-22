@@ -9,7 +9,7 @@ export const ROLE_HOME_PATH = {
   CONVENIENCE: "/convenience/dashboard",
   FINANCE: "/finance/dashboard",
   OPERATION: "/operation/dashboard",
-  PASSENGER: "/passenger/dashboard",
+  PASSENGER: "/tours", // trang tour dùng chung cho khách và passenger
   GUEST: "/login",
 };
 

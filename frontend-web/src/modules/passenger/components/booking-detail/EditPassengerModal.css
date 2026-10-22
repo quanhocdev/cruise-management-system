@@ -1,0 +1,55 @@
+/* Modal render trong portal, nằm ngoài .booking-detail-page,
+   nên mọi biến --td-* đều có giá trị fallback. */
+
+.bd-modal .modal-content {
+  border: 0;
+  border-radius: 1rem;
+}
+.bd-modal .modal-header,
+.bd-modal .modal-footer {
+  border: 0;
+}
+.bd-modal .modal-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--td-ink, #0f2b46);
+}
+
+.bd-modal .form-label {
+  margin-bottom: 0.3rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--td-muted, #5b6b7c);
+}
+.bd-modal .form-control,
+.bd-modal .form-select {
+  border-color: var(--td-line, #dde4ea);
+  border-radius: 0.6rem;
+}
+.bd-modal .form-control:focus,
+.bd-modal .form-select:focus {
+  border-color: var(--td-accent, #12808a);
+  box-shadow: 0 0 0 0.22rem rgba(18, 128, 138, 0.18);
+}
+
+.bd-modal__error {
+  margin: 0 0 1rem;
+  padding: 0.7rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #8a3320;
+  background: #fbebe6;
+  border-left: 3px solid #b4472f;
+  border-radius: 0 0.6rem 0.6rem 0;
+}
+
+.bd-modal .bd-modal__confirm {
+  padding-inline: 1.5rem;
+  font-weight: 600;
+  background: var(--td-accent, #12808a);
+  border: 0;
+  border-radius: 0.6rem;
+}
+.bd-modal .bd-modal__confirm:hover:not(:disabled) {
+  background: var(--td-accent-dark, #0d636b);
+}

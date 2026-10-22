@@ -1,6 +1,8 @@
+
 package com.project.auth.service.redis;
 
 import java.time.Duration;
+import java.util.UUID;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -15,76 +17,62 @@ public class TokenRedisServiceImpl implements TokenRedisService {
     }
 
     @Override
-    public void saveAccessToken(
-            String jti,
-            Long userId,
-            Duration ttl) {
+    public void saveAccessToken(String jti, UUID userId, Duration ttl) {
         String key = "auth:access:" + jti;
 
         redisTemplate.opsForValue().set(
                 key,
-                String.valueOf(userId),
+                userId.toString(),
                 ttl);
     }
 
     @Override
-    public void saveRefreshToken(
-            String jti,
-            Long userId,
-            Duration ttl) {
+    public void saveRefreshToken(String jti, UUID userId, Duration ttl) {
         String key = "auth:refresh:" + jti;
 
         redisTemplate.opsForValue().set(
                 key,
-                String.valueOf(userId),
+                userId.toString(),
                 ttl);
     }
 
     @Override
     public boolean existsAccessToken(String jti) {
-        String key = "auth:access:" + jti;
-
         return Boolean.TRUE.equals(
-                redisTemplate.hasKey(key));
+                redisTemplate.hasKey("auth:access:" + jti));
     }
 
     @Override
     public boolean existsRefreshToken(String jti) {
-        String key = "auth:refresh:" + jti;
-
         return Boolean.TRUE.equals(
-                redisTemplate.hasKey(key));
+                redisTemplate.hasKey("auth:refresh:" + jti));
     }
 
     @Override
     public void deleteAccessToken(String jti) {
-        String key = "auth:access:" + jti;
-
-        redisTemplate.delete(key);
+        redisTemplate.delete("auth:access:" + jti);
     }
 
     @Override
     public void deleteRefreshToken(String jti) {
-        String key = "auth:refresh:" + jti;
-
-        redisTemplate.delete(key);
+        redisTemplate.delete("auth:refresh:" + jti);
     }
 
     @Override
     public void saveActivationToken(
             String token,
-            Long userId,
+            UUID userId,
             Duration ttl) {
         String key = "auth:activation:" + token;
 
         redisTemplate.opsForValue().set(
                 key,
-                String.valueOf(userId),
+                userId.toString(),
                 ttl);
     }
 
     @Override
-    public Long getActivationUserId(String token) {
+    public UUID getActivationUserId(String token) {
         String key = "auth:activation:" + token;
 
         String value = redisTemplate.opsForValue().get(key);
@@ -93,13 +81,11 @@ public class TokenRedisServiceImpl implements TokenRedisService {
             return null;
         }
 
-        return Long.valueOf(value);
+        return UUID.fromString(value);
     }
 
     @Override
     public void deleteActivationToken(String token) {
-        String key = "auth:activation:" + token;
-
-        redisTemplate.delete(key);
+        redisTemplate.delete("auth:activation:" + token);
     }
 }

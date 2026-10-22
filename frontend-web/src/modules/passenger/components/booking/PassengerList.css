@@ -1,0 +1,16 @@
+.passenger-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.passenger-list__warning {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #8a3320;
+  background: #fbebe6;
+  border-left: 3px solid #b4472f;
+  border-radius: 0 0.6rem 0.6rem 0;
+}

@@ -1,0 +1,46 @@
+.passenger-form {
+  padding: 1.25rem;
+  background: var(--td-surface, #f3f6f9);
+  border-radius: 0.85rem;
+}
+
+.passenger-form__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.9rem;
+}
+.passenger-form__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--td-ink, #0f2b46);
+}
+.passenger-form .passenger-form__remove {
+  padding: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #b4472f;
+  text-decoration: none;
+}
+.passenger-form .passenger-form__remove:hover {
+  color: #8a3320;
+  text-decoration: underline;
+}
+
+.passenger-form__saved {
+  margin-bottom: 1rem;
+}
+
+.passenger-form__file {
+  margin-top: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #17784a;
+}
+
+@media (max-width: 575.98px) {
+  .passenger-form {
+    padding: 1rem;
+  }
+}

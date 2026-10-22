@@ -1,4 +1,11 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
+
 import api from "../api/axios";
 
 const AuthContext = createContext();
@@ -7,97 +14,79 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    checkAuthStatus();
+  // Lấy thông tin tài khoản từ cookie phiên nội bộ.
+  const refreshUser = useCallback(async () => {
+    const res = await api.get("/auth/me");
+
+    if (res.data && res.data.username) {
+      const currentUser = {
+        username: res.data.username,
+        role: res.data.role,
+      };
+
+      setUser(currentUser);
+      return currentUser;
+    }
+
+    setUser(null);
+    return null;
   }, []);
 
-  // =========================================================
-  // KIỂM TRA PHIÊN ĐĂNG NHẬP
-  // =========================================================
-  const checkAuthStatus = async () => {
-    try {
-      /*
-       * GET /api/auth/me
-       *
-       * Browser tự động gửi Cookie nhờ withCredentials: true.
-       *
-       * Trường hợp 1: Chưa đăng nhập
-       *     /auth/me → 401
-       *     /auth/refresh → 401
-       *     → catch → user = null
-       *
-       * Trường hợp 2: Access token còn hạn
-       *     /auth/me → 200
-       *     → lấy thông tin user
-       *
-       * Trường hợp 3: Access token hết hạn
-       *     /auth/me → 401
-       *     → Axios interceptor tự gọi /auth/refresh
-       *     → tạo access token mới
-       *     → gọi lại /auth/me
-       *     → 200 → lấy thông tin user
-       */
-      const res = await api.get("/auth/me");
+  useEffect(() => {
+    let active = true;
 
-      if (res.data && res.data.username) {
-        setUser({
-          username: res.data.username,
-          role: res.data.role,
-        });
-      } else {
-        setUser(null);
+    const checkAuthStatus = async () => {
+      try {
+        const res = await api.get("/auth/me");
+
+        if (!active) return;
+
+        if (res.data && res.data.username) {
+          setUser({
+            username: res.data.username,
+            role: res.data.role,
+          });
+        } else {
+          setUser(null);
+        }
+      } catch {
+        if (active) {
+          setUser(null);
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
       }
-    } catch (err) {
-      /*
-       * Không xác thực được phiên đăng nhập.
-       *
-       * Có thể do:
-       * - Chưa đăng nhập
-       * - Refresh token hết hạn
-       * - Refresh token không hợp lệ
-       */
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  // =========================================================
-  // LOGIN
-  // =========================================================
+    checkAuthStatus();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const login = async (username, password) => {
     const res = await api.post("/auth/login", {
       username,
       password,
     });
 
-    /*
-     * Auth Service:
-     *
-     * 1. Tạo accessToken
-     * 2. Tạo refreshToken
-     * 3. Set HttpOnly Cookie
-     *
-     * Browser tự lưu Cookie.
-     */
-    setUser({
+    const loggedInUser = {
       username: res.data.username,
       role: res.data.role,
-    });
+    };
+
+    setUser(loggedInUser);
 
     return res.data.role;
   };
 
-  // =========================================================
-  // REGISTER
-  // =========================================================
   const register = async (userData) => {
-    return await api.post("/auth/register", userData);
+    return api.post("/auth/register", userData);
   };
 
-  // =========================================================
-  // LOGOUT
-  // =========================================================
   const logout = async () => {
     try {
       await api.post("/auth/logout");
@@ -113,10 +102,12 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         user,
+        setUser,
         login,
         register,
         logout,
         loading,
+        refreshUser,
       }}
     >
       {children}

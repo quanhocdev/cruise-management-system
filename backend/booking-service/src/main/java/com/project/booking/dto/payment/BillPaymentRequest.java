@@ -1,9 +1,11 @@
+
 package com.project.booking.dto.payment;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 public record BillPaymentRequest(
-        Long billId,
-        Long payerId,
-        BigDecimal amount) {
+                Long billId,
+                UUID payerId,
+                BigDecimal amount) {
 }

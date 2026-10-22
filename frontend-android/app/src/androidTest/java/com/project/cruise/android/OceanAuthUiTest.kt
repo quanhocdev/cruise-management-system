@@ -2,7 +2,7 @@ package com.project.cruise.android
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
-import com.project.cruise.android.ui.screens.GuestScreen
+import com.project.cruise.android.ui.screens.guest.GuestScreen
 import com.project.cruise.android.ui.screens.auth.LoginScreen
 import com.project.cruise.android.ui.screens.auth.OtpScreen
 import org.junit.Assert.assertEquals

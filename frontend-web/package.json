@@ -13,6 +13,7 @@
     "@stomp/stompjs": "^7.3.0",
     "axios": "^1.19.0",
     "bootstrap": "^5.3.8",
+    "firebase": "^13.0.0",
     "lucide-react": "^1.31.0",
     "mapbox-gl": "^3.28.1",
     "qrcode": "^1.5.4",

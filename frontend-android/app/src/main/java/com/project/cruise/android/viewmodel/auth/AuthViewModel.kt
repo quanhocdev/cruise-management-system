@@ -10,10 +10,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-// =====================================================
-// LOGIN STATE
-// =====================================================
-
 sealed class LoginState {
 
     object Idle : LoginState()
@@ -28,11 +24,6 @@ sealed class LoginState {
         val message: String
     ) : LoginState()
 }
-
-
-// =====================================================
-// REGISTER STATE
-// =====================================================
 
 sealed class RegisterState {
 
@@ -50,9 +41,38 @@ sealed class RegisterState {
 }
 
 
-// =====================================================
-// VERIFY OTP STATE
-// =====================================================
+sealed class GoogleLoginState {
+    object Idle : GoogleLoginState()
+    object Loading : GoogleLoginState()
+
+    data class OtpRequired(
+        val userId: Long,
+        val message: String
+    ) : GoogleLoginState()
+
+    data class Success(
+        val response: JwtResponse
+    ) : GoogleLoginState()
+
+    data class Error(
+        val message: String
+    ) : GoogleLoginState()
+}
+
+sealed class GoogleOtpState {
+    object Idle : GoogleOtpState()
+    object Loading : GoogleOtpState()
+
+    data class Success(
+        val response: JwtResponse
+    ) : GoogleOtpState()
+
+    data class Error(
+        val message: String
+    ) : GoogleOtpState()
+}
+
+
 
 sealed class VerifyOtpState {
 
@@ -97,10 +117,6 @@ sealed class SessionState {
     object Unauthenticated : SessionState()
 }
 
-// =====================================================
-// AUTH VIEW MODEL
-// =====================================================
-
 class AuthViewModel(
     private val repository: AuthRepository
 ) : ViewModel() {
@@ -134,10 +150,6 @@ class AuthViewModel(
                 }
         }
     }
-
-    // =====================================================
-    // LOGIN
-    // =====================================================
 
     private val _loginState =
         MutableStateFlow<LoginState>(LoginState.Idle)
@@ -193,6 +205,112 @@ class AuthViewModel(
     }
 
 
+
+    private val _googleLoginState =
+        MutableStateFlow<GoogleLoginState>(GoogleLoginState.Idle)
+
+    val googleLoginState: StateFlow<GoogleLoginState> =
+        _googleLoginState
+
+    private val _googleOtpState =
+        MutableStateFlow<GoogleOtpState>(GoogleOtpState.Idle)
+
+    val googleOtpState: StateFlow<GoogleOtpState> =
+        _googleOtpState
+
+    fun googleLogin(firebaseIdToken: String) {
+        if (firebaseIdToken.isBlank()) {
+            _googleLoginState.value =
+                GoogleLoginState.Error("Không nhận được token từ Google")
+            return
+        }
+
+        viewModelScope.launch {
+            _googleLoginState.value = GoogleLoginState.Loading
+
+            try {
+                val result = repository.googleLogin(firebaseIdToken)
+
+                if (result.isOtpRequired) {
+                    val userId = result.userId
+                    if (userId == null) {
+                        _googleLoginState.value =
+                            GoogleLoginState.Error(
+                                "Backend yêu cầu OTP nhưng không trả về userId"
+                            )
+                        return@launch
+                    }
+
+                    _googleLoginState.value =
+                        GoogleLoginState.OtpRequired(
+                            userId = userId,
+                            message = result.message
+                                ?: "Vui lòng nhập mã OTP được gửi đến email"
+                        )
+                } else {
+                    val jwt = result.toJwtResponse()
+                    if (jwt == null) {
+                        _googleLoginState.value =
+                            GoogleLoginState.Error(
+                                "Không nhận được thông tin đăng nhập hợp lệ"
+                            )
+                        return@launch
+                    }
+
+                    _sessionState.value =
+                        SessionState.Authenticated(jwt.username, jwt.role)
+
+                    _googleLoginState.value =
+                        GoogleLoginState.Success(jwt)
+                }
+            } catch (e: Exception) {
+                _googleLoginState.value =
+                    GoogleLoginState.Error(
+                        e.message ?: "Đăng nhập Google thất bại"
+                    )
+            }
+        }
+    }
+
+    fun verifyGoogleOtp(userId: Long, otp: String) {
+        if (!otp.matches(Regex("^\\d{6}$"))) {
+            _googleOtpState.value =
+                GoogleOtpState.Error("OTP phải gồm đúng 6 chữ số")
+            return
+        }
+
+        viewModelScope.launch {
+            _googleOtpState.value = GoogleOtpState.Loading
+
+            try {
+                val response = repository.verifyGoogleOtp(userId, otp)
+
+                _sessionState.value =
+                    SessionState.Authenticated(
+                        response.username,
+                        response.role
+                    )
+
+                _googleOtpState.value =
+                    GoogleOtpState.Success(response)
+            } catch (e: Exception) {
+                _googleOtpState.value =
+                    GoogleOtpState.Error(
+                        e.message ?: "Xác thực OTP Google thất bại"
+                    )
+            }
+        }
+    }
+
+    fun resetGoogleLoginState() {
+        _googleLoginState.value = GoogleLoginState.Idle
+    }
+
+    fun resetGoogleOtpState() {
+        _googleOtpState.value = GoogleOtpState.Idle
+    }
+
+
     fun resetLoginState() {
 
         _loginState.value =
@@ -232,11 +350,6 @@ class AuthViewModel(
     fun resetPosLoginState() {
         _posLoginState.value = PosLoginState.Idle
     }
-
-
-    // =====================================================
-    // REGISTER
-    // =====================================================
 
     private val _registerState =
         MutableStateFlow<RegisterState>(RegisterState.Idle)
@@ -298,11 +411,6 @@ class AuthViewModel(
         _registerState.value =
             RegisterState.Idle
     }
-
-
-    // =====================================================
-    // VERIFY EMAIL / OTP
-    // =====================================================
 
     private val _verifyOtpState =
         MutableStateFlow<VerifyOtpState>(
@@ -400,10 +508,6 @@ class AuthViewModel(
     fun resetMeState() {
         _meState.value = MeState.Idle
     }
-    // =====================================================
-    // LOGOUT
-    // =====================================================
-
     fun logout(onLogoutSuccess: () -> Unit) {
         viewModelScope.launch {
             // 1. Xóa token lưu trong SharedPreferences / DataStore
@@ -417,6 +521,9 @@ class AuthViewModel(
             resetRegisterState()
             resetVerifyOtpState()
             resetMeState()
+
+            resetGoogleLoginState()
+            resetGoogleOtpState()
 
             // 3. Thực thi callback chuyển màn hình
             onLogoutSuccess()

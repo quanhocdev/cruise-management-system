@@ -16,6 +16,7 @@ import com.project.auth.mapper.AuthMapper;
 import com.project.auth.model.Users;
 import com.project.auth.model.enums.UserStatus;
 import com.project.auth.repository.UserRepository;
+import com.project.auth.service.redis.LoginAttemptRedisService;
 import com.project.auth.service.redis.RedisService;
 import com.project.auth.service.redis.TokenRedisService;
 import com.project.common.event.SendOtpEvent;
@@ -30,6 +31,7 @@ public class AuthServiceImpl implements AuthService {
     private final TokenRedisService tokenRedisService;
     private final AuthMapper authMapper;
     private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final LoginAttemptRedisService loginAttemptRedisService;
 
     public AuthServiceImpl(
             UserRepository userRepository,
@@ -38,7 +40,8 @@ public class AuthServiceImpl implements AuthService {
             RedisService redisService,
             TokenRedisService tokenRedisService,
             AuthMapper authMapper,
-            KafkaTemplate<String, Object> kafkaTemplate) {
+            KafkaTemplate<String, Object> kafkaTemplate,
+            LoginAttemptRedisService loginAttemptRedisService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
@@ -46,6 +49,7 @@ public class AuthServiceImpl implements AuthService {
         this.tokenRedisService = tokenRedisService;
         this.authMapper = authMapper;
         this.kafkaTemplate = kafkaTemplate;
+        this.loginAttemptRedisService = loginAttemptRedisService;
     }
 
     @Override
@@ -88,15 +92,31 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public Users login(LoginRequest request) {
-        Users user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(
-                        () -> new AppException("Tài khoản hoặc mật khẩu không chính xác", HttpStatus.UNAUTHORIZED));
+    public Users login(LoginRequest request, String clientIp) {
 
+        // 1. Giới hạn request theo IP trước khi kiểm tra tài khoản.
+        loginAttemptRedisService.checkIpRateLimit(clientIp);
+
+        // 2. Không tìm thấy username thì chỉ tính vào giới hạn IP.
+        // Không tạo khóa tài khoản cho username không tồn tại.
+        Users user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new AppException(
+                        "Tài khoản hoặc mật khẩu không chính xác",
+                        HttpStatus.UNAUTHORIZED));
+
+        // 3. Nếu tài khoản đang bị khóa, từ chối ngay.
+        loginAttemptRedisService.checkAccountLock(user.getUsername());
+
+        // 4. Chỉ username tồn tại + sai mật khẩu mới tăng bộ đếm tài khoản.
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new AppException("Tài khoản hoặc mật khẩu không chính xác", HttpStatus.UNAUTHORIZED);
+            loginAttemptRedisService.recordFailedLogin(user.getUsername());
+
+            throw new AppException(
+                    "Tài khoản hoặc mật khẩu không chính xác",
+                    HttpStatus.UNAUTHORIZED);
         }
 
+        // 5. Giữ nguyên các kiểm tra trạng thái tài khoản hiện tại.
         if (user.getStatus() == UserStatus.BLOCKED) {
             throw new AppException(
                     "Tài khoản đã bị khóa",
@@ -116,8 +136,13 @@ public class AuthServiceImpl implements AuthService {
         }
 
         if (!user.getEnabled()) {
-            throw new AppException("Vui lòng xác thực email trước khi đăng nhập", HttpStatus.FORBIDDEN);
+            throw new AppException(
+                    "Vui lòng xác thực email trước khi đăng nhập",
+                    HttpStatus.FORBIDDEN);
         }
+
+        // 6. Chỉ xóa bộ đếm sai khi đăng nhập hoàn tất thành công.
+        loginAttemptRedisService.clearFailedLogins(user.getUsername());
 
         return user;
     }

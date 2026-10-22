@@ -32,7 +32,13 @@ import com.project.cruise.android.data.dto.onboard.ActivityCruiseTourResponse
 import com.project.cruise.android.data.dto.onboard.ActivityCruiseUsageRequest
 import com.project.cruise.android.data.dto.onboard.ActivityCruiseUsageResponse
 
-
+import com.project.cruise.android.data.dto.auth.GoogleLoginRequest
+import com.project.cruise.android.data.dto.auth.GoogleLoginResponse
+import com.project.cruise.android.data.dto.auth.GoogleVerifyOtpRequest
+import com.project.cruise.android.data.dto.chat.ChatMessageRequest
+import com.project.cruise.android.data.dto.chat.ChatMessageResponse
+import com.project.cruise.android.data.dto.chat.ChatSessionRequest
+import com.project.cruise.android.data.dto.chat.ChatWelcomeResponse
 interface ApiService {
 
 
@@ -40,6 +46,18 @@ interface ApiService {
     suspend fun login(
         @Body request: LoginRequest
     ): JwtResponse
+
+
+    @POST("api/auth/google/login")
+    suspend fun googleLogin(
+        @Body request: GoogleLoginRequest
+    ): GoogleLoginResponse
+
+    @POST("api/auth/google/verify-otp")
+    suspend fun verifyGoogleOtp(
+        @Body request: GoogleVerifyOtpRequest
+    ): JwtResponse
+
 
     @POST("api/auth/register")
     suspend fun register(
@@ -132,5 +150,14 @@ interface ApiService {
     suspend fun createActivityCruiseUsage(
         @Body request: ActivityCruiseUsageRequest
     ): ActivityCruiseUsageResponse
+
+    @POST("api/chat/message")
+    suspend fun sendChatMessage(
+        @Body request: ChatMessageRequest
+    ): ChatMessageResponse
+    @POST("api/chat/welcome")
+    suspend fun openChat(
+        @Body request: ChatSessionRequest
+    ): ChatWelcomeResponse
 }
 

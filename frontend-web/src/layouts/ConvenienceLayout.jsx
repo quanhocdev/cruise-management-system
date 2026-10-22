@@ -1,21 +1,18 @@
-import { Outlet } from "react-router-dom";
-import ConvenienceHeader from "../components/convenience/ConvenienceHeader";
-import ConvenienceSidebar from "../components/convenience/ConvenienceSidebar";
-import ConvenienceFooter from "../components/convenience/ConvenienceFooter";
-import "./ConvenienceLayout.css";
+import ManagementLayout from "../components/management/ManagementLayout";
+import { convenienceConfig } from "../config/roles/convenience.config";
+import { useNotifications } from "../hooks/useNotifications";
+import convenienceNotificationService from "../modules/convenience/services/convenienceNotificationService";
 
 function ConvenienceLayout() {
+  const notificationProps = useNotifications(
+    convenienceNotificationService,
+    "Thông báo Convenience",
+  );
   return (
-    <div className="convenience-layout">
-      <ConvenienceSidebar />
-      <div className="convenience-layout-main">
-        <ConvenienceHeader />
-        <main className="convenience-layout-content">
-          <Outlet />
-        </main>
-        <ConvenienceFooter />
-      </div>
-    </div>
+    <ManagementLayout
+      config={convenienceConfig}
+      notificationProps={notificationProps}
+    />
   );
 }
 

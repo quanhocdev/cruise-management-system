@@ -3,7 +3,7 @@ package com.project.payment.dto;
 import com.project.payment.model.enums.PaymentMethod;
 import com.project.payment.model.enums.PaymentReferenceType;
 import com.project.payment.model.enums.PaymentStatus;
-
+import java.util.UUID;
 import java.math.BigDecimal;
 import java.time.Instant;
 
@@ -13,7 +13,7 @@ public class PaymentResponse {
 
     private Long referenceId;
 
-    private Long payerId;
+    private UUID payerId;
 
     private PaymentReferenceType referenceType;
 
@@ -54,8 +54,13 @@ public class PaymentResponse {
         this.referenceId = referenceId;
     }
 
-    public Long getPayerId() { return payerId; }
-    public void setPayerId(Long payerId) { this.payerId = payerId; }
+    public UUID getPayerId() {
+        return payerId;
+    }
+
+    public void setPayerId(UUID payerId) {
+        this.payerId = payerId;
+    }
 
     public PaymentReferenceType getReferenceType() {
         return referenceType;
@@ -97,8 +102,13 @@ public class PaymentResponse {
         this.transactionCode = transactionCode;
     }
 
-    public String getResponseCode() { return responseCode; }
-    public void setResponseCode(String responseCode) { this.responseCode = responseCode; }
+    public String getResponseCode() {
+        return responseCode;
+    }
+
+    public void setResponseCode(String responseCode) {
+        this.responseCode = responseCode;
+    }
 
     public String getPaymentUrl() {
         return paymentUrl;
@@ -124,6 +134,11 @@ public class PaymentResponse {
         this.paidAt = paidAt;
     }
 
-    public Instant getExpiresAt() { return expiresAt; }
-    public void setExpiresAt(Instant expiresAt) { this.expiresAt = expiresAt; }
+    public Instant getExpiresAt() {
+        return expiresAt;
+    }
+
+    public void setExpiresAt(Instant expiresAt) {
+        this.expiresAt = expiresAt;
+    }
 }

@@ -19,7 +19,7 @@ public class Booking {
     private Long id;
 
     @Column(name = "created_by_user_id")
-    private Long createdByUserId; // ID User thực hiện đặt tour
+    private UUID createdByUserId;
 
     @Column(name = "primary_contact_email", nullable = false, length = 150)
     private String primaryContactEmail; // Email người đại diện nhận vé / QR Code
@@ -82,11 +82,11 @@ public class Booking {
         this.id = id;
     }
 
-    public Long getCreatedByUserId() {
+    public UUID getCreatedByUserId() {
         return createdByUserId;
     }
 
-    public void setCreatedByUserId(Long createdByUserId) {
+    public void setCreatedByUserId(UUID createdByUserId) {
         this.createdByUserId = createdByUserId;
     }
 

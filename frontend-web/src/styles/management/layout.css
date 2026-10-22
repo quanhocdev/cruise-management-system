@@ -1,0 +1,37 @@
+/* layout.css */
+.mgmt-layout {
+  height: 100vh;
+  display: flex;
+  background: var(--mgmt-page-bg);
+  overflow: hidden;
+}
+
+.mgmt-layout-main {
+  min-width: 0;
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.mgmt-layout-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: var(--mgmt-content-overflow, auto);
+  padding: var(--mgmt-content-padding, 0);
+}
+/* Lớp phủ tối khi mở drawer trên mobile */
+.mgmt-backdrop {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mgmt-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    z-index: 999;
+  }
+}
