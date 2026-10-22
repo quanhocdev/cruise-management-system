@@ -18,6 +18,23 @@ public class FeedbackServiceImpl implements FeedbackService {
     public FeedbackServiceImpl(FeedbackRepository repository, BookingClient bookingClient, TourClient tourClient) {
         this.repository = repository; this.bookingClient = bookingClient; this.tourClient = tourClient;
     }
+    @Override @Transactional(readOnly = true)
+    public FeedbackOptions options(Long bookingId,Long userId) {
+        var booking=bookingClient.passengers(bookingId,userId);
+        String state="PASSENGER_NOT_COMPLETED";
+        if(booking.passengers().stream().anyMatch(FeedbackOptions.Guest::participated)) {
+            if(repository.existsByBookingIdAndReviewerUserIdAndFeedbackTypeAndTargetTypeAndTargetId(
+                    bookingId,userId,FeedbackType.TRIP,FeedbackTargetType.TOUR,booking.tourId())) state="ALREADY_REVIEWED";
+            else {
+                try {
+                    var tour=tourClient.context(booking.tourId());
+                    if(!booking.tourId().equals(tour.tourId()) || tour.cruiseId()==null) state="VERIFICATION_UNAVAILABLE";
+                    else state=tour.completed()?"READY":"TOUR_NOT_COMPLETED";
+                } catch(FeedbackException e) { state="VERIFICATION_UNAVAILABLE"; }
+            }
+        }
+        return new FeedbackOptions(bookingId,booking.tourId(),state,booking.passengers());
+    }
     @Override @Transactional
     public FeedbackResponse create(CreateFeedbackRequest request, Long userId) {
         FeedbackEligibility eligibility = request.bookingPassengerId() == null

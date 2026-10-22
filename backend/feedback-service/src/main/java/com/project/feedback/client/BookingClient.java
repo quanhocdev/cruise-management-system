@@ -16,6 +16,21 @@ public class BookingClient {
     public FeedbackEligibility eligibility(Long bookingId, Long userId) {
         return eligibility(bookingId, userId, null);
     }
+    public record Guests(Long bookingId, java.util.UUID tourId,
+                         java.util.List<com.project.feedback.dto.FeedbackOptions.Guest> passengers) {}
+    public Guests passengers(Long bookingId,Long userId) {
+        try {
+            Guests result=client.get().uri("/internal/bookings/{id}/feedback-passengers?userId={userId}",bookingId,userId)
+                .header("X-Internal-Api-Key",apiKey).retrieve().body(Guests.class);
+            if(result==null || !bookingId.equals(result.bookingId()) || result.tourId()==null || result.passengers()==null)
+                throw new FeedbackException(HttpStatus.BAD_GATEWAY,"Invalid booking feedback context");
+            return result;
+        } catch (FeedbackException e) { throw e; }
+        catch (org.springframework.web.client.HttpClientErrorException e) {
+            if(e.getStatusCode().value()==404) throw new FeedbackException(HttpStatus.NOT_FOUND,"Booking is unavailable for feedback");
+            throw new FeedbackException(HttpStatus.BAD_GATEWAY,"Cannot verify booking participation");
+        } catch (RuntimeException e) { throw new FeedbackException(HttpStatus.BAD_GATEWAY,"Cannot verify booking participation"); }
+    }
     public FeedbackEligibility eligibility(Long bookingId, Long userId, Long bookingPassengerId) {
         try {
             FeedbackEligibility result = client.get()

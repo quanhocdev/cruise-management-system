@@ -28,6 +28,9 @@ public class FeedbackController {
         service.delete(id, userId(jwt)); return ResponseEntity.noContent().build();
     }
     @GetMapping("/me") List<FeedbackResponse> mine(@AuthenticationPrincipal Jwt jwt) { return service.getMine(userId(jwt)); }
+    @GetMapping("/bookings/{bookingId}/options") FeedbackOptions options(@PathVariable Long bookingId,@AuthenticationPrincipal Jwt jwt) {
+        return service.options(bookingId,userId(jwt));
+    }
     @GetMapping("/tours/{tourId}") List<PublicFeedbackResponse> tour(@PathVariable UUID tourId) { return service.getTourFeedback(tourId); }
     @GetMapping("/tours/{tourId}/summary") RatingSummary tourSummary(@PathVariable UUID tourId) { return service.summarizeTour(tourId); }
     @GetMapping("/cruises/{cruiseId}") List<PublicFeedbackResponse> cruise(@PathVariable UUID cruiseId) { return service.getCruiseFeedback(cruiseId); }

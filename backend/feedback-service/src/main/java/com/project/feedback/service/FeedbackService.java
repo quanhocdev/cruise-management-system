@@ -5,6 +5,7 @@ import com.project.feedback.model.FeedbackTargetType;
 import java.util.*;
 
 public interface FeedbackService {
+    FeedbackOptions options(Long bookingId, Long userId);
     FeedbackResponse create(CreateFeedbackRequest request, Long userId);
     FeedbackResponse update(Long id, UpdateFeedbackRequest request, Long userId);
     void delete(Long id, Long userId);
