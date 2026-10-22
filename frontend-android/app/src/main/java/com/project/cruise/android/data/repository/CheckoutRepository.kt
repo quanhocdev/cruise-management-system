@@ -6,6 +6,8 @@ import com.project.cruise.android.data.dto.booking.*
 import com.project.cruise.android.data.network.RetrofitClient
 
 interface CheckoutSource {
+    suspend fun departures(id: Long): DepartureManifest? = null
+    suspend fun depart(id: Long,passengerId: Long,request: DepartureRequest): PassengerDeparture = error("Chưa hỗ trợ xác nhận rời tàu")
     suspend fun find(code: String): Long
     suspend fun bill(id: Long,finance: Boolean): ServiceBill
     suspend fun preview(id: Long): CheckoutPreview
@@ -16,6 +18,9 @@ interface CheckoutSource {
 class CheckoutRepository(context: Context): CheckoutSource {
     private val api=RetrofitClient.createApiService(TokenManager(context.applicationContext))
     private val commands=OnlinePosCommands(context.applicationContext)
+    override suspend fun departures(id: Long)=api.getDepartures(id)
+    override suspend fun depart(id: Long,passengerId: Long,request: DepartureRequest)=
+        commands.execute("PASSENGER_DEPARTURE:$id:$passengerId",request){key->api.confirmDeparture(id,passengerId,request.copy(clientRequestId=key))}
     override suspend fun find(code: String)=api.getFinanceSpending(code).bookingId
     override suspend fun bill(id: Long,finance: Boolean)=api.getServiceBill(if(finance)"finance" else "passengers",id)
     override suspend fun preview(id: Long)=api.getCheckoutPreview(id)

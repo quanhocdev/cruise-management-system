@@ -208,5 +208,18 @@ interface ApiService {
 
     @GET("api/v1/feedbacks/me")
     suspend fun getMyFeedback(): List<com.project.cruise.android.data.dto.feedback.MyFeedback>
+
+    @GET("api/v1/feedbacks/bookings/{id}/options")
+    suspend fun getFeedbackOptions(@Path("id") id: Long): com.project.cruise.android.data.dto.feedback.FeedbackOptions
+
+    @POST("api/v1/feedbacks")
+    suspend fun createFeedback(@Body request: com.project.cruise.android.data.dto.feedback.FeedbackDraft): com.project.cruise.android.data.dto.feedback.MyFeedback
+
+    @GET("api/finance/bookings/{id}/departures")
+    suspend fun getDepartures(@Path("id") id: Long): com.project.cruise.android.data.dto.booking.DepartureManifest
+
+    @POST("api/finance/bookings/{id}/departures/{passengerId}")
+    suspend fun confirmDeparture(@Path("id") id: Long,@Path("passengerId") passengerId: Long,
+        @Body request: com.project.cruise.android.data.dto.booking.DepartureRequest): com.project.cruise.android.data.dto.booking.PassengerDeparture
 }
 

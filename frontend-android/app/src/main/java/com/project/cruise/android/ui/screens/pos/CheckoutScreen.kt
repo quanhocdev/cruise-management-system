@@ -25,6 +25,11 @@ fun CheckoutScreen(model: CheckoutViewModel,finance: Boolean,bookingId: Long?=nu
     val context=LocalContext.current
     var code by rememberSaveable{mutableStateOf("")}
     var confirm by rememberSaveable{mutableStateOf(false)}
+    var departureId by rememberSaveable{mutableStateOf<Long?>(null)}
+    var draftPassengerId by rememberSaveable{mutableStateOf<Long?>(null)}
+    var roomReturned by rememberSaveable{mutableStateOf(false)}
+    var wristbandReturned by rememberSaveable{mutableStateOf(false)}
+    var departureReason by rememberSaveable{mutableStateOf("")}
     var launchError by remember{mutableStateOf<String?>(null)}
     val owner=LocalLifecycleOwner.current
     LaunchedEffect(bookingId){bookingId?.let(model::open)}
@@ -95,10 +100,35 @@ fun CheckoutScreen(model: CheckoutViewModel,finance: Boolean,bookingId: Long?=nu
             item{PassengerCard{Text("Tổng quyết toán",style=MaterialTheme.typography.titleMedium);Text(passengerMoney(preview.grandTotal),style=MaterialTheme.typography.headlineMedium)}}
             if(finance)item{Button(onClick={confirm=true},enabled=!state.busy && state.error==null && preview.grandTotal.signum()>=0,modifier=Modifier.fillMaxWidth()){Text("Kiểm tra & chốt bill")}}
         }
-        item{Text("Trạng thái bill phản ánh quyết toán chi tiêu. Việc trả phòng và thu hồi vòng tay được nhân viên xử lý riêng.",style=MaterialTheme.typography.bodySmall)}
+        if(finance)state.departures?.let{manifest->
+            item{PassengerSection("Xác nhận khách rời tàu","Sau quyết toán, kiểm tra khách đã trả phòng và vòng tay trước khi xác nhận từng người.")}
+            if(!manifest.settled)item{Text("Cần quyết toán xong trước khi xác nhận rời tàu.")}
+            manifest.passengers.forEach{guest->item{PassengerCard{
+                Text(guest.name,style=MaterialTheme.typography.titleMedium)
+                if(guest.status=="CHECKED_OUT")Text("Đã xác nhận rời tàu")
+                else if(guest.status!="CHECKED_IN")Text("Khách chưa check-in")
+                else OutlinedButton(onClick={
+                    if(draftPassengerId!=guest.bookingPassengerId){
+                        roomReturned=false;wristbandReturned=false;departureReason="";draftPassengerId=guest.bookingPassengerId
+                    }
+                    departureId=guest.bookingPassengerId
+                },
+                    enabled=manifest.settled && !state.busy){Text("Xác nhận rời tàu")}
+            }}}
+        }
+        item{Text("Chốt bill và xác nhận rời tàu là hai thao tác riêng. Vòng tay đã nhận lại cần được quản lý kho xử lý trước khi cấp lại.",style=MaterialTheme.typography.bodySmall)}
     }
     if(confirm)AlertDialog(onDismissRequest={if(!state.busy)confirm=false},title={Text("Xác nhận chốt bill")},
         text={Text("Tổng: ${state.preview?.grandTotal?.let(::passengerMoney).orEmpty()}\nSau khi chốt sẽ không ghi thêm hoặc điều chỉnh khoản chi trên bill này.")},
         confirmButton={TextButton(onClick={confirm=false;model.confirm()},enabled=!state.busy){Text("Xác nhận chốt")}},
         dismissButton={TextButton(onClick={confirm=false},enabled=!state.busy){Text("Kiểm tra lại")}})
+    if(departureId!=null)AlertDialog(onDismissRequest={if(!state.busy)departureId=null},title={Text("Xác nhận khách đã rời tàu")},
+        text={Column{
+            Text(state.departures?.passengers?.find{it.bookingPassengerId==departureId}?.name.orEmpty())
+            Row{Checkbox(roomReturned,{roomReturned=it});Text("Đã kiểm tra trả phòng")}
+            Row{Checkbox(wristbandReturned,{wristbandReturned=it});Text("Đã nhận lại vòng tay")}
+            OutlinedTextField(departureReason,{if(it.length<=500)departureReason=it},label={Text("Ghi chú bàn giao")})
+        }},confirmButton={TextButton(enabled=!state.busy && roomReturned && wristbandReturned && departureReason.isNotBlank(),
+            onClick={model.depart(departureId!!,roomReturned,wristbandReturned,departureReason);departureId=null}){Text("Xác nhận rời tàu")}},
+        dismissButton={TextButton(onClick={departureId=null}){Text("Kiểm tra lại")}})
 }

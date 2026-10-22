@@ -9,7 +9,7 @@ import retrofit2.HttpException
 import java.time.Instant
 
 data class CheckoutState(val bill: ServiceBill?=null,val preview: CheckoutPreview?=null,
-    val busy: Boolean=false,val error: String?=null,val message: String?=null)
+    val busy: Boolean=false,val error: String?=null,val message: String?=null,val departures: DepartureManifest?=null)
 object CheckoutDisplay {
     fun title(state: String)=when(state){
         "NOT_ISSUED"->"Chưa chốt bill"
@@ -54,7 +54,18 @@ class CheckoutViewModel(private val source: CheckoutSource,private val finance: 
         val bill=source.bill(id,finance)
         mutable.value=CheckoutState(bill=bill,busy=true)
         val preview=if(finance && bill.billId==null)source.preview(id) else null
-        mutable.value=CheckoutState(bill=bill,preview=preview)
+        val departures=if(finance)source.departures(id) else null
+        mutable.value=CheckoutState(bill=bill,preview=preview,departures=departures)
+    }
+    fun depart(passengerId: Long,roomReturned: Boolean,wristbandReturned: Boolean,reason: String) {
+        val manifest=mutable.value.departures?:return
+        if(!finance || !manifest.settled || !roomReturned || !wristbandReturned || reason.isBlank() || reason.length>500)return
+        if(manifest.passengers.none{it.bookingPassengerId==passengerId && it.status=="CHECKED_IN"})return
+        run {
+            source.depart(manifest.bookingId,passengerId,DepartureRequest(roomReturned,wristbandReturned,reason.trim()))
+            load()
+            mutable.value=mutable.value.copy(message="Đã xác nhận hành khách rời tàu.")
+        }
     }
     fun confirm(){
         val preview=mutable.value.preview?:return
