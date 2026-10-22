@@ -25,98 +25,98 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/auth/google")
 public class GoogleAuthController {
 
-    private final GoogleAuthService googleAuthService;
-    private final JwtService jwtService;
-    private final TokenRedisService tokenRedisService;
+        private final GoogleAuthService googleAuthService;
+        private final JwtService jwtService;
+        private final TokenRedisService tokenRedisService;
 
-    public GoogleAuthController(
-            GoogleAuthService googleAuthService,
-            JwtService jwtService,
-            TokenRedisService tokenRedisService) {
-        this.googleAuthService = googleAuthService;
-        this.jwtService = jwtService;
-        this.tokenRedisService = tokenRedisService;
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<?> login(
-            @Valid @RequestBody GoogleLoginRequest request,
-            HttpServletResponse response) {
-
-        GoogleLoginResult result = googleAuthService.login(request.getIdToken());
-
-        if (result.otpRequired()) {
-            return ResponseEntity.ok(Map.of(
-                    "status", "OTP_REQUIRED",
-                    "userId", result.userId(),
-                    "message", result.message()));
+        public GoogleAuthController(
+                        GoogleAuthService googleAuthService,
+                        JwtService jwtService,
+                        TokenRedisService tokenRedisService) {
+                this.googleAuthService = googleAuthService;
+                this.jwtService = jwtService;
+                this.tokenRedisService = tokenRedisService;
         }
 
-        JwtResponse jwtResponse = issueTokens(result.user(), response);
+        @PostMapping("/login")
+        public ResponseEntity<?> login(
+                        @Valid @RequestBody GoogleLoginRequest request,
+                        HttpServletResponse response) {
 
-        return ResponseEntity.ok(jwtResponse);
-    }
+                GoogleLoginResult result = googleAuthService.login(request.getIdToken());
 
-    @PostMapping("/verify-otp")
-    public ResponseEntity<JwtResponse> verifyOtp(
-            @Valid @RequestBody GoogleVerifyOtpRequest request,
-            HttpServletResponse response) {
+                if (result.otpRequired()) {
+                        return ResponseEntity.ok(Map.of(
+                                        "status", "OTP_REQUIRED",
+                                        "userId", result.userId(),
+                                        "message", result.message()));
+                }
 
-        Users user = googleAuthService.verifyOtp(
-                request.getUserId(),
-                request.getOtp());
+                JwtResponse jwtResponse = issueTokens(result.user(), response);
 
-        JwtResponse jwtResponse = issueTokens(user, response);
-
-        return ResponseEntity.ok(jwtResponse);
-    }
-
-    private JwtResponse issueTokens(
-            Users user,
-            HttpServletResponse response) {
-
-        String accessToken = jwtService.generateAccessToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user);
-
-        String accessJti = jwtService.extractJti(accessToken);
-        String refreshJti = jwtService.extractJti(refreshToken);
-
-        Instant accessExpiration = jwtService.extractExpiration(accessToken);
-
-        Instant refreshExpiration = jwtService.extractExpiration(refreshToken);
-
-        Duration accessTtl = Duration.between(Instant.now(), accessExpiration);
-
-        Duration refreshTtl = Duration.between(Instant.now(), refreshExpiration);
-
-        if (accessTtl.isZero() || accessTtl.isNegative()
-                || refreshTtl.isZero() || refreshTtl.isNegative()) {
-            throw new IllegalStateException(
-                    "Token expiration phải nằm trong tương lai");
+                return ResponseEntity.ok(jwtResponse);
         }
 
-        tokenRedisService.saveAccessToken(
-                accessJti, user.getId(), accessTtl);
+        @PostMapping("/verify-otp")
+        public ResponseEntity<JwtResponse> verifyOtp(
+                        @Valid @RequestBody GoogleVerifyOtpRequest request,
+                        HttpServletResponse response) {
 
-        tokenRedisService.saveRefreshToken(
-                refreshJti, user.getId(), refreshTtl);
+                Users user = googleAuthService.verifyOtp(
+                                request.getUserId(),
+                                request.getOtp());
 
-        CookieUtil.addCookie(
-                response,
-                CookieUtil.ACCESS_TOKEN_COOKIE_NAME,
-                accessToken,
-                accessTtl.getSeconds());
+                JwtResponse jwtResponse = issueTokens(user, response);
 
-        CookieUtil.addCookie(
-                response,
-                CookieUtil.REFRESH_TOKEN_COOKIE_NAME,
-                refreshToken,
-                refreshTtl.getSeconds());
+                return ResponseEntity.ok(jwtResponse);
+        }
 
-        return new JwtResponse(
-                accessToken,
-                refreshToken,
-                user.getUsername(),
-                user.getRole().getName());
-    }
+        private JwtResponse issueTokens(
+                        Users user,
+                        HttpServletResponse response) {
+
+                String accessToken = jwtService.generateAccessToken(user);
+                String refreshToken = jwtService.generateRefreshToken(user);
+
+                String accessJti = jwtService.extractJti(accessToken);
+                String refreshJti = jwtService.extractJti(refreshToken);
+
+                Instant accessExpiration = jwtService.extractExpiration(accessToken);
+
+                Instant refreshExpiration = jwtService.extractExpiration(refreshToken);
+
+                Duration accessTtl = Duration.between(Instant.now(), accessExpiration);
+
+                Duration refreshTtl = Duration.between(Instant.now(), refreshExpiration);
+
+                if (accessTtl.isZero() || accessTtl.isNegative()
+                                || refreshTtl.isZero() || refreshTtl.isNegative()) {
+                        throw new IllegalStateException(
+                                        "Token expiration phải nằm trong tương lai");
+                }
+
+                tokenRedisService.saveAccessToken(
+                                accessJti, user.getId(), accessTtl);
+
+                tokenRedisService.saveRefreshToken(
+                                refreshJti, user.getId(), refreshTtl);
+
+                CookieUtil.addCookie(
+                                response,
+                                CookieUtil.ACCESS_TOKEN_COOKIE_NAME,
+                                accessToken,
+                                accessTtl.getSeconds());
+
+                CookieUtil.addCookie(
+                                response,
+                                CookieUtil.REFRESH_TOKEN_COOKIE_NAME,
+                                refreshToken,
+                                refreshTtl.getSeconds());
+
+                return new JwtResponse(
+                                accessToken,
+                                refreshToken,
+                                user.getUsername(),
+                                user.getRole().getName());
+        }
 }

@@ -2,7 +2,9 @@
 package com.project.auth.service;
 
 import java.security.SecureRandom;
+import java.time.Instant;
 import java.util.Locale;
+import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -19,8 +21,6 @@ import com.project.auth.repository.UserRepository;
 import com.project.auth.service.FirebaseTokenService.VerifiedGoogleUser;
 import com.project.auth.service.redis.RedisService;
 import com.project.common.event.SendOtpEvent;
-
-import java.time.Instant;
 
 @Service
 public class GoogleAuthService {
@@ -61,7 +61,6 @@ public class GoogleAuthService {
         String firebaseUid = googleUser.firebaseUid();
         String email = googleUser.email().trim().toLowerCase(Locale.ROOT);
 
-        // Tài khoản đã liên kết với Firebase UID này.
         Users existingUser = userRepository
                 .findByFirebaseUid(firebaseUid)
                 .orElse(null);
@@ -69,8 +68,6 @@ public class GoogleAuthService {
         if (existingUser != null) {
             ensureAccountCanLogin(existingUser);
 
-            // Không cho UID Google đã liên kết sử dụng email
-            // của một tài khoản khác.
             if (!existingUser.getEmail().equalsIgnoreCase(email)) {
                 boolean emailOwnedByAnotherUser = userRepository
                         .findByEmail(email)
@@ -91,17 +88,16 @@ public class GoogleAuthService {
                 return GoogleLoginResult.authenticated(existingUser);
             }
 
-            // Tài khoản Google đã tạo nhưng chưa xác minh OTP.
             return sendGoogleOtp(existingUser);
         }
 
-        // UID chưa tồn tại: không tự động liên kết chỉ vì email trùng.
         if (userRepository.findByEmail(email).isPresent()) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "Email đã có tài khoản. Vui lòng đăng nhập bằng phương thức đã đăng ký");
         }
 
+        // Role.id vẫn là Long, không đổi.
         Role passengerRole = roleRepository.findByName("PASSENGER")
                 .orElseThrow(() -> new IllegalStateException(
                         "Default role PASSENGER not found"));
@@ -114,8 +110,6 @@ public class GoogleAuthService {
         newUser.setRole(passengerRole);
         newUser.setStatus(UserStatus.ACTIVE);
         newUser.setEnabled(false);
-
-        // Google account không dùng mật khẩu LOCAL.
         newUser.setPassword(null);
 
         Users savedUser = userRepository.save(newUser);
@@ -124,7 +118,7 @@ public class GoogleAuthService {
     }
 
     @Transactional
-    public Users verifyOtp(Long userId, String otp) {
+    public Users verifyOtp(UUID userId, String otp) {
         Users user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
@@ -144,6 +138,7 @@ public class GoogleAuthService {
                     HttpStatus.BAD_REQUEST,
                     "Tài khoản đã được kích hoạt. Vui lòng đăng nhập lại bằng Google");
         }
+
         String savedOtp = redisService.getGoogleLoginOtp(userId);
 
         if (savedOtp == null) {
@@ -207,7 +202,8 @@ public class GoogleAuthService {
     }
 
     private String generateUniqueUsername(String firebaseUid) {
-        String sanitizedUid = firebaseUid.replaceAll("[^a-zA-Z0-9]", "")
+        String sanitizedUid = firebaseUid
+                .replaceAll("[^a-zA-Z0-9]", "")
                 .toLowerCase(Locale.ROOT);
 
         if (sanitizedUid.isBlank()) {

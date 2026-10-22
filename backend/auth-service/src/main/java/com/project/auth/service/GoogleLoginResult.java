@@ -1,18 +1,24 @@
 
 package com.project.auth.service;
 
+import java.util.UUID;
+
 import com.project.auth.model.Users;
 
 public record GoogleLoginResult(
         boolean otpRequired,
-        Long userId,
+        UUID userId,
         String message,
         Users user) {
 
     public static GoogleLoginResult otpRequired(
-            Long userId,
+            UUID userId,
             String message) {
-        return new GoogleLoginResult(true, userId, message, null);
+        return new GoogleLoginResult(
+                true,
+                userId,
+                message,
+                null);
     }
 
     public static GoogleLoginResult authenticated(Users user) {

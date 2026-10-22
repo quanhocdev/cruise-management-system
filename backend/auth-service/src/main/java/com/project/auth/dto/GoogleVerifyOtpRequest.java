@@ -1,6 +1,8 @@
 
 package com.project.auth.dto;
 
+import java.util.UUID;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -8,7 +10,7 @@ import jakarta.validation.constraints.Pattern;
 public class GoogleVerifyOtpRequest {
 
     @NotNull(message = "User ID không được để trống")
-    private Long userId;
+    private UUID userId;
 
     @NotBlank(message = "OTP không được để trống")
     @Pattern(regexp = "\\d{6}", message = "OTP phải gồm 6 chữ số")
@@ -17,16 +19,16 @@ public class GoogleVerifyOtpRequest {
     public GoogleVerifyOtpRequest() {
     }
 
-    public GoogleVerifyOtpRequest(Long userId, String otp) {
+    public GoogleVerifyOtpRequest(UUID userId, String otp) {
         this.userId = userId;
         this.otp = otp;
     }
 
-    public Long getUserId() {
+    public UUID getUserId() {
         return userId;
     }
 
-    public void setUserId(Long userId) {
+    public void setUserId(UUID userId) {
         this.userId = userId;
     }
 
