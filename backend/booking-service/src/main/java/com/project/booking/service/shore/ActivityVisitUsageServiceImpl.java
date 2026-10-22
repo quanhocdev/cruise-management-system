@@ -102,7 +102,7 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
                                 request.visitTourId(),
                                 booking.getTourPackageId());
 
-                validator.validateVisitTour(booking, visitInfo, now);
+                validator.validateVisitTour(booking, visitInfo);
 
                 accounts.lockForUsage(booking);
                 capacityLock.acquire("SHORE", request.visitTourId());

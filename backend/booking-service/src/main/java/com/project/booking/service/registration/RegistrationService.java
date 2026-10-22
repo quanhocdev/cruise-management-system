@@ -5,6 +5,7 @@ import com.project.booking.model.enums.*;
 import com.project.booking.repository.*;
 import com.project.booking.service.account.*;
 import com.project.booking.service.command.CommandException;
+import com.project.booking.service.time.CruiseTime;
 import com.project.booking.service.onboard.ActivityCruiseUsageService;
 import com.project.booking.service.shore.ActivityVisitUsageService;
 import java.math.BigDecimal;
@@ -39,12 +40,14 @@ public class RegistrationService {
     private final ActivityCruiseUsageService activities;
     private final ActivityVisitUsageService visits;
     private final long cancellationHours;
+    private final CruiseTime time;
     public RegistrationService(JdbcTemplate jdbc,BookingRepository bookings,BookingPassengerRepository passengers,
             RegistrationCatalog catalog,UsageCapacityLock capacity,OnboardAccountService accounts,
             ActivityCruiseUsageService activities,ActivityVisitUsageService visits,
-            @Value("${booking.registrations.cancel-before-hours:24}") long cancellationHours) {
+            @Value("${booking.registrations.cancel-before-hours:24}") long cancellationHours, CruiseTime time) {
         this.jdbc=jdbc;this.bookings=bookings;this.passengers=passengers;this.catalog=catalog;this.capacity=capacity;
         this.accounts=accounts;this.activities=activities;this.visits=visits;this.cancellationHours=Math.max(0,cancellationHours);
+        this.time=time;
     }
     @Transactional(readOnly=true)
     public Catalog catalog(long bookingId,long userId) {
@@ -90,7 +93,7 @@ public class RegistrationService {
         lockBooking(b.getId());capacity.acquire(initial.targetType(),initial.targetId());Item item=read(id);
         if(item.status().equals("CANCELLED")) return item;
         var current=catalog.get(item.targetType(),item.targetId(),b.getTourPackageId());
-        if(!item.status().equals("CONFIRMED") || current.startTime()==null || !LocalDateTime.now().isBefore(current.startTime().minusHours(cancellationHours)))
+        if(!item.status().equals("CONFIRMED") || current.startTime()==null || !time.now().isBefore(current.startTime().minusHours(cancellationHours)))
             throw fail("CANCELLATION_CLOSED","Đã hết hạn hủy tự động. Vui lòng liên hệ nhân viên.",HttpStatus.UNPROCESSABLE_ENTITY);
         jdbc.update("update booking.activity_registrations set status='CANCELLED',updated_at=CURRENT_TIMESTAMP where id=?",id);
         notify(userId,b.getId(),id,"NORMAL","Đã hủy đăng ký",item.passengerName()+" đã hủy chỗ: "+item.name()+". Chưa phát sinh phí tham gia.");
@@ -130,7 +133,7 @@ public class RegistrationService {
     private void checkPage(int page) {if(page<0 || page>100000)throw fail("INVALID_PAGE","Trang không hợp lệ",HttpStatus.BAD_REQUEST);}
     private void validTarget(RegistrationCatalog.Target t,Booking b) {
         if(!Objects.equals(t.tourId(),b.getTourId())) throw fail("WRONG_TOUR","Hoạt động không thuộc chuyến của booking",HttpStatus.UNPROCESSABLE_ENTITY);
-        if(t.startTime()==null || t.endTime()==null || !t.endTime().isAfter(t.startTime()) || !LocalDateTime.now().isBefore(t.startTime())
+        if(t.startTime()==null || t.endTime()==null || !t.endTime().isAfter(t.startTime()) || !time.now().isBefore(t.startTime())
             || !Set.of("CONFIGURED","NOT_STARTED").contains(Objects.toString(t.status(),"")) || t.capacity()==null || t.capacity()<1 || t.price()==null || t.price().signum()<0)
             throw fail("REGISTRATION_CLOSED","Hoạt động chưa được cấu hình hoặc đã đóng đăng ký",HttpStatus.UNPROCESSABLE_ENTITY);
     }
@@ -138,7 +141,7 @@ public class RegistrationService {
         LocalDateTime start=rs.getTimestamp("starts_at").toLocalDateTime();String status=rs.getString("status");
         return new Item(rs.getLong("id"),rs.getLong("booking_passenger_id"),rs.getString("full_name"),rs.getString("booking_code"),rs.getObject("tour_id",UUID.class),
                 rs.getString("target_type"),rs.getObject("target_id",UUID.class),rs.getString("name"),start,rs.getTimestamp("ends_at").toLocalDateTime(),rs.getBigDecimal("listed_price"),status,
-                rs.getObject("usage_id",Long.class),status.equals("CONFIRMED") && LocalDateTime.now().isBefore(start.minusHours(cancellationHours)));
+                rs.getObject("usage_id",Long.class),status.equals("CONFIRMED") && time.now().isBefore(start.minusHours(cancellationHours)));
     }
     private CommandException fail(String code,String message,HttpStatus status){return new CommandException(code,message,status);}
 }

@@ -5,6 +5,7 @@ import com.project.booking.model.Booking;
 import com.project.booking.model.BookingPassenger;
 import com.project.booking.repository.ActivityVisitUsageRepository;
 import com.project.booking.repository.BookingPassengerRepository;
+import com.project.booking.service.time.CruiseTime;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -17,12 +18,14 @@ public class VisitTourValidator {
 
     private final BookingPassengerRepository bookingPassengerRepository;
     private final ActivityVisitUsageRepository activityVisitUsageRepository;
+    private final CruiseTime time;
 
     public VisitTourValidator(
             BookingPassengerRepository bookingPassengerRepository,
-            ActivityVisitUsageRepository activityVisitUsageRepository) {
+            ActivityVisitUsageRepository activityVisitUsageRepository, CruiseTime time) {
         this.bookingPassengerRepository = bookingPassengerRepository;
         this.activityVisitUsageRepository = activityVisitUsageRepository;
+        this.time = time;
     }
 
     public BookingPassenger validateAndGetPassenger(String nfcCardUid) {
@@ -66,7 +69,7 @@ public class VisitTourValidator {
 
         validateVisitTourStatus(visitInfo.visitTourStatus());
 
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = time.now();
 
         if (visitInfo.startTime() == null || visitInfo.endTime() == null) {
             throw new ResponseStatusException(
