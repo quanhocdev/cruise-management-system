@@ -1,19 +1,21 @@
 
 package com.project.auth.service.redis;
 
+import java.util.UUID;
+
 public interface RedisService {
 
     // OTP đăng ký LOCAL
-    void saveOtp(Long userId, String otp);
+    void saveOtp(UUID userId, String otp);
 
-    String getOtp(Long userId);
+    String getOtp(UUID userId);
 
-    void deleteOtp(Long userId);
+    void deleteOtp(UUID userId);
 
     // OTP dành riêng cho Google Login lần đầu
-    void saveGoogleLoginOtp(Long userId, String otp);
+    void saveGoogleLoginOtp(UUID userId, String otp);
 
-    String getGoogleLoginOtp(Long userId);
+    String getGoogleLoginOtp(UUID userId);
 
-    void deleteGoogleLoginOtp(Long userId);
+    void deleteGoogleLoginOtp(UUID userId);
 }

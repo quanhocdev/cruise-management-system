@@ -2,6 +2,7 @@
 package com.project.auth.service.redis;
 
 import java.time.Duration;
+import java.util.UUID;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,7 @@ public class RedisServiceImpl implements RedisService {
     // =========================
 
     @Override
-    public void saveOtp(Long userId, String otp) {
+    public void saveOtp(UUID userId, String otp) {
         String key = "otp:register:" + userId;
 
         redisTemplate.opsForValue()
@@ -28,13 +29,13 @@ public class RedisServiceImpl implements RedisService {
     }
 
     @Override
-    public String getOtp(Long userId) {
+    public String getOtp(UUID userId) {
         return redisTemplate.opsForValue()
                 .get("otp:register:" + userId);
     }
 
     @Override
-    public void deleteOtp(Long userId) {
+    public void deleteOtp(UUID userId) {
         redisTemplate.delete("otp:register:" + userId);
     }
 
@@ -43,7 +44,7 @@ public class RedisServiceImpl implements RedisService {
     // =========================
 
     @Override
-    public void saveGoogleLoginOtp(Long userId, String otp) {
+    public void saveGoogleLoginOtp(UUID userId, String otp) {
         String key = "otp:google-login:" + userId;
 
         redisTemplate.opsForValue()
@@ -51,13 +52,13 @@ public class RedisServiceImpl implements RedisService {
     }
 
     @Override
-    public String getGoogleLoginOtp(Long userId) {
+    public String getGoogleLoginOtp(UUID userId) {
         return redisTemplate.opsForValue()
                 .get("otp:google-login:" + userId);
     }
 
     @Override
-    public void deleteGoogleLoginOtp(Long userId) {
+    public void deleteGoogleLoginOtp(UUID userId) {
         redisTemplate.delete("otp:google-login:" + userId);
     }
 }

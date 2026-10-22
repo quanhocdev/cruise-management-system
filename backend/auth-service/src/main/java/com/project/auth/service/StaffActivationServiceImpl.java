@@ -41,7 +41,7 @@ public class StaffActivationServiceImpl implements StaffActivationService {
                 Long userId = tokenRedisService.getActivationUserId(request.token());
 
                 if (userId == null) {
-                        throw new AppException(
+                        throw new AppExc        eption(
                                         "Liên kết kích hoạt không hợp lệ hoặc đã hết hạn",
                                         HttpStatus.BAD_REQUEST);
                 }
