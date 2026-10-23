@@ -61,7 +61,11 @@ public class BookingController {
             @RequestParam(defaultValue = "false") boolean privileged) {
 
         UUID userId = extractUserId(principal);
-        return ResponseEntity.ok(bookingService.get(id, userId, privileged));
+        boolean staffAccess = privileged && principal instanceof JwtAuthenticationToken jwtAuth
+                && jwtAuth.getAuthorities().stream().anyMatch(authority ->
+                        authority.getAuthority().equals("ROLE_FINANCE")
+                                || authority.getAuthority().equals("ROLE_ADMIN"));
+        return ResponseEntity.ok(bookingService.get(id, userId, staffAccess));
     }
 
     private String extractEmail(Principal principal) {
