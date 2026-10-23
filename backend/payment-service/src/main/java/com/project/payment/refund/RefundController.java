@@ -20,10 +20,9 @@ public class RefundController {
     @PostMapping("/{paymentId}/refunds")
     public ResponseEntity<Receipt> create(@PathVariable long paymentId,@Valid @RequestBody Request request,
                                          @AuthenticationPrincipal Jwt jwt) {
-        long actor;
-        try { actor=Long.parseLong(String.valueOf(jwt.getClaims().get("userId"))); }
+        UUID actor;
+        try { actor=UUID.fromString(String.valueOf(jwt.getClaims().get("userId"))); }
         catch (Exception e) { throw new RefundException(403,"INVALID_ACTOR"); }
-        if (actor<=0) throw new RefundException(403,"INVALID_ACTOR");
         Accepted accepted=store.create(paymentId,actor,request);
         // The durable receipt is stable across retries; progress is read from the GET endpoint.
         // Dispatch runs from the durable queue, outside this request transaction.

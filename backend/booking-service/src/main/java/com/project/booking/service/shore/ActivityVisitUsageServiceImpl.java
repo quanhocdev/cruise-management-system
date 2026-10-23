@@ -173,7 +173,7 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
 
         @Override
         @Transactional(readOnly = true)
-        public List<ActivityVisitUsageResponse> getByUserId(Long userId) {
+        public List<ActivityVisitUsageResponse> getByUserId(UUID userId) {
 
                 return activityVisitUsageRepository
                                 .findAllByBookingPassenger_Booking_CreatedByUserIdOrderByUsedAtDesc(userId)

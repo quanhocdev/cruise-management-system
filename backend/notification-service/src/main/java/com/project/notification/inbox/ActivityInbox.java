@@ -24,11 +24,11 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @DependsOn("activityInboxSchema")
 public class ActivityInbox {
-    public record Event(@NotNull UUID clientRequestId, @NotNull @Positive Long recipientId,
+    public record Event(@NotNull UUID clientRequestId, @NotNull UUID recipientId,
                         @NotBlank @Size(max=255) String title, @NotBlank @Size(max=2000) String message,
                         @Pattern(regexp="NORMAL|URGENT") String priority,
                         @Positive Long bookingId, @Positive Long registrationId) {
-        public Event(UUID key, Long recipient, String title, String message) {
+        public Event(UUID key, UUID recipient, String title, String message) {
             this(key,recipient,title,message,"NORMAL",null,null);
         }
     }
@@ -71,7 +71,7 @@ public class ActivityInbox {
     @GetMapping("/api/v1/notifications/activities")
     public List<Notice> list(JwtAuthenticationToken jwt, @RequestParam(defaultValue="0") int page,
                             @RequestParam(defaultValue="false") boolean unreadOnly) {
-        long user=user(jwt);
+        UUID user=user(jwt);
         if(page<0 || page>100000)throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"INVALID_PAGE");
         return jdbc.query("""
             select * from notification.activity_inbox where recipient_id=? and (not ? or read_at is null)
@@ -86,7 +86,7 @@ public class ActivityInbox {
 
     @PostMapping("/api/v1/notifications/activities/{id}/read")
     public ResponseEntity<?> markRead(@PathVariable UUID id, @Valid @RequestBody ReadCommand command, JwtAuthenticationToken jwt) {
-        long user=user(jwt);
+        UUID user=user(jwt);
         if(!uuid4(command.clientRequestId()))return ResponseEntity.badRequest().body(Map.of("code","INVALID_CLIENT_REQUEST_ID"));
         String hash=payloadHash(id);
         return transaction.execute(status->{
@@ -119,11 +119,11 @@ public class ActivityInbox {
         return new Notice(r.getObject("id",UUID.class),r.getString("title"),r.getString("message"),r.getTimestamp("created_at").toInstant(),
                 r.getString("priority"),r.getObject("booking_id",Long.class),r.getObject("registration_id",Long.class),read==null?null:read.toInstant());
     }
-    private long user(JwtAuthenticationToken jwt) {
+    private UUID user(JwtAuthenticationToken jwt) {
         if(jwt==null || jwt.getAuthorities().stream().noneMatch(a->a.getAuthority().equals("ROLE_PASSENGER")))
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        try { return Long.parseLong(String.valueOf(jwt.getTokenAttributes().get("userId"))); }
-        catch(NumberFormatException e) { throw new ResponseStatusException(HttpStatus.UNAUTHORIZED); }
+        try { return UUID.fromString(String.valueOf(jwt.getTokenAttributes().get("userId"))); }
+        catch(IllegalArgumentException e) { throw new ResponseStatusException(HttpStatus.UNAUTHORIZED); }
     }
     private static boolean uuid4(UUID value) { return value!=null && value.version()==4 && value.variant()==2; }
     private static String payloadHash(UUID id) {

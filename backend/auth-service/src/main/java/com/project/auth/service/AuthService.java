@@ -1,3 +1,4 @@
+
 package com.project.auth.service;
 
 import com.project.auth.dto.LoginRequest;
@@ -10,7 +11,7 @@ public interface AuthService {
 
     RegisterResponse register(RegisterRequest request);
 
-    Users login(LoginRequest request);
+    Users login(LoginRequest request, String clientIp);
 
     Users refresh(String refreshToken);
 

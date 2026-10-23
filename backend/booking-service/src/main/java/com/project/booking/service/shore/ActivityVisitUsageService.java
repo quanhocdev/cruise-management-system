@@ -1,6 +1,8 @@
 
 package com.project.booking.service.shore;
 
+import java.util.UUID;
+
 import com.project.booking.dto.onboard.ActivityVisitUsageRequest;
 import com.project.booking.dto.shore.ActivityVisitUsageManagementResponse;
 import com.project.booking.dto.shore.ActivityVisitUsageResponse;
@@ -17,7 +19,7 @@ public interface ActivityVisitUsageService {
                         Long bookingPassengerId);
 
         List<ActivityVisitUsageResponse> getByUserId(
-                        Long userId);
+                        UUID userId);
 
         List<ActivityVisitUsageManagementResponse> getManagementUsages();
 }

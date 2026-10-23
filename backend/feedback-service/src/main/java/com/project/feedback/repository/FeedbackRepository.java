@@ -8,8 +8,8 @@ import java.util.*;
 
 public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
     boolean existsByBookingIdAndReviewerUserIdAndFeedbackTypeAndTargetTypeAndTargetId(
-        Long bookingId, Long reviewerUserId, FeedbackType feedbackType, FeedbackTargetType targetType, UUID targetId);
-    List<Feedback> findAllByReviewerUserIdOrderByCreatedAtDesc(Long reviewerUserId);
+        Long bookingId, UUID reviewerUserId, FeedbackType feedbackType, FeedbackTargetType targetType, UUID targetId);
+    List<Feedback> findAllByReviewerUserIdOrderByCreatedAtDesc(UUID reviewerUserId);
     List<Feedback> findAllByTourIdAndFeedbackTypeAndStatusOrderByCreatedAtDesc(
         UUID tourId, FeedbackType feedbackType, FeedbackStatus status);
     List<Feedback> findAllByCruiseIdAndFeedbackTypeAndStatusOrderByCreatedAtDesc(

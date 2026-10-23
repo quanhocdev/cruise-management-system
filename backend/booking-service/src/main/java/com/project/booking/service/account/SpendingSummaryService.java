@@ -26,7 +26,7 @@ public class SpendingSummaryService {
                           long totalItems, int page, int size, List<Line> items) {}
 
     @Transactional(readOnly=true, isolation=Isolation.REPEATABLE_READ)
-    public Summary getMine(Long bookingId, Long userId, int page, int size) {
+    public Summary getMine(Long bookingId, UUID userId, int page, int size) {
         if (page < 0 || size < 1 || size > 100) {
             throw new CommandException("INVALID_PAGE", "page >= 0 and size between 1 and 100 required", HttpStatus.BAD_REQUEST);
         }

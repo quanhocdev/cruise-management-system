@@ -2,7 +2,8 @@
 package com.project.tour.controller.internal;
 
 import com.project.tour.dto.admin.nfc.NfcCardResponse;
-import com.project.tour.service.NfcCardService;
+import com.project.tour.service.admin.nfc.NfcCardService;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

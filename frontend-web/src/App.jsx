@@ -7,10 +7,12 @@ import GuestLayout from "./layouts/GuestLayout";
 import TourPublic from "./modules/guest/pages/TourPublic";
 import TourPublicDetail from "./modules/guest/pages/TourPublicDetail";
 
+// Auth imports
 import RegisterPage from "./modules/auth/pages/RegisterPage";
 import LoginPage from "./modules/auth/pages/LoginPage";
 import VerifyOtpPage from "./modules/auth/pages/VerifyOtpPage";
 import ActivatePage from "./modules/auth/pages/ActivatePage";
+import GoogleVerifyOtpPage from "./modules/auth/pages/GoogleVerifyOtpPage";
 
 // Admin imports
 import AdminLayout from "./layouts/AdminLayout";
@@ -102,6 +104,7 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/verify-email" element={<VerifyOtpPage />} />
+          <Route path="/google-verify-otp" element={<GoogleVerifyOtpPage />} />
           <Route path="/payment/result" element={<PaymentResultPage />} />
 
           {/* =====================================================
@@ -178,6 +181,10 @@ export default function App() {
               element={<PassengerBookingDetail />}
             />
             <Route path="payment/result" element={<PaymentResultPage />} />
+            <Route
+              path="dashboard"
+              element={<Navigate to="/tours" replace />}
+            />
             {/* Trỏ mặc định về danh sách bookings nếu vào /passenger */}
             <Route path="" element={<Navigate to="bookings" replace />} />
           </Route>

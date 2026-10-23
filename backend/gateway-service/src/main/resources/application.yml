@@ -90,6 +90,17 @@ spring:
               predicates:
                 - Path=/api/public/**
 
+            # TOUR SERVICE - WEBHOOK
+            - id: tour-webhook-service
+              uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
+              predicates:
+                - Path=/api/webhook/**
+            # TOUR SERVICE - CHAT
+            - id: tour-chat-service
+              uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
+              predicates:
+                - Path=/api/chat/**
+
             # TOUR SERVICE - ROUTE PREVIEW
             - id: tour-route-preview-service
               uri: ${TOUR_SERVICE_URL:http://tour-service:8088}

@@ -1,12 +1,14 @@
 package com.project.booking.dto.passenger;
 
+import java.util.UUID;
+
 import com.project.booking.model.enums.DocumentType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public record PassengerResponse(
         Long id,
-        Long userId,
+        UUID userId,
         String fullName,
         LocalDate dateOfBirth,
         String gender,

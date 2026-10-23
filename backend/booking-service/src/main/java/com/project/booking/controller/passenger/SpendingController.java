@@ -1,5 +1,7 @@
 package com.project.booking.controller.passenger;
 
+import java.util.UUID;
+
 import com.project.booking.service.account.SpendingSummaryService;
 import com.project.booking.service.command.CommandException;
 import org.springframework.http.HttpStatus;
@@ -20,9 +22,9 @@ public class SpendingController {
             throw new CommandException("PASSENGER_REQUIRED", "Yêu cầu tài khoản hành khách", HttpStatus.FORBIDDEN);
         }
         Object claim = principal.getTokenAttributes().get("userId");
-        Long userId;
-        try { userId = Long.valueOf(String.valueOf(claim)); }
-        catch (NumberFormatException ex) {
+        UUID userId;
+        try { userId = UUID.fromString(String.valueOf(claim)); }
+        catch (IllegalArgumentException ex) {
             throw new CommandException("INVALID_USER_ID", "Không xác định được tài khoản", HttpStatus.UNAUTHORIZED);
         }
         return spending.getMine(bookingId, userId, page, size);

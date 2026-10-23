@@ -1,5 +1,7 @@
 package com.project.booking.service.finance.checkout;
 
+import java.util.UUID;
+
 import com.project.booking.service.command.CommandException;
 import java.time.Instant;
 import java.util.List;
@@ -32,7 +34,7 @@ public class PassengerDepartureService {
     }
 
     @Transactional
-    public Departure confirm(long bookingId, long passengerId, long actorId, boolean roomReturned,
+    public Departure confirm(long bookingId, long passengerId, UUID actorId, boolean roomReturned,
                              boolean wristbandReturned, String reason) {
         if (!roomReturned || !wristbandReturned || reason == null || reason.isBlank())
             throw failure("RETURN_CONFIRMATION_REQUIRED", "Cần xác nhận trả phòng, vòng tay và ghi chú bàn giao", HttpStatus.UNPROCESSABLE_ENTITY);
@@ -49,7 +51,7 @@ public class PassengerDepartureService {
         var guest = guests.get(0);
         if (!"CHECKED_IN".equals(guest.get("status")))
             throw failure("PASSENGER_NOT_CHECKED_IN", "Chỉ xác nhận rời tàu cho khách đã check-in", HttpStatus.UNPROCESSABLE_ENTITY);
-        Instant now = Instant.now();
+        Instant now = Instant.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS);
         jdbc.update("""
             insert into booking.passenger_departures
             (booking_passenger_id,booking_id,actor_user_id,room_returned,wristband_returned,reason,departed_at)

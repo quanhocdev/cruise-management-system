@@ -1,15 +1,18 @@
+
 package com.project.auth.dto;
+
+import java.util.UUID;
 
 public class VerifyOtpRequest {
 
-    private Long userId;
+    private UUID userId;
     private String otp;
 
-    public Long getUserId() {
+    public UUID getUserId() {
         return userId;
     }
 
-    public void setUserId(Long userId) {
+    public void setUserId(UUID userId) {
         this.userId = userId;
     }
 

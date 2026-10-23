@@ -172,7 +172,7 @@ public class ServiceUsageServiceImpl implements ServiceUsageService {
 
         @Override
         @Transactional(readOnly = true)
-        public List<ServiceUsageResponse> getByUserId(Long userId) {
+        public List<ServiceUsageResponse> getByUserId(UUID userId) {
                 return serviceUsageRepository
                                 .findAllByBookingPassenger_Booking_CreatedByUserIdOrderByUsedAtDesc(userId)
                                 .stream()

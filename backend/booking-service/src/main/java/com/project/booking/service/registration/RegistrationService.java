@@ -50,7 +50,7 @@ public class RegistrationService {
         this.time=time;
     }
     @Transactional(readOnly=true)
-    public Catalog catalog(long bookingId,long userId) {
+    public Catalog catalog(long bookingId,UUID userId) {
         Booking b=owned(bookingId,userId);
         var guests=passengers.findAllByBooking_IdOrderByIdAsc(b.getId()).stream()
                 .map(p->new Guest(p.getId(),p.getPassenger().getFullName(),p.getStatus().name())).toList();
@@ -60,9 +60,9 @@ public class RegistrationService {
         return new Catalog(b.getId(),b.getBookingCode(),b.getTourId(),guests,choices);
     }
     @Transactional(readOnly=true)
-    public void authorizePassenger(long passengerId,long userId) { owned(passenger(passengerId).getBooking().getId(),userId); }
+    public void authorizePassenger(long passengerId,UUID userId) { owned(passenger(passengerId).getBooking().getId(),userId); }
     @Transactional(readOnly=true)
-    public void authorizeItem(long id,long userId) {
+    public void authorizeItem(long id,UUID userId) {
         owned(passenger(read(id).bookingPassengerId()).getBooking().getId(),userId);
     }
     @Transactional(readOnly=true)
@@ -70,7 +70,7 @@ public class RegistrationService {
         if(!read(id).targetType().equals(type)) throw fail("WRONG_DEPARTMENT","Đăng ký không thuộc bộ phận này",HttpStatus.FORBIDDEN);
     }
     @Transactional
-    public Item register(long passengerId,String type,UUID targetId,long userId) {
+    public Item register(long passengerId,String type,UUID targetId,UUID userId) {
         BookingPassenger p=passenger(passengerId);Booking b=owned(p.getBooking().getId(),userId);
         var t=catalog.get(type,targetId,b.getTourPackageId());
         lockBooking(b.getId());capacity.acquire(type,targetId);
@@ -88,7 +88,7 @@ public class RegistrationService {
         return read(id);
     }
     @Transactional
-    public Item cancel(long id,long userId) {
+    public Item cancel(long id,UUID userId) {
         Item initial=read(id);Booking b=owned(passenger(initial.bookingPassengerId()).getBooking().getId(),userId);
         lockBooking(b.getId());capacity.acquire(initial.targetType(),initial.targetId());Item item=read(id);
         if(item.status().equals("CANCELLED")) return item;
@@ -111,20 +111,20 @@ public class RegistrationService {
         return read(id);
     }
     @Transactional(readOnly=true)
-    public List<Item> mine(long bookingId,long userId,int page) { owned(bookingId,userId);checkPage(page);return jdbc.query(SELECT+" where r.booking_id=? order by r.id desc limit 20 offset ?",this::map,bookingId,(long)page*20); }
+    public List<Item> mine(long bookingId,UUID userId,int page) { owned(bookingId,userId);checkPage(page);return jdbc.query(SELECT+" where r.booking_id=? order by r.id desc limit 20 offset ?",this::map,bookingId,(long)page*20); }
     @Transactional(readOnly=true)
     public List<Item> staff(String type,String code,String search,int page) {
         checkPage(page);
         if(code==null || code.isBlank()) throw fail("BOOKING_CODE_REQUIRED","Nhập mã booking",HttpStatus.BAD_REQUEST);
         return jdbc.query(SELECT+" where lower(b.booking_code)=lower(?) and r.target_type=? and position(lower(?) in lower(p.full_name))>0 order by r.starts_at,r.id limit 20 offset ?",this::map,code.trim(),type,search==null?"":search.trim(),(long)page*20);
     }
-    public void notify(long userId,long bookingId,long registrationId,String priority,String title,String message) {
+    public void notify(UUID userId,long bookingId,long registrationId,String priority,String title,String message) {
         jdbc.update("insert into booking.registration_notifications(id,recipient_id,title,message,booking_id,registration_id,priority) values (?,?,?,?,?,?,?)",
                 UUID.randomUUID(),userId,title,message,bookingId,registrationId,priority);
     }
     public Item read(long id) { return jdbc.query(SELECT+" where r.id=?",this::map,id).stream().findFirst().orElseThrow(()->fail("REGISTRATION_NOT_FOUND","Không tìm thấy đăng ký",HttpStatus.NOT_FOUND)); }
     private BookingPassenger passenger(long id) {return passengers.findById(id).orElseThrow(()->fail("PASSENGER_NOT_FOUND","Không tìm thấy hành khách",HttpStatus.NOT_FOUND));}
-    private Booking owned(long id,long user) {
+    private Booking owned(long id,UUID user) {
         Booking b=bookings.findById(id).orElseThrow(()->fail("BOOKING_NOT_FOUND","Không tìm thấy booking",HttpStatus.NOT_FOUND));
         if(!Objects.equals(b.getCreatedByUserId(),user)) throw fail("BOOKING_FORBIDDEN","Booking không thuộc tài khoản của bạn",HttpStatus.FORBIDDEN);
         return b;

@@ -1,0 +1,89 @@
+.tour-skeleton {
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--td-line, #dde4ea);
+  border-radius: 1rem;
+}
+
+.tour-skeleton__media {
+  aspect-ratio: 16 / 10;
+}
+
+.tour-skeleton__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1.25rem 1.4rem 1.4rem;
+}
+
+.tour-skeleton__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.tour-skeleton__line {
+  display: block;
+  width: 100%;
+  height: 0.8rem;
+  border-radius: 0.4rem;
+}
+.tour-skeleton__line.is-title {
+  height: 1.1rem;
+}
+.tour-skeleton__line.is-price {
+  width: 40%;
+  height: 1.5rem;
+}
+.tour-skeleton__line.is-w20 {
+  width: 20%;
+}
+.tour-skeleton__line.is-w30 {
+  width: 30%;
+}
+.tour-skeleton__line.is-w60 {
+  width: 60%;
+}
+.tour-skeleton__line.is-w70 {
+  width: 70%;
+}
+.tour-skeleton__line.is-w80 {
+  width: 80%;
+}
+
+.tour-skeleton__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.9rem 0;
+  margin: 0.4rem 0;
+  border-block: 1px solid var(--td-line, #dde4ea);
+}
+
+.tour-skeleton__btn {
+  width: 6.5rem;
+  height: 2.2rem;
+  border-radius: 50rem;
+}
+
+.tour-skeleton__shimmer {
+  background: linear-gradient(90deg, #e8edf1 25%, #f4f7f9 37%, #e8edf1 63%);
+  background-size: 400% 100%;
+  animation: tour-skeleton-shimmer 1.4s ease infinite;
+}
+
+@keyframes tour-skeleton-shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-skeleton__shimmer {
+    animation: none;
+  }
+}

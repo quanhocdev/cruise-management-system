@@ -1,5 +1,7 @@
 package com.project.feedback.service;
 
+import java.util.UUID;
+
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 import com.project.feedback.dto.CreateFeedbackRequest;
@@ -26,7 +28,7 @@ public class FeedbackCommands {
     }
 
     @Transactional
-    public ResponseEntity<FeedbackResponse> create(CreateFeedbackRequest request, Long userId) {
+    public ResponseEntity<FeedbackResponse> create(CreateFeedbackRequest request, UUID userId) {
         var key = request.clientRequestId();
         if (request.bookingPassengerId() != null && key == null)
             throw new FeedbackException(HttpStatus.BAD_REQUEST, "CLIENT_REQUEST_ID_REQUIRED");

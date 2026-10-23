@@ -1,6 +1,8 @@
+
 package com.project.auth.service;
 
 import java.time.Duration;
+import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,13 +34,10 @@ public class StaffActivationServiceImpl implements StaffActivationService {
                 this.passwordEncoder = passwordEncoder;
         }
 
-        // =====================================================
-        // VERIFY ACTIVATION TOKEN
-        // =====================================================
-
         @Override
         public String verifyActivationToken(ActivateTokenRequest request) {
-                Long userId = tokenRedisService.getActivationUserId(request.token());
+                UUID userId = tokenRedisService
+                                .getActivationUserId(request.token());
 
                 if (userId == null) {
                         throw new AppException(
@@ -60,10 +59,6 @@ public class StaffActivationServiceImpl implements StaffActivationService {
                 return user.getUsername();
         }
 
-        // =====================================================
-        // SET PASSWORD
-        // =====================================================
-
         @Override
         public void setPassword(SetPasswordRequest request) {
                 if (!request.password().equals(request.confirmPassword())) {
@@ -72,7 +67,8 @@ public class StaffActivationServiceImpl implements StaffActivationService {
                                         HttpStatus.BAD_REQUEST);
                 }
 
-                Long userId = tokenRedisService.getActivationUserId(request.token());
+                UUID userId = tokenRedisService
+                                .getActivationUserId(request.token());
 
                 if (userId == null) {
                         throw new AppException(

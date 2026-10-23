@@ -41,7 +41,10 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
-    public PaymentResponse createPayment(CreatePaymentRequest request, Long payerId, String clientIp) {
+    public PaymentResponse createPayment(
+            CreatePaymentRequest request,
+            UUID payerId,
+            String clientIp) {
         if (request.getMethod() != PaymentMethod.VNPAY)
             throw new PaymentException("Payment method is not available yet: " + request.getMethod());
         if (request.getReferenceType() != PaymentReferenceType.BOOKING)
@@ -76,10 +79,16 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional(readOnly = true)
-    public PaymentResponse getPayment(Long id, Long requesterId, boolean privileged) {
+    public PaymentResponse getPayment(
+            Long id,
+            UUID requesterId,
+            boolean privileged) {
         Payment payment = find(id);
-        if (!privileged && !payment.getPayerId().equals(requesterId))
+
+        if (!privileged && !payment.getPayerId().equals(requesterId)) {
             throw new PaymentException("You cannot access this payment");
+        }
+
         return mapper.toResponse(payment);
     }
 

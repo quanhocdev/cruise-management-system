@@ -1,12 +1,14 @@
+
 package com.project.auth.service.redis;
 
 import java.time.Duration;
+import java.util.UUID;
 
 public interface TokenRedisService {
 
-    void saveAccessToken(String jti, Long userId, Duration ttl);
+    void saveAccessToken(String jti, UUID userId, Duration ttl);
 
-    void saveRefreshToken(String jti, Long userId, Duration ttl);
+    void saveRefreshToken(String jti, UUID userId, Duration ttl);
 
     boolean existsAccessToken(String jti);
 
@@ -16,10 +18,9 @@ public interface TokenRedisService {
 
     void deleteRefreshToken(String jti);
 
-    void saveActivationToken(String token, Long userId, Duration ttl);
+    void saveActivationToken(String token, UUID userId, Duration ttl);
 
-    Long getActivationUserId(String token);
+    UUID getActivationUserId(String token);
 
     void deleteActivationToken(String token);
-
 }

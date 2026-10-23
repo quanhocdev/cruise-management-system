@@ -170,7 +170,7 @@ public class ActivityCruiseUsageServiceImpl
         @Override
         @Transactional(readOnly = true)
         public List<ActivityCruiseUsageResponse> getByUserId(
-                        Long userId) {
+                        UUID userId) {
 
                 return activityCruiseUsageRepository
                                 .findAllByBookingPassenger_Booking_CreatedByUserIdOrderByUsedAtDesc(

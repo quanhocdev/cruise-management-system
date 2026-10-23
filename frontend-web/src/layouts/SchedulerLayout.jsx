@@ -1,25 +1,22 @@
 // src/ layouts/SchedulerLayout.jsx
-// src/layouts/SchedulerLayout.jsx
+import ManagementLayout from "../components/management/ManagementLayout";
+import { schedulerConfig } from "../config/roles/scheduler.config";
 
-import SchedulerSidebar from "../components/scheduler/SchedulerSidebar";
-import SchedulerHeader from "../components/scheduler/SchedulerHeader";
-import SchedulerFooter from "../components/scheduler/SchedulerFooter";
-
-import "./SchedulerLayout.css";
+// TODO: thay bằng useNotifications(schedulerNotificationService, ...) khi có socket
+const notificationProps = {
+  notifications: [],
+  unreadCount: 0,
+  title: "Thông báo Scheduler",
+};
 
 function SchedulerLayout({ children }) {
   return (
-    <div className="scheduler-layout">
-      <SchedulerSidebar />
-
-      <div className="scheduler-layout-main">
-        <SchedulerHeader />
-
-        <main className="scheduler-layout-content">{children}</main>
-
-        <SchedulerFooter />
-      </div>
-    </div>
+    <ManagementLayout
+      config={schedulerConfig}
+      notificationProps={notificationProps}
+    >
+      {children}
+    </ManagementLayout>
   );
 }
 

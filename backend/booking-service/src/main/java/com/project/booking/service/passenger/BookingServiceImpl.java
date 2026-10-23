@@ -63,7 +63,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public synchronized BookingResponse create(CreateBookingRequest request, Long userId, String email) {
+    public synchronized BookingResponse create(CreateBookingRequest request, UUID userId, String email) {
         try {
             System.out.println(">>> [SERVICE] Bắt đầu xử lý create booking theo kho phòng...");
 
@@ -213,7 +213,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public BookingResponse get(Long id, Long requesterId, boolean privileged) {
+    public BookingResponse get(Long id, UUID requesterId, boolean privileged) {
         Booking booking = findBookingById(id);
         if (!privileged && !Objects.equals(booking.getCreatedByUserId(), requesterId)) {
             throw new AppException("You cannot access this booking", HttpStatus.FORBIDDEN);
@@ -224,7 +224,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookingResponse> getMine(Long userId) {
+    public List<BookingResponse> getMine(UUID userId) {
         return bookingRepository.findAllByCreatedByUserIdOrderByCreatedAtDesc(userId)
                 .stream()
                 .map(booking -> {
@@ -236,7 +236,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingResponse cancel(Long id, Long userId) {
+    public BookingResponse cancel(Long id, UUID userId) {
         Booking booking = findBookingById(id);
         if (!Objects.equals(booking.getCreatedByUserId(), userId)) {
             throw new AppException("You cannot cancel this booking", HttpStatus.FORBIDDEN);

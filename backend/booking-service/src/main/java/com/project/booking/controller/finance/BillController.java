@@ -31,11 +31,11 @@ public class BillController {
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename=service-bill-"+id+".pdf")
             .header(HttpHeaders.CACHE_CONTROL,"no-store").contentType(MediaType.APPLICATION_PDF).body(service.receipt(id));
     }
-    private Long user(JwtAuthenticationToken jwt){
+    private UUID user(JwtAuthenticationToken jwt){
         if(jwt==null)throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         if(jwt.getAuthorities().stream().noneMatch(a->a.getAuthority().equals("ROLE_PASSENGER")))
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        try{return Long.parseLong(String.valueOf(jwt.getTokenAttributes().get("userId")));}
+        try{return UUID.fromString(String.valueOf(jwt.getTokenAttributes().get("userId")));}
         catch(Exception e){throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);}
     }
 }

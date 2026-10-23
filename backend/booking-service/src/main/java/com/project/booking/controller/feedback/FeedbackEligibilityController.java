@@ -27,7 +27,7 @@ public class FeedbackEligibilityController {
     public record Guests(Long bookingId, UUID tourId, java.util.List<Guest> passengers) {}
 
     @GetMapping("/{id}/feedback-passengers")
-    public Guests passengers(@PathVariable Long id, @RequestParam Long userId,
+    public Guests passengers(@PathVariable Long id, @RequestParam UUID userId,
             @RequestHeader(value = "X-Internal-Api-Key", defaultValue = "") String supplied) {
         authorize(supplied);
         var bookings = jdbc.queryForList("SELECT tour_id,status FROM booking.bookings WHERE id=? AND created_by_user_id=?",id,userId);
@@ -47,7 +47,7 @@ public class FeedbackEligibilityController {
     }
 
     @GetMapping("/{id}/feedback-eligibility")
-    public Eligibility eligibility(@PathVariable Long id, @RequestParam Long userId,
+    public Eligibility eligibility(@PathVariable Long id, @RequestParam UUID userId,
             @RequestParam(required = false) Long bookingPassengerId,
             @RequestHeader(value = "X-Internal-Api-Key", defaultValue = "") String supplied) {
         authorize(supplied);

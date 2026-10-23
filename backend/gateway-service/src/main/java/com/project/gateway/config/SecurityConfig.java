@@ -1,9 +1,12 @@
+
 package com.project.gateway.config;
 
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -11,6 +14,7 @@ import org.springframework.security.oauth2.server.resource.web.server.authentica
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.ServerAuthenticationEntryPoint;
 import org.springframework.security.web.server.authorization.ServerAccessDeniedHandler;
+import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
@@ -22,7 +26,6 @@ import com.project.gateway.security.JsonAuthenticationEntryPoint;
 @Configuration
 public class SecurityConfig {
 
-        // PUBLIC ENDPOINTS
         private static final String[] PUBLIC_ENDPOINTS = {
                         "/api/auth/register",
                         "/api/auth/login",
@@ -30,28 +33,27 @@ public class SecurityConfig {
                         "/api/auth/verify-email",
                         "/api/auth/logout",
 
-                        // VNPay redirects the browser and calls IPN without JWT
+                        "/api/webhook/**",
+                        "/api/chat/**",
+
+                        "/api/auth/google/login",
+                        "/api/auth/google/verify-otp",
+
                         "/api/v1/payments/vnpay/return",
                         "/api/v1/payments/vnpay/ipn",
 
-                        // Registered POS devices authenticate using terminal headers
                         "/api/v1/pos/transactions/sync",
                         "/api/v1/pos/identify",
 
-                        // Staff activation
                         "/api/auth/activate/verify",
                         "/api/auth/activate/set-password",
 
-                        // WebSocket endpoints cho phép public bắt tay
                         "/ws-booking/**",
-
                         "/api/public/**",
 
                         "/actuator/health",
                         "/actuator/info"
         };
-
-        // CORS
 
         @Bean
         public CorsConfigurationSource corsConfigurationSource(
@@ -63,34 +65,44 @@ public class SecurityConfig {
                                 List.of(allowedOrigins.split(",")));
 
                 configuration.setAllowedMethods(
-                                List.of(
-                                                "GET",
-                                                "POST",
-                                                "PUT",
-                                                "DELETE",
-                                                "PATCH",
-                                                "OPTIONS"));
+                                List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
 
-                configuration.setAllowedHeaders(
-                                List.of("*"));
-
+                configuration.setAllowedHeaders(List.of("*"));
                 configuration.setAllowCredentials(true);
-
                 configuration.setExposedHeaders(
                                 List.of("Authorization", "Set-Cookie"));
 
                 UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
-                // CORS CHO REST API, KHÔNG CHO WebSocket (WebSocket CORS được xử lý riêng trong
-                // STOMP)
-                source.registerCorsConfiguration(
-                                "/api/**",
-                                configuration);
+                source.registerCorsConfiguration("/api/**", configuration);
 
                 return source;
         }
 
+        /**
+         * Public Dialogflow webhook.
+         * This chain does not enable OAuth2 Resource Server/JWT authentication.
+         */
         @Bean
+        @Order(0)
+        public SecurityWebFilterChain webhookSecurityWebFilterChain(
+                        ServerHttpSecurity http) {
+
+                return http
+                                .securityMatcher(
+                                                new PathPatternParserServerWebExchangeMatcher(
+                                                                "/api/webhook/**"))
+                                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                                .authorizeExchange(exchange -> exchange
+                                                .anyExchange().permitAll())
+                                .build();
+        }
+
+        /**
+         * Security for all other Gateway endpoints.
+         */
+        @Bean
+        @Order(1)
         public SecurityWebFilterChain securityWebFilterChain(
                         ServerHttpSecurity http,
                         CookieOrHeaderBearerTokenConverter bearerTokenConverter,

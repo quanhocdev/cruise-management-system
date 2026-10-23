@@ -22,7 +22,7 @@ CREATE INDEX IF NOT EXISTS idx_registration_capacity ON booking.activity_registr
 CREATE INDEX IF NOT EXISTS idx_registration_booking ON booking.activity_registrations(booking_id,id);
 CREATE TABLE IF NOT EXISTS booking.registration_notifications (
  id UUID PRIMARY KEY,
- recipient_id BIGINT NOT NULL,
+ recipient_id UUID NOT NULL,
  title VARCHAR(255) NOT NULL,
  message VARCHAR(2000) NOT NULL,
  delivered BOOLEAN NOT NULL DEFAULT FALSE,

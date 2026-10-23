@@ -1,6 +1,8 @@
 
 package com.project.booking.service.finance.checkout;
 
+import java.util.UUID;
+
 import com.project.booking.dto.finance.CheckoutPreviewResponse;
 import com.project.booking.dto.finance.CheckoutPreviewResponse.PassengerCheckoutPreview;
 import com.project.booking.dto.finance.CheckoutResponse;
@@ -110,7 +112,7 @@ public class CheckoutServiceImpl implements CheckoutService {
         public CheckoutResponse confirmCheckout(Long bookingId) {
                 CheckoutResponse snapshot = transaction.execute(s -> prepareCheckout(bookingId, null));
                 if (snapshot.totalAmount().signum() == 0) return snapshot;
-                Long payer = jdbc.queryForObject("select created_by_user_id from booking.bookings where id=?",Long.class,bookingId);
+                UUID payer = jdbc.queryForObject("select created_by_user_id from booking.bookings where id=?",UUID.class,bookingId);
                 BillPaymentResponse payment = paymentCheckoutService.createPayment(new BillPaymentRequest(snapshot.billId(),payer,snapshot.totalAmount()));
                 return new CheckoutResponse(snapshot.billId(),snapshot.billCode(),snapshot.bookingId(),snapshot.totalAmount(),snapshot.createdAt(),snapshot.items(),payment.paymentId(),payment.paymentUrl(),payment.status());
         }

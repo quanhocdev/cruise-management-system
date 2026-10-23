@@ -14,7 +14,7 @@ public final class RefundModels {
                           @NotBlank @Size(max=1000) String reason) {}
     public record Receipt(UUID refundId, long paymentId, BigDecimal amount, String status, Instant createdAt) {}
     public record Accepted(Receipt receipt, boolean replay) {}
-    public record Refund(UUID id, long paymentId, long actorId, BigDecimal amount, String reason,
+    public record Refund(UUID id, long paymentId, UUID actorId, BigDecimal amount, String reason,
                          String status, String transactionType, String originalTransactionNo,
                          Instant originalCreatedAt, String providerTransactionNo, String providerCode,
                          Instant createdAt, Instant updatedAt) {

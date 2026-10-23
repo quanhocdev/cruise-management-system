@@ -81,7 +81,7 @@ public interface ServiceUsageRepository extends JpaRepository<ServiceUsage, Long
          * -> createdByUserId
          */
         List<ServiceUsage> findAllByBookingPassenger_Booking_CreatedByUserIdOrderByUsedAtDesc(
-                        Long userId);
+                        UUID userId);
 
         List<ServiceUsage> findAllByOrderByUsedAtDesc();
 }

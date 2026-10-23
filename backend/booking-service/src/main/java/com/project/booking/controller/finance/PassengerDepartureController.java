@@ -27,8 +27,8 @@ public class PassengerDepartureController {
     @PostMapping("/{passengerId}")
     public ResponseEntity<PassengerDepartureService.Departure> confirm(@PathVariable long bookingId,
             @PathVariable long passengerId, @Valid @RequestBody Request request, @AuthenticationPrincipal Jwt jwt) {
-        long actor;
-        try { actor=Long.parseLong(String.valueOf(jwt.getClaimAsString("userId"))); }
+        UUID actor;
+        try { actor=UUID.fromString(String.valueOf(jwt.getClaimAsString("userId"))); }
         catch (RuntimeException e) { throw new ResponseStatusException(HttpStatus.UNAUTHORIZED); }
         return commands.execute("PASSENGER_DEPARTURE",request.clientRequestId(),
             Map.of("bookingId",bookingId,"passengerId",passengerId,"roomReturned",request.roomReturned(),

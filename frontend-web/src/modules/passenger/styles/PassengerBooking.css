@@ -1,194 +1,105 @@
-/* ==========================================
-   PASSENGER BOOKING PAGE STYLES
-   ================================          */
+/* ==========================================================
+   PASSENGER BOOKING - PAGE LEVEL
+   Design tokens, layout, và giao diện ô nhập liệu dùng chung.
+   Mỗi component con có CSS riêng trong components/booking/.
+   ========================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap");
 
 .passenger-booking-page {
-  background-color: #f8f9fa;
+  --td-ink: #0f2b46;
+  --td-muted: #5b6b7c;
+  --td-line: #dde4ea;
+  --td-surface: #f3f6f9;
+  --td-accent: #12808a;
+  --td-accent-dark: #0d636b;
+  --td-accent-tint: #eaf6f7;
+
   min-height: 100vh;
+  padding: 2.5rem 0 4rem;
+  font-family:
+    "Be Vietnam Pro",
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
+  color: var(--td-ink);
+  background: var(--td-surface);
 }
 
-/* Header & Navigation */
-.passenger-booking-page .back-btn {
-  font-weight: 500;
-  transition: all 0.2s ease-in-out;
+/* Loading */
+.booking-page-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  color: #5b6b7c;
+}
+.booking-page-state p {
+  margin-top: 1rem;
 }
 
-.passenger-booking-page .back-btn:hover {
-  background-color: #e9ecef;
-  transform: translateX(-3px);
+/* Header */
+.booking-page-header {
+  margin-bottom: 2rem;
+}
+.passenger-booking-page .booking-page-back {
+  padding: 0;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  color: var(--td-muted);
+  text-decoration: none;
+}
+.passenger-booking-page .booking-page-back:hover {
+  color: var(--td-accent);
+}
+.booking-page-title {
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--td-ink);
+}
+.booking-page-sub {
+  margin: 0;
+  color: var(--td-muted);
 }
 
-/* Page Title */
-.passenger-booking-page h2 {
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  color: #212529;
+/* Nút thêm hành khách */
+.passenger-booking-page .booking-add-btn {
+  font-weight: 600;
+  color: var(--td-accent);
+  border-color: var(--td-accent);
+  border-radius: 0.6rem;
+  white-space: nowrap;
+}
+.passenger-booking-page .booking-add-btn:hover {
+  color: #fff;
+  background: var(--td-accent);
+  border-color: var(--td-accent);
 }
 
-/* Cards & Layout Containers */
-.passenger-booking-page .card {
-  border: none;
-  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.04);
-  border-radius: 1rem;
-  background-color: #ffffff;
-  transition: box-shadow 0.2s ease-in-out;
-}
-
-.passenger-booking-page .card:hover {
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
-}
-
-/* Form Controls & Inputs */
+/* Ô nhập liệu dùng chung cho ContactForm và PassengerForm */
 .passenger-booking-page .form-label {
+  margin-bottom: 0.3rem;
   font-size: 0.85rem;
-  color: #495057;
-  margin-bottom: 0.35rem;
+  font-weight: 600;
+  color: var(--td-muted);
 }
-
 .passenger-booking-page .form-control,
 .passenger-booking-page .form-select {
-  border-radius: 0.5rem;
-  border: 1px solid #ced4da;
-  padding: 0.625rem 0.875rem;
-  font-size: 0.95rem;
-  transition:
-    border-color 0.15s ease-in-out,
-    box-shadow 0.15s ease-in-out;
+  border-color: var(--td-line);
+  border-radius: 0.6rem;
 }
-
 .passenger-booking-page .form-control:focus,
 .passenger-booking-page .form-select:focus {
-  border-color: #0d6efd;
-  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.125);
+  border-color: var(--td-accent);
+  box-shadow: 0 0 0 0.22rem rgba(18, 128, 138, 0.18);
 }
 
-/* Passenger Slot Item Block */
-.passenger-slot-item {
-  background-color: #f8f9fa;
-  border: 1px solid #e9ecef !important;
-  border-radius: 0.75rem;
-  padding: 1.25rem;
-  margin-bottom: 1.25rem;
-  position: relative;
-  transition:
-    border-color 0.2s ease,
-    transform 0.2s ease;
-}
-
-.passenger-slot-item:hover {
-  border-color: #cbd3da !important;
-}
-
-.passenger-slot-item .passenger-index-label {
-  font-weight: 700;
-  color: #495057;
-  font-size: 0.9rem;
-}
-
-.passenger-slot-item .remove-passenger-btn {
-  color: #dc3545;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 0.85rem;
-  transition: color 0.15s ease;
-}
-
-.passenger-slot-item .remove-passenger-btn:hover {
-  color: #a71d2a;
-  text-decoration: underline;
-}
-
-/* Summary Sidebar Card */
-.passenger-booking-page .summary-card {
-  background: linear-gradient(135deg, #ffffff 0%, #fdfdfe 100%);
-  border: 1px solid rgba(0, 0, 0, 0.03);
-}
-
-.passenger-booking-page .summary-card h5 {
-  font-weight: 700;
-  color: #212529;
-}
-
-.passenger-booking-page .summary-divider {
-  border-top: 1px dashed #dee2e6;
-  margin: 1rem 0;
-}
-
-/* Action Submit Button */
-.passenger-booking-page .btn-submit-booking {
-  border-radius: 50rem;
-  font-weight: 700;
-  padding: 0.75rem 1.5rem;
-  letter-spacing: 0.5px;
-  box-shadow: 0 4px 12px rgba(25, 135, 84, 0.25);
-  transition: all 0.2s ease-in-out;
-}
-
-.passenger-booking-page .btn-submit-booking:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(25, 135, 84, 0.35);
-}
-
-/* ==========================================
-   RESPONSIVE DESIGN (MEDIA QUERIES)
-   ================================          */
-
-/* Large Devices & Desktops (Laptop xuống dới) */
-@media (max-width: 1199.98px) {
-  .passenger-booking-page {
-    padding: 1.5rem 0;
-  }
-}
-
-/* Tablets & Small Laptops (dưới 992px) */
-@media (max-width: 991.98px) {
-  /* Tắt sticky-top của Sidebar tóm tắt để tránh đè nội dung trên mobile/tablet */
-  .passenger-booking-page .sticky-top {
-    position: relative !important;
-    top: 0 !important;
-    margin-top: 2rem;
-  }
-
-  .passenger-booking-page h2 {
-    font-size: 1.75rem;
-  }
-}
-
-/* Mobile Phones (dưới 768px) */
 @media (max-width: 767.98px) {
   .passenger-booking-page {
-    padding: 1rem 0.5rem;
-  }
-
-  .passenger-booking-page .card {
-    padding: 1rem !important;
-    border-radius: 0.75rem;
-  }
-
-  .passenger-slot-item {
-    padding: 0.875rem;
-  }
-
-  .passenger-booking-page h2 {
-    font-size: 1.5rem;
-    text-align: center;
-  }
-
-  .passenger-booking-page .back-btn {
-    margin-bottom: 0.5rem;
-  }
-}
-
-/* Small Mobile Phones (dưới 576px) */
-@media (max-width: 575.98px) {
-  .passenger-booking-page .form-control,
-  .passenger-booking-page .form-select {
-    font-size: 0.9rem;
-    padding: 0.5rem 0.75rem;
-  }
-
-  .passenger-booking-page .btn-submit-booking {
-    font-size: 0.95rem;
-    padding: 0.65rem 1rem;
+    padding-top: 1.5rem;
   }
 }

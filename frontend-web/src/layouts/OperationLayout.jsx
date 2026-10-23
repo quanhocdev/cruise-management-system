@@ -1,31 +1,19 @@
-import { Outlet } from "react-router-dom";
+import ManagementLayout from "../components/management/ManagementLayout";
+import { operationConfig } from "../config/roles/operation.config";
 
-import OperationHeader from "../components/operation/OperationHeader";
-import OperationSidebar from "../components/operation/OperationSidebar";
-import OperationFooter from "../components/operation/OperationFooter";
-
-import "./OperationLayout.css";
+// TODO: thay bằng useNotifications(operationNotificationService, ...) khi có socket
+const notificationProps = {
+  notifications: [],
+  unreadCount: 0,
+  title: "Thông báo Operation",
+};
 
 function OperationLayout() {
   return (
-    <div className="operation-layout">
-      {/* SIDEBAR */}
-      <OperationSidebar />
-
-      {/* MAIN AREA */}
-      <div className="operation-layout-main">
-        {/* HEADER */}
-        <OperationHeader />
-
-        {/* CONTENT */}
-        <main className="operation-layout-content">
-          <Outlet />
-        </main>
-
-        {/* FOOTER */}
-        <OperationFooter />
-      </div>
-    </div>
+    <ManagementLayout
+      config={operationConfig}
+      notificationProps={notificationProps}
+    />
   );
 }
 

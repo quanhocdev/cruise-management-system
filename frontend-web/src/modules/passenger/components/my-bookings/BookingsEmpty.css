@@ -1,0 +1,44 @@
+.my-bookings-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 1rem;
+  text-align: center;
+  background: #fff;
+  border: 1px dashed var(--td-line, #dde4ea);
+  border-radius: 1rem;
+}
+
+.my-bookings-empty__icon {
+  margin-bottom: 0.75rem;
+  color: var(--td-accent, #12808a);
+}
+
+.my-bookings-empty h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--td-ink, #0f2b46);
+}
+.my-bookings-empty p {
+  margin: 0 0 1.25rem;
+  color: var(--td-muted, #5b6b7c);
+}
+
+.my-bookings-empty button,
+.my-bookings-empty a {
+  padding: 0.55rem 1.4rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--td-accent, #12808a);
+  text-decoration: none;
+  background: none;
+  border: 1px solid var(--td-accent, #12808a);
+  border-radius: 50rem;
+  cursor: pointer;
+}
+.my-bookings-empty button:hover,
+.my-bookings-empty a:hover {
+  color: #fff;
+  background: var(--td-accent, #12808a);
+}

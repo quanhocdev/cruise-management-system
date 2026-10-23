@@ -153,7 +153,7 @@ public class ProductUsageServiceImpl implements ProductUsageService {
 
         @Override
         @Transactional(readOnly = true)
-        public List<ProductUsageResponse> getByUserId(Long userId) {
+        public List<ProductUsageResponse> getByUserId(UUID userId) {
                 return productUsageRepository
                                 .findAllByBookingPassenger_Booking_CreatedByUserIdOrderByUsedAtDesc(userId)
                                 .stream()

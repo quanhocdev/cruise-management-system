@@ -36,6 +36,13 @@ import com.project.cruise.android.data.dto.onboard.ActivityCruiseUsageResponse
 
 import okhttp3.MultipartBody
 
+import com.project.cruise.android.data.dto.auth.GoogleLoginRequest
+import com.project.cruise.android.data.dto.auth.GoogleLoginResponse
+import com.project.cruise.android.data.dto.auth.GoogleVerifyOtpRequest
+import com.project.cruise.android.data.dto.chat.ChatMessageRequest
+import com.project.cruise.android.data.dto.chat.ChatMessageResponse
+import com.project.cruise.android.data.dto.chat.ChatSessionRequest
+import com.project.cruise.android.data.dto.chat.ChatWelcomeResponse
 interface ApiService {
     @GET("api/{department}/bookings/{id}/bill")
     suspend fun getServiceBill(@Path("department") department: String,@Path("id") id: Long): com.project.cruise.android.data.dto.booking.ServiceBill
@@ -104,6 +111,18 @@ interface ApiService {
     suspend fun login(
         @Body request: LoginRequest
     ): JwtResponse
+
+
+    @POST("api/auth/google/login")
+    suspend fun googleLogin(
+        @Body request: GoogleLoginRequest
+    ): GoogleLoginResponse
+
+    @POST("api/auth/google/verify-otp")
+    suspend fun verifyGoogleOtp(
+        @Body request: GoogleVerifyOtpRequest
+    ): JwtResponse
+
 
     @POST("api/auth/register")
     suspend fun register(
@@ -221,5 +240,14 @@ interface ApiService {
     @POST("api/finance/bookings/{id}/departures/{passengerId}")
     suspend fun confirmDeparture(@Path("id") id: Long,@Path("passengerId") passengerId: Long,
         @Body request: com.project.cruise.android.data.dto.booking.DepartureRequest): com.project.cruise.android.data.dto.booking.PassengerDeparture
+
+    @POST("api/chat/message")
+    suspend fun sendChatMessage(
+        @Body request: ChatMessageRequest
+    ): ChatMessageResponse
+    @POST("api/chat/welcome")
+    suspend fun openChat(
+        @Body request: ChatSessionRequest
+    ): ChatWelcomeResponse
 }
 

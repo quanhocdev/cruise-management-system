@@ -1,0 +1,38 @@
+.bd-overview {
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  background: #fff;
+  border: 1px solid var(--td-line, #dde4ea);
+  border-radius: 1rem;
+}
+
+.bd-overview__title {
+  margin: 0 0 1.1rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--td-ink, #0f2b46);
+}
+
+.bd-overview__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 1rem 1.5rem;
+  margin: 0;
+}
+.bd-overview__grid dt {
+  margin-bottom: 0.2rem;
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: var(--td-muted, #5b6b7c);
+}
+.bd-overview__grid dd {
+  margin: 0;
+  font-weight: 600;
+  color: var(--td-ink, #0f2b46);
+}
+
+@media (max-width: 575.98px) {
+  .bd-overview {
+    padding: 1.1rem;
+  }
+}

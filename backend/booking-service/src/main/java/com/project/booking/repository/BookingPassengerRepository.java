@@ -1,5 +1,7 @@
 package com.project.booking.repository;
 
+import java.util.UUID;
+
 import com.project.booking.model.BookingPassenger;
 import com.project.booking.model.enums.BookingStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,7 +13,7 @@ public interface BookingPassengerRepository extends JpaRepository<BookingPasseng
 
         List<BookingPassenger> findAllByBooking_IdOrderByIdAsc(Long bookingId);
 
-        List<BookingPassenger> findByBooking_CreatedByUserId(Long userId);
+        List<BookingPassenger> findByBooking_CreatedByUserId(UUID userId);
 
         // Kiểm tra xem hành khách này có đang thuộc bất kỳ đơn hàng CONFIRMED nào không
         boolean existsByPassenger_IdAndBooking_Status(

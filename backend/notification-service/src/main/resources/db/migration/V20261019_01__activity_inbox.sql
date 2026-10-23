@@ -1,7 +1,7 @@
 CREATE SCHEMA IF NOT EXISTS notification;
 CREATE TABLE IF NOT EXISTS notification.activity_inbox (
  id UUID PRIMARY KEY,
- recipient_id BIGINT NOT NULL,
+ recipient_id UUID NOT NULL,
  title VARCHAR(255) NOT NULL,
  message VARCHAR(2000) NOT NULL,
  created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP

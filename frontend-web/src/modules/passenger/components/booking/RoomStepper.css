@@ -1,0 +1,74 @@
+.room-stepper {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  padding: 1rem 1.25rem;
+  background: var(--td-surface, #f3f6f9);
+  border-radius: 0.85rem;
+}
+
+.room-stepper__label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.room-stepper__title {
+  font-weight: 700;
+  color: var(--td-ink, #0f2b46);
+}
+.room-stepper__note {
+  font-size: 0.85rem;
+  color: var(--td-muted, #5b6b7c);
+}
+.room-stepper__note strong {
+  color: var(--td-ink, #0f2b46);
+}
+
+.room-stepper__control {
+  display: inline-flex;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--td-line, #dde4ea);
+  border-radius: 0.65rem;
+}
+.room-stepper__control button {
+  width: 2.6rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--td-accent, #12808a);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.room-stepper__control button:hover:not(:disabled) {
+  background: var(--td-accent-tint, #eaf6f7);
+}
+.room-stepper__control button:disabled {
+  color: #b3bcc5;
+  cursor: not-allowed;
+}
+.room-stepper__control input {
+  width: 3.4rem;
+  padding: 0.5rem 0;
+  font-weight: 700;
+  text-align: center;
+  color: var(--td-ink, #0f2b46);
+  background: none;
+  border: 0;
+  border-inline: 1px solid var(--td-line, #dde4ea);
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.room-stepper__control input::-webkit-outer-spin-button,
+.room-stepper__control input::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+.room-stepper__control input:focus-visible,
+.room-stepper__control button:focus-visible {
+  outline: 2px solid var(--td-accent, #12808a);
+  outline-offset: -2px;
+}

@@ -30,7 +30,7 @@ public class BillReadService {
                        String accountStatus,String currency,BigDecimal totalAmount,LocalDateTime createdAt,
                        List<Line> items,List<BillPaymentResponse> payments,boolean paymentAvailable,String paymentState) {}
 
-    public void authorize(Long id,Long owner) {
+    public void authorize(Long id,UUID owner) {
         if(owner==null || jdbc.queryForObject("SELECT count(*) FROM booking.bookings WHERE id=? AND created_by_user_id=?",Long.class,id,owner)!=1)
             throw new CommandException("BOOKING_NOT_FOUND","Không tìm thấy booking của bạn",HttpStatus.NOT_FOUND);
     }
@@ -81,7 +81,7 @@ public class BillReadService {
         if("PAID".equals(h.get("status")) && payment.getBillPayments((Long)h.get("bill_id")).stream()
                 .noneMatch(p->"SUCCESS".equals(p.status()) || "REFUNDED".equals(p.status())))
             throw new CommandException("BILL_ALREADY_PAID","Bill đã quyết toán, không tạo thêm thanh toán.",HttpStatus.CONFLICT);
-        var result=payment.createCommand(new BillPaymentRequest((Long)h.get("bill_id"),(Long)h.get("created_by_user_id"),(BigDecimal)h.get("total_amount"),key));
+        var result=payment.createCommand(new BillPaymentRequest((Long)h.get("bill_id"),(UUID)h.get("created_by_user_id"),(BigDecimal)h.get("total_amount"),key));
         return ResponseEntity.status(201).header("Idempotent-Replay",result.getHeaders().getFirst("Idempotent-Replay")==null?"false":result.getHeaders().getFirst("Idempotent-Replay")).body(result.getBody());
     }
     public byte[] receipt(Long id) {
@@ -91,7 +91,7 @@ public class BillReadService {
         var event=new BillPaidEvent(bill,(String)h.get("bill_code"),(BigDecimal)h.get("total_amount"),"PAID",
             ((java.sql.Timestamp)h.get("created_at")).toLocalDateTime(),((java.sql.Timestamp)h.get("updated_at")).toLocalDateTime(),
             id,(String)h.get("booking_code"),((Number)h.get("number_passengers")).intValue(),(BigDecimal)h.get("booking_amount"),
-            (Long)h.get("created_by_user_id"),(String)h.get("primary_contact_email"),(String)h.get("primary_contact_name"),List.of(),
+            (UUID)h.get("created_by_user_id"),(String)h.get("primary_contact_email"),(String)h.get("primary_contact_name"),List.of(),
             lines(bill).stream().map(l->new BillPaidEvent.BillItemDto(l.id(),l.bookingPassengerId(),l.usageType(),l.usageId(),l.quantity(),l.unitPrice(),l.discountAmount(),l.finalAmount())).toList());
         return notification.post().uri("/internal/bill-receipts").body(event).retrieve().body(byte[].class);
     }

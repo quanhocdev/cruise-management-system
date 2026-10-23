@@ -1,0 +1,27 @@
+.login-modal .modal-content {
+  border: 0;
+  border-radius: 1rem;
+}
+.login-modal .modal-header,
+.login-modal .modal-footer {
+  border: 0;
+}
+.login-modal .modal-title {
+  font-weight: 700;
+  color: var(--td-ink, #0f2b46);
+}
+.login-modal .modal-body {
+  padding-top: 0.5rem;
+  line-height: 1.6;
+  color: var(--td-muted, #5b6b7c);
+}
+.login-modal .login-modal__confirm {
+  padding-inline: 1.5rem;
+  font-weight: 600;
+  background: var(--td-accent, #12808a);
+  border: 0;
+  border-radius: 0.6rem;
+}
+.login-modal .login-modal__confirm:hover {
+  background: var(--td-accent-dark, #0d636b);
+}

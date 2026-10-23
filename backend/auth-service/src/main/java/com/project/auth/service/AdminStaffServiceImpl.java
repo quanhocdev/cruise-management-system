@@ -1,3 +1,4 @@
+
 package com.project.auth.service;
 
 import java.time.Duration;
@@ -8,6 +9,7 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+
 import com.project.auth.dto.CreateStaffRequest;
 import com.project.auth.dto.StaffResponse;
 import com.project.auth.dto.UpdateStaffRequest;
@@ -27,6 +29,7 @@ import com.project.common.event.SendStaffInvitationEvent;
 public class AdminStaffServiceImpl implements AdminStaffService {
 
     private static final Duration ACTIVATION_TOKEN_TTL = Duration.ofMinutes(10);
+
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final TokenRedisService tokenRedisService;
@@ -46,19 +49,25 @@ public class AdminStaffServiceImpl implements AdminStaffService {
         this.staffMapper = staffMapper;
     }
 
-    // Hàm tạo tài khoản nhân viên mới
     @Override
     public StaffResponse createStaff(CreateStaffRequest request) {
         if (userRepository.existsByUsername(request.username())) {
-            throw new AppException("Username đã tồn tại", HttpStatus.BAD_REQUEST);
+            throw new AppException(
+                    "Username đã tồn tại",
+                    HttpStatus.BAD_REQUEST);
         }
 
         if (userRepository.existsByEmail(request.email())) {
-            throw new AppException("Email đã tồn tại", HttpStatus.BAD_REQUEST);
+            throw new AppException(
+                    "Email đã tồn tại",
+                    HttpStatus.BAD_REQUEST);
         }
 
+        // Role.id vẫn là Long.
         Role role = roleRepository.findById(request.roleId())
-                .orElseThrow(() -> new AppException("Role không tồn tại", HttpStatus.BAD_REQUEST));
+                .orElseThrow(() -> new AppException(
+                        "Role không tồn tại",
+                        HttpStatus.BAD_REQUEST));
 
         validateStaffRole(role);
 
@@ -105,7 +114,6 @@ public class AdminStaffServiceImpl implements AdminStaffService {
         return staffMapper.toStaffResponse(savedUser);
     }
 
-    // Lấy danh sách tất cả nhân viên
     @Override
     public List<StaffResponse> getAllStaff() {
         return userRepository.findAllStaff()
@@ -114,41 +122,57 @@ public class AdminStaffServiceImpl implements AdminStaffService {
                 .toList();
     }
 
-    // Lấy thông tin nhân viên theo ID
     @Override
-    public StaffResponse getStaffById(Long id) {
+    public StaffResponse getStaffById(UUID id) {
         Users user = userRepository.findById(id)
-                .orElseThrow(() -> new AppException("Không tìm thấy tài khoản", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new AppException(
+                        "Không tìm thấy tài khoản",
+                        HttpStatus.NOT_FOUND));
 
         if (!isStaff(user)) {
-            throw new AppException("Tài khoản không phải nhân viên", HttpStatus.BAD_REQUEST);
+            throw new AppException(
+                    "Tài khoản không phải nhân viên",
+                    HttpStatus.BAD_REQUEST);
         }
 
         return staffMapper.toStaffResponse(user);
     }
 
-    // Hàm câp nhật thông tin nhân viên
     @Override
-    public StaffResponse updateStaff(Long id, UpdateStaffRequest request) {
+    public StaffResponse updateStaff(
+            UUID id,
+            UpdateStaffRequest request) {
+
         Users user = userRepository.findById(id)
-                .orElseThrow(() -> new AppException("Không tìm thấy tài khoản", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new AppException(
+                        "Không tìm thấy tài khoản",
+                        HttpStatus.NOT_FOUND));
 
         if (!isStaff(user)) {
-            throw new AppException("Tài khoản không phải nhân viên", HttpStatus.BAD_REQUEST);
+            throw new AppException(
+                    "Tài khoản không phải nhân viên",
+                    HttpStatus.BAD_REQUEST);
         }
 
         if (!user.getUsername().equals(request.username())
                 && userRepository.existsByUsername(request.username())) {
-            throw new AppException("Username đã tồn tại", HttpStatus.BAD_REQUEST);
+            throw new AppException(
+                    "Username đã tồn tại",
+                    HttpStatus.BAD_REQUEST);
         }
 
         if (!user.getEmail().equals(request.email())
                 && userRepository.existsByEmail(request.email())) {
-            throw new AppException("Email đã tồn tại", HttpStatus.BAD_REQUEST);
+            throw new AppException(
+                    "Email đã tồn tại",
+                    HttpStatus.BAD_REQUEST);
         }
 
+        // Role.id vẫn là Long.
         Role role = roleRepository.findById(request.roleId())
-                .orElseThrow(() -> new AppException("Role không tồn tại", HttpStatus.BAD_REQUEST));
+                .orElseThrow(() -> new AppException(
+                        "Role không tồn tại",
+                        HttpStatus.BAD_REQUEST));
 
         validateStaffRole(role);
 
@@ -161,20 +185,28 @@ public class AdminStaffServiceImpl implements AdminStaffService {
         return staffMapper.toStaffResponse(savedUser);
     }
 
-    // Hàm cập nhật trạng thái nhân viên
     @Override
-    public StaffResponse updateStaffStatus(Long id, UpdateStaffStatusRequest request) {
+    public StaffResponse updateStaffStatus(
+            UUID id,
+            UpdateStaffStatusRequest request) {
+
         Users user = userRepository.findById(id)
-                .orElseThrow(() -> new AppException("Không tìm thấy tài khoản", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new AppException(
+                        "Không tìm thấy tài khoản",
+                        HttpStatus.NOT_FOUND));
 
         if (!isStaff(user)) {
-            throw new AppException("Tài khoản không phải nhân viên", HttpStatus.BAD_REQUEST);
+            throw new AppException(
+                    "Tài khoản không phải nhân viên",
+                    HttpStatus.BAD_REQUEST);
         }
 
         UserStatus newStatus = request.status();
 
         if (newStatus == UserStatus.INVITED) {
-            throw new AppException("Không thể chuyển tài khoản về trạng thái INVITED", HttpStatus.BAD_REQUEST);
+            throw new AppException(
+                    "Không thể chuyển tài khoản về trạng thái INVITED",
+                    HttpStatus.BAD_REQUEST);
         }
 
         user.setStatus(newStatus);
@@ -185,19 +217,25 @@ public class AdminStaffServiceImpl implements AdminStaffService {
         return staffMapper.toStaffResponse(savedUser);
     }
 
-    // HELPERS
     private boolean isStaff(Users user) {
         if (user.getRole() == null) {
             return false;
         }
+
         String roleName = user.getRole().getName();
-        return !roleName.equals("PASSENGER") && !roleName.equals("GUEST");
+
+        return !roleName.equals("PASSENGER")
+                && !roleName.equals("GUEST");
     }
 
     private void validateStaffRole(Role role) {
         String roleName = role.getName();
-        if (roleName.equals("PASSENGER") || roleName.equals("GUEST")) {
-            throw new AppException("Role không hợp lệ cho tài khoản nhân viên", HttpStatus.BAD_REQUEST);
+
+        if (roleName.equals("PASSENGER")
+                || roleName.equals("GUEST")) {
+            throw new AppException(
+                    "Role không hợp lệ cho tài khoản nhân viên",
+                    HttpStatus.BAD_REQUEST);
         }
     }
 

@@ -13,7 +13,9 @@ object Routes {
     const val REGISTER = "register"
     const val OTP = "otp/{userId}"
 
-    fun otp(userId: Long) = "otp/$userId"
+    const val GOOGLE_OTP = "google_otp/{userId}"
+
+    fun otp(userId: String) = "otp/$userId"
 
     // =================================================
     // PASSENGER
@@ -53,6 +55,7 @@ object Routes {
     const val POS_HISTORY = "pos_history/{role}"
     const val POS_IDENTITY = "pos_identity/{role}/{localId}"
 
+    fun googleOtp(userId: String): String = "google_otp/$userId"
     fun posDashboard(role: PosRole) = "pos_dashboard/${role.apiRole}"
     fun posQrScan(role: PosRole) = "pos_qr_scan/${role.apiRole}"
     fun posNfcScan(role: PosRole) = "pos_nfc_scan/${role.apiRole}"

@@ -4,18 +4,15 @@ import com.project.payment.model.enums.PaymentMethod;
 import com.project.payment.model.enums.PaymentReferenceType;
 import com.project.payment.model.enums.PaymentStatus;
 import jakarta.persistence.*;
-
+import java.util.UUID;
 import java.math.BigDecimal;
 import java.time.Instant;
 
 @Entity
-@Table(
-    name = "payments",
-    indexes = {
+@Table(name = "payments", indexes = {
         @Index(name = "idx_payments_reference", columnList = "reference_type,reference_id"),
         @Index(name = "idx_payments_transaction_code", columnList = "transaction_code")
-    }
-)
+})
 public class Payment {
 
     @Id
@@ -32,7 +29,7 @@ public class Payment {
     private Long referenceId;
 
     @Column(name = "payer_id", nullable = false)
-    private Long payerId;
+    private UUID payerId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "reference_type", nullable = false, length = 20)
@@ -95,8 +92,13 @@ public class Payment {
         this.referenceId = referenceId;
     }
 
-    public Long getPayerId() { return payerId; }
-    public void setPayerId(Long payerId) { this.payerId = payerId; }
+    public UUID getPayerId() {
+        return payerId;
+    }
+
+    public void setPayerId(UUID payerId) {
+        this.payerId = payerId;
+    }
 
     public PaymentReferenceType getReferenceType() {
         return referenceType;
@@ -138,8 +140,13 @@ public class Payment {
         this.transactionCode = transactionCode;
     }
 
-    public String getResponseCode() { return responseCode; }
-    public void setResponseCode(String responseCode) { this.responseCode = responseCode; }
+    public String getResponseCode() {
+        return responseCode;
+    }
+
+    public void setResponseCode(String responseCode) {
+        this.responseCode = responseCode;
+    }
 
     public String getPaymentUrl() {
         return paymentUrl;
@@ -165,8 +172,19 @@ public class Payment {
         this.paidAt = paidAt;
     }
 
-    public Instant getExpiresAt() { return expiresAt; }
-    public void setExpiresAt(Instant expiresAt) { this.expiresAt = expiresAt; }
-    public Instant getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
+    public Instant getExpiresAt() {
+        return expiresAt;
+    }
+
+    public void setExpiresAt(Instant expiresAt) {
+        this.expiresAt = expiresAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }

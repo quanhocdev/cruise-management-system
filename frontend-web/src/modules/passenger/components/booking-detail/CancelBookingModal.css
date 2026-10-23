@@ -1,0 +1,27 @@
+.bd-cancel-modal .modal-content {
+  border: 0;
+  border-radius: 1rem;
+}
+.bd-cancel-modal .modal-header,
+.bd-cancel-modal .modal-footer {
+  border: 0;
+}
+.bd-cancel-modal .modal-title {
+  font-weight: 700;
+  color: var(--td-ink, #0f2b46);
+}
+.bd-cancel-modal .modal-body {
+  padding-top: 0.5rem;
+  line-height: 1.6;
+  color: var(--td-muted, #5b6b7c);
+}
+.bd-cancel-modal .bd-cancel-modal__confirm {
+  padding-inline: 1.5rem;
+  font-weight: 600;
+  background: #b4472f;
+  border: 0;
+  border-radius: 0.6rem;
+}
+.bd-cancel-modal .bd-cancel-modal__confirm:hover:not(:disabled) {
+  background: #8a3320;
+}

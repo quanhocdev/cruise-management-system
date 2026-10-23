@@ -1,5 +1,7 @@
 package com.project.feedback.controller;
 
+import java.util.UUID;
+
 import com.project.feedback.dto.*;
 import com.project.feedback.exception.FeedbackException;
 import com.project.feedback.service.FeedbackService;
@@ -20,9 +22,9 @@ public class AdminFeedbackController {
         @Valid @RequestBody ModerateFeedbackRequest request, @AuthenticationPrincipal Jwt jwt) {
         return service.moderate(id, request, userId(jwt));
     }
-    private Long userId(Jwt jwt) {
-        Object claim = jwt.getClaim("userId"); if (claim instanceof Number n) return n.longValue();
-        try { return Long.valueOf(String.valueOf(claim)); }
+    private UUID userId(Jwt jwt) {
+        Object claim = jwt.getClaim("userId");
+        try { return UUID.fromString(String.valueOf(claim)); }
         catch (Exception ex) { throw new FeedbackException(HttpStatus.BAD_REQUEST, "JWT userId claim is missing or invalid"); }
     }
 }

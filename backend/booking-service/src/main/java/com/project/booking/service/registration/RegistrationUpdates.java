@@ -40,7 +40,7 @@ public class RegistrationUpdates {
                     boolean cancelled="CANCELLED".equals(target.status());
                     if(cancelled || !old.startTime().equals(target.startTime()) || !old.endTime().equals(target.endTime())){
                         jdbc.update("update booking.activity_registrations set starts_at=?,ends_at=?,status=?,updated_at=CURRENT_TIMESTAMP where id=?",target.startTime(),target.endTime(),cancelled?"CANCELLED":"CONFIRMED",id);
-                        service.notify(((Number)row.get("created_by_user_id")).longValue(),((Number)row.get("booking_id")).longValue(),id,"URGENT",cancelled?"Hoạt động đã hủy":"Lịch hoạt động thay đổi",
+                        service.notify((UUID)row.get("created_by_user_id"),((Number)row.get("booking_id")).longValue(),id,"URGENT",cancelled?"Hoạt động đã hủy":"Lịch hoạt động thay đổi",
                                 old.name()+(cancelled?" đã bị hủy. Chưa phát sinh phí tham gia.":" cập nhật thời gian: "+target.startTime()+" đến "+target.endTime()));
                     }
                 });

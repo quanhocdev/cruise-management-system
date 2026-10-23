@@ -26,7 +26,7 @@ public class RefundStore {
         this.tx = new TransactionTemplate(manager);
     }
 
-    public Accepted create(long paymentId, long actorId, Request request) {
+    public Accepted create(long paymentId, UUID actorId, Request request) {
         validate(request);
         String hash = hash(paymentId, request);
         return tx.execute(s -> {
@@ -36,7 +36,7 @@ public class RefundStore {
             var previous = jdbc.queryForList("select * from payment.payment_refunds where client_request_id=?", request.clientRequestId());
             if (!previous.isEmpty()) {
                 var row = previous.get(0);
-                if (((Number)row.get("actor_id")).longValue() != actorId) throw new RefundException(403, "REFUND_REQUEST_FORBIDDEN");
+                if (!actorId.equals(row.get("actor_id"))) throw new RefundException(403, "REFUND_REQUEST_FORBIDDEN");
                 if (!hash.equals(row.get("request_hash"))) throw new RefundException(409, "IDEMPOTENCY_CONFLICT");
                 return new Accepted(receipt(read((UUID)row.get("id"))), true);
             }
@@ -130,7 +130,7 @@ public class RefundStore {
     }
     private Receipt receipt(Refund r) { return new Receipt(r.id(),r.paymentId(),r.amount(),"ACCEPTED",r.createdAt()); }
     private Refund map(ResultSet rs,int row) throws SQLException {
-        return new Refund(rs.getObject("id",UUID.class),rs.getLong("payment_id"),rs.getLong("actor_id"),rs.getBigDecimal("amount"),
+        return new Refund(rs.getObject("id",UUID.class),rs.getLong("payment_id"),rs.getObject("actor_id",UUID.class),rs.getBigDecimal("amount"),
                 rs.getString("reason"),rs.getString("status"),rs.getString("transaction_type"),rs.getString("original_transaction_no"),
                 rs.getTimestamp("original_created_at").toInstant(),rs.getString("provider_transaction_no"),rs.getString("provider_code"),
                 rs.getTimestamp("created_at").toInstant(),rs.getTimestamp("updated_at").toInstant());

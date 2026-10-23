@@ -1,5 +1,7 @@
 package com.project.booking.service.onboard;
 
+import java.util.UUID;
+
 import com.project.booking.dto.onboard.ActivityCruiseUsageManagementResponse;
 import com.project.booking.dto.onboard.ActivityCruiseUsageRequest;
 import com.project.booking.dto.onboard.ActivityCruiseUsageResponse;
@@ -15,7 +17,7 @@ public interface ActivityCruiseUsageService {
         List<ActivityCruiseUsageResponse> getByBookingPassengerId(
                         Long bookingPassengerId);
 
-        List<ActivityCruiseUsageResponse> getByUserId(Long userId);
+        List<ActivityCruiseUsageResponse> getByUserId(UUID userId);
 
         List<ActivityCruiseUsageManagementResponse> getManagementUsages();
 }

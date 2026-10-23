@@ -1,5 +1,7 @@
 package com.project.feedback.client;
 
+import java.util.UUID;
+
 import com.project.feedback.exception.FeedbackException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -13,12 +15,12 @@ public class BookingClient {
                          @Value("${internal.api-key}") String apiKey) {
         this.client = builder.clone().baseUrl(url).build(); this.apiKey = apiKey;
     }
-    public FeedbackEligibility eligibility(Long bookingId, Long userId) {
+    public FeedbackEligibility eligibility(Long bookingId, UUID userId) {
         return eligibility(bookingId, userId, null);
     }
     public record Guests(Long bookingId, java.util.UUID tourId,
                          java.util.List<com.project.feedback.dto.FeedbackOptions.Guest> passengers) {}
-    public Guests passengers(Long bookingId,Long userId) {
+    public Guests passengers(Long bookingId,UUID userId) {
         try {
             Guests result=client.get().uri("/internal/bookings/{id}/feedback-passengers?userId={userId}",bookingId,userId)
                 .header("X-Internal-Api-Key",apiKey).retrieve().body(Guests.class);
@@ -31,7 +33,7 @@ public class BookingClient {
             throw new FeedbackException(HttpStatus.BAD_GATEWAY,"Cannot verify booking participation");
         } catch (RuntimeException e) { throw new FeedbackException(HttpStatus.BAD_GATEWAY,"Cannot verify booking participation"); }
     }
-    public FeedbackEligibility eligibility(Long bookingId, Long userId, Long bookingPassengerId) {
+    public FeedbackEligibility eligibility(Long bookingId, UUID userId, Long bookingPassengerId) {
         try {
             FeedbackEligibility result = client.get()
                 .uri(uri -> {

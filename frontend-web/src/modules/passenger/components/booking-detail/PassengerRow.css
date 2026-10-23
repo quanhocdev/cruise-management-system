@@ -1,0 +1,109 @@
+.bd-passenger {
+  padding: 1.1rem 1.25rem;
+  background: var(--td-surface, #f3f6f9);
+  border-radius: 0.85rem;
+}
+
+.bd-passenger__head {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.bd-passenger__avatar {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--td-accent-dark, #0d636b);
+  background: var(--td-accent-tint, #eaf6f7);
+  border-radius: 50%;
+}
+
+.bd-passenger__who {
+  flex: 1;
+  min-width: 0;
+}
+.bd-passenger__name {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--td-ink, #0f2b46);
+}
+.bd-passenger__sub {
+  margin: 0.1rem 0 0;
+  font-size: 0.85rem;
+  color: var(--td-muted, #5b6b7c);
+}
+
+.bd-passenger__edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  padding: 0.4rem 1rem;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--td-accent, #12808a);
+  background: #fff;
+  border: 1px solid var(--td-accent, #12808a);
+  border-radius: 50rem;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+.bd-passenger__edit:hover {
+  color: #fff;
+  background: var(--td-accent, #12808a);
+}
+.bd-passenger__edit:focus-visible {
+  outline: 3px solid rgba(18, 128, 138, 0.35);
+  outline-offset: 2px;
+}
+
+.bd-passenger__info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.75rem 1.25rem;
+  margin: 1rem 0 0;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--td-line, #dde4ea);
+}
+.bd-passenger__info dt {
+  margin-bottom: 0.1rem;
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--td-muted, #5b6b7c);
+}
+.bd-passenger__info dd {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--td-ink, #0f2b46);
+  overflow-wrap: anywhere;
+}
+
+.bd-passenger__note {
+  margin: 0.8rem 0 0;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--td-muted, #5b6b7c);
+}
+
+@media (max-width: 575.98px) {
+  .bd-passenger {
+    padding: 1rem;
+  }
+  .bd-passenger__head {
+    flex-wrap: wrap;
+  }
+  .bd-passenger__edit {
+    width: 100%;
+    justify-content: center;
+  }
+}

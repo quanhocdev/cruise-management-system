@@ -43,9 +43,9 @@ public class FeedbackController {
         @PathVariable FeedbackTargetType targetType, @PathVariable UUID targetId) {
         return service.summarizeTarget(targetType, targetId);
     }
-    private Long userId(Jwt jwt) {
-        Object claim = jwt.getClaim("userId"); if (claim instanceof Number n) return n.longValue();
-        try { return Long.valueOf(String.valueOf(claim)); }
+    private UUID userId(Jwt jwt) {
+        Object claim = jwt.getClaim("userId");
+        try { return UUID.fromString(String.valueOf(claim)); }
         catch (Exception ex) { throw new FeedbackException(HttpStatus.BAD_REQUEST, "JWT userId claim is missing or invalid"); }
     }
 }

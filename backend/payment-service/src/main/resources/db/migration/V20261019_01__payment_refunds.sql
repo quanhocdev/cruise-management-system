@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS payment.payment_refunds (
     payment_id BIGINT NOT NULL REFERENCES payment.payments(id),
     client_request_id UUID NOT NULL UNIQUE,
     request_hash VARCHAR(64) NOT NULL,
-    actor_id BIGINT NOT NULL,
+    actor_id UUID NOT NULL,
     amount NUMERIC(19,2) NOT NULL CHECK (amount > 0),
     reason VARCHAR(1000) NOT NULL,
     status VARCHAR(20) NOT NULL CHECK (status IN ('QUEUED','SENDING','PROCESSING','UNKNOWN','SUCCEEDED','REJECTED')),

@@ -38,31 +38,44 @@ public class AuthController {
     }
 
     // Đăng nhập tài khoản
+
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(
             @Valid @RequestBody LoginRequest request,
+            HttpServletRequest httpRequest,
             HttpServletResponse response) {
-        Users user = authService.login(request);
+
+        String clientIp = httpRequest.getHeader("X-Client-IP");
+
+        if (clientIp == null || clientIp.isBlank()) {
+            clientIp = httpRequest.getRemoteAddr();
+        }
+
+        Users user = authService.login(request, clientIp);
 
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
 
-        // Lưu ACCESS TOKEN vào Redis whitelist
         String accessJti = jwtService.extractJti(accessToken);
         Instant accessExpiresAt = jwtService.extractExpiration(accessToken);
         Duration accessTtl = Duration.between(Instant.now(), accessExpiresAt);
         tokenRedisService.saveAccessToken(accessJti, user.getId(), accessTtl);
 
-        // Lưu REFRESH TOKEN vào Redis whitelist
         String refreshJti = jwtService.extractJti(refreshToken);
         Instant refreshExpiresAt = jwtService.extractExpiration(refreshToken);
         Duration refreshTtl = Duration.between(Instant.now(), refreshExpiresAt);
         tokenRedisService.saveRefreshToken(refreshJti, user.getId(), refreshTtl);
 
-        // Set Cookie thông qua CookieUtil
-        CookieUtil.addCookie(response, CookieUtil.ACCESS_TOKEN_COOKIE_NAME, accessToken,
+        CookieUtil.addCookie(
+                response,
+                CookieUtil.ACCESS_TOKEN_COOKIE_NAME,
+                accessToken,
                 jwtService.getAccessCookieMaxAgeInSeconds());
-        CookieUtil.addCookie(response, CookieUtil.REFRESH_TOKEN_COOKIE_NAME, refreshToken,
+
+        CookieUtil.addCookie(
+                response,
+                CookieUtil.REFRESH_TOKEN_COOKIE_NAME,
+                refreshToken,
                 jwtService.getRefreshCookieMaxAgeInSeconds());
 
         JwtResponse responseBody = new JwtResponse(

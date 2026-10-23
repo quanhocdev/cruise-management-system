@@ -1,8 +1,6 @@
 package com.project.cruise.android.ui.screens.auth
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import com.project.cruise.android.ui.theme.*
 
 @Composable
-fun OtpScreen(userId: Long, onBackClick: () -> Unit, onVerify: (Long, String) -> Unit,
+fun OtpScreen(userId: String, onBackClick: () -> Unit, onVerify: (String, String) -> Unit,
     isLoading: Boolean = false, errorMessage: String? = null) {
     var otp by remember(userId) { mutableStateOf("") }
     OceanPage {

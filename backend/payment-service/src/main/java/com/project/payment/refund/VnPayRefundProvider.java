@@ -114,7 +114,7 @@ public class VnPayRefundProvider implements RefundProvider {
             p.put("vnp_TransactionType",r.transactionType());
             p.put("vnp_Amount",r.amount().movePointRight(2).toBigIntegerExact().toString());
             p.put("vnp_TransactionNo",r.originalTransactionNo());
-            p.put("vnp_CreateBy",Long.toString(r.actorId()));
+            p.put("vnp_CreateBy",r.actorId().toString());
         } else if (r.providerTransactionNo()!=null) p.put("vnp_TransactionNo",r.providerTransactionNo());
         p.put("vnp_SecureHash",sign(p,query?QUERY_FIELDS:REFUND_FIELDS));
         return p;

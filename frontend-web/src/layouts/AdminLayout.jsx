@@ -1,21 +1,16 @@
-import AdminSidebar from "../components/admin/AdminSidebar";
-import AdminHeader from "../components/admin/AdminHeader";
-import AdminFooter from "../components/admin/AdminFooter";
-import "./AdminLayout.css";
+import ManagementLayout from "../components/management/ManagementLayout";
+import { adminConfig } from "../config/roles/admin.config";
+import { useAdminNotifications } from "../hooks/useAdminNotifications";
 
 function AdminLayout({ children }) {
+  const notificationProps = useAdminNotifications();
   return (
-    <div className="admin-layout">
-      <AdminSidebar />
-
-      <div className="admin-layout-main">
-        <AdminHeader />
-
-        <main className="admin-layout-content">{children}</main>
-
-        <AdminFooter />
-      </div>
-    </div>
+    <ManagementLayout
+      config={adminConfig}
+      notificationProps={notificationProps}
+    >
+      {children}
+    </ManagementLayout>
   );
 }
 

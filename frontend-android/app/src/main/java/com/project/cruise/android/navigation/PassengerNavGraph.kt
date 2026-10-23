@@ -12,9 +12,9 @@ import androidx.navigation.navArgument
 import com.project.cruise.android.data.network.ApiService
 import com.project.cruise.android.data.repository.BookingRepository
 import com.project.cruise.android.data.repository.TourRepository
-import com.project.cruise.android.ui.screens.ProfileScreen
-import com.project.cruise.android.ui.screens.TourDetailPublicScreen
-import com.project.cruise.android.ui.screens.TourPublicScreen
+import com.project.cruise.android.ui.screens.passenger.ProfileScreen
+import com.project.cruise.android.ui.screens.guest.TourDetailPublicScreen
+import com.project.cruise.android.ui.screens.guest.TourPublicScreen
 import com.project.cruise.android.ui.screens.passenger.Dashboard
 import com.project.cruise.android.ui.screens.passenger.MyBookingDetailScreen
 import com.project.cruise.android.ui.screens.passenger.MyBookingsScreen
@@ -24,6 +24,8 @@ import com.project.cruise.android.viewmodel.passenger.BookingViewModel
 import com.project.cruise.android.viewmodel.passenger.BookingViewModelFactory
 import com.project.cruise.android.viewmodel.tour.TourViewModel
 import com.project.cruise.android.viewmodel.tour.TourViewModelFactory
+import com.project.cruise.android.viewmodel.chat.ChatViewModel
+import com.project.cruise.android.viewmodel.chat.ChatViewModelFactory
 
 
 import com.project.cruise.android.ui.screens.passenger.CreateBookingScreen
@@ -71,13 +73,24 @@ fun NavGraphBuilder.passengerGraph(
     }
 
     // ----- TOURS (PUBLIC - MÀN HÌNH CHÍNH) -----
+
     composable(Routes.PASSENGER_TOURS) {
-        val tourRepo = remember(apiService) { TourRepository(apiService) }
-        val tourViewModel: TourViewModel = viewModel(factory = TourViewModelFactory(tourRepo))
+        val tourRepo = remember(apiService) {
+            TourRepository(apiService)
+        }
+
+        val tourViewModel: TourViewModel = viewModel(
+            factory = TourViewModelFactory(tourRepo)
+        )
+
+        val chatViewModel: ChatViewModel = viewModel(
+            factory = ChatViewModelFactory(apiService)
+        )
 
         TourPublicScreen(
             viewModel = tourViewModel,
             authViewModel = authViewModel,
+            chatViewModel = chatViewModel,
             onTourClick = { tourId ->
                 navController.navigate(Routes.passengerTourDetail(tourId))
             },
@@ -87,6 +100,7 @@ fun NavGraphBuilder.passengerGraph(
             onHomeClick = {}
         )
     }
+
 
     // ----- TOUR DETAIL (PUBLIC) -----
     composable(

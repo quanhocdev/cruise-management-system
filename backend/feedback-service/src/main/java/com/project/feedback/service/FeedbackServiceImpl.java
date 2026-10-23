@@ -19,7 +19,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         this.repository = repository; this.bookingClient = bookingClient; this.tourClient = tourClient;
     }
     @Override @Transactional(readOnly = true)
-    public FeedbackOptions options(Long bookingId,Long userId) {
+    public FeedbackOptions options(Long bookingId,UUID userId) {
         var booking=bookingClient.passengers(bookingId,userId);
         String state="PASSENGER_NOT_COMPLETED";
         if(booking.passengers().stream().anyMatch(FeedbackOptions.Guest::participated)) {
@@ -36,7 +36,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         return new FeedbackOptions(bookingId,booking.tourId(),state,booking.passengers());
     }
     @Override @Transactional
-    public FeedbackResponse create(CreateFeedbackRequest request, Long userId) {
+    public FeedbackResponse create(CreateFeedbackRequest request, UUID userId) {
         FeedbackEligibility eligibility = request.bookingPassengerId() == null
             ? bookingClient.eligibility(request.bookingId(), userId)
             : bookingClient.eligibility(request.bookingId(), userId, request.bookingPassengerId());
@@ -67,17 +67,17 @@ public class FeedbackServiceImpl implements FeedbackService {
         return toResponse(repository.save(f));
     }
     @Override @Transactional
-    public FeedbackResponse update(Long id, UpdateFeedbackRequest request, Long userId) {
+    public FeedbackResponse update(Long id, UpdateFeedbackRequest request, UUID userId) {
         Feedback f = owned(id, userId); ensureUserEditable(f);
         applyContent(f, request.rating(), request.content(), request.imageUrls()); f.setUpdatedAt(Instant.now());
         return toResponse(repository.save(f));
     }
     @Override @Transactional
-    public void delete(Long id, Long userId) {
+    public void delete(Long id, UUID userId) {
         Feedback f = owned(id, userId); ensureUserEditable(f); f.setStatus(FeedbackStatus.DELETED); f.setUpdatedAt(Instant.now()); repository.save(f);
     }
     @Override @Transactional(readOnly = true)
-    public List<FeedbackResponse> getMine(Long userId) { return map(repository.findAllByReviewerUserIdOrderByCreatedAtDesc(userId)); }
+    public List<FeedbackResponse> getMine(UUID userId) { return map(repository.findAllByReviewerUserIdOrderByCreatedAtDesc(userId)); }
     @Override @Transactional(readOnly = true)
     public List<PublicFeedbackResponse> getTourFeedback(UUID id) { return publicMap(repository.findAllByTourIdAndFeedbackTypeAndStatusOrderByCreatedAtDesc(id, FeedbackType.TRIP, FeedbackStatus.PUBLISHED)); }
     @Override @Transactional(readOnly = true)
@@ -91,7 +91,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     @Override @Transactional(readOnly = true) public RatingSummary summarizeTarget(FeedbackTargetType type, UUID id) { return repository.summarizeTarget(type, id); }
     @Override @Transactional(readOnly = true) public List<FeedbackResponse> getAllForAdmin() { return map(repository.findAllByOrderByCreatedAtDesc()); }
     @Override @Transactional
-    public FeedbackResponse moderate(Long id, ModerateFeedbackRequest request, Long adminId) {
+    public FeedbackResponse moderate(Long id, ModerateFeedbackRequest request, UUID adminId) {
         if (request.status() == FeedbackStatus.DELETED)
             throw new FeedbackException(HttpStatus.BAD_REQUEST, "Admin cannot set the user-deleted status");
         if ((request.status() == FeedbackStatus.HIDDEN || request.status() == FeedbackStatus.REMOVED)
@@ -138,7 +138,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         if (new HashSet<>(normalized).size() != normalized.size()) throw new FeedbackException(HttpStatus.BAD_REQUEST, "Duplicate image URLs are not allowed");
         return normalized;
     }
-    private Feedback owned(Long id, Long userId) { Feedback f = find(id); if (!Objects.equals(f.getReviewerUserId(), userId))
+    private Feedback owned(Long id, UUID userId) { Feedback f = find(id); if (!Objects.equals(f.getReviewerUserId(), userId))
         throw new FeedbackException(HttpStatus.FORBIDDEN, "You cannot change this feedback"); return f; }
     private Feedback find(Long id) { return repository.findById(id).orElseThrow(() -> new FeedbackException(HttpStatus.NOT_FOUND, "Feedback not found: " + id)); }
     private void ensureUserEditable(Feedback f) { if (f.getStatus() == FeedbackStatus.DELETED || f.getStatus() == FeedbackStatus.REMOVED)
