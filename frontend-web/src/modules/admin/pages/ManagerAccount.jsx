@@ -11,15 +11,14 @@ import "../styles/ManagerAccount.css";
 export default function ManagerAccount() {
   const {
     accounts,
+    roles,
     loading,
+    rolesLoading,
     saving,
-
     error,
     success,
-
     setError,
     setSuccess,
-
     createAccount,
     updateAccount,
     deactivateAccount,
@@ -216,6 +215,8 @@ export default function ManagerAccount() {
         saving={saving}
         editingAccount={editingAccount}
         form={form}
+        roles={roles}
+        rolesLoading={rolesLoading}
         error={error}
         onClose={handleCloseModal}
         onSubmit={handleSubmit}
