@@ -25,4 +25,6 @@ public interface UserRepository extends JpaRepository<Users, UUID> {
 
     @Query("SELECT u FROM Users u WHERE u.role.name NOT IN ('PASSENGER', 'GUEST')")
     List<Users> findAllStaff();
+
+    List<Users> findAllByRole_NameAndEnabledTrue(String roleName);
 }
