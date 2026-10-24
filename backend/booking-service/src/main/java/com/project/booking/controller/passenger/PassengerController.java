@@ -1,5 +1,7 @@
 package com.project.booking.controller.passenger;
 
+import java.util.UUID;
+
 import com.project.booking.dto.passenger.PassengerRequest;
 import com.project.booking.dto.passenger.PassengerResponse;
 import com.project.booking.service.passenger.PassengerService;
@@ -21,7 +23,7 @@ public class PassengerController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PassengerResponse>> getAll(@RequestParam(required = false) Long userId) {
+    public ResponseEntity<List<PassengerResponse>> getAll(@RequestParam(required = false) UUID userId) {
         return ResponseEntity.ok(passengerService.getAllPassengers(userId));
     }
 

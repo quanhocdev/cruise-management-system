@@ -10,9 +10,15 @@ import com.project.booking.client.VisitTourClient.VisitTourUsageInfo;
 import com.project.booking.exception.AppException;
 import com.project.booking.model.Booking;
 import com.project.booking.model.BookingPassenger;
+import com.project.booking.service.time.CruiseTime;
 
 @Component
 public class ActivityVisitUsageValidator {
+    private final CruiseTime time;
+
+    public ActivityVisitUsageValidator(CruiseTime time) {
+        this.time = time;
+    }
 
     public Booking validateBooking(BookingPassenger bookingPassenger) {
         Booking booking = bookingPassenger.getBooking();
@@ -29,7 +35,7 @@ public class ActivityVisitUsageValidator {
         return booking;
     }
 
-    public void validateVisitTour(Booking booking, VisitTourUsageInfo visitInfo, LocalDateTime now) {
+    public void validateVisitTour(Booking booking, VisitTourUsageInfo visitInfo) {
         if (visitInfo == null) {
             throw new AppException("Không tìm thấy thông tin VisitTour", HttpStatus.NOT_FOUND);
         }
@@ -38,7 +44,7 @@ public class ActivityVisitUsageValidator {
         }
 
         validateStatus(visitInfo.visitTourStatus());
-        validateTime(visitInfo, now);
+        validateTime(visitInfo, time.now());
         validatePrice(visitInfo.price());
         validateDiscountPercent(visitInfo.discountPercent());
     }

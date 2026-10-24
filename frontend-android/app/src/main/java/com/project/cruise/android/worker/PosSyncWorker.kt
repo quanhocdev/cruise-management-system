@@ -19,7 +19,9 @@ class PosSyncWorker(
     override suspend fun doWork(): Result {
         val dao = CruiseDatabase.getInstance(applicationContext).posTransactionDao()
         val posApi = RetrofitClient.createPosApiService(TokenManager(applicationContext))
-        val waiting = dao.findWaitingForSync()
+        val waiting = dao.findWaitingForSync().filter {
+            it.operatorRole == "FINANCE" && it.scanType == "QR"
+        }
         if (waiting.isEmpty()) return Result.success()
 
         var shouldRetry = false

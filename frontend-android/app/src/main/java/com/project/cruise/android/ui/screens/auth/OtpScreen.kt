@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import com.project.cruise.android.ui.theme.*
 
 @Composable
-fun OtpScreen(userId: Long, onBackClick: () -> Unit, onVerify: (Long, String) -> Unit,
+fun OtpScreen(userId: String, onBackClick: () -> Unit, onVerify: (String, String) -> Unit,
     isLoading: Boolean = false, errorMessage: String? = null) {
     var otp by remember(userId) { mutableStateOf("") }
     OceanPage {

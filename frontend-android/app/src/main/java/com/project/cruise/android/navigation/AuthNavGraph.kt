@@ -195,12 +195,12 @@ fun NavGraphBuilder.authGraph(
         route = Routes.OTP,
         arguments = listOf(
             navArgument("userId") {
-                type = NavType.LongType
+                type = NavType.StringType
             }
         )
     ) { backStackEntry ->
         val userId =
-            backStackEntry.arguments?.getLong("userId")
+            backStackEntry.arguments?.getString("userId")
                 ?: return@composable
 
         val verifyOtpState by authViewModel.verifyOtpState.collectAsState()
@@ -238,12 +238,12 @@ fun NavGraphBuilder.authGraph(
         route = Routes.GOOGLE_OTP,
         arguments = listOf(
             navArgument("userId") {
-                type = NavType.LongType
+                type = NavType.StringType
             }
         )
     ) { backStackEntry ->
         val userId =
-            backStackEntry.arguments?.getLong("userId")
+            backStackEntry.arguments?.getString("userId")
                 ?: return@composable
 
         val googleOtpState by authViewModel.googleOtpState.collectAsState()

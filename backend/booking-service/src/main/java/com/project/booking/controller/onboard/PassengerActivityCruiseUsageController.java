@@ -1,5 +1,7 @@
 package com.project.booking.controller.onboard;
 
+import java.util.UUID;
+
 import com.project.booking.dto.onboard.ActivityCruiseUsageResponse;
 import com.project.booking.service.onboard.ActivityCruiseUsageService;
 
@@ -28,25 +30,25 @@ public class PassengerActivityCruiseUsageController {
     public ResponseEntity<List<ActivityCruiseUsageResponse>> getMine(
             Principal principal) {
 
-        Long userId = extractUserId(principal);
+        UUID userId = extractUserId(principal);
 
         return ResponseEntity.ok(
                 activityCruiseUsageService.getByUserId(userId));
     }
 
-    private Long extractUserId(Principal principal) {
+    private UUID extractUserId(Principal principal) {
 
         if (principal instanceof JwtAuthenticationToken jwtAuth) {
 
             Object userIdClaim = jwtAuth.getTokenAttributes().get("userId");
 
             if (userIdClaim != null) {
-                return Long.valueOf(userIdClaim.toString());
+                return UUID.fromString(userIdClaim.toString());
             }
         }
 
         try {
-            return Long.valueOf(principal.getName());
+            return UUID.fromString(principal.getName());
 
         } catch (Exception e) {
 

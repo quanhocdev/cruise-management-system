@@ -15,10 +15,11 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import com.project.common.event.BillPaymentSuccessEvent;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
+    @org.springframework.beans.factory.annotation.Autowired
+    private org.springframework.jdbc.core.JdbcTemplate jdbc;
     private final PaymentRepository repository;
     private final PaymentMapper mapper;
     private final Map<PaymentMethod, PaymentProvider> providers;
@@ -124,7 +125,7 @@ public class PaymentServiceImpl implements PaymentService {
         } catch (PaymentException ex) {
             return new VnPayIpnResponse("04", "Invalid amount");
         }
-        if (payment.getStatus() == PaymentStatus.SUCCESS)
+        if (payment.getStatus() == PaymentStatus.SUCCESS || payment.getStatus() == PaymentStatus.REFUNDED)
             return new VnPayIpnResponse("02", "Order already confirmed");
         try {
             applyResult(payment, params);
@@ -137,7 +138,13 @@ public class PaymentServiceImpl implements PaymentService {
     private Payment applyResult(Payment payment, Map<String, String> params) {
         boolean success = "00".equals(params.get("vnp_ResponseCode"))
                 && "00".equals(params.getOrDefault("vnp_TransactionStatus", "00"));
-        if (payment.getStatus() != PaymentStatus.SUCCESS) {
+        if(payment.getReferenceType()==PaymentReferenceType.BILL) {
+            success="00".equals(params.get("vnp_ResponseCode")) && "00".equals(params.get("vnp_TransactionStatus"));
+            boolean failed=Set.of("09","10","11","12","13","24","51","65","75","79").contains(params.getOrDefault("vnp_ResponseCode",""))
+                    && !Set.of("04","07").contains(params.getOrDefault("vnp_TransactionStatus",""));
+            if(!success && !failed) return payment;
+        }
+        if (payment.getStatus() != PaymentStatus.SUCCESS && payment.getStatus() != PaymentStatus.REFUNDED) {
             PaymentStatus previousStatus = payment.getStatus();
             payment.setStatus(success ? PaymentStatus.SUCCESS : PaymentStatus.FAILED);
             if (success)
@@ -162,15 +169,7 @@ public class PaymentServiceImpl implements PaymentService {
                     kafkaTemplate.send("payment-success-topic", event);
 
                 } else if (saved.getReferenceType() == PaymentReferenceType.BILL) {
-                    // Luồng thanh toán hóa đơn checkout.
-                    BillPaymentSuccessEvent event = new BillPaymentSuccessEvent(
-                            saved.getReferenceId(),
-                            saved.getId(),
-                            saved.getPayerId(),
-                            saved.getStatus().name(),
-                            saved.getPaidAt());
-
-                    kafkaTemplate.send("bill-payment-success-topic", event);
+                    // BillPaymentDelivery publishes committed successful payments with durable retry.
                 }
             }
 
@@ -184,7 +183,16 @@ public class PaymentServiceImpl implements PaymentService {
         if (txnRef == null)
             throw new PaymentException("Missing VNPay transaction reference");
         try {
-            return find(Long.parseLong(txnRef));
+            Long id = Long.parseLong(txnRef);
+            if(jdbc!=null) {
+                var billIds=jdbc.queryForList("SELECT reference_id FROM payment.payments WHERE id=? AND reference_type='BILL'",Long.class,id);
+                if(!billIds.isEmpty()) {
+                    jdbc.update("INSERT INTO payment.bill_payment_locks(bill_id) VALUES (?) ON CONFLICT DO NOTHING",billIds.get(0));
+                    jdbc.queryForObject("SELECT bill_id FROM payment.bill_payment_locks WHERE bill_id=? FOR UPDATE",Long.class,billIds.get(0));
+                }
+            }
+            return repository.findForUpdate(id)
+                    .orElseThrow(() -> new PaymentException("Payment not found"));
         } catch (NumberFormatException ex) {
             throw new PaymentException("Invalid VNPay transaction reference");
         }

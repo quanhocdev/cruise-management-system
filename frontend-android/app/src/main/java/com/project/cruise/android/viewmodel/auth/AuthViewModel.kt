@@ -46,7 +46,7 @@ sealed class GoogleLoginState {
     object Loading : GoogleLoginState()
 
     data class OtpRequired(
-        val userId: Long,
+        val userId: String,
         val message: String
     ) : GoogleLoginState()
 
@@ -272,7 +272,7 @@ class AuthViewModel(
         }
     }
 
-    fun verifyGoogleOtp(userId: Long, otp: String) {
+    fun verifyGoogleOtp(userId: String, otp: String) {
         if (!otp.matches(Regex("^\\d{6}$"))) {
             _googleOtpState.value =
                 GoogleOtpState.Error("OTP phải gồm đúng 6 chữ số")
@@ -422,7 +422,7 @@ class AuthViewModel(
 
 
     fun verifyEmail(
-        userId: Long,
+        userId: String,
         otp: String
     ) {
 

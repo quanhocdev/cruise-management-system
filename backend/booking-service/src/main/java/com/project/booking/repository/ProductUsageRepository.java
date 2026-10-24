@@ -17,7 +17,7 @@ public interface ProductUsageRepository
       Long bookingPassengerId);
 
   List<ProductUsage> findAllByBookingPassenger_Booking_CreatedByUserIdOrderByUsedAtDesc(
-      Long userId);
+      UUID userId);
 
   @Query("""
       SELECT COALESCE(SUM(pu.quantity), 0)

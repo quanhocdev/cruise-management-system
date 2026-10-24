@@ -15,6 +15,7 @@ import com.project.cruise.android.data.network.RetrofitClient
 class ConvenienceRepository(context: Context) {
 
     private val appContext = context.applicationContext
+    private val commands = OnlinePosCommands(appContext)
 
     private val apiService =
         RetrofitClient.createApiService(
@@ -47,25 +48,20 @@ class ConvenienceRepository(context: Context) {
         productTourId: String,
         quantity: Int
     ): ProductUsageResponse {
-        return apiService.createProductUsage(
-            ProductUsageRequest(
-                nfcCardUid = nfcCardUid,
-                productTourId = productTourId,
-                quantity = quantity
-            )
-        )
+        val request = ProductUsageRequest(nfcCardUid, productTourId, quantity)
+        return commands.execute("PRODUCT_USAGE", request) { requestId ->
+            apiService.createProductUsage(request.copy(clientRequestId = requestId))
+        }
     }
 
     suspend fun createServiceUsage(
         nfcCardUid: String,
         serviceTourId: String
     ): ServiceUsageResponse {
-        return apiService.createServiceUsage(
-            ServiceUsageRequest(
-                nfcCardUid = nfcCardUid,
-                serviceTourId = serviceTourId
-            )
-        )
+        val request = ServiceUsageRequest(nfcCardUid, serviceTourId)
+        return commands.execute("SERVICE_SCAN", request) { requestId ->
+            apiService.createServiceUsage(request.copy(clientRequestId = requestId))
+        }
     }
 
 }

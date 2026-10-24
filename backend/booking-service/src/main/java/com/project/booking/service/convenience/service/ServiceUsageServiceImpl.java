@@ -13,6 +13,8 @@ import com.project.booking.repository.ServiceUsageRepository;
 import com.project.booking.service.common.benefit.BenefitConsumptionService;
 
 import org.springframework.transaction.annotation.Transactional;
+import com.project.booking.service.account.OnboardAccountService;
+import com.project.booking.service.account.UsageCapacityLock;
 import com.project.booking.client.ServiceTourManagementClient;
 import com.project.booking.client.ServiceTourManagementClient.ServiceUsageManagementInfo;
 import com.project.booking.dto.convenience.service.ServiceUsageManagementResponse;
@@ -27,6 +29,8 @@ import java.util.UUID;
 @org.springframework.stereotype.Service
 public class ServiceUsageServiceImpl implements ServiceUsageService {
 
+        private final OnboardAccountService accounts;
+        private final UsageCapacityLock capacityLock;
         private final ServiceUsageRepository serviceUsageRepository;
         private final ServiceUsageMapper serviceUsageMapper;
         private final ServiceTourClient serviceTourClient;
@@ -42,8 +46,10 @@ public class ServiceUsageServiceImpl implements ServiceUsageService {
                         BenefitConsumptionService benefitConsumptionService,
                         ServiceValidator serviceValidator,
                         ServicePricingCalculator servicePricingCalculator,
-                        ServiceTourManagementClient serviceTourManagementClient) {
+                        ServiceTourManagementClient serviceTourManagementClient, OnboardAccountService accounts, UsageCapacityLock capacityLock) {
 
+                this.accounts = accounts;
+                this.capacityLock = capacityLock;
                 this.serviceUsageRepository = serviceUsageRepository;
                 this.serviceUsageMapper = serviceUsageMapper;
                 this.serviceTourClient = serviceTourClient;
@@ -73,6 +79,8 @@ public class ServiceUsageServiceImpl implements ServiceUsageService {
                 serviceValidator.validateService(booking, serviceInfo);
 
                 // 7. Passenger đang sử dụng Service này không?
+                accounts.lockAccount(booking);
+                capacityLock.acquire("SERVICE", request.serviceTourId());
                 LocalDateTime now = LocalDateTime.now();
 
                 ServiceUsage activeUsage = serviceUsageRepository.findActiveUsage(
@@ -86,6 +94,8 @@ public class ServiceUsageServiceImpl implements ServiceUsageService {
                         ServiceUsage savedUsage = serviceUsageRepository.save(activeUsage);
                         return serviceUsageMapper.toResponse(savedUsage);
                 }
+
+                accounts.lockForUsage(booking);
 
                 // 9 -> 10. Chưa sử dụng -> CHECK-IN: kiểm tra chỗ + thời hạn
                 serviceValidator.validateCapacity(
@@ -123,6 +133,8 @@ public class ServiceUsageServiceImpl implements ServiceUsageService {
                                 serviceInfo,
                                 usedBenefitQuantity);
 
+                accounts.authorizeCharge(booking, pricingResult.finalAmount());
+
                 // 17. Cập nhật lượt benefit đã dùng
                 if (benefitConsumption != null && pricingResult.freeUsage() > 0) {
                         benefitConsumptionService.consume(
@@ -142,6 +154,8 @@ public class ServiceUsageServiceImpl implements ServiceUsageService {
                 usage.setEndedAt(null); // vừa check-in nên chưa checkout
 
                 ServiceUsage savedUsage = serviceUsageRepository.save(usage);
+                accounts.recordCharge(bookingPassenger, "SERVICE", savedUsage.getId(), savedUsage.getFinalAmount(),
+                        1, serviceInfo.packageBenefitId(), pricingResult.freeUsage(), request.clientRequestId());
 
                 return serviceUsageMapper.toResponse(savedUsage);
         }
@@ -158,7 +172,7 @@ public class ServiceUsageServiceImpl implements ServiceUsageService {
 
         @Override
         @Transactional(readOnly = true)
-        public List<ServiceUsageResponse> getByUserId(Long userId) {
+        public List<ServiceUsageResponse> getByUserId(UUID userId) {
                 return serviceUsageRepository
                                 .findAllByBookingPassenger_Booking_CreatedByUserIdOrderByUsedAtDesc(userId)
                                 .stream()

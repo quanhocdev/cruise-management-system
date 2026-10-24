@@ -17,6 +17,8 @@ import com.project.booking.service.common.benefit.BenefitConsumptionService;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.project.booking.service.account.OnboardAccountService;
+import com.project.booking.service.account.UsageCapacityLock;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,6 +31,8 @@ import java.util.stream.Collectors;
 public class ActivityCruiseUsageServiceImpl
                 implements ActivityCruiseUsageService {
 
+        private final OnboardAccountService accounts;
+        private final UsageCapacityLock capacityLock;
         private final ActivityCruiseUsageRepository activityCruiseUsageRepository;
         private final ActivityCruiseUsageMapper activityCruiseUsageMapper;
         private final ActivityCruiseUsageManagementMapper activityCruiseUsageManagementMapper;
@@ -46,8 +50,10 @@ public class ActivityCruiseUsageServiceImpl
                         ActivityCruiseManagementClient activityCruiseManagementClient,
                         BenefitConsumptionService benefitConsumptionService,
                         ActivityCruiseValidator activityCruiseValidator,
-                        ActivityPricingCalculator activityPricingCalculator) {
+                        ActivityPricingCalculator activityPricingCalculator, OnboardAccountService accounts, UsageCapacityLock capacityLock) {
 
+                this.accounts = accounts;
+                this.capacityLock = capacityLock;
                 this.activityCruiseUsageRepository = activityCruiseUsageRepository;
                 this.activityCruiseUsageMapper = activityCruiseUsageMapper;
                 this.activityCruiseUsageManagementMapper = activityCruiseUsageManagementMapper;
@@ -67,6 +73,16 @@ public class ActivityCruiseUsageServiceImpl
                 BookingPassenger bookingPassenger = activityCruiseValidator
                                 .validateAndGetPassenger(request.nfcCardUid());
 
+                return createFor(bookingPassenger,request);
+        }
+
+        @Transactional
+        public ActivityCruiseUsageResponse createForPassenger(Long passengerId,UUID targetId,UUID requestId) {
+                return createFor(activityCruiseValidator.validateAndGetPassenger(passengerId),new ActivityCruiseUsageRequest("MANUAL",targetId,requestId));
+        }
+
+        private ActivityCruiseUsageResponse createFor(BookingPassenger bookingPassenger,ActivityCruiseUsageRequest request) {
+
                 Booking booking = bookingPassenger.getBooking();
 
                 // 2. Lấy thông tin ActivityCruiseTour
@@ -75,11 +91,16 @@ public class ActivityCruiseUsageServiceImpl
                                                 request.activityCruiseTourId(),
                                                 booking.getTourPackageId());
 
+                accounts.lockForUsage(booking);
+                capacityLock.acquire("ACTIVITY", request.activityCruiseTourId());
+
                 // 3 -> 7. Validate nghiệp vụ
                 activityCruiseValidator.validateBookingAndActivity(
                                 booking,
                                 activityInfo,
                                 request.activityCruiseTourId());
+
+                capacityLock.requireSeat("ACTIVITY",request.activityCruiseTourId(),bookingPassenger.getId(),activityInfo.maxPassengers());
 
                 // 8 & 9. Benefit + lock row
                 UUID packageBenefitId = activityInfo.packageBenefitId();
@@ -105,6 +126,8 @@ public class ActivityCruiseUsageServiceImpl
                                 activityInfo,
                                 usedBenefitQuantity);
 
+                accounts.authorizeCharge(booking, pricingResult.finalAmount());
+
                 // 16. Cập nhật lượt benefit đã dùng
                 if (benefitConsumption != null) {
                         benefitConsumptionService.consume(
@@ -123,6 +146,10 @@ public class ActivityCruiseUsageServiceImpl
                 usage.setUsedAt(LocalDateTime.now());
 
                 ActivityCruiseUsage savedUsage = activityCruiseUsageRepository.save(usage);
+                accounts.recordCharge(bookingPassenger, "ACTIVITY", savedUsage.getId(), savedUsage.getFinalAmount(),
+                        1, packageBenefitId, pricingResult.freeQuantityThisUsage(), request.clientRequestId());
+
+                capacityLock.recordAttendance("ACTIVITY",request.activityCruiseTourId(),bookingPassenger.getId(),savedUsage.getId());
 
                 return activityCruiseUsageMapper.toResponse(savedUsage);
         }
@@ -143,7 +170,7 @@ public class ActivityCruiseUsageServiceImpl
         @Override
         @Transactional(readOnly = true)
         public List<ActivityCruiseUsageResponse> getByUserId(
-                        Long userId) {
+                        UUID userId) {
 
                 return activityCruiseUsageRepository
                                 .findAllByBookingPassenger_Booking_CreatedByUserIdOrderByUsedAtDesc(

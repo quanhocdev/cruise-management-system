@@ -14,6 +14,7 @@ import com.project.booking.service.common.benefit.BenefitConsumptionService;
 import com.project.common.event.ProductUsedEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.project.booking.service.account.OnboardAccountService;
 import com.project.booking.client.ProductTourManagementClient;
 import com.project.booking.client.ProductTourManagementClient.ProductUsageManagementInfo;
 import com.project.booking.dto.convenience.product.ProductUsageManagementResponse;
@@ -28,6 +29,7 @@ import java.util.UUID;
 @Service
 public class ProductUsageServiceImpl implements ProductUsageService {
 
+        private final OnboardAccountService accounts;
         private final ProductUsageRepository productUsageRepository;
         private final ProductUsageMapper productUsageMapper;
         private final TourProductClient tourProductClient;
@@ -45,8 +47,9 @@ public class ProductUsageServiceImpl implements ProductUsageService {
                         ProductUsedEventProducer productUsedEventProducer,
                         ProductValidator productValidator,
                         ProductPricingCalculator productPricingCalculator,
-                        ProductTourManagementClient productTourManagementClient) {
+                        ProductTourManagementClient productTourManagementClient, OnboardAccountService accounts) {
 
+                this.accounts = accounts;
                 this.productUsageRepository = productUsageRepository;
                 this.productUsageMapper = productUsageMapper;
                 this.tourProductClient = tourProductClient;
@@ -76,6 +79,8 @@ public class ProductUsageServiceImpl implements ProductUsageService {
                 // 3 -> 6. Validate nghiệp vụ (tour, active, status, giá)
                 productValidator.validateProduct(booking, productInfo);
 
+                accounts.lockForUsage(booking);
+
                 // 7. Benefit + lock row
                 UUID packageBenefitId = productInfo.packageBenefitId();
                 int benefitQuantity = productInfo.benefitQuantity() == null
@@ -101,6 +106,8 @@ public class ProductUsageServiceImpl implements ProductUsageService {
                                 usedBenefitQuantity,
                                 request.quantity());
 
+                accounts.authorizeCharge(booking, pricingResult.finalAmount());
+
                 // 14. Cập nhật lượt benefit đã dùng
                 if (benefitConsumption != null && pricingResult.freeQuantityThisUsage() > 0) {
                         benefitConsumptionService.consume(
@@ -119,6 +126,8 @@ public class ProductUsageServiceImpl implements ProductUsageService {
                 usage.setUsedAt(LocalDateTime.now());
 
                 ProductUsage savedUsage = productUsageRepository.save(usage);
+                accounts.recordCharge(bookingPassenger, "PRODUCT", savedUsage.getId(), savedUsage.getFinalAmount(),
+                        request.quantity(), packageBenefitId, pricingResult.freeQuantityThisUsage(), request.clientRequestId());
 
                 // 17. Bắn event
                 productUsedEventProducer.send(
@@ -144,7 +153,7 @@ public class ProductUsageServiceImpl implements ProductUsageService {
 
         @Override
         @Transactional(readOnly = true)
-        public List<ProductUsageResponse> getByUserId(Long userId) {
+        public List<ProductUsageResponse> getByUserId(UUID userId) {
                 return productUsageRepository
                                 .findAllByBookingPassenger_Booking_CreatedByUserIdOrderByUsedAtDesc(userId)
                                 .stream()

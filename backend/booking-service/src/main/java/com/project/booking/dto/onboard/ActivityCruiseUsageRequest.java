@@ -9,7 +9,11 @@ public record ActivityCruiseUsageRequest(
 
                 @NotBlank(message = "NFC card UID không được để trống") String nfcCardUid,
 
-                @NotNull(message = "Activity cruise tour ID không được để trống") UUID activityCruiseTourId
+                @NotNull(message = "Activity cruise tour ID không được để trống") UUID activityCruiseTourId,
+                UUID clientRequestId
 
 ) {
+    public ActivityCruiseUsageRequest(String nfcCardUid, UUID activityCruiseTourId) {
+        this(nfcCardUid, activityCruiseTourId, null);
+    }
 }

@@ -18,12 +18,39 @@ public class FeedbackServiceImpl implements FeedbackService {
     public FeedbackServiceImpl(FeedbackRepository repository, BookingClient bookingClient, TourClient tourClient) {
         this.repository = repository; this.bookingClient = bookingClient; this.tourClient = tourClient;
     }
+    @Override @Transactional(readOnly = true)
+    public FeedbackOptions options(Long bookingId,UUID userId) {
+        var booking=bookingClient.passengers(bookingId,userId);
+        String state="PASSENGER_NOT_COMPLETED";
+        if(booking.passengers().stream().anyMatch(FeedbackOptions.Guest::participated)) {
+            if(repository.existsByBookingIdAndReviewerUserIdAndFeedbackTypeAndTargetTypeAndTargetId(
+                    bookingId,userId,FeedbackType.TRIP,FeedbackTargetType.TOUR,booking.tourId())) state="ALREADY_REVIEWED";
+            else {
+                try {
+                    var tour=tourClient.context(booking.tourId());
+                    if(!booking.tourId().equals(tour.tourId()) || tour.cruiseId()==null) state="VERIFICATION_UNAVAILABLE";
+                    else state=tour.completed()?"READY":"TOUR_NOT_COMPLETED";
+                } catch(FeedbackException e) { state="VERIFICATION_UNAVAILABLE"; }
+            }
+        }
+        return new FeedbackOptions(bookingId,booking.tourId(),state,booking.passengers());
+    }
     @Override @Transactional
-    public FeedbackResponse create(CreateFeedbackRequest request, Long userId) {
-        FeedbackEligibility eligibility = bookingClient.eligibility(request.bookingId(), userId);
+    public FeedbackResponse create(CreateFeedbackRequest request, UUID userId) {
+        FeedbackEligibility eligibility = request.bookingPassengerId() == null
+            ? bookingClient.eligibility(request.bookingId(), userId)
+            : bookingClient.eligibility(request.bookingId(), userId, request.bookingPassengerId());
+        if (!Objects.equals(request.bookingId(), eligibility.bookingId()) || eligibility.tourId() == null)
+            throw new FeedbackException(HttpStatus.BAD_GATEWAY, "Booking service returned mismatched participation");
         if (!eligibility.participated())
             throw new FeedbackException(HttpStatus.FORBIDDEN, "Only passengers who completed the voyage can leave feedback");
+        if (eligibility.passengerVoyageId() == null && eligibility.bookingPassengerId() == null)
+            throw new FeedbackException(HttpStatus.CONFLICT, "Booking participation identity is unavailable");
+        if (request.bookingPassengerId() != null && !request.bookingPassengerId().equals(eligibility.bookingPassengerId()))
+            throw new FeedbackException(HttpStatus.BAD_GATEWAY, "Booking service returned a mismatched passenger");
         FeedbackTourContext tour = tourClient.context(eligibility.tourId());
+        if (!eligibility.tourId().equals(tour.tourId()))
+            throw new FeedbackException(HttpStatus.BAD_GATEWAY, "Tour service returned a mismatched tour");
         if (!tour.completed()) throw new FeedbackException(HttpStatus.CONFLICT, "Tour is not completed yet");
         if (tour.cruiseId() == null) throw new FeedbackException(HttpStatus.CONFLICT, "Tour has no assigned cruise");
         Target target = resolveTarget(request, tour.tourId());
@@ -32,6 +59,7 @@ public class FeedbackServiceImpl implements FeedbackService {
             throw new FeedbackException(HttpStatus.CONFLICT, "You already reviewed this target for this booking");
         Instant now = Instant.now(); Feedback f = new Feedback();
         f.setBookingId(request.bookingId()); f.setPassengerVoyageId(eligibility.passengerVoyageId());
+        f.setBookingPassengerId(eligibility.bookingPassengerId());
         f.setReviewerUserId(userId); f.setTourId(tour.tourId()); f.setCruiseId(tour.cruiseId());
         f.setFeedbackType(target.feedbackType()); f.setTargetType(target.targetType()); f.setTargetId(target.targetId());
         applyContent(f, request.rating(), request.content(), request.imageUrls());
@@ -39,17 +67,17 @@ public class FeedbackServiceImpl implements FeedbackService {
         return toResponse(repository.save(f));
     }
     @Override @Transactional
-    public FeedbackResponse update(Long id, UpdateFeedbackRequest request, Long userId) {
+    public FeedbackResponse update(Long id, UpdateFeedbackRequest request, UUID userId) {
         Feedback f = owned(id, userId); ensureUserEditable(f);
         applyContent(f, request.rating(), request.content(), request.imageUrls()); f.setUpdatedAt(Instant.now());
         return toResponse(repository.save(f));
     }
     @Override @Transactional
-    public void delete(Long id, Long userId) {
+    public void delete(Long id, UUID userId) {
         Feedback f = owned(id, userId); ensureUserEditable(f); f.setStatus(FeedbackStatus.DELETED); f.setUpdatedAt(Instant.now()); repository.save(f);
     }
     @Override @Transactional(readOnly = true)
-    public List<FeedbackResponse> getMine(Long userId) { return map(repository.findAllByReviewerUserIdOrderByCreatedAtDesc(userId)); }
+    public List<FeedbackResponse> getMine(UUID userId) { return map(repository.findAllByReviewerUserIdOrderByCreatedAtDesc(userId)); }
     @Override @Transactional(readOnly = true)
     public List<PublicFeedbackResponse> getTourFeedback(UUID id) { return publicMap(repository.findAllByTourIdAndFeedbackTypeAndStatusOrderByCreatedAtDesc(id, FeedbackType.TRIP, FeedbackStatus.PUBLISHED)); }
     @Override @Transactional(readOnly = true)
@@ -63,7 +91,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     @Override @Transactional(readOnly = true) public RatingSummary summarizeTarget(FeedbackTargetType type, UUID id) { return repository.summarizeTarget(type, id); }
     @Override @Transactional(readOnly = true) public List<FeedbackResponse> getAllForAdmin() { return map(repository.findAllByOrderByCreatedAtDesc()); }
     @Override @Transactional
-    public FeedbackResponse moderate(Long id, ModerateFeedbackRequest request, Long adminId) {
+    public FeedbackResponse moderate(Long id, ModerateFeedbackRequest request, UUID adminId) {
         if (request.status() == FeedbackStatus.DELETED)
             throw new FeedbackException(HttpStatus.BAD_REQUEST, "Admin cannot set the user-deleted status");
         if ((request.status() == FeedbackStatus.HIDDEN || request.status() == FeedbackStatus.REMOVED)
@@ -110,7 +138,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         if (new HashSet<>(normalized).size() != normalized.size()) throw new FeedbackException(HttpStatus.BAD_REQUEST, "Duplicate image URLs are not allowed");
         return normalized;
     }
-    private Feedback owned(Long id, Long userId) { Feedback f = find(id); if (!Objects.equals(f.getReviewerUserId(), userId))
+    private Feedback owned(Long id, UUID userId) { Feedback f = find(id); if (!Objects.equals(f.getReviewerUserId(), userId))
         throw new FeedbackException(HttpStatus.FORBIDDEN, "You cannot change this feedback"); return f; }
     private Feedback find(Long id) { return repository.findById(id).orElseThrow(() -> new FeedbackException(HttpStatus.NOT_FOUND, "Feedback not found: " + id)); }
     private void ensureUserEditable(Feedback f) { if (f.getStatus() == FeedbackStatus.DELETED || f.getStatus() == FeedbackStatus.REMOVED)
@@ -123,6 +151,6 @@ public class FeedbackServiceImpl implements FeedbackService {
     private FeedbackResponse toResponse(Feedback f) { return new FeedbackResponse(f.getId(), f.getBookingId(), f.getPassengerVoyageId(),
         f.getReviewerUserId(), f.getTourId(), f.getCruiseId(), f.getFeedbackType(), f.getTargetType(), f.getTargetId(),
         f.getRating(), f.getContent(), List.copyOf(f.getImageUrls()),
-        f.getStatus(), f.getModerationReason(), f.getCreatedAt(), f.getUpdatedAt()); }
+        f.getStatus(), f.getModerationReason(), f.getCreatedAt(), f.getUpdatedAt(), f.getBookingPassengerId()); }
     private record Target(FeedbackType feedbackType, FeedbackTargetType targetType, UUID targetId) {}
 }

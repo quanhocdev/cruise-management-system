@@ -15,7 +15,7 @@ object Routes {
 
     const val GOOGLE_OTP = "google_otp/{userId}"
 
-    fun otp(userId: Long) = "otp/$userId"
+    fun otp(userId: String) = "otp/$userId"
 
     // =================================================
     // PASSENGER
@@ -23,12 +23,15 @@ object Routes {
     const val PASSENGER_PROFILE = "passenger_profile"
     const val PASSENGER_DASHBOARD = "passenger_dashboard"
     const val PASSENGER_NOTIFICATIONS = "passenger_notifications"
+    const val PASSENGER_ACTIVITY_INBOX = "passenger_activity_inbox"
     const val PASSENGER_TOURS = "passenger_tours"
     const val PASSENGER_TOUR_DETAIL = "passenger_tours/{tourId}"
     const val PASSENGER_ROOMS = "passenger_rooms/{voyageId}"
     const val PASSENGER_CREATE_BOOKING = "passenger_booking/{tourId}/{packageId}"
     const val PASSENGER_BOOKINGS = "passenger_bookings"
     const val PASSENGER_BOOKING_DETAIL = "passenger_bookings/{bookingId}"
+    const val PASSENGER_ACTIVITIES = "passenger_activities/{bookingId}"
+    const val POS_REGISTRATIONS = "pos_registrations"
     const val PASSENGER_PAYMENT_RESULT =
         "passenger_payment_result?paymentId={paymentId}&status={status}"
 
@@ -36,11 +39,15 @@ object Routes {
     fun passengerCreateBooking(tourId: String, packageId: Any) =
         "passenger_booking/$tourId/$packageId"
     fun passengerBookingDetail(bookingId: Any) = "passenger_bookings/$bookingId"
+    fun passengerActivities(bookingId: Long) = "passenger_activities/$bookingId"
 
     // =================================================
     // POS
     // =================================================
     const val POS_LOGIN = "pos_login"
+    const val FINANCE_SPENDING = "finance_spending"
+    const val FINANCE_REFUNDS = "finance_refunds"
+    const val POS_CORRECTIONS = "pos_corrections"
     const val POS_DASHBOARD = "pos_dashboard/{role}"
     const val POS_QR_SCAN = "pos_qr_scan/{role}"
     const val POS_NFC_SCAN = "pos_nfc_scan/{role}"
@@ -48,7 +55,7 @@ object Routes {
     const val POS_HISTORY = "pos_history/{role}"
     const val POS_IDENTITY = "pos_identity/{role}/{localId}"
 
-    fun googleOtp(userId: Long): String = "google_otp/$userId"
+    fun googleOtp(userId: String): String = "google_otp/$userId"
     fun posDashboard(role: PosRole) = "pos_dashboard/${role.apiRole}"
     fun posQrScan(role: PosRole) = "pos_qr_scan/${role.apiRole}"
     fun posNfcScan(role: PosRole) = "pos_nfc_scan/${role.apiRole}"
