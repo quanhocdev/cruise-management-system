@@ -155,6 +155,12 @@ interface ApiService {
         @Path("id") id: String
     ): PublicTourDetailResponse
 
+    @GET("api/passenger/payments/booking/{id}")
+    suspend fun getBookingPayment(@Path("id") id: Long): com.project.cruise.android.data.dto.booking.BookingPayment
+
+    @GET("api/passengers/bookings/{id}/qr")
+    suspend fun getBookingQr(@Path("id") id: Long): okhttp3.ResponseBody
+
     @GET("api/passengers/bookings")
     suspend fun getMyBookings(): List<BookingResponse>
 

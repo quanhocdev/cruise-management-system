@@ -16,12 +16,13 @@ import com.project.cruise.android.viewmodel.passenger.*
 @Composable
 fun MyBookingDetailScreen(bookingId: Long, viewModel: BookingViewModel, onBack: () -> Unit, onSpending: (() -> Unit)? = null, onActivities: (() -> Unit)? = null, onBill: (() -> Unit)? = null, onFeedback: (() -> Unit)? = null,notificationButton: @Composable () -> Unit = {}) {
     val state by viewModel.bookingDetailState.collectAsState()
+    val access by viewModel.bookingAccessState.collectAsState()
     LaunchedEffect(bookingId) { viewModel.fetchBookingDetail(bookingId) }
-    MyBookingDetailContent(state, onBack, { viewModel.fetchBookingDetail(bookingId) }, onSpending, onActivities, onBill, onFeedback, notificationButton)
+    MyBookingDetailContent(state, onBack, { viewModel.fetchBookingDetail(bookingId) }, onSpending, onActivities, onBill, onFeedback, notificationButton, access)
 }
 
 @Composable
-fun MyBookingDetailContent(state: BookingDetailState, onBack: () -> Unit, onRetry: () -> Unit, onSpending: (() -> Unit)? = null, onActivities: (() -> Unit)? = null, onBill: (() -> Unit)? = null, onFeedback: (() -> Unit)? = null,notificationButton: @Composable () -> Unit = {}) {
+fun MyBookingDetailContent(state: BookingDetailState, onBack: () -> Unit, onRetry: () -> Unit, onSpending: (() -> Unit)? = null, onActivities: (() -> Unit)? = null, onBill: (() -> Unit)? = null, onFeedback: (() -> Unit)? = null,notificationButton: @Composable () -> Unit = {}, access: BookingAccessState = BookingAccessState()) {
     PassengerPage("Thông tin đặt chỗ", onBack = onBack) {
         when (state) {
             BookingDetailState.Idle,
@@ -75,6 +76,7 @@ fun MyBookingDetailContent(state: BookingDetailState, onBack: () -> Unit, onRetr
                         }
                     }
                 }
+                item { BookingTicketPanel(booking.status, access, onRetry) }
                 if (onActivities != null && booking.status == BookingStatus.CONFIRMED) item {
                     Button(onClick = onActivities, modifier = Modifier.fillMaxWidth()) { Text("Đăng ký hoạt động & tham quan bờ") }
                 }
