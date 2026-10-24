@@ -1,0 +1,196 @@
+/* src/modules/shore/styles/TourCompletionList.css */
+
+.shore-manager-tour-completion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.shore-manager-tour-completion-card {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) auto auto;
+  align-items: center;
+  gap: 18px;
+  min-height: 72px;
+  padding: 12px 15px;
+  border: 1px solid #e2e8f0;
+  border-radius: 11px;
+  background: #ffffff;
+}
+
+.shore-manager-tour-completion-card.ready {
+  border-color: #bfdbfe;
+  background: linear-gradient(90deg, #f8fbff 0%, #ffffff 70%);
+}
+
+.shore-manager-tour-completion-info {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+}
+
+.shore-manager-tour-completion-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 9px;
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.shore-manager-tour-completion-info > div:last-child {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.shore-manager-tour-completion-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shore-manager-tour-completion-info strong {
+  overflow: hidden;
+  color: #1e293b;
+  font-size: 13px;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shore-manager-tour-completion-info .shore-manager-tour-code-badge {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #e2e8f0;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.shore-manager-tour-completion-info small {
+  color: #64748b;
+  font-size: 11.5px;
+}
+
+.shore-manager-tour-completion-date {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.shore-manager-tour-completion-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #64748b;
+  font-size: 12.5px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.shore-manager-tour-completion-card.ready
+  .shore-manager-tour-completion-status {
+  color: #15803d;
+}
+
+.shore-manager-tour-completed-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid #10b981;
+  border-radius: 8px;
+  background-color: #ecfdf5;
+  color: #059669;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.shore-manager-tour-complete-button {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 13px;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  background: #f0fdf4;
+  color: #15803d;
+  font-size: 12.5px;
+  font-weight: 750;
+  cursor: pointer;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.shore-manager-tour-complete-button:hover:not(:disabled) {
+  border-color: #86efac;
+  background: #dcfce7;
+  color: #166534;
+  box-shadow: 0 4px 10px rgba(22, 163, 74, 0.12);
+}
+
+.shore-manager-tour-complete-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.shore-manager-tour-complete-button:disabled {
+  border-color: #e2e8f0;
+  background: #f8fafc;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+@media (max-width: 1050px) {
+  .shore-manager-tour-completion-card {
+    grid-template-columns: minmax(240px, 1fr) auto;
+  }
+
+  .shore-manager-tour-complete-button,
+  .shore-manager-tour-completed-badge {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .shore-manager-tour-completion-card {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .shore-manager-tour-complete-button,
+  .shore-manager-tour-completed-badge {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .shore-manager-tour-complete-button {
+    width: 100%;
+  }
+
+  .shore-manager-tour-completion-status {
+    padding-left: 47px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shore-manager-tour-complete-button {
+    transition: none;
+  }
+}

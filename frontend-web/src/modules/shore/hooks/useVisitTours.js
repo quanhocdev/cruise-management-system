@@ -4,13 +4,17 @@ import { useCallback, useEffect, useState } from "react";
 
 import visitTourService from "../services/visitTourService";
 
-const useVisitTours = ({ tourId = null, scheduleStopId = null } = {}) => {
+const useVisitTours = ({
+  all = false, // MỚI: lấy tất cả Visit Tour
+  tourId = null,
+  scheduleStopId = null,
+} = {}) => {
   const [visitTours, setVisitTours] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const loadVisitTours = useCallback(async () => {
-    if (!tourId && !scheduleStopId) {
+    if (!all && !tourId && !scheduleStopId) {
       setVisitTours([]);
       return;
     }
@@ -21,13 +25,15 @@ const useVisitTours = ({ tourId = null, scheduleStopId = null } = {}) => {
     try {
       let data;
 
-      if (scheduleStopId) {
+      if (all) {
+        data = await visitTourService.getAll();
+      } else if (scheduleStopId) {
         data = await visitTourService.getByScheduleStop(scheduleStopId);
       } else {
         data = await visitTourService.getByTour(tourId);
       }
 
-      setVisitTours(data);
+      setVisitTours(data || []);
     } catch (err) {
       console.error("🔥 LOAD VISIT TOURS ERROR:", err);
 
@@ -36,15 +42,11 @@ const useVisitTours = ({ tourId = null, scheduleStopId = null } = {}) => {
     } finally {
       setLoading(false);
     }
-  }, [tourId, scheduleStopId]);
+  }, [all, tourId, scheduleStopId]);
 
   useEffect(() => {
     loadVisitTours();
   }, [loadVisitTours]);
-
-  // =====================================================
-  // CREATE
-  // =====================================================
 
   const createVisitTour = useCallback(
     async (targetScheduleStopId, payload) => {
@@ -69,10 +71,6 @@ const useVisitTours = ({ tourId = null, scheduleStopId = null } = {}) => {
     [loadVisitTours],
   );
 
-  // =====================================================
-  // UPDATE
-  // =====================================================
-
   const updateVisitTour = useCallback(
     async (id, payload) => {
       setError(null);
@@ -92,10 +90,6 @@ const useVisitTours = ({ tourId = null, scheduleStopId = null } = {}) => {
     },
     [loadVisitTours],
   );
-
-  // =====================================================
-  // DELETE
-  // =====================================================
 
   const deleteVisitTour = useCallback(
     async (id) => {

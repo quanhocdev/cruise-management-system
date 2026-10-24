@@ -84,6 +84,39 @@ const visitTourService = {
 
     return response.data;
   },
+  // getConfigurationHistory: async () => {
+  //   const response = await api.get("/shore/visit-tour-configurations/history");
+
+  //   return response.data;
+  // },
+  /**
+   * GET /api/shore/staff
+   * Lấy danh sách nhân viên SHORE_STAFF.
+   */
+  getShoreStaff: async () => {
+    const response = await api.get("/shore/staff");
+    return response.data;
+  },
+
+  /**
+   * GET /api/shore/visit-tours/{visitTourId}/assignments
+   * Lấy danh sách nhân viên đã được phân công.
+   */
+  getAssignments: async (visitTourId) => {
+    const response = await api.get(`${BASE_URL}/${visitTourId}/assignments`);
+    return response.data;
+  },
+
+  /**
+   * POST /api/shore/visit-tours/{visitTourId}/assignments
+   * Phân công nhiều nhân viên.
+   */
+  assignStaff: async (visitTourId, userIds) => {
+    const response = await api.post(`${BASE_URL}/${visitTourId}/assignments`, {
+      userIds,
+    });
+    return response.data;
+  },
 
   /**
    * DELETE /api/shore/visit-tours/{id}
