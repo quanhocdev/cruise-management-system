@@ -32,4 +32,15 @@ public class AuthStaffCacheConfig {
                 .maximumSize(maxSize)
                 .build();
     }
+
+    @Bean("convenienceStaffCache")
+    public Cache<String, List<ShoreStaffResponse>> convenienceStaffCache(
+            @Value("${convenience.staff-cache.ttl-minutes:2}") long ttlMinutes,
+            @Value("${convenience.staff-cache.max-size:500}") long maxSize) {
+
+        return Caffeine.newBuilder()
+                .expireAfterWrite(Duration.ofMinutes(ttlMinutes))
+                .maximumSize(maxSize)
+                .build();
+    }
 }

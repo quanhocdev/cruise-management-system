@@ -637,3 +637,15 @@
     animation: none;
   }
 }
+/* Convenience staff assignment action */
+.tour-config-action--assign {
+  color: #2563eb;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.tour-config-action--assign:hover {
+  color: #1d4ed8;
+  background: #dbeafe;
+  border-color: #93c5fd;
+}

@@ -125,6 +125,12 @@ spring:
               predicates:
                 - Path=/api/convenience/products/**,/api/convenience/services/**,/api/convenience/product-tours/**,/api/convenience/service-tours/**
 
+            # TOUR SERVICE - CONVENIENCE STAFF ASSIGNMENT
+            - id: tour-convenience-staff-assignment
+              uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
+              predicates:
+                - Path=/api/convenience/staff/**,/api/convenience/assignments/**
+
             # BOOKING SERVICE - ONBOARD NFC / USAGE
             - id: booking-onboard-service
               uri: ${BOOKING_SERVICE_URL:http://booking-service:8082}

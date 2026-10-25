@@ -3,8 +3,7 @@
 // Prop `prefix` = "tour-config" (class CSS nằm trong styles/tour-config/TourConfigTable.css)
 
 import { useMemo, useState } from "react";
-import { CheckCircle2, Edit3, Eye, Plus } from "lucide-react";
-
+import { CheckCircle2, Edit3, Eye, Plus, Users } from "lucide-react";
 export const STATUS_LABELS = {
   ALL: "Tất cả",
   WAITING_CONFIG: "Chờ cấu hình",
@@ -74,7 +73,19 @@ export function TourCell({ prefix, assignment, onView }) {
     </div>
   );
 }
-
+export function AssignStaffAction({ prefix = "tour-config", onOpen }) {
+  return (
+    <button
+      type="button"
+      className={`${prefix}-action ${prefix}-action--assign`}
+      onClick={onOpen}
+      title="Phân công nhân viên Convenience"
+    >
+      <Users size={15} />
+      <span>Phân công</span>
+    </button>
+  );
+}
 export function AreaCell({ prefix, assignment, onView }) {
   const fullArea = assignment.cruiseAreaName || assignment.cruiseAreaId || "";
 

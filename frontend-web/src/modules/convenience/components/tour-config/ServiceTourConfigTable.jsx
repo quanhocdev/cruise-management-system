@@ -1,5 +1,4 @@
-// src/modules/convenience/tour-config/ServiceTourConfigTable.jsx
-// (SỬA file có sẵn) Phần dùng chung đã chuyển sang TourConfigShared.jsx
+// src/modules/convenience/components/tour-config/ServiceTourConfigTable.jsx
 
 import React, { useMemo, useState } from "react";
 import { AlertCircle, RefreshCw, Wrench } from "lucide-react";
@@ -8,11 +7,11 @@ import useServiceTour from "../../hooks/useServiceTour";
 import "../../styles/tour-config/TourConfigTable.css";
 
 import ServiceTourConfigModal from "./ServiceTourConfigModal";
-// ⚠️ File gốc dùng <ServiceTourDetailModal> nhưng KHÔNG import -> bấm con mắt sẽ crash.
-// Sửa lại đường dẫn cho đúng file thật của bạn:
-import ServiceTourDetailModal from "../history/ServiceTourDetailModal";
+import ConvenienceStaffAssignmentModal from "./ConvenienceStaffAssignmentModal";
+
 import {
   AreaCell,
+  AssignStaffAction,
   ConfigAction,
   StatusTabs,
   TourCell,
@@ -21,6 +20,7 @@ import {
 } from "./TourConfigShared";
 
 const PREFIX = "tour-config";
+
 const STATUSES = [
   "ALL",
   "WAITING_CONFIG",
@@ -46,11 +46,15 @@ const ServiceTourConfigTable = () => {
 
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [selectedAssignment, setSelectedAssignment] = useState(null);
-  const [viewDetailAssignment, setViewDetailAssignment] = useState(null);
+  const [assignmentTarget, setAssignmentTarget] = useState(null);
 
   const filteredTours = useMemo(() => {
     const list = serviceTours || [];
-    if (statusFilter === "ALL") return list;
+
+    if (statusFilter === "ALL") {
+      return list;
+    }
+
     return list.filter((item) => item.status === statusFilter);
   }, [serviceTours, statusFilter]);
 
@@ -61,6 +65,7 @@ const ServiceTourConfigTable = () => {
 
   const handleSubmit = async (assignmentId, payload) => {
     const assignment = serviceTours.find((item) => item.id === assignmentId);
+
     if (!assignment) return;
 
     if (assignment.status === "WAITING_CONFIG") {
@@ -144,7 +149,7 @@ const ServiceTourConfigTable = () => {
                 <th>Khách tối đa</th>
                 <th>Thời lượng</th>
                 <th>Trạng thái</th>
-                <th>Thao tác</th>
+                <th style={{ textAlign: "center" }}>Thao tác</th>
               </tr>
             </thead>
 
@@ -154,31 +159,26 @@ const ServiceTourConfigTable = () => {
                   <td>{index + 1}</td>
 
                   <td>
-                    <TourCell
-                      prefix={PREFIX}
-                      assignment={assignment}
-                      onView={setViewDetailAssignment}
-                    />
+                    <TourCell prefix={PREFIX} assignment={assignment} />
                   </td>
 
                   <td>
-                    <AreaCell
-                      prefix={PREFIX}
-                      assignment={assignment}
-                      onView={setViewDetailAssignment}
-                    />
+                    <AreaCell prefix={PREFIX} assignment={assignment} />
                   </td>
 
                   <td>
                     {assignment.serviceName ? (
                       <div className={`${PREFIX}-item`}>
                         <strong>{assignment.serviceName}</strong>
+
                         {assignment.serviceDescription && (
                           <span>{assignment.serviceDescription}</span>
                         )}
                       </div>
                     ) : (
-                      <span className={`${PREFIX}-muted`}>Chưa chọn dịch vụ</span>
+                      <span className={`${PREFIX}-muted`}>
+                        Chưa chọn dịch vụ
+                      </span>
                     )}
                   </td>
 
@@ -211,11 +211,24 @@ const ServiceTourConfigTable = () => {
                   </td>
 
                   <td>
-                    <ConfigAction
-                      prefix={PREFIX}
-                      assignment={assignment}
-                      onOpen={setSelectedAssignment}
-                    />
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "8px",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <ConfigAction
+                        prefix={PREFIX}
+                        assignment={assignment}
+                        onOpen={setSelectedAssignment}
+                      />
+
+                      <AssignStaffAction
+                        prefix={PREFIX}
+                        onOpen={() => setAssignmentTarget(assignment)}
+                      />
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -233,10 +246,11 @@ const ServiceTourConfigTable = () => {
         />
       )}
 
-      {viewDetailAssignment && (
-        <ServiceTourDetailModal
-          assignmentId={viewDetailAssignment.id}
-          onClose={() => setViewDetailAssignment(null)}
+      {assignmentTarget && (
+        <ConvenienceStaffAssignmentModal
+          assignment={assignmentTarget}
+          assignmentType="SERVICE"
+          onClose={() => setAssignmentTarget(null)}
         />
       )}
     </>

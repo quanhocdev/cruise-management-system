@@ -1,5 +1,4 @@
-// src/modules/convenience/tour-config/ProductTourConfigTable.jsx
-// (SỬA file có sẵn) Phần dùng chung đã chuyển sang TourConfigShared.jsx
+// src/modules/convenience/components/tour-config/ProductTourConfigTable.jsx
 
 import React, { useMemo, useState } from "react";
 import { AlertCircle, Package, RefreshCw } from "lucide-react";
@@ -8,11 +7,11 @@ import useProductTour from "../../hooks/useProductTour";
 import "../../styles/tour-config/TourConfigTable.css";
 
 import ProductTourConfigModal from "./ProductTourConfigModal";
-// ⚠️ File gốc đang comment import này nhưng vẫn render <ProductTourDetailModal>
-// -> bấm con mắt sẽ crash. Bỏ comment / sửa đường dẫn cho đúng file thật:
-import ProductTourDetailModal from "../history/ProductTourDetailModal";
+import ConvenienceStaffAssignmentModal from "./ConvenienceStaffAssignmentModal";
+
 import {
   AreaCell,
+  AssignStaffAction,
   ConfigAction,
   StatusTabs,
   TourCell,
@@ -22,6 +21,7 @@ import {
 } from "./TourConfigShared";
 
 const PREFIX = "tour-config";
+
 // Khớp ProductTourStatus (Java enum)
 const STATUSES = [
   "ALL",
@@ -49,11 +49,15 @@ const ProductTourConfigTable = () => {
 
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [selectedAssignment, setSelectedAssignment] = useState(null);
-  const [viewDetailAssignment, setViewDetailAssignment] = useState(null);
+  const [assignmentTarget, setAssignmentTarget] = useState(null);
 
   const filteredTours = useMemo(() => {
     const list = productTours || [];
-    if (statusFilter === "ALL") return list;
+
+    if (statusFilter === "ALL") {
+      return list;
+    }
+
     return list.filter((item) => item.status === statusFilter);
   }, [productTours, statusFilter]);
 
@@ -62,9 +66,11 @@ const ProductTourConfigTable = () => {
     setSelectedAssignment(null);
   };
 
-  // Backend chỉ cho configure() khi WAITING_CONFIG, updateConfig() khi CONFIGURED
+  // Backend chỉ cho configure() khi WAITING_CONFIG,
+  // updateConfig() khi CONFIGURED.
   const handleSubmit = async (assignmentId, payload) => {
     const assignment = productTours.find((item) => item.id === assignmentId);
+
     if (!assignment) return;
 
     if (assignment.status === "WAITING_CONFIG") {
@@ -157,19 +163,11 @@ const ProductTourConfigTable = () => {
                   <td>{index + 1}</td>
 
                   <td>
-                    <TourCell
-                      prefix={PREFIX}
-                      assignment={assignment}
-                      onView={setViewDetailAssignment}
-                    />
+                    <TourCell prefix={PREFIX} assignment={assignment} />
                   </td>
 
                   <td>
-                    <AreaCell
-                      prefix={PREFIX}
-                      assignment={assignment}
-                      onView={setViewDetailAssignment}
-                    />
+                    <AreaCell prefix={PREFIX} assignment={assignment} />
                   </td>
 
                   <td>
@@ -183,6 +181,7 @@ const ProductTourConfigTable = () => {
                             ? `PRD-${formatShortId(assignment.productId, 6)}`
                             : "—")}
                       </strong>
+
                       {assignment.productName && (
                         <span>{assignment.productName}</span>
                       )}
@@ -216,6 +215,11 @@ const ProductTourConfigTable = () => {
                         assignment={assignment}
                         onOpen={setSelectedAssignment}
                       />
+
+                      <AssignStaffAction
+                        prefix={PREFIX}
+                        onOpen={() => setAssignmentTarget(assignment)}
+                      />
                     </div>
                   </td>
                 </tr>
@@ -234,10 +238,11 @@ const ProductTourConfigTable = () => {
         />
       )}
 
-      {viewDetailAssignment && (
-        <ProductTourDetailModal
-          assignmentId={viewDetailAssignment.id}
-          onClose={() => setViewDetailAssignment(null)}
+      {assignmentTarget && (
+        <ConvenienceStaffAssignmentModal
+          assignment={assignmentTarget}
+          assignmentType="PRODUCT"
+          onClose={() => setAssignmentTarget(null)}
         />
       )}
     </>
