@@ -1,4 +1,7 @@
 // src/modules/convenience/tour-config/TourConfigShared.jsx
+// (FILE MỚI) Các phần dùng chung của ServiceTourConfigTable và ProductTourConfigTable.
+// Prop `prefix` = "tour-config" (class CSS nằm trong styles/tour-config/TourConfigTable.css)
+
 import { useMemo, useState } from "react";
 import { CheckCircle2, Edit3, Eye, Plus } from "lucide-react";
 

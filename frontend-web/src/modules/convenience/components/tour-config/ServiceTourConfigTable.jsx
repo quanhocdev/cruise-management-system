@@ -5,7 +5,7 @@ import React, { useMemo, useState } from "react";
 import { AlertCircle, RefreshCw, Wrench } from "lucide-react";
 
 import useServiceTour from "../../hooks/useServiceTour";
-import "../../styles/tour-config/ServiceTourConfigTable.css";
+import "../../styles/tour-config/TourConfigTable.css";
 
 import ServiceTourConfigModal from "./ServiceTourConfigModal";
 // ⚠️ File gốc dùng <ServiceTourDetailModal> nhưng KHÔNG import -> bấm con mắt sẽ crash.
@@ -20,7 +20,7 @@ import {
   getStatusLabel,
 } from "./TourConfigShared";
 
-const PREFIX = "service-tour-config";
+const PREFIX = "tour-config";
 const STATUSES = [
   "ALL",
   "WAITING_CONFIG",
@@ -171,16 +171,14 @@ const ServiceTourConfigTable = () => {
 
                   <td>
                     {assignment.serviceName ? (
-                      <div className={`${PREFIX}-service`}>
+                      <div className={`${PREFIX}-item`}>
                         <strong>{assignment.serviceName}</strong>
                         {assignment.serviceDescription && (
                           <span>{assignment.serviceDescription}</span>
                         )}
                       </div>
                     ) : (
-                      <span className={`${PREFIX}-muted`}>
-                        Chưa chọn dịch vụ
-                      </span>
+                      <span className={`${PREFIX}-muted`}>Chưa chọn dịch vụ</span>
                     )}
                   </td>
 

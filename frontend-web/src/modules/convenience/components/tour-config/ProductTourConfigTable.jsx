@@ -5,7 +5,7 @@ import React, { useMemo, useState } from "react";
 import { AlertCircle, Package, RefreshCw } from "lucide-react";
 
 import useProductTour from "../../hooks/useProductTour";
-import "../../styles/tour-config/ProductTourConfigTable.css";
+import "../../styles/tour-config/TourConfigTable.css";
 
 import ProductTourConfigModal from "./ProductTourConfigModal";
 // ⚠️ File gốc đang comment import này nhưng vẫn render <ProductTourDetailModal>
@@ -21,7 +21,7 @@ import {
   getStatusLabel,
 } from "./TourConfigShared";
 
-const PREFIX = "product-tour-config";
+const PREFIX = "tour-config";
 // Khớp ProductTourStatus (Java enum)
 const STATUSES = [
   "ALL",
@@ -173,7 +173,7 @@ const ProductTourConfigTable = () => {
                   </td>
 
                   <td>
-                    <div className={`${PREFIX}-product`}>
+                    <div className={`${PREFIX}-item`}>
                       <strong
                         className="font-mono"
                         title={assignment.productId}
