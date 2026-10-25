@@ -1,18 +1,9 @@
 // src/modules/shore/components/visit-tour/VisitTourFormModal.jsx
-
 import { useEffect, useState } from "react";
-import {
-  X,
-  AlertCircle,
-  Clock,
-  Calendar,
-  Info,
-  Users,
-  UserRound,
-  RefreshCw,
-} from "lucide-react";
+import { X, AlertCircle, Clock, Calendar, Info } from "lucide-react";
 
-import visitTourService from "../../services/visitTourService";
+import useShoreStaffAssignment from "../../hooks/useShoreStaffAssignment";
+import ShoreStaffAssignment from "./ShoreStaffAssignment";
 import "../../styles/VisitTourFormModal.css";
 
 const EMPTY_FORM = {
@@ -32,24 +23,11 @@ function toInputDateTime(value) {
 function formatDisplayDateTime(dateTimeStr) {
   if (!dateTimeStr) return "—";
 
-  try {
-    const [datePart, timePart] = dateTimeStr.split("T");
+  const [datePart, timePart] = dateTimeStr.split("T");
+  if (!datePart || !timePart) return dateTimeStr;
 
-    if (!datePart || !timePart) return dateTimeStr;
-
-    const [year, month, day] = datePart.split("-");
-    const timeOnly = timePart.substring(0, 5);
-
-    return `${day}/${month}/${year} lúc ${timeOnly}`;
-  } catch {
-    return dateTimeStr;
-  }
-}
-
-function formatPrice(price) {
-  if (price == null || price === "") return "Chưa có giá";
-
-  return `${Number(price).toLocaleString("vi-VN")} VND`;
+  const [year, month, day] = datePart.split("-");
+  return `${day}/${month}/${year} lúc ${timePart.substring(0, 5)}`;
 }
 
 function VisitTourFormModal({
@@ -62,13 +40,7 @@ function VisitTourFormModal({
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState("");
 
-  const [staffList, setStaffList] = useState([]);
-  const [assignments, setAssignments] = useState([]);
-  const [selectedUserIds, setSelectedUserIds] = useState([]);
-
-  const [staffLoading, setStaffLoading] = useState(false);
-  const [staffError, setStaffError] = useState("");
-  const [assignmentLoading, setAssignmentLoading] = useState(false);
+  const staff = useShoreStaffAssignment(visitTour?.id);
 
   const isEdit = Boolean(visitTour);
 
@@ -99,142 +71,46 @@ function VisitTourFormModal({
     setError("");
   }, [visitTour, arriveAt, leaveAt]);
 
-  // Tải nhân viên có thể phân công và danh sách đã phân công.
-  useEffect(() => {
-    let active = true;
-
-    const loadStaffData = async () => {
-      setStaffLoading(true);
-      setStaffError("");
-      setStaffList([]);
-      setAssignments([]);
-      setSelectedUserIds([]);
-
-      try {
-        const staffData = await visitTourService.getShoreStaff();
-
-        if (!active) return;
-
-        const normalizedStaff = Array.isArray(staffData)
-          ? staffData.filter(
-              (staff) => staff?.userId && staff.role === "SHORE_STAFF",
-            )
-          : [];
-
-        setStaffList(normalizedStaff);
-      } catch (err) {
-        if (!active) return;
-
-        console.error("LOAD SHORE STAFF ERROR:", err);
-        setStaffError(
-          err.response?.data?.message ||
-            "Không thể tải danh sách nhân viên Shore.",
-        );
-      }
-
-      if (visitTour?.id) {
-        setAssignmentLoading(true);
-
-        try {
-          const assignmentData = await visitTourService.getAssignments(
-            visitTour.id,
-          );
-
-          if (!active) return;
-
-          setAssignments(Array.isArray(assignmentData) ? assignmentData : []);
-        } catch (err) {
-          if (!active) return;
-
-          console.error("LOAD SHORE ASSIGNMENTS ERROR:", err);
-          setStaffError((previous) =>
-            [previous, "Không thể tải danh sách nhân viên đã phân công."]
-              .filter(Boolean)
-              .join(" "),
-          );
-        } finally {
-          if (active) setAssignmentLoading(false);
-        }
-      }
-
-      if (active) setStaffLoading(false);
-    };
-
-    loadStaffData();
-
-    return () => {
-      active = false;
-    };
-  }, [visitTour?.id]);
-
-  const assignedUserIds = new Set(
-    assignments.map((item) => item.userId).filter(Boolean),
-  );
-
-  // Không hiển thị nhân viên đã được phân công trong danh sách chọn thêm.
-  const availableStaff = staffList.filter(
-    (staff) => !assignedUserIds.has(staff.userId),
-  );
-
   const handleChange = (event) => {
     const { name, value } = event.target;
-
-    setForm((previous) => ({
-      ...previous,
-      [name]: value,
-    }));
+    setForm((previous) => ({ ...previous, [name]: value }));
   };
 
-  const toggleStaff = (userId) => {
-    setSelectedUserIds((previous) =>
-      previous.includes(userId)
-        ? previous.filter((id) => id !== userId)
-        : [...previous, userId],
-    );
+  // Trả về message lỗi, hoặc "" nếu hợp lệ
+  const validate = () => {
+    if (!form.name.trim()) return "Vui lòng nhập tên Visit Tour.";
+
+    if (!form.startTime || !form.endTime)
+      return "Vui lòng nhập đầy đủ thời gian bắt đầu và kết thúc.";
+
+    if (form.startTime >= form.endTime)
+      return "Thời gian bắt đầu phải diễn ra trước thời gian kết thúc.";
+
+    if (arriveAt && form.startTime + ":00" < arriveAt)
+      return `Thời gian bắt đầu không được sớm hơn giờ tàu cập cảng (${formatDisplayDateTime(arriveAt)}).`;
+
+    if (leaveAt && form.endTime + ":00" > leaveAt)
+      return `Thời gian kết thúc không được muộn hơn giờ tàu rời cảng (${formatDisplayDateTime(leaveAt)}).`;
+
+    if (!form.maxPassengers || Number(form.maxPassengers) <= 0)
+      return "Số lượng khách tối đa phải lớn hơn 0.";
+
+    if (form.price === "" || Number(form.price) < 0)
+      return "Giá tiền phải lớn hơn hoặc bằng 0.";
+
+    return "";
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    const message = validate();
+    if (message) {
+      setError(message);
+      return;
+    }
+
     setError("");
-
-    if (!form.name.trim()) {
-      setError("Vui lòng nhập tên Visit Tour.");
-      return;
-    }
-
-    if (!form.startTime || !form.endTime) {
-      setError("Vui lòng nhập đầy đủ thời gian bắt đầu và kết thúc.");
-      return;
-    }
-
-    if (form.startTime >= form.endTime) {
-      setError("Thời gian bắt đầu phải diễn ra trước thời gian kết thúc.");
-      return;
-    }
-
-    if (arriveAt && form.startTime + ":00" < arriveAt) {
-      setError(
-        `Thời gian bắt đầu không được sớm hơn giờ tàu cập cảng (${formatDisplayDateTime(arriveAt)}).`,
-      );
-      return;
-    }
-
-    if (leaveAt && form.endTime + ":00" > leaveAt) {
-      setError(
-        `Thời gian kết thúc không được muộn hơn giờ tàu rời cảng (${formatDisplayDateTime(leaveAt)}).`,
-      );
-      return;
-    }
-
-    if (!form.maxPassengers || Number(form.maxPassengers) <= 0) {
-      setError("Số lượng khách tối đa phải lớn hơn 0.");
-      return;
-    }
-
-    if (form.price === "" || Number(form.price) < 0) {
-      setError("Giá tiền phải lớn hơn hoặc bằng 0.");
-      return;
-    }
 
     const payload = {
       name: form.name.trim(),
@@ -246,7 +122,7 @@ function VisitTourFormModal({
     };
 
     try {
-      await onSubmit(payload, selectedUserIds);
+      await onSubmit(payload, staff.selectedUserIds);
     } catch (submitError) {
       console.error("SUBMIT VISIT TOUR ERROR:", submitError);
 
@@ -262,9 +138,7 @@ function VisitTourFormModal({
     <div
       className="visit-tour-modal-overlay"
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget && !loading) {
-          onClose();
-        }
+        if (event.target === event.currentTarget && !loading) onClose();
       }}
     >
       <div className="visit-tour-modal">
@@ -419,181 +293,18 @@ function VisitTourFormModal({
             </div>
           </div>
 
-          {/* PHÂN CÔNG NHÂN VIÊN SHORE */}
-          <section className="shore-staff-assignment">
-            <div className="shore-staff-assignment-heading">
-              <Users size={20} />
-              <div>
-                <h3>Phân công nhân viên Shore</h3>
-                <p>
-                  Chọn nhân viên phụ trách Visit Tour này. Có thể chọn nhiều
-                  người.
-                </p>
-              </div>
-            </div>
-
-            {!isEdit && (
-              <div className="shore-staff-info">
-                <Info size={15} />
-                <span>
-                  Visit Tour sẽ được tạo trước, sau đó hệ thống lưu phân công
-                  nhân viên.
-                </span>
-              </div>
-            )}
-
-            {staffError && (
-              <div className="shore-staff-error">
-                <AlertCircle size={16} />
-                <span>{staffError}</span>
-                <button
-                  type="button"
-                  disabled={staffLoading || loading}
-                  onClick={() => {
-                    // Tải lại dữ liệu bằng cách gọi API trực tiếp.
-                    setStaffError("");
-                    setStaffLoading(true);
-
-                    Promise.all([
-                      visitTourService.getShoreStaff(),
-                      visitTour?.id
-                        ? visitTourService.getAssignments(visitTour.id)
-                        : Promise.resolve([]),
-                    ])
-                      .then(([staffData, assignmentData]) => {
-                        setStaffList(
-                          (Array.isArray(staffData) ? staffData : []).filter(
-                            (staff) =>
-                              staff?.userId && staff.role === "SHORE_STAFF",
-                          ),
-                        );
-                        setAssignments(
-                          Array.isArray(assignmentData) ? assignmentData : [],
-                        );
-                      })
-                      .catch((err) => {
-                        setStaffError(
-                          err.response?.data?.message ||
-                            "Không thể tải lại dữ liệu nhân viên.",
-                        );
-                      })
-                      .finally(() => setStaffLoading(false));
-                  }}
-                >
-                  Thử lại
-                </button>
-              </div>
-            )}
-
-            {isEdit && (
-              <div className="shore-staff-current">
-                <h4>Đã được phân công ({assignments.length})</h4>
-
-                {assignmentLoading ? (
-                  <p className="shore-staff-muted">
-                    <RefreshCw size={15} className="shore-staff-spinner" />
-                    Đang tải phân công...
-                  </p>
-                ) : assignments.length === 0 ? (
-                  <p className="shore-staff-muted">
-                    Chưa có nhân viên được phân công.
-                  </p>
-                ) : (
-                  <div className="shore-staff-list">
-                    {assignments.map((assignment) => (
-                      <div
-                        className="shore-staff-current-item"
-                        key={assignment.id}
-                      >
-                        <UserRound size={19} />
-
-                        <div className="shore-staff-details">
-                          <strong>
-                            {assignment.fullName ||
-                              assignment.username ||
-                              assignment.userId}
-                          </strong>
-                          <span>{assignment.email || "Không có email"}</span>
-                        </div>
-
-                        <span
-                          className={`shore-staff-status shore-staff-status-${String(
-                            assignment.status || "PENDING",
-                          ).toLowerCase()}`}
-                        >
-                          {assignment.status || "PENDING"}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="shore-staff-available">
-              <h4>
-                Chọn nhân viên bổ sung
-                {selectedUserIds.length > 0 &&
-                  ` (${selectedUserIds.length} đã chọn)`}
-              </h4>
-
-              {staffLoading ? (
-                <p className="shore-staff-muted">
-                  <RefreshCw size={15} className="shore-staff-spinner" />
-                  Đang tải danh sách nhân viên...
-                </p>
-              ) : staffError && staffList.length === 0 ? (
-                <p className="shore-staff-muted">
-                  Không thể tải danh sách. Bạn có thể lưu cấu hình Visit Tour
-                  rồi thử tải nhân viên lại.
-                </p>
-              ) : availableStaff.length === 0 ? (
-                <p className="shore-staff-muted">
-                  {staffList.length === 0
-                    ? "Chưa có nhân viên SHORE_STAFF nào trong danh sách."
-                    : "Không còn nhân viên chưa được phân công."}
-                </p>
-              ) : (
-                <div className="shore-staff-list">
-                  {availableStaff.map((staff) => {
-                    const checked = selectedUserIds.includes(staff.userId);
-
-                    return (
-                      <label
-                        key={staff.userId}
-                        className={`shore-staff-option ${
-                          checked ? "selected" : ""
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          disabled={loading}
-                          onChange={() => toggleStaff(staff.userId)}
-                        />
-
-                        <UserRound size={19} />
-
-                        <div className="shore-staff-details">
-                          <strong>
-                            {staff.fullName || staff.username || staff.userId}
-                          </strong>
-                          <span>{staff.email || "Không có email"}</span>
-                          {staff.phone && <span>{staff.phone}</span>}
-                        </div>
-                      </label>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {selectedUserIds.length > 0 && (
-              <p className="shore-staff-selection-summary">
-                Đã chọn thêm {selectedUserIds.length} nhân viên cho Visit Tour.
-              </p>
-            )}
-          </section>
+          <ShoreStaffAssignment
+            isEdit={isEdit}
+            disabled={loading}
+            loading={staff.loading}
+            error={staff.error}
+            staffList={staff.staffList}
+            availableStaff={staff.availableStaff}
+            assignments={staff.assignments}
+            selectedUserIds={staff.selectedUserIds}
+            onToggle={staff.toggleStaff}
+            onRetry={staff.reload}
+          />
 
           <div className="visit-tour-form-actions">
             <button

@@ -18,7 +18,7 @@ function ShoreManagerTour() {
   const navigate = useNavigate();
   const m = useShoreTourManager();
 
-  if (m.loading) {
+  if (m.loading && !m.isModalOpen) {
     return (
       <div className="shore-manager-tour">
         <div className="shore-manager-tour-loading">

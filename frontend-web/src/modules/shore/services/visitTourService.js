@@ -84,11 +84,11 @@ const visitTourService = {
 
     return response.data;
   },
-  // getConfigurationHistory: async () => {
-  //   const response = await api.get("/shore/visit-tour-configurations/history");
+  getConfigurationHistory: async () => {
+    const response = await api.get("/shore/visit-tour-configurations/history");
 
-  //   return response.data;
-  // },
+    return response.data;
+  },
   /**
    * GET /api/shore/staff
    * Lấy danh sách nhân viên SHORE_STAFF.
