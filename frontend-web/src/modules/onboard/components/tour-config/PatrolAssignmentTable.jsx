@@ -1,20 +1,7 @@
-import React, { useState } from "react";
-import {
-  AssignmentStatus,
-  AssignmentSummary,
-  EmptyState,
-  LoadingState,
-} from "./OnboardAssignmentShared";
+import React from "react";
+import { EmptyState, LoadingState } from "./OnboardAssignmentShared";
 
-function PatrolAssignmentTable({
-  tour,
-  decks,
-  loading,
-  onAssign,
-  onViewAssignments,
-}) {
-  const [expandedDeckId, setExpandedDeckId] = useState(null);
-
+function PatrolAssignmentTable({ tour, decks, loading, onAssign }) {
   if (loading) {
     return <LoadingState>Đang tải danh sách tầng boong...</LoadingState>;
   }
@@ -29,88 +16,37 @@ function PatrolAssignmentTable({
 
   return (
     <div className="onboard-target-list">
-      {decks.map((deck) => {
-        const isExpanded = expandedDeckId === deck.id;
+      {decks.map((deck) => (
+        <div className="onboard-target-card" key={deck.id}>
+          <div className="onboard-target-main">
+            <div className="onboard-target-info">
+              <div className="onboard-target-icon">🛳️</div>
 
-        const assignments = deck.assignments || [];
-
-        return (
-          <div className="onboard-target-card" key={deck.id}>
-            <div className="onboard-target-main">
-              <div className="onboard-target-info">
-                <div className="onboard-target-icon">🛳️</div>
-
-                <div>
-                  <h3>Tầng {deck.deckNumber}</h3>
-
-                  <p>{tour?.cruiseName || "Du thuyền"} · Tuần tra an ninh</p>
-                </div>
-              </div>
-
-              <div className="onboard-target-actions">
-                <button
-                  type="button"
-                  className="onboard-button onboard-button-outline"
-                  onClick={() => setExpandedDeckId(isExpanded ? null : deck.id)}
-                >
-                  {isExpanded ? "Thu gọn" : "Xem phân công"}
-                </button>
-
-                <button
-                  type="button"
-                  className="onboard-button onboard-button-primary"
-                  onClick={() =>
-                    onAssign({
-                      tourId: tour.id,
-                      cruiseDeckId: deck.id,
-                      title: `Tuần tra - Tầng ${deck.deckNumber}`,
-                      subtitle: tour.cruiseName,
-                    })
-                  }
-                >
-                  + Phân công
-                </button>
+              <div>
+                <h3>Tầng {deck.deckNumber}</h3>
+                <p>{tour?.cruiseName || "Du thuyền"} · Tuần tra an ninh</p>
               </div>
             </div>
 
-            {isExpanded && (
-              <div className="onboard-target-details">
-                {assignments.length > 0 ? (
-                  <div className="onboard-assigned-list">
-                    {assignments.map((item) => (
-                      <div className="onboard-assigned-row" key={item.id}>
-                        <div>
-                          <strong>
-                            {item.fullName || item.username || item.email}
-                          </strong>
-                          <span>{item.email}</span>
-                        </div>
-
-                        <AssignmentStatus status={item.status} />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="onboard-muted">
-                    Chưa có dữ liệu phân công. Nhấn tải lại hoặc mở chức năng
-                    phân công để kiểm tra.
-                  </p>
-                )}
-
-                {onViewAssignments && (
-                  <button
-                    type="button"
-                    className="onboard-text-button"
-                    onClick={() => onViewAssignments(deck)}
-                  >
-                    Làm mới danh sách
-                  </button>
-                )}
-              </div>
-            )}
+            <div className="onboard-target-actions">
+              <button
+                type="button"
+                className="onboard-button onboard-button-primary"
+                onClick={() =>
+                  onAssign({
+                    tourId: tour.id,
+                    cruiseDeckId: deck.id,
+                    title: `Tuần tra - Tầng ${deck.deckNumber}`,
+                    subtitle: tour.cruiseName,
+                  })
+                }
+              >
+                + Phân công nhân viên
+              </button>
+            </div>
           </div>
-        );
-      })}
+        </div>
+      ))}
     </div>
   );
 }
