@@ -65,4 +65,22 @@ public interface UserRepository extends JpaRepository<Users, UUID> {
                   AND u.enabled = true
             """)
     List<ShoreStaffResponse> findAllConvenienceStaffResponses();
+
+    @Query("""
+            SELECT new com.project.auth.dto.ShoreStaffResponse(
+                u.id,
+                u.username,
+                u.email,
+                r.name,
+                p.fullName,
+                p.phone,
+                p.avatarUrl
+            )
+            FROM Users u
+            JOIN u.role r
+            LEFT JOIN UserProfile p ON p.user = u
+            WHERE r.name = 'ONBOARD_STAFF'
+              AND u.enabled = true
+            """)
+    List<ShoreStaffResponse> findAllOnboardStaffResponses();
 }
