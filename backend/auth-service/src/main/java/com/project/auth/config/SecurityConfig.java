@@ -76,6 +76,10 @@ public class SecurityConfig {
                                                                 "/api/auth/me")
                                                 .authenticated()
 
+                                                // User Profile: mọi role đã đăng nhập đều được truy cập
+                                                .requestMatchers("/api/profile/**")
+                                                .authenticated()
+
                                                 // Web Pages
                                                 .requestMatchers("/admin/**")
                                                 .hasRole("ADMIN")
@@ -113,6 +117,9 @@ public class SecurityConfig {
 
                                                 .requestMatchers("/api/passenger/**")
                                                 .hasAuthority("SCOPE_PASSENGER")
+
+                                                .requestMatchers("/internal/staff/**")
+                                                .hasAuthority("SCOPE_staff.read")
 
                                                 .anyRequest().authenticated())
 

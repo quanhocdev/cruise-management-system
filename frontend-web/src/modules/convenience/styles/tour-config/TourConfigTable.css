@@ -1,9 +1,9 @@
-/* =========================================================
-   SERVICE TOUR CONFIG TABLE - OPTIMIZED CSS
-   ========================================================= */
+/* src/modules/convenience/styles/tour-config/TourConfigTable.css
+   Dùng chung cho ServiceTourConfigTable và ProductTourConfigTable
+   (thay cho ServiceTourConfigTable.css + ProductTourConfigTable.css) */
 
-/* State & Common */
-.service-tour-config-loading {
+/* ===== Loading ===== */
+.tour-config-loading {
   width: 100%;
   min-height: 220px;
   display: flex;
@@ -15,26 +15,26 @@
 }
 
 .spin {
-  animation: service-tour-config-spin 0.8s linear infinite;
+  animation: tour-config-spin 0.8s linear infinite;
 }
-@keyframes service-tour-config-spin {
+@keyframes tour-config-spin {
   to {
     transform: rotate(360deg);
   }
 }
 
-/* Toolbar */
-.service-tour-config-toolbar {
+/* ===== Toolbar ===== */
+.tour-config-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
   margin-bottom: 18px;
 }
-.service-tour-config-toolbar > div {
+.tour-config-toolbar > div {
   min-width: 0;
 }
-.service-tour-config-toolbar h2 {
+.tour-config-toolbar h2 {
   margin: 0;
   display: flex;
   align-items: center;
@@ -44,19 +44,18 @@
   font-weight: 700;
   line-height: 1.35;
 }
-.service-tour-config-toolbar h2 svg {
+.tour-config-toolbar h2 svg {
   flex-shrink: 0;
   color: #2563eb;
 }
-.service-tour-config-toolbar p {
+.tour-config-toolbar p {
   margin: 6px 0 0;
   color: #64748b;
   font-size: 13px;
   line-height: 1.5;
 }
 
-/* Buttons */
-.service-tour-config-refresh {
+.tour-config-refresh {
   flex-shrink: 0;
   min-height: 38px;
   padding: 0 14px;
@@ -73,22 +72,22 @@
   cursor: pointer;
   transition: all 0.18s ease;
 }
-.service-tour-config-refresh:hover:not(:disabled) {
+.tour-config-refresh:hover:not(:disabled) {
   background: #f8fafc;
   border-color: #bfdbfe;
   color: #2563eb;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
 }
-.service-tour-config-refresh:active:not(:disabled) {
+.tour-config-refresh:active:not(:disabled) {
   transform: translateY(1px);
 }
-.service-tour-config-refresh:disabled {
+.tour-config-refresh:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
 
-/* Error & Messages */
-.service-tour-config-error {
+/* ===== Error ===== */
+.tour-config-error {
   box-sizing: border-box;
   display: flex;
   align-items: flex-start;
@@ -102,13 +101,13 @@
   font-size: 13px;
   line-height: 1.5;
 }
-.service-tour-config-error svg {
+.tour-config-error svg {
   flex-shrink: 0;
   margin-top: 1px;
 }
 
-/* Complete Box */
-.service-tour-config-complete-box {
+/* ===== Complete box ===== */
+.tour-config-complete-box {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -119,27 +118,27 @@
   border-radius: 12px;
   background: #f8fafc;
 }
-.service-tour-config-complete-info strong {
+.tour-config-complete-info strong {
   display: block;
   margin-bottom: 3px;
   color: #0f172a;
   font-size: 14.5px;
   font-weight: 700;
 }
-.service-tour-config-complete-info p {
+.tour-config-complete-info p {
   margin: 0;
   max-width: 640px;
   color: #64748b;
   font-size: 12.5px;
   line-height: 1.5;
 }
-.service-tour-config-complete-controls {
+.tour-config-complete-controls {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
 }
-.service-tour-config-complete-select {
+.tour-config-complete-select {
   flex: 1 1 260px;
   min-width: 220px;
   min-height: 38px;
@@ -152,12 +151,12 @@
   font-weight: 600;
   cursor: pointer;
 }
-.service-tour-config-complete-select:disabled {
+.tour-config-complete-select:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.service-tour-config-complete-button {
+.tour-config-complete-button {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
@@ -176,45 +175,43 @@
     background-color 0.18s ease,
     transform 0.12s ease;
 }
-.service-tour-config-complete-button:hover:not(:disabled) {
+.tour-config-complete-button:hover:not(:disabled) {
   background: #1d4ed8;
 }
-.service-tour-config-complete-button:active:not(:disabled) {
+.tour-config-complete-button:active:not(:disabled) {
   transform: translateY(1px);
 }
-.service-tour-config-complete-button:disabled {
+.tour-config-complete-button:disabled {
   background: #cbd5e1;
   color: #64748b;
   cursor: not-allowed;
 }
 
-.service-tour-config-complete-hint {
+.tour-config-complete-hint,
+.tour-config-complete-error,
+.tour-config-complete-success {
   display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.tour-config-complete-hint {
   color: #b45309;
-  font-size: 12.5px;
-  font-weight: 600;
 }
-.service-tour-config-complete-error {
-  display: block;
+.tour-config-complete-error {
   color: #b91c1c;
-  font-size: 12.5px;
-  font-weight: 600;
 }
-.service-tour-config-complete-success {
-  display: block;
+.tour-config-complete-success {
   color: #15803d;
-  font-size: 12.5px;
-  font-weight: 600;
 }
 
-/* Status Filter Tabs */
-.service-tour-config-filters {
+/* ===== Status tabs ===== */
+.tour-config-filters {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 16px;
 }
-.service-tour-config-filter-btn {
+.tour-config-filter-btn {
   min-height: 34px;
   padding: 0 14px;
   border: 1px solid #dbe3ef;
@@ -226,21 +223,19 @@
   cursor: pointer;
   transition: all 0.18s ease;
 }
-.service-tour-config-filter-btn:hover {
+.tour-config-filter-btn:hover {
   border-color: #bfdbfe;
   color: #2563eb;
 }
-.service-tour-config-filter-btn--active {
+.tour-config-filter-btn--active,
+.tour-config-filter-btn--active:hover {
   border-color: #2563eb;
   background: #2563eb;
   color: #fff;
 }
-.service-tour-config-filter-btn--active:hover {
-  color: #fff;
-}
 
-/* Empty State */
-.service-tour-config-empty {
+/* ===== Empty ===== */
+.tour-config-empty {
   min-height: 280px;
   box-sizing: border-box;
   display: flex;
@@ -253,17 +248,17 @@
   background: #f8fafc;
   text-align: center;
 }
-.service-tour-config-empty > svg {
+.tour-config-empty > svg {
   margin-bottom: 12px;
   color: #94a3b8;
 }
-.service-tour-config-empty h3 {
+.tour-config-empty h3 {
   margin: 0;
   color: #334155;
   font-size: 16px;
   font-weight: 700;
 }
-.service-tour-config-empty p {
+.tour-config-empty p {
   max-width: 420px;
   margin: 7px 0 0;
   color: #64748b;
@@ -271,8 +266,8 @@
   line-height: 1.5;
 }
 
-/* Table Wrapper & Scrollbars */
-.service-tour-config-table-wrapper {
+/* ===== Table ===== */
+.tour-config-table-wrapper {
   overflow-x: auto;
   overflow-y: hidden;
   border: 1px solid #e2e8f0;
@@ -281,25 +276,24 @@
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;
 }
-.service-tour-config-table-wrapper::-webkit-scrollbar {
+.tour-config-table-wrapper::-webkit-scrollbar {
   height: 7px;
 }
-.service-tour-config-table-wrapper::-webkit-scrollbar-thumb {
+.tour-config-table-wrapper::-webkit-scrollbar-thumb {
   border-radius: 10px;
   background: #cbd5e1;
 }
-.service-tour-config-table-wrapper::-webkit-scrollbar-thumb:hover {
+.tour-config-table-wrapper::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
 
-/* Table Structure */
-.service-tour-config-table {
+.tour-config-table {
   width: 100%;
   min-width: 1060px;
   border-collapse: separate;
   border-spacing: 0;
 }
-.service-tour-config-table thead th {
+.tour-config-table thead th {
   height: 46px;
   padding: 0 14px;
   border-bottom: 1px solid #e2e8f0;
@@ -312,14 +306,13 @@
   letter-spacing: 0.035em;
   white-space: nowrap;
 }
-.service-tour-config-table thead th:first-child {
+.tour-config-table thead th:first-child {
   border-top-left-radius: 11px;
 }
-.service-tour-config-table thead th:last-child {
+.tour-config-table thead th:last-child {
   border-top-right-radius: 11px;
 }
-
-.service-tour-config-table tbody td {
+.tour-config-table tbody td {
   min-height: 68px;
   padding: 13px 14px;
   border-bottom: 1px solid #eef2f7;
@@ -327,19 +320,19 @@
   font-size: 13px;
   vertical-align: middle;
 }
-.service-tour-config-table tbody tr:last-child td {
+.tour-config-table tbody tr:last-child td {
   border-bottom: none;
 }
-.service-tour-config-table tbody tr {
+.tour-config-table tbody tr {
   transition: background-color 0.15s ease;
 }
-.service-tour-config-table tbody tr:hover {
+.tour-config-table tbody tr:hover {
   background: #f8fafc;
 }
 
-/* Table Column Details */
-.service-tour-config-table thead th:first-child,
-.service-tour-config-table tbody td:first-child {
+/* STT */
+.tour-config-table thead th:first-child,
+.tour-config-table tbody td:first-child {
   width: 48px;
   min-width: 48px;
   text-align: center;
@@ -347,20 +340,27 @@
   font-weight: 600;
 }
 
-.service-tour-config-tour {
-  min-width: 170px;
+/* Ô Tour / Khu vực */
+.tour-config-tour,
+.tour-config-area {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 6px;
 }
-.service-tour-config-tour strong {
+.tour-config-tour {
+  min-width: 170px;
+}
+.tour-config-area {
+  min-width: 150px;
+}
+.tour-config-tour strong {
   color: #0f172a;
   font-size: 13px;
   font-weight: 700;
   white-space: nowrap;
 }
-.service-tour-config-tour span {
+.tour-config-tour span {
   max-width: 190px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -368,15 +368,7 @@
   color: #64748b;
   font-size: 12px;
 }
-
-.service-tour-config-area {
-  min-width: 150px;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-}
-.service-tour-config-area strong {
+.tour-config-area strong {
   max-width: 170px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -385,20 +377,21 @@
   font-size: 13px;
   font-weight: 600;
 }
-.service-tour-config-area span {
+.tour-config-area span {
   color: #94a3b8;
   font-size: 12px;
   white-space: nowrap;
 }
 
-.service-tour-config-service {
+/* Ô Dịch vụ / Sản phẩm */
+.tour-config-item {
   min-width: 170px;
   max-width: 250px;
   display: flex;
   flex-direction: column;
   gap: 3px;
 }
-.service-tour-config-service strong {
+.tour-config-item strong {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -406,7 +399,7 @@
   font-size: 13px;
   font-weight: 600;
 }
-.service-tour-config-service span {
+.tour-config-item span {
   display: -webkit-box;
   overflow: hidden;
   color: #64748b;
@@ -416,8 +409,8 @@
   -webkit-line-clamp: 2;
 }
 
-/* Status Badges */
-.service-tour-config-status {
+/* ===== Status badge ===== */
+.tour-config-status {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -428,34 +421,39 @@
   font-weight: 700;
   white-space: nowrap;
 }
-.service-tour-config-status.waiting_config {
+.tour-config-status.waiting_config {
   border: 1px solid #fde68a;
   background: #fffbeb;
   color: #b45309;
 }
-.service-tour-config-status.configured {
+.tour-config-status.configured {
   border: 1px solid #99f6e4;
   background: #f0fdfa;
   color: #0f766e;
 }
-.service-tour-config-status.not_started {
+.tour-config-status.not_started {
   border: 1px solid #bfdbfe;
   background: #eff6ff;
   color: #1d4ed8;
 }
-.service-tour-config-status.in_progress {
+.tour-config-status.in_progress {
   border: 1px solid #bbf7d0;
   background: #f0fdf4;
   color: #15803d;
 }
-.service-tour-config-status.completed {
+.tour-config-status.out_of_stock {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+.tour-config-status.completed {
   border: 1px solid #cbd5e1;
   background: #f8fafc;
   color: #64748b;
 }
 
-/* Action Buttons */
-.service-tour-config-action {
+/* ===== Action buttons ===== */
+.tour-config-action {
   min-height: 34px;
   padding: 0 11px;
   display: inline-flex;
@@ -472,17 +470,17 @@
   cursor: pointer;
   transition: all 0.18s ease;
 }
-.service-tour-config-action:hover {
+.tour-config-action:hover {
   border-color: #93c5fd;
   background: #dbeafe;
   color: #1d4ed8;
   box-shadow: 0 2px 7px rgba(37, 99, 235, 0.1);
 }
-.service-tour-config-action:active {
+.tour-config-action:active {
   transform: translateY(1px);
 }
 
-.service-tour-config-action--view {
+.tour-config-action--view {
   min-height: 24px;
   min-width: 24px;
   padding: 2px 4px;
@@ -493,149 +491,161 @@
   font-size: 0;
   font-weight: 400;
 }
-.service-tour-config-action--view:hover {
+.tour-config-action--view:hover {
   border-color: #bfdbfe;
   background: #eff6ff;
   color: #2563eb;
   box-shadow: none;
 }
 
-/* Responsive Adjustments */
+/* ===== Responsive ===== */
 @media (max-width: 1024px) {
-  .service-tour-config-toolbar {
+  .tour-config-toolbar {
     align-items: flex-start;
   }
-  .service-tour-config-toolbar h2 {
+  .tour-config-toolbar h2 {
     font-size: 18px;
   }
-  .service-tour-config-table {
+  .tour-config-table {
     min-width: 1000px;
   }
-  .service-tour-config-table thead th,
-  .service-tour-config-table tbody td {
+  .tour-config-table thead th,
+  .tour-config-table tbody td {
     padding-left: 12px;
     padding-right: 12px;
   }
 }
 
 @media (max-width: 768px) {
-  .service-tour-config-toolbar {
+  .tour-config-toolbar {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
     margin-bottom: 14px;
   }
-  .service-tour-config-toolbar h2 {
+  .tour-config-toolbar h2 {
     font-size: 17px;
   }
-  .service-tour-config-toolbar p {
+  .tour-config-toolbar p {
     margin-top: 5px;
     font-size: 12px;
   }
-  .service-tour-config-refresh {
+  .tour-config-refresh {
     width: 100%;
   }
-  .service-tour-config-error {
+  .tour-config-error {
     padding: 10px 12px;
     font-size: 12px;
   }
-  .service-tour-config-complete-box {
+  .tour-config-complete-box {
     padding: 14px;
   }
-  .service-tour-config-complete-controls {
+  .tour-config-complete-controls {
     flex-direction: column;
     align-items: stretch;
   }
-  .service-tour-config-complete-select,
-  .service-tour-config-complete-button {
+  .tour-config-complete-select,
+  .tour-config-complete-button {
     width: 100%;
   }
-  .service-tour-config-empty {
+  .tour-config-empty {
     min-height: 240px;
     padding: 32px 18px;
   }
-  .service-tour-config-empty h3 {
+  .tour-config-empty h3 {
     font-size: 15px;
   }
-  .service-tour-config-empty p {
+  .tour-config-empty p {
     font-size: 12px;
   }
-  .service-tour-config-table-wrapper {
+  .tour-config-table-wrapper {
     border-radius: 10px;
   }
-  .service-tour-config-table {
+  .tour-config-table {
     min-width: 960px;
   }
-  .service-tour-config-table thead th {
+  .tour-config-table thead th {
     height: 43px;
     padding: 0 10px;
     font-size: 10px;
   }
-  .service-tour-config-table tbody td {
+  .tour-config-table tbody td {
     padding: 11px 10px;
     font-size: 12px;
   }
-  .service-tour-config-tour strong,
-  .service-tour-config-area strong,
-  .service-tour-config-service strong {
+  .tour-config-tour strong,
+  .tour-config-area strong,
+  .tour-config-item strong {
     font-size: 12px;
   }
-  .service-tour-config-tour span,
-  .service-tour-config-area span,
-  .service-tour-config-service span {
+  .tour-config-tour span,
+  .tour-config-area span,
+  .tour-config-item span {
     font-size: 11px;
   }
-  .service-tour-config-status {
+  .tour-config-status {
     min-height: 25px;
     padding: 0 8px;
     font-size: 10px;
   }
-  .service-tour-config-action {
+  .tour-config-action {
     min-height: 32px;
     padding: 0 9px;
     font-size: 11px;
   }
-  .service-tour-config-action--view {
+  .tour-config-action--view {
     min-height: 22px;
     min-width: 22px;
   }
 }
 
 @media (max-width: 480px) {
-  .service-tour-config-toolbar h2 {
+  .tour-config-toolbar h2 {
     font-size: 16px;
   }
-  .service-tour-config-toolbar p {
+  .tour-config-toolbar p {
     font-size: 11px;
   }
-  .service-tour-config-refresh {
+  .tour-config-refresh {
     min-height: 36px;
     font-size: 12px;
   }
-  .service-tour-config-table {
+  .tour-config-table {
     min-width: 900px;
   }
-  .service-tour-config-table thead th {
+  .tour-config-table thead th {
     padding: 0 9px;
   }
-  .service-tour-config-table tbody td {
+  .tour-config-table tbody td {
     padding: 10px 9px;
   }
-  .service-tour-config-empty {
+  .tour-config-empty {
     min-height: 220px;
     padding: 28px 14px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .service-tour-config-refresh,
-  .service-tour-config-action,
-  .service-tour-config-table tbody tr,
-  .service-tour-config-complete-button,
-  .service-tour-config-filter-btn {
+  .tour-config-refresh,
+  .tour-config-action,
+  .tour-config-table tbody tr,
+  .tour-config-complete-button,
+  .tour-config-filter-btn {
     transition: none;
   }
   .spin {
     animation: none;
   }
+}
+/* Convenience staff assignment action */
+.tour-config-action--assign {
+  color: #2563eb;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.tour-config-action--assign:hover {
+  color: #1d4ed8;
+  background: #dbeafe;
+  border-color: #93c5fd;
 }

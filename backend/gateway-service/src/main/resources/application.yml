@@ -21,7 +21,7 @@ spring:
             - id: auth-service
               uri: ${AUTH_SERVICE_URL:http://auth-service:8081}
               predicates:
-                - Path=/api/auth/**,/api/admin/staff/**
+                - Path=/api/auth/**,/api/admin/staff/**,/api/admin/roles/**,/api/profile/**
 
             # PAYMENT SERVICE
             - id: payment-service
@@ -124,6 +124,12 @@ spring:
               uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
               predicates:
                 - Path=/api/convenience/products/**,/api/convenience/services/**,/api/convenience/product-tours/**,/api/convenience/service-tours/**
+
+            # TOUR SERVICE - CONVENIENCE STAFF ASSIGNMENT
+            - id: tour-convenience-staff-assignment
+              uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
+              predicates:
+                - Path=/api/convenience/staff/**,/api/convenience/assignments/**
 
             # BOOKING SERVICE - ONBOARD NFC / USAGE
             - id: booking-onboard-service

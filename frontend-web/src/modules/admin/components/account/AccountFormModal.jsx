@@ -6,6 +6,8 @@ export default function AccountFormModal({
   editingAccount,
   form,
   error,
+  roles = [],
+  rolesLoading = false,
   onClose,
   onSubmit,
   onChange,
@@ -64,21 +66,29 @@ export default function AccountFormModal({
               value={form.roleId}
               onChange={onChange}
               required
+              disabled={rolesLoading || saving}
             >
-              <option value="">-- Chọn vai trò --</option>
+              <option value="">
+                {rolesLoading
+                  ? "Đang tải vai trò..."
+                  : roles.length === 0
+                    ? "Không có vai trò khả dụng"
+                    : "-- Chọn vai trò --"}
+              </option>
 
-              <option value="2">Scheduler</option>
-
-              <option value="3">Shore</option>
-
-              <option value="4">Onboard</option>
-
-              <option value="5">Convenience</option>
-
-              <option value="6">Finance</option>
-
-              <option value="7">Operation</option>
+              {roles.map((role) => (
+                <option key={role.id} value={String(role.id)}>
+                  {role.name}
+                </option>
+              ))}
             </Form.Select>
+
+            {!rolesLoading && roles.length === 0 && (
+              <Form.Text className="text-danger">
+                Không tải được vai trò hoặc chưa có vai trò khả dụng. Vui lòng
+                kiểm tra API lấy danh sách vai trò.
+              </Form.Text>
+            )}
           </Form.Group>
 
           {editingAccount && (
@@ -91,7 +101,6 @@ export default function AccountFormModal({
                 onChange={onChange}
               >
                 <option value="ACTIVE">ACTIVE</option>
-
                 <option value="INACTIVE">INACTIVE</option>
               </Form.Select>
             </Form.Group>
@@ -110,7 +119,11 @@ export default function AccountFormModal({
             Hủy
           </Button>
 
-          <Button variant="primary" type="submit" disabled={saving}>
+          <Button
+            variant="primary"
+            type="submit"
+            disabled={saving || rolesLoading || roles.length === 0}
+          >
             {saving ? (
               <>
                 <Spinner size="sm" animation="border" className="me-2" />

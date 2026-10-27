@@ -1,6 +1,9 @@
 // src/modules/shore/components/visit-tour/VisitTourFormModal.jsx
 import { useEffect, useState } from "react";
 import { X, AlertCircle, Clock, Calendar, Info } from "lucide-react";
+
+import useShoreStaffAssignment from "../../hooks/useShoreStaffAssignment";
+import ShoreStaffAssignment from "./ShoreStaffAssignment";
 import "../../styles/VisitTourFormModal.css";
 
 const EMPTY_FORM = {
@@ -17,18 +20,14 @@ function toInputDateTime(value) {
   return value.slice(0, 16);
 }
 
-// Hàm format hiển thị ngày giờ đẹp mắt (VD: 10/10/2026 08:00)
 function formatDisplayDateTime(dateTimeStr) {
   if (!dateTimeStr) return "—";
-  try {
-    const [datePart, timePart] = dateTimeStr.split("T");
-    if (!datePart || !timePart) return dateTimeStr;
-    const [year, month, day] = datePart.split("-");
-    const timeOnly = timePart.substring(0, 5);
-    return `${day}/${month}/${year} lúc ${timeOnly}`;
-  } catch (e) {
-    return dateTimeStr;
-  }
+
+  const [datePart, timePart] = dateTimeStr.split("T");
+  if (!datePart || !timePart) return dateTimeStr;
+
+  const [year, month, day] = datePart.split("-");
+  return `${day}/${month}/${year} lúc ${timePart.substring(0, 5)}`;
 }
 
 function VisitTourFormModal({
@@ -40,6 +39,8 @@ function VisitTourFormModal({
 }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState("");
+
+  const staff = useShoreStaffAssignment(visitTour?.id);
 
   const isEdit = Boolean(visitTour);
 
@@ -59,68 +60,57 @@ function VisitTourFormModal({
         maxPassengers: visitTour.maxPassengers ?? "",
         price: visitTour.price ?? "",
       });
-      return;
+    } else {
+      setForm({
+        ...EMPTY_FORM,
+        startTime: toInputDateTime(arriveAt),
+        endTime: toInputDateTime(leaveAt),
+      });
     }
 
-    // Trạng thái gán đủ ban đầu theo giờ cập cảng chuẩn
-    setForm({
-      ...EMPTY_FORM,
-      startTime: toInputDateTime(arriveAt),
-      endTime: toInputDateTime(leaveAt),
-    });
+    setError("");
   }, [visitTour, arriveAt, leaveAt]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setForm((previous) => ({
-      ...previous,
-      [name]: value,
-    }));
+    setForm((previous) => ({ ...previous, [name]: value }));
+  };
+
+  // Trả về message lỗi, hoặc "" nếu hợp lệ
+  const validate = () => {
+    if (!form.name.trim()) return "Vui lòng nhập tên Visit Tour.";
+
+    if (!form.startTime || !form.endTime)
+      return "Vui lòng nhập đầy đủ thời gian bắt đầu và kết thúc.";
+
+    if (form.startTime >= form.endTime)
+      return "Thời gian bắt đầu phải diễn ra trước thời gian kết thúc.";
+
+    if (arriveAt && form.startTime + ":00" < arriveAt)
+      return `Thời gian bắt đầu không được sớm hơn giờ tàu cập cảng (${formatDisplayDateTime(arriveAt)}).`;
+
+    if (leaveAt && form.endTime + ":00" > leaveAt)
+      return `Thời gian kết thúc không được muộn hơn giờ tàu rời cảng (${formatDisplayDateTime(leaveAt)}).`;
+
+    if (!form.maxPassengers || Number(form.maxPassengers) <= 0)
+      return "Số lượng khách tối đa phải lớn hơn 0.";
+
+    if (form.price === "" || Number(form.price) < 0)
+      return "Giá tiền phải lớn hơn hoặc bằng 0.";
+
+    return "";
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    const message = validate();
+    if (message) {
+      setError(message);
+      return;
+    }
+
     setError("");
-
-    if (!form.name.trim()) {
-      setError("Vui lòng nhập tên Visit Tour.");
-      return;
-    }
-
-    if (!form.startTime || !form.endTime) {
-      setError("Vui lòng nhập đầy đủ thời gian bắt đầu và kết thúc.");
-      return;
-    }
-
-    if (form.startTime >= form.endTime) {
-      setError("Thời gian bắt đầu phải diễn ra trước thời gian kết thúc.");
-      return;
-    }
-
-    // Kiểm tra ràng buộc bắt buộc nằm trong khoảng giờ tàu cập bến
-    if (arriveAt && form.startTime + ":00" < arriveAt) {
-      setError(
-        `Thời gian bắt đầu không được sớm hơn giờ tàu cập bến (${formatDisplayDateTime(arriveAt)}).`,
-      );
-      return;
-    }
-
-    if (leaveAt && form.endTime + ":00" > leaveAt) {
-      setError(
-        `Thời gian kết thúc không được muộn hơn giờ tàu rời cảng (${formatDisplayDateTime(leaveAt)}).`,
-      );
-      return;
-    }
-
-    if (!form.maxPassengers || Number(form.maxPassengers) <= 0) {
-      setError("Số lượng khách tối đa phải lớn hơn 0.");
-      return;
-    }
-
-    if (form.price === "" || Number(form.price) < 0) {
-      setError("Giá tiền phải lớn hơn hoặc bằng 0.");
-      return;
-    }
 
     const payload = {
       name: form.name.trim(),
@@ -132,14 +122,15 @@ function VisitTourFormModal({
     };
 
     try {
-      await onSubmit(payload);
+      await onSubmit(payload, staff.selectedUserIds);
     } catch (submitError) {
       console.error("SUBMIT VISIT TOUR ERROR:", submitError);
-      const message =
+
+      setError(
         submitError?.response?.data?.message ||
-        submitError?.message ||
-        "Không thể lưu Visit Tour.";
-      setError(message);
+          submitError?.message ||
+          "Không thể lưu Visit Tour hoặc phân công nhân viên.",
+      );
     }
   };
 
@@ -147,9 +138,7 @@ function VisitTourFormModal({
     <div
       className="visit-tour-modal-overlay"
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget) {
-          onClose();
-        }
+        if (event.target === event.currentTarget && !loading) onClose();
       }}
     >
       <div className="visit-tour-modal">
@@ -169,7 +158,6 @@ function VisitTourFormModal({
           </button>
         </div>
 
-        {/* KHU VỰC THÔNG TIN CẬP CẢNG KÈM DÒNG CHÚ THÍCH CÓ THỂ ĐIỀU CHỈNH */}
         <div className="visit-tour-modal-notice-box">
           {scheduleDate && (
             <div className="notice-row">
@@ -183,6 +171,7 @@ function VisitTourFormModal({
             <div className="notice-row">
               <Clock size={15} className="notice-icon" />
               <span>Khung giờ cập cảng cho phép:</span>
+
               <div className="time-badge-group">
                 <span className="time-badge">
                   {formatDisplayDateTime(arriveAt)}
@@ -198,8 +187,8 @@ function VisitTourFormModal({
           <div className="notice-hint">
             <Info size={13} />
             <span>
-              Hệ thống tự động điền theo khung giờ cập cảng, bạn có thể tự điều
-              chỉnh lại thời gian bên dưới cho phù hợp.
+              Hệ thống tự động điền thời gian theo lịch cập cảng. Bạn có thể
+              điều chỉnh lại thời gian cho phù hợp.
             </span>
           </div>
         </div>
@@ -304,6 +293,19 @@ function VisitTourFormModal({
             </div>
           </div>
 
+          <ShoreStaffAssignment
+            isEdit={isEdit}
+            disabled={loading}
+            loading={staff.loading}
+            error={staff.error}
+            staffList={staff.staffList}
+            availableStaff={staff.availableStaff}
+            assignments={staff.assignments}
+            selectedUserIds={staff.selectedUserIds}
+            onToggle={staff.toggleStaff}
+            onRetry={staff.reload}
+          />
+
           <div className="visit-tour-form-actions">
             <button
               type="button"
@@ -313,12 +315,13 @@ function VisitTourFormModal({
             >
               Hủy
             </button>
+
             <button type="submit" disabled={loading} className="btn-submit">
               {loading
-                ? "Đang lưu..."
+                ? "Đang lưu cấu hình và phân công..."
                 : isEdit
-                  ? "Lưu thay đổi"
-                  : "Xác nhận cấu hình"}
+                  ? "Lưu cấu hình và phân công"
+                  : "Xác nhận cấu hình và phân công"}
             </button>
           </div>
         </form>
