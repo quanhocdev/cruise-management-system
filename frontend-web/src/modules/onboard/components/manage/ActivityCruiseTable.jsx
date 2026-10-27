@@ -1,6 +1,6 @@
 import React from "react";
 import { Edit2, Trash2, Image as ImageIcon } from "lucide-react";
-import "../styles/ActivityCruise.css";
+import "../../styles/ActivityCruise.css";
 
 function ActivityCruiseTable({ activities, onEdit, onDelete, loading }) {
   if (loading) {

@@ -6,6 +6,7 @@ import useActivityCruiseTour from "../hooks/useActivityCruiseTour";
 import ActivityCruiseTourTable from "../components/activity-cruise-tour/ActivityCruiseTourTable";
 import ActivityCruiseTourDetail from "../components/activity-cruise-tour/ActivityCruiseTourDetail";
 import ActivityCruiseTourConfigModal from "../components/activity-cruise-tour/ActivityCruiseTourConfigModal";
+import OnboardStaffAssignmentModal from "../components/tour-config/OnboardStaffAssignmentModal";
 
 import "../styles/ActivityCruiseTour.css";
 
@@ -42,7 +43,9 @@ const ActivityCruiseTour = () => {
   const [selectedTour, setSelectedTour] = useState(null);
   const [configTour, setConfigTour] = useState(null);
 
-  // Tour đang được chọn để "Hoàn thành cấu hình"
+  // Hoạt động đang được chọn để phân công nhân viên
+  const [assignmentActivity, setAssignmentActivity] = useState(null);
+
   const [selectedTourIdToComplete, setSelectedTourIdToComplete] = useState("");
   const [completeSuccess, setCompleteSuccess] = useState(false);
 
@@ -50,6 +53,19 @@ const ActivityCruiseTour = () => {
   const handleOpenConfig = (tour) => setConfigTour(tour);
   const handleCloseDetail = () => setSelectedTour(null);
   const handleCloseConfig = () => setConfigTour(null);
+
+  const handleOpenAssignment = (activity) => {
+    if (!activity?.id || !activity?.tourId) {
+      console.error("Activity assignment is missing id or tourId:", activity);
+      return;
+    }
+
+    setAssignmentActivity(activity);
+  };
+
+  const handleCloseAssignment = () => {
+    setAssignmentActivity(null);
+  };
 
   const handleSubmitConfig = async (assignmentId, data) => {
     try {
@@ -70,7 +86,6 @@ const ActivityCruiseTour = () => {
     }
   };
 
-  // Tour đang chọn có đủ điều kiện hoàn thành không (tất cả activity CONFIGURED)
   const selectedTourSummary = useMemo(
     () =>
       tourSummaries.find((tour) => tour.tourId === selectedTourIdToComplete),
@@ -91,7 +106,6 @@ const ActivityCruiseTour = () => {
       setSelectedTourIdToComplete("");
     } catch (err) {
       console.error("COMPLETE TOUR ERROR:", err);
-      // completeError đã được hook set, hiển thị bên dưới
     }
   };
 
@@ -103,12 +117,13 @@ const ActivityCruiseTour = () => {
           <div className="activity-cruise-tour-page__icon">
             <Activity size={22} />
           </div>
+
           <div>
             <h1 className="activity-cruise-tour-page__title">
               Cấu hình hoạt động Tour
             </h1>
             <p className="activity-cruise-tour-page__subtitle">
-              Quản lý và cấu hình các hoạt động được phân công cho Tour
+              Quản lý, cấu hình hoạt động và phân công nhân viên ONBOARD
             </p>
           </div>
         </div>
@@ -129,7 +144,6 @@ const ActivityCruiseTour = () => {
         </button>
       </div>
 
-      {/* ERROR chung */}
       {error && (
         <div className="activity-cruise-tour-page__error">
           <AlertCircle size={18} />
@@ -137,7 +151,7 @@ const ActivityCruiseTour = () => {
         </div>
       )}
 
-      {/* ============ COMPLETE TOUR CONFIGURATION ============ */}
+      {/* HOÀN THÀNH CẤU HÌNH TOUR */}
       <div className="activity-cruise-tour-page__complete-box">
         <div className="activity-cruise-tour-page__complete-info">
           <strong>Hoàn thành cấu hình Tour</strong>
@@ -158,6 +172,7 @@ const ActivityCruiseTour = () => {
             disabled={completing}
           >
             <option value="">— Chọn Tour —</option>
+
             {tourSummaries.map((tour) => (
               <option
                 key={tour.tourId}
@@ -204,7 +219,7 @@ const ActivityCruiseTour = () => {
         )}
       </div>
 
-      {/* MAIN SECTION (giữ nguyên) */}
+      {/* DANH SÁCH HOẠT ĐỘNG */}
       <section className="activity-cruise-tour-page__section">
         <div className="activity-cruise-tour-page__section-header">
           <div>
@@ -212,7 +227,7 @@ const ActivityCruiseTour = () => {
               Danh sách hoạt động
             </h2>
             <p className="activity-cruise-tour-page__section-description">
-              Toàn bộ hoạt động thuộc Tour, lọc theo trạng thái cấu hình.
+              Quản lý cấu hình và phân công nhân viên phụ trách từng hoạt động.
             </p>
           </div>
 
@@ -243,9 +258,11 @@ const ActivityCruiseTour = () => {
           loading={loading}
           onViewDetail={handleViewDetail}
           onConfigure={handleOpenConfig}
+          onAssign={handleOpenAssignment}
         />
       </section>
 
+      {/* MODAL XEM CHI TIẾT */}
       {selectedTour && (
         <div className="activity-cruise-tour-page__modal-overlay">
           <div className="activity-cruise-tour-page__detail-modal">
@@ -257,12 +274,27 @@ const ActivityCruiseTour = () => {
         </div>
       )}
 
+      {/* MODAL CẤU HÌNH HOẠT ĐỘNG */}
       {configTour && (
         <ActivityCruiseTourConfigModal
           assignment={configTour}
           onClose={handleCloseConfig}
           onSubmit={handleSubmitConfig}
+          onUpdate={handleUpdateConfig}
           submitting={loading}
+        />
+      )}
+
+      {/* MODAL PHÂN CÔNG NHÂN VIÊN */}
+      {assignmentActivity && (
+        <OnboardStaffAssignmentModal
+          open={true}
+          assignment={{
+            tourId: assignmentActivity.tourId,
+            activityCruiseTourId: assignmentActivity.id,
+          }}
+          assignmentType="ACTIVITY_CRUISE"
+          onClose={handleCloseAssignment}
         />
       )}
     </div>

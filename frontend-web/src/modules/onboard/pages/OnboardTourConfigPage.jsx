@@ -1,3 +1,4 @@
+// src/modules/onboard/pages/OnboardTourConfigPage.jsx
 import React from "react";
 import OnboardTourConfig from "../components/tour-config/OnboardTourConfig";
 
