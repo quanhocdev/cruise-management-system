@@ -1,7 +1,4 @@
 // src/modules/operation/hooks/useManagerTour.js
-// (FILE MỚI) Hook riêng cho page ManagerTour: gom 5 hook dữ liệu,
-// bộ lọc, state 2 modal và các handler. Page chỉ việc render.
-
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import useOperationTours from "./useOperationTours";
