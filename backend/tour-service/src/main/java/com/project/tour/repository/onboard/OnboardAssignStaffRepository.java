@@ -2,6 +2,7 @@
 package com.project.tour.repository.onboard;
 
 import com.project.tour.model.OnboardAssignStaff;
+import com.project.tour.model.StatusAssignStaff;
 import com.project.tour.model.TypeOnboardStaff;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,41 +14,47 @@ import java.util.UUID;
 
 @Repository
 public interface OnboardAssignStaffRepository
-        extends JpaRepository<OnboardAssignStaff, UUID> {
+                extends JpaRepository<OnboardAssignStaff, UUID> {
 
-    List<OnboardAssignStaff> findAllByTourIdAndAssignmentTypeAndCruiseDeckIdOrderByAssignedAtDesc(
-            UUID tourId,
-            TypeOnboardStaff assignmentType,
-            UUID cruiseDeckId);
+        List<OnboardAssignStaff> findAllByTourIdAndAssignmentTypeAndCruiseDeckIdOrderByAssignedAtDesc(
+                        UUID tourId,
+                        TypeOnboardStaff assignmentType,
+                        UUID cruiseDeckId);
 
-    List<OnboardAssignStaff> findAllByTourIdAndAssignmentTypeAndActivityCruiseTourIdOrderByAssignedAtDesc(
-            UUID tourId,
-            TypeOnboardStaff assignmentType,
-            UUID activityCruiseTourId);
+        List<OnboardAssignStaff> findAllByTourIdAndAssignmentTypeAndActivityCruiseTourIdOrderByAssignedAtDesc(
+                        UUID tourId,
+                        TypeOnboardStaff assignmentType,
+                        UUID activityCruiseTourId);
 
-    List<OnboardAssignStaff> findAllByTourIdAndAssignmentTypeAndCruiseDeckIdAndUserIdIn(
-            UUID tourId,
-            TypeOnboardStaff assignmentType,
-            UUID cruiseDeckId,
-            Collection<UUID> userIds);
+        List<OnboardAssignStaff> findAllByTourIdAndAssignmentTypeAndCruiseDeckIdAndUserIdIn(
+                        UUID tourId,
+                        TypeOnboardStaff assignmentType,
+                        UUID cruiseDeckId,
+                        Collection<UUID> userIds);
 
-    List<OnboardAssignStaff> findAllByTourIdAndAssignmentTypeAndActivityCruiseTourIdAndUserIdIn(
-            UUID tourId,
-            TypeOnboardStaff assignmentType,
-            UUID activityCruiseTourId,
-            Collection<UUID> userIds);
+        List<OnboardAssignStaff> findAllByTourIdAndAssignmentTypeAndActivityCruiseTourIdAndUserIdIn(
+                        UUID tourId,
+                        TypeOnboardStaff assignmentType,
+                        UUID activityCruiseTourId,
+                        Collection<UUID> userIds);
 
-    List<OnboardAssignStaff> findAllByTourIdOrderByAssignedAtDesc(UUID tourId);
+        List<OnboardAssignStaff> findAllByTourIdOrderByAssignedAtDesc(UUID tourId);
 
-    boolean existsByTourIdAndAssignmentTypeAndCruiseDeckIdAndUserId(
-            UUID tourId,
-            TypeOnboardStaff assignmentType,
-            UUID cruiseDeckId,
-            UUID userId);
+        boolean existsByTourIdAndAssignmentTypeAndCruiseDeckIdAndUserId(
+                        UUID tourId,
+                        TypeOnboardStaff assignmentType,
+                        UUID cruiseDeckId,
+                        UUID userId);
 
-    boolean existsByTourIdAndAssignmentTypeAndActivityCruiseTourIdAndUserId(
-            UUID tourId,
-            TypeOnboardStaff assignmentType,
-            UUID activityCruiseTourId,
-            UUID userId);
+        boolean existsByTourIdAndAssignmentTypeAndActivityCruiseTourIdAndUserId(
+                        UUID tourId,
+                        TypeOnboardStaff assignmentType,
+                        UUID activityCruiseTourId,
+                        UUID userId);
+
+        long countByTourIdAndAssignmentTypeAndCruiseDeckIdAndStatusIn(
+                        UUID tourId,
+                        TypeOnboardStaff assignmentType,
+                        UUID cruiseDeckId,
+                        Collection<StatusAssignStaff> statuses);
 }

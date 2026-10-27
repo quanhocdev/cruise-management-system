@@ -6,10 +6,13 @@ import com.project.tour.dto.operation.patrol.PatrolRequirementRequest;
 import com.project.tour.dto.operation.patrol.PatrolRequirementResponse;
 import com.project.tour.exception.AppException;
 import com.project.tour.model.OperationRequirePatrol;
+import com.project.tour.model.StatusAssignStaff;
+import com.project.tour.model.TypeOnboardStaff;
 import com.project.tour.model.admin.CruiseDeck;
 import com.project.tour.model.enums.cruise.CruiseDeckStatus;
 import com.project.tour.model.scheduler.Tour;
 import com.project.tour.repository.cruise.CruiseDeckRepository;
+import com.project.tour.repository.onboard.OnboardAssignStaffRepository;
 import com.project.tour.repository.operation.OperationRequirePatrolRepository;
 import com.project.tour.repository.tour.TourRepository;
 
@@ -19,27 +22,32 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 public class OperationRequirePatrolService {
 
+    private static final List<StatusAssignStaff> ACTIVE_ASSIGNMENT_STATUSES = List.of(
+            StatusAssignStaff.PENDING,
+            StatusAssignStaff.ACCEPTED);
+
     private final OperationRequirePatrolRepository patrolRepository;
     private final TourRepository tourRepository;
     private final CruiseDeckRepository cruiseDeckRepository;
+    private final OnboardAssignStaffRepository onboardAssignStaffRepository;
 
     public OperationRequirePatrolService(
             OperationRequirePatrolRepository patrolRepository,
             TourRepository tourRepository,
-            CruiseDeckRepository cruiseDeckRepository) {
+            CruiseDeckRepository cruiseDeckRepository,
+            OnboardAssignStaffRepository onboardAssignStaffRepository) {
         this.patrolRepository = patrolRepository;
         this.tourRepository = tourRepository;
         this.cruiseDeckRepository = cruiseDeckRepository;
+        this.onboardAssignStaffRepository = onboardAssignStaffRepository;
     }
 
     /**
@@ -50,7 +58,6 @@ public class OperationRequirePatrolService {
     public List<PatrolRequirementResponse> getRequirements(UUID tourId) {
 
         Tour tour = getTourWithCruise(tourId);
-
         UUID cruiseId = tour.getCruise().getId();
 
         List<CruiseDeck> activeDecks = cruiseDeckRepository.findAllByCruise_IdAndStatusOrderByDeckNumberAsc(
@@ -74,10 +81,12 @@ public class OperationRequirePatrolService {
     /**
      * Lưu danh sách yêu cầu tuần tra của Tour.
      *
-     * requiredCount = 0: xóa yêu cầu tuần tra của tầng đó.
+     * requiredCount = 0: xóa yêu cầu tuần tra nếu không còn
+     * nhân sự PENDING hoặc ACCEPTED.
+     *
      * requiredCount > 0: tạo mới hoặc cập nhật yêu cầu.
      *
-     * Danh sách gửi lên là danh sách đầy đủ các tầng cần cấu hình.
+     * Danh sách gửi lên chỉ cập nhật những tầng được chỉ định.
      */
     @Transactional
     public List<PatrolRequirementResponse> saveRequirements(
@@ -111,6 +120,7 @@ public class OperationRequirePatrolService {
 
         Map<UUID, Integer> requestedCounts = new HashMap<>();
 
+        // Validate request
         for (PatrolRequirementItemRequest item : request.requirements()) {
 
             if (item == null || item.cruiseDeckId() == null) {
@@ -155,19 +165,30 @@ public class OperationRequirePatrolService {
             UUID deckId = entry.getKey();
             Integer requiredCount = entry.getValue();
 
+            // Kiểm tra số nhân sự đang được phân công trước khi thay đổi
+            validateRequiredCount(
+                    tourId,
+                    deckId,
+                    requiredCount);
+
             OperationRequirePatrol existing = existingByDeck.get(deckId);
 
             if (requiredCount == 0) {
+
                 if (existing != null) {
                     toDelete.add(existing);
                 }
+
                 continue;
             }
 
             if (existing != null) {
+
                 existing.setRequiredCount(requiredCount);
                 toSave.add(existing);
+
             } else {
+
                 OperationRequirePatrol requirement = new OperationRequirePatrol();
 
                 requirement.setTourId(tourId);
@@ -188,6 +209,33 @@ public class OperationRequirePatrolService {
         }
 
         return getRequirements(tourId);
+    }
+
+    /**
+     * Không cho giảm yêu cầu xuống thấp hơn số nhân sự
+     * đang được phân công ở trạng thái PENDING hoặc ACCEPTED.
+     */
+    private void validateRequiredCount(
+            UUID tourId,
+            UUID cruiseDeckId,
+            Integer newRequiredCount) {
+
+        long assignedCount = onboardAssignStaffRepository
+                .countByTourIdAndAssignmentTypeAndCruiseDeckIdAndStatusIn(
+                        tourId,
+                        TypeOnboardStaff.PATROL,
+                        cruiseDeckId,
+                        ACTIVE_ASSIGNMENT_STATUSES);
+
+        if (newRequiredCount < assignedCount) {
+            throw new AppException(
+                    "Cannot reduce patrol requirement to "
+                            + newRequiredCount
+                            + " because this deck currently has "
+                            + assignedCount
+                            + " assigned staff members in PENDING or ACCEPTED status.",
+                    HttpStatus.CONFLICT);
+        }
     }
 
     private Tour getTourWithCruise(UUID tourId) {
