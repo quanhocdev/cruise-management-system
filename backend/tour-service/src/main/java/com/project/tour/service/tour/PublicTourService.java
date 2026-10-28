@@ -24,6 +24,7 @@ import com.project.tour.model.convenience.service.ServiceTour;
 import com.project.tour.repository.convenience.ProductTourRepository;
 import com.project.tour.repository.convenience.ServiceTourRepository;
 import com.project.tour.repository.onboard.ActivityCruiseTourRepository;
+import com.project.tour.repository.scheduler.TourRepository;
 import com.project.tour.repository.shore.VisitTourRepository;
 
 import java.math.BigDecimal;
