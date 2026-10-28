@@ -1,7 +1,11 @@
+
 package com.project.tour.service.scheduler;
 
 import com.project.tour.dto.scheduler.tour.CreateTourRequest;
+import com.project.tour.dto.scheduler.CreateTourWithRouteRequest;
+import com.project.tour.dto.scheduler.CreateTourWithRouteResponse;
 import com.project.tour.dto.scheduler.tour.TourResponse;
+import com.project.tour.dto.scheduler.TourRouteResponse;
 import com.project.tour.dto.scheduler.tour.UpdateTourRequest;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.scheduler.TourMapper;
@@ -10,10 +14,11 @@ import com.project.tour.model.operation.TourPackage;
 import com.project.tour.model.scheduler.Tour;
 import com.project.tour.repository.scheduler.TourRepository;
 import com.project.tour.repository.tour.TourPackageRepository;
+import com.project.tour.service.redis.TourRedisService;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.project.tour.service.redis.TourRedisService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -24,35 +29,33 @@ import java.util.UUID;
 public class TourService {
 
         private final TourRepository tourRepository;
-
         private final TourStatusValidator tourStatusValidator;
-
         private final TourRedisService tourRedisService;
-
         private final TourPackageRepository tourPackageRepository;
+        private final TourRouteService tourRouteService;
 
         public TourService(
                         TourRepository tourRepository,
                         TourStatusValidator tourStatusValidator,
                         TourRedisService tourRedisService,
-                        TourPackageRepository tourPackageRepository) {
+                        TourPackageRepository tourPackageRepository,
+                        TourRouteService tourRouteService) {
 
                 this.tourRepository = tourRepository;
                 this.tourStatusValidator = tourStatusValidator;
                 this.tourRedisService = tourRedisService;
                 this.tourPackageRepository = tourPackageRepository;
+                this.tourRouteService = tourRouteService;
         }
 
-        // CREATE
-        public TourResponse createTour(
-                        CreateTourRequest request) {
+        // CREATE TOUR - GIỮ API CŨ
+        public TourResponse createTour(CreateTourRequest request) {
 
                 validateDates(
                                 request.startDate(),
                                 request.endDate());
 
-                validateCodeNotExists(
-                                request.code());
+                validateCodeNotExists(request.code());
 
                 Tour tour = TourMapper.toEntity(request);
 
@@ -61,10 +64,56 @@ public class TourService {
                 return TourMapper.toResponse(savedTour);
         }
 
+        // CREATE TOUR WITH INITIAL ROUTE - API MỚI
+        public CreateTourWithRouteResponse createTourWithRoute(
+                        CreateTourWithRouteRequest request) {
+
+                validateDates(
+                                request.startDate(),
+                                request.endDate());
+
+                validateCodeNotExists(request.code());
+
+                if (request.departurePortId() == null
+                                || request.destinationPortId() == null) {
+
+                        throw new AppException(
+                                        "Departure port and destination port are required",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                if (request.departurePortId().equals(request.destinationPortId())) {
+                        throw new AppException(
+                                        "Departure port and destination port must be different",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                // Tạo Tour trước.
+                Tour tour = new Tour();
+
+                tour.setCode(request.code());
+                tour.setName(request.name());
+                tour.setDescription(request.description());
+                tour.setStartDate(request.startDate());
+                tour.setEndDate(request.endDate());
+
+                Tour savedTour = tourRepository.save(tour);
+
+                // Tính toán và lưu tuyến đường ban đầu.
+                // Nếu tính toán hoặc lưu route thất bại, transaction sẽ rollback Tour.
+                TourRouteResponse routeResponse = tourRouteService.createRoute(
+                                savedTour.getId(),
+                                request.departurePortId(),
+                                request.destinationPortId());
+
+                return new CreateTourWithRouteResponse(
+                                TourMapper.toResponse(savedTour),
+                                routeResponse);
+        }
+
         // GET BY ID
         @Transactional(readOnly = true)
-        public TourResponse getTourById(
-                        UUID id) {
+        public TourResponse getTourById(UUID id) {
 
                 Tour tour = findById(id);
 
@@ -73,8 +122,7 @@ public class TourService {
 
         // GET BY CODE
         @Transactional(readOnly = true)
-        public TourResponse getTourByCode(
-                        String code) {
+        public TourResponse getTourByCode(String code) {
 
                 Tour tour = tourRepository
                                 .findByCodeIgnoreCase(code)
@@ -93,34 +141,29 @@ public class TourService {
 
                 List<Tour> tours;
 
-                // Không có cruiseId + không có statusTrip -> lấy tất cả tour.
                 if (cruiseId == null && statusTrip == null) {
-                        tours = tourRepository
-                                        .findAllByOrderByNameAsc();
 
-                        // Có cruiseId + không có statusTrip -> lấy tour theo cruise.
+                        tours = tourRepository.findAllByOrderByNameAsc();
+
                 } else if (cruiseId != null && statusTrip == null) {
-                        tours = tourRepository
-                                        .findAllByCruise_IdOrderByNameAsc(
-                                                        cruiseId);
 
-                        // Không có cruiseId + có statusTrip -> lọc theo trạng thái tour.
+                        tours = tourRepository.findAllByCruise_IdOrderByNameAsc(
+                                        cruiseId);
+
                 } else if (cruiseId == null && statusTrip != null) {
-                        tours = tourRepository
-                                        .findAllByStatusTripOrderByNameAsc(
-                                                        statusTrip);
 
-                        // Có cruiseId + statusTrip -> lọc theo cả hai điều kiện.
+                        tours = tourRepository.findAllByStatusTripOrderByNameAsc(
+                                        statusTrip);
 
                 } else {
+
                         tours = tourRepository
                                         .findAllByCruise_IdAndStatusTripOrderByNameAsc(
                                                         cruiseId,
                                                         statusTrip);
                 }
 
-                return tours
-                                .stream()
+                return tours.stream()
                                 .map(TourMapper::toResponse)
                                 .toList();
         }
@@ -136,7 +179,6 @@ public class TourService {
 
                 Tour tour = findById(id);
 
-                // Chỉ DRAFT mới được phép chỉnh sửa
                 tourStatusValidator.validateCanUpdate(tour);
 
                 if (tourRepository.existsByCodeIgnoreCaseAndIdNot(
@@ -148,9 +190,7 @@ public class TourService {
                                         HttpStatus.CONFLICT);
                 }
 
-                TourMapper.updateEntity(
-                                tour,
-                                request);
+                TourMapper.updateEntity(tour, request);
 
                 Tour updatedTour = tourRepository.save(tour);
 
@@ -159,13 +199,14 @@ public class TourService {
 
         // DELETE
         public void deleteTour(UUID id) {
+
                 Tour tour = findById(id);
 
-                // Chỉ DRAFT mới được phép xóa
                 tourStatusValidator.validateCanDelete(tour);
 
-                // Dọn dẹp Redis cho tất cả các tour package thuộc tour này trước khi xóa
+                // Dọn dẹp Redis cho các TourPackage.
                 List<TourPackage> packages = tourPackageRepository.findAllByTourId(id);
+
                 for (TourPackage pkg : packages) {
                         tourRedisService.deletePackageAvailableRooms(pkg.getId());
                 }
@@ -174,8 +215,7 @@ public class TourService {
         }
 
         // FIND
-        private Tour findById(
-                        UUID id) {
+        private Tour findById(UUID id) {
 
                 return tourRepository
                                 .findById(id)
@@ -204,20 +244,21 @@ public class TourService {
                         LocalDate dayEnd) {
 
                 if (dayStart == null || dayEnd == null) {
+
                         throw new AppException(
                                         "Start date and end date are required",
                                         HttpStatus.BAD_REQUEST);
                 }
 
                 if (dayEnd.isBefore(dayStart)) {
+
                         throw new AppException(
                                         "End date must be greater than or equal to start date",
                                         HttpStatus.BAD_REQUEST);
                 }
         }
 
-        private void validateCodeNotExists(
-                        String code) {
+        private void validateCodeNotExists(String code) {
 
                 if (tourRepository.existsByCodeIgnoreCase(code)) {
 
