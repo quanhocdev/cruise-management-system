@@ -39,6 +39,9 @@ public class Tour {
     @JoinColumn(name = "cruise_id")
     private Cruise cruise;
 
+    @OneToOne(mappedBy = "tour", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private TourRoute tourRoute;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status_trip", nullable = false, length = 30)
     private TourStatusTrip statusTrip = TourStatusTrip.DRAFT;
@@ -141,6 +144,18 @@ public class Tour {
 
     public void setCruise(Cruise cruise) {
         this.cruise = cruise;
+    }
+
+    public TourRoute getTourRoute() {
+        return tourRoute;
+    }
+
+    public void setTourRoute(TourRoute tourRoute) {
+        this.tourRoute = tourRoute;
+
+        if (tourRoute != null) {
+            tourRoute.setTour(this);
+        }
     }
 
     public TourStatusTrip getStatusTrip() {

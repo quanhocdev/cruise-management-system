@@ -3,7 +3,6 @@ import { ArrowLeft, CalendarDays, RefreshCw } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import useSchedules from "../hooks/useSchedules";
-import scheduleService from "../services/scheduleService";
 import tourService from "../services/tourService";
 
 import ScheduleFormModal from "../components/schedule/ScheduleFormModal";

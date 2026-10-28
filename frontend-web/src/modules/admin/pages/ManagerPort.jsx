@@ -33,45 +33,21 @@ export default function ManagerPort() {
     deactivatePort,
   } = usePorts();
 
-  // =====================================================
-  // VIEW
-  // =====================================================
-
   const [activeView, setActiveView] = useState("map");
 
-  // =====================================================
-  // SELECTED LOCATION
-  // =====================================================
-
   const [selectedLocation, setSelectedLocation] = useState(null);
-
-  // =====================================================
-  // MODAL
-  // =====================================================
 
   const [showFormModal, setShowFormModal] = useState(false);
 
   const [editingPort, setEditingPort] = useState(null);
 
-  // =====================================================
-  // MAP LOCATION SELECT
-  // =====================================================
-
   const handleMapLocationSelect = useCallback((location) => {
     setSelectedLocation(location);
   }, []);
 
-  // =====================================================
-  // SEARCH LOCATION SELECT
-  // =====================================================
-
   const handleSearchLocationSelect = (location) => {
     setSelectedLocation(location);
   };
-
-  // =====================================================
-  // CREATE AT SELECTED LOCATION
-  // =====================================================
 
   const handleCreateAtLocation = () => {
     if (!selectedLocation) {
@@ -87,10 +63,6 @@ export default function ManagerPort() {
     setShowFormModal(true);
   };
 
-  // =====================================================
-  // CREATE MANUALLY
-  // =====================================================
-
   const handleOpenManualCreate = () => {
     setError("");
     setSuccess("");
@@ -100,10 +72,6 @@ export default function ManagerPort() {
 
     setShowFormModal(true);
   };
-
-  // =====================================================
-  // EDIT
-  // =====================================================
 
   const handleEditPort = (port) => {
     setError("");
@@ -121,10 +89,6 @@ export default function ManagerPort() {
     setShowFormModal(true);
   };
 
-  // =====================================================
-  // CLOSE FORM
-  // =====================================================
-
   const handleCloseForm = () => {
     if (saving) {
       return;
@@ -133,10 +97,6 @@ export default function ManagerPort() {
     setShowFormModal(false);
     setEditingPort(null);
   };
-
-  // =====================================================
-  // SUBMIT FORM
-  // =====================================================
 
   const handleSubmitPort = async (data) => {
     let result = null;
@@ -166,10 +126,6 @@ export default function ManagerPort() {
     setActiveView("map");
   };
 
-  // =====================================================
-  // DELETE
-  // =====================================================
-
   const handleDeletePort = async (port) => {
     const confirmed = window.confirm(
       `Bạn có chắc muốn vô hiệu hóa cảng "${port.name}" không?\n\n` +
@@ -183,10 +139,6 @@ export default function ManagerPort() {
     await deactivatePort(port.id);
   };
 
-  // =====================================================
-  // CLEAR MESSAGES
-  // =====================================================
-
   const handleCloseSuccess = () => {
     setSuccess("");
   };
@@ -195,16 +147,8 @@ export default function ManagerPort() {
     setError("");
   };
 
-  // =====================================================
-  // RENDER
-  // =====================================================
-
   return (
     <div className="manager-port-page">
-      {/* =================================================
-          HEADER
-         ================================================= */}
-
       <div className="manager-port-header">
         <div>
           <h2 className="manager-port-title">Quản lý cảng</h2>
@@ -235,10 +179,6 @@ export default function ManagerPort() {
         </div>
       </div>
 
-      {/* =================================================
-          ALERT
-         ================================================= */}
-
       {success && (
         <Alert variant="success" dismissible onClose={handleCloseSuccess}>
           {success}
@@ -250,10 +190,6 @@ export default function ManagerPort() {
           {error}
         </Alert>
       )}
-
-      {/* =================================================
-          MAP VIEW
-         ================================================= */}
 
       {activeView === "map" && (
         <div className="manager-port-map-section">
@@ -327,10 +263,6 @@ export default function ManagerPort() {
         </div>
       )}
 
-      {/* =================================================
-          TABLE VIEW
-         ================================================= */}
-
       {activeView === "table" && (
         <div className="manager-port-table-section">
           <div className="manager-port-table-header">
@@ -355,10 +287,6 @@ export default function ManagerPort() {
           />
         </div>
       )}
-
-      {/* =================================================
-          FORM MODAL
-         ================================================= */}
 
       <PortFormModal
         show={showFormModal}
