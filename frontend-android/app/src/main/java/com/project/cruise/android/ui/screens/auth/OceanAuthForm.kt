@@ -93,7 +93,7 @@ internal fun OceanAuthForm(
                             style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
                         Text(
                             if (register) "Đăng ký để bắt đầu hành trình của bạn"
-                            else "Đăng nhập để xem hành trình và booking",
+                            else "Hành trình của khách · Công việc của nhân viên",
                             style = MaterialTheme.typography.bodyLarge
                         )
                     }
@@ -157,7 +157,7 @@ internal fun OceanAuthForm(
                 }
                 Text(
                     if (register) "Mã OTP sẽ được gửi đến email sau khi đăng ký."
-                    else "Sử dụng tài khoản hành khách đã đăng ký.",
+                    else "Hành khách dùng tài khoản đã đăng ký. Nhân viên dùng tài khoản được cấp.",
                     modifier = Modifier.padding(horizontal = 28.dp, vertical = 16.dp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodySmall

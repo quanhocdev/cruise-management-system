@@ -39,5 +39,6 @@ fun NavGraph() {
         authGraph(navController, authViewModel)
         passengerGraph(navController, authViewModel, apiService)
         posGraph(navController, authViewModel)
+        staffGraph(navController, authViewModel, tokenManager)
     }
 }

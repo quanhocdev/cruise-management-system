@@ -44,6 +44,16 @@ import com.project.cruise.android.data.dto.chat.ChatMessageResponse
 import com.project.cruise.android.data.dto.chat.ChatSessionRequest
 import com.project.cruise.android.data.dto.chat.ChatWelcomeResponse
 interface ApiService {
+    @GET("api/{department}/assignments")
+    suspend fun getMyStaffAssignments(@Path("department") department: String): List<com.project.cruise.android.data.dto.staff.StaffAssignment>
+
+    @retrofit2.http.PATCH("api/{department}/assignments/{id}/respond")
+    suspend fun respondToStaffAssignment(
+        @Path("department") department: String,
+        @Path("id") id: String,
+        @Body request: com.project.cruise.android.data.dto.staff.StaffResponseRequest
+    ): com.project.cruise.android.data.dto.staff.StaffAssignment
+
     @GET("api/{department}/bookings/{id}/bill")
     suspend fun getServiceBill(@Path("department") department: String,@Path("id") id: Long): com.project.cruise.android.data.dto.booking.ServiceBill
     @GET("api/finance/bookings/{id}/checkout-preview")
