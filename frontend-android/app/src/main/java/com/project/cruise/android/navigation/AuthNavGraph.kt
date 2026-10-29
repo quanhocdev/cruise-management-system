@@ -20,6 +20,7 @@ import com.project.cruise.android.ui.screens.auth.OtpScreen
 import com.project.cruise.android.ui.screens.auth.RegisterScreen
 import com.project.cruise.android.ui.screens.auth.GoogleOtpScreen
 import com.project.cruise.android.ui.screens.pos.PosRole
+import com.project.cruise.android.data.dto.staff.StaffRole
 import com.project.cruise.android.viewmodel.auth.AuthViewModel
 import com.project.cruise.android.viewmodel.auth.LoginState
 import com.project.cruise.android.viewmodel.auth.RegisterState
@@ -41,7 +42,8 @@ fun NavGraphBuilder.authGraph(
                 is SessionState.Authenticated -> {
                     val role = PosRole.fromApiRole(state.role)
                     val destination =
-                        if (role != null) Routes.posDashboard(role)
+                        if (StaffRole.fromApiRole(state.role) != null) Routes.STAFF_ASSIGNMENTS
+                        else if (role != null) Routes.posDashboard(role)
                         else Routes.PASSENGER_TOURS
 
                     navController.navigate(destination) {
@@ -96,10 +98,10 @@ fun NavGraphBuilder.authGraph(
         // Đăng nhập username/password thành công
         LaunchedEffect(loginState) {
             if (loginState is LoginState.Success) {
-                navController.navigate(Routes.PASSENGER_TOURS) {
-                    popUpTo(Routes.GUEST) {
-                        inclusive = true
-                    }
+                val role = (loginState as LoginState.Success).response.role
+                val destination = if (StaffRole.fromApiRole(role) != null) Routes.STAFF_ASSIGNMENTS else Routes.PASSENGER_TOURS
+                navController.navigate(destination) {
+                    popUpTo(navController.graph.id) { inclusive = false }
                     launchSingleTop = true
                 }
                 authViewModel.resetLoginState()

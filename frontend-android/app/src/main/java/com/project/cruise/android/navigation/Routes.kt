@@ -3,6 +3,7 @@ package com.project.cruise.android.navigation
 import com.project.cruise.android.ui.screens.pos.PosRole
 
 object Routes {
+    const val STAFF_ASSIGNMENTS = "staff_assignments"
 
     // =================================================
     // AUTH
