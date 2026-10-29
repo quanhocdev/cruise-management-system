@@ -29,8 +29,14 @@ public interface ShoreAssignStaffRepository
                         UUID userId);
 
         Optional<ShoreAssignStaff> findByIdAndVisitTourIdAndStatus(
-        UUID id,
-        UUID visitTourId,
-        StatusAssignStaff status
-);
+                        UUID id,
+                        UUID visitTourId,
+                        StatusAssignStaff status);
+
+        List<ShoreAssignStaff> findAllByUserIdOrderByAssignedAtDesc(UUID userId);
+
+        Optional<ShoreAssignStaff> findByIdAndUserIdAndStatus(
+                        UUID id,
+                        UUID userId,
+                        StatusAssignStaff status);
 }
