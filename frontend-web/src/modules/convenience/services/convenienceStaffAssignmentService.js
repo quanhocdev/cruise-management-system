@@ -25,6 +25,16 @@ const convenienceStaffAssignmentService = {
     const response = await api.post(ASSIGNMENT_URL, payload);
     return response.data;
   },
+
+  async cancelAssignment({ assignmentId, tourId, assignmentType, targetId }) {
+    await api.delete(`${ASSIGNMENT_URL}/${assignmentId}`, {
+      params: {
+        tourId,
+        assignmentType,
+        targetId,
+      },
+    });
+  },
 };
 
 export default convenienceStaffAssignmentService;

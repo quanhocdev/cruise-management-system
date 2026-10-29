@@ -7,7 +7,7 @@ import com.project.tour.model.TypeOnboardStaff;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
+import java.util.Optional;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -57,4 +57,18 @@ public interface OnboardAssignStaffRepository
                         TypeOnboardStaff assignmentType,
                         UUID cruiseDeckId,
                         Collection<StatusAssignStaff> statuses);
+
+        Optional<OnboardAssignStaff> findByIdAndTourIdAndAssignmentTypeAndCruiseDeckIdAndStatus(
+                        UUID id,
+                        UUID tourId,
+                        TypeOnboardStaff assignmentType,
+                        UUID cruiseDeckId,
+                        StatusAssignStaff status);
+
+        Optional<OnboardAssignStaff> findByIdAndTourIdAndAssignmentTypeAndActivityCruiseTourIdAndStatus(
+                        UUID id,
+                        UUID tourId,
+                        TypeOnboardStaff assignmentType,
+                        UUID activityCruiseTourId,
+                        StatusAssignStaff status);
 }

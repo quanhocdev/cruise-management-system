@@ -40,6 +40,23 @@ public class OnboardAssignStaffController {
         return assignmentService.assignStaff(request, assignedBy);
     }
 
+    @DeleteMapping("/{assignmentId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void cancelAssignment(
+            @PathVariable UUID assignmentId,
+            @RequestParam UUID tourId,
+            @RequestParam TypeOnboardStaff assignmentType,
+            @RequestParam(required = false) UUID cruiseDeckId,
+            @RequestParam(required = false) UUID activityCruiseTourId) {
+
+        assignmentService.cancelAssignment(
+                tourId,
+                assignmentType,
+                cruiseDeckId,
+                activityCruiseTourId,
+                assignmentId);
+    }
+
     @GetMapping
     public List<OnboardStaffAssignmentResponse> getAssignments(
             @RequestParam UUID tourId,

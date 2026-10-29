@@ -207,6 +207,58 @@ public class OnboardAssignStaffService {
                                 .toList();
         }
 
+        @Transactional
+        public void cancelAssignment(
+                        UUID tourId,
+                        TypeOnboardStaff assignmentType,
+                        UUID cruiseDeckId,
+                        UUID activityCruiseTourId,
+                        UUID assignmentId) {
+
+                // Kiểm tra đối tượng phân công hợp lệ
+                validateTarget(
+                                tourId,
+                                assignmentType,
+                                cruiseDeckId,
+                                activityCruiseTourId);
+
+                OnboardAssignStaff assignment;
+
+                if (assignmentType == TypeOnboardStaff.PATROL) {
+
+                        assignment = assignmentRepository
+                                        .findByIdAndTourIdAndAssignmentTypeAndCruiseDeckIdAndStatus(
+                                                        assignmentId,
+                                                        tourId,
+                                                        assignmentType,
+                                                        cruiseDeckId,
+                                                        StatusAssignStaff.PENDING)
+                                        .orElseThrow(() -> new AppException(
+                                                        "Không tìm thấy phân công PATROL đang chờ phản hồi để hủy",
+                                                        HttpStatus.NOT_FOUND));
+
+                } else if (assignmentType == TypeOnboardStaff.ACTIVITY_CRUISE) {
+
+                        assignment = assignmentRepository
+                                        .findByIdAndTourIdAndAssignmentTypeAndActivityCruiseTourIdAndStatus(
+                                                        assignmentId,
+                                                        tourId,
+                                                        assignmentType,
+                                                        activityCruiseTourId,
+                                                        StatusAssignStaff.PENDING)
+                                        .orElseThrow(() -> new AppException(
+                                                        "Không tìm thấy phân công ACTIVITY_CRUISE đang chờ phản hồi để hủy",
+                                                        HttpStatus.NOT_FOUND));
+
+                } else {
+                        throw new AppException(
+                                        "Loại phân công không hợp lệ",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                assignmentRepository.delete(assignment);
+        }
+
         private void validateTarget(
                         UUID tourId,
                         TypeOnboardStaff assignmentType,

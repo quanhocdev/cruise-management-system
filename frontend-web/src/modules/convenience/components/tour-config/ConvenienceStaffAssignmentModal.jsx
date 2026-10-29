@@ -12,6 +12,7 @@ import {
   XCircle,
   Ban,
   Info,
+  Trash2,
 } from "lucide-react";
 
 import useConvenienceStaffAssignment, {
@@ -64,8 +65,6 @@ function ConvenienceStaffAssignmentModal({
   assignmentType,
   onClose,
 }) {
-  const [cancelNotice, setCancelNotice] = useState("");
-
   const {
     assignments,
     availableStaff,
@@ -79,6 +78,11 @@ function ConvenienceStaffAssignmentModal({
     toggleStaff,
     assignSelectedStaff,
     reload,
+
+    cancelAssignment,
+    cancelingId,
+    cancelError,
+    cancelSuccess,
   } = useConvenienceStaffAssignment({
     assignment,
     assignmentType,
@@ -116,6 +120,18 @@ function ConvenienceStaffAssignmentModal({
 
   const handleAssign = async () => {
     await assignSelectedStaff();
+  };
+
+  const handleCancelAssignment = async (item) => {
+    if (item.status !== "PENDING") return;
+
+    const confirmed = window.confirm(
+      `Bạn có chắc chắn muốn hủy phân công cho ${getAssignedName(item)}?`,
+    );
+
+    if (!confirmed) return;
+
+    await cancelAssignment(item.id);
   };
 
   return (
@@ -380,35 +396,47 @@ function ConvenienceStaffAssignmentModal({
                           "Chờ xác nhận"}
                       </span>
 
-                      <button
-                        type="button"
-                        className="convenience-assignment-cancel"
-                        onClick={() =>
-                          setCancelNotice(
-                            "Chức năng hủy phân công chưa được kết nối với backend.",
-                          )
-                        }
-                        title="Hủy phân công"
-                      >
-                        Hủy
-                      </button>
+                      {item.status === "PENDING" && (
+                        <button
+                          type="button"
+                          className="convenience-assignment-cancel"
+                          onClick={() => handleCancelAssignment(item)}
+                          disabled={Boolean(cancelingId) || submitting}
+                          title="Hủy phân công"
+                        >
+                          {String(cancelingId) === String(item.id) ? (
+                            <>
+                              <RefreshCw
+                                size={13}
+                                className="convenience-assignment-spinner"
+                              />
+                              Đang hủy...
+                            </>
+                          ) : (
+                            <>
+                              <Trash2 size={13} />
+                              Hủy
+                            </>
+                          )}
+                        </button>
+                      )}
                     </div>
                   );
                 })}
               </div>
             )}
 
-            {cancelNotice && (
-              <div className="convenience-assignment-info-notice">
-                <Info size={15} />
-                <span>{cancelNotice}</span>
-                <button
-                  type="button"
-                  onClick={() => setCancelNotice("")}
-                  aria-label="Đóng thông báo"
-                >
-                  <X size={14} />
-                </button>
+            {cancelError && (
+              <div className="convenience-assignment-error">
+                <AlertCircle size={15} />
+                <span>{cancelError}</span>
+              </div>
+            )}
+
+            {cancelSuccess && (
+              <div className="convenience-assignment-result">
+                <CheckCircle2 size={15} />
+                <span>{cancelSuccess}</span>
               </div>
             )}
           </section>
