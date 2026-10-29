@@ -71,4 +71,12 @@ public interface OnboardAssignStaffRepository
                         TypeOnboardStaff assignmentType,
                         UUID activityCruiseTourId,
                         StatusAssignStaff status);
+        List<OnboardAssignStaff> findAllByUserIdOrderByAssignedAtDesc(
+        UUID userId);
+
+Optional<OnboardAssignStaff> findByIdAndUserIdAndStatus(
+        UUID id,
+        UUID userId,
+        StatusAssignStaff status
+);
 }
