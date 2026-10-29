@@ -304,6 +304,10 @@ function VisitTourFormModal({
             selectedUserIds={staff.selectedUserIds}
             onToggle={staff.toggleStaff}
             onRetry={staff.reload}
+            onCancelAssignment={staff.cancelAssignment}
+            cancelingId={staff.cancelingId}
+            actionError={staff.actionError}
+            actionSuccess={staff.actionSuccess}
           />
 
           <div className="visit-tour-form-actions">

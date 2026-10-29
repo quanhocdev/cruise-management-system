@@ -13,24 +13,24 @@ import java.util.UUID;
 
 @Repository
 public interface ConvenienceAssignStaffRepository
-        extends JpaRepository<ConvenienceAssignStaff, UUID> {
+                extends JpaRepository<ConvenienceAssignStaff, UUID> {
 
-    List<ConvenienceAssignStaff> findAllByTourIdAndAssignmentTypeAndTargetIdOrderByAssignedAtDesc(
-            UUID tourId,
-            TypeConvenienceAssign assignmentType,
-            UUID targetId);
+        List<ConvenienceAssignStaff> findAllByTourIdAndAssignmentTypeAndTargetIdOrderByAssignedAtDesc(
+                        UUID tourId,
+                        TypeConvenienceAssign assignmentType,
+                        UUID targetId);
 
-    List<ConvenienceAssignStaff> findAllByTourIdAndAssignmentTypeAndTargetIdAndUserIdIn(
-            UUID tourId,
-            TypeConvenienceAssign assignmentType,
-            UUID targetId,
-            Collection<UUID> userIds);
+        List<ConvenienceAssignStaff> findAllByTourIdAndAssignmentTypeAndTargetIdAndUserIdIn(
+                        UUID tourId,
+                        TypeConvenienceAssign assignmentType,
+                        UUID targetId,
+                        Collection<UUID> userIds);
 
-    List<ConvenienceAssignStaff> findAllByTourIdOrderByAssignedAtDesc(UUID tourId);
+        List<ConvenienceAssignStaff> findAllByTourIdOrderByAssignedAtDesc(UUID tourId);
 
-    boolean existsByTourIdAndAssignmentTypeAndTargetIdAndUserId(
-            UUID tourId,
-            TypeConvenienceAssign assignmentType,
-            UUID targetId,
-            UUID userId);
+        boolean existsByTourIdAndAssignmentTypeAndTargetIdAndUserId(
+                        UUID tourId,
+                        TypeConvenienceAssign assignmentType,
+                        UUID targetId,
+                        UUID userId);
 }

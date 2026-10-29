@@ -1,10 +1,13 @@
 // src/modules/shore/components/visit-tour/ShoreStaffAssignment.jsx
-// (FILE MỚI) Phần "Phân công nhân viên Shore" trong VisitTourFormModal.
-// Chỉ render, data lấy từ useShoreStaffAssignment (truyền qua props).
-// CSS: các rule `.shore-staff-*` đang nằm trong styles/VisitTourFormModal.css,
-//      bạn có thể cắt sang styles/ShoreStaffAssignment.css rồi import ở đây.
 
-import { AlertCircle, Info, RefreshCw, UserRound, Users } from "lucide-react";
+import {
+  AlertCircle,
+  Info,
+  RefreshCw,
+  UserRound,
+  Users,
+  Trash2,
+} from "lucide-react";
 
 function ShoreStaffAssignment({
   isEdit,
@@ -17,7 +20,21 @@ function ShoreStaffAssignment({
   selectedUserIds,
   onToggle,
   onRetry,
+  onCancelAssignment,
+  cancelingId,
+  actionError,
+  actionSuccess,
 }) {
+  const handleCancel = async (assignment) => {
+    const confirmed = window.confirm(
+      `Bạn có chắc chắn muốn hủy phân công cho nhân viên "${assignment.fullName || assignment.username || assignment.userId}" không?`,
+    );
+
+    if (!confirmed) return;
+
+    await onCancelAssignment?.(assignment.id);
+  };
+
   return (
     <section className="shore-staff-assignment">
       <div className="shore-staff-assignment-heading">
@@ -54,6 +71,20 @@ function ShoreStaffAssignment({
         </div>
       )}
 
+      {actionError && (
+        <div className="shore-staff-error">
+          <AlertCircle size={16} />
+          <span>{actionError}</span>
+        </div>
+      )}
+
+      {actionSuccess && (
+        <div className="shore-staff-info">
+          <Info size={15} />
+          <span>{actionSuccess}</span>
+        </div>
+      )}
+
       {isEdit && (
         <div className="shore-staff-current">
           <h4>Đã được phân công ({assignments.length})</h4>
@@ -69,24 +100,51 @@ function ShoreStaffAssignment({
             </p>
           ) : (
             <div className="shore-staff-list">
-              {assignments.map((a) => (
-                <div className="shore-staff-current-item" key={a.id}>
-                  <UserRound size={19} />
+              {assignments.map((a) => {
+                const isPending = a.status === "PENDING";
+                const isCanceling = cancelingId === a.id;
 
-                  <div className="shore-staff-details">
-                    <strong>{a.fullName || a.username || a.userId}</strong>
-                    <span>{a.email || "Không có email"}</span>
+                return (
+                  <div className="shore-staff-current-item" key={a.id}>
+                    <UserRound size={19} />
+
+                    <div className="shore-staff-details">
+                      <strong>{a.fullName || a.username || a.userId}</strong>
+                      <span>{a.email || "Không có email"}</span>
+                    </div>
+
+                    <span
+                      className={`shore-staff-status shore-staff-status-${String(
+                        a.status || "PENDING",
+                      ).toLowerCase()}`}
+                    >
+                      {a.status || "PENDING"}
+                    </span>
+
+                    {isPending && (
+                      <button
+                        type="button"
+                        className="shore-staff-cancel-btn"
+                        disabled={
+                          disabled || isCanceling || Boolean(cancelingId)
+                        }
+                        onClick={() => handleCancel(a)}
+                        title="Hủy phân công"
+                      >
+                        {isCanceling ? (
+                          <RefreshCw
+                            size={15}
+                            className="shore-staff-spinner"
+                          />
+                        ) : (
+                          <Trash2 size={15} />
+                        )}
+                        <span>{isCanceling ? "Đang hủy..." : "Hủy"}</span>
+                      </button>
+                    )}
                   </div>
-
-                  <span
-                    className={`shore-staff-status shore-staff-status-${String(
-                      a.status || "PENDING",
-                    ).toLowerCase()}`}
-                  >
-                    {a.status || "PENDING"}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -127,7 +185,7 @@ function ShoreStaffAssignment({
                   <input
                     type="checkbox"
                     checked={checked}
-                    disabled={disabled}
+                    disabled={disabled || Boolean(cancelingId)}
                     onChange={() => onToggle(staff.userId)}
                   />
 
