@@ -134,6 +134,30 @@ public class ConvenienceAssignStaffService {
                                 invalidUserIds);
         }
 
+        @Transactional
+        public void cancelAssignment(
+                        UUID tourId,
+                        TypeConvenienceAssign assignmentType,
+                        UUID targetId,
+                        UUID assignmentId) {
+
+                // Kiểm tra target có thực sự thuộc tour và đúng loại phân công.
+                validateTarget(tourId, assignmentType, targetId);
+
+                ConvenienceAssignStaff assignment = assignmentRepository
+                                .findByIdAndTourIdAndAssignmentTypeAndTargetIdAndStatus(
+                                                assignmentId,
+                                                tourId,
+                                                assignmentType,
+                                                targetId,
+                                                StatusAssignStaff.PENDING)
+                                .orElseThrow(() -> new AppException(
+                                                "Không tìm thấy phân công đang chờ phản hồi để hủy",
+                                                HttpStatus.NOT_FOUND));
+
+                assignmentRepository.delete(assignment);
+        }
+
         @Transactional(readOnly = true)
         public List<ConvenienceStaffAssignmentResponse> getAssignments(
                         UUID tourId,

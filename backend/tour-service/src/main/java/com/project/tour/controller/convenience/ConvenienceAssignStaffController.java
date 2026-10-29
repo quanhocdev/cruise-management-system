@@ -1,3 +1,4 @@
+
 package com.project.tour.controller.convenience;
 
 import com.project.tour.dto.convenience.AssignConvenienceStaffRequest;
@@ -49,6 +50,21 @@ public class ConvenienceAssignStaffController {
                 tourId,
                 assignmentType,
                 targetId);
+    }
+
+    @DeleteMapping("/{assignmentId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void cancelAssignment(
+            @PathVariable UUID assignmentId,
+            @RequestParam UUID tourId,
+            @RequestParam TypeConvenienceAssign assignmentType,
+            @RequestParam UUID targetId) {
+
+        assignmentService.cancelAssignment(
+                tourId,
+                assignmentType,
+                targetId,
+                assignmentId);
     }
 
     private UUID extractUserId(Jwt jwt) {
