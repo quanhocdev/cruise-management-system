@@ -86,10 +86,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/scheduler/**")
                         .hasRole("SCHEDULER")
 
-                        // Convenience
-                        .requestMatchers("/api/convenience/**")
-                        .hasRole("CONVENIENCE")
-
                         // Operation
                         .requestMatchers("/api/operation/**")
                         .hasRole("OPERATION")
@@ -98,14 +94,29 @@ public class SecurityConfig {
                         .requestMatchers("/api/finance/**")
                         .hasRole("FINANCE")
 
-                        // Onboard
+                        // Convenience Manager
+                        .requestMatchers("/api/convenience/**")
+                        .hasRole("CONVENIENCE")
+
+                        // Convenience Staff
+                        .requestMatchers("/api/convenience-staff/**")
+                        .hasRole("CONVENIENCE_STAFF")
+
+                        // Onboard Manager
                         .requestMatchers("/api/onboard/**")
                         .hasRole("ONBOARD")
 
-                        // Shore
+                        // Onboard Staff
+                        .requestMatchers("/api/onboard-staff/**")
+                        .hasRole("ONBOARD_STAFF")
+
+                        // Shore Manager
                         .requestMatchers("/api/shore/**")
                         .hasRole("SHORE")
 
+                        // Shore Staff
+                        .requestMatchers("/api/shore-staff/**")
+                        .hasRole("SHORE_STAFF")
                         // Passenger
                         .requestMatchers("/api/passengers/**")
                         .hasRole("PASSENGER")
