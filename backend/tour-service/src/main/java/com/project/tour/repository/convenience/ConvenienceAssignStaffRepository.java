@@ -42,4 +42,13 @@ public interface ConvenienceAssignStaffRepository
                         TypeConvenienceAssign assignmentType,
                         UUID targetId,
                         StatusAssignStaff status);
+
+        List<ConvenienceAssignStaff> findAllByUserIdOrderByAssignedAtDesc(
+                        UUID userId);
+
+        Optional<ConvenienceAssignStaff> findByIdAndUserIdAndStatus(
+                        UUID id,
+                        UUID userId,
+                        StatusAssignStaff status);
+
 }
