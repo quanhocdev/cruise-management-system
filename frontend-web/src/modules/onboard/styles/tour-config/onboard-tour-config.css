@@ -692,3 +692,32 @@
     white-space: nowrap;
   }
 }
+
+.onboard-assigned-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.onboard-assignment-cancel {
+  border: 1px solid #dc2626;
+  background: transparent;
+  color: #dc2626;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.onboard-assignment-cancel:hover:not(:disabled) {
+  background: #dc2626;
+  color: white;
+}
+
+.onboard-assignment-cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

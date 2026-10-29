@@ -26,6 +26,11 @@ function OnboardStaffAssignmentModal({
     result,
     toggleStaff,
     assignSelectedStaff,
+
+    cancelingId,
+    cancelError,
+    cancelSuccess,
+    cancelAssignment,
   } = useOnboardAssignment({
     assignment,
     assignmentType,
@@ -48,6 +53,24 @@ function OnboardStaffAssignmentModal({
     } catch {
       // Error đã được hook xử lý.
     }
+  };
+
+  const handleCancelAssignment = async (item) => {
+    if (item.status !== "PENDING") {
+      return;
+    }
+
+    const staffName = item.fullName || item.username || "nhân viên này";
+
+    const confirmed = window.confirm(
+      `Bạn có chắc chắn muốn hủy phân công cho ${staffName}?`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    await cancelAssignment(item.id);
   };
 
   return (
@@ -95,6 +118,18 @@ function OnboardStaffAssignmentModal({
             <div className="onboard-alert onboard-alert-error">{error}</div>
           )}
 
+          {cancelError && (
+            <div className="onboard-alert onboard-alert-error">
+              {cancelError}
+            </div>
+          )}
+
+          {cancelSuccess && (
+            <div className="onboard-alert onboard-alert-success">
+              {cancelSuccess}
+            </div>
+          )}
+
           {result && (
             <div className="onboard-alert onboard-alert-success">
               Đã gửi yêu cầu phân công.
@@ -134,7 +169,23 @@ function OnboardStaffAssignmentModal({
                       </div>
                     </div>
 
-                    <AssignmentStatus status={item.status} />
+                    <div className="onboard-assigned-actions">
+                      <AssignmentStatus status={item.status} />
+
+                      {item.status === "PENDING" && (
+                        <button
+                          type="button"
+                          className="onboard-assignment-cancel"
+                          onClick={() => handleCancelAssignment(item)}
+                          disabled={Boolean(cancelingId) || submitting}
+                          title="Hủy phân công"
+                        >
+                          {String(cancelingId) === String(item.id)
+                            ? "Đang hủy..."
+                            : "Hủy"}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>

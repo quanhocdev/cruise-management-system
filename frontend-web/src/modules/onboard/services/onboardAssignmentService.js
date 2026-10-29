@@ -31,6 +31,23 @@ const onboardAssignmentService = {
     const response = await api.post(ASSIGNMENT_URL, payload);
     return response.data;
   },
+
+  async cancelAssignment({
+    assignmentId,
+    tourId,
+    assignmentType,
+    cruiseDeckId,
+    activityCruiseTourId,
+  }) {
+    await api.delete(`${ASSIGNMENT_URL}/${assignmentId}`, {
+      params: {
+        tourId,
+        assignmentType,
+        ...(cruiseDeckId ? { cruiseDeckId } : {}),
+        ...(activityCruiseTourId ? { activityCruiseTourId } : {}),
+      },
+    });
+  },
 };
 
 export default onboardAssignmentService;
