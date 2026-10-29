@@ -75,4 +75,18 @@ public class ShoreAssignStaffController {
                     HttpStatus.UNAUTHORIZED);
         }
     }
+
+    /**
+     * Hủy phân công nhân viên SHORE_STAFF.
+     */
+    @DeleteMapping("/{assignmentId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void cancelAssignment(
+            @PathVariable UUID visitTourId,
+            @PathVariable UUID assignmentId) {
+
+        shoreAssignStaffService.cancelAssignment(
+                visitTourId,
+                assignmentId);
+    }
 }

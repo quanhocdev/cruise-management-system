@@ -21,7 +21,7 @@ public class RouteServiceImpl implements RouteService {
     private final SeaRouting seaRouting;
 
     public RouteServiceImpl() {
-        this.seaRouting = new SeaRouting(5);
+        this.seaRouting = new SeaRouting();
     }
 
     @Override
