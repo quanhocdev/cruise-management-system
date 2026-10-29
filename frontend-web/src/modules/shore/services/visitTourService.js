@@ -130,6 +130,13 @@ const visitTourService = {
   },
 
   /**
+   * DELETE /api/shore/visit-tours/{visitTourId}/assignments/{assignmentId}
+   * Hủy phân công nhân viên đang chờ phản hồi.
+   */
+  cancelStaffAssignment: async (visitTourId, assignmentId) => {
+    await api.delete(`${BASE_URL}/${visitTourId}/assignments/${assignmentId}`);
+  },
+  /**
    * POST /api/shore/visit-tour-configurations/{tourId}/complete
    *
    * Hoàn thành cấu hình Visit Tour của một Tour.

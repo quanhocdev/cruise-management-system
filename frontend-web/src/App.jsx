@@ -66,8 +66,7 @@ import OnboardDashboard from "./modules/onboard/pages/Dashboard";
 import OnboardActivityCruiseTour from "./modules/onboard/pages/ActivityCruiseTour";
 import ActivityCruise from "./modules/onboard/pages/ActivityCruise";
 import ActivityCruiseUsage from "./modules/onboard/pages/ActivityCruiseUsage";
-import OnboardTourConfigPage from "../modules/onboard/pages/OnboardTourConfigPage";
-
+import OnboardTourConfigPage from "./modules/onboard/pages/OnboardTourConfigPage";
 // Shore imports
 import ShoreLayout from "./layouts/ShoreLayout";
 import ShoreDashboard from "./modules/shore/pages/Dashboard";

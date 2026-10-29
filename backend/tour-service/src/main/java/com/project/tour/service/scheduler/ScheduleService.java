@@ -6,7 +6,7 @@ import com.project.tour.dto.scheduler.schedule.UpdateScheduleRequest;
 import com.project.tour.exception.AppException;
 import com.project.tour.mapper.scheduler.schedule.ScheduleMapper;
 import com.project.tour.model.enums.ScheduleStatus;
-import com.project.tour.repository.tour.TourRepository;
+import com.project.tour.repository.scheduler.TourRepository;
 import com.project.tour.repository.tour.schedule.ScheduleRepository;
 import com.project.tour.model.enums.tour.TourStatusTrip;
 import com.project.tour.model.scheduler.Schedule;

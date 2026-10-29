@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from "react"; // 1. Bổ sung useMemo
 import { Plus, RefreshCw, AlertCircle } from "lucide-react";
 import { useActivityCruise } from "../hooks/useActivityCruise";
-import ActivityCruiseTable from "../components/ActivityCruiseTable";
-import ActivityCruiseFormModal from "../components/ActivityCruiseFormModal";
-import ActivityCruiseFilter from "../components/ActivityCruiseFilter"; // 2. Bổ sung import
+import ActivityCruiseTable from "../components/manage/ActivityCruiseTable";
+import ActivityCruiseFormModal from "../components/manage/ActivityCruiseFormModal";
+import ActivityCruiseFilter from "../components/manage/ActivityCruiseFilter";
 import "../styles/ActivityCruise.css";
 
 function ActivityCruise() {

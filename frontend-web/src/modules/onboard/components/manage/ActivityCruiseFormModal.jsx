@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { X, Upload } from "lucide-react";
-import "../styles/ActivityCruise.css";
+import "../../styles/ActivityCruise.css";
 
 const initialFormState = {
   name: "",

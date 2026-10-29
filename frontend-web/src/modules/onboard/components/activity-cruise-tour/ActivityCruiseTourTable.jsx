@@ -1,6 +1,12 @@
-// src/modules/onboard/components/activity-cruise-tour/ActivityCruiseTourTable.jsx
 import React from "react";
-import { CalendarDays, MapPin, Settings, Ship, Eye } from "lucide-react";
+import {
+  CalendarDays,
+  MapPin,
+  Settings,
+  Ship,
+  Eye,
+  UserPlus,
+} from "lucide-react";
 
 import "../../styles/activity-cruise-tour/ActivityCruiseTourTable.css";
 
@@ -9,8 +15,8 @@ const ActivityCruiseTourTable = ({
   loading = false,
   onConfigure,
   onViewDetail,
+  onAssign,
 }) => {
-  // Hàm bổ trợ cắt ngắn UUID nếu cần
   const formatShortId = (id) => {
     if (!id) return "—";
     return id.length > 8 ? `${id.substring(0, 8)}...` : id;
@@ -20,7 +26,7 @@ const ActivityCruiseTourTable = ({
     return (
       <div className="activity-cruise-tour-table-wrapper">
         <div className="activity-cruise-tour-table-loading">
-          Đang tải danh sách hoạt động cần cấu hình...
+          Đang tải danh sách hoạt động...
         </div>
       </div>
     );
@@ -31,8 +37,8 @@ const ActivityCruiseTourTable = ({
       <div className="activity-cruise-tour-table-wrapper">
         <div className="activity-cruise-tour-table-empty">
           <CalendarDays size={40} />
-          <h3>Không có hoạt động cần cấu hình</h3>
-          <p>Hiện tại không có hoạt động nào đang chờ ONBOARD cấu hình.</p>
+          <h3>Không có hoạt động</h3>
+          <p>Hiện tại chưa có hoạt động nào thuộc các trạng thái đang chọn.</p>
         </div>
       </div>
     );
@@ -55,23 +61,15 @@ const ActivityCruiseTourTable = ({
           <tbody>
             {activities.map((item) => (
               <tr key={item.id}>
-                {/* ASSIGNMENT ID */}
                 <td>
-                  <span
-                    className="activity-cruise-tour-id"
-                    title={item.id} // Di chuột vào để xem đầy đủ UUID
-                  >
+                  <span className="activity-cruise-tour-id" title={item.id}>
                     #{formatShortId(item.id)}
                   </span>
                 </td>
 
-                {/* TOUR ID + NÚT XEM DETAIL */}
                 <td>
                   <div className="activity-cruise-tour-code flex-cell">
-                    <div
-                      className="id-text-wrapper"
-                      title={item.tourId} // Di chuột vào xem full tourId
-                    >
+                    <div className="id-text-wrapper" title={item.tourId}>
                       <Ship size={16} />
                       <span className="truncate-id">{item.tourId || "—"}</span>
                     </div>
@@ -89,13 +87,9 @@ const ActivityCruiseTourTable = ({
                   </div>
                 </td>
 
-                {/* CRUISE AREA ID + NÚT XEM DETAIL */}
                 <td>
                   <div className="activity-cruise-tour-area flex-cell">
-                    <div
-                      className="id-text-wrapper"
-                      title={item.cruiseAreaId} // Di chuột vào xem full cruiseAreaId
-                    >
+                    <div className="id-text-wrapper" title={item.cruiseAreaId}>
                       <MapPin size={16} />
                       <span className="truncate-id">
                         {item.cruiseAreaId || "—"}
@@ -115,7 +109,6 @@ const ActivityCruiseTourTable = ({
                   </div>
                 </td>
 
-                {/* STATUS */}
                 <td>
                   <span
                     className={`activity-cruise-tour-status status-${String(
@@ -128,12 +121,27 @@ const ActivityCruiseTourTable = ({
                   </span>
                 </td>
 
-                {/* ACTIONS */}
                 <td style={{ textAlign: "center" }}>
                   <div
                     className="activity-cruise-tour-actions"
-                    style={{ justifyContent: "center" }}
+                    style={{
+                      justifyContent: "center",
+                      flexWrap: "wrap",
+                      gap: "8px",
+                    }}
                   >
+                    {/* PHÂN CÔNG NHÂN VIÊN */}
+                    <button
+                      type="button"
+                      className="activity-cruise-tour-config-button"
+                      onClick={() => onAssign?.(item)}
+                      title="Phân công nhân viên ONBOARD cho hoạt động"
+                    >
+                      <UserPlus size={16} />
+                      Phân công
+                    </button>
+
+                    {/* CẤU HÌNH HOẠT ĐỘNG */}
                     {item.status === "WAITING_CONFIG" && (
                       <button
                         type="button"

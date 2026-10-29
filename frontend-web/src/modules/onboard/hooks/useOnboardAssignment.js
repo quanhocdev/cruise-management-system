@@ -20,6 +20,10 @@ export default function useOnboardAssignment({
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
 
+  const [cancelingId, setCancelingId] = useState(null);
+  const [cancelError, setCancelError] = useState("");
+  const [cancelSuccess, setCancelSuccess] = useState("");
+
   const tourId = assignment?.tourId;
 
   const cruiseDeckId =
@@ -84,7 +88,7 @@ export default function useOnboardAssignment({
   // =====================================================
 
   const assignedUserIds = useMemo(
-    () => new Set(assignments.map((item) => item.userId)),
+    () => new Set(assignments.map((item) => String(item.userId))),
     [assignments],
   );
 
@@ -94,7 +98,7 @@ export default function useOnboardAssignment({
     return staffList.filter((staff) => {
       const userId = getUserId(staff);
 
-      if (!userId || assignedUserIds.has(userId)) {
+      if (!userId || assignedUserIds.has(String(userId))) {
         return false;
       }
 
@@ -177,6 +181,79 @@ export default function useOnboardAssignment({
     reload,
   ]);
 
+  // =====================================================
+  // CANCEL PENDING ASSIGNMENT
+  // =====================================================
+
+  const cancelAssignment = useCallback(
+    async (assignmentId) => {
+      if (!tourId || !targetId || !assignmentType || !assignmentId) {
+        setCancelError("Thiếu thông tin phân công cần hủy.");
+        return false;
+      }
+
+      if (cancelingId) {
+        return false;
+      }
+
+      const currentAssignment = assignments.find(
+        (item) => String(item.id) === String(assignmentId),
+      );
+
+      if (!currentAssignment || currentAssignment.status !== "PENDING") {
+        setCancelError("Chỉ có thể hủy phân công đang chờ phản hồi.");
+        return false;
+      }
+
+      try {
+        setCancelingId(assignmentId);
+        setCancelError("");
+        setCancelSuccess("");
+
+        await onboardAssignmentService.cancelAssignment({
+          assignmentId,
+          tourId,
+          assignmentType,
+          cruiseDeckId,
+          activityCruiseTourId,
+        });
+
+        setAssignments((previous) =>
+          previous.filter((item) => String(item.id) !== String(assignmentId)),
+        );
+
+        setSelectedUserIds((previous) =>
+          previous.filter(
+            (id) => String(id) !== String(currentAssignment.userId),
+          ),
+        );
+
+        setCancelSuccess("Đã hủy phân công nhân viên thành công.");
+
+        return true;
+      } catch (err) {
+        console.error("CANCEL ONBOARD ASSIGNMENT ERROR:", err);
+
+        setCancelError(
+          err.response?.data?.message || "Không thể hủy phân công nhân viên.",
+        );
+
+        return false;
+      } finally {
+        setCancelingId(null);
+      }
+    },
+    [
+      tourId,
+      targetId,
+      assignmentType,
+      cruiseDeckId,
+      activityCruiseTourId,
+      cancelingId,
+      assignments,
+    ],
+  );
+
   return {
     staffList,
     assignments,
@@ -192,8 +269,13 @@ export default function useOnboardAssignment({
     error,
     result,
 
+    cancelingId,
+    cancelError,
+    cancelSuccess,
+
     toggleStaff,
     assignSelectedStaff,
+    cancelAssignment,
     reload,
   };
 }

@@ -100,6 +100,23 @@ spring:
               uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
               predicates:
                 - Path=/api/chat/**
+                  # TOUR SERVICE - CONVENIENCE STAFF ASSIGNMENT
+            - id: tour-convenience-staff-api
+              uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
+              predicates:
+                - Path=/api/convenience-staff/**
+
+            # TOUR SERVICE - ONBOARD STAFF ASSIGNMENT
+            - id: tour-onboard-staff-api
+              uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
+              predicates:
+                - Path=/api/onboard-staff/**
+
+            # TOUR SERVICE - SHORE STAFF ASSIGNMENT
+            - id: tour-shore-staff-api
+              uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
+              predicates:
+                - Path=/api/shore-staff/**
 
             # TOUR SERVICE - ROUTE PREVIEW
             - id: tour-route-preview-service

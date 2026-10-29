@@ -13,12 +13,6 @@ export default function useSchedules(tourId) {
 
   const [success, setSuccess] = useState("");
 
-  /**
-   * =====================================================
-   * LOAD ALL
-   * =====================================================
-   */
-
   const loadSchedules = useCallback(async () => {
     if (!tourId) {
       setSchedules([]);

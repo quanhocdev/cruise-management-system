@@ -18,7 +18,7 @@ import com.project.tour.model.scheduler.Tour;
 import com.project.tour.repository.cruise.CruiseDeckRepository;
 import com.project.tour.repository.onboard.ActivityCruiseTourRepository;
 import com.project.tour.repository.onboard.OnboardAssignStaffRepository;
-import com.project.tour.repository.tour.TourRepository;
+import com.project.tour.repository.scheduler.TourRepository;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -38,244 +38,296 @@ import java.util.stream.Collectors;
 @Service
 public class OnboardAssignStaffService {
 
-    private final OnboardAssignStaffRepository assignmentRepository;
-    private final TourRepository tourRepository;
-    private final CruiseDeckRepository cruiseDeckRepository;
-    private final ActivityCruiseTourRepository activityCruiseTourRepository;
-    private final AuthOnboardStaffClient authOnboardStaffClient;
+        private final OnboardAssignStaffRepository assignmentRepository;
+        private final TourRepository tourRepository;
+        private final CruiseDeckRepository cruiseDeckRepository;
+        private final ActivityCruiseTourRepository activityCruiseTourRepository;
+        private final AuthOnboardStaffClient authOnboardStaffClient;
 
-    public OnboardAssignStaffService(
-            OnboardAssignStaffRepository assignmentRepository,
-            TourRepository tourRepository,
-            CruiseDeckRepository cruiseDeckRepository,
-            ActivityCruiseTourRepository activityCruiseTourRepository,
-            AuthOnboardStaffClient authOnboardStaffClient) {
+        public OnboardAssignStaffService(
+                        OnboardAssignStaffRepository assignmentRepository,
+                        TourRepository tourRepository,
+                        CruiseDeckRepository cruiseDeckRepository,
+                        ActivityCruiseTourRepository activityCruiseTourRepository,
+                        AuthOnboardStaffClient authOnboardStaffClient) {
 
-        this.assignmentRepository = assignmentRepository;
-        this.tourRepository = tourRepository;
-        this.cruiseDeckRepository = cruiseDeckRepository;
-        this.activityCruiseTourRepository = activityCruiseTourRepository;
-        this.authOnboardStaffClient = authOnboardStaffClient;
-    }
-
-    @Transactional
-    public AssignOnboardStaffResult assignStaff(
-            AssignOnboardStaffRequest request,
-            UUID assignedBy) {
-
-        if (assignedBy == null) {
-            throw new AppException(
-                    "Không xác định được người thực hiện phân công",
-                    HttpStatus.UNAUTHORIZED);
+                this.assignmentRepository = assignmentRepository;
+                this.tourRepository = tourRepository;
+                this.cruiseDeckRepository = cruiseDeckRepository;
+                this.activityCruiseTourRepository = activityCruiseTourRepository;
+                this.authOnboardStaffClient = authOnboardStaffClient;
         }
 
-        validateTarget(
-                request.tourId(),
-                request.assignmentType(),
-                request.cruiseDeckId(),
-                request.activityCruiseTourId());
+        @Transactional
+        public AssignOnboardStaffResult assignStaff(
+                        AssignOnboardStaffRequest request,
+                        UUID assignedBy) {
 
-        Set<UUID> requestedIds = new LinkedHashSet<>(request.userIds());
+                if (assignedBy == null) {
+                        throw new AppException(
+                                        "Không xác định được người thực hiện phân công",
+                                        HttpStatus.UNAUTHORIZED);
+                }
 
-        List<ShoreStaffResponse> eligibleStaff = authOnboardStaffClient.getOnboardStaffByIds(
-                new ArrayList<>(requestedIds));
+                validateTarget(
+                                request.tourId(),
+                                request.assignmentType(),
+                                request.cruiseDeckId(),
+                                request.activityCruiseTourId());
 
-        Map<UUID, ShoreStaffResponse> staffById = eligibleStaff.stream()
-                .collect(Collectors.toMap(
-                        ShoreStaffResponse::userId,
-                        Function.identity(),
-                        (first, second) -> first,
-                        LinkedHashMap::new));
+                Set<UUID> requestedIds = new LinkedHashSet<>(request.userIds());
 
-        List<UUID> invalidUserIds = requestedIds.stream()
-                .filter(userId -> !staffById.containsKey(userId))
-                .toList();
+                List<ShoreStaffResponse> eligibleStaff = authOnboardStaffClient.getOnboardStaffByIds(
+                                new ArrayList<>(requestedIds));
 
-        Collection<UUID> eligibleIds = staffById.keySet();
+                Map<UUID, ShoreStaffResponse> staffById = eligibleStaff.stream()
+                                .collect(Collectors.toMap(
+                                                ShoreStaffResponse::userId,
+                                                Function.identity(),
+                                                (first, second) -> first,
+                                                LinkedHashMap::new));
 
-        List<OnboardAssignStaff> existingAssignments;
+                List<UUID> invalidUserIds = requestedIds.stream()
+                                .filter(userId -> !staffById.containsKey(userId))
+                                .toList();
 
-        if (eligibleIds.isEmpty()) {
-            existingAssignments = List.of();
+                Collection<UUID> eligibleIds = staffById.keySet();
 
-        } else if (request.assignmentType() == TypeOnboardStaff.PATROL) {
-            existingAssignments = assignmentRepository
-                    .findAllByTourIdAndAssignmentTypeAndCruiseDeckIdAndUserIdIn(
-                            request.tourId(),
-                            request.assignmentType(),
-                            request.cruiseDeckId(),
-                            eligibleIds);
+                List<OnboardAssignStaff> existingAssignments;
 
-        } else {
-            existingAssignments = assignmentRepository
-                    .findAllByTourIdAndAssignmentTypeAndActivityCruiseTourIdAndUserIdIn(
-                            request.tourId(),
-                            request.assignmentType(),
-                            request.activityCruiseTourId(),
-                            eligibleIds);
+                if (eligibleIds.isEmpty()) {
+                        existingAssignments = List.of();
+
+                } else if (request.assignmentType() == TypeOnboardStaff.PATROL) {
+                        existingAssignments = assignmentRepository
+                                        .findAllByTourIdAndAssignmentTypeAndCruiseDeckIdAndUserIdIn(
+                                                        request.tourId(),
+                                                        request.assignmentType(),
+                                                        request.cruiseDeckId(),
+                                                        eligibleIds);
+
+                } else {
+                        existingAssignments = assignmentRepository
+                                        .findAllByTourIdAndAssignmentTypeAndActivityCruiseTourIdAndUserIdIn(
+                                                        request.tourId(),
+                                                        request.assignmentType(),
+                                                        request.activityCruiseTourId(),
+                                                        eligibleIds);
+                }
+
+                Set<UUID> existingUserIds = existingAssignments.stream()
+                                .map(OnboardAssignStaff::getUserId)
+                                .collect(Collectors.toSet());
+
+                List<UUID> alreadyAssigned = requestedIds.stream()
+                                .filter(staffById::containsKey)
+                                .filter(existingUserIds::contains)
+                                .toList();
+
+                List<OnboardAssignStaff> newAssignments = requestedIds.stream()
+                                .filter(staffById::containsKey)
+                                .filter(userId -> !existingUserIds.contains(userId))
+                                .map(userId -> {
+                                        OnboardAssignStaff assignment = new OnboardAssignStaff();
+
+                                        assignment.setTourId(request.tourId());
+                                        assignment.setAssignmentType(request.assignmentType());
+                                        assignment.setCruiseDeckId(request.cruiseDeckId());
+                                        assignment.setActivityCruiseTourId(
+                                                        request.activityCruiseTourId());
+                                        assignment.setUserId(userId);
+                                        assignment.setAssignedBy(assignedBy);
+                                        assignment.setStatus(StatusAssignStaff.PENDING);
+                                        assignment.setRespondedAt(null);
+                                        assignment.setRejectionReason(null);
+
+                                        return assignment;
+                                })
+                                .toList();
+
+                List<OnboardAssignStaff> savedAssignments = assignmentRepository.saveAll(newAssignments);
+
+                List<OnboardStaffAssignmentResponse> assigned = savedAssignments.stream()
+                                .map(assignment -> OnboardAssignStaffMapper.toResponse(
+                                                assignment,
+                                                staffById.get(assignment.getUserId())))
+                                .toList();
+
+                return new AssignOnboardStaffResult(
+                                assigned,
+                                alreadyAssigned,
+                                invalidUserIds);
         }
 
-        Set<UUID> existingUserIds = existingAssignments.stream()
-                .map(OnboardAssignStaff::getUserId)
-                .collect(Collectors.toSet());
+        @Transactional(readOnly = true)
+        public List<OnboardStaffAssignmentResponse> getAssignments(
+                        UUID tourId,
+                        TypeOnboardStaff assignmentType,
+                        UUID cruiseDeckId,
+                        UUID activityCruiseTourId) {
 
-        List<UUID> alreadyAssigned = requestedIds.stream()
-                .filter(staffById::containsKey)
-                .filter(existingUserIds::contains)
-                .toList();
+                validateTarget(
+                                tourId,
+                                assignmentType,
+                                cruiseDeckId,
+                                activityCruiseTourId);
 
-        List<OnboardAssignStaff> newAssignments = requestedIds.stream()
-                .filter(staffById::containsKey)
-                .filter(userId -> !existingUserIds.contains(userId))
-                .map(userId -> {
-                    OnboardAssignStaff assignment = new OnboardAssignStaff();
+                List<OnboardAssignStaff> assignments;
 
-                    assignment.setTourId(request.tourId());
-                    assignment.setAssignmentType(request.assignmentType());
-                    assignment.setCruiseDeckId(request.cruiseDeckId());
-                    assignment.setActivityCruiseTourId(
-                            request.activityCruiseTourId());
-                    assignment.setUserId(userId);
-                    assignment.setAssignedBy(assignedBy);
-                    assignment.setStatus(StatusAssignStaff.PENDING);
-                    assignment.setRespondedAt(null);
-                    assignment.setRejectionReason(null);
+                if (assignmentType == TypeOnboardStaff.PATROL) {
+                        assignments = assignmentRepository
+                                        .findAllByTourIdAndAssignmentTypeAndCruiseDeckIdOrderByAssignedAtDesc(
+                                                        tourId,
+                                                        assignmentType,
+                                                        cruiseDeckId);
+                } else {
+                        assignments = assignmentRepository
+                                        .findAllByTourIdAndAssignmentTypeAndActivityCruiseTourIdOrderByAssignedAtDesc(
+                                                        tourId,
+                                                        assignmentType,
+                                                        activityCruiseTourId);
+                }
 
-                    return assignment;
-                })
-                .toList();
+                if (assignments.isEmpty()) {
+                        return List.of();
+                }
 
-        List<OnboardAssignStaff> savedAssignments = assignmentRepository.saveAll(newAssignments);
+                List<ShoreStaffResponse> staffList = authOnboardStaffClient.getAllOnboardStaff();
 
-        List<OnboardStaffAssignmentResponse> assigned = savedAssignments.stream()
-                .map(assignment -> OnboardAssignStaffMapper.toResponse(
-                        assignment,
-                        staffById.get(assignment.getUserId())))
-                .toList();
+                Map<UUID, ShoreStaffResponse> staffById = staffList.stream()
+                                .collect(Collectors.toMap(
+                                                ShoreStaffResponse::userId,
+                                                Function.identity(),
+                                                (first, second) -> first));
 
-        return new AssignOnboardStaffResult(
-                assigned,
-                alreadyAssigned,
-                invalidUserIds);
-    }
-
-    @Transactional(readOnly = true)
-    public List<OnboardStaffAssignmentResponse> getAssignments(
-            UUID tourId,
-            TypeOnboardStaff assignmentType,
-            UUID cruiseDeckId,
-            UUID activityCruiseTourId) {
-
-        validateTarget(
-                tourId,
-                assignmentType,
-                cruiseDeckId,
-                activityCruiseTourId);
-
-        List<OnboardAssignStaff> assignments;
-
-        if (assignmentType == TypeOnboardStaff.PATROL) {
-            assignments = assignmentRepository
-                    .findAllByTourIdAndAssignmentTypeAndCruiseDeckIdOrderByAssignedAtDesc(
-                            tourId,
-                            assignmentType,
-                            cruiseDeckId);
-        } else {
-            assignments = assignmentRepository
-                    .findAllByTourIdAndAssignmentTypeAndActivityCruiseTourIdOrderByAssignedAtDesc(
-                            tourId,
-                            assignmentType,
-                            activityCruiseTourId);
+                return assignments.stream()
+                                .map(assignment -> OnboardAssignStaffMapper.toResponse(
+                                                assignment,
+                                                staffById.get(assignment.getUserId())))
+                                .toList();
         }
 
-        if (assignments.isEmpty()) {
-            return List.of();
+        @Transactional
+        public void cancelAssignment(
+                        UUID tourId,
+                        TypeOnboardStaff assignmentType,
+                        UUID cruiseDeckId,
+                        UUID activityCruiseTourId,
+                        UUID assignmentId) {
+
+                // Kiểm tra đối tượng phân công hợp lệ
+                validateTarget(
+                                tourId,
+                                assignmentType,
+                                cruiseDeckId,
+                                activityCruiseTourId);
+
+                OnboardAssignStaff assignment;
+
+                if (assignmentType == TypeOnboardStaff.PATROL) {
+
+                        assignment = assignmentRepository
+                                        .findByIdAndTourIdAndAssignmentTypeAndCruiseDeckIdAndStatus(
+                                                        assignmentId,
+                                                        tourId,
+                                                        assignmentType,
+                                                        cruiseDeckId,
+                                                        StatusAssignStaff.PENDING)
+                                        .orElseThrow(() -> new AppException(
+                                                        "Không tìm thấy phân công PATROL đang chờ phản hồi để hủy",
+                                                        HttpStatus.NOT_FOUND));
+
+                } else if (assignmentType == TypeOnboardStaff.ACTIVITY_CRUISE) {
+
+                        assignment = assignmentRepository
+                                        .findByIdAndTourIdAndAssignmentTypeAndActivityCruiseTourIdAndStatus(
+                                                        assignmentId,
+                                                        tourId,
+                                                        assignmentType,
+                                                        activityCruiseTourId,
+                                                        StatusAssignStaff.PENDING)
+                                        .orElseThrow(() -> new AppException(
+                                                        "Không tìm thấy phân công ACTIVITY_CRUISE đang chờ phản hồi để hủy",
+                                                        HttpStatus.NOT_FOUND));
+
+                } else {
+                        throw new AppException(
+                                        "Loại phân công không hợp lệ",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                assignmentRepository.delete(assignment);
         }
 
-        List<ShoreStaffResponse> staffList = authOnboardStaffClient.getAllOnboardStaff();
+        private void validateTarget(
+                        UUID tourId,
+                        TypeOnboardStaff assignmentType,
+                        UUID cruiseDeckId,
+                        UUID activityCruiseTourId) {
 
-        Map<UUID, ShoreStaffResponse> staffById = staffList.stream()
-                .collect(Collectors.toMap(
-                        ShoreStaffResponse::userId,
-                        Function.identity(),
-                        (first, second) -> first));
+                if (tourId == null || assignmentType == null) {
+                        throw new AppException(
+                                        "Tour ID và loại phân công không được để trống",
+                                        HttpStatus.BAD_REQUEST);
+                }
 
-        return assignments.stream()
-                .map(assignment -> OnboardAssignStaffMapper.toResponse(
-                        assignment,
-                        staffById.get(assignment.getUserId())))
-                .toList();
-    }
+                Tour tour = tourRepository.findById(tourId)
+                                .orElseThrow(() -> new AppException(
+                                                "Không tìm thấy tour",
+                                                HttpStatus.NOT_FOUND));
 
-    private void validateTarget(
-            UUID tourId,
-            TypeOnboardStaff assignmentType,
-            UUID cruiseDeckId,
-            UUID activityCruiseTourId) {
+                if (assignmentType == TypeOnboardStaff.PATROL) {
 
-        if (tourId == null || assignmentType == null) {
-            throw new AppException(
-                    "Tour ID và loại phân công không được để trống",
-                    HttpStatus.BAD_REQUEST);
+                        if (cruiseDeckId == null || activityCruiseTourId != null) {
+                                throw new AppException(
+                                                "PATROL yêu cầu cruiseDeckId và không được gửi activityCruiseTourId",
+                                                HttpStatus.BAD_REQUEST);
+                        }
+
+                        if (tour.getCruise() == null) {
+                                throw new AppException(
+                                                "Tour chưa được phân công tàu",
+                                                HttpStatus.CONFLICT);
+                        }
+
+                        CruiseDeck deck = cruiseDeckRepository
+                                        .findByIdAndCruise_Id(
+                                                        cruiseDeckId,
+                                                        tour.getCruise().getId())
+                                        .orElseThrow(() -> new AppException(
+                                                        "Không tìm thấy deck thuộc tàu của tour",
+                                                        HttpStatus.NOT_FOUND));
+
+                        if (deck.getStatus() != CruiseDeckStatus.ACTIVE) {
+                                throw new AppException(
+                                                "Không thể phân công nhân viên vào deck không hoạt động",
+                                                HttpStatus.CONFLICT);
+                        }
+
+                } else if (assignmentType == TypeOnboardStaff.ACTIVITY_CRUISE) {
+
+                        if (activityCruiseTourId == null || cruiseDeckId != null) {
+                                throw new AppException(
+                                                "ACTIVITY_CRUISE yêu cầu activityCruiseTourId và không được gửi cruiseDeckId",
+                                                HttpStatus.BAD_REQUEST);
+                        }
+
+                        ActivityCruiseTour activityTour = activityCruiseTourRepository
+                                        .findById(activityCruiseTourId)
+                                        .orElseThrow(() -> new AppException(
+                                                        "Không tìm thấy ActivityCruiseTour cần phân công",
+                                                        HttpStatus.NOT_FOUND));
+
+                        if (!tourId.equals(activityTour.getTourId())) {
+                                throw new AppException(
+                                                "ActivityCruiseTour không thuộc tour được cung cấp",
+                                                HttpStatus.BAD_REQUEST);
+                        }
+
+                } else {
+                        throw new AppException(
+                                        "Loại phân công không hợp lệ",
+                                        HttpStatus.BAD_REQUEST);
+                }
         }
-
-        Tour tour = tourRepository.findById(tourId)
-                .orElseThrow(() -> new AppException(
-                        "Không tìm thấy tour",
-                        HttpStatus.NOT_FOUND));
-
-        if (assignmentType == TypeOnboardStaff.PATROL) {
-
-            if (cruiseDeckId == null || activityCruiseTourId != null) {
-                throw new AppException(
-                        "PATROL yêu cầu cruiseDeckId và không được gửi activityCruiseTourId",
-                        HttpStatus.BAD_REQUEST);
-            }
-
-            if (tour.getCruise() == null) {
-                throw new AppException(
-                        "Tour chưa được phân công tàu",
-                        HttpStatus.CONFLICT);
-            }
-
-            CruiseDeck deck = cruiseDeckRepository
-                    .findByIdAndCruise_Id(
-                            cruiseDeckId,
-                            tour.getCruise().getId())
-                    .orElseThrow(() -> new AppException(
-                            "Không tìm thấy deck thuộc tàu của tour",
-                            HttpStatus.NOT_FOUND));
-
-            if (deck.getStatus() != CruiseDeckStatus.ACTIVE) {
-                throw new AppException(
-                        "Không thể phân công nhân viên vào deck không hoạt động",
-                        HttpStatus.CONFLICT);
-            }
-
-        } else if (assignmentType == TypeOnboardStaff.ACTIVITY_CRUISE) {
-
-            if (activityCruiseTourId == null || cruiseDeckId != null) {
-                throw new AppException(
-                        "ACTIVITY_CRUISE yêu cầu activityCruiseTourId và không được gửi cruiseDeckId",
-                        HttpStatus.BAD_REQUEST);
-            }
-
-            ActivityCruiseTour activityTour = activityCruiseTourRepository
-                    .findById(activityCruiseTourId)
-                    .orElseThrow(() -> new AppException(
-                            "Không tìm thấy ActivityCruiseTour cần phân công",
-                            HttpStatus.NOT_FOUND));
-
-            if (!tourId.equals(activityTour.getTourId())) {
-                throw new AppException(
-                        "ActivityCruiseTour không thuộc tour được cung cấp",
-                        HttpStatus.BAD_REQUEST);
-            }
-
-        } else {
-            throw new AppException(
-                    "Loại phân công không hợp lệ",
-                    HttpStatus.BAD_REQUEST);
-        }
-    }
 }

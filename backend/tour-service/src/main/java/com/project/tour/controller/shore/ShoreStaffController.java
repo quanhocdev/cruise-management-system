@@ -1,6 +1,6 @@
 package com.project.tour.controller.shore;
 
-import com.project.tour.client.auth.AuthStaffClient;
+import com.project.tour.client.auth.AuthShoreStaffClient;
 import com.project.tour.client.auth.ShoreStaffResponse;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,9 +13,9 @@ import java.util.List;
 @RequestMapping("/api/shore/staff")
 public class ShoreStaffController {
 
-    private final AuthStaffClient authStaffClient;
+    private final AuthShoreStaffClient authStaffClient;
 
-    public ShoreStaffController(AuthStaffClient authStaffClient) {
+    public ShoreStaffController(AuthShoreStaffClient authStaffClient) {
         this.authStaffClient = authStaffClient;
     }
 

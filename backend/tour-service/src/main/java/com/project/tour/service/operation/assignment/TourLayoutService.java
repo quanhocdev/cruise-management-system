@@ -13,7 +13,8 @@ import com.project.tour.model.scheduler.Tour;
 import com.project.tour.repository.cruise.CruiseAreaRepository;
 import com.project.tour.repository.cruise.CruiseDeckRepository;
 import com.project.tour.repository.room.RoomRepository;
-import com.project.tour.repository.tour.TourRepository;
+import com.project.tour.repository.scheduler.TourRepository;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

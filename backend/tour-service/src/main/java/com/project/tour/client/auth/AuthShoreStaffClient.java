@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 @Component
-public class AuthStaffClient {
+public class AuthShoreStaffClient {
 
     private static final String SHORE_STAFF_CACHE_KEY = "shore-staff-list";
     private static final String SHORE_STAFF_ROLE = "SHORE_STAFF";
@@ -22,7 +22,7 @@ public class AuthStaffClient {
     private final ServiceTokenClient serviceTokenClient;
     private final Cache<String, List<ShoreStaffResponse>> shoreStaffCache;
 
-    public AuthStaffClient(
+    public AuthShoreStaffClient(
             RestClient.Builder restClientBuilder,
             ServiceTokenClient serviceTokenClient,
             @Qualifier("shoreStaffCache") Cache<String, List<ShoreStaffResponse>> shoreStaffCache,

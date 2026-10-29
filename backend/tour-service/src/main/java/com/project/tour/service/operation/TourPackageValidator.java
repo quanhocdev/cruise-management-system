@@ -5,8 +5,9 @@ import com.project.tour.model.admin.RoomType;
 import com.project.tour.model.operation.TourPackage;
 import com.project.tour.model.scheduler.Tour;
 import com.project.tour.repository.room.RoomTypeRepository;
+import com.project.tour.repository.scheduler.TourRepository;
 import com.project.tour.repository.tour.TourPackageRepository;
-import com.project.tour.repository.tour.TourRepository;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 

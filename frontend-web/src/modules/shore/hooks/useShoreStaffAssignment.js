@@ -1,6 +1,4 @@
 // src/modules/shore/hooks/useShoreStaffAssignment.js
-// (FILE MỚI) Tải nhân viên SHORE_STAFF + danh sách đã phân công của 1 Visit Tour,
-// và giữ state các nhân viên được chọn thêm.
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -12,6 +10,10 @@ const useShoreStaffAssignment = (visitTourId) => {
   const [selectedUserIds, setSelectedUserIds] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const [cancelingId, setCancelingId] = useState(null);
+  const [actionError, setActionError] = useState("");
+  const [actionSuccess, setActionSuccess] = useState("");
 
   const requestRef = useRef(0); // bỏ qua kết quả của request cũ
 
@@ -76,6 +78,38 @@ const useShoreStaffAssignment = (visitTourId) => {
     );
   }, []);
 
+  const cancelAssignment = useCallback(
+    async (assignmentId) => {
+      if (!visitTourId || !assignmentId) return;
+
+      setCancelingId(assignmentId);
+      setActionError("");
+      setActionSuccess("");
+
+      try {
+        await visitTourService.cancelStaffAssignment(visitTourId, assignmentId);
+
+        setAssignments((previous) =>
+          previous.filter((item) => item.id !== assignmentId),
+        );
+
+        setActionSuccess("Đã hủy phân công nhân viên thành công.");
+
+        return true;
+      } catch (err) {
+        console.error("CANCEL SHORE ASSIGNMENT ERROR:", err);
+
+        setActionError(
+          err?.response?.data?.message || "Không thể hủy phân công nhân viên.",
+        );
+
+        return false;
+      } finally {
+        setCancelingId(null);
+      }
+    },
+    [visitTourId],
+  );
   // Không cho chọn lại người đã được phân công
   const assignedIds = new Set(assignments.map((a) => a.userId).filter(Boolean));
   const availableStaff = staffList.filter((s) => !assignedIds.has(s.userId));
@@ -89,6 +123,11 @@ const useShoreStaffAssignment = (visitTourId) => {
     loading,
     error,
     reload: load,
+
+    cancelAssignment,
+    cancelingId,
+    actionError,
+    actionSuccess,
   };
 };
 

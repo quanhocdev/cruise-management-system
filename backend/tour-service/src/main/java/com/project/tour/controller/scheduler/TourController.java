@@ -1,6 +1,8 @@
 package com.project.tour.controller.scheduler;
 
 import com.project.tour.dto.scheduler.tour.CreateTourRequest;
+import com.project.tour.dto.scheduler.CreateTourWithRouteRequest;
+import com.project.tour.dto.scheduler.CreateTourWithRouteResponse;
 import com.project.tour.dto.scheduler.tour.TourResponse;
 import com.project.tour.dto.scheduler.tour.UpdateTourRequest;
 import com.project.tour.model.enums.tour.TourStatusTrip;
@@ -19,84 +21,91 @@ import java.util.UUID;
 @RequestMapping("/api/scheduler/tours")
 public class TourController {
 
-        private final TourService tourService;
+    private final TourService tourService;
 
-        public TourController(
-                        TourService tourService) {
+    public TourController(TourService tourService) {
+        this.tourService = tourService;
+    }
 
-                this.tourService = tourService;
-        }
+    // CREATE TOUR
+    @PostMapping
+    public ResponseEntity<TourResponse> createTour(
+            @Valid @RequestBody CreateTourRequest request) {
 
-        // CREATE TOUR
-        @PostMapping
-        public ResponseEntity<TourResponse> createTour(
-                        @Valid @RequestBody CreateTourRequest request) {
+        TourResponse response = tourService.createTour(request);
 
-                TourResponse response = tourService.createTour(request);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
+    }
 
-                return ResponseEntity
-                                .status(HttpStatus.CREATED)
-                                .body(response);
-        }
+    // CREATE TOUR WITH INITIAL ROUTE
+    @PostMapping("/with-route")
+    public ResponseEntity<CreateTourWithRouteResponse> createTourWithRoute(
+            @Valid @RequestBody CreateTourWithRouteRequest request) {
 
-        // GET BY ID
-        @GetMapping("/{id}")
-        public ResponseEntity<TourResponse> getTourById(
-                        @PathVariable UUID id) {
+        CreateTourWithRouteResponse response =
+                tourService.createTourWithRoute(request);
 
-                return ResponseEntity.ok(
-                                tourService.getTourById(id));
-        }
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
+    }
 
-        // GET BY CODE
-        @GetMapping("/code/{code}")
-        public ResponseEntity<TourResponse> getTourByCode(
-                        @PathVariable String code) {
+    // GET BY ID
+    @GetMapping("/{id}")
+    public ResponseEntity<TourResponse> getTourById(
+            @PathVariable UUID id) {
 
-                return ResponseEntity.ok(
-                                tourService.getTourByCode(code));
-        }
+        return ResponseEntity.ok(
+                tourService.getTourById(id));
+    }
 
-        // GET ALL / FILTER
-        @GetMapping
-        public ResponseEntity<List<TourResponse>> getTours(
-                        @RequestParam(required = false) UUID cruiseId,
-                        @RequestParam(required = false) TourStatusTrip statusTrip) {
+    // GET BY CODE
+    @GetMapping("/code/{code}")
+    public ResponseEntity<TourResponse> getTourByCode(
+            @PathVariable String code) {
 
-                return ResponseEntity.ok(
-                                tourService.getTours(
-                                                cruiseId,
-                                                statusTrip));
-        }
+        return ResponseEntity.ok(
+                tourService.getTourByCode(code));
+    }
 
-        // UPDATE
-        @PatchMapping("/{id}")
-        public ResponseEntity<TourResponse> updateTour(
-                        @PathVariable UUID id,
-                        @Valid @RequestBody UpdateTourRequest request) {
+    // GET ALL / FILTER
+    @GetMapping
+    public ResponseEntity<List<TourResponse>> getTours(
+            @RequestParam(required = false) UUID cruiseId,
+            @RequestParam(required = false) TourStatusTrip statusTrip) {
 
-                return ResponseEntity.ok(
-                                tourService.updateTour(
-                                                id,
-                                                request));
-        }
+        return ResponseEntity.ok(
+                tourService.getTours(cruiseId, statusTrip));
+    }
 
-        // DELETE
-        @DeleteMapping("/{id}")
-        public ResponseEntity<Void> deleteTour(
-                        @PathVariable UUID id) {
+    // UPDATE
+    @PatchMapping("/{id}")
+    public ResponseEntity<TourResponse> updateTour(
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateTourRequest request) {
 
-                tourService.deleteTour(id);
+        return ResponseEntity.ok(
+                tourService.updateTour(id, request));
+    }
 
-                return ResponseEntity.noContent().build();
-        }
+    // DELETE
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTour(
+            @PathVariable UUID id) {
 
-        // SUBMIT FOR APPROVAL
-        @PatchMapping("/{id}/submit-for-approval")
-        public ResponseEntity<TourResponse> submitForApproval(
-                        @PathVariable UUID id) {
+        tourService.deleteTour(id);
 
-                return ResponseEntity.ok(
-                                tourService.submitForApproval(id));
-        }
+        return ResponseEntity.noContent().build();
+    }
+
+    // SUBMIT FOR APPROVAL
+    @PatchMapping("/{id}/submit-for-approval")
+    public ResponseEntity<TourResponse> submitForApproval(
+            @PathVariable UUID id) {
+
+        return ResponseEntity.ok(
+                tourService.submitForApproval(id));
+    }
 }

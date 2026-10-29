@@ -1,295 +1,378 @@
-// src/modules/admin/components/port/PortMap.jsx
-
-import { useEffect, useRef, useState } from "react";
-
+import { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN;
 
-mapboxgl.accessToken = MAPBOX_TOKEN;
+const ROUTE_SOURCE_ID = "scheduler-route-source";
+const ROUTE_LAYER_ID = "scheduler-route-layer";
 
-export default function PortMap({
+const DEFAULT_CENTER = [106.7009, 10.7769];
+
+function getPortCoordinates(port) {
+  const longitude = Number(port?.longitude);
+  const latitude = Number(port?.latitude);
+
+  if (
+    !Number.isFinite(longitude) ||
+    !Number.isFinite(latitude) ||
+    longitude < -180 ||
+    longitude > 180 ||
+    latitude < -90 ||
+    latitude > 90
+  ) {
+    return null;
+  }
+
+  return [longitude, latitude];
+}
+
+function getRouteFeature(routeGeoJson) {
+  if (!routeGeoJson) return null;
+
+  // API có thể trả về trực tiếp GeoJSON Feature.
+  if (routeGeoJson.type === "Feature") {
+    return routeGeoJson;
+  }
+
+  // Hoặc trả về FeatureCollection.
+  if (routeGeoJson.type === "FeatureCollection") {
+    return routeGeoJson.features?.[0] ?? null;
+  }
+
+  // Trường hợp dữ liệu chỉ chứa geometry.
+  if (
+    routeGeoJson.type === "LineString" ||
+    routeGeoJson.type === "MultiLineString"
+  ) {
+    return {
+      type: "Feature",
+      properties: {},
+      geometry: routeGeoJson,
+    };
+  }
+
+  return null;
+}
+
+function createMarkerElement(type) {
+  const element = document.createElement("div");
+
+  element.className = `scheduler-map-marker scheduler-map-marker-${type}`;
+
+  element.style.width = "20px";
+  element.style.height = "20px";
+  element.style.borderRadius = "50%";
+  element.style.border = "3px solid #ffffff";
+  element.style.boxShadow = "0 2px 8px rgba(0,0,0,0.35)";
+  element.style.cursor = "pointer";
+
+  if (type === "departure") {
+    element.style.backgroundColor = "#16a34a";
+  } else if (type === "destination") {
+    element.style.backgroundColor = "#dc2626";
+  } else {
+    element.style.backgroundColor = "#2563eb";
+  }
+
+  return element;
+}
+
+function SchedulerRouteMap({
   ports = [],
-  selectedLocation,
-  onMapLocationSelect,
-  onEditPort,
+  departurePortId = null,
+  destinationPortId = null,
+  routeGeoJson = null,
+  onSelectPort,
 }) {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
+  const markersRef = useRef([]);
+  const onSelectPortRef = useRef(onSelectPort);
 
-  const markersRef = useRef(new Map());
-  const temporaryMarkerRef = useRef(null);
-
-  const [mapReady, setMapReady] = useState(false);
+  useEffect(() => {
+    onSelectPortRef.current = onSelectPort;
+  }, [onSelectPort]);
 
   // =====================================================
   // INITIALIZE MAP
   // =====================================================
 
   useEffect(() => {
-    if (!mapContainerRef.current) {
-      return;
-    }
-
-    if (mapRef.current) {
-      return;
-    }
+    if (!mapContainerRef.current || mapRef.current) return;
 
     if (!MAPBOX_TOKEN) {
-      console.error("❌ VITE_MAPBOX_PUBLIC_TOKEN chưa được cấu hình.");
-
+      console.error(
+        "Không tìm thấy VITE_MAPBOX_PUBLIC_TOKEN trong environment.",
+      );
       return;
     }
+
+    mapboxgl.accessToken = MAPBOX_TOKEN;
 
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: "mapbox://styles/mapbox/streets-v12",
-
-      // 965 Quang Trung, Gò Vấp, TP.HCM
-      center: [106.6687, 10.8386],
-
-      // Zoom vào khu vực thành phố
-      zoom: 13,
-
-      // Nghiêng nhẹ
-      pitch: 35,
-
-      // Hướng nhìn
-      bearing: 0,
+      center: DEFAULT_CENTER,
+      zoom: 5,
+      attributionControl: true,
     });
 
-    map.addControl(new mapboxgl.NavigationControl(), "top-right");
+    map.addControl(
+      new mapboxgl.NavigationControl(),
+      "top-right",
+    );
 
-    map.addControl(new mapboxgl.FullscreenControl(), "top-right");
+    map.addControl(
+      new mapboxgl.FullscreenControl(),
+      "top-right",
+    );
 
     map.on("load", () => {
-      setMapReady(true);
-    });
+      map.addSource(ROUTE_SOURCE_ID, {
+        type: "geojson",
+        data: {
+          type: "FeatureCollection",
+          features: [],
+        },
+      });
 
-    map.on("click", (event) => {
-      const { lng, lat } = event.lngLat;
-
-      onMapLocationSelect?.({
-        latitude: lat,
-        longitude: lng,
-        placeName: "",
+      map.addLayer({
+        id: ROUTE_LAYER_ID,
+        type: "line",
+        source: ROUTE_SOURCE_ID,
+        layout: {
+          "line-join": "round",
+          "line-cap": "round",
+        },
+        paint: {
+          "line-color": "#2563eb",
+          "line-width": 4,
+          "line-opacity": 0.9,
+        },
       });
     });
 
     mapRef.current = map;
 
     return () => {
-      markersRef.current.forEach((marker) => {
-        marker.remove();
-      });
-
-      markersRef.current.clear();
-
-      if (temporaryMarkerRef.current) {
-        temporaryMarkerRef.current.remove();
-        temporaryMarkerRef.current = null;
-      }
+      markersRef.current.forEach((marker) => marker.remove());
+      markersRef.current = [];
 
       map.remove();
-
       mapRef.current = null;
     };
-  }, [onMapLocationSelect]);
+  }, []);
 
   // =====================================================
-  // RENDER PORT MARKERS
+  // UPDATE PORT MARKERS
   // =====================================================
 
   useEffect(() => {
-    if (!mapReady || !mapRef.current) {
-      return;
-    }
-
     const map = mapRef.current;
 
-    const activePortIds = new Set(
-      ports
-        .filter((port) => port.latitude != null && port.longitude != null)
-        .map((port) => String(port.id)),
-    );
+    if (!map || !map.isStyleLoaded()) return;
 
-    // Remove old markers
-    markersRef.current.forEach((marker, id) => {
-      if (!activePortIds.has(id)) {
-        marker.remove();
-        markersRef.current.delete(id);
-      }
-    });
+    markersRef.current.forEach((marker) => marker.remove());
+    markersRef.current = [];
 
-    // Create/update markers
-    ports.forEach((port) => {
-      if (port.latitude == null || port.longitude == null) {
-        return;
-      }
+    const validPorts = ports
+      .map((port) => ({
+        port,
+        coordinates: getPortCoordinates(port),
+      }))
+      .filter((item) => item.coordinates !== null);
 
-      const id = String(port.id);
+    validPorts.forEach(({ port, coordinates }) => {
+      let markerType = "normal";
 
-      const existingMarker = markersRef.current.get(id);
-
-      if (existingMarker) {
-        existingMarker.setLngLat([
-          Number(port.longitude),
-          Number(port.latitude),
-        ]);
-
-        return;
+      if (port.id === departurePortId) {
+        markerType = "departure";
+      } else if (port.id === destinationPortId) {
+        markerType = "destination";
       }
 
-      const markerElement = document.createElement("div");
+      const element = createMarkerElement(markerType);
 
-      markerElement.className = "port-map-marker";
+      const popupContent = document.createElement("div");
+      popupContent.style.minWidth = "180px";
+      popupContent.style.padding = "4px";
 
-      markerElement.innerHTML = `
-        <div class="port-map-marker-pin">
-          <span>⚓</span>
-        </div>
-      `;
+      const name = document.createElement("strong");
+      name.textContent = port.name || "Cảng chưa có tên";
+      name.style.display = "block";
+      name.style.marginBottom = "5px";
+
+      const location = document.createElement("div");
+      location.textContent = [port.city, port.country]
+        .filter(Boolean)
+        .join(", ");
+      location.style.fontSize = "12px";
+      location.style.color = "#64748b";
+
+      const action = document.createElement("div");
+      action.style.marginTop = "8px";
+      action.style.fontSize = "12px";
+      action.style.fontWeight = "600";
+
+      if (port.id === departurePortId) {
+        action.textContent = "Cảng khởi hành";
+        action.style.color = "#16a34a";
+      } else if (port.id === destinationPortId) {
+        action.textContent = "Cảng điểm đến";
+        action.style.color = "#dc2626";
+      } else {
+        action.textContent = "Nhấn để chọn cảng";
+        action.style.color = "#2563eb";
+      }
+
+      popupContent.append(name, location, action);
 
       const popup = new mapboxgl.Popup({
-        offset: 25,
+        offset: 16,
         closeButton: true,
-        closeOnClick: false,
-      }).setHTML(`
-        <div class="port-map-popup">
-          <div class="port-map-popup-title">
-            ${escapeHtml(port.name || "Cảng")}
-          </div>
-
-          <div class="port-map-popup-address">
-            ${escapeHtml(
-              port.address || `${port.city || ""}, ${port.country || ""}`,
-            )}
-          </div>
-
-          <div class="port-map-popup-coordinate">
-            ${Number(port.latitude).toFixed(6)},
-            ${Number(port.longitude).toFixed(6)}
-          </div>
-
-          <div class="port-map-popup-status ${
-            port.status === "ACTIVE" ? "active" : "inactive"
-          }">
-            ${port.status === "ACTIVE" ? "Đang hoạt động" : "Ngừng hoạt động"}
-          </div>
-
-          <button
-            type="button"
-            class="port-map-popup-edit"
-            data-port-id="${escapeHtml(id)}"
-          >
-            Chỉnh sửa
-          </button>
-        </div>
-      `);
-
-      popup.on("open", () => {
-        const button = popup
-          .getElement()
-          ?.querySelector(".port-map-popup-edit");
-
-        if (button) {
-          button.addEventListener("click", () => {
-            onEditPort?.(port);
-          });
-        }
-      });
+      }).setDOMContent(popupContent);
 
       const marker = new mapboxgl.Marker({
-        element: markerElement,
-        anchor: "bottom",
+        element,
+        anchor: "center",
       })
-        .setLngLat([Number(port.longitude), Number(port.latitude)])
+        .setLngLat(coordinates)
         .setPopup(popup)
         .addTo(map);
 
-      markersRef.current.set(id, marker);
+      element.addEventListener("click", () => {
+        onSelectPortRef.current?.(port);
+      });
+
+      markersRef.current.push(marker);
     });
-  }, [ports, mapReady, onEditPort]);
+
+    // Khi có cảng được chọn, đưa bản đồ đến cảng đó.
+    const selectedPort =
+      ports.find((port) => port.id === destinationPortId) ||
+      ports.find((port) => port.id === departurePortId);
+
+    const selectedCoordinates = getPortCoordinates(selectedPort);
+
+    if (selectedCoordinates) {
+      map.flyTo({
+        center: selectedCoordinates,
+        zoom: Math.max(map.getZoom(), 5),
+        duration: 800,
+      });
+    } else if (validPorts.length > 0) {
+      const bounds = new mapboxgl.LngLatBounds();
+
+      validPorts.forEach(({ coordinates }) => {
+        bounds.extend(coordinates);
+      });
+
+      map.fitBounds(bounds, {
+        padding: 60,
+        maxZoom: 7,
+        duration: 800,
+      });
+    }
+  }, [ports, departurePortId, destinationPortId]);
 
   // =====================================================
-  // SELECTED LOCATION
+  // UPDATE SEA ROUTE
   // =====================================================
 
   useEffect(() => {
-    if (!mapReady || !mapRef.current || !selectedLocation) {
-      return;
-    }
-
-    const latitude = Number(selectedLocation.latitude);
-
-    const longitude = Number(selectedLocation.longitude);
-
-    if (Number.isNaN(latitude) || Number.isNaN(longitude)) {
-      return;
-    }
-
     const map = mapRef.current;
 
-    map.flyTo({
-      center: [longitude, latitude],
-      zoom: 14,
-      duration: 900,
-      essential: true,
-    });
+    if (!map) return;
 
-    if (temporaryMarkerRef.current) {
-      temporaryMarkerRef.current.remove();
+    const updateRoute = () => {
+      const source = map.getSource(ROUTE_SOURCE_ID);
+
+      if (!source) return;
+
+      const feature = getRouteFeature(routeGeoJson);
+
+      source.setData({
+        type: "FeatureCollection",
+        features: feature ? [feature] : [],
+      });
+
+      if (!feature?.geometry?.coordinates) return;
+
+      const bounds = new mapboxgl.LngLatBounds();
+
+      const addCoordinates = (coordinates) => {
+        if (
+          Array.isArray(coordinates) &&
+          typeof coordinates[0] === "number" &&
+          typeof coordinates[1] === "number"
+        ) {
+          bounds.extend(coordinates);
+          return;
+        }
+
+        if (Array.isArray(coordinates)) {
+          coordinates.forEach(addCoordinates);
+        }
+      };
+
+      addCoordinates(feature.geometry.coordinates);
+
+      if (!bounds.isEmpty()) {
+        map.fitBounds(bounds, {
+          padding: {
+            top: 70,
+            bottom: 70,
+            left: 70,
+            right: 70,
+          },
+          maxZoom: 8,
+          duration: 1000,
+        });
+      }
+    };
+
+    if (map.isStyleLoaded()) {
+      updateRoute();
+    } else {
+      map.once("load", updateRoute);
     }
 
-    const element = document.createElement("div");
-
-    element.className = "port-map-temporary-marker";
-
-    element.innerHTML = `
-      <div class="port-map-temporary-pin">
-        +
-      </div>
-    `;
-
-    temporaryMarkerRef.current = new mapboxgl.Marker({
-      element,
-      anchor: "bottom",
-    })
-      .setLngLat([longitude, latitude])
-      .addTo(map);
-  }, [selectedLocation, mapReady]);
+    return () => {
+      map.off("load", updateRoute);
+    };
+  }, [routeGeoJson]);
 
   return (
-    <div className="port-map-container">
-      <div ref={mapContainerRef} className="port-map" />
+    <div className="scheduler-route-map-wrapper">
+      <div
+        ref={mapContainerRef}
+        className="scheduler-route-map"
+        style={{
+          width: "100%",
+          height: "100%",
+          minHeight: "500px",
+        }}
+      />
 
-      {!MAPBOX_TOKEN && (
-        <div className="port-map-config-error">
-          Chưa cấu hình VITE_MAPBOX_PUBLIC_TOKEN
+      <div className="scheduler-route-map-legend">
+        <div>
+          <span className="scheduler-route-legend-dot departure" />
+          <span>Cảng đi</span>
         </div>
-      )}
 
-      <div className="port-map-hint">
-        <span>💡</span>
-        <span>
-          Nhập địa chỉ để tìm kiếm hoặc click trực tiếp trên bản đồ để chọn tọa
-          độ.
-        </span>
+        <div>
+          <span className="scheduler-route-legend-dot destination" />
+          <span>Cảng đến</span>
+        </div>
+
+        <div>
+          <span className="scheduler-route-legend-dot normal" />
+          <span>Cảng khác</span>
+        </div>
       </div>
     </div>
   );
 }
 
-// =====================================================
-// ESCAPE HTML
-// =====================================================
-
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
+export default SchedulerRouteMap;

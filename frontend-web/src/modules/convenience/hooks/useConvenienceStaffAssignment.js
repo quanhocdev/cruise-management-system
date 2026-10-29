@@ -20,8 +20,6 @@ function normalizeStaff(staffData) {
   return list.filter((staff) => {
     const role = staff?.role;
 
-    // Endpoint đã lọc role CONVENIENCE_STAFF.
-    // Kiểm tra thêm nếu response có trường role.
     return (
       !role ||
       role === "CONVENIENCE_STAFF" ||
@@ -44,8 +42,12 @@ export default function useConvenienceStaffAssignment({
 
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [cancelingId, setCancelingId] = useState(null);
+
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
+  const [cancelError, setCancelError] = useState("");
+  const [cancelSuccess, setCancelSuccess] = useState("");
 
   const loadData = useCallback(async () => {
     if (!tourId || !targetId || !assignmentType) {
@@ -89,6 +91,8 @@ export default function useConvenienceStaffAssignment({
     setSelectedUserIds([]);
     setSearch("");
     setResult(null);
+    setCancelError("");
+    setCancelSuccess("");
 
     loadData();
   }, [loadData]);
@@ -185,6 +189,70 @@ export default function useConvenienceStaffAssignment({
     }
   };
 
+  const cancelAssignment = useCallback(
+    async (assignmentId) => {
+      if (!tourId || !targetId || !assignmentType || !assignmentId) {
+        setCancelError("Thiếu thông tin phân công cần hủy.");
+        return false;
+      }
+
+      if (cancelingId) return false;
+
+      const targetAssignment = assignments.find(
+        (item) => String(item.id) === String(assignmentId),
+      );
+
+      if (!targetAssignment) {
+        setCancelError("Không tìm thấy phân công cần hủy.");
+        return false;
+      }
+
+      if (targetAssignment.status !== "PENDING") {
+        setCancelError("Chỉ có thể hủy phân công đang chờ xác nhận.");
+        return false;
+      }
+
+      setCancelingId(assignmentId);
+      setCancelError("");
+      setCancelSuccess("");
+
+      try {
+        await convenienceStaffAssignmentService.cancelAssignment({
+          assignmentId,
+          tourId,
+          assignmentType,
+          targetId,
+        });
+
+        // Xóa khỏi danh sách phân công ngay sau khi API thành công.
+        // Nhân viên sẽ tự xuất hiện lại trong availableStaff.
+        setAssignments((previous) =>
+          previous.filter((item) => String(item.id) !== String(assignmentId)),
+        );
+
+        setSelectedUserIds((previous) =>
+          previous.filter(
+            (userId) => String(userId) !== String(targetAssignment.userId),
+          ),
+        );
+
+        setCancelSuccess("Đã hủy phân công nhân viên thành công.");
+        return true;
+      } catch (err) {
+        console.error("CANCEL CONVENIENCE STAFF ERROR:", err);
+
+        setCancelError(
+          getErrorMessage(err, "Không thể hủy phân công nhân viên."),
+        );
+
+        return false;
+      } finally {
+        setCancelingId(null);
+      }
+    },
+    [tourId, targetId, assignmentType, assignments, cancelingId],
+  );
+
   return {
     staffList,
     assignments,
@@ -199,5 +267,11 @@ export default function useConvenienceStaffAssignment({
     toggleStaff,
     assignSelectedStaff,
     reload: loadData,
+
+    // Hủy phân công
+    cancelAssignment,
+    cancelingId,
+    cancelError,
+    cancelSuccess,
   };
 }

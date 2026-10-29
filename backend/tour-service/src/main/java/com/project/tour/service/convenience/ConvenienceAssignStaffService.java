@@ -35,184 +35,208 @@ import java.util.stream.Collectors;
 @Service
 public class ConvenienceAssignStaffService {
 
-    private final ConvenienceAssignStaffRepository assignmentRepository;
-    private final ProductTourRepository productTourRepository;
-    private final ServiceTourRepository serviceTourRepository;
-    private final AuthConvenienceStaffClient authConvenienceStaffClient;
+        private final ConvenienceAssignStaffRepository assignmentRepository;
+        private final ProductTourRepository productTourRepository;
+        private final ServiceTourRepository serviceTourRepository;
+        private final AuthConvenienceStaffClient authConvenienceStaffClient;
 
-    public ConvenienceAssignStaffService(
-            ConvenienceAssignStaffRepository assignmentRepository,
-            ProductTourRepository productTourRepository,
-            ServiceTourRepository serviceTourRepository,
-            AuthConvenienceStaffClient authConvenienceStaffClient) {
+        public ConvenienceAssignStaffService(
+                        ConvenienceAssignStaffRepository assignmentRepository,
+                        ProductTourRepository productTourRepository,
+                        ServiceTourRepository serviceTourRepository,
+                        AuthConvenienceStaffClient authConvenienceStaffClient) {
 
-        this.assignmentRepository = assignmentRepository;
-        this.productTourRepository = productTourRepository;
-        this.serviceTourRepository = serviceTourRepository;
-        this.authConvenienceStaffClient = authConvenienceStaffClient;
-    }
-
-    @Transactional
-    public AssignConvenienceStaffResult assignStaff(
-            AssignConvenienceStaffRequest request,
-            UUID assignedBy) {
-
-        if (assignedBy == null) {
-            throw new AppException(
-                    "Không xác định được người thực hiện phân công",
-                    HttpStatus.UNAUTHORIZED);
+                this.assignmentRepository = assignmentRepository;
+                this.productTourRepository = productTourRepository;
+                this.serviceTourRepository = serviceTourRepository;
+                this.authConvenienceStaffClient = authConvenienceStaffClient;
         }
 
-        validateTarget(request);
+        @Transactional
+        public AssignConvenienceStaffResult assignStaff(
+                        AssignConvenienceStaffRequest request,
+                        UUID assignedBy) {
 
-        Set<UUID> requestedIds = new LinkedHashSet<>(request.userIds());
+                if (assignedBy == null) {
+                        throw new AppException(
+                                        "Không xác định được người thực hiện phân công",
+                                        HttpStatus.UNAUTHORIZED);
+                }
 
-        List<ShoreStaffResponse> eligibleStaff = authConvenienceStaffClient.getConvenienceStaffByIds(
-                new ArrayList<>(requestedIds));
+                validateTarget(request);
 
-        Map<UUID, ShoreStaffResponse> staffById = eligibleStaff.stream()
-                .collect(Collectors.toMap(
-                        ShoreStaffResponse::userId,
-                        Function.identity(),
-                        (first, second) -> first,
-                        LinkedHashMap::new));
+                Set<UUID> requestedIds = new LinkedHashSet<>(request.userIds());
 
-        List<UUID> invalidUserIds = requestedIds.stream()
-                .filter(userId -> !staffById.containsKey(userId))
-                .toList();
+                List<ShoreStaffResponse> eligibleStaff = authConvenienceStaffClient.getConvenienceStaffByIds(
+                                new ArrayList<>(requestedIds));
 
-        Collection<UUID> eligibleIds = staffById.keySet();
+                Map<UUID, ShoreStaffResponse> staffById = eligibleStaff.stream()
+                                .collect(Collectors.toMap(
+                                                ShoreStaffResponse::userId,
+                                                Function.identity(),
+                                                (first, second) -> first,
+                                                LinkedHashMap::new));
 
-        List<ConvenienceAssignStaff> existingAssignments = eligibleIds.isEmpty()
-                ? List.of()
-                : assignmentRepository
-                        .findAllByTourIdAndAssignmentTypeAndTargetIdAndUserIdIn(
+                List<UUID> invalidUserIds = requestedIds.stream()
+                                .filter(userId -> !staffById.containsKey(userId))
+                                .toList();
+
+                Collection<UUID> eligibleIds = staffById.keySet();
+
+                List<ConvenienceAssignStaff> existingAssignments = eligibleIds.isEmpty()
+                                ? List.of()
+                                : assignmentRepository
+                                                .findAllByTourIdAndAssignmentTypeAndTargetIdAndUserIdIn(
+                                                                request.tourId(),
+                                                                request.assignmentType(),
+                                                                request.targetId(),
+                                                                eligibleIds);
+
+                Set<UUID> existingUserIds = existingAssignments.stream()
+                                .map(ConvenienceAssignStaff::getUserId)
+                                .collect(Collectors.toSet());
+
+                List<UUID> alreadyAssigned = requestedIds.stream()
+                                .filter(staffById::containsKey)
+                                .filter(existingUserIds::contains)
+                                .toList();
+
+                List<ConvenienceAssignStaff> newAssignments = requestedIds.stream()
+                                .filter(staffById::containsKey)
+                                .filter(userId -> !existingUserIds.contains(userId))
+                                .map(userId -> {
+                                        ConvenienceAssignStaff assignment = new ConvenienceAssignStaff();
+
+                                        assignment.setTourId(request.tourId());
+                                        assignment.setAssignmentType(request.assignmentType());
+                                        assignment.setTargetId(request.targetId());
+                                        assignment.setUserId(userId);
+                                        assignment.setAssignedBy(assignedBy);
+                                        assignment.setStatus(StatusAssignStaff.PENDING);
+                                        assignment.setRespondedAt(null);
+                                        assignment.setRejectionReason(null);
+
+                                        return assignment;
+                                })
+                                .toList();
+
+                List<ConvenienceAssignStaff> savedAssignments = assignmentRepository.saveAll(newAssignments);
+
+                List<ConvenienceStaffAssignmentResponse> assigned = savedAssignments.stream()
+                                .map(assignment -> ConvenienceAssignStaffMapper.toResponse(
+                                                assignment,
+                                                staffById.get(assignment.getUserId())))
+                                .toList();
+
+                return new AssignConvenienceStaffResult(
+                                assigned,
+                                alreadyAssigned,
+                                invalidUserIds);
+        }
+
+        @Transactional
+        public void cancelAssignment(
+                        UUID tourId,
+                        TypeConvenienceAssign assignmentType,
+                        UUID targetId,
+                        UUID assignmentId) {
+
+                // Kiểm tra target có thực sự thuộc tour và đúng loại phân công.
+                validateTarget(tourId, assignmentType, targetId);
+
+                ConvenienceAssignStaff assignment = assignmentRepository
+                                .findByIdAndTourIdAndAssignmentTypeAndTargetIdAndStatus(
+                                                assignmentId,
+                                                tourId,
+                                                assignmentType,
+                                                targetId,
+                                                StatusAssignStaff.PENDING)
+                                .orElseThrow(() -> new AppException(
+                                                "Không tìm thấy phân công đang chờ phản hồi để hủy",
+                                                HttpStatus.NOT_FOUND));
+
+                assignmentRepository.delete(assignment);
+        }
+
+        @Transactional(readOnly = true)
+        public List<ConvenienceStaffAssignmentResponse> getAssignments(
+                        UUID tourId,
+                        TypeConvenienceAssign assignmentType,
+                        UUID targetId) {
+
+                validateTarget(tourId, assignmentType, targetId);
+
+                List<ConvenienceAssignStaff> assignments = assignmentRepository
+                                .findAllByTourIdAndAssignmentTypeAndTargetIdOrderByAssignedAtDesc(
+                                                tourId,
+                                                assignmentType,
+                                                targetId);
+
+                if (assignments.isEmpty()) {
+                        return List.of();
+                }
+
+                List<ShoreStaffResponse> staffList = authConvenienceStaffClient.getAllConvenienceStaff();
+
+                Map<UUID, ShoreStaffResponse> staffById = staffList.stream()
+                                .collect(Collectors.toMap(
+                                                ShoreStaffResponse::userId,
+                                                Function.identity(),
+                                                (first, second) -> first));
+
+                return assignments.stream()
+                                .map(assignment -> ConvenienceAssignStaffMapper.toResponse(
+                                                assignment,
+                                                staffById.get(assignment.getUserId())))
+                                .toList();
+        }
+
+        private void validateTarget(AssignConvenienceStaffRequest request) {
+                validateTarget(
                                 request.tourId(),
                                 request.assignmentType(),
-                                request.targetId(),
-                                eligibleIds);
-
-        Set<UUID> existingUserIds = existingAssignments.stream()
-                .map(ConvenienceAssignStaff::getUserId)
-                .collect(Collectors.toSet());
-
-        List<UUID> alreadyAssigned = requestedIds.stream()
-                .filter(staffById::containsKey)
-                .filter(existingUserIds::contains)
-                .toList();
-
-        List<ConvenienceAssignStaff> newAssignments = requestedIds.stream()
-                .filter(staffById::containsKey)
-                .filter(userId -> !existingUserIds.contains(userId))
-                .map(userId -> {
-                    ConvenienceAssignStaff assignment = new ConvenienceAssignStaff();
-
-                    assignment.setTourId(request.tourId());
-                    assignment.setAssignmentType(request.assignmentType());
-                    assignment.setTargetId(request.targetId());
-                    assignment.setUserId(userId);
-                    assignment.setAssignedBy(assignedBy);
-                    assignment.setStatus(StatusAssignStaff.PENDING);
-                    assignment.setRespondedAt(null);
-                    assignment.setRejectionReason(null);
-
-                    return assignment;
-                })
-                .toList();
-
-        List<ConvenienceAssignStaff> savedAssignments = assignmentRepository.saveAll(newAssignments);
-
-        List<ConvenienceStaffAssignmentResponse> assigned = savedAssignments.stream()
-                .map(assignment -> ConvenienceAssignStaffMapper.toResponse(
-                        assignment,
-                        staffById.get(assignment.getUserId())))
-                .toList();
-
-        return new AssignConvenienceStaffResult(
-                assigned,
-                alreadyAssigned,
-                invalidUserIds);
-    }
-
-    @Transactional(readOnly = true)
-    public List<ConvenienceStaffAssignmentResponse> getAssignments(
-            UUID tourId,
-            TypeConvenienceAssign assignmentType,
-            UUID targetId) {
-
-        validateTarget(tourId, assignmentType, targetId);
-
-        List<ConvenienceAssignStaff> assignments = assignmentRepository
-                .findAllByTourIdAndAssignmentTypeAndTargetIdOrderByAssignedAtDesc(
-                        tourId,
-                        assignmentType,
-                        targetId);
-
-        if (assignments.isEmpty()) {
-            return List.of();
+                                request.targetId());
         }
 
-        List<ShoreStaffResponse> staffList = authConvenienceStaffClient.getAllConvenienceStaff();
+        private void validateTarget(
+                        UUID tourId,
+                        TypeConvenienceAssign assignmentType,
+                        UUID targetId) {
 
-        Map<UUID, ShoreStaffResponse> staffById = staffList.stream()
-                .collect(Collectors.toMap(
-                        ShoreStaffResponse::userId,
-                        Function.identity(),
-                        (first, second) -> first));
+                if (tourId == null || assignmentType == null || targetId == null) {
+                        throw new AppException(
+                                        "Tour ID, loại phân công và target ID không được để trống",
+                                        HttpStatus.BAD_REQUEST);
+                }
 
-        return assignments.stream()
-                .map(assignment -> ConvenienceAssignStaffMapper.toResponse(
-                        assignment,
-                        staffById.get(assignment.getUserId())))
-                .toList();
-    }
+                UUID actualTourId;
 
-    private void validateTarget(AssignConvenienceStaffRequest request) {
-        validateTarget(
-                request.tourId(),
-                request.assignmentType(),
-                request.targetId());
-    }
+                if (assignmentType == TypeConvenienceAssign.PRODUCT) {
+                        ProductTour productTour = productTourRepository.findById(targetId)
+                                        .orElseThrow(() -> new AppException(
+                                                        "Không tìm thấy ProductTour cần phân công",
+                                                        HttpStatus.NOT_FOUND));
 
-    private void validateTarget(
-            UUID tourId,
-            TypeConvenienceAssign assignmentType,
-            UUID targetId) {
+                        actualTourId = productTour.getTourId();
 
-        if (tourId == null || assignmentType == null || targetId == null) {
-            throw new AppException(
-                    "Tour ID, loại phân công và target ID không được để trống",
-                    HttpStatus.BAD_REQUEST);
+                } else if (assignmentType == TypeConvenienceAssign.SERVICE) {
+                        ServiceTour serviceTour = serviceTourRepository.findById(targetId)
+                                        .orElseThrow(() -> new AppException(
+                                                        "Không tìm thấy ServiceTour cần phân công",
+                                                        HttpStatus.NOT_FOUND));
+
+                        actualTourId = serviceTour.getTourId();
+
+                } else {
+                        throw new AppException(
+                                        "Loại phân công không hợp lệ",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                if (!tourId.equals(actualTourId)) {
+                        throw new AppException(
+                                        "Đối tượng phân công không thuộc tour được cung cấp",
+                                        HttpStatus.BAD_REQUEST);
+                }
         }
-
-        UUID actualTourId;
-
-        if (assignmentType == TypeConvenienceAssign.PRODUCT) {
-            ProductTour productTour = productTourRepository.findById(targetId)
-                    .orElseThrow(() -> new AppException(
-                            "Không tìm thấy ProductTour cần phân công",
-                            HttpStatus.NOT_FOUND));
-
-            actualTourId = productTour.getTourId();
-
-        } else if (assignmentType == TypeConvenienceAssign.SERVICE) {
-            ServiceTour serviceTour = serviceTourRepository.findById(targetId)
-                    .orElseThrow(() -> new AppException(
-                            "Không tìm thấy ServiceTour cần phân công",
-                            HttpStatus.NOT_FOUND));
-
-            actualTourId = serviceTour.getTourId();
-
-        } else {
-            throw new AppException(
-                    "Loại phân công không hợp lệ",
-                    HttpStatus.BAD_REQUEST);
-        }
-
-        if (!tourId.equals(actualTourId)) {
-            throw new AppException(
-                    "Đối tượng phân công không thuộc tour được cung cấp",
-                    HttpStatus.BAD_REQUEST);
-        }
-    }
 }

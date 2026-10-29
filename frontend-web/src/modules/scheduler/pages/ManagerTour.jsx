@@ -1,21 +1,48 @@
-import { useEffect, useState } from "react";
-import { Plus, RefreshCw } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  Map,
+  RefreshCw,
+  Plus,
+  Route,
+  Trash2,
+  X,
+  Navigation,
+} from "lucide-react";
 
 import useTours from "../hooks/useTours";
+import useSchedulerRoute from "../hooks/useSchedulerRoute";
+
 import TourTable from "../components/tour/TourTable";
 import TourFormModal from "../components/tour/TourFormModal";
+import SchedulerRouteMap from "../components/tour/SchedulerRouteMap";
 
 import "../styles/ManagerTour.css";
 import "../styles/ManagerSchedule.css";
 
-function ManagerTour() {
+const STATUS_OPTIONS = [
+  { value: "ALL", label: "Tất cả trạng thái" },
+  { value: "DRAFT", label: "Bản nháp" },
+  { value: "APPROVAL_PENDING", label: "Chờ duyệt" },
+  { value: "APPROVED", label: "Đã duyệt" },
+  { value: "READY", label: "Sẵn sàng" },
+  { value: "IN_PROGRESS", label: "Đang diễn ra" },
+  { value: "COMPLETED", label: "Hoàn thành" },
+  { value: "CANCELLED", label: "Đã hủy" },
+];
+
+export default function ManagerTour() {
   const navigate = useNavigate();
 
+  // Quản lý Tour: CRUD, duyệt Tour.
   const {
     tours,
     loading,
+    saving,
     error,
+    success,
+    setError,
+    setSuccess,
     loadTours,
     createTour,
     updateTour,
@@ -23,339 +50,485 @@ function ManagerTour() {
     submitForApproval,
   } = useTours();
 
-  const [showModal, setShowModal] = useState(false);
-  const [selectedTour, setSelectedTour] = useState(null);
+  // Quản lý cảng và tuyến đường: Page -> Hook -> Service.
+  const {
+    ports,
+    departurePort,
+    destinationPort,
+    departurePortId,
+    destinationPortId,
+    routePreview,
+    loadingPorts,
+    routeLoading,
+    routeError,
+    handleSelectPort,
+    clearRouteSelection,
+    handlePreviewRoute,
+    handleCreateTourWithRoute,
+  } = useSchedulerRoute();
 
-  /*
-   * =====================================================
-   * FILTER
-   * =====================================================
-   *
-   * null = tất cả
-   */
-  const [statusFilter, setStatusFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [showForm, setShowForm] = useState(false);
+  const [selectedTour, setSelectedTour] = useState(null);
+  const [formLoading, setFormLoading] = useState(false);
+
+  const refreshTours = useCallback(async () => {
+    try {
+      await loadTours();
+    } catch (err) {
+      console.error("Không thể tải danh sách Tour:", err);
+    }
+  }, [loadTours]);
 
   useEffect(() => {
-    loadTours(statusFilter || null);
-  }, [loadTours, statusFilter]);
+    refreshTours();
+  }, [refreshTours]);
 
-  /*
-   * =====================================================
-   * CREATE
-   * =====================================================
-   */
+  const filteredTours =
+    statusFilter === "ALL"
+      ? tours
+      : tours.filter((tour) => tour.status === statusFilter);
 
-  const handleCreate = () => {
-    console.log("CLICK TAO TOUR");
-
-    setSelectedTour(null);
-    setShowModal(true);
+  const summary = {
+    total: tours.length,
+    draft: tours.filter((tour) => tour.status === "DRAFT").length,
+    pending: tours.filter(
+      (tour) => tour.status === "APPROVAL_PENDING"
+    ).length,
+    approved: tours.filter((tour) => tour.status === "APPROVED").length,
+    ready: tours.filter((tour) => tour.status === "READY").length,
+    inProgress: tours.filter(
+      (tour) => tour.status === "IN_PROGRESS"
+    ).length,
+    completed: tours.filter(
+      (tour) => tour.status === "COMPLETED"
+    ).length,
   };
 
-  /*
-   * =====================================================
-   * SUBMIT FOR APPROVAL
-   * =====================================================
-   */
-
-  const handleSubmitForApproval = async (tour) => {
-    const confirmed = window.confirm(
-      `Bạn có chắc muốn gửi tour "${tour.name}" cho Operation duyệt không?`,
-    );
-
-    if (!confirmed) {
+  const openCreateForm = () => {
+    if (!departurePortId || !destinationPortId) {
+      setError?.("Vui lòng chọn cảng khởi hành và cảng đến.");
       return;
     }
 
-    try {
-      await submitForApproval(tour.id);
-
-      await loadTours(statusFilter || null);
-    } catch (err) {
-      console.error("SUBMIT TOUR FOR APPROVAL ERROR:", err);
+    if (!routePreview) {
+      setError?.("Vui lòng tính tuyến đường trước khi tạo Tour.");
+      return;
     }
+
+    setSelectedTour(null);
+    setShowForm(true);
   };
-  /*
-   * =====================================================
-   * EDIT
-   * =====================================================
-   */
 
   const handleEdit = (tour) => {
     setSelectedTour(tour);
-    setShowModal(true);
+    setShowForm(true);
   };
 
-  /*
-   * =====================================================
-   * MANAGE SCHEDULE
-   * =====================================================
-   */
+  const handleCloseForm = () => {
+    if (formLoading) return;
 
-  const handleManageSchedule = (tour) => {
-    if (!tour?.id) {
-      console.error("TOUR ID KHÔNG TỒN TẠI:", tour);
-      return;
-    }
-
-    navigate(`/scheduler/tours/${tour.id}/schedules`);
-  };
-
-  /*
-   * =====================================================
-   * CLOSE MODAL
-   * =====================================================
-   */
-
-  const handleCloseModal = () => {
-    setShowModal(false);
+    setShowForm(false);
     setSelectedTour(null);
   };
 
-  /*
-   * =====================================================
-   * SUBMIT
-   * =====================================================
-   */
+  const handleSubmitForm = async (formData) => {
+    setFormLoading(true);
 
-  const handleSubmit = async (data) => {
     try {
       if (selectedTour) {
-        await updateTour(selectedTour.id, data);
+        await updateTour(selectedTour.id, formData);
       } else {
-        await createTour(data);
+        // Tạo Tour và lưu tuyến đường đã tính.
+        await handleCreateTourWithRoute(formData);
       }
 
-      handleCloseModal();
+      setShowForm(false);
+      setSelectedTour(null);
 
-      /*
-       * Tải lại theo filter hiện tại.
-       */
-      await loadTours(statusFilter || null);
+      await refreshTours();
     } catch (err) {
-      console.error("SAVE TOUR ERROR:", err);
+      console.error("Không thể lưu Tour:", err);
+      setError?.(err.message || "Không thể lưu thông tin Tour.");
+    } finally {
+      setFormLoading(false);
     }
   };
-
-  /*
-   * =====================================================
-   * DELETE
-   * =====================================================
-   */
 
   const handleDelete = async (tour) => {
     const confirmed = window.confirm(
-      `Bạn có chắc muốn xóa tour "${tour.name}" không?`,
+      `Bạn có chắc chắn muốn xóa Tour "${tour.name}" không?`
     );
 
-    if (!confirmed) {
-      return;
-    }
+    if (!confirmed) return;
 
     try {
       await deleteTour(tour.id);
-
-      /*
-       * Tải lại theo filter hiện tại.
-       */
-      await loadTours(statusFilter || null);
+      await refreshTours();
     } catch (err) {
-      console.error("DELETE TOUR ERROR:", err);
+      console.error("Không thể xóa Tour:", err);
+      setError?.(err.message || "Không thể xóa Tour.");
     }
   };
 
-  /*
-   * =====================================================
-   * CHANGE FILTER
-   * =====================================================
-   */
+  const handleSubmitForApproval = async (tour) => {
+    const confirmed = window.confirm(
+      `Bạn có muốn gửi Tour "${tour.name}" để phê duyệt không?`
+    );
 
-  const handleStatusFilterChange = (event) => {
-    const value = event.target.value;
+    if (!confirmed) return;
 
-    console.log("FILTER STATUS:", value || "ALL");
-
-    setStatusFilter(value);
+    try {
+      await submitForApproval(tour.id);
+      await refreshTours();
+    } catch (err) {
+      console.error("Không thể gửi duyệt Tour:", err);
+      setError?.(err.message || "Không thể gửi Tour để phê duyệt.");
+    }
   };
 
-  /*
-   * =====================================================
-   * REFRESH
-   * =====================================================
-   */
+  const handleManageSchedule = (tour) => {
+    navigate(`/scheduler/tours/${tour.id}/schedules`);
+  };
 
-  const handleRefresh = () => {
-    loadTours(statusFilter || null);
+  const getPortName = (port) => {
+    if (!port) return "Chưa chọn";
+    return port.name || port.portName || port.code || "Cảng";
+  };
+
+  const formatDistance = (distance) => {
+    if (distance == null || Number.isNaN(Number(distance))) {
+      return "--";
+    }
+
+    return `${Number(distance).toLocaleString("vi-VN", {
+      maximumFractionDigits: 2,
+    })} km`;
   };
 
   return (
-    <div className="scheduler-tour-page">
-      {/* =====================================================
-          HEADER
-         ===================================================== */}
-
-      <div className="scheduler-tour-header">
+    <div className="manager-tour-page">
+      {/* PAGE HEADER */}
+      <div className="manager-tour-header">
         <div>
-          <h1>Quản lý Tour</h1>
-
-          <p>Tạo và quản lý các tour, lịch trình và điểm dừng của tour.</p>
+          <h2>Quản lý Tour</h2>
+          <p>
+            Lập tuyến đường, tạo Tour và quản lý các hành trình du thuyền.
+          </p>
         </div>
 
-        <div className="scheduler-tour-header-actions">
-          <button
-            type="button"
-            className="scheduler-tour-refresh-button"
-            onClick={handleRefresh}
-            disabled={loading}
-            title="Làm mới"
-          >
-            <RefreshCw size={18} className={loading ? "scheduler-spin" : ""} />
-
-            <span>Làm mới</span>
-          </button>
-
-          <button
-            type="button"
-            className="scheduler-tour-create-button"
-            onClick={handleCreate}
-          >
-            <Plus size={18} />
-
-            <span>Tạo Tour</span>
-          </button>
-        </div>
-      </div>
-
-      {/* =====================================================
-          FILTER
-         ===================================================== */}
-
-      <div className="scheduler-tour-filter">
-        <label htmlFor="tour-status-filter">Trạng thái Tour</label>
-
-        <select
-          id="tour-status-filter"
-          value={statusFilter}
-          onChange={handleStatusFilterChange}
+        <button
+          type="button"
+          className="manager-tour-refresh-btn"
+          onClick={refreshTours}
           disabled={loading}
         >
-          <option value="">Tất cả</option>
-
-          <option value="DRAFT">Đang cấu hình</option>
-
-          <option value="APPROVAL_PENDING">Chờ duyệt</option>
-
-          <option value="APPROVED">Đã được duyệt</option>
-
-          <option value="IN_PROGRESS">Đang diễn ra</option>
-
-          <option value="COMPLETED">Hoàn thành</option>
-
-          <option value="CANCELLED">Đã hủy</option>
-        </select>
+          <RefreshCw size={16} />
+          Làm mới
+        </button>
       </div>
 
-      {/* =====================================================
-          ERROR
-         ===================================================== */}
-
+      {/* NOTIFICATIONS */}
       {error && (
-        <div className="scheduler-tour-error">
-          <strong>Không thể tải dữ liệu.</strong>
-
+        <div className="manager-tour-alert manager-tour-alert-error">
           <span>{error}</span>
+          <button
+            type="button"
+            onClick={() => setError?.("")}
+            aria-label="Đóng thông báo lỗi"
+          >
+            <X size={16} />
+          </button>
         </div>
       )}
-      {/* =====================================================
-    SUMMARY
-   ===================================================== */}
 
-      <div className="scheduler-tour-summary">
-        {/* DRAFT */}
-        <div className="scheduler-tour-summary-card draft">
-          <span>Đang cấu hình</span>
+      {success && (
+        <div className="manager-tour-alert manager-tour-alert-success">
+          <span>{success}</span>
+          <button
+            type="button"
+            onClick={() => setSuccess?.("")}
+            aria-label="Đóng thông báo thành công"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
 
-          <strong>
-            {tours.filter((tour) => tour.statusTrip === "DRAFT").length}
-          </strong>
+      {/* ROUTE PLANNER */}
+      <section className="scheduler-route-section">
+        <div className="scheduler-route-heading">
+          <div className="scheduler-route-heading-icon">
+            <Route size={21} />
+          </div>
+
+          <div>
+            <h3>Lập tuyến đường cho Tour</h3>
+            <p>
+              Chọn cảng khởi hành và cảng đến trên bản đồ để xem trước tuyến
+              đường biển.
+            </p>
+          </div>
         </div>
 
-        {/* APPROVAL_PENDING */}
-        <div className="scheduler-tour-summary-card pending">
-          <span>Chờ duyệt</span>
+        <div className="scheduler-route-layout">
+          <div className="scheduler-route-map-container">
+            {loadingPorts ? (
+              <div className="scheduler-route-map-loading">
+                <RefreshCw className="spin" size={22} />
+                <span>Đang tải danh sách cảng...</span>
+              </div>
+            ) : (
+              <SchedulerRouteMap
+                ports={ports}
+                departurePortId={departurePortId}
+                destinationPortId={destinationPortId}
+                routeGeoJson={routePreview?.geoJson || null}
+                onSelectPort={handleSelectPort}
+              />
+            )}
+          </div>
 
-          <strong>
-            {
-              tours.filter((tour) => tour.statusTrip === "APPROVAL_PENDING")
-                .length
-            }
-          </strong>
+          <div className="scheduler-route-sidebar">
+            <div className="scheduler-route-port-card">
+              <div className="scheduler-route-port-label">
+                <span className="scheduler-route-dot departure-dot" />
+                Cảng khởi hành
+              </div>
+
+              <strong>
+                {getPortName(departurePort)}
+              </strong>
+
+              {departurePort?.code && (
+                <small>{departurePort.code}</small>
+              )}
+            </div>
+
+            <div className="scheduler-route-port-card">
+              <div className="scheduler-route-port-label">
+                <span className="scheduler-route-dot destination-dot" />
+                Cảng đến
+              </div>
+
+              <strong>
+                {getPortName(destinationPort)}
+              </strong>
+
+              {destinationPort?.code && (
+                <small>{destinationPort.code}</small>
+              )}
+            </div>
+
+            <div className="scheduler-route-actions">
+              <button
+                type="button"
+                className="scheduler-route-preview-btn"
+                onClick={handlePreviewRoute}
+                disabled={
+                  !departurePortId ||
+                  !destinationPortId ||
+                  routeLoading ||
+                  departurePortId === destinationPortId
+                }
+              >
+                {routeLoading ? (
+                  <>
+                    <RefreshCw size={16} className="spin" />
+                    Đang tính tuyến...
+                  </>
+                ) : (
+                  <>
+                    <Navigation size={16} />
+                    Tính tuyến đường
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                className="scheduler-route-clear-btn"
+                onClick={clearRouteSelection}
+                disabled={
+                  !departurePortId && !destinationPortId
+                }
+              >
+                <Trash2 size={15} />
+                Xóa lựa chọn
+              </button>
+            </div>
+
+            {routeError && (
+              <div className="scheduler-route-error">
+                {routeError}
+              </div>
+            )}
+
+            {routePreview && (
+              <div className="scheduler-route-result">
+                <div className="scheduler-route-result-heading">
+                  <Route size={17} />
+                  Kết quả tuyến đường
+                </div>
+
+                <div className="scheduler-route-distance">
+                  <span>Khoảng cách tuyến đường</span>
+                  <strong>
+                    {formatDistance(routePreview.distanceKm)}
+                  </strong>
+                </div>
+
+                <div className="scheduler-route-distance-detail">
+                  <div>
+                    <span>Từ cảng khởi hành</span>
+                    <strong>
+                      {formatDistance(
+                        routePreview.distanceFromDepartureKm
+                      )}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Đến cảng đích</span>
+                    <strong>
+                      {formatDistance(
+                        routePreview.distanceToDestinationKm
+                      )}
+                    </strong>
+                  </div>
+                </div>
+
+                <p>
+                  Tuyến đường đang ở chế độ xem trước. Hệ thống chỉ lưu
+                  tuyến đường khi bạn xác nhận tạo Tour.
+                </p>
+              </div>
+            )}
+
+            <div className="scheduler-route-legend">
+              <div>
+                <span className="scheduler-route-dot departure-dot" />
+                Cảng khởi hành
+              </div>
+
+              <div>
+                <span className="scheduler-route-dot destination-dot" />
+                Cảng đến
+              </div>
+
+              <div>
+                <span className="scheduler-route-dot normal-port-dot" />
+                Cảng khác
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* APPROVED */}
-        <div className="scheduler-tour-summary-card approved">
-          <span>Đã được duyệt</span>
+        <div className="scheduler-route-create-footer">
+          <div>
+            <strong>
+              {routePreview
+                ? "Tuyến đường đã sẵn sàng"
+                : "Chưa có tuyến đường được xác nhận"}
+            </strong>
 
-          <strong>
-            {tours.filter((tour) => tour.statusTrip === "APPROVED").length}
-          </strong>
+            <p>
+              Chỉ có thể tạo Tour sau khi chọn đủ hai cảng và tính tuyến
+              đường thành công.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="scheduler-route-create-btn"
+            onClick={openCreateForm}
+            disabled={!routePreview || !departurePortId || !destinationPortId}
+          >
+            <Plus size={17} />
+            Tạo Tour từ tuyến đường
+          </button>
+        </div>
+      </section>
+
+      {/* TOUR SUMMARY */}
+      <section className="manager-tour-summary">
+        <div className="manager-tour-summary-card">
+          <span>Tổng số Tour</span>
+          <strong>{summary.total}</strong>
         </div>
 
-        {/* IN_PROGRESS */}
-        <div className="scheduler-tour-summary-card in-progress">
+        <div className="manager-tour-summary-card">
+          <span>Bản nháp</span>
+          <strong>{summary.draft}</strong>
+        </div>
+
+        <div className="manager-tour-summary-card">
+          <span>Chờ phê duyệt</span>
+          <strong>{summary.pending}</strong>
+        </div>
+
+        <div className="manager-tour-summary-card">
+          <span>Đã duyệt</span>
+          <strong>{summary.approved}</strong>
+        </div>
+
+        <div className="manager-tour-summary-card">
+          <span>Sẵn sàng</span>
+          <strong>{summary.ready}</strong>
+        </div>
+
+        <div className="manager-tour-summary-card">
           <span>Đang diễn ra</span>
-
-          <strong>
-            {tours.filter((tour) => tour.statusTrip === "IN_PROGRESS").length}
-          </strong>
+          <strong>{summary.inProgress}</strong>
         </div>
 
-        {/* COMPLETED */}
-        <div className="scheduler-tour-summary-card completed">
+        <div className="manager-tour-summary-card">
           <span>Hoàn thành</span>
+          <strong>{summary.completed}</strong>
+        </div>
+      </section>
 
-          <strong>
-            {tours.filter((tour) => tour.statusTrip === "COMPLETED").length}
-          </strong>
+      {/* TOUR LIST */}
+      <section className="manager-tour-list-section">
+        <div className="manager-tour-list-header">
+          <div>
+            <h3>Danh sách Tour</h3>
+            <p>Quản lý thông tin và trạng thái các Tour đã tạo.</p>
+          </div>
+
+          <div className="manager-tour-list-actions">
+            <select
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value)}
+              className="manager-tour-status-filter"
+            >
+              {STATUS_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        {/* CANCELLED */}
-        <div className="scheduler-tour-summary-card cancelled">
-          <span>Đã hủy</span>
-
-          <strong>
-            {tours.filter((tour) => tour.statusTrip === "CANCELLED").length}
-          </strong>
-        </div>
-      </div>
-      {/* =====================================================
-          TOUR TABLE
-         ===================================================== */}
-
-      <div className="scheduler-tour-content">
         <TourTable
-          tours={tours}
+          tours={filteredTours}
           loading={loading}
           onEdit={handleEdit}
           onDelete={handleDelete}
           onManageSchedule={handleManageSchedule}
           onSubmitForApproval={handleSubmitForApproval}
         />
-      </div>
+      </section>
 
-      {/* =====================================================
-          CREATE / EDIT TOUR MODAL
-         ===================================================== */}
-
+      {/* CREATE / EDIT TOUR MODAL */}
       <TourFormModal
-        open={showModal}
+        open={showForm}
         tour={selectedTour}
-        loading={loading}
-        onClose={handleCloseModal}
-        onSubmit={handleSubmit}
+        loading={formLoading || saving}
+        onClose={handleCloseForm}
+        onSubmit={handleSubmitForm}
       />
     </div>
   );
 }
-
-export default ManagerTour;

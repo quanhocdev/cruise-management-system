@@ -16,7 +16,7 @@ import com.project.tour.model.scheduler.ScheduleStop;
 import com.project.tour.model.scheduler.Tour;
 import com.project.tour.repository.cruise.CruiseAreaRepository;
 import com.project.tour.repository.cruise.CruiseDeckRepository;
-import com.project.tour.repository.tour.TourRepository;
+import com.project.tour.repository.scheduler.TourRepository;
 import com.project.tour.repository.tour.schedule.ScheduleRepository;
 import com.project.tour.repository.tour.schedule.ScheduleStopRepository;
 import com.project.tour.service.operation.assignment.OperationCruiseAssignmentService;

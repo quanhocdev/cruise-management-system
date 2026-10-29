@@ -1,10 +1,11 @@
 package com.project.tour.repository.shore;
 
 import com.project.tour.model.ShoreAssignStaff;
+import com.project.tour.model.StatusAssignStaff;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
+import java.util.Optional;
 import java.util.List;
 import java.util.Collection;
 import java.util.UUID;
@@ -26,4 +27,16 @@ public interface ShoreAssignStaffRepository
         boolean existsByVisitTourIdAndUserId(
                         UUID visitTourId,
                         UUID userId);
+
+        Optional<ShoreAssignStaff> findByIdAndVisitTourIdAndStatus(
+                        UUID id,
+                        UUID visitTourId,
+                        StatusAssignStaff status);
+
+        List<ShoreAssignStaff> findAllByUserIdOrderByAssignedAtDesc(UUID userId);
+
+        Optional<ShoreAssignStaff> findByIdAndUserIdAndStatus(
+                        UUID id,
+                        UUID userId,
+                        StatusAssignStaff status);
 }
