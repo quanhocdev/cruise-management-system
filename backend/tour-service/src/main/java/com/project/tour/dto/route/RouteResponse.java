@@ -1,4 +1,4 @@
-package com.project.tour.dto;
+package com.project.tour.dto.route;
 
 import java.util.Map;
 

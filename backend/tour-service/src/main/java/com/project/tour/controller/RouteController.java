@@ -1,8 +1,9 @@
 package com.project.tour.controller;
 
-import com.project.tour.dto.RouteRequest;
-import com.project.tour.dto.RouteResponse;
-import com.project.tour.service.RouteService;
+import com.project.tour.dto.route.RouteRequest;
+import com.project.tour.dto.route.RouteResponse;
+import com.project.tour.service.route.RouteService;
+
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
