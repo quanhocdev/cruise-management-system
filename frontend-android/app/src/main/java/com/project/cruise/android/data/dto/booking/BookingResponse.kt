@@ -1,8 +1,10 @@
 package com.project.cruise.android.data.dto.booking
+
 import java.math.BigDecimal
+
 data class BookingResponse(
     val id: Long,
-    val createdByUserId: Long?,
+    val createdByUserId: String?,
     val primaryContactEmail: String?,
     val tourId: String?,
     val tourPackageId: String?,

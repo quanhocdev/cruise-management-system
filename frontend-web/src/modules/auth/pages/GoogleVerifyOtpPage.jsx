@@ -1,3 +1,5 @@
+// src/modules/auth/pages/GoogleVerifyOtpPage.jsx
+
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Alert, Button, Card, Container, Form, Spinner } from "react-bootstrap";

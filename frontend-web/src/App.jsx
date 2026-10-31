@@ -1,5 +1,4 @@
 // src/App.jsx
-// Chỉ ghép các nhóm route. Route của từng role nằm trong src/routes/.
 
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
@@ -32,6 +31,7 @@ export default function App() {
 
           {/* Đường dẫn không tồn tại -> về trang chủ */}
           <Route path="*" element={<Navigate to="/" replace />} />
+          
         </Routes>
       </AuthProvider>
     </BrowserRouter>
