@@ -29,10 +29,18 @@ export const TOUR_STATUS_TRIP_LABELS = {
   CANCELLED: "Đã hủy",
 };
 
+// export const FINANCE_VISIBLE_TOUR_STATUSES = [
+//   "READY",
+//   "IN_PROGRESS",
+//   "COMPLETED",
+// ];
+// thử nghiệm và sẽ bỏ
 export const FINANCE_VISIBLE_TOUR_STATUSES = [
   "READY",
   "IN_PROGRESS",
   "COMPLETED",
+  "APPROVED",
+  "APPROVAL_PENDING",
 ];
 
 // Thêm vào src/modules/finance/constants/statuses.js

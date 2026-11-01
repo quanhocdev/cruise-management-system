@@ -90,12 +90,17 @@ public class BillPaymentServiceImpl implements BillPaymentService {
         payment.setExpiresAt(
                 now.plus(timeoutMinutes, ChronoUnit.MINUTES));
 
-        // Tạo URL mới cho phiên VNPay hiện tại.
-        payment.setPaymentUrl(
-                paymentProvider.createPaymentUrl(payment, "127.0.0.1"));
-
+        // Bước 1: Lưu Payment trước để database sinh ID.
         Payment savedPayment = paymentRepository.save(payment);
 
+        // Bước 2: Tạo URL sau khi đã có ID.
+        savedPayment.setPaymentUrl(
+                paymentProvider.createPaymentUrl(savedPayment, "127.0.0.1"));
+
+        // Bước 3: Lưu lại URL thanh toán.
+        savedPayment = paymentRepository.save(savedPayment);
+
         return billPaymentMapper.toResponse(savedPayment);
+
     }
 }
