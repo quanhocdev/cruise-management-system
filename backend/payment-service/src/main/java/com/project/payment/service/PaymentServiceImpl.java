@@ -136,7 +136,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     private Payment applyResult(Payment payment, Map<String, String> params) {
         boolean success = "00".equals(params.get("vnp_ResponseCode"))
-                && "00".equals(params.getOrDefault("vnp_TransactionStatus", "00"));
+                && "00".equals(params.get("vnp_TransactionStatus"));
         if (payment.getStatus() != PaymentStatus.SUCCESS) {
             PaymentStatus previousStatus = payment.getStatus();
             payment.setStatus(success ? PaymentStatus.SUCCESS : PaymentStatus.FAILED);
