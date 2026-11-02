@@ -1,8 +1,8 @@
 package com.project.payment.service.refund;
 
+import com.project.payment.dto.refund.RefundModels.Outcome;
+import com.project.payment.dto.refund.RefundModels.Refund;
 import com.project.payment.provider.refund.RefundProvider;
-import com.project.payment.service.refund.RefundModels.Outcome;
-import com.project.payment.service.refund.RefundModels.Refund;
 
 import java.util.UUID;
 

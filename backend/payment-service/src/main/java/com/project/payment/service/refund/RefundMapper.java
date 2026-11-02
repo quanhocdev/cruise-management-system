@@ -1,9 +1,9 @@
 
 package com.project.payment.service.refund;
 
+import com.project.payment.dto.refund.RefundModels.Receipt;
+import com.project.payment.dto.refund.RefundModels.Refund;
 import com.project.payment.model.PaymentRefund;
-import com.project.payment.service.refund.RefundModels.Receipt;
-import com.project.payment.service.refund.RefundModels.Refund;
 
 import org.springframework.stereotype.Component;
 

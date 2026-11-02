@@ -1,7 +1,7 @@
 package com.project.payment.provider.refund;
 
-import com.project.payment.service.refund.RefundModels.Outcome;
-import com.project.payment.service.refund.RefundModels.Refund;
+import com.project.payment.dto.refund.RefundModels.Outcome;
+import com.project.payment.dto.refund.RefundModels.Refund;
 
 public interface RefundProvider {
 
