@@ -7,33 +7,38 @@ import com.project.payment.model.Payment;
 import com.project.payment.model.enums.*;
 import com.project.payment.repository.PaymentRepository;
 import com.project.common.event.PaymentSuccessEvent;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import com.project.common.event.BillPaymentSuccessEvent;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
+
     private final PaymentRepository repository;
     private final PaymentMapper mapper;
     private final Map<PaymentMethod, PaymentProvider> providers;
     private final long timeoutMinutes;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public PaymentServiceImpl(PaymentRepository repository,
+    public PaymentServiceImpl(
+            PaymentRepository repository,
             PaymentMapper mapper,
             List<PaymentProvider> paymentProviders,
             KafkaTemplate<String, Object> kafkaTemplate,
             @Value("${vnpay.payment-timeout-minutes:15}") long timeoutMinutes) {
+
         this.repository = repository;
         this.mapper = mapper;
         this.kafkaTemplate = kafkaTemplate;
         this.timeoutMinutes = timeoutMinutes;
+
         providers = new EnumMap<>(PaymentMethod.class);
         paymentProviders.forEach(provider -> providers.put(provider.getPaymentMethod(), provider));
     }
@@ -44,33 +49,43 @@ public class PaymentServiceImpl implements PaymentService {
             CreatePaymentRequest request,
             UUID payerId,
             String clientIp) {
-        if (request.getMethod() != PaymentMethod.VNPAY)
-            throw new PaymentException("Payment method is not available yet: " + request.getMethod());
-        if (request.getReferenceType() != PaymentReferenceType.BOOKING)
-            throw new PaymentException("Payment reference type is not available yet: " + request.getReferenceType());
 
-        // Tìm bản ghi thanh toán đã được Kafka consumer (BookingListener) tạo sẵn dưới
-        // DB nội bộ
+        if (request.getMethod() != PaymentMethod.VNPAY) {
+            throw new PaymentException(
+                    "Payment method is not available yet: " + request.getMethod());
+        }
+
+        if (request.getReferenceType() != PaymentReferenceType.BOOKING) {
+            throw new PaymentException(
+                    "Payment reference type is not available yet: " + request.getReferenceType());
+        }
+
         Payment payment = repository
-                .findByReferenceIdAndReferenceType(request.getReferenceId(), request.getReferenceType())
-                .orElseThrow(
-                        () -> new PaymentException("Payment reference not found. Please wait for booking sync event."));
+                .findByReferenceIdAndReferenceType(
+                        request.getReferenceId(),
+                        request.getReferenceType())
+                .orElseThrow(() -> new PaymentException(
+                        "Payment reference not found. Please wait for booking sync event."));
 
-        // Validate thông tin trực tiếp từ bản ghi nội bộ
-        if (!payerId.equals(payment.getPayerId()))
+        if (!payerId.equals(payment.getPayerId())) {
             throw new PaymentException("You cannot pay for this booking");
-        if (payment.getStatus() != PaymentStatus.PENDING)
+        }
+
+        if (payment.getStatus() != PaymentStatus.PENDING) {
             throw new PaymentException("Booking is not payable or already processed");
-        if (request.getAmount().compareTo(payment.getAmount()) != 0)
+        }
+
+        if (request.getAmount().compareTo(payment.getAmount()) != 0) {
             throw new PaymentException("Payment amount does not match booking total");
+        }
 
         Instant now = Instant.now();
+
         payment.setMethod(request.getMethod());
         payment.setUpdatedAt(now);
         payment.setExpiresAt(now.plus(timeoutMinutes, ChronoUnit.MINUTES));
-
-        // Cập nhật URL thanh toán VNPay vào bản ghi hiện có
         payment.setPaymentUrl(provider().createPaymentUrl(payment, clientIp));
+
         Payment saved = repository.save(payment);
 
         return mapper.toResponse(saved);
@@ -82,6 +97,7 @@ public class PaymentServiceImpl implements PaymentService {
             Long id,
             UUID requesterId,
             boolean privileged) {
+
         Payment payment = find(id);
 
         if (!privileged && !payment.getPayerId().equals(requesterId)) {
@@ -93,96 +109,124 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<PaymentResponse> getPayments(Long referenceId, PaymentReferenceType referenceType) {
-        return repository.findAllByReferenceIdAndReferenceTypeOrderByCreatedAtDesc(referenceId, referenceType)
-                .stream().map(mapper::toResponse).toList();
+    public List<PaymentResponse> getPayments(
+            Long referenceId,
+            PaymentReferenceType referenceType) {
+
+        return repository
+                .findAllByReferenceIdAndReferenceTypeOrderByCreatedAtDesc(
+                        referenceId,
+                        referenceType)
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
     }
 
     @Override
     @Transactional
     public PaymentResponse handleVnPayReturn(Map<String, String> params) {
-        if (!provider().verifyCallback(params))
+
+        if (!provider().verifyCallback(params)) {
             throw new PaymentException("Invalid VNPay signature");
+        }
+
         Payment payment = findFromCallback(params);
         validateAmount(payment, params);
+
         return mapper.toResponse(applyResult(payment, params));
     }
 
     @Override
     @Transactional
     public VnPayIpnResponse handleVnPayIpn(Map<String, String> params) {
-        if (!provider().verifyCallback(params))
+
+        if (!provider().verifyCallback(params)) {
             return new VnPayIpnResponse("97", "Invalid checksum");
+        }
+
         Payment payment;
+
         try {
             payment = findFromCallback(params);
         } catch (PaymentException ex) {
             return new VnPayIpnResponse("01", "Order not found");
         }
+
         try {
             validateAmount(payment, params);
         } catch (PaymentException ex) {
             return new VnPayIpnResponse("04", "Invalid amount");
         }
-        if (payment.getStatus() == PaymentStatus.SUCCESS)
+
+        if (payment.getStatus() == PaymentStatus.SUCCESS) {
             return new VnPayIpnResponse("02", "Order already confirmed");
+        }
+
         try {
             applyResult(payment, params);
         } catch (PaymentException ex) {
             return new VnPayIpnResponse("99", "Booking confirmation failed");
         }
+
         return new VnPayIpnResponse("00", "Confirm success");
     }
 
-    private Payment applyResult(Payment payment, Map<String, String> params) {
+    private Payment applyResult(
+            Payment payment,
+            Map<String, String> params) {
+
         boolean success = "00".equals(params.get("vnp_ResponseCode"))
                 && "00".equals(params.get("vnp_TransactionStatus"));
-        if (payment.getStatus() != PaymentStatus.SUCCESS) {
-            PaymentStatus previousStatus = payment.getStatus();
-            payment.setStatus(success ? PaymentStatus.SUCCESS : PaymentStatus.FAILED);
-            if (success)
-                payment.setPaidAt(Instant.now());
-            payment.setTransactionCode(provider().getTransactionCode(params));
-            payment.setResponseCode(params.get("vnp_ResponseCode"));
-            payment.setUpdatedAt(Instant.now());
-            Payment saved = repository.save(payment);
 
-            // Gửi sự kiện sang Kafka khi thanh toán và checkout thành công đơn booking
-
-            if (success) {
-                if (saved.getReferenceType() == PaymentReferenceType.BOOKING) {
-                    // Luồng thanh toán booking hiện tại: giữ nguyên.
-                    PaymentSuccessEvent event = new PaymentSuccessEvent(
-                            saved.getReferenceId(),
-                            saved.getId(),
-                            saved.getPayerId(),
-                            saved.getStatus().name(),
-                            saved.getPaidAt());
-
-                    kafkaTemplate.send("payment-success-topic", event);
-
-                } else if (saved.getReferenceType() == PaymentReferenceType.BILL) {
-                    // Luồng thanh toán hóa đơn checkout.
-                    BillPaymentSuccessEvent event = new BillPaymentSuccessEvent(
-                            saved.getReferenceId(),
-                            saved.getId(),
-                            saved.getPayerId(),
-                            saved.getStatus().name(),
-                            saved.getPaidAt());
-
-                    kafkaTemplate.send("bill-payment-success-topic", event);
-                }
-            }
-
-            return saved;
+        if (payment.getStatus() == PaymentStatus.SUCCESS) {
+            return payment;
         }
-        return payment;
+
+        payment.setStatus(success
+                ? PaymentStatus.SUCCESS
+                : PaymentStatus.FAILED);
+
+        if (success) {
+            payment.setPaidAt(Instant.now());
+        }
+
+        payment.setTransactionCode(provider().getTransactionCode(params));
+        payment.setResponseCode(params.get("vnp_ResponseCode"));
+        payment.setUpdatedAt(Instant.now());
+
+        Payment saved = repository.save(payment);
+
+        /*
+         * BOOKING:
+         * Giữ nguyên luồng gửi PaymentSuccessEvent hiện tại.
+         *
+         * BILL:
+         * Không gửi event trực tiếp ở đây nữa.
+         * BillPaymentDelivery chịu trách nhiệm phát BillPaymentSuccessEvent.
+         */
+        if (success && saved.getReferenceType() == PaymentReferenceType.BOOKING) {
+
+            PaymentSuccessEvent event = new PaymentSuccessEvent(
+                    saved.getReferenceId(),
+                    saved.getId(),
+                    saved.getPayerId(),
+                    saved.getStatus().name(),
+                    saved.getPaidAt());
+
+            kafkaTemplate.send("payment-success-topic", event);
+        }
+
+        return saved;
     }
 
     private Payment findFromCallback(Map<String, String> params) {
+
         String txnRef = params.get("vnp_TxnRef");
-        if (txnRef == null)
+
+        if (txnRef == null) {
             throw new PaymentException("Missing VNPay transaction reference");
+        }
+
         try {
             return find(Long.parseLong(txnRef));
         } catch (NumberFormatException ex) {
@@ -190,27 +234,41 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
 
-    private void validateAmount(Payment payment, Map<String, String> params) {
+    private void validateAmount(
+            Payment payment,
+            Map<String, String> params) {
+
         String rawAmount = params.get("vnp_Amount");
-        if (rawAmount == null)
+
+        if (rawAmount == null) {
             throw new PaymentException("Missing VNPay amount");
+        }
+
         try {
             BigDecimal callbackAmount = new BigDecimal(rawAmount).movePointLeft(2);
-            if (callbackAmount.compareTo(payment.getAmount()) != 0)
-                throw new PaymentException("VNPay amount does not match payment amount");
+
+            if (callbackAmount.compareTo(payment.getAmount()) != 0) {
+                throw new PaymentException(
+                        "VNPay amount does not match payment amount");
+            }
         } catch (NumberFormatException ex) {
             throw new PaymentException("Invalid VNPay amount");
         }
     }
 
     private Payment find(Long id) {
-        return repository.findById(id).orElseThrow(() -> new PaymentException("Payment not found: " + id));
+        return repository.findById(id)
+                .orElseThrow(() -> new PaymentException("Payment not found: " + id));
     }
 
     private PaymentProvider provider() {
+
         PaymentProvider provider = providers.get(PaymentMethod.VNPAY);
-        if (provider == null)
+
+        if (provider == null) {
             throw new PaymentException("VNPay provider is unavailable");
+        }
+
         return provider;
     }
 }
