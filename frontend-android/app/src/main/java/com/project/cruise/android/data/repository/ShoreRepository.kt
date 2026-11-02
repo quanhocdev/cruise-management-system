@@ -13,6 +13,7 @@ import com.project.cruise.android.data.network.RetrofitClient
 class ShoreRepository(context: Context) {
 
     private val appContext = context.applicationContext
+    private val commands = OnlinePosCommands(appContext)
 
     private val apiService: ApiService =
         RetrofitClient.createApiService(TokenManager(appContext))
@@ -37,11 +38,9 @@ class ShoreRepository(context: Context) {
         nfcCardUid: String,
         visitTourId: String
     ): ActivityVisitUsageResponse {
-        return apiService.createActivityVisitUsage(
-            ActivityVisitUsageRequest(
-                nfcCardUid = nfcCardUid,
-                visitTourId = visitTourId
-            )
-        )
+        val request = ActivityVisitUsageRequest(nfcCardUid, visitTourId)
+        return commands.execute("SHORE_USAGE", request) { requestId ->
+            apiService.createActivityVisitUsage(request.copy(clientRequestId = requestId))
+        }
     }
 }

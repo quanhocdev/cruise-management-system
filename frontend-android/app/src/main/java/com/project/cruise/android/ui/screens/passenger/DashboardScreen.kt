@@ -102,7 +102,7 @@ fun Dashboard(
 
         Text("Dịch vụ nhanh", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         OceanAction("Khám phá tour", "Xem tour, chuyến khởi hành và phòng", "⌕", onBrowseTours)
-        OceanAction("Booking của tôi", "Thanh toán, QR và thông tin chuyến đi", "▤", onMyBookings)
+        OceanAction("Chuyến đi của tôi", "Thông tin đặt chỗ và trạng thái hành khách", "▤", onMyBookings)
         notificationButton()
 
         Box(Modifier.fillMaxWidth().background(OceanLavender, RoundedCornerShape(22.dp)).padding(18.dp)) {

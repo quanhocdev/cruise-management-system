@@ -12,6 +12,10 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+    public ResponseEntity<ApiErrorResponse> handleStatus(org.springframework.web.server.ResponseStatusException ex, HttpServletRequest request) {
+        return response(HttpStatus.valueOf(ex.getStatusCode().value()), ex.getReason(), request.getRequestURI(), null);
+    }
     @ExceptionHandler(PaymentException.class)
     public ResponseEntity<ApiErrorResponse> handlePayment(PaymentException ex, HttpServletRequest request) {
         return response(HttpStatus.BAD_REQUEST, ex.getMessage(), request.getRequestURI(), null);

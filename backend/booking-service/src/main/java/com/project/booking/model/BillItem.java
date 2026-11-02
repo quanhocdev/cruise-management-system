@@ -14,6 +14,11 @@ public class BillItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name="passenger_name", length=255)
+    private String passengerName;
+    public String getPassengerName() { return passengerName; }
+    public void setPassengerName(String name) { this.passengerName=name; }
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "bill_id", nullable = false)
     private Bill bill;

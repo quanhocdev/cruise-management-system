@@ -1,5 +1,7 @@
 package com.project.booking.service.passenger;
 
+import java.util.UUID;
+
 import com.project.common.dto.UploadResult;
 import com.project.common.service.file.FileStorageService;
 import com.project.booking.dto.passenger.PassengerRequest;
@@ -38,7 +40,7 @@ public class PassengerServiceImpl implements PassengerService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<PassengerResponse> getAllPassengers(Long userId) {
+    public List<PassengerResponse> getAllPassengers(UUID userId) {
         if (userId == null) {
             return List.of();
         }

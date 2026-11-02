@@ -1,5 +1,7 @@
 package com.project.booking.service.convenience.service;
 
+import java.util.UUID;
+
 import com.project.booking.dto.convenience.service.ServiceUsageManagementResponse;
 import com.project.booking.dto.convenience.service.ServiceUsageRequest;
 import com.project.booking.dto.convenience.service.ServiceUsageResponse;
@@ -14,7 +16,7 @@ public interface ServiceUsageService {
         List<ServiceUsageResponse> getByBookingPassengerId(
                         Long bookingPassengerId);
 
-        List<ServiceUsageResponse> getByUserId(Long userId);
+        List<ServiceUsageResponse> getByUserId(UUID userId);
 
         List<ServiceUsageManagementResponse> getManagementUsages();
 }

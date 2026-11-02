@@ -8,6 +8,9 @@ public class ApiErrorResponse {
     private LocalDateTime timestamp;
     private int status;
     private String error;
+    private String code;
+    public String getCode() { return code; }
+    public void setCode(String code) { this.code = code; }
     private String message;
     private String path;
     private Map<String, String> validationErrors;

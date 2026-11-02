@@ -15,9 +15,12 @@ import java.util.*;
 @RequestMapping("/api/v1/feedbacks")
 public class FeedbackController {
     private final FeedbackService service;
-    public FeedbackController(FeedbackService service) { this.service = service; }
+    private final com.project.feedback.service.FeedbackCommands commands;
+    public FeedbackController(FeedbackService service, com.project.feedback.service.FeedbackCommands commands) {
+        this.service = service; this.commands = commands;
+    }
     @PostMapping ResponseEntity<FeedbackResponse> create(@Valid @RequestBody CreateFeedbackRequest request, @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(request, userId(jwt)));
+        return commands.create(request, userId(jwt));
     }
     @PutMapping("/{id}") FeedbackResponse update(@PathVariable Long id, @Valid @RequestBody UpdateFeedbackRequest request,
         @AuthenticationPrincipal Jwt jwt) { return service.update(id, request, userId(jwt)); }
@@ -25,6 +28,9 @@ public class FeedbackController {
         service.delete(id, userId(jwt)); return ResponseEntity.noContent().build();
     }
     @GetMapping("/me") List<FeedbackResponse> mine(@AuthenticationPrincipal Jwt jwt) { return service.getMine(userId(jwt)); }
+    @GetMapping("/bookings/{bookingId}/options") FeedbackOptions options(@PathVariable Long bookingId,@AuthenticationPrincipal Jwt jwt) {
+        return service.options(bookingId,userId(jwt));
+    }
     @GetMapping("/tours/{tourId}") List<PublicFeedbackResponse> tour(@PathVariable UUID tourId) { return service.getTourFeedback(tourId); }
     @GetMapping("/tours/{tourId}/summary") RatingSummary tourSummary(@PathVariable UUID tourId) { return service.summarizeTour(tourId); }
     @GetMapping("/cruises/{cruiseId}") List<PublicFeedbackResponse> cruise(@PathVariable UUID cruiseId) { return service.getCruiseFeedback(cruiseId); }
@@ -37,9 +43,9 @@ public class FeedbackController {
         @PathVariable FeedbackTargetType targetType, @PathVariable UUID targetId) {
         return service.summarizeTarget(targetType, targetId);
     }
-    private Long userId(Jwt jwt) {
-        Object claim = jwt.getClaim("userId"); if (claim instanceof Number n) return n.longValue();
-        try { return Long.valueOf(String.valueOf(claim)); }
+    private UUID userId(Jwt jwt) {
+        Object claim = jwt.getClaim("userId");
+        try { return UUID.fromString(String.valueOf(claim)); }
         catch (Exception ex) { throw new FeedbackException(HttpStatus.BAD_REQUEST, "JWT userId claim is missing or invalid"); }
     }
 }

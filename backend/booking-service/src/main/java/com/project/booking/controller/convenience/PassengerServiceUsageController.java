@@ -1,5 +1,7 @@
 package com.project.booking.controller.convenience;
 
+import java.util.UUID;
+
 import com.project.booking.dto.convenience.service.ServiceUsageResponse;
 import com.project.booking.service.convenience.service.ServiceUsageService;
 
@@ -28,25 +30,25 @@ public class PassengerServiceUsageController {
     public ResponseEntity<List<ServiceUsageResponse>> getMine(
             Principal principal) {
 
-        Long userId = extractUserId(principal);
+        UUID userId = extractUserId(principal);
 
         return ResponseEntity.ok(
                 serviceUsageService.getByUserId(userId));
     }
 
-    private Long extractUserId(Principal principal) {
+    private UUID extractUserId(Principal principal) {
 
         if (principal instanceof JwtAuthenticationToken jwtAuth) {
 
             Object userIdClaim = jwtAuth.getTokenAttributes().get("userId");
 
             if (userIdClaim != null) {
-                return Long.valueOf(userIdClaim.toString());
+                return UUID.fromString(userIdClaim.toString());
             }
         }
 
         try {
-            return Long.valueOf(principal.getName());
+            return UUID.fromString(principal.getName());
         } catch (Exception e) {
             throw new IllegalStateException(
                     "Không thể xác định userId từ token xác thực.");

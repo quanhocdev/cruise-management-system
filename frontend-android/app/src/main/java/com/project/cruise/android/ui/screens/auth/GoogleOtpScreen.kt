@@ -26,7 +26,7 @@ import com.project.cruise.android.ui.theme.OceanPage
 import com.project.cruise.android.ui.theme.OceanPrimaryButton
 @Composable
 fun GoogleOtpScreen(
-    userId: Long,
+    userId: String,
     onBackClick: () -> Unit,
     onVerify: (String) -> Unit,
     isLoading: Boolean = false,

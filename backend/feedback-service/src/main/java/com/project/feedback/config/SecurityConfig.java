@@ -21,6 +21,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/feedbacks/tours/**", "/api/v1/feedbacks/cruises/**",
                     "/api/v1/feedbacks/targets/**").permitAll()
                 .requestMatchers("/api/admin/feedbacks/**").hasRole("ADMIN")
+                .requestMatchers("/api/v1/feedbacks", "/api/v1/feedbacks/**").hasRole("PASSENGER")
                 .anyRequest().authenticated())
             .oauth2ResourceServer(o -> o.bearerTokenResolver(resolver).jwt(j -> j.jwtAuthenticationConverter(converter))).build();
     }

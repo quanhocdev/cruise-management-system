@@ -44,6 +44,8 @@ public class SecurityConfig {
                         .permitAll()
 
                         // Role-based rules matching booking service standard
+                        .requestMatchers("/api/v1/payments/refunds/**", "/api/v1/payments/*/refunds")
+                        .hasAnyRole("FINANCE", "ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/scheduler/**").hasRole("SCHEDULER")
                         .requestMatchers("/api/convenience/**").hasRole("CONVENIENCE")

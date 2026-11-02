@@ -12,7 +12,11 @@ public record ProductUsageRequest(
 
                 @NotNull(message = "Product tour ID không được để trống") UUID productTourId,
 
-                @NotNull(message = "Số lượng không được để trống") @Min(value = 1, message = "Số lượng phải lớn hơn 0") Integer quantity
+                @NotNull(message = "Số lượng không được để trống") @Min(value = 1, message = "Số lượng phải lớn hơn 0") Integer quantity,
+                UUID clientRequestId
 
 ) {
+    public ProductUsageRequest(String nfcCardUid, UUID productTourId, Integer quantity) {
+        this(nfcCardUid, productTourId, quantity, null);
+    }
 }

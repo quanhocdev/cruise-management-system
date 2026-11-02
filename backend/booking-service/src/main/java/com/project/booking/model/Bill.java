@@ -12,6 +12,10 @@ import java.time.LocalDateTime;
         @Index(name = "idx_bills_code", columnList = "bill_code")
 })
 public class Bill {
+    @Column(name="preview_version",length=64)
+    private String previewVersion;
+    public String getPreviewVersion(){return previewVersion;}
+    public void setPreviewVersion(String value){previewVersion=value;}
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

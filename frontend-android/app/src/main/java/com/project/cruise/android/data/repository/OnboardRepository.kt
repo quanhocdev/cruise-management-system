@@ -14,6 +14,7 @@ import java.util.UUID
 class OnboardRepository(context: Context) {
 
     private val appContext = context.applicationContext
+    private val commands = OnlinePosCommands(appContext)
 
     private val apiService: ApiService =
         RetrofitClient.createApiService(TokenManager(appContext))
@@ -38,11 +39,9 @@ class OnboardRepository(context: Context) {
         nfcCardUid: String,
         activityCruiseTourId: String
     ): ActivityCruiseUsageResponse {
-        return apiService.createActivityCruiseUsage(
-            ActivityCruiseUsageRequest(
-                nfcCardUid = nfcCardUid,
-                activityCruiseTourId = activityCruiseTourId
-            )
-        )
+        val request = ActivityCruiseUsageRequest(nfcCardUid, activityCruiseTourId)
+        return commands.execute("ACTIVITY_USAGE", request) { requestId ->
+            apiService.createActivityCruiseUsage(request.copy(clientRequestId = requestId))
+        }
     }
 }

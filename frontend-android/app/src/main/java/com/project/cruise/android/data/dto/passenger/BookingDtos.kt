@@ -53,7 +53,7 @@ data class PassengerBookingResponse(
     val id: Long,
     val voyageId: String,
     val bookingCode: String?,
-    val createdByUserId: Long? = null,
+    val createdByUserId: String? = null,
     val primaryContactName: String,
     val primaryContactPhone: String,
     val totalAmount: BigDecimal,
@@ -67,7 +67,7 @@ data class PassengerBookingResponse(
 data class PassengerVoyageBookingResponse(
     val passengerVoyageId: Long,
     val passengerId: Long,
-    val userId: Long? = null,
+    val userId: String? = null,
     val fullName: String,
     val dateOfBirth: String,
     val gender: String,

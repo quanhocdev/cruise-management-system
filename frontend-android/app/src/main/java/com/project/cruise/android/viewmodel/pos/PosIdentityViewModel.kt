@@ -14,6 +14,7 @@ import java.io.IOException
 
 data class PosScanState(
     val loading: Boolean = false,
+    val localReadOnly: Boolean = false,
     val response: ScanResponse? = null,
     val error: String? = null
 )
@@ -34,6 +35,10 @@ class PosIdentityViewModel(
         _state.value = PosScanState(loading = true)
         viewModelScope.launch {
             try {
+                if (repository.isLocalReadOnly(localId)) {
+                    _state.value = PosScanState(localReadOnly = true)
+                    return@launch
+                }
                 val apiResponse = repository.scanAndNotify(localId)
                 _state.value = PosScanState(
                     loading = false,
@@ -45,7 +50,7 @@ class PosIdentityViewModel(
             } catch (error: IOException) {
                 _state.value = PosScanState(
                     loading = false,
-                    error = "Đã lưu bản ghi quét. Chưa gửi được lên máy chủ do mất kết nối; WorkManager sẽ tự đồng bộ khi có mạng."
+                    error = "Đã lưu bản ghi quét. Chưa xác định kết quả gửi do mất kết nối. Kiểm tra lịch sử và quầy lễ tân trước khi gửi lại."
                 )
             } catch (error: HttpException) {
                 _state.value = PosScanState(

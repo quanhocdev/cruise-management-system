@@ -1,29 +1,40 @@
 package com.project.cruise.android.ui.screens.pos.shore
 
+import com.project.cruise.android.ui.screens.pos.*
+
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import com.project.cruise.android.ui.screens.pos.PosDashboardAction
-import com.project.cruise.android.ui.screens.pos.PosRole
-import com.project.cruise.android.ui.screens.pos.RolePosDashboard
 
 @Composable
 fun ShorePosDashboardScreen(
+    username: String,
     onLogoutClick: () -> Unit,
-    onNfcClick: () -> Unit,
-    onHistoryClick: () -> Unit
+    onQrClick: () -> Unit,
+    onManualClick: () -> Unit,
+    onHistoryClick: () -> Unit,
+    onNfcClick: () -> Unit = {},
+    onRegistrationsClick: () -> Unit = {}
 ) {
     RolePosDashboard(
+        username = username,
         role = PosRole.SHORE,
-        accent = Color(0xFF18794E),
+        accent = PosRole.SHORE.accent(),
         actions = listOf(
+            PosDashboardAction("Khách đăng ký tham quan", "Tra cứu và xác nhận khách tham gia", "DS", onRegistrationsClick),
+            PosDashboardAction("Quét NFC dịch vụ", "Nhận diện khách và ghi nhận lượt sử dụng", "NFC", onNfcClick),
             PosDashboardAction(
-                "Quét NFC người tham gia",
-                "Xác định hành khách và ghi nhận tham gia hoạt động tham quan bờ",
-                "NFC",
-                onNfcClick
+                "Quét QR tham quan",
+                "Kiểm tra khách trước khi rời tàu hoặc khi quay lại",
+                "QR",
+                onQrClick
+            ),
+            PosDashboardAction(
+                "Nhập mã vé",
+                "Đối chiếu mã khi không đọc được QR",
+                "123",
+                onManualClick
             )
         ),
-        notice = "Quét NFC để xác định hành khách và ghi nhận tham gia hoạt động tham quan bờ.",
+        notice = "Chọn đúng chuyến tham quan để đối chiếu. Mã đã lưu chưa xác nhận khách rời tàu hoặc trở về.",
         onLogoutClick = onLogoutClick,
         onHistoryClick = onHistoryClick
     )

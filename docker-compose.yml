@@ -116,29 +116,28 @@ services:
 
   # ==========================
   # PostgreSQL cho Feedback Service
-  # TẠM COMMENT: feedback-service chưa code xong
   # ==========================
-  # postgres-feedback:
-  #   image: postgres:15-alpine
-  #   container_name: cruise_postgres_feedback
-  #   restart: always
-  #   environment:
-  #     POSTGRES_DB: feedback_service_db
-  #     POSTGRES_USER: ${POSTGRES_USER:-postgres}
-  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-  #   ports:
-  #     - "5440:5432"
-  #   volumes:
-  #     - postgres_feedback_data:/var/lib/postgresql/data
-  #   healthcheck:
-  #     test:
-  #       [
-  #         "CMD-SHELL",
-  #         "pg_isready -U $${POSTGRES_USER:-postgres} -d feedback_service_db",
-  #       ]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
+  postgres-feedback:
+    image: postgres:15-alpine
+    container_name: cruise_postgres_feedback
+    restart: always
+    environment:
+      POSTGRES_DB: feedback_service_db
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5440:5432"
+    volumes:
+      - postgres_feedback_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER:-postgres} -d feedback_service_db",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # Redis
   redis:
@@ -425,33 +424,32 @@ services:
 
   # ==========================
   # Feedback Service
-  # TẠM COMMENT: chưa code xong, khi nào làm tới thì bỏ comment
   # ==========================
-  # feedback-service:
-  #   build:
-  #     context: ./backend/feedback-service
-  #     dockerfile: Dockerfile.dev
-  #   container_name: feedback-service
-  #   restart: always
-  #   ports:
-  #     - "8089:8089"
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-feedback:5432/feedback_service_db
-  #     SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
-  #     SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-  #     BOOKING_SERVICE_URL: http://booking-service:8082
-  #     TOUR_SERVICE_URL: http://tour-service:8088
-  #   depends_on:
-  #     postgres-feedback:
-  #       condition: service_healthy
-  #     booking-service:
-  #       condition: service_started
-  #     tour-service:
-  #       condition: service_started
-  #     kafka:
-  #       condition: service_started
+  feedback-service:
+    build:
+      context: ./backend/feedback-service
+      dockerfile: Dockerfile.dev
+    container_name: feedback-service
+    restart: always
+    ports:
+      - "8089:8089"
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-feedback:5432/feedback_service_db
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      BOOKING_SERVICE_URL: http://booking-service:8082
+      TOUR_SERVICE_URL: http://tour-service:8088
+    depends_on:
+      postgres-feedback:
+        condition: service_healthy
+      booking-service:
+        condition: service_started
+      tour-service:
+        condition: service_started
+      kafka:
+        condition: service_started
 
   # React Frontend
   frontend-web:
@@ -477,5 +475,5 @@ volumes:
   postgres_booking_data:
   postgres_payment_data:
   postgres_notification_data:
-  # postgres_feedback_data:
+  postgres_feedback_data:
   kafka_data:

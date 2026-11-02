@@ -14,8 +14,9 @@ import java.util.*;
 public class Feedback {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
     @Column(name = "booking_id", nullable = false) private Long bookingId;
-    @Column(name = "passenger_voyage_id", nullable = false) private Long passengerVoyageId;
-    @Column(name = "reviewer_user_id", nullable = false) private Long reviewerUserId;
+    @Column(name = "passenger_voyage_id") private Long passengerVoyageId;
+    @Column(name = "booking_passenger_id") private Long bookingPassengerId;
+    @Column(name = "reviewer_user_id", nullable = false) private UUID reviewerUserId;
     @Column(name = "tour_id", nullable = false) private UUID tourId;
     @Column(name = "cruise_id", nullable = false) private UUID cruiseId;
     @Enumerated(EnumType.STRING) @Column(name = "feedback_type", length = 20) private FeedbackType feedbackType;
@@ -29,14 +30,15 @@ public class Feedback {
     @OrderColumn(name = "display_order") private List<String> imageUrls = new ArrayList<>();
     @Enumerated(EnumType.STRING) @Column(nullable = false, length = 20) private FeedbackStatus status;
     @Column(name = "moderation_reason", length = 1000) private String moderationReason;
-    @Column(name = "moderated_by_user_id") private Long moderatedByUserId;
+    @Column(name = "moderated_by_user_id") private UUID moderatedByUserId;
     @Column(name = "created_at", nullable = false) private Instant createdAt;
     @Column(name = "updated_at", nullable = false) private Instant updatedAt;
     @Version private long version;
     public Long getId() { return id; } public void setId(Long v) { id = v; }
     public Long getBookingId() { return bookingId; } public void setBookingId(Long v) { bookingId = v; }
     public Long getPassengerVoyageId() { return passengerVoyageId; } public void setPassengerVoyageId(Long v) { passengerVoyageId = v; }
-    public Long getReviewerUserId() { return reviewerUserId; } public void setReviewerUserId(Long v) { reviewerUserId = v; }
+    public Long getBookingPassengerId() { return bookingPassengerId; } public void setBookingPassengerId(Long v) { bookingPassengerId = v; }
+    public UUID getReviewerUserId() { return reviewerUserId; } public void setReviewerUserId(UUID v) { reviewerUserId = v; }
     public UUID getTourId() { return tourId; } public void setTourId(UUID v) { tourId = v; }
     public UUID getCruiseId() { return cruiseId; } public void setCruiseId(UUID v) { cruiseId = v; }
     public FeedbackType getFeedbackType() { return feedbackType; } public void setFeedbackType(FeedbackType v) { feedbackType = v; }
@@ -47,7 +49,7 @@ public class Feedback {
     public List<String> getImageUrls() { return imageUrls; } public void setImageUrls(List<String> v) { imageUrls = v; }
     public FeedbackStatus getStatus() { return status; } public void setStatus(FeedbackStatus v) { status = v; }
     public String getModerationReason() { return moderationReason; } public void setModerationReason(String v) { moderationReason = v; }
-    public Long getModeratedByUserId() { return moderatedByUserId; } public void setModeratedByUserId(Long v) { moderatedByUserId = v; }
+    public UUID getModeratedByUserId() { return moderatedByUserId; } public void setModeratedByUserId(UUID v) { moderatedByUserId = v; }
     public Instant getCreatedAt() { return createdAt; } public void setCreatedAt(Instant v) { createdAt = v; }
     public Instant getUpdatedAt() { return updatedAt; } public void setUpdatedAt(Instant v) { updatedAt = v; }
 }

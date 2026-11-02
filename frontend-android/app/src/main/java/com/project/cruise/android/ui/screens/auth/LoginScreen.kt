@@ -26,6 +26,14 @@ fun LoginScreen(
     isLoading: Boolean = false,
     errorMessage: String? = null
 ) {
+    if (!com.project.cruise.android.BuildConfig.GOOGLE_SIGN_IN_ENABLED) {
+        OceanAuthForm(
+            register = false, onBack = onBackClick,
+            onSubmit = { username, password, _ -> onLogin(username, password) },
+            loading = isLoading, error = errorMessage
+        )
+        return
+    }
     val context = LocalContext.current
     var googleError by rememberSaveable {
         mutableStateOf<String?>(null)

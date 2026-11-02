@@ -5,6 +5,7 @@ import com.project.booking.dto.shore.ActivityVisitUsageManagementResponse;
 import com.project.booking.dto.shore.ActivityVisitUsageResponse;
 import com.project.booking.service.shore.ActivityVisitUsageService;
 
+import com.project.booking.service.command.IdempotentCommandService;
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
@@ -19,11 +20,13 @@ import java.util.List;
 public class ActivityVisitUsageController {
 
     private final ActivityVisitUsageService activityVisitUsageService;
+    private final IdempotentCommandService commands;
 
     public ActivityVisitUsageController(
-            ActivityVisitUsageService activityVisitUsageService) {
+            ActivityVisitUsageService activityVisitUsageService, IdempotentCommandService commands) {
 
         this.activityVisitUsageService = activityVisitUsageService;
+        this.commands = commands;
     }
 
     @PostMapping
@@ -31,9 +34,7 @@ public class ActivityVisitUsageController {
     public ResponseEntity<ActivityVisitUsageResponse> create(
             @Valid @RequestBody ActivityVisitUsageRequest request) {
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(activityVisitUsageService.create(request));
+        return commands.execute("SHORE_USAGE", request.clientRequestId(), request, ActivityVisitUsageResponse.class, () -> activityVisitUsageService.create(request));
     }
 
     @GetMapping

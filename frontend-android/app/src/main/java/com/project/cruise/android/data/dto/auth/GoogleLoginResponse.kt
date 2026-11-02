@@ -3,7 +3,7 @@ package com.project.cruise.android.data.dto.auth
 
 data class GoogleLoginResponse(
     val status: String? = null,
-    val userId: Long? = null,
+    val userId: String? = null,
     val message: String? = null,
     val token: String? = null,
     val refreshToken: String? = null,

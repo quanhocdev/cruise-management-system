@@ -1,6 +1,8 @@
 
 package com.project.booking.service.finance.checkout;
 
+import java.util.UUID;
+
 import com.project.booking.dto.finance.CheckoutPreviewResponse;
 import com.project.booking.dto.finance.CheckoutPreviewResponse.PassengerCheckoutPreview;
 import com.project.booking.dto.finance.CheckoutResponse;
@@ -23,6 +25,7 @@ import com.project.booking.service.finance.checkout.PassengerUsageReader.Passeng
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.project.booking.service.account.OnboardAccountService;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
@@ -30,10 +33,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@Transactional(readOnly = true)
 public class CheckoutServiceImpl implements CheckoutService {
+        private final org.springframework.transaction.support.TransactionTemplate transaction;
+        private final org.springframework.jdbc.core.JdbcTemplate jdbc;
 
-        private final BookingRepository bookingRepository;
+        private final OnboardAccountService accounts;
+        private final com.project.booking.service.account.LedgerAdjustmentReader adjustments;
+    private final BookingRepository bookingRepository;
         private final BookingPassengerRepository bookingPassengerRepository;
         private final BillRepository billRepository;
         private final BillItemRepository billItemRepository;
@@ -54,9 +60,17 @@ public class CheckoutServiceImpl implements CheckoutService {
                         PaymentCheckoutService paymentCheckoutService,
                         PassengerUsageReader passengerUsageReader,
                         PassengerCheckoutPreviewBuilder passengerCheckoutPreviewBuilder,
-                        BillCodeGenerator billCodeGenerator) {
+                        BillCodeGenerator billCodeGenerator, OnboardAccountService accounts,
+                        com.project.booking.service.account.LedgerAdjustmentReader adjustments,
+                        org.springframework.transaction.PlatformTransactionManager transactionManager,
+                        org.springframework.jdbc.core.JdbcTemplate jdbc) {
 
-                this.bookingRepository = bookingRepository;
+                this.transaction = new org.springframework.transaction.support.TransactionTemplate(transactionManager);
+                this.jdbc = jdbc;
+
+                this.accounts = accounts;
+                this.adjustments = adjustments;
+        this.bookingRepository = bookingRepository;
                 this.bookingPassengerRepository = bookingPassengerRepository;
                 this.billRepository = billRepository;
                 this.billItemRepository = billItemRepository;
@@ -69,6 +83,7 @@ public class CheckoutServiceImpl implements CheckoutService {
         }
 
         @Override
+        @Transactional(readOnly = true, isolation = org.springframework.transaction.annotation.Isolation.REPEATABLE_READ)
         public CheckoutPreviewResponse getCheckoutPreview(Long bookingId) {
 
                 Booking booking = getBooking(bookingId);
@@ -93,14 +108,29 @@ public class CheckoutServiceImpl implements CheckoutService {
         }
 
         @Override
-        @Transactional
+        @Transactional(propagation = org.springframework.transaction.annotation.Propagation.NOT_SUPPORTED)
         public CheckoutResponse confirmCheckout(Long bookingId) {
+                CheckoutResponse snapshot = transaction.execute(s -> prepareCheckout(bookingId, null));
+                if (snapshot.totalAmount().signum() == 0) return snapshot;
+                UUID payer = jdbc.queryForObject("select created_by_user_id from booking.bookings where id=?",UUID.class,bookingId);
+                BillPaymentResponse payment = paymentCheckoutService.createPayment(new BillPaymentRequest(snapshot.billId(),payer,snapshot.totalAmount()));
+                return new CheckoutResponse(snapshot.billId(),snapshot.billCode(),snapshot.bookingId(),snapshot.totalAmount(),snapshot.createdAt(),snapshot.items(),payment.paymentId(),payment.paymentUrl(),payment.status());
+        }
+
+        @Override
+        @Transactional
+        public CheckoutResponse prepareCheckout(Long bookingId, String previewVersion) {
 
                 Booking booking = getBooking(bookingId);
+                if (booking.getStatus() != com.project.booking.model.enums.BookingStatus.CONFIRMED)
+                        throw new com.project.booking.service.command.CommandException("BOOKING_NOT_CONFIRMED","Booking chưa được xác nhận",HttpStatus.UNPROCESSABLE_ENTITY);
+                accounts.beginSettlement(booking);
 
                 // 1. Tìm hóa đơn hiện có của booking.
                 List<Bill> existingBills = billRepository
                                 .findAllByBooking_IdOrderByCreatedAtDesc(bookingId);
+                if(existingBills.size()>1)
+                        throw new com.project.booking.service.command.CommandException("AMBIGUOUS_BILLS","Booking có nhiều bill, cần kiểm tra trước khi quyết toán",HttpStatus.CONFLICT);
 
                 Bill bill = existingBills.stream()
                                 .filter(b -> b.getStatus() == BillStatus.PENDING_PAYMENT)
@@ -111,6 +141,8 @@ public class CheckoutServiceImpl implements CheckoutService {
                 Bill finalBill;
 
                 if (bill != null) {
+                        if(previewVersion!=null && bill.getPreviewVersion()!=null && !previewVersion.equals(bill.getPreviewVersion()))
+                                throw new com.project.booking.service.command.CommandException("PREVIEW_CHANGED","Bill đã chốt với nội dung khác. Vui lòng tải lại.",HttpStatus.UNPROCESSABLE_ENTITY);
                         // 2. Đã có hóa đơn chờ thanh toán: dùng lại hóa đơn và BillItem.
                         finalBill = bill;
 
@@ -128,12 +160,21 @@ public class CheckoutServiceImpl implements CheckoutService {
                                                 "Booking này đã có hóa đơn thanh toán thành công.");
                         }
 
+                        var preview = getCheckoutPreview(bookingId);
+                        if (previewVersion != null && !previewVersion.equals(preview.previewVersion()))
+                                throw new com.project.booking.service.command.CommandException("PREVIEW_CHANGED","Chi tiêu đã thay đổi. Vui lòng cập nhật và xác nhận lại.",HttpStatus.UNPROCESSABLE_ENTITY);
+                        if (preview.grandTotal().signum() < 0)
+                                throw new com.project.booking.service.command.CommandException("NEGATIVE_BILL","Tổng bill âm, cần kiểm tra điều chỉnh",HttpStatus.UNPROCESSABLE_ENTITY);
+
                         // 4. Chưa có hóa đơn phù hợp: tạo hóa đơn mới.
                         List<BookingPassenger> bookingPassengers = bookingPassengerRepository
                                         .findAllByBooking_IdOrderByIdAsc(bookingId);
+                        if(bookingPassengers.isEmpty() || bookingPassengers.stream().anyMatch(p -> p.getStatus()!=com.project.booking.model.enums.BookingPassengerStatus.CHECKED_IN))
+                                throw new com.project.booking.service.command.CommandException("PASSENGERS_NOT_CHECKED_IN","Cần hoàn tất check-in hành khách trước khi quyết toán",HttpStatus.UNPROCESSABLE_ENTITY);
 
                         Bill newBill = new Bill();
                         newBill.setBooking(booking);
+                        newBill.setPreviewVersion(preview.previewVersion());
                         newBill.setBillCode(billCodeGenerator.generate());
                         newBill.setTotalAmount(BigDecimal.ZERO);
                         newBill.setStatus(BillStatus.PENDING_PAYMENT);
@@ -143,7 +184,9 @@ public class CheckoutServiceImpl implements CheckoutService {
                         items = new ArrayList<>();
 
                         for (BookingPassenger passenger : bookingPassengers) {
-                                items.addAll(buildBillItems(savedBill, passenger.getId()));
+                                var lines = buildBillItems(savedBill, passenger.getId());
+                                lines.forEach(line -> line.setPassengerName(passenger.getPassenger().getFullName()));
+                                items.addAll(lines);
                         }
 
                         billItemRepository.saveAll(items);
@@ -160,26 +203,12 @@ public class CheckoutServiceImpl implements CheckoutService {
                                         .findAllByBill_IdOrderByIdAsc(finalBill.getId());
                 }
 
-                // 5. Tạo hoặc tái sử dụng Payment và lấy URL VNPay.
-                BillPaymentRequest paymentRequest = new BillPaymentRequest(
-                                finalBill.getId(),
-                                booking.getCreatedByUserId(),
-                                finalBill.getTotalAmount());
-
-                BillPaymentResponse paymentResponse = paymentCheckoutService.createPayment(paymentRequest);
-
-                CheckoutResponse checkoutResponse = checkoutMapper.toResponse(finalBill, items);
-
-                return new CheckoutResponse(
-                                checkoutResponse.billId(),
-                                checkoutResponse.billCode(),
-                                checkoutResponse.bookingId(),
-                                checkoutResponse.totalAmount(),
-                                checkoutResponse.createdAt(),
-                                checkoutResponse.items(),
-                                paymentResponse.paymentId(),
-                                paymentResponse.paymentUrl(),
-                                paymentResponse.status());
+                if (finalBill.getTotalAmount().signum() == 0) {
+                        finalBill.setStatus(BillStatus.PAID);
+                        billRepository.save(finalBill);
+                        accounts.markClosed(bookingId);
+                }
+                return checkoutMapper.toResponse(finalBill, items);
         }
 
         private List<BillItem> buildBillItems(
@@ -210,6 +239,7 @@ public class CheckoutServiceImpl implements CheckoutService {
                                                 billItemMapper.fromProduct(
                                                                 bill, bookingPassengerId, usage)));
 
+                items.addAll(adjustments.billItems(bill, bookingPassengerId));
                 return items;
         }
 

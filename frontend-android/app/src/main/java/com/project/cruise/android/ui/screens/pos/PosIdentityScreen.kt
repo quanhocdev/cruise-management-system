@@ -1,68 +1,49 @@
 package com.project.cruise.android.ui.screens.pos
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.project.cruise.android.viewmodel.pos.PosScanState
 
 @Composable
-fun PosIdentityScreen(
-    role: PosRole,
-    state: PosScanState,
-    onRetry: () -> Unit,
-    onBack: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .safeDrawingPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        TextButton(onClick = onBack) { Text("← Quay lại POS") }
-
-        Text("Gửi mã quét đến máy chủ", style = MaterialTheme.typography.headlineMedium)
-
-        if (state.loading) {
-            CircularProgressIndicator()
-            Text("Đang truyền dữ liệu và kích hoạt màn hình lễ tân…")
-        }
-
-        state.error?.let {
-            Text(it, color = MaterialTheme.colorScheme.error)
-        }
-
-        state.response?.let { res ->
-            if (res.success) {
-                Text("Gửi mã thành công!", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleLarge)
-                Text("Thông điệp từ hệ thống: ${res.message}")
-                if (res.bookingId != null) {
-                    Text("Mã định danh Booking ID: ${res.bookingId}")
+fun PosIdentityScreen(role: PosRole, state: PosScanState, onRetry: () -> Unit, onBack: () -> Unit) {
+    val success = state.response?.success == true
+    val color = if (success || state.localReadOnly) role.accent() else PosAmber
+    PosPage {
+        PosTopBar("Kết quả xử lý", role, onBack, !state.loading)
+        Spacer(Modifier.height(12.dp))
+        PosPanel {
+            Column(Modifier.fillMaxWidth().padding(vertical = 16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(18.dp)) {
+                Box(Modifier.size(104.dp).background(color.copy(alpha=.08f), CircleShape).padding(16.dp).background(color.copy(alpha=.12f), CircleShape), contentAlignment = Alignment.Center) {
+                    if(state.loading) CircularProgressIndicator(color = role.accent())
+                    else PosGlyph(if(success) PosSymbol.CHECK else if(state.localReadOnly) PosSymbol.NFC else PosSymbol.INFO, color, Modifier.size(38.dp))
                 }
-                Card(
-                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
-                ) {
-                    Text(
-                        "Mã QR đã được truyền tới hệ thống. Màn hình Web của lễ tân đã tự động hiển thị thông tin hành khách để gán phòng và check-in.",
-                        modifier = Modifier.padding(16.dp),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            } else {
-                Text("Máy chủ từ chối", color = MaterialTheme.colorScheme.error)
-                Text("Lý do: ${res.message}")
+                PosBadge(when { state.loading -> "Đang xử lý"; success -> "Máy chủ đã nhận mã"; state.localReadOnly -> "Đã lưu trên máy"; else -> "Cần kiểm tra" }, color)
+                Text(when { state.loading -> "Đang gửi mã booking"; state.localReadOnly -> "Đã đọc vòng NFC"; success -> "Đã gửi mã booking"; else -> "Chưa xác nhận kết quả" },
+                    style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
+                Text(when {
+                    state.loading -> "Vui lòng chờ phản hồi trước khi tiếp tục."
+                    state.localReadOnly -> "Mã vòng đã được lưu trên thiết bị. Thông tin hành khách chưa được xác minh."
+                    success -> "Tiếp tục làm thủ tục cho khách tại quầy lễ tân."
+                    else -> state.error ?: state.response?.message ?: "Chưa có phản hồi xác nhận."
+                }, color = PosMuted, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
             }
+            if(success) state.response?.bookingId?.let { HorizontalDivider(); PosDetailRow("Tham chiếu booking", it.toString()) }
         }
-
-        Spacer(Modifier.height(16.dp))
-        OutlinedButton(onClick = onRetry, enabled = !state.loading) {
-            Text("Thử gửi lại")
+        if(!state.loading) {
+            PosPrimaryButton("Về trang tác vụ", role, onBack)
+            if(success) PosNotice("Gửi mã thành công chưa phải hoàn tất check-in.")
+            if(!success && !state.localReadOnly && role == PosRole.FINANCE) {
+                PosNotice("Kiểm tra lịch sử và quầy lễ tân trước khi gửi lại để tránh lặp thao tác.", warning = true)
+                OutlinedButton(onClick = onRetry, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) { Text("Thử lại sau khi kiểm tra") }
+            }
         }
     }
 }

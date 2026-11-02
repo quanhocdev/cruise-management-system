@@ -1,5 +1,7 @@
 package com.project.booking.controller.shore;
 
+import java.util.UUID;
+
 import com.project.booking.dto.shore.ActivityVisitUsageResponse;
 import com.project.booking.service.shore.ActivityVisitUsageService;
 
@@ -25,13 +27,13 @@ public class PassengerActivityVisitUsageController {
     public ResponseEntity<List<ActivityVisitUsageResponse>> getMine(
             Principal principal) {
 
-        Long userId = extractUserId(principal);
+        UUID userId = extractUserId(principal);
 
         return ResponseEntity.ok(
                 activityVisitUsageService.getByUserId(userId));
     }
 
-    private Long extractUserId(Principal principal) {
+    private UUID extractUserId(Principal principal) {
 
         if (principal instanceof org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken jwtAuth) {
 
@@ -39,13 +41,13 @@ public class PassengerActivityVisitUsageController {
                     .get("userId");
 
             if (userIdClaim != null) {
-                return Long.valueOf(
+                return UUID.fromString(
                         userIdClaim.toString());
             }
         }
 
         try {
-            return Long.valueOf(principal.getName());
+            return UUID.fromString(principal.getName());
 
         } catch (Exception e) {
 

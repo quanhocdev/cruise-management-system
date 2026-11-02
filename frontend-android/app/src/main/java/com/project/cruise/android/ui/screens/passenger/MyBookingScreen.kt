@@ -2,88 +2,165 @@ package com.project.cruise.android.ui.screens.passenger
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.project.cruise.android.data.dto.booking.BookingResponse
+import com.project.cruise.android.data.dto.booking.*
+import com.project.cruise.android.ui.components.*
 import com.project.cruise.android.ui.theme.*
-import com.project.cruise.android.viewmodel.passenger.BookingListState
-import com.project.cruise.android.viewmodel.passenger.BookingViewModel
-import java.text.NumberFormat
-import java.util.Locale
+import com.project.cruise.android.viewmodel.passenger.*
 
 @Composable
 fun MyBookingsScreen(
     viewModel: BookingViewModel,
     onBookingClick: (Long) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onBrowseTours: () -> Unit = onBack,
+    onAccount: (() -> Unit)? = null,
 ) {
     val state by viewModel.bookingListState.collectAsState()
+    LaunchedEffect(Unit) { viewModel.fetchMyBookings() }
+    MyBookingsContent(
+        state,
+        onBookingClick,
+        onBack,
+        { viewModel.fetchMyBookings() },
+        onBrowseTours,
+        bottomBar = {
+            if (onAccount != null)
+                OceanBottomBar(true, "passenger_bookings", onBrowseTours, {}, onAccount, {})
+        },
+    )
+}
 
-    LaunchedEffect(Unit) {
-        viewModel.fetchMyBookings()
-    }
-
-    OceanPage {
-        // Header
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            FilledTonalButton(
-                onClick = onBack,
-                colors = ButtonDefaults.filledTonalButtonColors(containerColor = Color.White)
-            ) {
-                Text("←", style = MaterialTheme.typography.titleLarge)
+@Composable
+fun MyBookingsContent(
+    state: BookingListState,
+    onBookingClick: (Long) -> Unit,
+    onBack: () -> Unit,
+    onRetry: () -> Unit,
+    onBrowseTours: (() -> Unit)? = null,
+    bottomBar: @Composable () -> Unit = {},
+) {
+    var query by rememberSaveable { mutableStateOf("") }
+    var selected by rememberSaveable { mutableStateOf<String?>(null) }
+    val bookings = (state as? BookingListState.Success)?.bookings.orEmpty()
+    val filtered =
+        remember(bookings, query, selected) {
+            bookings.filter {
+                (selected == null || it.status?.name == selected) &&
+                    (query.isBlank() ||
+                        listOf(it.bookingCode, it.primaryContactName).any { text ->
+                            text?.contains(query.trim(), ignoreCase = true) == true
+                        })
             }
-            Spacer(Modifier.width(12.dp))
-            Text("Booking của tôi", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = OceanNavy)
         }
-
-        Spacer(Modifier.height(16.dp))
-
-        when (val currentState = state) {
-            is BookingListState.Idle,
-            is BookingListState.Loading -> {
-                Box(Modifier.fillMaxWidth().padding(vertical = 40.dp), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = OceanTeal)
-                }
-            }
-            is BookingListState.Error -> {
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
-                    modifier = Modifier.fillMaxWidth()
+    PassengerPage(
+        "Chuyến đi của tôi",
+        "Theo dõi đặt chỗ và thông tin hành khách",
+        onBack,
+        bottomBar,
+    ) {
+        item {
+            Surface(
+                color = OceanNavy,
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(24.dp),
+            ) {
+                Column(
+                    Modifier.fillMaxWidth().padding(22.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Lỗi tải dữ liệu", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onErrorContainer)
-                        Text(currentState.message, color = MaterialTheme.colorScheme.onErrorContainer)
-                        OutlinedButton(onClick = { viewModel.fetchMyBookings() }) {
-                            Text("Thử lại")
-                        }
-                    }
+                    Text(
+                        "ĐẶT CHỖ CỦA BẠN",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = OceanMint,
+                    )
+                    Text(
+                        if (state is BookingListState.Success) "${bookings.size} booking"
+                        else "Hành trình của bạn",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = androidx.compose.ui.graphics.Color.White,
+                    )
+                    if (state is BookingListState.Success)
+                        Text(
+                            "${bookings.count{it.status==BookingStatus.CONFIRMED}} đã xác nhận · ${bookings.count{it.status==BookingStatus.PENDING_PAYMENT}} chờ thanh toán",
+                            color = androidx.compose.ui.graphics.Color.White.copy(alpha = .85f),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
                 }
             }
+        }
+        item {
+            OutlinedTextField(
+                query,
+                { query = it },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(18.dp),
+                placeholder = {
+                    Text(
+                        "Tìm mã booking hoặc tên",
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    )
+                },
+                leadingIcon = { PassengerIcon(PassengerGlyph.SEARCH) },
+                trailingIcon = {
+                    if (query.isNotEmpty()) TextButton(onClick = { query = "" }) { Text("Xóa") }
+                },
+            )
+        }
+        item {
+            @OptIn(ExperimentalLayoutApi::class)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(selected == null, { selected = null }, label = { Text("Tất cả") })
+                BookingStatus.entries.forEach { status ->
+                    FilterChip(
+                        selected == status.name,
+                        { selected = status.name },
+                        label = { Text(bookingLabel(status)) },
+                    )
+                }
+            }
+            if (state is BookingListState.Success)
+                Text(
+                    "${filtered.size} booking",
+                    color = OceanSlate,
+                    style = MaterialTheme.typography.labelLarge,
+                )
+        }
+        when (state) {
+            BookingListState.Idle,
+            BookingListState.Loading -> item { PassengerLoading() }
+            is BookingListState.Error -> item { PassengerError(state.message, onRetry) }
             is BookingListState.Success -> {
-                val bookings = currentState.bookings
-                if (bookings.isEmpty()) {
-                    Box(Modifier.fillMaxWidth().padding(vertical = 40.dp), contentAlignment = Alignment.Center) {
-                        Text("Bạn chưa có booking nào.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (filtered.isEmpty())
+                    item {
+                        PassengerEmpty(
+                            "Chưa có booking phù hợp",
+                            if (bookings.isEmpty())
+                                "Khám phá các hành trình và chọn gói tour để bắt đầu kỳ nghỉ."
+                            else "Thử mã khác hoặc đổi bộ lọc trạng thái.",
+                            if (bookings.isEmpty()) {
+                                if (onBrowseTours != null) "Khám phá tour" else "Quay lại"
+                            } else "Xóa bộ lọc",
+                            {
+                                if (bookings.isEmpty()) (onBrowseTours ?: onBack)()
+                                else {
+                                    query = ""
+                                    selected = null
+                                }
+                            },
+                        )
                     }
-                } else {
-                    // Dùng Column kết hợp forEach thay cho LazyColumn để chạy hoàn hảo bên trong OceanPage cuộn dọc
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        bookings.forEach { booking ->
-                            BookingCard(booking = booking, onClick = { onBookingClick(booking.id) })
-                        }
-                    }
+                items(filtered, key = { it.id }) { booking ->
+                    BookingCard(booking) { onBookingClick(booking.id) }
                 }
             }
         }
@@ -91,67 +168,58 @@ fun MyBookingsScreen(
 }
 
 @Composable
-fun BookingCard(
-    booking: BookingResponse,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(
-                Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+fun BookingCard(booking: BookingResponse, onClick: () -> Unit) {
+    PassengerCard(Modifier.clickable(onClick = onClick)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Surface(
+                color = OceanMintSoft,
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
             ) {
-                Text(
-                    text = booking.bookingCode ?: "Mã: #${booking.id}",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = OceanTeal
-                )
-                Surface(
-                    color = OceanMint.copy(alpha = 0.3f),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(
-                        text = booking.status?.name ?: "UNKNOWN",
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = OceanNavy,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                PassengerIcon(PassengerGlyph.TICKET, modifier = Modifier.padding(12.dp).size(24.dp))
             }
-
-            Text("Người liên hệ: ${booking.primaryContactName ?: "N/A"} (${booking.primaryContactPhone ?: ""})")
-            Text("Số hành khách: ${booking.numberPassengers ?: booking.bookingPassengers?.size ?: 0}")
-
-            val formattedAmount = booking.totalAmount?.let {
-                NumberFormat.getCurrencyInstance(Locale.forLanguageTag("vi-VN")).format(it)
-            } ?: "0 đ"
-
-            Row(
-                Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Column(Modifier.weight(1f)) {
+                Text("MÃ BOOKING", style = MaterialTheme.typography.labelSmall, color = OceanSlate)
                 Text(
-                    text = "Tổng tiền: $formattedAmount",
+                    booking.bookingCode ?: "#${booking.id}",
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = OceanNavy
+                    color = OceanNavy,
+                )
+            }
+        }
+        PassengerPill(bookingLabel(booking.status), booking.status == BookingStatus.CONFIRMED)
+        PassengerInfo("Người liên hệ", booking.primaryContactName)
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(Modifier.weight(1f)) {
+                PassengerInfo(
+                    "Hành khách",
+                    booking.numberPassengers?.let { "$it khách" }
+                        ?: booking.bookingPassengers?.size?.let { "$it khách" },
+                )
+            }
+            Column(Modifier.weight(1f)) {
+                PassengerInfo("Ngày đặt", passengerDate(booking.createdAt))
+            }
+        }
+        HorizontalDivider(color = OceanLine)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(
+                    "Tổng giá trị booking",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = OceanSlate,
                 )
                 Text(
-                    text = "Chi tiết →",
+                    passengerMoney(booking.totalAmount),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
                     color = OceanTeal,
-                    style = MaterialTheme.typography.labelLarge
                 )
             }
+            PassengerIcon(PassengerGlyph.ARROW)
         }
     }
 }

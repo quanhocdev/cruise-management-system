@@ -9,5 +9,9 @@ public record ActivityVisitUsageRequest(
 
                 @NotBlank(message = "NFC card UID không được để trống") String nfcCardUid,
 
-                @NotNull(message = "Visit tour ID không được để trống") UUID visitTourId) {
+                @NotNull(message = "Visit tour ID không được để trống") UUID visitTourId,
+                UUID clientRequestId) {
+    public ActivityVisitUsageRequest(String nfcCardUid, UUID visitTourId) {
+        this(nfcCardUid, visitTourId, null);
+    }
 }

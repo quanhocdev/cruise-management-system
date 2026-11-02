@@ -18,7 +18,7 @@ public interface ActivityVisitUsageRepository
                         Long bookingPassengerId);
 
         List<ActivityVisitUsage> findAllByBookingPassenger_Booking_CreatedByUserIdOrderByUsedAtDesc(
-                        Long userId);
+                        UUID userId);
 
         List<ActivityVisitUsage> findAllByOrderByUsedAtDesc();
 }

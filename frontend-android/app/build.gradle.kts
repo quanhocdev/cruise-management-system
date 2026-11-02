@@ -5,9 +5,12 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
-    id("com.google.gms.google-services")
+    id("com.google.gms.google-services") apply false
 
 }
+val googleServicesConfigured = file("google-services.json").isFile
+if (googleServicesConfigured) apply(plugin = "com.google.gms.google-services")
+
 val localProperties = Properties().apply {
     val file = rootProject.file("local.properties")
     if (file.exists()) load(file.inputStream())
@@ -23,6 +26,8 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+        buildConfigField("boolean", "GOOGLE_SIGN_IN_ENABLED", googleServicesConfigured.toString())
+        if (!googleServicesConfigured) resValue("string", "default_web_client_id", "")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

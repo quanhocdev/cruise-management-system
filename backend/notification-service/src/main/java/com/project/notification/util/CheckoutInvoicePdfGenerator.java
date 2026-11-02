@@ -105,7 +105,7 @@ public final class CheckoutInvoicePdfGenerator {
 
             y -= 25;
             drawText(content, regular, 9, LEFT, y,
-                    "Trạng thái: " + safe(event.billStatus()));
+                    event.totalAmount().signum()==0 ? "Không phát sinh thanh toán" : "Trạng thái: " + safe(event.billStatus()));
 
             y -= 22;
             drawText(content, regular, 9, LEFT, y,
@@ -234,7 +234,7 @@ public final class CheckoutInvoicePdfGenerator {
             PDPage page) throws IOException {
 
         drawText(content, font, 8, LEFT, 30,
-                "Cruise System - Hóa đơn điện tử");
+                "Cruise System - Biên nhận dịch vụ");
     }
 
     private static float drawText(

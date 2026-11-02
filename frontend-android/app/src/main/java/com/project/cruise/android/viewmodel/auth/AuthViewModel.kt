@@ -6,6 +6,7 @@ import com.project.cruise.android.data.dto.auth.JwtResponse
 import com.project.cruise.android.data.dto.auth.RegisterResponse
 import com.project.cruise.android.data.repository.AuthRepository
 import com.project.cruise.android.ui.screens.pos.PosRole
+import com.project.cruise.android.data.dto.staff.StaffRole
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -46,7 +47,7 @@ sealed class GoogleLoginState {
     object Loading : GoogleLoginState()
 
     data class OtpRequired(
-        val userId: Long,
+        val userId: String,
         val message: String
     ) : GoogleLoginState()
 
@@ -137,7 +138,7 @@ class AuthViewModel(
         viewModelScope.launch {
             runCatching { repository.getCurrentUser() }
                 .onSuccess { user ->
-                    if (user.role.isPassengerRole() || user.role.isSupportedPosRole()) {
+                    if (user.role.isPassengerRole() || user.role.isSupportedPosRole() || StaffRole.fromApiRole(user.role) != null) {
                         _sessionState.value = SessionState.Authenticated(user.username, user.role)
                     } else {
                         repository.logout()
@@ -186,9 +187,9 @@ class AuthViewModel(
                         password = password
                     )
 
-                if (!response.role.isPassengerRole()) {
+                if (!response.role.isPassengerRole() && StaffRole.fromApiRole(response.role) == null) {
                     repository.logout()
-                    _loginState.value = LoginState.Error("Ứng dụng này chỉ dành cho hành khách")
+                    _loginState.value = LoginState.Error("Đăng nhập này dành cho hành khách và nhân viên. Tài khoản quản lý vui lòng dùng đăng nhập POS.")
                 } else {
                     _sessionState.value = SessionState.Authenticated(response.username, response.role)
                     _loginState.value = LoginState.Success(response)
@@ -272,7 +273,7 @@ class AuthViewModel(
         }
     }
 
-    fun verifyGoogleOtp(userId: Long, otp: String) {
+    fun verifyGoogleOtp(userId: String, otp: String) {
         if (!otp.matches(Regex("^\\d{6}$"))) {
             _googleOtpState.value =
                 GoogleOtpState.Error("OTP phải gồm đúng 6 chữ số")
@@ -422,7 +423,7 @@ class AuthViewModel(
 
 
     fun verifyEmail(
-        userId: Long,
+        userId: String,
         otp: String
     ) {
 

@@ -27,6 +27,12 @@ import com.project.cruise.android.viewmodel.tour.TourViewModelFactory
 import com.project.cruise.android.viewmodel.chat.ChatViewModel
 import com.project.cruise.android.viewmodel.chat.ChatViewModelFactory
 
+
+import com.project.cruise.android.ui.screens.passenger.CreateBookingScreen
+import com.project.cruise.android.data.repository.PassengerBookingRepository
+import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModel
+import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModelFactory
+
 fun NavGraphBuilder.passengerGraph(
     navController: NavHostController,
     authViewModel: AuthViewModel,
@@ -47,9 +53,6 @@ fun NavGraphBuilder.passengerGraph(
                 navController.navigate(Routes.GUEST) {
                     popUpTo(Routes.PASSENGER_TOURS) { inclusive = true }
                 }
-            },
-            onNotificationClick = {
-                // TODO: chuyển sang trang thông báo
             }
         )
     }
@@ -60,7 +63,7 @@ fun NavGraphBuilder.passengerGraph(
             viewModel = authViewModel,
             onBrowseTours = { navController.navigate(Routes.PASSENGER_TOURS) },
             onMyBookings = { navController.navigate(Routes.PASSENGER_BOOKINGS) },
-            notificationButton = {},
+            notificationButton = { ActivityInboxEntry { navController.navigate(Routes.PASSENGER_ACTIVITY_INBOX) } },
             onLogout = {
                 navController.navigate(Routes.GUEST) {
                     popUpTo(Routes.PASSENGER_DASHBOARD) { inclusive = true }
@@ -91,24 +94,10 @@ fun NavGraphBuilder.passengerGraph(
             onTourClick = { tourId ->
                 navController.navigate(Routes.passengerTourDetail(tourId))
             },
-            onLoginClick = {
-                navController.navigate(Routes.GUEST)
-            },
-            onUserClick = {
-                navController.navigate(Routes.PASSENGER_PROFILE)
-            },
-            onMyBookingsClick = {
-                navController.navigate(Routes.PASSENGER_BOOKINGS)
-            },
-            onLogout = {
-                navController.navigate(Routes.GUEST) {
-                    popUpTo(Routes.PASSENGER_TOURS) {
-                        inclusive = true
-                    }
-                }
-            },
-            onHomeClick = {},
-            onNotificationClick = {}
+            onLoginClick = { navController.navigate(Routes.GUEST) },       // Chưa đăng nhập -> Guest
+            onUserClick = { navController.navigate(Routes.PASSENGER_PROFILE) }, // Đã đăng nhập -> Profile
+            onMyBookingsClick = { navController.navigate(Routes.PASSENGER_BOOKINGS) },
+            onHomeClick = {}
         )
     }
 
@@ -137,6 +126,41 @@ fun NavGraphBuilder.passengerGraph(
         )
     }
 
+        composable(
+            route = Routes.PASSENGER_CREATE_BOOKING,
+            arguments = listOf(
+                navArgument("tourId") { type = NavType.StringType },
+                navArgument("packageId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val tourId = backStackEntry.arguments?.getString("tourId") ?: return@composable
+            val packageId = backStackEntry.arguments?.getString("packageId") ?: return@composable
+            val bookingViewModel: PassengerBookingViewModel = viewModel(
+                viewModelStoreOwner = backStackEntry,
+                factory = PassengerBookingViewModelFactory(
+                    PassengerBookingRepository(apiService),
+                    tourId,
+                    packageId
+                )
+            )
+            val bookingState by bookingViewModel.state.collectAsState()
+
+            CreateBookingScreen(
+                state = bookingState,
+                onDraftChange = bookingViewModel::edit,
+                onSubmit = bookingViewModel::submit,
+                onRetry = bookingViewModel::refreshPackage,
+                onBack = { navController.popBackStack() },
+                onDone = {
+                    navController.navigate(Routes.PASSENGER_BOOKINGS) {
+                        popUpTo(Routes.PASSENGER_CREATE_BOOKING) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
+
+
     // ----- BOOKINGS LIST -----
     composable(Routes.PASSENGER_BOOKINGS) {
         val bookingRepo = remember(apiService) { BookingRepository(apiService) }
@@ -148,7 +172,9 @@ fun NavGraphBuilder.passengerGraph(
             onBookingClick = { bookingId ->
                 navController.navigate(Routes.passengerBookingDetail(bookingId))
             },
-            onBack = { navController.popBackStack() }
+            onBack = { navController.popBackStack() },
+            onBrowseTours = { navController.navigate(Routes.PASSENGER_TOURS) },
+            onAccount = { navController.navigate(Routes.PASSENGER_PROFILE) }
         )
     }
 
@@ -165,7 +191,60 @@ fun NavGraphBuilder.passengerGraph(
         MyBookingDetailScreen(
             bookingId = bookingId,
             viewModel = bookingViewModel,
-            onBack = { navController.popBackStack() }
+            onBack = { navController.popBackStack() },
+            onSpending = { navController.navigate("passenger_spending/$bookingId") },
+            onActivities = { navController.navigate(Routes.passengerActivities(bookingId)) },
+            onBill = { navController.navigate("passenger_bill/$bookingId") },
+            onFeedback = { navController.navigate("passenger_feedback/$bookingId") },
+            notificationButton = { ActivityInboxEntry { navController.navigate(Routes.PASSENGER_ACTIVITY_INBOX) } }
         )
     }
+    composable(Routes.PASSENGER_ACTIVITIES, arguments = listOf(navArgument("bookingId") { type = NavType.LongType })) { entry ->
+        val bookingId = entry.arguments?.getLong("bookingId") ?: return@composable
+        val context = androidx.compose.ui.platform.LocalContext.current
+        val source = remember(context) { com.project.cruise.android.data.repository.ActivityRegistrationRepository(context) }
+        val model: com.project.cruise.android.viewmodel.passenger.ActivityRegistrationViewModel = viewModel(
+            factory = com.project.cruise.android.viewmodel.passenger.ActivityRegistrationViewModel.Factory(source))
+        com.project.cruise.android.ui.screens.passenger.ActivityRegistrationScreen(bookingId, model,
+            onBack={navController.popBackStack()},
+            notificationButton={ActivityInboxEntry { navController.navigate(Routes.PASSENGER_ACTIVITY_INBOX) }})
+    }
+    composable(Routes.PASSENGER_ACTIVITY_INBOX) {
+        val context=androidx.compose.ui.platform.LocalContext.current
+        val source=remember(context) { com.project.cruise.android.data.repository.ActivityInboxRepository(context) }
+        val model:com.project.cruise.android.viewmodel.passenger.ActivityInboxViewModel=viewModel(
+            factory=com.project.cruise.android.viewmodel.passenger.ActivityInboxViewModel.Factory(source))
+        com.project.cruise.android.ui.screens.passenger.ActivityInboxScreen(model,
+            onBooking={navController.navigate(Routes.passengerBookingDetail(it))},onBack={navController.popBackStack()})
+    }
+    composable("passenger_feedback/{bookingId}", arguments = listOf(navArgument("bookingId") { type = NavType.LongType })) { entry ->
+        val bookingId = entry.arguments?.getLong("bookingId") ?: return@composable
+        val context=androidx.compose.ui.platform.LocalContext.current
+        val source = remember(apiService,context) { com.project.cruise.android.data.repository.FeedbackRepository(apiService,context) }
+        val model: com.project.cruise.android.viewmodel.passenger.FeedbackViewModel = viewModel(
+            factory = com.project.cruise.android.viewmodel.passenger.FeedbackViewModel.Factory(source))
+        com.project.cruise.android.ui.screens.passenger.MyFeedbackScreen(bookingId, model) { navController.popBackStack() }
+    }
+    composable("passenger_bill/{bookingId}", arguments = listOf(navArgument("bookingId") { type = NavType.LongType })) { entry ->
+        val bookingId=entry.arguments?.getLong("bookingId")?:return@composable
+        val context=androidx.compose.ui.platform.LocalContext.current
+        val source=remember(context){com.project.cruise.android.data.repository.CheckoutRepository(context)}
+        val model:com.project.cruise.android.viewmodel.pos.CheckoutViewModel=viewModel(
+            factory=com.project.cruise.android.viewmodel.pos.CheckoutViewModel.Factory(source,false))
+        com.project.cruise.android.ui.screens.pos.CheckoutScreen(model,false,bookingId){navController.popBackStack()}
+    }
+    composable("passenger_spending/{bookingId}", arguments = listOf(navArgument("bookingId") { type = NavType.LongType })) { entry ->
+        val bookingId = entry.arguments?.getLong("bookingId") ?: return@composable
+        val spending: com.project.cruise.android.viewmodel.passenger.SpendingViewModel = viewModel(
+            factory = com.project.cruise.android.viewmodel.passenger.SpendingViewModel.Factory(apiService, bookingId))
+        com.project.cruise.android.ui.screens.passenger.SpendingScreen(spending) { navController.popBackStack() }
+    }
+
+}
+
+@androidx.compose.runtime.Composable
+private fun ActivityInboxEntry(onClick: ()->Unit) {
+    val context=androidx.compose.ui.platform.LocalContext.current
+    val source=remember(context) { com.project.cruise.android.data.repository.ActivityInboxRepository(context) }
+    com.project.cruise.android.ui.screens.passenger.ActivityInboxButton(source,onClick)
 }

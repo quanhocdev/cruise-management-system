@@ -76,7 +76,7 @@ class AuthRepository(
 
     // XÁC THỰC OTP CỦA GOOGLE LOGIN
     suspend fun verifyGoogleOtp(
-        userId: Long,
+        userId: String,
         otp: String
     ): JwtResponse {
         val response = apiService.verifyGoogleOtp(
@@ -118,7 +118,7 @@ class AuthRepository(
 
     // OTP ĐĂNG KÝ THÔNG THƯỜNG — GIỮ NGUYÊN ENDPOINT CŨ
     suspend fun verifyEmail(
-        userId: Long,
+        userId: String,
         otp: String
     ): Map<String, String> {
         return apiService.verifyEmail(

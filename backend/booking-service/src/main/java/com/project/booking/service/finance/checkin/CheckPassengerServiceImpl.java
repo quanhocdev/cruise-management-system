@@ -11,18 +11,21 @@ import com.project.booking.repository.BookingPassengerRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.project.booking.service.account.OnboardAccountService;
 
 import java.time.LocalDateTime;
 
 @Service
 public class CheckPassengerServiceImpl implements CheckPassengerService {
 
+    private final OnboardAccountService accounts;
     private final BookingPassengerRepository bookingPassengerRepository;
     private final TourNfcCardClient tourNfcCardClient;
 
     public CheckPassengerServiceImpl(
             BookingPassengerRepository bookingPassengerRepository,
-            TourNfcCardClient tourNfcCardClient) {
+            TourNfcCardClient tourNfcCardClient, OnboardAccountService accounts) {
+        this.accounts = accounts;
         this.bookingPassengerRepository = bookingPassengerRepository;
         this.tourNfcCardClient = tourNfcCardClient;
     }
@@ -77,6 +80,7 @@ public class CheckPassengerServiceImpl implements CheckPassengerService {
         passengerAssignment.setCheckedInAt(LocalDateTime.now());
 
         bookingPassengerRepository.save(passengerAssignment);
+        accounts.openForCheckIn(passengerAssignment.getBooking());
 
         System.out.println("[CHECK-IN] Check-in thành công.");
     }

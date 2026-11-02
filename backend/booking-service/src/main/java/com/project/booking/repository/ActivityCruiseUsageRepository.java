@@ -19,7 +19,7 @@ public interface ActivityCruiseUsageRepository
         long countByActivityCruiseTourId(UUID activityCruiseTourId);
 
         List<ActivityCruiseUsage> findAllByBookingPassenger_Booking_CreatedByUserIdOrderByUsedAtDesc(
-                        Long userId);
+                        UUID userId);
 
         List<ActivityCruiseUsage> findAllByOrderByUsedAtDesc();
 }

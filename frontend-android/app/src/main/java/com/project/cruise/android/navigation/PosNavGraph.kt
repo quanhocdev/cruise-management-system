@@ -63,6 +63,7 @@ fun NavGraphBuilder.posGraph(
         val role = entry.posRole() ?: return@composable
         PosDashboardScreen(
             role = role,
+            username = (authViewModel.sessionState.value as? com.project.cruise.android.viewmodel.auth.SessionState.Authenticated)?.username.orEmpty(),
             onLogoutClick = {
                 authViewModel.logout {
                     navController.navigate(Routes.GUEST) {
@@ -73,8 +74,106 @@ fun NavGraphBuilder.posGraph(
             onQrClick = { navController.navigate(Routes.posQrScan(role)) },
             onNfcClick = { navController.navigate(Routes.posNfcScan(role)) },
             onManualClick = { navController.navigate(Routes.posManualEntry(role)) },
-            onHistoryClick = { navController.navigate(Routes.posHistory(role)) }
+            onHistoryClick = { navController.navigate(Routes.posHistory(role)) },
+            onSpendingClick = { navController.navigate(Routes.FINANCE_SPENDING) },
+            onCorrectionClick = { navController.navigate(Routes.POS_CORRECTIONS) },
+            onRefundClick = { navController.navigate(Routes.FINANCE_REFUNDS) },
+            onRegistrationsClick = { navController.navigate(Routes.POS_REGISTRATIONS) },
+            onCheckoutClick = { navController.navigate("finance_checkout") },
+            onReportClick = { navController.navigate("finance_report") }
         )
+    }
+
+    composable("finance_checkout") {
+        val session by authViewModel.sessionState.collectAsState()
+        val role = (session as? com.project.cruise.android.viewmodel.auth.SessionState.Authenticated)?.role
+        if (PosRole.fromApiRole(role) != PosRole.FINANCE) {
+            LaunchedEffect(role) { navController.popBackStack() }
+            return@composable
+        }
+        val context=LocalContext.current
+        val source=remember(context){com.project.cruise.android.data.repository.CheckoutRepository(context)}
+        val model: com.project.cruise.android.viewmodel.pos.CheckoutViewModel = viewModel(
+            factory=com.project.cruise.android.viewmodel.pos.CheckoutViewModel.Factory(source,true))
+        com.project.cruise.android.ui.screens.pos.CheckoutScreen(model,true){navController.popBackStack()}
+    }
+
+    composable("finance_report") {
+        val session by authViewModel.sessionState.collectAsState()
+        val role=(session as? com.project.cruise.android.viewmodel.auth.SessionState.Authenticated)?.role
+        if(PosRole.fromApiRole(role)!=PosRole.FINANCE){LaunchedEffect(role){navController.popBackStack()};return@composable}
+        val context=LocalContext.current
+        val source=remember(context){com.project.cruise.android.data.repository.FinanceReportRepository(context)}
+        val model:com.project.cruise.android.viewmodel.pos.FinanceReportViewModel=viewModel(factory=com.project.cruise.android.viewmodel.pos.FinanceReportViewModel.Factory(source))
+        com.project.cruise.android.ui.screens.pos.FinanceReportScreen(model,
+            onBill={navController.navigate("finance_report_bill/$it")},onBack={navController.popBackStack()})
+    }
+    composable("finance_report_bill/{bookingId}",arguments=listOf(navArgument("bookingId"){type=NavType.LongType})) { entry ->
+        val session by authViewModel.sessionState.collectAsState()
+        val role=(session as? com.project.cruise.android.viewmodel.auth.SessionState.Authenticated)?.role
+        if(PosRole.fromApiRole(role)!=PosRole.FINANCE){LaunchedEffect(role){navController.popBackStack()};return@composable}
+        val id=entry.arguments?.getLong("bookingId")?:return@composable
+        val context=LocalContext.current
+        val source=remember(context){com.project.cruise.android.data.repository.CheckoutRepository(context)}
+        val model:com.project.cruise.android.viewmodel.pos.CheckoutViewModel=viewModel(factory=com.project.cruise.android.viewmodel.pos.CheckoutViewModel.Factory(source,true))
+        com.project.cruise.android.ui.screens.pos.CheckoutScreen(model,true,id){navController.popBackStack()}
+    }
+
+    composable(Routes.POS_REGISTRATIONS) {
+        val session by authViewModel.sessionState.collectAsState()
+        val role = PosRole.fromApiRole((session as? com.project.cruise.android.viewmodel.auth.SessionState.Authenticated)?.role)
+        if (role != PosRole.ONBOARD && role != PosRole.SHORE) {
+            LaunchedEffect(role) { navController.popBackStack() }
+            return@composable
+        }
+        val context = LocalContext.current
+        val source = remember(context) { com.project.cruise.android.data.repository.ActivityRegistrationRepository(context) }
+        val model: com.project.cruise.android.viewmodel.passenger.ActivityRegistrationViewModel = viewModel(
+            key = "registrations-${role.name}",
+            factory = com.project.cruise.android.viewmodel.passenger.ActivityRegistrationViewModel.Factory(source))
+        com.project.cruise.android.ui.screens.pos.RegistrationAttendanceScreen(role, model) { navController.popBackStack() }
+    }
+
+    composable(Routes.FINANCE_REFUNDS) {
+        val session by authViewModel.sessionState.collectAsState()
+        val role = (session as? com.project.cruise.android.viewmodel.auth.SessionState.Authenticated)?.role
+        if (PosRole.fromApiRole(role) != PosRole.FINANCE) {
+            LaunchedEffect(role) { navController.popBackStack() }
+            return@composable
+        }
+        val context = LocalContext.current
+        val source = remember(context) { com.project.cruise.android.data.repository.PaymentRefundRepository(context) }
+        val model: com.project.cruise.android.viewmodel.pos.PaymentRefundViewModel = viewModel(
+            factory=com.project.cruise.android.viewmodel.pos.PaymentRefundViewModel.Factory(source))
+        com.project.cruise.android.ui.screens.pos.PaymentRefundScreen(model) { navController.popBackStack() }
+    }
+
+    composable(Routes.POS_CORRECTIONS) {
+        val session by authViewModel.sessionState.collectAsState()
+        val role = PosRole.fromApiRole((session as? com.project.cruise.android.viewmodel.auth.SessionState.Authenticated)?.role)
+        if (role != PosRole.FINANCE && role != PosRole.CONVENIENCE) {
+            LaunchedEffect(role) { navController.popBackStack() }
+            return@composable
+        }
+        val context = LocalContext.current
+        val source = remember(context,role) { com.project.cruise.android.data.repository.LedgerCorrectionRepository(context,role==PosRole.FINANCE) }
+        val model: com.project.cruise.android.viewmodel.pos.LedgerCorrectionViewModel = viewModel(
+            key="corrections-${role.name}",factory=com.project.cruise.android.viewmodel.pos.LedgerCorrectionViewModel.Factory(source))
+        com.project.cruise.android.ui.screens.pos.LedgerCorrectionScreen(model,role) { navController.popBackStack() }
+    }
+
+    composable(Routes.FINANCE_SPENDING) {
+        val session by authViewModel.sessionState.collectAsState()
+        val role = (session as? com.project.cruise.android.viewmodel.auth.SessionState.Authenticated)?.role
+        if (PosRole.fromApiRole(role) != PosRole.FINANCE) {
+            LaunchedEffect(role) { navController.popBackStack() }
+            return@composable
+        }
+        val context = LocalContext.current
+        val source = remember(context) { com.project.cruise.android.data.repository.FinanceSpendingRepository(context) }
+        val model: com.project.cruise.android.viewmodel.pos.FinanceSpendingViewModel = viewModel(
+            factory=com.project.cruise.android.viewmodel.pos.FinanceSpendingViewModel.Factory(source))
+        com.project.cruise.android.ui.screens.pos.FinanceSpendingScreen(model) { navController.popBackStack() }
     }
 
     // ----- QR SCAN -----
