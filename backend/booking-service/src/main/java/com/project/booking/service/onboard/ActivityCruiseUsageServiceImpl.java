@@ -14,6 +14,7 @@ import com.project.booking.model.Booking;
 import com.project.booking.model.BookingPassenger;
 import com.project.booking.repository.ActivityCruiseUsageRepository;
 import com.project.booking.service.common.benefit.BenefitConsumptionService;
+import com.project.booking.service.common.pricing.PricingCalculator;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +37,7 @@ public class ActivityCruiseUsageServiceImpl
         private final ActivityCruiseManagementClient activityCruiseManagementClient;
         private final BenefitConsumptionService benefitConsumptionService;
         private final ActivityCruiseValidator activityCruiseValidator;
-        private final ActivityPricingCalculator activityPricingCalculator;
+        private final PricingCalculator pricingCalculator;
 
         public ActivityCruiseUsageServiceImpl(
                         ActivityCruiseUsageRepository activityCruiseUsageRepository,
@@ -46,7 +47,7 @@ public class ActivityCruiseUsageServiceImpl
                         ActivityCruiseManagementClient activityCruiseManagementClient,
                         BenefitConsumptionService benefitConsumptionService,
                         ActivityCruiseValidator activityCruiseValidator,
-                        ActivityPricingCalculator activityPricingCalculator) {
+                        PricingCalculator pricingCalculator) {
 
                 this.activityCruiseUsageRepository = activityCruiseUsageRepository;
                 this.activityCruiseUsageMapper = activityCruiseUsageMapper;
@@ -55,7 +56,7 @@ public class ActivityCruiseUsageServiceImpl
                 this.activityCruiseManagementClient = activityCruiseManagementClient;
                 this.benefitConsumptionService = benefitConsumptionService;
                 this.activityCruiseValidator = activityCruiseValidator;
-                this.activityPricingCalculator = activityPricingCalculator;
+                this.pricingCalculator = pricingCalculator;
         }
 
         @Override
@@ -101,15 +102,18 @@ public class ActivityCruiseUsageServiceImpl
                 }
 
                 // 10 -> 15. Tính tiền
-                var pricingResult = activityPricingCalculator.calculate(
-                                activityInfo,
+                var pricingResult = pricingCalculator.calculate(
+                                activityInfo.price(),
+                                activityInfo.discountPercent(),
+                                1,
+                                benefitQuantity,
                                 usedBenefitQuantity);
 
                 // 16. Cập nhật lượt benefit đã dùng
                 if (benefitConsumption != null) {
                         benefitConsumptionService.consume(
                                         benefitConsumption,
-                                        pricingResult.freeQuantityThisUsage());
+                                        pricingResult.discountedQuantity());
                 }
 
                 // 17 & 18. Lưu usage

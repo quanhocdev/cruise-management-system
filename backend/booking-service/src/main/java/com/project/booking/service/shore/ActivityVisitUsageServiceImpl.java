@@ -1,11 +1,16 @@
+
 package com.project.booking.service.shore;
 
 import com.project.booking.client.VisitTourClient;
 import com.project.booking.client.VisitTourClient.VisitTourUsageInfo;
+import com.project.booking.client.VisitTourManagementClient;
 import com.project.booking.dto.onboard.ActivityVisitUsageRequest;
 import com.project.booking.dto.shore.ActivityVisitUsageResponse;
+import com.project.booking.dto.shore.ActivityVisitUsageManagementInfo;
+import com.project.booking.dto.shore.ActivityVisitUsageManagementResponse;
 import com.project.booking.exception.AppException;
 import com.project.booking.mapper.ActivityVisitUsageMapper;
+import com.project.booking.mapper.ActivityVisitUsageManagementMapper;
 import com.project.booking.model.ActivityVisitUsage;
 import com.project.booking.model.BenefitConsumption;
 import com.project.booking.model.Booking;
@@ -13,22 +18,19 @@ import com.project.booking.model.BookingPassenger;
 import com.project.booking.repository.ActivityVisitUsageRepository;
 import com.project.booking.repository.BookingPassengerRepository;
 import com.project.booking.service.common.benefit.BenefitConsumptionService;
-import com.project.booking.service.shore.ActivityVisitUsageCalculator.UsageAmount;
+import com.project.booking.service.common.pricing.PricingCalculator;
+import com.project.booking.service.common.pricing.PricingResult;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.project.booking.client.VisitTourManagementClient;
-import com.project.booking.dto.shore.ActivityVisitUsageManagementInfo;
-import com.project.booking.dto.shore.ActivityVisitUsageManagementResponse;
-import com.project.booking.mapper.ActivityVisitUsageManagementMapper;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService {
@@ -40,7 +42,7 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
         private final VisitTourClient visitTourClient;
         private final BookingPassengerRepository bookingPassengerRepository;
         private final ActivityVisitUsageValidator validator;
-        private final ActivityVisitUsageCalculator calculator;
+        private final PricingCalculator pricingCalculator;
         private final BenefitConsumptionService benefitConsumptionService;
         private final VisitTourManagementClient visitTourManagementClient;
         private final ActivityVisitUsageManagementMapper activityVisitUsageManagementMapper;
@@ -51,7 +53,7 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
                         VisitTourClient visitTourClient,
                         BookingPassengerRepository bookingPassengerRepository,
                         ActivityVisitUsageValidator validator,
-                        ActivityVisitUsageCalculator calculator,
+                        PricingCalculator pricingCalculator,
                         BenefitConsumptionService benefitConsumptionService,
                         VisitTourManagementClient visitTourManagementClient,
                         ActivityVisitUsageManagementMapper activityVisitUsageManagementMapper) {
@@ -61,7 +63,7 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
                 this.visitTourClient = visitTourClient;
                 this.bookingPassengerRepository = bookingPassengerRepository;
                 this.validator = validator;
-                this.calculator = calculator;
+                this.pricingCalculator = pricingCalculator;
                 this.benefitConsumptionService = benefitConsumptionService;
                 this.visitTourManagementClient = visitTourManagementClient;
                 this.activityVisitUsageManagementMapper = activityVisitUsageManagementMapper;
@@ -95,7 +97,7 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
 
                 validator.validateCapacity(visitInfo.maxPassengers(), currentPassengerCount);
 
-                // 4. Benefit (lock row nếu có benefit)
+                // 4. Benefit + lock row
                 int benefitQuantity = visitInfo.benefitQuantity() == null
                                 ? 0
                                 : Math.max(visitInfo.benefitQuantity(), 0);
@@ -104,6 +106,7 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
                 long usedBenefitQuantity = 0;
 
                 if (visitInfo.packageBenefitId() != null && benefitQuantity > 0) {
+
                         benefitConsumption = benefitConsumptionService.getForUpdate(
                                         booking.getId(),
                                         visitInfo.packageBenefitId());
@@ -113,19 +116,20 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
                                         : benefitConsumption.getUsedQuantity();
                 }
 
-                // 5. Tính tiền
-                UsageAmount amount = calculator.calculate(
+                // 5. Tính giá bằng PricingCalculator dùng chung
+                PricingResult amount = pricingCalculator.calculate(
                                 visitInfo.price(),
                                 visitInfo.discountPercent(),
                                 DEFAULT_QUANTITY,
                                 benefitQuantity,
                                 usedBenefitQuantity);
 
-                // 6. Trừ lượt benefit đã dùng
-                if (benefitConsumption != null) {
+                // 6. Cập nhật lượt benefit đã được áp dụng
+                if (benefitConsumption != null && amount.discountedQuantity() > 0) {
+
                         benefitConsumptionService.consume(
                                         benefitConsumption,
-                                        amount.freeQuantity());
+                                        amount.discountedQuantity());
                 }
 
                 // 7. Lưu usage
@@ -137,7 +141,8 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
 
         @Override
         @Transactional(readOnly = true)
-        public List<ActivityVisitUsageResponse> getByBookingPassengerId(Long bookingPassengerId) {
+        public List<ActivityVisitUsageResponse> getByBookingPassengerId(
+                        Long bookingPassengerId) {
 
                 return activityVisitUsageRepository
                                 .findAllByBookingPassengerIdOrderByUsedAtDesc(bookingPassengerId)
@@ -160,7 +165,7 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
         private ActivityVisitUsage buildUsage(
                         BookingPassenger bookingPassenger,
                         ActivityVisitUsageRequest request,
-                        UsageAmount amount,
+                        PricingResult amount,
                         LocalDateTime now) {
 
                 ActivityVisitUsage usage = new ActivityVisitUsage();
@@ -207,5 +212,4 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
                                                 visitInfoMap.get(usage.getVisitTourId())))
                                 .toList();
         }
-
 }

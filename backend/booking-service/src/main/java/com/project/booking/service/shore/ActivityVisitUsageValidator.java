@@ -29,9 +29,11 @@ public class ActivityVisitUsageValidator {
         return booking;
     }
 
-    public void validateVisitTour(Booking booking, VisitTourUsageInfo visitInfo, LocalDateTime now) {
+    public void validateVisitTour(Booking booking, VisitTourUsageInfo visitInfo,
+            LocalDateTime now) {
         if (visitInfo == null) {
-            throw new AppException("Không tìm thấy thông tin VisitTour", HttpStatus.NOT_FOUND);
+            throw new AppException("Không tìm thấy thông tin VisitTour",
+                    HttpStatus.NOT_FOUND);
         }
         if (!booking.getTourId().equals(visitInfo.tourId())) {
             throw badRequest("Visit Tour không thuộc tour của booking");
@@ -89,7 +91,7 @@ public class ActivityVisitUsageValidator {
             case "IN_PROGRESS" -> {
             }
             case "WAITING_CONFIG" -> throw badRequest("VisitTour chưa được cấu hình");
-            case "CONFIGURED", "NOT_STARTED" -> throw badRequest("Visit Tour chưa bắt đầu");
+            case "CONFIGURED", "NOT_STARTED" -> throw badRequest("Visit Tour chưa bắtđầu");
             case "DELAYED" -> throw badRequest("Visit Tour đang bị trì hoãn");
             case "COMPLETED" -> throw badRequest("Visit Tour đã hoàn thành");
             case "CANCELLED" -> throw badRequest("Visit Tour đã bị hủy");
