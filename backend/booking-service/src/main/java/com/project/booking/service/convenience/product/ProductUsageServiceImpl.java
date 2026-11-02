@@ -1,6 +1,10 @@
+
 package com.project.booking.service.convenience.product;
 
+import com.project.booking.client.ProductTourManagementClient;
+import com.project.booking.client.ProductTourManagementClient.ProductUsageManagementInfo;
 import com.project.booking.client.TourProductClient;
+import com.project.booking.dto.convenience.product.ProductUsageManagementResponse;
 import com.project.booking.dto.convenience.product.ProductUsageRequest;
 import com.project.booking.dto.convenience.product.ProductUsageResponse;
 import com.project.booking.kafka.ProductUsedEventProducer;
@@ -11,19 +15,19 @@ import com.project.booking.model.BookingPassenger;
 import com.project.booking.model.ProductUsage;
 import com.project.booking.repository.ProductUsageRepository;
 import com.project.booking.service.common.benefit.BenefitConsumptionService;
+import com.project.booking.service.common.pricing.PricingCalculator;
 import com.project.common.event.ProductUsedEvent;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.project.booking.client.ProductTourManagementClient;
-import com.project.booking.client.ProductTourManagementClient.ProductUsageManagementInfo;
-import com.project.booking.dto.convenience.product.ProductUsageManagementResponse;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductUsageServiceImpl implements ProductUsageService {
@@ -34,7 +38,7 @@ public class ProductUsageServiceImpl implements ProductUsageService {
         private final BenefitConsumptionService benefitConsumptionService;
         private final ProductUsedEventProducer productUsedEventProducer;
         private final ProductValidator productValidator;
-        private final ProductPricingCalculator productPricingCalculator;
+        private final PricingCalculator pricingCalculator;
         private final ProductTourManagementClient productTourManagementClient;
 
         public ProductUsageServiceImpl(
@@ -44,7 +48,7 @@ public class ProductUsageServiceImpl implements ProductUsageService {
                         BenefitConsumptionService benefitConsumptionService,
                         ProductUsedEventProducer productUsedEventProducer,
                         ProductValidator productValidator,
-                        ProductPricingCalculator productPricingCalculator,
+                        PricingCalculator pricingCalculator,
                         ProductTourManagementClient productTourManagementClient) {
 
                 this.productUsageRepository = productUsageRepository;
@@ -53,7 +57,7 @@ public class ProductUsageServiceImpl implements ProductUsageService {
                 this.benefitConsumptionService = benefitConsumptionService;
                 this.productUsedEventProducer = productUsedEventProducer;
                 this.productValidator = productValidator;
-                this.productPricingCalculator = productPricingCalculator;
+                this.pricingCalculator = pricingCalculator;
                 this.productTourManagementClient = productTourManagementClient;
         }
 
@@ -73,11 +77,12 @@ public class ProductUsageServiceImpl implements ProductUsageService {
                                 request.productTourId(),
                                 booking.getTourPackageId());
 
-                // 3 -> 6. Validate nghiệp vụ (tour, active, status, giá)
+                // 3. Validate nghiệp vụ sản phẩm
                 productValidator.validateProduct(booking, productInfo);
 
-                // 7. Benefit + lock row
+                // 4. Lấy thông tin benefit
                 UUID packageBenefitId = productInfo.packageBenefitId();
+
                 int benefitQuantity = productInfo.benefitQuantity() == null
                                 ? 0
                                 : Math.max(productInfo.benefitQuantity(), 0);
@@ -85,7 +90,9 @@ public class ProductUsageServiceImpl implements ProductUsageService {
                 BenefitConsumption benefitConsumption = null;
                 long usedBenefitQuantity = 0;
 
+                // 5. Lock BenefitConsumption để tránh sử dụng benefit đồng thời
                 if (packageBenefitId != null && benefitQuantity > 0) {
+
                         benefitConsumption = benefitConsumptionService.getForUpdate(
                                         booking.getId(),
                                         packageBenefitId);
@@ -95,20 +102,24 @@ public class ProductUsageServiceImpl implements ProductUsageService {
                                         : benefitConsumption.getUsedQuantity();
                 }
 
-                // 8 -> 13. Tính tiền
-                var pricingResult = productPricingCalculator.calculate(
-                                productInfo,
-                                usedBenefitQuantity,
-                                request.quantity());
+                // 6. Tính giá bằng PricingCalculator dùng chung
+                var pricingResult = pricingCalculator.calculate(
+                                productInfo.unitPrice(),
+                                productInfo.discountPercent(),
+                                request.quantity(),
+                                benefitQuantity,
+                                usedBenefitQuantity);
 
-                // 14. Cập nhật lượt benefit đã dùng
-                if (benefitConsumption != null && pricingResult.freeQuantityThisUsage() > 0) {
+                // 7. Cập nhật số lượng benefit đã được áp dụng
+                if (benefitConsumption != null
+                                && pricingResult.discountedQuantity() > 0) {
+
                         benefitConsumptionService.consume(
                                         benefitConsumption,
-                                        pricingResult.freeQuantityThisUsage());
+                                        pricingResult.discountedQuantity());
                 }
 
-                // 15 & 16. Lưu usage (snapshot giá tại thời điểm sử dụng)
+                // 8. Lưu ProductUsage với snapshot giá tại thời điểm sử dụng
                 ProductUsage usage = new ProductUsage();
                 usage.setBookingPassenger(bookingPassenger);
                 usage.setProductTourId(request.productTourId());
@@ -120,7 +131,7 @@ public class ProductUsageServiceImpl implements ProductUsageService {
 
                 ProductUsage savedUsage = productUsageRepository.save(usage);
 
-                // 17. Bắn event
+                // 9. Gửi event sau khi lưu usage
                 productUsedEventProducer.send(
                                 new ProductUsedEvent(
                                                 booking.getId(),
@@ -134,7 +145,9 @@ public class ProductUsageServiceImpl implements ProductUsageService {
 
         @Override
         @Transactional(readOnly = true)
-        public List<ProductUsageResponse> getByBookingPassengerId(Long bookingPassengerId) {
+        public List<ProductUsageResponse> getByBookingPassengerId(
+                        Long bookingPassengerId) {
+
                 return productUsageRepository
                                 .findAllByBookingPassenger_IdOrderByUsedAtDesc(bookingPassengerId)
                                 .stream()
@@ -145,6 +158,7 @@ public class ProductUsageServiceImpl implements ProductUsageService {
         @Override
         @Transactional(readOnly = true)
         public List<ProductUsageResponse> getByUserId(Long userId) {
+
                 return productUsageRepository
                                 .findAllByBookingPassenger_Booking_CreatedByUserIdOrderByUsedAtDesc(userId)
                                 .stream()
