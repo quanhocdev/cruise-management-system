@@ -1,9 +1,9 @@
-package com.project.booking.dto.payment;
 
-import java.util.UUID;
+package com.project.booking.dto.payment;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.UUID;
 
 public record BillPaymentResponse(
         Long paymentId,

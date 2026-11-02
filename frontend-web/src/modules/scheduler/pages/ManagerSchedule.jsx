@@ -1,14 +1,28 @@
-import { useEffect, useMemo, useState } from "react";
+// src/modules/scheduler/pages/ManagerSchedule.jsx
+// (SỬA file có sẵn) Không còn gọi tourService trực tiếp: dùng hooks/useTourDetail.js
+
+import { useEffect, useState } from "react";
 import { ArrowLeft, CalendarDays, RefreshCw } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import useSchedules from "../hooks/useSchedules";
-import tourService from "../services/tourService";
-
+import useTourDetail from "../hooks/useTourDetail";
+import "../styles/TourTable.css";
 import ScheduleFormModal from "../components/schedule/ScheduleFormModal";
 import ScheduleCard from "../components/schedule/ScheduleCard";
 
 import "../styles/ManagerSchedule.css";
+
+const formatDate = (dateString) => {
+  if (!dateString) return "-";
+
+  return new Date(`${dateString}T00:00:00`).toLocaleDateString("vi-VN", {
+    weekday: "long",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
 
 function ManagerSchedule() {
   const { tourId } = useParams();
@@ -25,88 +39,27 @@ function ManagerSchedule() {
     deleteSchedule,
   } = useSchedules(tourId);
 
-  const [tour, setTour] = useState(null);
-  const [tourLoading, setTourLoading] = useState(false);
+  const {
+    tour,
+    tourDays,
+    loading: tourLoading,
+    reload: reloadTour,
+  } = useTourDetail(tourId);
 
   const [showModal, setShowModal] = useState(false);
   const [selectedSchedule, setSelectedSchedule] = useState(null);
-
   const [selectedDay, setSelectedDay] = useState(null);
 
   useEffect(() => {
-    loadTour();
     loadSchedules();
+    // chỉ tải lại khi đổi tour
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tourId]);
 
-  const loadTour = async () => {
-    if (!tourId) {
-      return;
-    }
+  const getScheduleForDay = (dayNumber) =>
+    schedules.find((schedule) => schedule.dayNumber === dayNumber);
 
-    setTourLoading(true);
-
-    try {
-      const data = await tourService.getTourById(tourId);
-
-      setTour(data);
-    } catch (err) {
-      console.error("LOAD TOUR ERROR:", err);
-    } finally {
-      setTourLoading(false);
-    }
-  };
-
-  const tourDays = useMemo(() => {
-    if (!tour?.startDate || !tour?.endDate) {
-      return [];
-    }
-
-    const result = [];
-
-    const start = new Date(`${tour.startDate}T00:00:00`);
-    const end = new Date(`${tour.endDate}T00:00:00`);
-
-    let current = new Date(start);
-    let dayNumber = 1;
-
-    while (current <= end) {
-      const year = current.getFullYear();
-      const month = String(current.getMonth() + 1).padStart(2, "0");
-      const day = String(current.getDate()).padStart(2, "0");
-
-      const realDay = `${year}-${month}-${day}`;
-
-      result.push({
-        dayNumber,
-        realDay,
-      });
-
-      current.setDate(current.getDate() + 1);
-      dayNumber += 1;
-    }
-
-    return result;
-  }, [tour]);
-
-  const getScheduleForDay = (dayNumber) => {
-    return schedules.find((schedule) => schedule.dayNumber === dayNumber);
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) {
-      return "-";
-    }
-
-    const date = new Date(`${dateString}T00:00:00`);
-
-    return date.toLocaleDateString("vi-VN", {
-      weekday: "long",
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-  };
-
+  // ---------- MODAL ----------
   const handleCreateForDay = (day) => {
     setSelectedSchedule(null);
     setSelectedDay(day);
@@ -130,29 +83,19 @@ function ManagerSchedule() {
 
   const handleSubmit = async (data) => {
     try {
-      if (selectedSchedule) {
-        const result = await updateSchedule(selectedSchedule.id, {
-          name: data.name,
-          description: data.description,
-        });
+      const result = selectedSchedule
+        ? await updateSchedule(selectedSchedule.id, {
+            name: data.name,
+            description: data.description,
+          })
+        : await createSchedule({
+            name: data.name,
+            description: data.description,
+            dayNumber: data.dayNumber,
+            realDay: data.realDay,
+          });
 
-        if (result) {
-          handleCloseModal();
-        }
-
-        return;
-      }
-
-      const result = await createSchedule({
-        name: data.name,
-        description: data.description,
-        dayNumber: data.dayNumber,
-        realDay: data.realDay,
-      });
-
-      if (result) {
-        handleCloseModal();
-      }
+      if (result) handleCloseModal();
     } catch (err) {
       console.error("SAVE SCHEDULE ERROR:", err);
     }
@@ -162,31 +105,27 @@ function ManagerSchedule() {
     const confirmed = window.confirm(
       `Bạn có chắc muốn xóa lịch trình "${schedule.name}" không?`,
     );
-
-    if (!confirmed) {
-      return;
-    }
+    if (!confirmed) return;
 
     await deleteSchedule(schedule.id);
   };
 
   const handleViewStops = (schedule) => {
-    // Ép Number() để tránh lỗi so sánh kiểu String vs Number
+    // Ép Number() để tránh lỗi so sánh String vs Number
     const day = tourDays.find(
       (item) => Number(item.dayNumber) === Number(schedule.dayNumber),
     );
+    const realDay =
+      day?.realDay || schedule.realDay || schedule.scheduleDate || "";
 
     navigate(`/scheduler/tours/${tourId}/schedules/${schedule.id}/stops`, {
-      state: {
-        schedule: {
-          ...schedule,
-          realDay:
-            day?.realDay || schedule.realDay || schedule.scheduleDate || "",
-        },
-        scheduleDate:
-          day?.realDay || schedule.realDay || schedule.scheduleDate || "",
-      },
+      state: { schedule: { ...schedule, realDay }, scheduleDate: realDay },
     });
+  };
+
+  const handleRefresh = () => {
+    reloadTour();
+    loadSchedules();
   };
 
   if (tourLoading) {
@@ -194,12 +133,21 @@ function ManagerSchedule() {
       <div className="scheduler-schedule-page">
         <div className="schedule-list-state">
           <div className="tour-table-spinner" />
-
           <span>Đang tải thông tin tour...</span>
         </div>
       </div>
     );
   }
+
+  const tourInfo = tour
+    ? [
+        ["Tour", tour.code],
+        ["Tên tour", tour.name],
+        ["Bắt đầu", formatDate(tour.startDate)],
+        ["Kết thúc", formatDate(tour.endDate)],
+        ["Số ngày", `${tourDays.length} ngày`],
+      ]
+    : [];
 
   return (
     <div className="scheduler-schedule-page">
@@ -216,7 +164,6 @@ function ManagerSchedule() {
 
           <div>
             <h1>Quản lý lịch trình</h1>
-
             <p>
               {tour?.code} — {tour?.name}
             </p>
@@ -226,14 +173,10 @@ function ManagerSchedule() {
         <button
           type="button"
           className="scheduler-tour-refresh-button"
-          onClick={() => {
-            loadTour();
-            loadSchedules();
-          }}
+          onClick={handleRefresh}
           disabled={loading}
         >
           <RefreshCw size={18} className={loading ? "scheduler-spin" : ""} />
-
           <span>Làm mới</span>
         </button>
       </div>
@@ -241,37 +184,18 @@ function ManagerSchedule() {
       {error && (
         <div className="scheduler-tour-error">
           <strong>Không thể tải lịch trình.</strong>
-
           <span>{error}</span>
         </div>
       )}
 
       {tour && (
         <div className="scheduler-tour-info">
-          <div>
-            <span>Tour</span>
-            <strong>{tour.code}</strong>
-          </div>
-
-          <div>
-            <span>Tên tour</span>
-            <strong>{tour.name}</strong>
-          </div>
-
-          <div>
-            <span>Bắt đầu</span>
-            <strong>{formatDate(tour.startDate)}</strong>
-          </div>
-
-          <div>
-            <span>Kết thúc</span>
-            <strong>{formatDate(tour.endDate)}</strong>
-          </div>
-
-          <div>
-            <span>Số ngày</span>
-            <strong>{tourDays.length} ngày</strong>
-          </div>
+          {tourInfo.map(([label, value]) => (
+            <div key={label}>
+              <span>{label}</span>
+              <strong>{value}</strong>
+            </div>
+          ))}
         </div>
       )}
 
@@ -280,7 +204,6 @@ function ManagerSchedule() {
           <div>
             <div className="section-title">
               <CalendarDays size={21} />
-
               <h2>Các ngày trong tour</h2>
             </div>
 
@@ -294,9 +217,7 @@ function ManagerSchedule() {
         {!tourDays.length ? (
           <div className="schedule-list-empty">
             <CalendarDays size={44} />
-
             <h3>Tour chưa có thời gian</h3>
-
             <p>
               Không thể tạo lịch trình khi tour chưa có ngày bắt đầu và ngày kết
               thúc.
@@ -317,7 +238,6 @@ function ManagerSchedule() {
                   <div className="schedule-day-item-header">
                     <div className="schedule-day-number">
                       <CalendarDays size={19} />
-
                       <strong>Ngày {day.dayNumber}</strong>
                     </div>
 
@@ -334,9 +254,7 @@ function ManagerSchedule() {
                   ) : (
                     <div className="schedule-day-empty">
                       <CalendarDays size={32} />
-
                       <h3>Chưa có lịch trình</h3>
-
                       <p>Chưa cấu hình nội dung cho ngày này.</p>
 
                       <button

@@ -1,7 +1,8 @@
-package com.project.tour.service;
+package com.project.tour.service.route;
 
-import com.project.tour.dto.RouteRequest;
-import com.project.tour.dto.RouteResponse;
+import com.project.tour.dto.route.RouteRequest;
+import com.project.tour.dto.route.RouteResponse;
+
 import eu.europa.ec.eurostat.jgiscotools.feature.Feature;
 import eu.europa.ec.eurostat.searoute.SeaRouting;
 import org.locationtech.jts.geom.Coordinate;

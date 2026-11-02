@@ -1,49 +1,63 @@
 // src/modules/auth/pages/RegisterPage.jsx
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Mail, User, UserPlus } from "lucide-react";
 
-import { Container, Card, Form, Button, Alert, Spinner } from "react-bootstrap";
+import authService from "../services/authService";
 
-import api from "../../../api/axios";
+import AuthLayout from "../components/AuthLayout";
+import PasswordInput from "../components/PasswordInput";
+import { AuthAlert, SubmitButton, TextField } from "../components/AuthControls";
+
+const MIN_PASSWORD_LENGTH = 8;
 
 export default function RegisterPage() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
     username: "",
-    password: "",
     email: "",
+    password: "",
+    confirmPassword: "",
   });
-
   const [error, setError] = useState("");
-
-  const [success, setSuccess] = useState("");
-
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setForm((previous) => ({ ...previous, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const confirmMismatch =
+    form.confirmPassword !== "" && form.password !== form.confirmPassword;
 
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setError("");
-    setSuccess("");
+
+    if (form.password.length < MIN_PASSWORD_LENGTH) {
+      setError(`Mật khẩu phải có ít nhất ${MIN_PASSWORD_LENGTH} ký tự.`);
+      return;
+    }
+
+    if (form.password !== form.confirmPassword) {
+      setError("Mật khẩu xác nhận không khớp.");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const res = await api.post("/auth/register", form);
+      // Backend chỉ nhận username / email / password
+      const data = await authService.register({
+        username: form.username.trim(),
+        email: form.email.trim(),
+        password: form.password,
+      });
 
       navigate("/verify-email", {
-        state: {
-          userId: res.data.id,
-          email: res.data.email,
-        },
+        state: { userId: data.id, email: data.email },
       });
     } catch (err) {
       setError(err.response?.data?.message || "Đăng ký thất bại!");
@@ -53,69 +67,82 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="bg-light min-vh-100 d-flex align-items-center justify-content-center">
-      <Container>
-        <div className="row justify-content-center">
-          <div className="col-md-5">
-            <Card className="shadow border-0">
-              <Card.Body className="p-4">
-                <h3 className="text-center mb-4">Đăng ký tài khoản</h3>
+    <AuthLayout
+      icon={<UserPlus size={26} />}
+      title="Tạo tài khoản"
+      subtitle="Đăng ký để đặt tour du thuyền của bạn"
+      footer={
+        <>
+          Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
+        </>
+      }
+    >
+      {error && (
+        <AuthAlert type="error" onClose={() => setError("")}>
+          {error}
+        </AuthAlert>
+      )}
 
-                {error && <Alert variant="danger">{error}</Alert>}
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <TextField
+          id="register-username"
+          label="Tên đăng nhập"
+          icon={User}
+          name="username"
+          placeholder="Ví dụ: nguyenvana"
+          value={form.username}
+          onChange={handleChange}
+          autoComplete="username"
+          required
+          disabled={loading}
+        />
 
-                {success && <Alert variant="success">{success}</Alert>}
+        <TextField
+          id="register-email"
+          label="Email"
+          icon={Mail}
+          type="email"
+          name="email"
+          placeholder="ban@example.com"
+          hint="Mã OTP xác thực sẽ được gửi tới email này."
+          value={form.email}
+          onChange={handleChange}
+          autoComplete="email"
+          required
+          disabled={loading}
+        />
 
-                <Form onSubmit={handleSubmit}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Username</Form.Label>
+        <PasswordInput
+          id="register-password"
+          label="Mật khẩu"
+          name="password"
+          placeholder="Tạo mật khẩu"
+          hint={`Tối thiểu ${MIN_PASSWORD_LENGTH} ký tự.`}
+          value={form.password}
+          onChange={handleChange}
+          autoComplete="new-password"
+          minLength={MIN_PASSWORD_LENGTH}
+          required
+          disabled={loading}
+        />
 
-                    <Form.Control
-                      name="username"
-                      value={form.username}
-                      onChange={handleChange}
-                      required
-                    />
-                  </Form.Group>
+        <PasswordInput
+          id="register-confirm"
+          label="Xác nhận mật khẩu"
+          name="confirmPassword"
+          placeholder="Nhập lại mật khẩu"
+          error={confirmMismatch ? "Mật khẩu xác nhận không khớp." : ""}
+          value={form.confirmPassword}
+          onChange={handleChange}
+          autoComplete="new-password"
+          required
+          disabled={loading}
+        />
 
-                  <Form.Group className="mb-3">
-                    <Form.Label>Email</Form.Label>
-
-                    <Form.Control
-                      type="email"
-                      name="email"
-                      value={form.email}
-                      onChange={handleChange}
-                      required
-                    />
-                  </Form.Group>
-
-                  <Form.Group className="mb-4">
-                    <Form.Label>Password</Form.Label>
-
-                    <Form.Control
-                      type="password"
-                      name="password"
-                      value={form.password}
-                      onChange={handleChange}
-                      required
-                    />
-                  </Form.Group>
-
-                  <Button type="submit" className="w-100" disabled={loading}>
-                    {loading ? (
-                      <>
-                        <Spinner size="sm" /> Đang tạo...
-                      </>
-                    ) : (
-                      "Đăng ký"
-                    )}
-                  </Button>
-                </Form>
-              </Card.Body>
-            </Card>
-          </div>
-        </div>
-      </Container>
-    </div>
+        <SubmitButton loading={loading} loadingText="Đang tạo tài khoản...">
+          Đăng ký
+        </SubmitButton>
+      </form>
+    </AuthLayout>
   );
 }

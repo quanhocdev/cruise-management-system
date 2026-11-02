@@ -1,0 +1,246 @@
+/* src/modules/scheduler/styles/TourTable.css
+   Bảng danh sách Tour + trạng thái + nút thao tác + loading/empty */
+
+.tour-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.tour-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.tour-table th,
+.tour-table td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.tour-table th {
+  background: #f8fafc;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tour-table td {
+  color: #334155;
+  font-size: 14px;
+}
+
+.tour-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+.tour-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+/* Mã Tour + tên Tour */
+.tour-code {
+  color: #0f766e;
+  font-weight: 700;
+}
+
+.tour-name-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 220px;
+  max-width: 320px;
+}
+
+.tour-name-cell strong {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tour-name-cell span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* Trạng thái */
+.tour-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.tour-status.status-warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.tour-status.status-success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.tour-status.status-info {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.tour-status.status-completed {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.tour-status.status-danger {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.tour-status.status-default {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.tour-status.status-muted {
+  background: #f8fafc;
+  color: #64748b;
+}
+
+/* Nút thao tác */
+.tour-table-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.icon-button {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.icon-button:hover {
+  transform: translateY(-1px);
+}
+
+.icon-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.icon-button.view {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.icon-button.view:hover {
+  background: #dbeafe;
+}
+
+.icon-button.schedule {
+  background: #f0fdfa;
+  color: #0f766e;
+}
+
+.icon-button.schedule:hover {
+  background: #ccfbf1;
+}
+
+.icon-button.edit {
+  background: #ecfeff;
+  color: #0891b2;
+}
+
+.icon-button.edit:hover {
+  background: #cffafe;
+}
+
+.icon-button.delete {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.icon-button.delete:hover {
+  background: #fee2e2;
+}
+
+/* Loading / rỗng */
+.tour-table-state {
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: #64748b;
+  text-align: center;
+}
+
+.tour-table-state svg {
+  margin-bottom: 14px;
+  color: #94a3b8;
+}
+
+.tour-table-state h3 {
+  margin: 0 0 6px;
+  color: #334155;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.tour-table-state p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.tour-table-spinner {
+  width: 32px;
+  height: 32px;
+  margin-bottom: 12px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #0f766e;
+  border-radius: 50%;
+  animation: tour-table-spin 0.8s linear infinite;
+}
+
+@keyframes tour-table-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .tour-table th,
+  .tour-table td {
+    padding: 12px;
+  }
+
+  .tour-name-cell {
+    min-width: 180px;
+  }
+
+  .tour-table-actions {
+    gap: 4px;
+  }
+
+  .icon-button {
+    width: 32px;
+    height: 32px;
+  }
+}

@@ -10,15 +10,9 @@ import com.project.booking.client.VisitTourClient.VisitTourUsageInfo;
 import com.project.booking.exception.AppException;
 import com.project.booking.model.Booking;
 import com.project.booking.model.BookingPassenger;
-import com.project.booking.service.time.CruiseTime;
 
 @Component
 public class ActivityVisitUsageValidator {
-    private final CruiseTime time;
-
-    public ActivityVisitUsageValidator(CruiseTime time) {
-        this.time = time;
-    }
 
     public Booking validateBooking(BookingPassenger bookingPassenger) {
         Booking booking = bookingPassenger.getBooking();
@@ -35,16 +29,18 @@ public class ActivityVisitUsageValidator {
         return booking;
     }
 
-    public void validateVisitTour(Booking booking, VisitTourUsageInfo visitInfo) {
+    public void validateVisitTour(Booking booking, VisitTourUsageInfo visitInfo,
+            LocalDateTime now) {
         if (visitInfo == null) {
-            throw new AppException("Không tìm thấy thông tin VisitTour", HttpStatus.NOT_FOUND);
+            throw new AppException("Không tìm thấy thông tin VisitTour",
+                    HttpStatus.NOT_FOUND);
         }
         if (!booking.getTourId().equals(visitInfo.tourId())) {
             throw badRequest("Visit Tour không thuộc tour của booking");
         }
 
         validateStatus(visitInfo.visitTourStatus());
-        validateTime(visitInfo, time.now());
+        validateTime(visitInfo, now);
         validatePrice(visitInfo.price());
         validateDiscountPercent(visitInfo.discountPercent());
     }
@@ -95,7 +91,7 @@ public class ActivityVisitUsageValidator {
             case "IN_PROGRESS" -> {
             }
             case "WAITING_CONFIG" -> throw badRequest("VisitTour chưa được cấu hình");
-            case "CONFIGURED", "NOT_STARTED" -> throw badRequest("Visit Tour chưa bắt đầu");
+            case "CONFIGURED", "NOT_STARTED" -> throw badRequest("Visit Tour chưa bắtđầu");
             case "DELAYED" -> throw badRequest("Visit Tour đang bị trì hoãn");
             case "COMPLETED" -> throw badRequest("Visit Tour đã hoàn thành");
             case "CANCELLED" -> throw badRequest("Visit Tour đã bị hủy");

@@ -1,4 +1,4 @@
-package com.project.tour.dto;
+package com.project.tour.dto.route;
 
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;

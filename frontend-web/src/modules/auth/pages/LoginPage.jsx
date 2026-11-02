@@ -1,12 +1,39 @@
 // src/modules/auth/pages/LoginPage.jsx
 
 import { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Ship, User } from "lucide-react";
+
 import { useAuth } from "../../../context/AuthContext";
-import { useNavigate, useLocation } from "react-router-dom";
 import { getRedirectPathByRole } from "../../../routes/roleRoutes";
 import useGoogleAuth from "../hooks/useGoogleAuth";
 
-import { Container, Card, Form, Button, Alert, Spinner } from "react-bootstrap";
+import AuthLayout from "../components/AuthLayout";
+import PasswordInput from "../components/PasswordInput";
+import { AuthAlert, SubmitButton, TextField } from "../components/AuthControls";
+
+function GoogleIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+      <path
+        fill="#EA4335"
+        d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+      />
+      <path
+        fill="#4285F4"
+        d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+      />
+      <path
+        fill="#34A853"
+        d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+      />
+    </svg>
+  );
+}
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -37,10 +64,7 @@ export default function LoginPage() {
 
     try {
       const role = await login(username, password);
-
-      navigate(getTargetPath(role), {
-        replace: true,
-      });
+      navigate(getTargetPath(role), { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || "Đăng nhập thất bại!");
     } finally {
@@ -53,115 +77,70 @@ export default function LoginPage() {
     await loginWithGoogle();
   };
 
+  const busy = loading || googleLoading;
+
   return (
-    <div className="bg-light min-vh-100 d-flex align-items-center justify-content-center py-5">
-      <Container>
-        <div className="row justify-content-center">
-          <div className="col-12 col-sm-10 col-md-8 col-lg-5 col-xl-4">
-            <Card className="shadow-lg border-0 rounded-4">
-              <Card.Body className="p-4 p-sm-5">
-                <div className="text-center mb-4">
-                  <div
-                    className="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                    style={{
-                      width: "60px",
-                      height: "60px",
-                    }}
-                  >
-                    ⚓
-                  </div>
+    <AuthLayout
+      icon={<Ship size={26} />}
+      title="Chào mừng trở lại"
+      subtitle="Đăng nhập để tiếp tục hành trình của bạn"
+      footer={
+        <>
+          Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link>
+        </>
+      }
+    >
+      {error && (
+        <AuthAlert type="error" onClose={() => setError("")}>
+          {error}
+        </AuthAlert>
+      )}
 
-                  <h3 className="fw-bold text-dark">CRUISE SYSTEM</h3>
+      {googleError && <AuthAlert type="error">{googleError}</AuthAlert>}
 
-                  <p className="text-muted small">
-                    Đăng nhập để truy cập hệ thống
-                  </p>
-                </div>
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <TextField
+          id="login-username"
+          label="Tài khoản"
+          icon={User}
+          type="text"
+          placeholder="Nhập tên đăng nhập"
+          value={username}
+          onChange={(event) => setUsername(event.target.value)}
+          autoComplete="username"
+          required
+          disabled={busy}
+        />
 
-                {error && (
-                  <Alert
-                    variant="danger"
-                    dismissible
-                    onClose={() => setError("")}
-                  >
-                    {error}
-                  </Alert>
-                )}
+        <PasswordInput
+          id="login-password"
+          label="Mật khẩu"
+          placeholder="Nhập mật khẩu"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          autoComplete="current-password"
+          required
+          disabled={busy}
+        />
 
-                {googleError && <Alert variant="danger">{googleError}</Alert>}
+        <SubmitButton loading={loading} disabled={googleLoading}>
+          Đăng nhập
+        </SubmitButton>
+      </form>
 
-                <Form onSubmit={handleSubmit}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Tài khoản</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="Nhập username"
-                      value={username}
-                      onChange={(event) => setUsername(event.target.value)}
-                      required
-                      autoComplete="username"
-                    />
-                  </Form.Group>
+      <div className="auth-divider">HOẶC</div>
 
-                  <Form.Group className="mb-4">
-                    <Form.Label>Mật khẩu</Form.Label>
-                    <Form.Control
-                      type="password"
-                      placeholder="Nhập mật khẩu"
-                      value={password}
-                      onChange={(event) => setPassword(event.target.value)}
-                      required
-                      autoComplete="current-password"
-                    />
-                  </Form.Group>
-
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    className="w-100"
-                    disabled={loading || googleLoading}
-                  >
-                    {loading ? (
-                      <>
-                        <Spinner size="sm" className="me-2" />
-                        Đang xử lý...
-                      </>
-                    ) : (
-                      "Đăng nhập"
-                    )}
-                  </Button>
-                </Form>
-
-                <div className="d-flex align-items-center my-4">
-                  <hr className="flex-grow-1" />
-                  <span className="px-3 text-muted small">HOẶC</span>
-                  <hr className="flex-grow-1" />
-                </div>
-
-                <Button
-                  type="button"
-                  variant="outline-dark"
-                  className="w-100 d-flex align-items-center justify-content-center gap-2"
-                  disabled={loading || googleLoading}
-                  onClick={handleGoogleLogin}
-                >
-                  {googleLoading ? (
-                    <>
-                      <Spinner size="sm" />
-                      Đang đăng nhập Google...
-                    </>
-                  ) : (
-                    <>
-                      <span className="fw-bold">G</span>
-                      Tiếp tục với Google
-                    </>
-                  )}
-                </Button>
-              </Card.Body>
-            </Card>
-          </div>
-        </div>
-      </Container>
-    </div>
+      <SubmitButton
+        type="button"
+        variant="outline"
+        loading={googleLoading}
+        loadingText="Đang đăng nhập Google..."
+        disabled={loading}
+        onClick={handleGoogleLogin}
+      >
+        <GoogleIcon />
+        Tiếp tục với Google
+      </SubmitButton>
+    </AuthLayout>
   );
 }

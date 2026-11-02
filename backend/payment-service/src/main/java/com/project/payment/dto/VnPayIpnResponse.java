@@ -1,4 +1,8 @@
 package com.project.payment.dto;
 
-public record VnPayIpnResponse(String RspCode, String Message) {
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public record VnPayIpnResponse(
+        @JsonProperty("RspCode") String rspCode,
+        @JsonProperty("Message") String message) {
 }

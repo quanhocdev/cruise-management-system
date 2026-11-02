@@ -1,274 +1,117 @@
-import { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import api from "../../../api/axios";
+// src/modules/auth/pages/ActivatePage.jsx
+
+import { useState } from "react";
+import { KeyRound, Link2Off, User } from "lucide-react";
+
+import useActivateAccount from "../hooks/useActivateAccount";
+
+import AuthLayout from "../components/AuthLayout";
+import PasswordInput from "../components/PasswordInput";
+import {
+  AuthAlert,
+  SessionExpired,
+  SubmitButton,
+  TextField,
+} from "../components/AuthControls";
 
 export default function ActivatePage() {
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
+  const a = useActivateAccount();
 
-  const token = searchParams.get("token");
-
-  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-
-  const [valid, setValid] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-
-  useEffect(() => {
-    verifyToken();
-  }, []);
-
-  const verifyToken = async () => {
-    if (!token) {
-      setError("Liên kết kích hoạt không hợp lệ.");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const res = await api.post("/auth/activate/verify", {
-        token,
-      });
-
-      setUsername(res.data.username);
-      setValid(true);
-    } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          "Liên kết kích hoạt không hợp lệ hoặc đã hết hạn.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    setError("");
-    setSuccess("");
-
-    if (password !== confirmPassword) {
-      setError("Mật khẩu xác nhận không khớp.");
-      return;
-    }
-
-    setSubmitting(true);
-
-    try {
-      const res = await api.post("/auth/activate/set-password", {
-        token,
-        password,
-        confirmPassword,
-      });
-
-      setSuccess(res.data?.message || "Kích hoạt tài khoản thành công.");
-
-      setTimeout(() => {
-        navigate("/login");
-      }, 1500);
-    } catch (err) {
-      setError(err.response?.data?.message || "Không thể kích hoạt tài khoản.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  if (loading) {
+  if (a.checking) {
     return (
-      <div style={styles.center}>
-        <p>Đang kiểm tra liên kết kích hoạt...</p>
-      </div>
+      <AuthLayout
+        icon={<span className="auth-spinner auth-spinner--lg" />}
+        title="Đang kiểm tra liên kết"
+        subtitle="Vui lòng chờ trong giây lát..."
+      />
     );
   }
 
-  if (!valid) {
+  if (!a.valid) {
     return (
-      <div style={styles.center}>
-        <div style={styles.errorCard}>
-          <h2>Liên kết không hợp lệ</h2>
-
-          <p>{error}</p>
-
-          <button style={styles.button} onClick={() => navigate("/login")}>
-            Đến trang đăng nhập
-          </button>
-        </div>
-      </div>
+      <SessionExpired
+        icon={<Link2Off size={26} />}
+        title="Liên kết không hợp lệ"
+        message={a.error}
+        actionText="Đến trang đăng nhập"
+        onAction={a.goToLogin}
+      />
     );
   }
+
+  const confirmMismatch =
+    confirmPassword !== "" && password !== confirmPassword;
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    a.submit(password, confirmPassword);
+  };
+
+  const locked = a.submitting || Boolean(a.success);
 
   return (
-    <div style={styles.page}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>Kích hoạt tài khoản</h1>
+    <AuthLayout
+      icon={<KeyRound size={26} />}
+      title="Kích hoạt tài khoản"
+      subtitle="Tạo mật khẩu mới để hoàn tất kích hoạt tài khoản"
+    >
+      {a.error && (
+        <AuthAlert type="error" onClose={a.clearError}>
+          {a.error}
+        </AuthAlert>
+      )}
 
-        <p style={styles.subtitle}>
-          Tài khoản: <strong>{username}</strong>
-        </p>
+      {a.success && <AuthAlert type="success">{a.success}</AuthAlert>}
 
-        <p style={styles.description}>
-          Vui lòng tạo mật khẩu mới để hoàn tất kích hoạt tài khoản.
-        </p>
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <TextField
+          id="activate-username"
+          label="Tài khoản"
+          icon={User}
+          value={a.username}
+          readOnly
+          disabled
+        />
 
-        {error && <div style={styles.error}>{error}</div>}
+        <PasswordInput
+          id="activate-password"
+          label="Mật khẩu mới"
+          placeholder="Nhập mật khẩu mới"
+          hint="Tối thiểu 8 ký tự."
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          autoComplete="new-password"
+          minLength={8}
+          maxLength={100}
+          required
+          disabled={locked}
+        />
 
-        {success && <div style={styles.success}>{success}</div>}
+        <PasswordInput
+          id="activate-confirm"
+          label="Xác nhận mật khẩu"
+          placeholder="Nhập lại mật khẩu"
+          error={confirmMismatch ? "Mật khẩu xác nhận không khớp." : ""}
+          value={confirmPassword}
+          onChange={(event) => setConfirmPassword(event.target.value)}
+          autoComplete="new-password"
+          minLength={8}
+          maxLength={100}
+          required
+          disabled={locked}
+        />
 
-        <form onSubmit={handleSubmit}>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Mật khẩu mới</label>
-
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Nhập mật khẩu mới"
-              minLength={8}
-              maxLength={100}
-              required
-              style={styles.input}
-            />
-          </div>
-
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Xác nhận mật khẩu</label>
-
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Nhập lại mật khẩu"
-              minLength={8}
-              maxLength={100}
-              required
-              style={styles.input}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={submitting}
-            style={{
-              ...styles.button,
-              opacity: submitting ? 0.6 : 1,
-            }}
-          >
-            {submitting ? "Đang kích hoạt..." : "Kích hoạt tài khoản"}
-          </button>
-        </form>
-      </div>
-    </div>
+        <SubmitButton
+          loading={a.submitting}
+          loadingText="Đang kích hoạt..."
+          disabled={Boolean(a.success)}
+        >
+          Kích hoạt tài khoản
+        </SubmitButton>
+      </form>
+    </AuthLayout>
   );
 }
-
-const styles = {
-  page: {
-    minHeight: "100vh",
-    backgroundColor: "#f5f6f8",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: "30px",
-  },
-
-  card: {
-    width: "100%",
-    maxWidth: "500px",
-    backgroundColor: "#ffffff",
-    borderRadius: "12px",
-    padding: "30px",
-    boxShadow: "0 2px 12px rgba(0, 0, 0, 0.08)",
-  },
-
-  errorCard: {
-    width: "100%",
-    maxWidth: "500px",
-    boxSizing: "border-box",
-    backgroundColor: "#ffffff",
-    borderRadius: "12px",
-    padding: "30px",
-    boxShadow: "0 2px 12px rgba(0, 0, 0, 0.08)",
-    textAlign: "center",
-  },
-
-  center: {
-    minHeight: "100vh",
-    backgroundColor: "#f5f6f8",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: "30px",
-  },
-
-  title: {
-    margin: 0,
-    fontSize: "26px",
-    color: "#1f2937",
-  },
-
-  subtitle: {
-    marginTop: "12px",
-    color: "#374151",
-  },
-
-  description: {
-    color: "#6b7280",
-    lineHeight: "1.5",
-    marginBottom: "24px",
-  },
-
-  formGroup: {
-    marginBottom: "20px",
-  },
-
-  label: {
-    display: "block",
-    marginBottom: "8px",
-    fontSize: "14px",
-    fontWeight: "500",
-    color: "#374151",
-  },
-
-  input: {
-    width: "100%",
-    boxSizing: "border-box",
-    padding: "12px 14px",
-    border: "1px solid #d1d5db",
-    borderRadius: "8px",
-    fontSize: "15px",
-  },
-
-  button: {
-    width: "100%",
-    padding: "12px",
-    border: "none",
-    borderRadius: "8px",
-    backgroundColor: "#2563eb",
-    color: "#ffffff",
-    fontSize: "15px",
-    fontWeight: "600",
-    cursor: "pointer",
-  },
-
-  error: {
-    marginBottom: "20px",
-    padding: "12px",
-    borderRadius: "8px",
-    backgroundColor: "#fef2f2",
-    color: "#dc2626",
-  },
-
-  success: {
-    marginBottom: "20px",
-    padding: "12px",
-    borderRadius: "8px",
-    backgroundColor: "#ecfdf5",
-    color: "#047857",
-  },
-};

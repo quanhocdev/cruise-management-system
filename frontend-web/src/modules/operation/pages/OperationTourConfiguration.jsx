@@ -1,13 +1,5 @@
 import React from "react";
-import {
-  AlertCircle,
-  ArrowLeft,
-  RefreshCw,
-  ShieldCheck,
-  Save,
-  Users,
-  CheckCircle,
-} from "lucide-react";
+import { AlertCircle, ArrowLeft, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import useTourConfigurationPage from "../hooks/useTourConfigurationPage";
@@ -42,153 +34,6 @@ function ErrorState({ title, message, onBack }) {
         </div>
       </div>
     </div>
-  );
-}
-
-function PatrolRequirementSection({ m }) {
-  const totalRequired = m.patrolRequirements.reduce(
-    (total, item) => total + (Number(item.requiredCount) || 0),
-    0,
-  );
-
-  return (
-    <section
-      id="patrol-section"
-      className="operation-tour-configuration-section otc-patrol"
-    >
-      <div className="otc-patrol-header">
-        <div className="otc-patrol-heading">
-          <div className="otc-patrol-icon">
-            <ShieldCheck size={23} />
-          </div>
-
-          <div>
-            <h2>Cấu hình nhân sự tuần tra</h2>
-            <p>
-              Thiết lập số lượng nhân viên ONBOARD cần bố trí tuần tra tại từng
-              tầng của tàu.
-            </p>
-          </div>
-        </div>
-
-        <div className="otc-patrol-total">
-          <Users size={19} />
-          <div>
-            <strong>{totalRequired}</strong>
-            <span>Tổng nhân sự yêu cầu</span>
-          </div>
-        </div>
-      </div>
-
-      {m.patrolError && (
-        <div className="otc-patrol-message otc-patrol-message--error">
-          <AlertCircle size={18} />
-          <span>{m.patrolError}</span>
-        </div>
-      )}
-
-      {m.patrolSuccess && (
-        <div className="otc-patrol-message otc-patrol-message--success">
-          <CheckCircle size={18} />
-          <span>{m.patrolSuccess}</span>
-        </div>
-      )}
-
-      {m.patrolLoading ? (
-        <div className="otc-patrol-loading">
-          <RefreshCw size={19} className="operation-tour-configuration-spin" />
-          <span>Đang tải danh sách tầng...</span>
-        </div>
-      ) : m.patrolRequirements.length === 0 ? (
-        <div className="otc-patrol-empty">
-          <AlertCircle size={20} />
-          <div>
-            <strong>Chưa có dữ liệu tầng tàu</strong>
-            <p>
-              Tour cần được gán tàu và tàu cần có tầng đang hoạt động (ACTIVE)
-              trước khi cấu hình nhân sự tuần tra.
-            </p>
-          </div>
-        </div>
-      ) : (
-        <>
-          <div className="otc-patrol-table-wrapper">
-            <table className="otc-patrol-table">
-              <thead>
-                <tr>
-                  <th>Tầng tàu</th>
-                  <th>Nhân sự cần thiết</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {m.patrolRequirements.map((item) => (
-                  <tr key={item.cruiseDeckId}>
-                    <td>
-                      <div className="otc-patrol-deck">
-                        <span className="otc-patrol-deck-icon">
-                          <ShieldCheck size={17} />
-                        </span>
-                        <strong>Tầng {item.deckNumber}</strong>
-                      </div>
-                    </td>
-
-                    <td>
-                      <div className="otc-patrol-input-wrapper">
-                        <input
-                          type="number"
-                          min="0"
-                          step="1"
-                          value={item.requiredCount ?? 0}
-                          onChange={(event) =>
-                            m.updatePatrolRequirement(
-                              item.cruiseDeckId,
-                              event.target.value,
-                            )
-                          }
-                          disabled={m.patrolSaving}
-                          aria-label={`Số nhân sự tuần tra tầng ${item.deckNumber}`}
-                        />
-                        <span>người</span>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="otc-patrol-footer">
-            <p>
-              Nhập 0 nếu tầng không cần bố trí nhân sự tuần tra. Hệ thống sẽ
-              kiểm tra số nhân sự đã được ONBOARD phân công trước khi lưu.
-            </p>
-
-            <button
-              type="button"
-              className="otc-patrol-save"
-              onClick={m.savePatrolRequirements}
-              disabled={m.patrolSaving || m.patrolLoading}
-            >
-              {m.patrolSaving ? (
-                <>
-                  <RefreshCw
-                    size={17}
-                    className="operation-tour-configuration-spin"
-                  />
-                  Đang lưu...
-                </>
-              ) : (
-                <>
-                  <Save size={17} />
-                  Lưu cấu hình tuần tra
-                </>
-              )}
-            </button>
-          </div>
-        </>
-      )}
-    </section>
   );
 }
 
@@ -275,15 +120,11 @@ const OperationTourConfiguration = () => {
           type="button"
           className="operation-tour-configuration-refresh"
           onClick={m.refresh}
-          disabled={m.loading || m.patrolLoading || m.patrolSaving}
+          disabled={m.loading}
         >
           <RefreshCw
             size={17}
-            className={
-              m.loading || m.patrolLoading
-                ? "operation-tour-configuration-spin"
-                : ""
-            }
+            className={m.loading ? "operation-tour-configuration-spin" : ""}
           />
           Làm mới
         </button>
@@ -298,9 +139,6 @@ const OperationTourConfiguration = () => {
         activeFilter={m.activeFilter}
         onFilterChange={m.handleFilterChange}
       />
-
-      {/* Patrol requirement configuration */}
-      <PatrolRequirementSection m={m} />
 
       <div className="operation-tour-configuration-tables">
         {sections

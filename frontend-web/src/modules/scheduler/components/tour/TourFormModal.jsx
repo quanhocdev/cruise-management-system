@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { X, Save } from "lucide-react";
-
+import "../../styles/TourFormModal.css";
 const initialForm = {
   code: "",
   name: "",

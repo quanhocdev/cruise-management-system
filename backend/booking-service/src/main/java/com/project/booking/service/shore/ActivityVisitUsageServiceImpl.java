@@ -1,11 +1,16 @@
+
 package com.project.booking.service.shore;
 
 import com.project.booking.client.VisitTourClient;
 import com.project.booking.client.VisitTourClient.VisitTourUsageInfo;
+import com.project.booking.client.VisitTourManagementClient;
 import com.project.booking.dto.onboard.ActivityVisitUsageRequest;
 import com.project.booking.dto.shore.ActivityVisitUsageResponse;
+import com.project.booking.dto.shore.ActivityVisitUsageManagementInfo;
+import com.project.booking.dto.shore.ActivityVisitUsageManagementResponse;
 import com.project.booking.exception.AppException;
 import com.project.booking.mapper.ActivityVisitUsageMapper;
+import com.project.booking.mapper.ActivityVisitUsageManagementMapper;
 import com.project.booking.model.ActivityVisitUsage;
 import com.project.booking.model.BenefitConsumption;
 import com.project.booking.model.Booking;
@@ -13,38 +18,31 @@ import com.project.booking.model.BookingPassenger;
 import com.project.booking.repository.ActivityVisitUsageRepository;
 import com.project.booking.repository.BookingPassengerRepository;
 import com.project.booking.service.common.benefit.BenefitConsumptionService;
-import com.project.booking.service.shore.ActivityVisitUsageCalculator.UsageAmount;
+import com.project.booking.service.common.pricing.PricingCalculator;
+import com.project.booking.service.common.pricing.PricingResult;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.project.booking.service.account.OnboardAccountService;
-import com.project.booking.service.account.UsageCapacityLock;
-import com.project.booking.client.VisitTourManagementClient;
-import com.project.booking.dto.shore.ActivityVisitUsageManagementInfo;
-import com.project.booking.dto.shore.ActivityVisitUsageManagementResponse;
-import com.project.booking.mapper.ActivityVisitUsageManagementMapper;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService {
 
         private static final int DEFAULT_QUANTITY = 1;
 
-        private final OnboardAccountService accounts;
-        private final UsageCapacityLock capacityLock;
         private final ActivityVisitUsageRepository activityVisitUsageRepository;
         private final ActivityVisitUsageMapper activityVisitUsageMapper;
         private final VisitTourClient visitTourClient;
         private final BookingPassengerRepository bookingPassengerRepository;
         private final ActivityVisitUsageValidator validator;
-        private final ActivityVisitUsageCalculator calculator;
+        private final PricingCalculator pricingCalculator;
         private final BenefitConsumptionService benefitConsumptionService;
         private final VisitTourManagementClient visitTourManagementClient;
         private final ActivityVisitUsageManagementMapper activityVisitUsageManagementMapper;
@@ -55,19 +53,17 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
                         VisitTourClient visitTourClient,
                         BookingPassengerRepository bookingPassengerRepository,
                         ActivityVisitUsageValidator validator,
-                        ActivityVisitUsageCalculator calculator,
+                        PricingCalculator pricingCalculator,
                         BenefitConsumptionService benefitConsumptionService,
                         VisitTourManagementClient visitTourManagementClient,
-                        ActivityVisitUsageManagementMapper activityVisitUsageManagementMapper, OnboardAccountService accounts, UsageCapacityLock capacityLock) {
+                        ActivityVisitUsageManagementMapper activityVisitUsageManagementMapper) {
 
-                this.accounts = accounts;
-                this.capacityLock = capacityLock;
                 this.activityVisitUsageRepository = activityVisitUsageRepository;
                 this.activityVisitUsageMapper = activityVisitUsageMapper;
                 this.visitTourClient = visitTourClient;
                 this.bookingPassengerRepository = bookingPassengerRepository;
                 this.validator = validator;
-                this.calculator = calculator;
+                this.pricingCalculator = pricingCalculator;
                 this.benefitConsumptionService = benefitConsumptionService;
                 this.visitTourManagementClient = visitTourManagementClient;
                 this.activityVisitUsageManagementMapper = activityVisitUsageManagementMapper;
@@ -77,6 +73,8 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
         @Transactional
         public ActivityVisitUsageResponse create(ActivityVisitUsageRequest request) {
 
+                LocalDateTime now = LocalDateTime.now();
+
                 // 1. Hành khách + booking
                 BookingPassenger bookingPassenger = bookingPassengerRepository
                                 .findByNfcCardUid(request.nfcCardUid())
@@ -84,17 +82,6 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
                                                 "Không tìm thấy hành khách với NFC card UID: " + request.nfcCardUid(),
                                                 HttpStatus.NOT_FOUND));
 
-                return createFor(bookingPassenger,request);
-        }
-
-        @Transactional
-        public ActivityVisitUsageResponse createForPassenger(Long passengerId,UUID targetId,UUID requestId) {
-                var passenger=bookingPassengerRepository.findById(passengerId).orElseThrow(() -> new AppException("Không tìm thấy hành khách",HttpStatus.NOT_FOUND));
-                return createFor(passenger,new ActivityVisitUsageRequest("MANUAL",targetId,requestId));
-        }
-
-        private ActivityVisitUsageResponse createFor(BookingPassenger bookingPassenger,ActivityVisitUsageRequest request) {
-                LocalDateTime now=LocalDateTime.now();
                 Booking booking = validator.validateBooking(bookingPassenger);
 
                 // 2. Thông tin VisitTour
@@ -102,19 +89,15 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
                                 request.visitTourId(),
                                 booking.getTourPackageId());
 
-                validator.validateVisitTour(booking, visitInfo);
-
-                accounts.lockForUsage(booking);
-                capacityLock.acquire("SHORE", request.visitTourId());
+                validator.validateVisitTour(booking, visitInfo, now);
 
                 // 3. Sức chứa
                 long currentPassengerCount = activityVisitUsageRepository
                                 .countByVisitTourId(request.visitTourId());
 
                 validator.validateCapacity(visitInfo.maxPassengers(), currentPassengerCount);
-                capacityLock.requireSeat("SHORE",request.visitTourId(),bookingPassenger.getId(),visitInfo.maxPassengers());
 
-                // 4. Benefit (lock row nếu có benefit)
+                // 4. Benefit + lock row
                 int benefitQuantity = visitInfo.benefitQuantity() == null
                                 ? 0
                                 : Math.max(visitInfo.benefitQuantity(), 0);
@@ -123,6 +106,7 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
                 long usedBenefitQuantity = 0;
 
                 if (visitInfo.packageBenefitId() != null && benefitQuantity > 0) {
+
                         benefitConsumption = benefitConsumptionService.getForUpdate(
                                         booking.getId(),
                                         visitInfo.packageBenefitId());
@@ -132,37 +116,33 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
                                         : benefitConsumption.getUsedQuantity();
                 }
 
-                // 5. Tính tiền
-                UsageAmount amount = calculator.calculate(
+                // 5. Tính giá bằng PricingCalculator dùng chung
+                PricingResult amount = pricingCalculator.calculate(
                                 visitInfo.price(),
                                 visitInfo.discountPercent(),
                                 DEFAULT_QUANTITY,
                                 benefitQuantity,
                                 usedBenefitQuantity);
 
-                accounts.authorizeCharge(booking, amount.finalAmount());
+                // 6. Cập nhật lượt benefit đã được áp dụng
+                if (benefitConsumption != null && amount.discountedQuantity() > 0) {
 
-                // 6. Trừ lượt benefit đã dùng
-                if (benefitConsumption != null) {
                         benefitConsumptionService.consume(
                                         benefitConsumption,
-                                        amount.freeQuantity());
+                                        amount.discountedQuantity());
                 }
 
                 // 7. Lưu usage
                 ActivityVisitUsage savedUsage = activityVisitUsageRepository.save(
                                 buildUsage(bookingPassenger, request, amount, now));
-                accounts.recordCharge(bookingPassenger, "SHORE", savedUsage.getId(), savedUsage.getFinalAmount(),
-                        1, visitInfo.packageBenefitId(), amount.freeQuantity(), request.clientRequestId());
-
-                capacityLock.recordAttendance("SHORE",request.visitTourId(),bookingPassenger.getId(),savedUsage.getId());
 
                 return activityVisitUsageMapper.toResponse(savedUsage);
         }
 
         @Override
         @Transactional(readOnly = true)
-        public List<ActivityVisitUsageResponse> getByBookingPassengerId(Long bookingPassengerId) {
+        public List<ActivityVisitUsageResponse> getByBookingPassengerId(
+                        Long bookingPassengerId) {
 
                 return activityVisitUsageRepository
                                 .findAllByBookingPassengerIdOrderByUsedAtDesc(bookingPassengerId)
@@ -173,7 +153,7 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
 
         @Override
         @Transactional(readOnly = true)
-        public List<ActivityVisitUsageResponse> getByUserId(UUID userId) {
+        public List<ActivityVisitUsageResponse> getByUserId(Long userId) {
 
                 return activityVisitUsageRepository
                                 .findAllByBookingPassenger_Booking_CreatedByUserIdOrderByUsedAtDesc(userId)
@@ -185,7 +165,7 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
         private ActivityVisitUsage buildUsage(
                         BookingPassenger bookingPassenger,
                         ActivityVisitUsageRequest request,
-                        UsageAmount amount,
+                        PricingResult amount,
                         LocalDateTime now) {
 
                 ActivityVisitUsage usage = new ActivityVisitUsage();
@@ -232,5 +212,4 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
                                                 visitInfoMap.get(usage.getVisitTourId())))
                                 .toList();
         }
-
 }

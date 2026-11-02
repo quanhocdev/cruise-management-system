@@ -1,9 +1,24 @@
+// src/modules/scheduler/components/schedule/ScheduleFormModal.jsx
+
 import { useEffect, useState } from "react";
 import { X, Save, CalendarDays } from "lucide-react";
+
+import "../../styles/TourFormModal.css";
 
 const initialForm = {
   name: "",
   description: "",
+};
+
+const formatDate = (dateString) => {
+  if (!dateString) return "-";
+
+  return new Date(`${dateString}T00:00:00`).toLocaleDateString("vi-VN", {
+    weekday: "long",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
 };
 
 function ScheduleFormModal({
@@ -20,37 +35,33 @@ function ScheduleFormModal({
 
   const isEdit = Boolean(schedule);
 
+  // Ngày hiển thị: khi sửa lấy từ lịch trình, khi tạo lấy từ ngày đã chọn
+  const day = isEdit
+    ? { dayNumber: schedule.dayNumber, realDay: schedule.realDay }
+    : { dayNumber, realDay };
+
   useEffect(() => {
     if (!open) return;
 
-    if (schedule) {
-      setForm({
-        name: schedule.name || "",
-        description: schedule.description || "",
-      });
-    } else {
-      setForm(initialForm);
-    }
+    setForm(
+      schedule
+        ? {
+            name: schedule.name || "",
+            description: schedule.description || "",
+          }
+        : initialForm,
+    );
 
     setErrors({});
   }, [open, schedule]);
 
-  if (!open) {
-    return null;
-  }
+  if (!open) return null;
 
   const handleChange = (event) => {
     const { name, value } = event.target;
 
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    setErrors((prev) => ({
-      ...prev,
-      [name]: undefined,
-    }));
+    setForm((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
   const validate = () => {
@@ -68,40 +79,21 @@ function ScheduleFormModal({
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!validate()) {
-      return;
-    }
+    if (!validate()) return;
 
     await onSubmit?.({
       name: form.name.trim(),
       description: form.description.trim() || null,
-
-      ...(isEdit
-        ? {}
-        : {
-            dayNumber,
-            realDay,
-          }),
+      ...(isEdit ? {} : { dayNumber, realDay }),
     });
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) {
-      return "-";
-    }
-
-    const date = new Date(`${dateString}T00:00:00`);
-
-    return date.toLocaleDateString("vi-VN", {
-      weekday: "long",
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
+  const handleClose = () => {
+    if (!loading) onClose?.();
   };
 
   return (
-    <div className="tour-modal-overlay" onMouseDown={onClose}>
+    <div className="tour-modal-overlay" onMouseDown={handleClose}>
       <div
         className="tour-modal"
         onMouseDown={(event) => event.stopPropagation()}
@@ -122,7 +114,7 @@ function ScheduleFormModal({
           <button
             type="button"
             className="tour-modal-close"
-            onClick={onClose}
+            onClick={handleClose}
             disabled={loading}
           >
             <X size={20} />
@@ -131,44 +123,27 @@ function ScheduleFormModal({
 
         <form onSubmit={handleSubmit}>
           <div className="tour-modal-body">
-            {!isEdit && (
-              <div className="schedule-selected-day">
-                <div className="schedule-selected-day-icon">
-                  <CalendarDays size={20} />
-                </div>
-
-                <div>
-                  <span>Ngày trong tour</span>
-
-                  <strong>
-                    Ngày {dayNumber} — {formatDate(realDay)}
-                  </strong>
-                </div>
+            <div className="schedule-selected-day">
+              <div className="schedule-selected-day-icon">
+                <CalendarDays size={20} />
               </div>
-            )}
 
-            {isEdit && schedule && (
-              <div className="schedule-selected-day">
-                <div className="schedule-selected-day-icon">
-                  <CalendarDays size={20} />
-                </div>
+              <div>
+                <span>Ngày trong tour</span>
 
-                <div>
-                  <span>Ngày trong tour</span>
-
-                  <strong>
-                    Ngày {schedule.dayNumber} — {formatDate(schedule.realDay)}
-                  </strong>
-                </div>
+                <strong>
+                  Ngày {day.dayNumber} — {formatDate(day.realDay)}
+                </strong>
               </div>
-            )}
+            </div>
 
             <div className="form-group">
-              <label>
+              <label htmlFor="schedule-name">
                 Tên lịch trình <span>*</span>
               </label>
 
               <input
+                id="schedule-name"
                 type="text"
                 name="name"
                 value={form.name}
@@ -184,9 +159,10 @@ function ScheduleFormModal({
             </div>
 
             <div className="form-group">
-              <label>Mô tả</label>
+              <label htmlFor="schedule-description">Mô tả</label>
 
               <textarea
+                id="schedule-description"
                 name="description"
                 value={form.description}
                 onChange={handleChange}
@@ -210,7 +186,7 @@ function ScheduleFormModal({
             <button
               type="button"
               className="secondary-button"
-              onClick={onClose}
+              onClick={handleClose}
               disabled={loading}
             >
               Hủy
