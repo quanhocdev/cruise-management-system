@@ -29,21 +29,8 @@ export const TOUR_STATUS_TRIP_LABELS = {
   CANCELLED: "Đã hủy",
 };
 
-// export const FINANCE_VISIBLE_TOUR_STATUSES = [
-//   "READY",
-//   "IN_PROGRESS",
-//   "COMPLETED",
-// ];
-// thử nghiệm và sẽ bỏ
-export const FINANCE_VISIBLE_TOUR_STATUSES = [
-  "READY",
-  "IN_PROGRESS",
-  "COMPLETED",
-  "APPROVED",
-  "APPROVAL_PENDING",
-];
+export const FINANCE_VISIBLE_TOUR_STATUSES = ["READY", "IN_PROGRESS"];
 
-// Thêm vào src/modules/finance/constants/statuses.js
 export const BOOKING_STATUS_OPTIONS = [
   { value: "PENDING_PAYMENT", label: "Chờ thanh toán" },
   { value: "CONFIRMED", label: "Đã xác nhận" },
