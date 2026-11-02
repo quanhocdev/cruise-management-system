@@ -10,9 +10,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/passenger/payments")
@@ -30,13 +27,6 @@ public class PassengerPaymentController {
             @PathVariable Long bookingId,
             @AuthenticationPrincipal Jwt jwt) {
 
-        UUID requesterId;
-        try {
-            Object userIdClaim = jwt.getClaim("userId");
-            requesterId = UUID.fromString(String.valueOf(userIdClaim));
-        } catch (IllegalArgumentException | NullPointerException ex) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid user identity");
-        }
         List<PaymentResponse> payments = paymentService.getPayments(bookingId, PaymentReferenceType.BOOKING);
 
         if (payments == null || payments.isEmpty()) {
@@ -44,10 +34,9 @@ public class PassengerPaymentController {
         }
 
         // Trả về 200 OK kèm bản ghi thanh toán mới nhất
-        return ResponseEntity.ok(paymentService.getPayment(payments.get(0).getId(), requesterId, false));
+        return ResponseEntity.ok(payments.get(0));
     }
 }
-
 // 9704198526191432198
 // NGUYEN VAN A
 // 07/15
