@@ -8,5 +8,4 @@ public interface CheckoutService {
     CheckoutPreviewResponse getCheckoutPreview(Long bookingId);
 
     CheckoutResponse confirmCheckout(Long bookingId);
-    CheckoutResponse prepareCheckout(Long bookingId, String previewVersion);
 }
