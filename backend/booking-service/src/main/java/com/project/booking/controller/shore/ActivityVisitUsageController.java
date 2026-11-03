@@ -1,7 +1,7 @@
 package com.project.booking.controller.shore;
 
-import com.project.booking.dto.onboard.ActivityVisitUsageRequest;
 import com.project.booking.dto.shore.ActivityVisitUsageManagementResponse;
+import com.project.booking.dto.shore.ActivityVisitUsageRequest;
 import com.project.booking.dto.shore.ActivityVisitUsageResponse;
 import com.project.booking.service.shore.ActivityVisitUsageService;
 
