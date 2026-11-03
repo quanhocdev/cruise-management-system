@@ -9,7 +9,6 @@ import com.project.booking.dto.onboard.ActivityCruiseUsageResponse;
 import java.util.List;
 
 public interface ActivityCruiseUsageService {
-        ActivityCruiseUsageResponse createForPassenger(Long passengerId, java.util.UUID targetId, java.util.UUID requestId);
 
         ActivityCruiseUsageResponse create(
                         ActivityCruiseUsageRequest request);
