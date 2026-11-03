@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import com.project.booking.service.account.OnboardAccountService;
 
 import java.util.List;
 import java.util.Objects;
@@ -43,7 +42,8 @@ public class BillPaymentResultService {
                 this.bookingPassengerRepository = bookingPassengerRepository;
         }
 
-        private void complete(BillPaymentSuccessEvent event) {
+        @Transactional
+        public void processPaymentSuccess(BillPaymentSuccessEvent event) {
                 if (event == null || event.billId() == null) {
                         throw new IllegalArgumentException(
                                         "Bill payment success event or bill ID must not be null");
