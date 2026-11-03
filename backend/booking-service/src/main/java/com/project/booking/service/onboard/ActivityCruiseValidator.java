@@ -5,7 +5,6 @@ import com.project.booking.model.Booking;
 import com.project.booking.model.BookingPassenger;
 import com.project.booking.repository.ActivityCruiseUsageRepository;
 import com.project.booking.repository.BookingPassengerRepository;
-import com.project.booking.service.time.CruiseTime;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -31,11 +30,6 @@ public class ActivityCruiseValidator {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Không tìm thấy hành khách với NFC card UID: " + nfcCardUid));
-    }
-
-    public BookingPassenger validateAndGetPassenger(Long id) {
-        return bookingPassengerRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy hành khách"));
     }
 
     public void validateBookingAndActivity(Booking booking, ActivityCruiseClient.ActivityCruiseUsageInfo activityInfo,
