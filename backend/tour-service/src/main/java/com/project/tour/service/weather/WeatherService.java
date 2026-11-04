@@ -1,4 +1,4 @@
-package com.project.tour.service;
+package com.project.tour.service.weather;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.benmanes.caffeine.cache.Cache;

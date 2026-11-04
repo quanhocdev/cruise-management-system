@@ -1,10 +1,11 @@
 
-package com.project.tour.controller;
+package com.project.tour.controller.helper;
 
 import com.project.tour.dto.weather.WeatherResponse;
 import com.project.tour.exception.ForecastUnavailableException;
 import com.project.tour.exception.WeatherApiException;
-import com.project.tour.service.WeatherService;
+import com.project.tour.service.weather.WeatherService;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

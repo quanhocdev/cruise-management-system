@@ -35,12 +35,6 @@ export function CruiseStats({ cruises }) {
       icon: PauseCircle,
       tone: "gray",
     },
-    {
-      label: "Tổng sức chứa",
-      value: capacity.toLocaleString("vi-VN"),
-      icon: Users,
-      tone: "sky",
-    },
   ];
 
   return (
