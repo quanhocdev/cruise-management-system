@@ -849,3 +849,12 @@ textarea.mc-input {
     animation: none;
   }
 }
+/* Bổ sung nhỏ cho mc-icon-btn khi kết hợp icon + text */
+.mc-icon-btn {
+  gap: 6px;
+  padding: 0 14px;
+  width: auto;
+}
+.mc-icon-btn svg {
+  flex-shrink: 0;
+}

@@ -1,3 +1,4 @@
+// src/modules/scheduler/components/schedule/ScheduleCard.jsx
 import { CalendarDays, Eye, Pencil, Trash2, MapPin } from "lucide-react";
 
 const getStatusLabel = (status) => {
