@@ -1,3 +1,4 @@
+
 package com.project.cruise.android.ui.screens.staff
 
 import androidx.activity.compose.BackHandler
@@ -34,12 +35,30 @@ fun StaffAssignmentsScreen(
     onRespond: (Boolean, String) -> Unit,
     onLogout: () -> Unit
 ) {
-    var filter by rememberSaveable { mutableStateOf("ALL") }
-    var confirm by rememberSaveable(state.selectedId) { mutableStateOf<String?>(null) }
-    var reason by rememberSaveable(state.selectedId) { mutableStateOf("") }
-    var logoutConfirmation by remember { mutableStateOf(false) }
+    var filter by rememberSaveable {
+        mutableStateOf("ALL")
+    }
+
+    var confirm by rememberSaveable(state.selectedId) {
+        mutableStateOf<String?>(null)
+    }
+
+    var reason by rememberSaveable(state.selectedId) {
+        mutableStateOf("")
+    }
+
+    var logoutConfirmation by remember {
+        mutableStateOf(false)
+    }
+
     val selected = state.selected
-    BackHandler(state.selectedId != null) { if (!state.responding) onSelect(null) }
+
+    BackHandler(state.selectedId != null) {
+        if (!state.responding) {
+            onSelect(null)
+        }
+    }
+
     val rows = state.assignments.filter {
         when (filter) {
             "PENDING", "ACCEPTED" -> it.status == filter
@@ -47,60 +66,174 @@ fun StaffAssignmentsScreen(
             else -> true
         }
     }
+
     OceanTheme {
-        Surface(Modifier.fillMaxSize(), color = OceanMist) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = OceanMist
+        ) {
             LazyColumn(
-                Modifier.fillMaxSize().safeDrawingPadding().imePadding().testTag("staff-assignments"),
-                contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .safeDrawingPadding()
+                    .imePadding()
+                    .testTag("staff-assignments"),
+                contentPadding = PaddingValues(20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 item {
-                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         if (state.selectedId != null) {
-                            TextButton(onClick = { onSelect(null) }, enabled = !state.responding) { Text("← Phân công") }
+                            TextButton(
+                                onClick = { onSelect(null) },
+                                enabled = !state.responding
+                            ) {
+                                Text("← Phân công")
+                            }
                         } else {
-                            Text("Công việc của tôi", fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
+                            Text(
+                                text = "Công việc của tôi",
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleLarge,
+                                modifier = Modifier.weight(1f)
+                            )
                         }
-                        if (state.selectedId != null) Spacer(Modifier.weight(1f))
-                        TextButton(onClick = { logoutConfirmation = true }, enabled = !state.busy) { Text("Đăng xuất") }
+
+                        if (state.selectedId != null) {
+                            Spacer(Modifier.weight(1f))
+                        }
+
+                        TextButton(
+                            onClick = {
+                                logoutConfirmation = true
+                            },
+                            enabled = !state.busy
+                        ) {
+                            Text("Đăng xuất")
+                        }
                     }
                 }
+
                 if (state.selectedId == null) {
                     item {
-                        OceanBanner(role.title.uppercase(), "Xin chào, $username",
-                            "Theo dõi công việc và phản hồi phân công của bạn.")
+                        OceanBanner(
+                            role.title.uppercase(),
+                            "Xin chào, $username",
+                            "Theo dõi công việc và phản hồi phân công của bạn."
+                        )
                     }
+
                     item {
-                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            SummaryTile("Chờ phản hồi", state.assignments.count { it.status == "PENDING" }, Modifier.weight(1f))
-                            SummaryTile("Đã nhận", state.assignments.count { it.status == "ACCEPTED" }, Modifier.weight(1f))
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            SummaryTile(
+                                "Chờ phản hồi",
+                                state.assignments.count {
+                                    it.status == "PENDING"
+                                },
+                                Modifier.weight(1f)
+                            )
+
+                            SummaryTile(
+                                "Đã nhận",
+                                state.assignments.count {
+                                    it.status == "ACCEPTED"
+                                },
+                                Modifier.weight(1f)
+                            )
                         }
                     }
                 }
+
                 item {
-                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        Text(if (selected != null) "Chi tiết công việc" else "Phân công của bạn",
-                            style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                        TextButton(onClick = onRefresh, enabled = !state.busy) { Text("Tải lại") }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = if (selected != null) {
+                                "Chi tiết công việc"
+                            } else {
+                                "Phân công của bạn"
+                            },
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        TextButton(
+                            onClick = onRefresh,
+                            enabled = !state.busy
+                        ) {
+                            Text("Tải lại")
+                        }
                     }
-                    if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
+
+                    if (state.busy) {
+                        LinearProgressIndicator(
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
-                state.error?.let { item { OceanNotice(it, error = true) } }
-                state.message?.let { item { OceanNotice(it) } }
+
+                state.error?.let { error ->
+                    item {
+                        OceanNotice(error, error = true)
+                    }
+                }
+
+                state.message?.let { message ->
+                    item {
+                        OceanNotice(message)
+                    }
+                }
+
                 if (state.selectedId != null) {
                     if (selected == null) {
-                        item { OceanStatePanel("Phân công không còn trong danh sách", "Quay lại danh sách để chọn công việc khác.", "↻") }
+                        item {
+                            OceanStatePanel(
+                                "Phân công không còn trong danh sách",
+                                "Quay lại danh sách để chọn công việc khác.",
+                                "↻"
+                            )
+                        }
                     } else {
                         item {
-                            AssignmentDetail(selected, role, state.tours[selected.tourId])
+                            AssignmentDetail(
+                                item = selected,
+                                role = role,
+                                state = state
+                            )
                         }
+
                         if (selected.canRespond) {
                             item {
-                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    OceanPrimaryButton("Chấp nhận phân công", { confirm = "ACCEPTED" },
-                                        enabled = state.canRespond(selected), loading = state.responding)
-                                    OutlinedButton(onClick = { confirm = "REJECTED" }, enabled = state.canRespond(selected),
-                                        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp), shape = RoundedCornerShape(18.dp)) {
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    OceanPrimaryButton(
+                                        "Chấp nhận phân công",
+                                        onClick = {
+                                            confirm = "ACCEPTED"
+                                        },
+                                        enabled = state.canRespond(selected),
+                                        loading = state.responding
+                                    )
+
+                                    OutlinedButton(
+                                        onClick = {
+                                            confirm = "REJECTED"
+                                        },
+                                        enabled = state.canRespond(selected),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .heightIn(min = 52.dp),
+                                        shape = RoundedCornerShape(18.dp)
+                                    ) {
                                         Text("Từ chối phân công")
                                     }
                                 }
@@ -109,59 +242,197 @@ fun StaffAssignmentsScreen(
                     }
                 } else {
                     item {
-                        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            listOf("ALL" to "Tất cả", "PENDING" to "Chờ phản hồi", "ACCEPTED" to "Đã nhận", "HISTORY" to "Lịch sử").forEach { (key, label) ->
-                                FilterChip(selected = filter == key, onClick = { filter = key }, label = { Text(label) })
+                        Row(
+                            modifier = Modifier.horizontalScroll(
+                                rememberScrollState()
+                            ),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            listOf(
+                                "ALL" to "Tất cả",
+                                "PENDING" to "Chờ phản hồi",
+                                "ACCEPTED" to "Đã nhận",
+                                "HISTORY" to "Lịch sử"
+                            ).forEach { (key, label) ->
+                                FilterChip(
+                                    selected = filter == key,
+                                    onClick = {
+                                        filter = key
+                                    },
+                                    label = {
+                                        Text(label)
+                                    }
+                                )
                             }
                         }
                     }
-                    if (rows.isEmpty() && !state.loading && state.error == null) {
-                        item { OceanStatePanel("Chưa có phân công", "Công việc được giao sẽ xuất hiện ở đây. Bạn có thể tải lại để cập nhật.", "☷") }
-                    }
-                    itemsIndexed(rows) { _, assignment ->
-                        AssignmentCard(assignment, role, state.tours[assignment.tourId]) {
-                            assignment.id?.let(onSelect)
+
+                    if (
+                        rows.isEmpty() &&
+                        !state.loading &&
+                        state.error == null
+                    ) {
+                        item {
+                            OceanStatePanel(
+                                "Chưa có phân công",
+                                "Công việc được giao sẽ xuất hiện ở đây. Bạn có thể tải lại để cập nhật.",
+                                "☷"
+                            )
                         }
                     }
+
+                    itemsIndexed(rows) { _, assignment ->
+                        AssignmentCard(
+                            item = assignment,
+                            role = role,
+                            state = state,
+                            onClick = {
+                                assignment.id?.let(onSelect)
+                            }
+                        )
+                    }
                 }
-                item { Spacer(Modifier.height(12.dp)) }
+
+                item {
+                    Spacer(Modifier.height(12.dp))
+                }
             }
         }
-        if (confirm != null && selected != null) {
-            val accepting = confirm == "ACCEPTED"
-            AlertDialog(
-                onDismissRequest = { confirm = null },
-                title = { Text(if (accepting) "Nhận công việc này?" else "Từ chối phân công?") },
-                text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text(if (accepting) "Xác nhận bạn nhận phân công này. Sau khi gửi, bạn không thể tự đổi phản hồi."
-                            else "Cho người phụ trách biết lý do bạn không thể nhận công việc.")
-                        if (!accepting) OutlinedTextField(value = reason, onValueChange = { reason = it },
-                            label = { Text("Lý do từ chối (bắt buộc)") }, modifier = Modifier.fillMaxWidth(), minLines = 3)
+    }
+
+    if (confirm != null && selected != null) {
+        val accepting = confirm == "ACCEPTED"
+
+        AlertDialog(
+            onDismissRequest = {
+                confirm = null
+            },
+            title = {
+                Text(
+                    if (accepting) {
+                        "Nhận công việc này?"
+                    } else {
+                        "Từ chối phân công?"
                     }
-                },
-                confirmButton = {
-                    TextButton(enabled = state.canRespond(selected) && (accepting || reason.isNotBlank()), onClick = {
+                )
+            },
+            text = {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        if (accepting) {
+                            "Xác nhận bạn nhận phân công này. Sau khi gửi, bạn không thể tự đổi phản hồi."
+                        } else {
+                            "Cho người phụ trách biết lý do bạn không thể nhận công việc."
+                        }
+                    )
+
+                    if (!accepting) {
+                        OutlinedTextField(
+                            value = reason,
+                            onValueChange = {
+                                reason = it
+                            },
+                            label = {
+                                Text("Lý do từ chối (bắt buộc)")
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            minLines = 3
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = state.canRespond(selected) &&
+                            (accepting || reason.isNotBlank()),
+                    onClick = {
                         onRespond(accepting, reason)
                         confirm = null
-                    }) { Text(if (accepting) "Xác nhận nhận việc" else "Gửi lý do từ chối") }
-                },
-                dismissButton = { TextButton(onClick = { confirm = null }) { Text("Quay lại") } }
-            )
-        }
-        if (logoutConfirmation) AlertDialog(onDismissRequest = { logoutConfirmation = false },
-            title = { Text("Đăng xuất tài khoản?") }, text = { Text("Bạn có thể đăng nhập lại để tiếp tục xem phân công.") },
-            confirmButton = { TextButton(onClick = { logoutConfirmation = false; onLogout() }) { Text("Đăng xuất") } },
-            dismissButton = { TextButton(onClick = { logoutConfirmation = false }) { Text("Ở lại") } })
+                    }
+                ) {
+                    Text(
+                        if (accepting) {
+                            "Xác nhận nhận việc"
+                        } else {
+                            "Gửi lý do từ chối"
+                        }
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        confirm = null
+                    }
+                ) {
+                    Text("Quay lại")
+                }
+            }
+        )
+    }
+
+    if (logoutConfirmation) {
+        AlertDialog(
+            onDismissRequest = {
+                logoutConfirmation = false
+            },
+            title = {
+                Text("Đăng xuất tài khoản?")
+            },
+            text = {
+                Text("Bạn có thể đăng nhập lại để tiếp tục xem phân công.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        logoutConfirmation = false
+                        onLogout()
+                    }
+                ) {
+                    Text("Đăng xuất")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        logoutConfirmation = false
+                    }
+                ) {
+                    Text("Ở lại")
+                }
+            }
+        )
     }
 }
 
 @Composable
-private fun SummaryTile(label: String, count: Int, modifier: Modifier) {
-    Surface(modifier, shape = RoundedCornerShape(20.dp), color = Color.White) {
-        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(count.toString(), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = OceanNavy)
-            Text(label, style = MaterialTheme.typography.bodyMedium)
+private fun SummaryTile(
+    label: String,
+    count: Int,
+    modifier: Modifier
+) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(20.dp),
+        color = Color.White
+    ) {
+        Column(
+            Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                count.toString(),
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = OceanNavy
+            )
+
+            Text(
+                label,
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
     }
 }
@@ -173,65 +444,334 @@ private fun StatusPill(status: String?) {
         "ACCEPTED", "COMPLETED" -> OceanTeal
         else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
-    Text(assignmentStatusLabel(status), color = color, style = MaterialTheme.typography.labelMedium,
-        modifier = Modifier.background(color.copy(alpha = .1f), RoundedCornerShape(50)).padding(horizontal = 12.dp, vertical = 7.dp))
+
+    Text(
+        assignmentStatusLabel(status),
+        color = color,
+        style = MaterialTheme.typography.labelMedium,
+        modifier = Modifier
+            .background(
+                color.copy(alpha = .1f),
+                RoundedCornerShape(50)
+            )
+            .padding(
+                horizontal = 12.dp,
+                vertical = 7.dp
+            )
+    )
 }
 
 @Composable
-private fun AssignmentCard(item: StaffAssignment, role: StaffRole, tour: PublicTourDetailResponse?, onClick: () -> Unit) {
-    Card(onClick = onClick, enabled = item.id != null, modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
-        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+private fun AssignmentCard(
+    item: StaffAssignment,
+    role: StaffRole,
+    state: StaffAssignmentsState,
+    onClick: () -> Unit
+) {
+    val tour = item.tourId?.let {
+        state.tours[it]
+    }
+
+    Card(
+        onClick = onClick,
+        enabled = item.id != null,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        )
+    ) {
+        Column(
+            Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Row(
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 StatusPill(item.status)
+
                 Spacer(Modifier.weight(1f))
-                Text("Chi tiết ›", color = OceanTeal, style = MaterialTheme.typography.labelLarge)
+
+                Text(
+                    "Chi tiết ›",
+                    color = OceanTeal,
+                    style = MaterialTheme.typography.labelLarge
+                )
             }
-            Text(targetName(item, tour) ?: item.title(role), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            Text(tour?.name?.takeIf { it.isNotBlank() } ?: "Chuyến ${item.tourId?.take(8) ?: "chưa xác định"}",
-                style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text("Phân công: ${displayTime(item.assignedAt)}", style = MaterialTheme.typography.bodySmall)
+
+            Text(
+                text = targetName(item, state) ?: item.title(role),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+
+            Text(
+                text = tour?.name?.takeIf {
+                    it.isNotBlank()
+                } ?: "Chuyến ${item.tourId?.take(8) ?: "chưa xác định"}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Text(
+                "Phân công: ${displayTime(item.assignedAt)}",
+                style = MaterialTheme.typography.bodySmall
+            )
         }
     }
 }
 
 @Composable
-private fun AssignmentDetail(item: StaffAssignment, role: StaffRole, tour: PublicTourDetailResponse?) {
-    Surface(shape = RoundedCornerShape(24.dp), color = Color.White) {
-        Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+private fun AssignmentDetail(
+    item: StaffAssignment,
+    role: StaffRole,
+    state: StaffAssignmentsState
+) {
+    val tour = item.tourId?.let {
+        state.tours[it]
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(
+                targetName(item, state) ?: item.title(role),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+
             StatusPill(item.status)
-            Text(targetName(item, tour) ?: item.title(role), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-            DetailField("Công việc", item.title(role))
-            DetailField("Chuyến tàu", tour?.name?.takeIf { it.isNotBlank() } ?: "Chưa có tên chuyến")
-            tour?.cruise?.name?.let { DetailField("Tàu", it) }
-            DetailField("Mã chuyến", item.tourId ?: "—")
-            DetailField(if (item.assignmentType == "PATROL") "Mã tầng được giao" else "Mã mục được giao", item.targetReference ?: "—")
-            HorizontalDivider()
-            DetailField("Ngày phân công", displayTime(item.assignedAt))
-            item.respondedAt?.let { DetailField("Ngày phản hồi", displayTime(it)) }
-            item.rejectionReason?.takeIf { it.isNotBlank() }?.let { DetailField("Lý do từ chối", it) }
-            Text("Thông tin ca làm cụ thể: liên hệ người phụ trách.", style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant)
+
+            DetailRow(
+                "Chuyến du lịch",
+                tour?.name ?: item.tourId
+            )
+
+            DetailRow(
+                "Mã phân công",
+                item.id
+            )
+
+            AssignmentTargetDetail(
+                item = item,
+                state = state
+            )
+
+            DetailRow(
+                "Người giao việc",
+                item.assignedBy
+            )
+
+            DetailRow(
+                "Thời gian phân công",
+                displayTime(item.assignedAt)
+            )
+
+            DetailRow(
+                "Thời gian phản hồi",
+                displayTime(item.respondedAt)
+            )
+
+            if (!item.rejectionReason.isNullOrBlank()) {
+                DetailRow(
+                    "Lý do từ chối",
+                    item.rejectionReason
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun DetailField(label: String, value: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(value, style = MaterialTheme.typography.bodyMedium)
+private fun AssignmentTargetDetail(
+    item: StaffAssignment,
+    state: StaffAssignmentsState
+) {
+    when (item.assignmentType) {
+        "PRODUCT" -> {
+            val product = state.productOf(item)
+
+            if (product != null) {
+                DetailRow("Sản phẩm", product.productName)
+                DetailRow("Khu vực", product.cruiseAreaName)
+
+                DetailRow(
+                    "Tầng",
+                    product.deckNumber?.let {
+                        "Tầng $it"
+                    }
+                )
+
+                DetailRow(
+                    "Số lượng",
+                    product.quantity?.toString()
+                )
+
+                DetailRow(
+                    "Mô tả",
+                    product.productDescription
+                )
+            } else {
+                DetailRow("Sản phẩm", "Đang tải thông tin...")
+            }
+        }
+
+        "SERVICE" -> {
+            val service = state.serviceOf(item)
+
+            if (service != null) {
+                DetailRow("Dịch vụ", service.serviceName)
+                DetailRow("Khu vực", service.cruiseAreaName)
+
+                DetailRow(
+                    "Tầng",
+                    service.deckNumber?.let {
+                        "Tầng $it"
+                    }
+                )
+
+                DetailRow(
+                    "Thời lượng",
+                    service.durationMinutes?.let {
+                        "$it phút"
+                    }
+                )
+
+                DetailRow(
+                    "Số khách tối đa",
+                    service.maxPassengers?.toString()
+                )
+
+                DetailRow(
+                    "Mô tả",
+                    service.serviceDescription
+                )
+            } else {
+                DetailRow("Dịch vụ", "Đang tải thông tin...")
+            }
+        }
+
+        "ACTIVITY_CRUISE" -> {
+            val activity = state.onboardActivityOf(item)
+
+            if (activity != null) {
+                DetailRow(
+                    "Hoạt động",
+                    activity.activityCruiseName
+                )
+
+                DetailRow(
+                    "Khu vực",
+                    activity.cruiseAreaName
+                )
+
+                DetailRow("Bắt đầu", activity.startTime)
+                DetailRow("Kết thúc", activity.endTime)
+
+                DetailRow(
+                    "Số khách tối đa",
+                    activity.maxPassengers?.toString()
+                )
+
+                DetailRow(
+                    "Mô tả",
+                    activity.activityCruiseDescription
+                )
+            } else {
+                DetailRow("Hoạt động", "Đang tải thông tin...")
+            }
+        }
+
+        "PATROL" -> {
+            DetailRow(
+                "Nhiệm vụ",
+                "Tuần tra tầng tàu"
+            )
+
+            DetailRow(
+                "Mã tầng tàu",
+                item.cruiseDeckId ?: "Chưa có thông tin"
+            )
+        }
+
+        else -> {
+            val activity = state.shoreActivityOf(item)
+
+            if (activity != null) {
+                DetailRow(
+                    "Hoạt động chuyến bờ",
+                    activity.name
+                )
+
+                DetailRow("Bắt đầu", activity.startTime)
+                DetailRow("Kết thúc", activity.endTime)
+
+                DetailRow(
+                    "Số khách tối đa",
+                    activity.maxPassengers?.toString()
+                )
+
+                DetailRow(
+                    "Mô tả",
+                    activity.description
+                )
+            } else {
+                DetailRow(
+                    "Hoạt động chuyến bờ",
+                    "Đang tải thông tin..."
+                )
+            }
+        }
     }
 }
 
-private fun targetName(item: StaffAssignment, tour: PublicTourDetailResponse?): String? = when (item.assignmentType) {
-    "ACTIVITY_CRUISE" -> tour?.onboardActivities?.find { it.id == item.activityCruiseTourId }?.activityName
-    "PRODUCT" -> tour?.products?.find { it.id == item.targetId }?.productName
-    "SERVICE" -> tour?.services?.find { it.id == item.targetId }?.serviceName
-    else -> tour?.schedules?.flatMap { it.stops.orEmpty() }?.mapNotNull { it.visitActivity }
-        ?.find { it.id == item.visitTourId }?.visitName
-}?.takeIf { it.isNotBlank() }
+@Composable
+private fun DetailRow(
+    label: String,
+    value: String?
+) {
+    if (value.isNullOrBlank()) return
 
-private fun displayTime(value: String?): String = value?.let {
-    runCatching { LocalDateTime.parse(it).format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) }.getOrDefault(it)
-} ?: "—"
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 5.dp)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
+}
+
+private fun targetName(
+    item: StaffAssignment,
+    state: StaffAssignmentsState
+): String? {
+    return state.targetName(item)
+}
+
+private fun displayTime(value: String?): String {
+    if (value.isNullOrBlank()) return "—"
+
+    return runCatching {
+        LocalDateTime.parse(value).format(
+            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+        )
+    }.getOrDefault(value)
+}
