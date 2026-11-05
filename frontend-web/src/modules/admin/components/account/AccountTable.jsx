@@ -5,6 +5,7 @@ export default function AccountTable({
   loading,
   onEdit,
   onDeactivate,
+  emptyMessage = "Không tìm thấy tài khoản phù hợp.",
 }) {
   if (loading) {
     return (
@@ -12,7 +13,6 @@ export default function AccountTable({
         <Card.Body>
           <div className="text-center py-5">
             <Spinner animation="border" />
-
             <div className="mt-2">Đang tải danh sách tài khoản...</div>
           </div>
         </Card.Body>
@@ -24,9 +24,7 @@ export default function AccountTable({
     return (
       <Card>
         <Card.Body>
-          <div className="text-center text-muted py-5">
-            Chưa có tài khoản nhân viên nào.
-          </div>
+          <div className="text-center text-muted py-5">{emptyMessage}</div>
         </Card.Body>
       </Card>
     );
