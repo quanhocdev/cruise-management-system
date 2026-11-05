@@ -9,7 +9,7 @@ import AccountSummaryCards from "../components/account/AccountSummaryCards";
 
 import "../styles/ManagerAccount.css";
 
-const MANAGER_ROLES = [
+const MANAGEMENT_ROLES = [
   "SCHEDULER",
   "OPERATION",
   "ONBOARD",
@@ -21,20 +21,24 @@ const MANAGER_ROLES = [
 const STAFF_ROLES = ["ONBOARD_STAFF", "SHORE_STAFF", "CONVENIENCE_STAFF"];
 
 function getRoleName(account) {
-  const role = account.role?.name || account.roleName || account.role || "";
-
-  return String(role).trim().toUpperCase();
+  return String(account.role?.name || account.roleName || account.role || "")
+    .trim()
+    .toUpperCase();
 }
 
 function getAccountCategory(account) {
   const role = getRoleName(account);
 
-  if (role === "PASSENGER" || role === "GUEST") {
+  if (role === "ADMIN") {
+    return "ADMIN";
+  }
+
+  if (role === "PASSENGER") {
     return "PASSENGER";
   }
 
-  if (MANAGER_ROLES.includes(role)) {
-    return "MANAGER";
+  if (MANAGEMENT_ROLES.includes(role)) {
+    return "MANAGEMENT";
   }
 
   if (STAFF_ROLES.includes(role)) {
@@ -73,10 +77,12 @@ export default function ManagerAccount() {
     status: "ACTIVE",
   });
 
+  // Thống kê dựa trên toàn bộ danh sách tài khoản
   const counts = useMemo(() => {
     const result = {
       ALL: accounts.length,
-      MANAGER: 0,
+      ADMIN: 0,
+      MANAGEMENT: 0,
       STAFF: 0,
       PASSENGER: 0,
     };
@@ -92,6 +98,7 @@ export default function ManagerAccount() {
     return result;
   }, [accounts]);
 
+  // Lọc theo nhóm và từ khóa
   const filteredAccounts = useMemo(() => {
     const keyword = searchTerm.trim().toLowerCase();
 
@@ -128,13 +135,11 @@ export default function ManagerAccount() {
   const handleOpenEdit = (account) => {
     setEditingAccount(account);
 
-    const roleId = account.role?.id || account.roleId || "";
-
     setForm({
       username: account.username || "",
       email: account.email || "",
-      roleId: String(roleId),
-      status: account.status || account.accountStatus || "ACTIVE",
+      roleId: "",
+      status: account.status || "ACTIVE",
     });
 
     setError("");
@@ -172,25 +177,24 @@ export default function ManagerAccount() {
       return;
     }
 
-    if (!form.roleId) {
-      setError("Vui lòng chọn vai trò.");
-      return;
-    }
-
     let successResult;
 
     if (!editingAccount) {
+      if (!form.roleId) {
+        setError("Vui lòng chọn vai trò.");
+        return;
+      }
+
       successResult = await createAccount({
         username: form.username.trim(),
         email: form.email.trim(),
         roleId: Number(form.roleId),
       });
     } else {
+      // Không gửi roleId khi cập nhật tài khoản
       successResult = await updateAccount(editingAccount.id, {
         username: form.username.trim(),
         email: form.email.trim(),
-        roleId: Number(form.roleId),
-        status: form.status,
       });
     }
 
@@ -222,7 +226,8 @@ export default function ManagerAccount() {
         </div>
 
         <Button variant="primary" onClick={handleOpenCreate}>
-          + Tạo tài khoản
+          <i className="bi bi-plus-lg me-2" />
+          Tạo tài khoản
         </Button>
       </div>
 
@@ -244,7 +249,7 @@ export default function ManagerAccount() {
         onCategoryChange={setActiveCategory}
       />
 
-      <div className="mb-3">
+      <div className="manager-account-search">
         <InputGroup>
           <InputGroup.Text>
             <i className="bi bi-search" />
@@ -275,7 +280,8 @@ export default function ManagerAccount() {
 
           <small className="text-muted">
             {activeCategory === "ALL" && "Tất cả tài khoản"}
-            {activeCategory === "MANAGER" && "Tài khoản quản lý"}
+            {activeCategory === "ADMIN" && "Tài khoản quản trị"}
+            {activeCategory === "MANAGEMENT" && "Tài khoản quản lý"}
             {activeCategory === "STAFF" && "Tài khoản nhân viên"}
             {activeCategory === "PASSENGER" && "Tài khoản hành khách"}
           </small>

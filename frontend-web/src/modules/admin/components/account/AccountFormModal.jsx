@@ -12,6 +12,13 @@ export default function AccountFormModal({
   onSubmit,
   onChange,
 }) {
+  const currentRole = editingAccount
+    ? editingAccount.role?.name ||
+      editingAccount.roleName ||
+      editingAccount.role ||
+      "—"
+    : "";
+
   return (
     <Modal show={show} onHide={onClose} centered>
       <Modal.Header closeButton>
@@ -51,63 +58,61 @@ export default function AccountFormModal({
               name="email"
               value={form.email}
               onChange={onChange}
-              placeholder="Nhập email nhân viên"
+              placeholder="Nhập email"
               required
             />
           </Form.Group>
 
-          <Form.Group className="mb-3">
-            <Form.Label>
-              Vai trò <span className="text-danger">*</span>
-            </Form.Label>
-
-            <Form.Select
-              name="roleId"
-              value={form.roleId}
-              onChange={onChange}
-              required
-              disabled={rolesLoading || saving}
-            >
-              <option value="">
-                {rolesLoading
-                  ? "Đang tải vai trò..."
-                  : roles.length === 0
-                    ? "Không có vai trò khả dụng"
-                    : "-- Chọn vai trò --"}
-              </option>
-
-              {roles.map((role) => (
-                <option key={role.id} value={String(role.id)}>
-                  {role.name}
-                </option>
-              ))}
-            </Form.Select>
-
-            {!rolesLoading && roles.length === 0 && (
-              <Form.Text className="text-danger">
-                Không tải được vai trò hoặc chưa có vai trò khả dụng. Vui lòng
-                kiểm tra API lấy danh sách vai trò.
-              </Form.Text>
-            )}
-          </Form.Group>
-
-          {editingAccount && (
+          {editingAccount ? (
             <Form.Group className="mb-3">
-              <Form.Label>Trạng thái</Form.Label>
+              <Form.Label>Vai trò</Form.Label>
+
+              <Form.Control type="text" value={currentRole} disabled readOnly />
+
+              <Form.Text className="text-muted">
+                Vai trò tài khoản không thể thay đổi.
+              </Form.Text>
+            </Form.Group>
+          ) : (
+            <Form.Group className="mb-3">
+              <Form.Label>
+                Vai trò <span className="text-danger">*</span>
+              </Form.Label>
 
               <Form.Select
-                name="status"
-                value={form.status}
+                name="roleId"
+                value={form.roleId}
                 onChange={onChange}
+                required
+                disabled={rolesLoading || saving}
               >
-                <option value="ACTIVE">ACTIVE</option>
-                <option value="INACTIVE">INACTIVE</option>
+                <option value="">
+                  {rolesLoading
+                    ? "Đang tải vai trò..."
+                    : roles.length === 0
+                      ? "Không có vai trò khả dụng"
+                      : "-- Chọn vai trò --"}
+                </option>
+
+                {roles.map((role) => (
+                  <option key={role.id} value={String(role.id)}>
+                    {role.name}
+                  </option>
+                ))}
               </Form.Select>
+
+              {!rolesLoading && roles.length === 0 && (
+                <Form.Text className="text-danger">
+                  Không có vai trò khả dụng. Vui lòng kiểm tra API lấy danh sách
+                  vai trò.
+                </Form.Text>
+              )}
             </Form.Group>
           )}
 
           {!editingAccount && (
             <Alert variant="light">
+              <i className="bi bi-info-circle me-2" />
               Nhân viên sẽ nhận email kích hoạt và tự thiết lập mật khẩu. Admin
               không cần tạo mật khẩu.
             </Alert>
@@ -122,7 +127,10 @@ export default function AccountFormModal({
           <Button
             variant="primary"
             type="submit"
-            disabled={saving || rolesLoading || roles.length === 0}
+            disabled={
+              saving ||
+              (!editingAccount && (rolesLoading || roles.length === 0))
+            }
           >
             {saving ? (
               <>

@@ -1,0 +1,137 @@
+.manager-account-page {
+  min-height: 100%;
+  background-color: #f8f9fc;
+}
+
+.manager-account-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.manager-account-title {
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: #202938;
+  margin-bottom: 6px;
+}
+
+.manager-account-description {
+  color: #6c757d;
+  margin-bottom: 0;
+}
+
+/* Summary cards */
+
+.account-summary-card {
+  border: 1px solid #e5e9f0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.account-summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 16px rgba(30, 50, 80, 0.08);
+}
+
+.account-summary-card.active {
+  border: 2px solid #0d6efd;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.08);
+}
+
+.account-summary-title {
+  color: #6c757d;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.account-summary-count {
+  color: #202938;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.account-summary-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f1f4f9;
+  border-radius: 12px;
+  font-size: 1.5rem;
+}
+
+/* Search */
+
+.manager-account-search {
+  margin-bottom: 18px;
+}
+
+.manager-account-search .input-group {
+  max-width: 600px;
+}
+
+.manager-account-search .form-control,
+.manager-account-search .input-group-text {
+  min-height: 42px;
+}
+
+/* Table */
+
+.manager-account-table-card {
+  border: 1px solid #e5e9f0;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(30, 50, 80, 0.04);
+}
+
+.manager-account-table-card .card-body {
+  padding: 18px;
+}
+
+.manager-account-table-card table {
+  vertical-align: middle;
+}
+
+.manager-account-table-card th {
+  white-space: nowrap;
+  font-weight: 600;
+  color: #465164;
+  font-size: 0.9rem;
+}
+
+.manager-account-table-card td {
+  font-size: 0.9rem;
+}
+
+.manager-account-table-card .badge {
+  font-weight: 500;
+  padding: 6px 9px;
+}
+
+/* Responsive */
+
+@media (max-width: 767px) {
+  .manager-account-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .manager-account-title {
+    font-size: 1.4rem;
+  }
+
+  .manager-account-header button {
+    width: 100%;
+  }
+
+  .manager-account-table-card .card-body {
+    padding: 10px;
+  }
+}
