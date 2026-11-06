@@ -1,5 +1,11 @@
 // config/roles/shore.config.js
-import { LayoutDashboard, ClipboardList, History, Ship } from "lucide-react";
+import {
+  LayoutDashboard,
+  ClipboardList,
+  History,
+  Ship,
+  MessageCircle,
+} from "lucide-react";
 
 export const shoreConfig = {
   theme: "shore",
@@ -30,6 +36,11 @@ export const shoreConfig = {
           label: "Lịch sử sử dụng",
           icon: History,
           path: "/shore/activity-visit-usages",
+        },
+        {
+          label: "Tin nhắn hành khách",
+          icon: MessageCircle,
+          path: "/shore/messages",
         },
       ],
     },
