@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/chat/conversations")
+@RequestMapping("/api/message/conversations")
 public class ConversationController {
 
     private final ConversationService conversationService;

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/chat/managers")
+@RequestMapping("/api/message/managers")
 public class ManagerController {
 
     private final ManagerService managerService;

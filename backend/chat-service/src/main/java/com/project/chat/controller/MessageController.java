@@ -17,7 +17,7 @@ import java.security.Principal;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/chat/conversations/{conversationId}/messages")
+@RequestMapping("/api/message/conversations/{conversationId}/messages")
 public class MessageController {
 
     private final MessageService messageService;
