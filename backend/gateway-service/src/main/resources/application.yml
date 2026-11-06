@@ -108,6 +108,11 @@ spring:
               predicates:
                 - Path=/api/message/**
 
+            - id: chat-websocket-service
+              uri: ${CHAT_SERVICE_WS_URL:ws://chat-service:8091}
+              predicates:
+                - Path=/ws-chat/**
+
                   # TOUR SERVICE - CONVENIENCE STAFF ASSIGNMENT
             - id: tour-convenience-staff-api
               uri: ${TOUR_SERVICE_URL:http://tour-service:8088}

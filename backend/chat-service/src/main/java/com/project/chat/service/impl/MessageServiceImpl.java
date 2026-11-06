@@ -11,7 +11,7 @@ import com.project.chat.model.enums.MessageType;
 import com.project.chat.repository.ChatMessageRepository;
 import com.project.chat.service.ChatValidator;
 import com.project.chat.service.MessageService;
-
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,14 +25,17 @@ public class MessageServiceImpl implements MessageService {
     private final ChatMessageRepository messageRepository;
     private final ChatValidator chatValidator;
     private final MessageMapper messageMapper;
+    private final SimpMessagingTemplate messagingTemplate;
 
     public MessageServiceImpl(
             ChatMessageRepository messageRepository,
             ChatValidator chatValidator,
-            MessageMapper messageMapper) {
+            MessageMapper messageMapper,
+            SimpMessagingTemplate messagingTemplate) {
         this.messageRepository = messageRepository;
         this.chatValidator = chatValidator;
         this.messageMapper = messageMapper;
+        this.messagingTemplate = messagingTemplate;
     }
 
     @Override
@@ -56,7 +59,14 @@ public class MessageServiceImpl implements MessageService {
 
         ChatMessage savedMessage = messageRepository.save(message);
 
-        return messageMapper.toResponse(savedMessage);
+        MessageResponse response = messageMapper.toResponse(savedMessage);
+
+        // Phát tin nhắn realtime đến những người đang subscribe conversation.
+        messagingTemplate.convertAndSend(
+                "/topic/conversations/" + conversationId,
+                response);
+
+        return response;
     }
 
     @Override
