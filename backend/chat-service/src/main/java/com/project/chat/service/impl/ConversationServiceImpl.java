@@ -16,6 +16,7 @@ import com.project.chat.repository.ChatConversationRepository;
 import com.project.chat.repository.ConversationParticipantRepository;
 import com.project.chat.service.ChatValidator;
 import com.project.chat.service.ConversationService;
+import com.project.chat.service.ManagerAssignmentService;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +29,7 @@ public class ConversationServiceImpl implements ConversationService {
 
     private final ChatConversationRepository conversationRepository;
     private final ConversationParticipantRepository participantRepository;
-
+    private final ManagerAssignmentService managerAssignmentService;
     private final ChatValidator chatValidator;
     private final ConversationMapper conversationMapper;
     private final ParticipantMapper participantMapper;
@@ -36,11 +37,13 @@ public class ConversationServiceImpl implements ConversationService {
     public ConversationServiceImpl(
             ChatConversationRepository conversationRepository,
             ConversationParticipantRepository participantRepository,
+            ManagerAssignmentService managerAssignmentService,
             ChatValidator chatValidator,
             ConversationMapper conversationMapper,
             ParticipantMapper participantMapper) {
         this.conversationRepository = conversationRepository;
         this.participantRepository = participantRepository;
+        this.managerAssignmentService = managerAssignmentService;
         this.chatValidator = chatValidator;
         this.conversationMapper = conversationMapper;
         this.participantMapper = participantMapper;
@@ -51,22 +54,22 @@ public class ConversationServiceImpl implements ConversationService {
     public ConversationResponse createOrGetConversation(
             CreateConversationRequest request,
             UUID userId) {
+
         ConfirmedBooking booking = chatValidator.validateBookingOwner(
                 request.bookingId(),
                 userId);
 
         ChatDepartment department = request.department();
 
-        // Nếu hội thoại đã tồn tại thì mở lại hội thoại đó.
         ChatConversation existingConversation = conversationRepository
                 .findByBooking_BookingIdAndDepartment(
                         booking.getBookingId(),
                         department)
                 .orElse(null);
 
+        // Đã có conversation trước đó.
         if (existingConversation != null) {
 
-            // Mở lại hội thoại nếu trước đó đã đóng.
             if (existingConversation.getStatus() == ConversationStatus.CLOSED) {
                 existingConversation.setStatus(ConversationStatus.ACTIVE);
                 existingConversation.setClosedAt(null);
@@ -76,19 +79,30 @@ public class ConversationServiceImpl implements ConversationService {
 
             addPassengerIfNotExists(existingConversation, userId);
 
+            // Nếu conversation chưa có Manager thì thử phân công lại.
+            // Không bắt buộc vì đây là conversation đã tồn tại.
+            if (existingConversation.getStatus() == ConversationStatus.ACTIVE) {
+                managerAssignmentService.ensureActiveManager(
+                        existingConversation,
+                        false);
+            }
+
             return conversationMapper.toResponse(existingConversation);
         }
 
+        // Chưa có conversation: tạo mới.
         ChatConversation conversation = new ChatConversation();
-
         conversation.setBooking(booking);
         conversation.setDepartment(department);
         conversation.setStatus(ConversationStatus.ACTIVE);
 
         ChatConversation savedConversation = conversationRepository.save(conversation);
 
-        // Thêm Passenger tạo hội thoại vào participant.
         addPassengerIfNotExists(savedConversation, userId);
+
+        managerAssignmentService.assignManager(
+                savedConversation,
+                true);
 
         return conversationMapper.toResponse(savedConversation);
     }

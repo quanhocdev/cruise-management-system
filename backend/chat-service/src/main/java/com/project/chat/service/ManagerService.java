@@ -3,7 +3,7 @@ package com.project.chat.service;
 import com.project.chat.client.InternalUserClient;
 import com.project.chat.dto.response.ManagerInfoResponse;
 import org.springframework.stereotype.Service;
-
+import java.util.UUID;
 import java.util.List;
 import java.util.Set;
 
@@ -32,5 +32,12 @@ public class ManagerService {
         }
 
         return internalUserClient.getManagersByRoleName(normalizedRole);
+    }
+
+    public List<UUID> getManagerIdsByRoleName(String roleName) {
+        return getManagersByRoleName(roleName)
+                .stream()
+                .map(ManagerInfoResponse::userId)
+                .toList();
     }
 }

@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+import com.project.common.event.ManagerStatusChangedEvent;
+
 @Component
 public class ManagerStatusChangedEventPublisher {
 
@@ -28,13 +30,20 @@ public class ManagerStatusChangedEventPublisher {
     public void handleManagerStatusChanged(
             ManagerStatusChangedApplicationEvent event) {
 
+        ManagerStatusChangedEvent kafkaEvent = new ManagerStatusChangedEvent(
+                event.userId(),
+                event.roleName(),
+                event.previousStatus().name(),
+                event.newStatus().name(),
+                event.changedAt());
+
         kafkaTemplate.send(
                 topic,
                 event.userId().toString(),
-                event).whenComplete((result, exception) -> {
+                kafkaEvent).whenComplete((result, exception) -> {
                     if (exception != null) {
                         log.error(
-                                "Không thể gửi ManagerStatusChangedEvent lên Kafka. userId={}, role={}",
+                                "Không thể gửi ManagerStatusChangedEvent. userId={}, role={}",
                                 event.userId(),
                                 event.roleName(),
                                 exception);
