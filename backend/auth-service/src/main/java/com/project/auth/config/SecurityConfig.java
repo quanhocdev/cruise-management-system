@@ -118,6 +118,9 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/passenger/**")
                                                 .hasAuthority("SCOPE_PASSENGER")
 
+                                                .requestMatchers("/api/internal/users/**")
+                                                .hasAuthority("SCOPE_manager.read")
+
                                                 .requestMatchers("/internal/staff/**")
                                                 .hasAuthority("SCOPE_staff.read")
 

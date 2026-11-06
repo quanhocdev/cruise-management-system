@@ -52,8 +52,25 @@ public class RegisteredClientConfig {
                                                 .build())
                                 .build();
 
+                // Chat Service: dùng để gọi API nội bộ lấy danh sách quản lý
+                RegisteredClient chatService = RegisteredClient.withId(
+                                UUID.randomUUID().toString())
+                                .clientId("chat-service")
+                                .clientSecret(passwordEncoder.encode("chat-service-secret"))
+                                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                                .scope("manager.read")
+                                .tokenSettings(TokenSettings.builder()
+                                                .accessTokenTimeToLive(Duration.ofMinutes(10))
+                                                .build())
+                                .clientSettings(ClientSettings.builder()
+                                                .requireAuthorizationConsent(false)
+                                                .build())
+                                .build();
+
                 return new InMemoryRegisteredClientRepository(
                                 bookingService,
-                                tourService);
+                                tourService,
+                                chatService);
         }
 }
