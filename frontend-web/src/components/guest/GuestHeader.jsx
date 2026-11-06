@@ -1,5 +1,4 @@
-// src/components/guest/GuestHeader.jsx
-
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Container,
@@ -9,6 +8,7 @@ import {
   Form,
   InputGroup,
   Dropdown,
+  Modal,
 } from "react-bootstrap";
 import { useAuth } from "../../context/AuthContext";
 import { getRedirectPathByRole } from "../../routes/roleRoutes";
@@ -18,122 +18,201 @@ export default function GuestHeader() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
   const handleLogout = async () => {
     await logout();
   };
 
+  const handleMessagesClick = () => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    if (user.role === "PASSENGER") {
+      navigate("/passenger/messages");
+      return;
+    }
+
+    // Tài khoản không phải Passenger không sử dụng chức năng này.
+    setShowLoginModal(true);
+  };
+
+  const handleGoToLogin = () => {
+    setShowLoginModal(false);
+    navigate("/login");
+  };
+
   return (
-    <Navbar
-      bg="white"
-      expand="lg"
-      className="guest-header shadow-sm sticky-top"
-    >
-      <Container>
-        <Navbar.Brand as={Link} to="/" className="fw-bold text-primary fs-4">
-          🚢 CruiseTour
-        </Navbar.Brand>
+    <>
+      <Navbar
+        bg="white"
+        expand="lg"
+        className="guest-header shadow-sm sticky-top"
+      >
+        <Container>
+          <Navbar.Brand as={Link} to="/" className="fw-bold text-primary fs-4">
+            🚢 CruiseTour
+          </Navbar.Brand>
 
-        <Navbar.Toggle aria-controls="guest-navbar-nav" />
+          <Navbar.Toggle aria-controls="guest-navbar-nav" />
 
-        <Navbar.Collapse id="guest-navbar-nav">
-          <Nav className="me-auto ms-4 gap-3">
-            <Nav.Link as={Link} to="/" className="fw-medium">
-              Trang chủ
-            </Nav.Link>
-            <Nav.Link as={Link} to="/tours" className="fw-medium">
-              Khám phá Tour
-            </Nav.Link>
-            <Nav.Link as={Link} to="/about" className="fw-medium">
-              Về chúng tôi
-            </Nav.Link>
-            <Nav.Link as={Link} to="/contact" className="fw-medium">
-              Liên hệ
-            </Nav.Link>
-          </Nav>
+          <Navbar.Collapse id="guest-navbar-nav">
+            <Nav className="me-auto ms-4 gap-3">
+              <Nav.Link as={Link} to="/" className="fw-medium">
+                Trang chủ
+              </Nav.Link>
 
-          {/* Thanh tìm kiếm tĩnh */}
-          <Form className="d-none d-lg-flex me-3">
-            <InputGroup className="search-input-group">
-              <InputGroup.Text className="bg-light border-end-0">
-                🔍
-              </InputGroup.Text>
-              <Form.Control
-                type="text"
-                placeholder="Tìm kiếm điểm đến, du thuyền..."
-                className="bg-light border-start-0 shadow-none"
-                readOnly
-              />
-            </InputGroup>
-          </Form>
+              <Nav.Link as={Link} to="/tours" className="fw-medium">
+                Khám phá Tour
+              </Nav.Link>
 
-          {/* Khu vực hiển thị theo trạng thái Đăng nhập */}
-          <div className="d-flex align-items-center gap-2 mt-3 mt-lg-0">
-            {user ? (
-              // TRƯỜNG HỢP ĐÃ ĐĂNG NHẬP: Hiển thị tên/role và Dropdown hoặc nút Đăng xuất
-              <Dropdown align="end">
-                <Dropdown.Toggle
-                  variant="outline-primary"
-                  size="sm"
-                  className="rounded-pill px-3 fw-semibold d-flex align-items-center gap-2"
+              <Nav.Link as={Link} to="/about" className="fw-medium">
+                Về chúng tôi
+              </Nav.Link>
+
+              <Nav.Link as={Link} to="/contact" className="fw-medium">
+                Liên hệ
+              </Nav.Link>
+
+              {(!user || user.role === "PASSENGER") && (
+                <Nav.Link
+                  as="button"
+                  type="button"
+                  onClick={handleMessagesClick}
+                  className="fw-medium border-0 bg-transparent"
                 >
-                  <span>👤 {user.username}</span>
-                  <span className="badge bg-primary text-light small">
-                    {user.role}
-                  </span>
-                </Dropdown.Toggle>
+                  💬 Tin nhắn
+                </Nav.Link>
+              )}
+            </Nav>
 
-                <Dropdown.Menu className="shadow border-0 py-2 rounded-3 mt-2">
-                  {user.role === "PASSENGER" && (
+            {/* Thanh tìm kiếm */}
+            <Form className="d-none d-lg-flex me-3">
+              <InputGroup className="search-input-group">
+                <InputGroup.Text className="bg-light border-end-0">
+                  🔍
+                </InputGroup.Text>
+
+                <Form.Control
+                  type="text"
+                  placeholder="Tìm kiếm điểm đến, du thuyền..."
+                  className="bg-light border-start-0 shadow-none"
+                  readOnly
+                />
+              </InputGroup>
+            </Form>
+
+            {/* Khu vực tài khoản */}
+            <div className="d-flex align-items-center gap-2 mt-3 mt-lg-0">
+              {user ? (
+                <Dropdown align="end">
+                  <Dropdown.Toggle
+                    variant="outline-primary"
+                    size="sm"
+                    className="rounded-pill px-3 fw-semibold d-flex align-items-center gap-2"
+                  >
+                    <span>👤 {user.username}</span>
+
+                    <span className="badge bg-primary text-light small">
+                      {user.role}
+                    </span>
+                  </Dropdown.Toggle>
+
+                  <Dropdown.Menu className="shadow border-0 py-2 rounded-3 mt-2">
+                    {user.role === "PASSENGER" && (
+                      <Dropdown.Item
+                        as={Link}
+                        to="/passenger/bookings"
+                        className="py-2 small fw-medium"
+                      >
+                        🎫 Tour đã đặt của tôi
+                      </Dropdown.Item>
+                    )}
+
                     <Dropdown.Item
                       as={Link}
-                      to="/passenger/bookings"
+                      to={getRedirectPathByRole(user.role)}
                       className="py-2 small fw-medium"
                     >
-                      🎫 Tour đã đặt của tôi
+                      📊 Trang Dashboard
                     </Dropdown.Item>
-                  )}
-                  <Dropdown.Item
+
+                    <Dropdown.Divider />
+
+                    <Dropdown.Item
+                      onClick={handleLogout}
+                      className="py-2 small text-danger fw-semibold"
+                    >
+                      🚪 Đăng xuất
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              ) : (
+                <>
+                  <Button
                     as={Link}
-                    to={getRedirectPathByRole(user.role)}
-                    className="py-2 small fw-medium"
+                    to="/login"
+                    variant="outline-primary"
+                    size="sm"
+                    className="px-3"
                   >
-                    📊 Trang Dashboard
-                  </Dropdown.Item>
-                  <Dropdown.Divider />
-                  <Dropdown.Item
-                    onClick={handleLogout}
-                    className="py-2 small text-danger fw-semibold"
+                    Đăng nhập
+                  </Button>
+
+                  <Button
+                    as={Link}
+                    to="/register"
+                    variant="primary"
+                    size="sm"
+                    className="px-3"
                   >
-                    🚪 Đăng xuất
-                  </Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
-            ) : (
-              // TRƯỜNG HỢP CHƯA ĐĂNG NHẬP: Hiển thị nút Đăng nhập & Đăng ký
-              <>
-                <Button
-                  as={Link}
-                  to="/login"
-                  variant="outline-primary"
-                  size="sm"
-                  className="px-3"
-                >
-                  Đăng nhập
-                </Button>
-                <Button
-                  as={Link}
-                  to="/register"
-                  variant="primary"
-                  size="sm"
-                  className="px-3"
-                >
-                  Đăng ký
-                </Button>
-              </>
-            )}
-          </div>
-        </Navbar.Collapse>
-      </Container>
-    </Navbar>
+                    Đăng ký
+                  </Button>
+                </>
+              )}
+            </div>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
+
+      {/* Modal yêu cầu đăng nhập */}
+      <Modal
+        show={showLoginModal}
+        onHide={() => setShowLoginModal(false)}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Đăng nhập để sử dụng tin nhắn</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body className="text-center py-4">
+          <div className="fs-1 mb-3">💬</div>
+
+          <p className="mb-2">
+            Vui lòng đăng nhập bằng tài khoản hành khách để liên hệ với các
+            phòng ban trên du thuyền.
+          </p>
+
+          <small className="text-muted">
+            Bạn cần có tài khoản Passenger để sử dụng chức năng này.
+          </small>
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button
+            variant="outline-secondary"
+            onClick={() => setShowLoginModal(false)}
+          >
+            Để sau
+          </Button>
+
+          <Button variant="primary" onClick={handleGoToLogin}>
+            Đăng nhập ngay
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </>
   );
 }

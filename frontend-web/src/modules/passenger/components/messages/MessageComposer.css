@@ -1,0 +1,37 @@
+/* src/modules/passenger/components/messages/MessageComposer.css */
+
+.passenger-message-composer {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 15px 18px;
+  background: #fff;
+  border-top: 1px solid #edf0f4;
+}
+
+.passenger-message-composer textarea {
+  min-height: 43px;
+  max-height: 120px;
+  resize: vertical;
+  padding: 11px 14px;
+  border-radius: 22px;
+  background: #f7f9fc;
+  border-color: #e5eaf0;
+  font-size: 14px;
+}
+
+.passenger-message-composer textarea:focus {
+  background: #fff;
+  box-shadow: none;
+  border-color: #86b7fe;
+}
+
+.passenger-message-composer button {
+  width: 43px;
+  height: 43px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 50%;
+}

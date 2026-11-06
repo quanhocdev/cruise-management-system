@@ -3,7 +3,7 @@ import SockJS from "sockjs-client";
 
 const getSocketUrl = () => {
   const apiBaseUrl =
-    import.meta.env.VITE_API_BASE_URL || window.location.origin;
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
 
   const gatewayUrl = apiBaseUrl.replace(/\/api\/?$/, "").replace(/\/$/, "");
 

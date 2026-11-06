@@ -1,0 +1,131 @@
+/* src/modules/passenger/components/messages/ChatWindow.css */
+
+.passenger-chat-window {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+
+.passenger-chat-header {
+  min-height: 76px;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #edf0f4;
+}
+
+.passenger-chat-header-avatar {
+  width: 43px;
+  height: 43px;
+  display: grid;
+  place-items: center;
+  color: #0d6efd;
+  background: #e8f1ff;
+  border-radius: 50%;
+}
+
+.passenger-chat-header h6 {
+  margin: 0 0 4px;
+  font-weight: 700;
+}
+
+.passenger-chat-header span {
+  color: #84909d;
+  font-size: 12px;
+}
+
+.passenger-chat-status {
+  margin-left: auto;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 11px !important;
+  font-weight: 600;
+}
+
+.passenger-chat-status.active {
+  color: #16834a;
+  background: #e7f7ee;
+}
+
+.passenger-chat-status.closed {
+  color: #7b8490;
+  background: #edf0f3;
+}
+
+.passenger-chat-messages {
+  flex: 1;
+  min-height: 250px;
+  overflow-y: auto;
+  padding: 18px 22px;
+  background: #fafbfd;
+}
+
+.passenger-chat-loading,
+.passenger-chat-empty,
+.passenger-chat-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #84909d;
+  text-align: center;
+}
+
+.passenger-chat-loading {
+  min-height: 200px;
+}
+
+.passenger-chat-empty {
+  min-height: 200px;
+}
+
+.passenger-chat-empty p {
+  margin: 0;
+  color: #475569;
+  font-weight: 600;
+}
+
+.passenger-chat-empty small {
+  font-size: 12px;
+}
+
+.passenger-chat-placeholder {
+  flex: 1;
+  padding: 30px;
+  background: #fafbfd;
+}
+
+.passenger-chat-placeholder h5 {
+  margin: 0;
+  color: #344054;
+}
+
+.passenger-chat-placeholder p {
+  max-width: 360px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.passenger-chat-closed-notice {
+  padding: 11px 18px;
+  color: #856404;
+  background: #fff3cd;
+  text-align: center;
+  font-size: 12px;
+}
+
+@media (max-width: 767px) {
+  .passenger-chat-window {
+    min-height: 500px;
+  }
+
+  .passenger-chat-messages {
+    padding: 14px;
+  }
+}
