@@ -1,0 +1,57 @@
+.shore-message-composer {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 16px 20px;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+}
+
+.shore-message-composer textarea {
+  flex: 1;
+  min-height: 43px;
+  max-height: 130px;
+  resize: vertical;
+  padding: 12px 14px;
+  color: #334155;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  outline: none;
+  font: inherit;
+  font-size: 13px;
+}
+
+.shore-message-composer textarea:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgb(56 189 248 / 12%);
+}
+
+.shore-message-composer textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.shore-message-composer button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 43px;
+  height: 43px;
+  color: #ffffff;
+  background: #0369a1;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.shore-message-composer button:hover:not(:disabled) {
+  background: #075985;
+}
+
+.shore-message-composer button:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+}

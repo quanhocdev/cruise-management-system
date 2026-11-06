@@ -1,4 +1,5 @@
 import { MessageCircle, Search, UserRound } from "lucide-react";
+import { useState } from "react";
 
 import "./ConversationList.css";
 
@@ -14,11 +15,21 @@ const formatTime = (value) => {
 };
 
 const ConversationList = ({
-  conversations,
+  conversations = [],
   selectedConversationId,
   onSelect,
   loading,
 }) => {
+  const [keyword, setKeyword] = useState("");
+
+  const filteredConversations = conversations.filter((conversation) => {
+    const searchValue = `${conversation.bookingCode || ""} ${
+      conversation.bookingId || ""
+    }`.toLowerCase();
+
+    return searchValue.includes(keyword.trim().toLowerCase());
+  });
+
   return (
     <aside className="shore-conversation-list">
       <div className="shore-conversation-header">
@@ -38,22 +49,25 @@ const ConversationList = ({
         <input
           type="text"
           placeholder="Tìm theo mã booking..."
-          onChange={(event) => {
-            // Sẽ bổ sung tìm kiếm ở bước sau.
-          }}
+          value={keyword}
+          onChange={(event) => setKeyword(event.target.value)}
         />
       </div>
 
       <div className="shore-conversation-items">
         {loading ? (
           <div className="shore-conversation-empty">Đang tải hội thoại...</div>
-        ) : conversations.length === 0 ? (
+        ) : filteredConversations.length === 0 ? (
           <div className="shore-conversation-empty">
             <MessageCircle size={28} />
-            <span>Chưa có cuộc hội thoại nào</span>
+            <span>
+              {keyword
+                ? "Không tìm thấy cuộc hội thoại"
+                : "Chưa có cuộc hội thoại nào"}
+            </span>
           </div>
         ) : (
-          conversations.map((conversation) => {
+          filteredConversations.map((conversation) => {
             const selected = conversation.id === selectedConversationId;
 
             return (
