@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import com.project.auth.dto.ShoreStaffResponse;
 import com.project.auth.model.Users;
+import com.project.auth.model.enums.UserStatus;
 
 @Repository
 public interface UserRepository extends JpaRepository<Users, UUID> {
@@ -83,4 +84,8 @@ public interface UserRepository extends JpaRepository<Users, UUID> {
               AND u.enabled = true
             """)
     List<ShoreStaffResponse> findAllOnboardStaffResponses();
+
+    List<Users> findAllByRole_IdAndEnabledTrueAndStatus(
+            Long roleId,
+            UserStatus status);
 }
