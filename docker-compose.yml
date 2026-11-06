@@ -138,6 +138,28 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    # PostgreSQL cho Chat Service
+  postgres-chat:
+    image: postgres:15-alpine
+    container_name: cruise_postgres_chat
+    restart: always
+    environment:
+      POSTGRES_DB: chat_service_db
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5441:5432"
+    volumes:
+      - postgres_chat_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER:-postgres} -d chat_service_db",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # Redis
   redis:
@@ -254,6 +276,7 @@ services:
       NOTIFICATION_SERVICE_URL: http://notification-service:8086
       TOUR_SERVICE_URL: http://tour-service:8088
       # FEEDBACK_SERVICE_URL: http://feedback-service:8089
+      CHAT_SERVICE_URL: http://chat-service:8091
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
     depends_on:
       - auth-service
@@ -261,6 +284,7 @@ services:
       - booking-service
       - payment-service
       - notification-service
+      - chat-service
       # - feedback-service
 
   # Auth Service
@@ -422,6 +446,33 @@ services:
       kafka:
         condition: service_started
 
+    # Chat Service
+  chat-service:
+    build:
+      context: .
+      dockerfile: backend/chat-service/Dockerfile.dev
+    container_name: chat-service
+    restart: always
+    ports:
+      - "8091:8091"
+    working_dir: /app/chat-service
+    volumes:
+      - ./backend/chat-service/src:/app/chat-service/src
+      - ./backend/common/src:/app/common/src
+      - /app/chat-service/target
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-chat:5432/chat_service_db
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    depends_on:
+      postgres-chat:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
   # ==========================
   # Feedback Service
   # ==========================
@@ -481,4 +532,5 @@ volumes:
   postgres_payment_data:
   postgres_notification_data:
   postgres_feedback_data:
+  postgres_chat_data:
   kafka_data:
