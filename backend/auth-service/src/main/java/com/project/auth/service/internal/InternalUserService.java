@@ -1,6 +1,6 @@
-package com.project.auth.service;
+package com.project.auth.service.internal;
 
-import com.project.auth.dto.ManagerInfoResponse;
+import com.project.auth.dto.response.ManagerInfoResponse;
 
 import java.util.List;
 

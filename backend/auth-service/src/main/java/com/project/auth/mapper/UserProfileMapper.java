@@ -1,4 +1,3 @@
-
 package com.project.auth.mapper;
 
 import com.project.auth.dto.UserProfileRequest;
@@ -13,12 +12,13 @@ public final class UserProfileMapper {
     }
 
     /**
-     * Chuyển dữ liệu request vào entity đang tồn tại.
-     * Không thay đổi user, id, createdAt và updatedAt.
+     * Cập nhật thông tin cá nhân.
+     * Không thay đổi user, id, avatar, createdAt và updatedAt.
      */
     public static void updateEntity(
             UserProfile profile,
             UserProfileRequest request) {
+
         profile.setFullName(request.fullName());
         profile.setDateOfBirth(request.dateOfBirth());
         profile.setPhone(request.phone());
@@ -26,13 +26,13 @@ public final class UserProfileMapper {
         profile.setGender(request.gender());
         profile.setNationality(request.nationality());
         profile.setIdentityNumber(request.identityNumber());
-        profile.setAvatarUrl(request.avatarUrl());
     }
 
     /**
      * Chuyển entity thành response.
      */
     public static UserProfileResponse toResponse(UserProfile profile) {
+
         UUID userId = profile.getUser().getId();
 
         return new UserProfileResponse(
@@ -45,7 +45,7 @@ public final class UserProfileMapper {
                 profile.getGender(),
                 profile.getNationality(),
                 profile.getIdentityNumber(),
-                profile.getAvatarUrl(),
+                profile.getAvatarPublicId(),
                 profile.getCreatedAt(),
                 profile.getUpdatedAt());
     }

@@ -1,4 +1,4 @@
-package com.project.auth.dto;
+package com.project.auth.dto.response;
 
 import java.util.UUID;
 
