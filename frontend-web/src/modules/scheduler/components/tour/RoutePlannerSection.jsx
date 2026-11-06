@@ -1,7 +1,4 @@
 // src/modules/scheduler/components/tour/RoutePlannerSection.jsx
-// (FILE MỚI) Khối "Lập tuyến đường cho Tour" của trang ManagerTour:
-// bản đồ chọn cảng, kết quả tuyến đường và nút tạo Tour.
-// CSS: dùng chung styles/ManagerSchedule.css (các class scheduler-route-*)
 
 import { RefreshCw, Route, Trash2, Navigation, Plus } from "lucide-react";
 
@@ -50,27 +47,21 @@ function RoutePlannerSection({
   onClear,
   onCreate,
 }) {
+  const hint = !departurePortId
+    ? "Bước 1: nhấn vào một cảng trên bản đồ để chọn cảng khởi hành."
+    : !destinationPortId
+      ? "Bước 2: nhấn vào cảng thứ hai để chọn cảng đến."
+      : !routePreview
+        ? "Bước 3: nhấn “Tính tuyến đường” để xem trước tuyến."
+        : "Tuyến đường đã sẵn sàng. Nhấn “Tạo Tour từ tuyến đường” để tiếp tục.";
+
   return (
     <section className="scheduler-route-section">
-      <div className="scheduler-route-heading">
-        <div className="scheduler-route-heading-icon">
-          <Route size={21} />
-        </div>
-
-        <div>
-          <h3>Lập tuyến đường cho Tour</h3>
-          <p>
-            Chọn cảng khởi hành và cảng đến trên bản đồ để xem trước tuyến
-            đường biển.
-          </p>
-        </div>
-      </div>
-
       <div className="scheduler-route-layout">
         <div className="scheduler-route-map-container">
           {loadingPorts ? (
             <div className="scheduler-route-map-loading">
-              <RefreshCw className="spin" size={22} />
+              <RefreshCw className="scheduler-route-spin" size={22} />
               <span>Đang tải danh sách cảng...</span>
             </div>
           ) : (
@@ -85,6 +76,8 @@ function RoutePlannerSection({
         </div>
 
         <div className="scheduler-route-sidebar">
+          <p className="scheduler-route-hint">{hint}</p>
+
           <PortCard
             label="Cảng khởi hành"
             dotClass="departure-dot"
@@ -110,7 +103,7 @@ function RoutePlannerSection({
             >
               {routeLoading ? (
                 <>
-                  <RefreshCw size={16} className="spin" />
+                  <RefreshCw size={16} className="scheduler-route-spin" />
                   Đang tính tuyến...
                 </>
               ) : (
@@ -170,21 +163,6 @@ function RoutePlannerSection({
               </p>
             </div>
           )}
-
-          <div className="scheduler-route-legend">
-            <div>
-              <span className="scheduler-route-dot departure-dot" />
-              Cảng khởi hành
-            </div>
-            <div>
-              <span className="scheduler-route-dot destination-dot" />
-              Cảng đến
-            </div>
-            <div>
-              <span className="scheduler-route-dot normal-port-dot" />
-              Cảng khác
-            </div>
-          </div>
         </div>
       </div>
 

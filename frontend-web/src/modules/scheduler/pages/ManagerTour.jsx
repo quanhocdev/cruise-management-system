@@ -1,16 +1,16 @@
 // src/modules/scheduler/pages/ManagerTour.jsx
-// (SỬA file có sẵn) Khối lập tuyến đường đã tách sang components/tour/RoutePlannerSection.jsx
+// (SỬA file có sẵn) Trang danh sách Tour: thống kê + bảng + nút "Tạo Tour mới".
+// Phần lập tuyến đường đã chuyển sang pages/TourRoutePlanner.jsx
+// (route: /scheduler/tours/new).
 
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { RefreshCw, X } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Plus, RefreshCw, X } from "lucide-react";
 
 import useTours from "../hooks/useTours";
-import useSchedulerRoute from "../hooks/useSchedulerRoute";
 
 import TourTable from "../components/tour/TourTable";
 import TourFormModal from "../components/tour/TourFormModal";
-import RoutePlannerSection from "../components/tour/RoutePlannerSection";
 
 import "../styles/ManagerTour.css";
 import "../styles/ManagerSchedule.css";
@@ -39,6 +39,7 @@ const SUMMARY_ITEMS = [
 
 export default function ManagerTour() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const {
     tours,
@@ -49,13 +50,10 @@ export default function ManagerTour() {
     setError,
     setSuccess,
     loadTours,
-    createTour,
     updateTour,
     deleteTour,
     submitForApproval,
   } = useTours();
-
-  const route = useSchedulerRoute();
 
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [showForm, setShowForm] = useState(false);
@@ -74,6 +72,16 @@ export default function ManagerTour() {
     refreshTours();
   }, [refreshTours]);
 
+  // Nhận thông báo thành công từ trang lập tuyến (navigate kèm state),
+  // hiển thị một lần rồi xóa state để F5 không hiện lại.
+  useEffect(() => {
+    const message = location.state?.successMessage;
+    if (!message) return;
+
+    setSuccess?.(message);
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.state, location.pathname, navigate, setSuccess]);
+
   const filteredTours =
     statusFilter === "ALL"
       ? tours
@@ -84,22 +92,7 @@ export default function ManagerTour() {
       ? tours.filter((tour) => tour.status === status).length
       : tours.length;
 
-  // ---------- FORM ----------
-  const openCreateForm = () => {
-    if (!route.departurePortId || !route.destinationPortId) {
-      setError?.("Vui lòng chọn cảng khởi hành và cảng đến.");
-      return;
-    }
-
-    if (!route.routePreview) {
-      setError?.("Vui lòng tính tuyến đường trước khi tạo Tour.");
-      return;
-    }
-
-    setSelectedTour(null);
-    setShowForm(true);
-  };
-
+  // ---------- FORM (chỉ còn dùng để SỬA Tour) ----------
   const handleEdit = (tour) => {
     setSelectedTour(tour);
     setShowForm(true);
@@ -113,15 +106,12 @@ export default function ManagerTour() {
   };
 
   const handleSubmitForm = async (formData) => {
+    if (!selectedTour) return;
+
     setFormLoading(true);
 
     try {
-      if (selectedTour) {
-        await updateTour(selectedTour.id, formData);
-      } else {
-        // Tạo Tour và lưu tuyến đường đã tính
-        await route.handleCreateTourWithRoute(formData);
-      }
+      await updateTour(selectedTour.id, formData);
 
       setShowForm(false);
       setSelectedTour(null);
@@ -166,24 +156,39 @@ export default function ManagerTour() {
     navigate(`/scheduler/tours/${tour.id}/schedules`);
   };
 
+  const handleCreateTour = () => {
+    navigate("/scheduler/tours/new");
+  };
+
   return (
     <div className="manager-tour-page">
       {/* PAGE HEADER */}
       <div className="manager-tour-header">
         <div>
           <h2>Quản lý Tour</h2>
-          <p>Lập tuyến đường, tạo Tour và quản lý các hành trình du thuyền.</p>
+          <p>Theo dõi trạng thái và quản lý các hành trình du thuyền.</p>
         </div>
 
-        <button
-          type="button"
-          className="manager-tour-refresh-btn"
-          onClick={refreshTours}
-          disabled={loading}
-        >
-          <RefreshCw size={16} />
-          Làm mới
-        </button>
+        <div className="manager-tour-header-actions">
+          <button
+            type="button"
+            className="manager-tour-refresh-btn"
+            onClick={refreshTours}
+            disabled={loading}
+          >
+            <RefreshCw size={16} className={loading ? "spin" : undefined} />
+            Làm mới
+          </button>
+
+          <button
+            type="button"
+            className="manager-tour-create-btn"
+            onClick={handleCreateTour}
+          >
+            <Plus size={17} />
+            Tạo Tour mới
+          </button>
+        </div>
       </div>
 
       {/* NOTIFICATIONS */}
@@ -212,23 +217,6 @@ export default function ManagerTour() {
           </button>
         </div>
       )}
-
-      {/* ROUTE PLANNER */}
-      <RoutePlannerSection
-        ports={route.ports}
-        departurePort={route.departurePort}
-        destinationPort={route.destinationPort}
-        departurePortId={route.departurePortId}
-        destinationPortId={route.destinationPortId}
-        routePreview={route.routePreview}
-        loadingPorts={route.loadingPorts}
-        routeLoading={route.routeLoading}
-        routeError={route.routeError}
-        onSelectPort={route.handleSelectPort}
-        onPreview={route.handlePreviewRoute}
-        onClear={route.clearRouteSelection}
-        onCreate={openCreateForm}
-      />
 
       {/* TOUR SUMMARY */}
       <section className="manager-tour-summary">
