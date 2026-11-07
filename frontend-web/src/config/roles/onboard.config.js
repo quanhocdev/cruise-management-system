@@ -7,6 +7,7 @@ import {
   Activity,
   ListChecks,
   History,
+  MessageCircle,
 } from "lucide-react";
 
 export const onboardConfig = {
@@ -38,6 +39,11 @@ export const onboardConfig = {
           label: "Cấu hình hoạt động",
           icon: Activity,
           path: "/onboard/activity-cruise",
+        },
+        {
+          label: "Tin nhắn hành khách",
+          icon: MessageCircle,
+          path: "/onboard/messages",
         },
         {
           label: "Lịch sử sử dụng",

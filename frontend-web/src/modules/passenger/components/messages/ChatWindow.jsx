@@ -18,9 +18,6 @@ const DEPARTMENT_LABELS = {
 
 const PASSENGER_ROLES = ["PASSENGER", "CUSTOMER", "USER", "CLIENT"];
 
-// Tin của hành khách đang đăng nhập -> bên phải.
-// 1) So sánh ID (ép về string để tránh lệch number/string).
-// 2) Nếu không có ID để so sánh thì dựa vào role của người gửi.
 const checkIsMine = (message, currentUserId) => {
   if (currentUserId != null && message.senderUserId != null) {
     return String(message.senderUserId) === String(currentUserId);

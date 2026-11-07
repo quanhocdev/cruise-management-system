@@ -11,7 +11,11 @@ const normalizeList = (data) => {
   if (Array.isArray(data?.data)) return data.data;
   return [];
 };
-
+const sortMessagesOldestFirst = (data) => {
+  return normalizeList(data).sort(
+    (a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime(),
+  );
+};
 export default function usePassengerMessages() {
   // Booking đã xác nhận thanh toán, lấy từ Chat Service
   const [bookings, setBookings] = useState([]);
@@ -140,7 +144,7 @@ export default function usePassengerMessages() {
         passengerMessageService.getParticipants(conversationId),
       ]);
 
-      setMessages(normalizeList(messageData));
+      setMessages(sortMessagesOldestFirst(messageData));
       setParticipants(normalizeList(participantData));
     } catch (err) {
       setError(
@@ -188,7 +192,7 @@ export default function usePassengerMessages() {
 
           if (existed) return current;
 
-          return [...current, incomingMessage];
+          return sortMessagesOldestFirst([...current, incomingMessage]);
         });
 
         setConversations((current) =>
@@ -255,7 +259,7 @@ export default function usePassengerMessages() {
 
           if (existed) return current;
 
-          return [...current, sentMessage];
+          return sortMessagesOldestFirst([...current, sentMessage]);
         });
 
         setConversations((current) =>

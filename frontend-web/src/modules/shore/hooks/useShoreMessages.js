@@ -10,7 +10,11 @@ const normalizeList = (data) => {
 
   return [];
 };
-
+const sortMessagesOldestFirst = (data) => {
+  return normalizeList(data).sort(
+    (a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime(),
+  );
+};
 const useShoreMessages = () => {
   const [conversations, setConversations] = useState([]);
   const [selectedConversationId, setSelectedConversationId] = useState(null);
@@ -40,7 +44,7 @@ const useShoreMessages = () => {
 
       if (exists) return previous;
 
-      return [...previous, newMessage];
+      return sortMessagesOldestFirst([...previous, newMessage]);
     });
   }, []);
 
@@ -91,7 +95,7 @@ const useShoreMessages = () => {
       if (selectedIdRef.current !== conversationId) return;
 
       setParticipants(normalizeList(participantData));
-      setMessages(normalizeList(messageData));
+      setMessages(sortMessagesOldestFirst(messageData));
     } catch (err) {
       console.error("LOAD CHAT MESSAGES ERROR:", err);
       setError(err);
