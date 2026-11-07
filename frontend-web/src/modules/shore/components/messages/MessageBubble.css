@@ -1,21 +1,81 @@
+@keyframes shore-message-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(14px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes shore-message-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-14px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
 .shore-message-row {
   display: flex;
+  align-items: flex-end;
+  gap: 8px;
   width: 100%;
-  margin-bottom: 17px;
+  margin-bottom: 3px;
 }
 
+.shore-message-row.last {
+  margin-bottom: 14px;
+}
+
+/* Shore (mình) -> bên phải */
 .shore-message-row.mine {
+  flex-direction: row;
   justify-content: flex-end;
+  animation: shore-message-in-right 0.25s ease-out;
 }
 
+/* Hành khách -> bên trái */
 .shore-message-row.theirs {
+  flex-direction: row;
   justify-content: flex-start;
+  animation: shore-message-in-left 0.25s ease-out;
+}
+
+.shore-message-avatar-slot {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+}
+
+.shore-message-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgb(15 23 42 / 12%);
+}
+
+.shore-message-avatar.passenger {
+  color: #475569;
+  background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+}
+
+.shore-message-avatar.shore {
+  color: #ffffff;
+  background: linear-gradient(135deg, #0ea5e9, #0369a1);
 }
 
 .shore-message-content {
   display: flex;
   flex-direction: column;
-  max-width: min(72%, 600px);
+  max-width: min(68%, 560px);
 }
 
 .shore-message-row.mine .shore-message-content {
@@ -27,45 +87,131 @@
 }
 
 .shore-message-sender {
-  margin-bottom: 5px;
+  margin: 0 6px 4px;
   color: #64748b;
   font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
 }
 
 .shore-message-bubble {
   display: flex;
   align-items: flex-start;
-  gap: 7px;
-  padding: 11px 14px;
-  color: #334155;
-  background: #f1f5f9;
-  border-radius: 13px 13px 13px 3px;
+  gap: 8px;
+  padding: 10px 15px;
   font-size: 14px;
   line-height: 1.5;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
+.shore-message-bubble:hover {
+  transform: translateY(-1px);
+}
+
+/* ---- Hành khách: trắng, viền nhạt, bên trái ---- */
+.shore-message-row.theirs .shore-message-bubble {
+  color: #1e293b;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  box-shadow: 0 2px 6px rgb(15 23 42 / 6%);
+}
+
+.shore-message-row.theirs.first .shore-message-bubble {
+  border-top-left-radius: 18px;
+}
+
+.shore-message-row.theirs:not(.first) .shore-message-bubble {
+  border-top-left-radius: 5px;
+}
+
+.shore-message-row.theirs:not(.last) .shore-message-bubble {
+  border-bottom-left-radius: 5px;
+}
+
+.shore-message-row.theirs.last .shore-message-bubble {
+  border-bottom-left-radius: 5px;
+}
+
+/* ---- Shore: gradient xanh, bên phải ---- */
 .shore-message-row.mine .shore-message-bubble {
   color: #ffffff;
-  background: #0369a1;
-  border-radius: 13px 13px 3px 13px;
+  background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+  border-radius: 18px;
+  box-shadow: 0 4px 12px rgb(3 105 161 / 28%);
 }
 
-.shore-message-time {
-  margin-top: 5px;
+.shore-message-row.mine:not(.first) .shore-message-bubble {
+  border-top-right-radius: 5px;
+}
+
+.shore-message-row.mine:not(.last) .shore-message-bubble {
+  border-bottom-right-radius: 5px;
+}
+
+.shore-message-row.mine.last .shore-message-bubble {
+  border-bottom-right-radius: 5px;
+}
+
+.shore-message-file-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 22%);
+}
+
+.shore-message-row.theirs .shore-message-file-icon {
+  color: #0369a1;
+  background: #e0f2fe;
+}
+
+.shore-message-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 6px 0;
   color: #94a3b8;
-  font-size: 10px;
+  font-size: 10.5px;
+}
+
+.shore-message-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: #94a3b8;
+}
+
+.shore-message-status.read {
+  color: #0ea5e9;
+}
+
+.shore-message-status em {
+  font-style: normal;
+  font-weight: 600;
 }
 
 .shore-message-system {
   width: fit-content;
   max-width: 80%;
   margin: 12px auto;
-  padding: 7px 13px;
-  color: #64748b;
-  background: #f8fafc;
+  padding: 6px 14px;
+  color: #475569;
+  background: #e2e8f0;
   border-radius: 20px;
   text-align: center;
   font-size: 11px;
+}
+
+@media (max-width: 768px) {
+  .shore-message-content {
+    max-width: 78%;
+  }
 }
