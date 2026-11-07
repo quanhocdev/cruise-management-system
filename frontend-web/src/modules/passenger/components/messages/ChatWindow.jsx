@@ -16,12 +16,22 @@ const DEPARTMENT_LABELS = {
   SCHEDULER: "Điều phối",
 };
 
+const PASSENGER_ROLES = ["PASSENGER", "CUSTOMER", "USER", "CLIENT"];
+
 // Tin của hành khách đang đăng nhập -> bên phải.
-// Ép về string để tránh lệch number/string giữa user.id và senderUserId.
-const checkIsMine = (message, currentUserId) =>
-  currentUserId != null &&
-  message.senderUserId != null &&
-  String(message.senderUserId) === String(currentUserId);
+// 1) So sánh ID (ép về string để tránh lệch number/string).
+// 2) Nếu không có ID để so sánh thì dựa vào role của người gửi.
+const checkIsMine = (message, currentUserId) => {
+  if (currentUserId != null && message.senderUserId != null) {
+    return String(message.senderUserId) === String(currentUserId);
+  }
+
+  const role = String(
+    message.senderRole || message.senderType || "",
+  ).toUpperCase();
+
+  return PASSENGER_ROLES.includes(role);
+};
 
 const getDayKey = (value) => (value ? new Date(value).toDateString() : "");
 

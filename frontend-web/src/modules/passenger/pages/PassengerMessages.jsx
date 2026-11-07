@@ -22,6 +22,7 @@ export default function PassengerMessages() {
     selectedConversation,
     selectedConversationId,
     messages,
+    participants,
 
     loading,
     messagesLoading,
@@ -34,6 +35,12 @@ export default function PassengerMessages() {
     sendMessage,
     socketConnected,
   } = usePassengerMessages();
+
+  // `user` từ AuthContext chỉ có username và role (không có ID), nên lấy ID
+  // của hành khách từ danh sách participants của cuộc trò chuyện.
+  const currentUserId = participants.find(
+    (participant) => participant.participantRole === "PASSENGER",
+  )?.userId;
 
   const handleCreateConversation = async (bookingId, department) => {
     try {
@@ -94,7 +101,7 @@ export default function PassengerMessages() {
             <ChatWindow
               conversation={selectedConversation}
               messages={messages}
-              currentUserId={user?.id}
+              currentUserId={currentUserId ?? user?.id}
               loading={messagesLoading}
               sending={sending}
               error={null}
