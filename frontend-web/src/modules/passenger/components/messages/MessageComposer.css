@@ -4,34 +4,61 @@
   display: flex;
   align-items: flex-end;
   gap: 10px;
-  padding: 15px 18px;
+  padding: 14px 18px 16px;
   background: #fff;
-  border-top: 1px solid #edf0f4;
+  border-top: 1px solid #e2e8f0;
 }
 
 .passenger-message-composer textarea {
-  min-height: 43px;
+  min-height: 46px;
   max-height: 120px;
-  resize: vertical;
-  padding: 11px 14px;
-  border-radius: 22px;
-  background: #f7f9fc;
-  border-color: #e5eaf0;
+  resize: none;
+  padding: 12px 18px;
+  border-radius: 24px;
+  background: #f1f5f9;
+  border: 1px solid transparent;
   font-size: 14px;
+  line-height: 1.4;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .passenger-message-composer textarea:focus {
   background: #fff;
-  box-shadow: none;
-  border-color: #86b7fe;
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.18);
 }
 
 .passenger-message-composer button {
-  width: 43px;
-  height: 43px;
+  width: 46px;
+  height: 46px;
   flex-shrink: 0;
   display: grid;
   place-items: center;
   padding: 0;
+  border: none;
   border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  box-shadow: 0 4px 12px rgba(29, 78, 216, 0.35);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    filter 0.15s ease;
+}
+
+.passenger-message-composer button:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 6px 16px rgba(29, 78, 216, 0.45);
+  filter: brightness(1.05);
+}
+
+.passenger-message-composer button:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.passenger-message-composer button:disabled {
+  background: #cbd5e1;
+  box-shadow: none;
 }

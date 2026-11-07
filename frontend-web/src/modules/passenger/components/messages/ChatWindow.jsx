@@ -1,8 +1,8 @@
 // src/modules/passenger/components/messages/ChatWindow.jsx
 
-import { useEffect, useRef } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import { Alert, Spinner } from "react-bootstrap";
-import { MessageCircle } from "lucide-react";
+import { Headset, MessageCircle } from "lucide-react";
 
 import MessageBubble from "./MessageBubble";
 import MessageComposer from "./MessageComposer";
@@ -14,6 +14,33 @@ const DEPARTMENT_LABELS = {
   FINANCE: "Tài chính",
   SHORE: "Hoạt động bờ",
   SCHEDULER: "Điều phối",
+};
+
+// Tin của hành khách đang đăng nhập -> bên phải.
+// Ép về string để tránh lệch number/string giữa user.id và senderUserId.
+const checkIsMine = (message, currentUserId) =>
+  currentUserId != null &&
+  message.senderUserId != null &&
+  String(message.senderUserId) === String(currentUserId);
+
+const getDayKey = (value) => (value ? new Date(value).toDateString() : "");
+
+const formatDayLabel = (value) => {
+  if (!value) return "";
+
+  const date = new Date(value);
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+
+  if (date.toDateString() === today.toDateString()) return "Hôm nay";
+  if (date.toDateString() === yesterday.toDateString()) return "Hôm qua";
+
+  return date.toLocaleDateString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
 };
 
 export default function ChatWindow({
@@ -36,7 +63,9 @@ export default function ChatWindow({
   if (!conversation) {
     return (
       <div className="passenger-chat-placeholder">
-        <MessageCircle size={54} />
+        <div className="passenger-chat-placeholder-icon">
+          <MessageCircle size={40} />
+        </div>
         <h5>Chọn cuộc trò chuyện</h5>
         <p>
           Chọn một cuộc trò chuyện hoặc bắt đầu trao đổi với phòng ban liên quan
@@ -47,19 +76,55 @@ export default function ChatWindow({
   }
 
   const isClosed = conversation.status === "CLOSED";
+  const departmentLabel =
+    DEPARTMENT_LABELS[conversation.department] || conversation.department;
+
+  const renderMessages = () =>
+    messages.map((message, index) => {
+      const prev = messages[index - 1];
+      const next = messages[index + 1];
+
+      const isSystem = message.messageType === "SYSTEM";
+      const isMine = checkIsMine(message, currentUserId);
+
+      const sameGroup = (other) =>
+        other &&
+        other.messageType !== "SYSTEM" &&
+        checkIsMine(other, currentUserId) === isMine &&
+        getDayKey(other.sentAt) === getDayKey(message.sentAt);
+
+      const isFirstInGroup = !sameGroup(prev);
+      const isLastInGroup = !sameGroup(next);
+      const showDay = getDayKey(prev?.sentAt) !== getDayKey(message.sentAt);
+
+      return (
+        <Fragment key={message.id}>
+          {showDay && message.sentAt && (
+            <div className="passenger-chat-day">
+              <span>{formatDayLabel(message.sentAt)}</span>
+            </div>
+          )}
+
+          <MessageBubble
+            message={message}
+            isMine={isMine}
+            senderLabel={departmentLabel}
+            isFirstInGroup={isSystem || isFirstInGroup}
+            isLastInGroup={isSystem || isLastInGroup}
+          />
+        </Fragment>
+      );
+    });
 
   return (
     <section className="passenger-chat-window">
       <header className="passenger-chat-header">
         <div className="passenger-chat-header-avatar">
-          <MessageCircle size={22} />
+          <Headset size={22} />
         </div>
 
         <div>
-          <h6>
-            {DEPARTMENT_LABELS[conversation.department] ||
-              conversation.department}
-          </h6>
+          <h6>{departmentLabel}</h6>
 
           <span>
             {conversation.bookingCode || `Booking #${conversation.bookingId}`}
@@ -92,13 +157,7 @@ export default function ChatWindow({
             <small>Hãy gửi lời chào để bắt đầu cuộc trò chuyện.</small>
           </div>
         ) : (
-          messages.map((message) => (
-            <MessageBubble
-              key={message.id}
-              message={message}
-              isMine={message.senderUserId === currentUserId}
-            />
-          ))
+          renderMessages()
         )}
 
         <div ref={messagesEndRef} />
