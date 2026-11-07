@@ -1,7 +1,6 @@
 // src/modules/passenger/hooks/usePassengerMessages.js
 
 import { useCallback, useEffect, useState } from "react";
-import usePassengerBookings from "./usePassengerBookings";
 import passengerMessageService from "../services/passengerMessageService";
 import chatSocketService from "../../shore/services/chatSocketService";
 
@@ -14,12 +13,10 @@ const normalizeList = (data) => {
 };
 
 export default function usePassengerMessages() {
-  const {
-    bookings,
-    loading: bookingsLoading,
-    error: bookingsError,
-    loadMyBookings,
-  } = usePassengerBookings();
+  // Booking đã xác nhận thanh toán, lấy từ Chat Service
+  const [bookings, setBookings] = useState([]);
+  const [bookingsLoading, setBookingsLoading] = useState(false);
+  const [bookingsError, setBookingsError] = useState("");
 
   const [conversations, setConversations] = useState([]);
   const [selectedConversationId, setSelectedConversationId] = useState(null);
@@ -35,6 +32,28 @@ export default function usePassengerMessages() {
 
   const selectedConversation =
     conversations.find((item) => item.id === selectedConversationId) || null;
+
+  // Load booking đã xác nhận thanh toán từ Chat Service
+  const loadConfirmedBookings = useCallback(async () => {
+    setBookingsLoading(true);
+    setBookingsError("");
+
+    try {
+      const data = await passengerMessageService.getConfirmedBookings();
+      const list = normalizeList(data);
+
+      setBookings(list);
+    } catch (err) {
+      setBookings([]);
+
+      setBookingsError(
+        err.response?.data?.message ||
+          "Không thể tải danh sách booking đã xác nhận.",
+      );
+    } finally {
+      setBookingsLoading(false);
+    }
+  }, []);
 
   // Load danh sách hội thoại
   const loadConversations = useCallback(async () => {
@@ -76,7 +95,7 @@ export default function usePassengerMessages() {
 
     try {
       const conversation = await passengerMessageService.createConversation({
-        bookingId,
+        bookingId: Number(bookingId),
         department,
       });
 
@@ -214,8 +233,7 @@ export default function usePassengerMessages() {
     }
   }, [selectedConversationId, loadConversationDetails]);
 
-  // Gửi tin nhắn qua REST.
-  // WebSocket sẽ phát tin nhắn đến các thành viên trong hội thoại.
+  // Gửi tin nhắn qua REST
   const sendMessage = useCallback(
     async (content) => {
       const trimmedContent = content?.trim();
@@ -231,8 +249,7 @@ export default function usePassengerMessages() {
           trimmedContent,
         );
 
-        // Thêm tin nhắn từ kết quả REST.
-        // Nếu WebSocket đã nhận trước thì không thêm trùng.
+        // Tránh thêm trùng nếu WebSocket đã nhận tin nhắn
         setMessages((current) => {
           const existed = current.some((item) => item.id === sentMessage.id);
 
@@ -268,9 +285,9 @@ export default function usePassengerMessages() {
 
   // Khởi tạo dữ liệu
   useEffect(() => {
-    loadMyBookings();
+    loadConfirmedBookings();
     loadConversations();
-  }, [loadMyBookings, loadConversations]);
+  }, [loadConfirmedBookings, loadConversations]);
 
   return {
     bookings,
@@ -290,6 +307,7 @@ export default function usePassengerMessages() {
     socketConnected,
     error,
 
+    loadConfirmedBookings,
     loadConversations,
     createConversation,
     selectConversation,

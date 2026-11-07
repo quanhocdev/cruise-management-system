@@ -34,10 +34,19 @@ spring:
               uri: ${NOTIFICATION_SERVICE_URL:http://notification-service:8086}
               predicates:
                 - Path=/api/v1/notifications/**
-            - id: notification-websocket-service
+
+            # NOTIFICATION SERVICE - SOCKJS HTTP
+            - id: notification-sockjs
+              uri: ${NOTIFICATION_SERVICE_URL:http://notification-service:8086}
+              predicates:
+                - Path=/ws-notification/**
+
+            # NOTIFICATION SERVICE - WEBSOCKET
+            - id: notification-websocket
               uri: ${NOTIFICATION_SERVICE_WS_URL:ws://notification-service:8086}
               predicates:
                 - Path=/ws-notification/**
+                - Header=Upgrade,websocket
 
             # FEEDBACK SERVICE
             - id: feedback-service
@@ -112,8 +121,16 @@ spring:
               predicates:
                 - Path=/api/message/**
 
-            - id: chat-websocket-service
+            # CHAT SERVICE - WEBSOCKET
+            - id: chat-websocket
               uri: ${CHAT_SERVICE_WS_URL:ws://chat-service:8091}
+              predicates:
+                - Path=/ws-chat/**
+                - Header=Upgrade,websocket
+
+            # CHAT SERVICE - SOCKJS HTTP
+            - id: chat-sockjs
+              uri: ${CHAT_SERVICE_URL:http://chat-service:8091}
               predicates:
                 - Path=/ws-chat/**
 

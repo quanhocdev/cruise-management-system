@@ -157,3 +157,123 @@
     border-bottom: 1px solid #e9edf2;
   }
 }
+/* Booking cards */
+
+.passenger-booking-card {
+  margin: 12px;
+  padding: 14px;
+  border: 1px solid #e5eaf0;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.passenger-booking-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.passenger-booking-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  color: #0d6efd;
+  background: #e8f1ff;
+  border-radius: 10px;
+}
+
+.passenger-booking-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.passenger-booking-info strong {
+  overflow-wrap: anywhere;
+  font-size: 14px;
+}
+
+.passenger-booking-info small {
+  color: #84909d;
+  font-size: 11px;
+}
+
+.passenger-booking-details {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 12px 0;
+  margin-top: 10px;
+  border-top: 1px solid #edf0f4;
+  border-bottom: 1px solid #edf0f4;
+}
+
+.passenger-booking-details div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+}
+
+.passenger-booking-details span {
+  color: #84909d;
+}
+
+.passenger-booking-details strong {
+  text-align: right;
+  color: #334155;
+}
+
+.passenger-booking-departments {
+  margin-top: 12px;
+}
+
+.passenger-booking-department-title {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+}
+
+.passenger-booking-department-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.passenger-booking-department-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  text-align: left;
+  white-space: normal;
+}
+
+.passenger-booking-department-button span {
+  font-size: 12px;
+}
+
+.passenger-booking-department-button small {
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.passenger-conversation-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  color: #84909d;
+  font-size: 12px;
+}
+
+.passenger-conversation-item {
+  transition: background 0.2s;
+}

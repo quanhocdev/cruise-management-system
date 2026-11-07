@@ -35,6 +35,10 @@ const passengerMessageService = {
     );
     return response.data?.data ?? response.data;
   },
+  getConfirmedBookings: async () => {
+    const response = await api.get(`${BASE_URL}/bookings`);
+    return response.data?.data ?? response.data;
+  },
 
   async sendMessage(conversationId, content) {
     const response = await api.post(

@@ -84,6 +84,7 @@ export default function PassengerMessages() {
               conversations={conversations}
               selectedConversationId={selectedConversationId}
               bookingsLoading={bookingsLoading}
+              bookingsError={bookingsError}
               loading={loading}
               creating={creating}
               onSelect={selectConversation}

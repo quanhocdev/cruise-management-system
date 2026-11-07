@@ -1,8 +1,8 @@
 // src/modules/passenger/components/messages/ConversationList.jsx
 
 import { useState } from "react";
-import { Button, Form, Spinner } from "react-bootstrap";
-import { MessageCircle, Plus, Search } from "lucide-react";
+import { Button, Spinner } from "react-bootstrap";
+import { MessageCircle, Search } from "lucide-react";
 import "./ConversationList.css";
 
 const DEPARTMENTS = [
@@ -13,22 +13,27 @@ const DEPARTMENTS = [
   { value: "SCHEDULER", label: "Điều phối" },
 ];
 
-const DEPARTMENT_LABELS = Object.fromEntries(
-  DEPARTMENTS.map((item) => [item.value, item.label]),
-);
+const getBookingId = (booking) => booking.bookingId;
 
 const getBookingLabel = (booking) =>
-  booking.bookingCode || booking.code || `Booking #${booking.id}`;
+  booking.bookingCode || `Booking #${getBookingId(booking)}`;
 
-const formatTime = (value) => {
-  if (!value) return "";
+const formatDate = (value) => {
+  if (!value) return "Chưa có thông tin";
 
   return new Date(value).toLocaleString("vi-VN", {
-    hour: "2-digit",
-    minute: "2-digit",
     day: "2-digit",
     month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
+};
+
+const formatAmount = (value) => {
+  if (value == null) return "Chưa có thông tin";
+
+  return Number(value).toLocaleString("vi-VN") + " VNĐ";
 };
 
 export default function ConversationList({
@@ -36,21 +41,19 @@ export default function ConversationList({
   conversations = [],
   selectedConversationId,
   bookingsLoading,
+  bookingsError,
   loading,
   creating,
   onSelect,
   onCreate,
 }) {
   const [keyword, setKeyword] = useState("");
-  const [bookingId, setBookingId] = useState("");
-  const [department, setDepartment] = useState("SHORE");
-  const [showCreateForm, setShowCreateForm] = useState(false);
 
-  const filteredConversations = conversations.filter((item) => {
+  const filteredBookings = bookings.filter((booking) => {
     const searchText = [
-      item.bookingCode,
-      item.bookingId,
-      DEPARTMENT_LABELS[item.department] || item.department,
+      booking.bookingCode,
+      booking.bookingId,
+      booking.recipientName,
     ]
       .join(" ")
       .toLowerCase();
@@ -58,14 +61,17 @@ export default function ConversationList({
     return searchText.includes(keyword.trim().toLowerCase());
   });
 
-  const handleCreate = async (event) => {
-    event.preventDefault();
+  const getConversation = (bookingId, department) =>
+    conversations.find(
+      (item) =>
+        String(item.bookingId) === String(bookingId) &&
+        item.department === department,
+    );
 
-    if (!bookingId || !department) return;
+  const handleDepartmentClick = async (bookingId, department) => {
+    if (creating) return;
 
     await onCreate(bookingId, department);
-    setShowCreateForm(false);
-    setBookingId("");
   };
 
   return (
@@ -73,83 +79,9 @@ export default function ConversationList({
       <div className="passenger-conversation-header">
         <div>
           <h5>Tin nhắn</h5>
-          <p>Trao đổi với các phòng ban</p>
+          <p>Chọn booking và phòng ban cần hỗ trợ</p>
         </div>
-
-        <Button
-          variant="primary"
-          size="sm"
-          title="Tạo cuộc trò chuyện"
-          onClick={() => setShowCreateForm((value) => !value)}
-        >
-          <Plus size={17} />
-        </Button>
       </div>
-
-      {showCreateForm && (
-        <Form className="passenger-create-conversation" onSubmit={handleCreate}>
-          <h6>Bắt đầu cuộc trò chuyện</h6>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Chọn booking</Form.Label>
-
-            <Form.Select
-              value={bookingId}
-              onChange={(event) => setBookingId(event.target.value)}
-              disabled={bookingsLoading || creating}
-              required
-            >
-              <option value="">
-                {bookingsLoading
-                  ? "Đang tải booking..."
-                  : "Chọn booking của bạn"}
-              </option>
-
-              {bookings.map((booking) => (
-                <option key={booking.id} value={booking.id}>
-                  {getBookingLabel(booking)}
-                </option>
-              ))}
-            </Form.Select>
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Phòng ban cần liên hệ</Form.Label>
-
-            <Form.Select
-              value={department}
-              onChange={(event) => setDepartment(event.target.value)}
-              disabled={creating}
-            >
-              {DEPARTMENTS.map((item) => (
-                <option key={item.value} value={item.value}>
-                  {item.label}
-                </option>
-              ))}
-            </Form.Select>
-          </Form.Group>
-
-          <div className="d-flex gap-2">
-            <Button
-              type="button"
-              variant="light"
-              className="flex-grow-1"
-              onClick={() => setShowCreateForm(false)}
-              disabled={creating}
-            >
-              Hủy
-            </Button>
-
-            <Button
-              type="submit"
-              className="flex-grow-1"
-              disabled={!bookingId || creating}
-            >
-              {creating ? <Spinner size="sm" animation="border" /> : "Bắt đầu"}
-            </Button>
-          </div>
-        </Form>
-      )}
 
       <div className="passenger-conversation-search">
         <Search size={17} />
@@ -157,61 +89,127 @@ export default function ConversationList({
         <input
           value={keyword}
           onChange={(event) => setKeyword(event.target.value)}
-          placeholder="Tìm cuộc trò chuyện..."
+          placeholder="Tìm mã booking..."
         />
       </div>
 
       <div className="passenger-conversation-items">
-        {loading ? (
+        {bookingsLoading ? (
           <div className="passenger-conversation-state">
             <Spinner animation="border" size="sm" />
-            <span>Đang tải cuộc trò chuyện...</span>
+            <span>Đang tải booking...</span>
           </div>
-        ) : filteredConversations.length === 0 ? (
+        ) : bookingsError ? (
+          <div className="passenger-conversation-empty">
+            <p>Không thể tải danh sách booking</p>
+            <small>{bookingsError}</small>
+          </div>
+        ) : filteredBookings.length === 0 ? (
           <div className="passenger-conversation-empty">
             <MessageCircle size={30} />
-            <p>Chưa có cuộc trò chuyện nào</p>
-            <small>Chọn booking và phòng ban để bắt đầu trao đổi.</small>
+            <p>
+              {bookings.length === 0
+                ? "Bạn chưa có booking nào được xác nhận"
+                : "Không tìm thấy booking"}
+            </p>
+            <small>Booking đã xác nhận thanh toán sẽ xuất hiện tại đây.</small>
           </div>
         ) : (
-          filteredConversations.map((conversation) => (
-            <button
-              type="button"
-              key={conversation.id}
-              className={`passenger-conversation-item ${
-                selectedConversationId === conversation.id ? "active" : ""
-              }`}
-              onClick={() => onSelect(conversation.id)}
-            >
-              <div className="passenger-conversation-avatar">
-                <MessageCircle size={20} />
-              </div>
+          filteredBookings.map((booking) => {
+            const bookingId = getBookingId(booking);
 
-              <div className="passenger-conversation-info">
-                <div className="passenger-conversation-top">
-                  <strong>
-                    {DEPARTMENT_LABELS[conversation.department] ||
-                      conversation.department}
-                  </strong>
+            return (
+              <div className="passenger-booking-card" key={bookingId}>
+                <div className="passenger-booking-card-header">
+                  <div className="passenger-booking-icon">
+                    <MessageCircle size={20} />
+                  </div>
 
-                  <small>{formatTime(conversation.updatedAt)}</small>
+                  <div className="passenger-booking-info">
+                    <strong>{getBookingLabel(booking)}</strong>
+                    <small>Xác nhận: {formatDate(booking.confirmedAt)}</small>
+                  </div>
                 </div>
 
-                <span>
-                  {conversation.bookingCode ||
-                    `Booking #${conversation.bookingId}`}
-                </span>
+                <div className="passenger-booking-details">
+                  <div>
+                    <span>Người đặt</span>
+                    <strong>
+                      {booking.recipientName || "Chưa có thông tin"}
+                    </strong>
+                  </div>
 
-                <small className="passenger-conversation-status">
-                  {conversation.status === "CLOSED"
-                    ? "Đã đóng"
-                    : "Đang hoạt động"}
-                </small>
+                  <div>
+                    <span>Số hành khách</span>
+                    <strong>{booking.numberPassengers ?? 0}</strong>
+                  </div>
+
+                  <div>
+                    <span>Tổng tiền</span>
+                    <strong>{formatAmount(booking.totalAmount)}</strong>
+                  </div>
+                </div>
+
+                <div className="passenger-booking-departments">
+                  <span className="passenger-booking-department-title">
+                    Liên hệ phòng ban
+                  </span>
+
+                  <div className="passenger-booking-department-list">
+                    {DEPARTMENTS.map((department) => {
+                      const conversation = getConversation(
+                        bookingId,
+                        department.value,
+                      );
+
+                      const isSelected =
+                        conversation &&
+                        conversation.id === selectedConversationId;
+
+                      return (
+                        <Button
+                          key={department.value}
+                          size="sm"
+                          variant={
+                            isSelected
+                              ? "primary"
+                              : conversation
+                                ? "outline-primary"
+                                : "light"
+                          }
+                          className="passenger-booking-department-button"
+                          disabled={creating}
+                          onClick={() =>
+                            handleDepartmentClick(bookingId, department.value)
+                          }
+                          title={department.label}
+                        >
+                          <span>{department.label}</span>
+
+                          {conversation && (
+                            <small>
+                              {conversation.status === "CLOSED"
+                                ? "Đã đóng"
+                                : "Đã có hội thoại"}
+                            </small>
+                          )}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
-            </button>
-          ))
+            );
+          })
         )}
       </div>
+
+      {loading && (
+        <div className="passenger-conversation-footer">
+          <Spinner animation="border" size="sm" />
+          <span>Đang tải hội thoại...</span>
+        </div>
+      )}
     </aside>
   );
 }

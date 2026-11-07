@@ -23,7 +23,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // Điểm kết nối (Endpoint) để Frontend (React) trỏ tới khi khởi tạo Socket
         registry.addEndpoint("/ws-notification")
-                .setAllowedOriginPatterns("*") // Cho phép các nguồn (origins) kết nối vào
-                .withSockJS(); // Hỗ trợ fallback sang SockJS nếu trình duyệt không hỗ trợ WebSocket thuần
+                .setAllowedOriginPatterns("http://localhost:5173")
+                .withSockJS();
     }
 }
