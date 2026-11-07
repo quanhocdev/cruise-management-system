@@ -32,7 +32,7 @@ public class SecurityConfig {
                         "/api/auth/refresh",
                         "/api/auth/verify-email",
                         "/api/auth/logout",
-
+                        "/ws-notification/**",
                         "/api/webhook/**",
                         "/api/chat/**",
 
@@ -63,7 +63,12 @@ public class SecurityConfig {
                 CorsConfiguration configuration = new CorsConfiguration();
 
                 configuration.setAllowedOrigins(
-                                List.of(allowedOrigins.split(",")));
+                                List.of(allowedOrigins.split(","))
+                                                .stream()
+                                                .map(String::trim)
+                                                .filter(origin -> !origin.isBlank())
+                                                .distinct()
+                                                .toList());
 
                 configuration.setAllowedMethods(
                                 List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
@@ -116,6 +121,7 @@ public class SecurityConfig {
                                 .authorizeExchange(exchange -> exchange
                                                 .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                                 .pathMatchers("/ws-booking/**").permitAll()
+                                                .pathMatchers("/ws-notification/**").permitAll()
                                                 .pathMatchers(PUBLIC_ENDPOINTS).permitAll()
                                                 .anyExchange().authenticated())
                                 .oauth2ResourceServer(resourceServer -> resourceServer

@@ -7,7 +7,6 @@ import java.util.List;
 
 import jakarta.servlet.http.Cookie;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -15,14 +14,9 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableMethodSecurity
@@ -35,8 +29,6 @@ public class SecurityConfig {
             JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
 
         return http
-                .cors(cors -> {
-                })
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
@@ -45,10 +37,8 @@ public class SecurityConfig {
                                 "/actuator/info")
                         .permitAll()
 
-                        // WebSocket xác thực riêng tại STOMP CONNECT.
                         .requestMatchers("/ws-chat/**").permitAll()
 
-                        // REST API bắt buộc đăng nhập.
                         .requestMatchers("/api/chat/**").authenticated()
 
                         .anyRequest().authenticated())
@@ -141,43 +131,4 @@ public class SecurityConfig {
         return converter;
     }
 
-    /**
-     * CORS cho React frontend.
-     */
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource(
-            @Value("${cors.allowed-origins:http://localhost:5173}") String allowedOrigins) {
-
-        CorsConfiguration config = new CorsConfiguration();
-
-        List<String> origins = List.of(
-                allowedOrigins.split(",")).stream()
-                .map(String::trim)
-                .filter(origin -> !origin.isBlank())
-                .toList();
-
-        config.setAllowedOrigins(origins);
-
-        config.setAllowedMethods(List.of(
-                "GET",
-                "POST",
-                "PUT",
-                "PATCH",
-                "DELETE",
-                "OPTIONS"));
-
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true);
-
-        config.setExposedHeaders(List.of(
-                "Authorization",
-                "Set-Cookie"));
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-
-        source.registerCorsConfiguration("/api/**", config);
-        source.registerCorsConfiguration("/ws-chat/**", config);
-
-        return source;
-    }
 }

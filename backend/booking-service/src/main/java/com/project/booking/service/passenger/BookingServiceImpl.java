@@ -290,6 +290,7 @@ public class BookingServiceImpl implements BookingService {
             System.out.println(">>> [SERVICE] Đã cập nhật đơn hàng #" + bookingId + " thành CONFIRMED.");
 
             BookingConfirmedEvent confirmedEvent = new BookingConfirmedEvent(
+                    savedBooking.getId(),
                     savedBooking.getCreatedByUserId(),
                     savedBooking.getPrimaryContactEmail(),
                     savedBooking.getPrimaryContactName(),
