@@ -4,7 +4,6 @@ import useOnboardMessages from "../hooks/useOnboardMessages";
 
 import ConversationList from "../components/messages/ConversationList";
 import ChatWindow from "../components/messages/ChatWindow";
-
 import "./OnboardMessages.css";
 
 const OnboardMessages = () => {
