@@ -1,12 +1,13 @@
 package com.project.chat.service;
 
+import com.project.chat.dto.ConfirmedBookingResponse;
 import com.project.chat.model.ConfirmedBooking;
 import com.project.chat.repository.ConfirmedBookingRepository;
 import com.project.common.event.BookingConfirmedEvent;
-
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.util.UUID;
 import java.time.Instant;
 
 @Service
@@ -45,4 +46,19 @@ public class ConfirmedBookingService {
 
         confirmedBookingRepository.save(booking);
     }
+    @Transactional(readOnly = true)
+public List<ConfirmedBookingResponse> getMyConfirmedBookings(UUID userId) {
+    return confirmedBookingRepository
+            .findByPrimaryHolderUserIdOrderByConfirmedAtDesc(userId)
+            .stream()
+            .map(booking -> new ConfirmedBookingResponse(
+                    booking.getBookingId(),
+                    booking.getBookingCode(),
+                    booking.getRecipientName(),
+                    booking.getNumberPassengers(),
+                    booking.getTotalAmount(),
+                    booking.getConfirmedAt()
+            ))
+            .toList();
+}
 }
