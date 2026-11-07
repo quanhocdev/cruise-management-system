@@ -2,8 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import passengerMessageService from "../services/passengerMessageService";
-import chatSocketService from "../../shore/services/chatSocketService";
-
+import chatSocketService from "../../chat/services/chatSocketService";
 const normalizeList = (data) => {
   if (Array.isArray(data)) return data;
   if (Array.isArray(data?.content)) return data.content;

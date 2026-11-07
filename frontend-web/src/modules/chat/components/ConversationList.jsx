@@ -49,19 +49,19 @@ const ConversationList = ({
   }, [conversations, keyword]);
 
   return (
-    <div className="onboard-conversation-list">
-      <div className="onboard-conversation-header">
+    <div className="chat-conversation-list">
+      <div className="chat-conversation-header">
         <div>
           <h2>Hội thoại</h2>
           <span>{conversations.length} cuộc trò chuyện</span>
         </div>
 
-        <div className="onboard-conversation-header-icon">
+        <div className="chat-conversation-header-icon">
           <MessageCircle size={20} />
         </div>
       </div>
 
-      <div className="onboard-conversation-search">
+      <div className="chat-conversation-search">
         <Search size={17} />
 
         <input
@@ -72,14 +72,14 @@ const ConversationList = ({
         />
       </div>
 
-      <div className="onboard-conversation-items">
+      <div className="chat-conversation-items">
         {loading ? (
-          <div className="onboard-conversation-state">
-            <div className="onboard-conversation-spinner" />
+          <div className="chat-conversation-state">
+            <div className="chat-conversation-spinner" />
             <span>Đang tải hội thoại...</span>
           </div>
         ) : filteredConversations.length === 0 ? (
-          <div className="onboard-conversation-state">
+          <div className="chat-conversation-state">
             <MessageCircle size={30} />
             <span>
               {keyword
@@ -98,37 +98,37 @@ const ConversationList = ({
               <button
                 type="button"
                 key={conversation.id}
-                className={`onboard-conversation-item ${
+                className={`chat-conversation-item ${
                   isSelected ? "selected" : ""
                 }`}
                 onClick={() => onSelect(conversation.id)}
               >
-                <div className="onboard-conversation-avatar">
+                <div className="chat-conversation-avatar">
                   <UserRound size={21} />
                 </div>
 
-                <div className="onboard-conversation-info">
-                  <div className="onboard-conversation-top">
+                <div className="chat-conversation-info">
+                  <div className="chat-conversation-top">
                     <strong>
                       {conversation.bookingCode
                         ? `Booking ${conversation.bookingCode}`
                         : `Booking #${conversation.bookingId || conversation.id}`}
                     </strong>
 
-                    <span className="onboard-conversation-time">
+                    <span className="chat-conversation-time">
                       {formatTime(
                         conversation.updatedAt || conversation.createdAt,
                       )}
                     </span>
                   </div>
 
-                  <div className="onboard-conversation-bottom">
-                    <span className="onboard-conversation-department">
-                      {conversation.department || "ONBOARD"}
+                  <div className="chat-conversation-bottom">
+                    <span className="chat-conversation-department">
+                      {conversation.department || ""}
                     </span>
 
                     <span
-                      className={`onboard-conversation-status ${
+                      className={`chat-conversation-status ${
                         isClosed ? "closed" : "active"
                       }`}
                     >

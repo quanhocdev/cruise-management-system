@@ -3,7 +3,7 @@ import { Send } from "lucide-react";
 
 import "./MessageComposer.css";
 
-const MessageComposer = ({ onSend, sending, disabled }) => {
+const MessageComposer = ({ onSend, sending }) => {
   const [content, setContent] = useState("");
 
   const handleSubmit = async (event) => {
@@ -11,13 +11,13 @@ const MessageComposer = ({ onSend, sending, disabled }) => {
 
     const value = content.trim();
 
-    if (!value || sending || disabled) return;
+    if (!value || sending) return;
 
     try {
       await onSend(value);
       setContent("");
-    } catch {
-      // Giữ nội dung để người dùng có thể gửi lại.
+    } catch (error) {
+      console.error("CHAT COMPOSER SEND ERROR:", error);
     }
   };
 
@@ -29,20 +29,19 @@ const MessageComposer = ({ onSend, sending, disabled }) => {
   };
 
   return (
-    <form className="onboard-message-composer" onSubmit={handleSubmit}>
+    <form className="chat-message-composer" onSubmit={handleSubmit}>
       <textarea
         value={content}
         onChange={(event) => setContent(event.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder={disabled ? "Cuộc hội thoại đã đóng" : "Nhập tin nhắn..."}
+        placeholder="Nhập tin nhắn..."
         rows={1}
-        maxLength={5000}
-        disabled={disabled || sending}
+        disabled={sending}
       />
 
       <button
         type="submit"
-        disabled={!content.trim() || sending || disabled}
+        disabled={!content.trim() || sending}
         title="Gửi tin nhắn"
       >
         <Send size={18} />
