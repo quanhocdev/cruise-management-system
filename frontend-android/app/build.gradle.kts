@@ -77,6 +77,8 @@ android {
 }
 
 dependencies {
+    // WebSocket native cho Chat
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

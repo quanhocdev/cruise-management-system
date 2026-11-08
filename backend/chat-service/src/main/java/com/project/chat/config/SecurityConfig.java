@@ -38,7 +38,7 @@ public class SecurityConfig {
                         .permitAll()
 
                         .requestMatchers("/ws-chat-native/**").authenticated()
-                        .requestMatchers("/ws-chat/**").permitAll()
+                        .requestMatchers("/ws-chat/**").authenticated()
 
                         .requestMatchers("/api/chat/**").authenticated()
 

@@ -49,7 +49,6 @@ public class SecurityConfig {
                         "/api/auth/activate/set-password",
 
                         "/ws-booking/**",
-                        "/ws-chat/**",
                         "/api/public/**",
 
                         "/actuator/health",
