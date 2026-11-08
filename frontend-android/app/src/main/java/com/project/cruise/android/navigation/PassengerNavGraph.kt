@@ -27,7 +27,10 @@ import com.project.cruise.android.viewmodel.tour.TourViewModel
 import com.project.cruise.android.viewmodel.tour.TourViewModelFactory
 import com.project.cruise.android.viewmodel.chat.ChatViewModel
 import com.project.cruise.android.viewmodel.chat.ChatViewModelFactory
-
+import com.project.cruise.android.ui.screens.passenger.PassengerMessagesScreen
+import com.project.cruise.android.ui.screens.passenger.MessageDetailScreen
+import com.project.cruise.android.viewmodel.chat.MessagingViewModel
+import com.project.cruise.android.viewmodel.chat.MessagingViewModelFactory
 
 import com.project.cruise.android.ui.screens.passenger.CreateBookingScreen
 import com.project.cruise.android.data.repository.PassengerBookingRepository
@@ -63,6 +66,7 @@ fun NavGraphBuilder.passengerGraph(
             }
         )
     }
+
 
     // ----- DASHBOARD -----
     composable(Routes.PASSENGER_DASHBOARD) {
@@ -214,6 +218,50 @@ fun NavGraphBuilder.passengerGraph(
             onFeedback = { navController.navigate("passenger_feedback/$bookingId") },
             notificationButton = { ActivityInboxEntry { navController.navigate(Routes.PASSENGER_ACTIVITY_INBOX) } }
         )
+    }
+    // ----- PASSENGER MESSAGES -----
+    composable(Routes.PASSENGER_MESSAGES) {
+
+        val messagingViewModel: MessagingViewModel = viewModel(
+            factory = MessagingViewModelFactory(chatRepository)
+        )
+
+        PassengerMessagesScreen(
+            viewModel = messagingViewModel,
+            onConversationClick = { conversationId ->
+                navController.navigate(
+                    Routes.passengerMessageDetail(conversationId)
+                )
+            },
+            onBackClick = {
+                navController.popBackStack()
+            }
+        )
+    }
+    // ----- PASSENGER MESSAGE DETAIL -----
+    composable(
+        route = Routes.PASSENGER_MESSAGE_DETAIL,
+        arguments = listOf(
+            navArgument("conversationId") {
+                type = NavType.StringType
+            }
+        )
+    ) { backStackEntry ->
+
+        val conversationId = backStackEntry.arguments
+            ?.getString("conversationId")
+            ?: return@composable
+
+        val parentEntry = remember(backStackEntry) {
+            navController.getBackStackEntry(Routes.PASSENGER_MESSAGES)
+        }
+
+        val messagingViewModel: MessagingViewModel = viewModel(
+            viewModelStoreOwner = parentEntry,
+            factory = MessagingViewModelFactory(chatRepository)
+        )
+
+        // Kết nối MessageDetailScreen ở bước tiếp theo.
     }
     composable(Routes.PASSENGER_ACTIVITIES, arguments = listOf(navArgument("bookingId") { type = NavType.LongType })) { entry ->
         val bookingId = entry.arguments?.getLong("bookingId") ?: return@composable
