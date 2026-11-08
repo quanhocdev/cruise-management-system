@@ -17,8 +17,9 @@ class ConvenienceRepository(context: Context) {
     private val appContext = context.applicationContext
     private val commands = OnlinePosCommands(appContext)
 
+    // Đổi sang ConvenienceApiService
     private val apiService =
-        RetrofitClient.createApiService(
+        RetrofitClient.createConvenienceApiService(
             TokenManager(appContext)
         )
 
@@ -43,6 +44,7 @@ class ConvenienceRepository(context: Context) {
     ): List<ServiceTourResponse> {
         return apiService.getConvenienceServiceTours(tourId)
     }
+
     suspend fun createProductUsage(
         nfcCardUid: String,
         productTourId: String,
@@ -63,5 +65,4 @@ class ConvenienceRepository(context: Context) {
             apiService.createServiceUsage(request.copy(clientRequestId = requestId))
         }
     }
-
 }

@@ -21,7 +21,8 @@ object ChatRepositoryProvider {
 
             val tokenManager = TokenManager(appContext)
 
-            val apiService = RetrofitClient.createApiService(
+            // Đổi sang createChatApiService
+            val apiService = RetrofitClient.createChatApiService(
                 tokenManager = tokenManager
             )
 

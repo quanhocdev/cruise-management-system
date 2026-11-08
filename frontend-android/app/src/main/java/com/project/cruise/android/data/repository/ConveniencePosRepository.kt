@@ -3,8 +3,8 @@ package com.project.cruise.android.data.repository
 import android.content.Context
 import com.project.cruise.android.data.auth.TokenManager
 import com.project.cruise.android.data.local.CruiseDatabase
-import com.project.cruise.android.data.network.ConvenienceProductResponse
-import com.project.cruise.android.data.network.ConvenienceServiceResponse
+import com.project.cruise.android.data.dto.pos.ConvenienceProductResponse
+import com.project.cruise.android.data.dto.pos.ConvenienceServiceResponse
 import com.project.cruise.android.data.network.RetrofitClient
 
 class ConveniencePosRepository(context: Context) {

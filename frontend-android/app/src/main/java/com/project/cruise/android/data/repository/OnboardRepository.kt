@@ -6,18 +6,17 @@ import com.project.cruise.android.data.dto.nfc.NfcResolveResponse
 import com.project.cruise.android.data.dto.onboard.ActivityCruiseTourResponse
 import com.project.cruise.android.data.dto.onboard.ActivityCruiseUsageRequest
 import com.project.cruise.android.data.dto.onboard.ActivityCruiseUsageResponse
-import com.project.cruise.android.data.network.ApiService
 import com.project.cruise.android.data.network.RetrofitClient
 import com.project.cruise.android.data.auth.TokenManager
-import java.util.UUID
 
 class OnboardRepository(context: Context) {
 
     private val appContext = context.applicationContext
     private val commands = OnlinePosCommands(appContext)
 
-    private val apiService: ApiService =
-        RetrofitClient.createApiService(TokenManager(appContext))
+    // Đổi sang OnboardApiService
+    private val apiService =
+        RetrofitClient.createOnboardApiService(TokenManager(appContext))
 
     suspend fun resolveNfc(
         nfcCardUid: String

@@ -2,13 +2,17 @@ package com.project.cruise.android.data.repository
 
 import com.project.cruise.android.data.dto.booking.BookingResponse
 import com.project.cruise.android.data.dto.tour.PublicTourDetailResponse
-import com.project.cruise.android.data.network.ApiService
+import com.project.cruise.android.data.network.api.BookingApiService
+import com.project.cruise.android.data.network.api.TourApiService
 import com.project.cruise.android.viewmodel.passenger.BookingDraft
 import okhttp3.MultipartBody
 
-class PassengerBookingRepository(private val api: ApiService) {
+class PassengerBookingRepository(
+    private val tourApi: TourApiService,      // Dùng cho việc lấy chi tiết tour (package)
+    private val bookingApi: BookingApiService // Dùng cho việc tạo passenger booking
+) {
     suspend fun getPackage(tourId: String, packageId: String): PublicTourDetailResponse.TourPackageRecord? =
-        api.getPublicTourDetail(tourId).packages.orEmpty().firstOrNull { it.id == packageId }
+        tourApi.getPublicTourDetail(tourId).packages.orEmpty().firstOrNull { it.id == packageId }
 
     suspend fun create(tourId: String, packageId: String, draft: BookingDraft): BookingResponse {
         val parts = buildList {
@@ -29,7 +33,7 @@ class PassengerBookingRepository(private val api: ApiService) {
                 passenger.documentNote.trim().takeIf { it.isNotEmpty() }?.let { add(textPart("$prefix.documentNote", it)) }
             }
         }
-        return api.createPassengerBooking(parts)
+        return bookingApi.createPassengerBooking(parts)
     }
 
     private fun textPart(name: String, value: String): MultipartBody.Part =

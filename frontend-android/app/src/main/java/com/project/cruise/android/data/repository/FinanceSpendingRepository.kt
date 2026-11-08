@@ -13,13 +13,21 @@ interface FinanceSpendingSource {
 }
 
 class FinanceSpendingRepository(context: Context) : FinanceSpendingSource {
-    private val api = RetrofitClient.createApiService(TokenManager(context.applicationContext))
+    // Đổi sang FinanceApiService vì các API spending account, limit, ledger history thuộc phân hệ finance
+    private val api = RetrofitClient.createFinanceApiService(TokenManager(context.applicationContext))
     private val commands = OnlinePosCommands(context.applicationContext)
+
     override suspend fun find(code: String) = api.getFinanceSpending(code)
+
     override suspend fun setLimit(id: Long, amount: BigDecimal, reason: String): SpendingLimitResult {
         val request = SpendingLimitRequest(amount, reason)
-        return commands.execute("SPENDING_LIMIT:$id", request) { key -> api.setSpendingLimit(id, request.copy(clientRequestId=key)) }
+        return commands.execute("SPENDING_LIMIT:$id", request) { key ->
+            api.setSpendingLimit(id, request.copy(clientRequestId = key))
+        }
     }
+
     override suspend fun importHistory(id: Long): LedgerHistoryResult =
-        commands.execute("LEDGER_HISTORY:$id", mapOf("bookingId" to id)) { key -> api.importLedgerHistory(id, LedgerHistoryRequest(key)) }
+        commands.execute("LEDGER_HISTORY:$id", mapOf("bookingId" to id)) { key ->
+            api.importLedgerHistory(id, LedgerHistoryRequest(key))
+        }
 }

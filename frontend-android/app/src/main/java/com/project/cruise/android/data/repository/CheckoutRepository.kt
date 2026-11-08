@@ -7,27 +7,43 @@ import com.project.cruise.android.data.network.RetrofitClient
 
 interface CheckoutSource {
     suspend fun departures(id: Long): DepartureManifest? = null
-    suspend fun depart(id: Long,passengerId: Long,request: DepartureRequest): PassengerDeparture = error("Chưa hỗ trợ xác nhận rời tàu")
+    suspend fun depart(id: Long, passengerId: Long, request: DepartureRequest): PassengerDeparture = error("Chưa hỗ trợ xác nhận rời tàu")
     suspend fun find(code: String): Long
-    suspend fun bill(id: Long,finance: Boolean): ServiceBill
+    suspend fun bill(id: Long, finance: Boolean): ServiceBill
     suspend fun preview(id: Long): CheckoutPreview
-    suspend fun confirm(id: Long,version: String): CheckoutSnapshot
+    suspend fun confirm(id: Long, version: String): CheckoutSnapshot
     suspend fun payment(id: Long): ServiceBillPayment
-    suspend fun receipt(id: Long,finance: Boolean): ByteArray
+    suspend fun receipt(id: Long, finance: Boolean): ByteArray
 }
-class CheckoutRepository(context: Context): CheckoutSource {
-    private val api=RetrofitClient.createApiService(TokenManager(context.applicationContext))
-    private val commands=OnlinePosCommands(context.applicationContext)
-    override suspend fun departures(id: Long)=api.getDepartures(id)
-    override suspend fun depart(id: Long,passengerId: Long,request: DepartureRequest)=
-        commands.execute("PASSENGER_DEPARTURE:$id:$passengerId",request){key->api.confirmDeparture(id,passengerId,request.copy(clientRequestId=key))}
-    override suspend fun find(code: String)=api.getFinanceSpending(code).bookingId
-    override suspend fun bill(id: Long,finance: Boolean)=api.getServiceBill(if(finance)"finance" else "passengers",id)
-    override suspend fun preview(id: Long)=api.getCheckoutPreview(id)
-    override suspend fun confirm(id: Long,version: String): CheckoutSnapshot {
-        val draft=CheckoutConfirm(version)
-        return commands.execute("CHECKOUT:$id",draft){key->api.confirmCheckout(id,draft.copy(clientRequestId=key))}
+
+class CheckoutRepository(context: Context) : CheckoutSource {
+    // Đổi sang FinanceApiService vì các endpoint checkout, bill, ledger thuộc về finance
+    private val api = RetrofitClient.createFinanceApiService(TokenManager(context.applicationContext))
+    private val commands = OnlinePosCommands(context.applicationContext)
+
+    override suspend fun departures(id: Long) = api.getDepartures(id)
+
+    override suspend fun depart(id: Long, passengerId: Long, request: DepartureRequest) =
+        commands.execute("PASSENGER_DEPARTURE:$id:$passengerId", request) { key ->
+            api.confirmDeparture(id, passengerId, request.copy(clientRequestId = key))
+        }
+
+    override suspend fun find(code: String) = api.getFinanceSpending(code).bookingId
+
+    override suspend fun bill(id: Long, finance: Boolean) = api.getServiceBill(if (finance) "finance" else "passengers", id)
+
+    override suspend fun preview(id: Long) = api.getCheckoutPreview(id)
+
+    override suspend fun confirm(id: Long, version: String): CheckoutSnapshot {
+        val draft = CheckoutConfirm(version)
+        return commands.execute("CHECKOUT:$id", draft) { key ->
+            api.confirmCheckout(id, draft.copy(clientRequestId = key))
+        }
     }
-    override suspend fun payment(id: Long)=commands.execute("BILL_PAYMENT:$id",mapOf("bookingId" to id)){key->api.createBillPayment(id,BillPaymentCommand(key))}
-    override suspend fun receipt(id: Long,finance: Boolean)=api.getBillReceipt(if(finance)"finance" else "passengers",id).use{it.bytes()}
+
+    override suspend fun payment(id: Long) = commands.execute("BILL_PAYMENT:$id", mapOf("bookingId" to id)) { key ->
+        api.createBillPayment(id, BillPaymentCommand(key))
+    }
+
+    override suspend fun receipt(id: Long, finance: Boolean) = api.getBillReceipt(if (finance) "finance" else "passengers", id).use { it.bytes() }
 }
