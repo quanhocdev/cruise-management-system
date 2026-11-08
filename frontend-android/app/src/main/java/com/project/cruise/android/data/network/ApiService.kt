@@ -43,6 +43,14 @@ import com.project.cruise.android.data.dto.chat.ChatMessageRequest
 import com.project.cruise.android.data.dto.chat.ChatMessageResponse
 import com.project.cruise.android.data.dto.chat.ChatSessionRequest
 import com.project.cruise.android.data.dto.chat.ChatWelcomeResponse
+import com.project.cruise.android.data.dto.chat.CreateConversationRequest
+import com.project.cruise.android.data.dto.chat.SendMessageRequest
+import com.project.cruise.android.data.dto.chat.ConversationResponse
+import com.project.cruise.android.data.dto.chat.ParticipantResponse
+import com.project.cruise.android.data.dto.chat.MessageResponse
+import com.project.cruise.android.data.dto.chat.ManagerInfoResponse
+import com.project.cruise.android.data.dto.chat.ConfirmedBookingResponse
+import com.project.cruise.android.data.dto.chat.ChatPageResponse
 interface ApiService {
     @GET("api/{department}/assignments")
     suspend fun getMyStaffAssignments(@Path("department") department: String): List<com.project.cruise.android.data.dto.staff.StaffAssignment>
@@ -265,5 +273,47 @@ interface ApiService {
     suspend fun openChat(
         @Body request: ChatSessionRequest
     ): ChatWelcomeResponse
+
+
+    // ==================== CHAT ====================
+
+    @GET("api/message/bookings")
+    suspend fun getChatBookings(): List<ConfirmedBookingResponse>
+
+    @GET("api/message/managers/{roleName}")
+    suspend fun getChatManagers(
+        @Path("roleName") roleName: String
+    ): List<ManagerInfoResponse>
+
+    @POST("api/message/conversations")
+    suspend fun createOrGetConversation(
+        @Body request: CreateConversationRequest
+    ): ConversationResponse
+
+    @GET("api/message/conversations")
+    suspend fun getMyConversations(): List<ConversationResponse>
+
+    @GET("api/message/conversations/{conversationId}")
+    suspend fun getConversationDetail(
+        @Path("conversationId") conversationId: String
+    ): ConversationResponse
+
+    @GET("api/message/conversations/{conversationId}/participants")
+    suspend fun getConversationParticipants(
+        @Path("conversationId") conversationId: String
+    ): List<ParticipantResponse>
+
+    @GET("api/message/conversations/{conversationId}/messages")
+    suspend fun getChatMessages(
+        @Path("conversationId") conversationId: String,
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 20
+    ): ChatPageResponse<MessageResponse>
+
+    @POST("api/message/conversations/{conversationId}/messages")
+    suspend fun sendMessage(
+        @Path("conversationId") conversationId: String,
+        @Body request: SendMessageRequest
+    ): MessageResponse
 }
 
