@@ -37,6 +37,7 @@ public class SecurityConfig {
                                 "/actuator/info")
                         .permitAll()
 
+                        .requestMatchers("/ws-chat-native/**").authenticated()
                         .requestMatchers("/ws-chat/**").permitAll()
 
                         .requestMatchers("/api/chat/**").authenticated()

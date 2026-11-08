@@ -18,8 +18,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
+
+        // React Web: SockJS
         registry.addEndpoint("/ws-chat")
                 .setAllowedOriginPatterns("http://localhost:5173")
                 .withSockJS();
+
+        // Android: Native WebSocket + STOMP
+        registry.addEndpoint("/ws-chat-native");
     }
 }

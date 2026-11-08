@@ -121,6 +121,13 @@ spring:
               predicates:
                 - Path=/api/message/**
 
+            # CHAT SERVICE - ANDROID NATIVE WEBSOCKET
+            - id: chat-native-websocket
+              uri: ${CHAT_SERVICE_WS_URL:ws://chat-service:8091}
+              predicates:
+                - Path=/ws-chat-native/**
+                - Header=Upgrade,websocket
+
             # CHAT SERVICE - WEBSOCKET
             - id: chat-websocket
               uri: ${CHAT_SERVICE_WS_URL:ws://chat-service:8091}
