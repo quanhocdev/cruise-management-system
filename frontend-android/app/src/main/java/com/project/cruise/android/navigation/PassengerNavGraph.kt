@@ -37,7 +37,7 @@ import androidx.compose.runtime.DisposableEffect
 
 import com.project.cruise.android.viewmodel.auth.MeState
 
-import com.project.cruise.android.ui.screens.passenger.CreateBookingScreen
+import com.project.cruise.android.ui.passenger.screen.CreateBookingScreen
 import com.project.cruise.android.data.repository.PassengerBookingRepository
 import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModel
 import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModelFactory
