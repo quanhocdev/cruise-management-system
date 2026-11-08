@@ -18,7 +18,7 @@ import com.project.cruise.android.ui.screens.passenger.ProfileScreen
 import com.project.cruise.android.ui.screens.guest.TourDetailPublicScreen
 import com.project.cruise.android.ui.screens.guest.TourPublicScreen
 import com.project.cruise.android.ui.screens.passenger.Dashboard
-import com.project.cruise.android.ui.screens.passenger.MyBookingDetailScreen
+import com.project.cruise.android.ui.passenger.screen.MyBookingDetailScreen
 import com.project.cruise.android.ui.passenger.screen.MyBookingsScreen
 import com.project.cruise.android.viewmodel.auth.AuthViewModel
 import com.project.cruise.android.viewmodel.auth.SessionState
