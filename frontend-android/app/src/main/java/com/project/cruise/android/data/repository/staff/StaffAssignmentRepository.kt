@@ -1,4 +1,4 @@
-package com.project.cruise.android.data.repository
+package com.project.cruise.android.data.repository.staff
 
 import com.project.cruise.android.data.dto.staff.StaffAssignment
 import com.project.cruise.android.data.dto.staff.StaffResponseRequest

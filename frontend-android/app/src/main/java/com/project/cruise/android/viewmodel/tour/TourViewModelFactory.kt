@@ -2,7 +2,7 @@ package com.project.cruise.android.viewmodel.tour
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.project.cruise.android.data.repository.TourRepository
+import com.project.cruise.android.data.repository.tour.TourRepository
 
 class TourViewModelFactory(
     private val repository: TourRepository

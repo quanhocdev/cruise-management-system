@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.project.cruise.android.data.dto.tour.PublicTourDetailResponse
 import com.project.cruise.android.data.dto.tour.PublicTourSummaryResponse
-import com.project.cruise.android.data.repository.TourRepository
+import com.project.cruise.android.data.repository.tour.TourRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch

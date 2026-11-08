@@ -25,7 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.project.cruise.android.BuildConfig
 import com.project.cruise.android.data.local.pos.PosScanType
-import com.project.cruise.android.data.repository.PosTransactionQueue
+import com.project.cruise.android.data.repository.pos.PosTransactionQueue
 import kotlinx.coroutines.launch
 
 @Composable

@@ -1,16 +1,16 @@
-package com.project.cruise.android.data.repository
+package com.project.cruise.android.data.repository.pos
 
 import android.content.Context
 import com.project.cruise.android.BuildConfig
 import com.project.cruise.android.data.auth.TokenManager
-import com.project.cruise.android.data.local.CruiseDatabase
 import com.project.cruise.android.data.dto.pos.QrScanRequest
 import com.project.cruise.android.data.dto.pos.ScanResponse
+import com.project.cruise.android.data.local.CruiseDatabase
 import com.project.cruise.android.data.network.RetrofitClient
 
 class PosIdentityRepository(context: Context, private val operatorRole: String) {
     private val appContext = context.applicationContext
-    private val dao = CruiseDatabase.getInstance(appContext).posTransactionDao()
+    private val dao = CruiseDatabase.Companion.getInstance(appContext).posTransactionDao()
     private val posApi = RetrofitClient.createPosApiService(TokenManager(appContext))
 
     suspend fun isLocalReadOnly(localId: String): Boolean {

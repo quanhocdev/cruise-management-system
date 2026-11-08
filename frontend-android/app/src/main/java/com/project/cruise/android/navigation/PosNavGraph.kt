@@ -11,10 +11,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.project.cruise.android.data.repository.PosIdentityRepository
+import com.project.cruise.android.data.repository.pos.PosIdentityRepository
 import com.project.cruise.android.data.repository.booking.ActivityRegistrationRepository
+import com.project.cruise.android.data.repository.finance.CheckoutRepository
 import com.project.cruise.android.data.repository.finance.FinanceReportRepository
 import com.project.cruise.android.data.repository.finance.FinanceSpendingRepository
+import com.project.cruise.android.data.repository.finance.LedgerCorrectionRepository
+import com.project.cruise.android.data.repository.finance.PaymentRefundRepository
 import com.project.cruise.android.ui.screens.pos.NfcScanScreen
 import com.project.cruise.android.ui.screens.pos.PosDashboardScreen
 import com.project.cruise.android.ui.screens.pos.PosHistoryScreen
@@ -101,7 +104,7 @@ fun NavGraphBuilder.posGraph(
 
         // Chỉ render màn hình khi đã xác định đúng role hoặc đang đợi session load xong
         val context = LocalContext.current
-        val source = remember(context) { com.project.cruise.android.data.repository.CheckoutRepository(context) }
+        val source = remember(context) { CheckoutRepository(context) }
         val model: com.project.cruise.android.viewmodel.pos.CheckoutViewModel = viewModel(
             factory = com.project.cruise.android.viewmodel.pos.CheckoutViewModel.Factory(source, true)
         )
@@ -124,7 +127,7 @@ fun NavGraphBuilder.posGraph(
         if(PosRole.fromApiRole(role)!=PosRole.FINANCE){LaunchedEffect(role){navController.popBackStack()};return@composable}
         val id=entry.arguments?.getLong("bookingId")?:return@composable
         val context=LocalContext.current
-        val source=remember(context){com.project.cruise.android.data.repository.CheckoutRepository(context)}
+        val source=remember(context){ CheckoutRepository(context) }
         val model:com.project.cruise.android.viewmodel.pos.CheckoutViewModel=viewModel(factory=com.project.cruise.android.viewmodel.pos.CheckoutViewModel.Factory(source,true))
         com.project.cruise.android.ui.screens.pos.CheckoutScreen(model,true,id){navController.popBackStack()}
     }
@@ -152,7 +155,7 @@ fun NavGraphBuilder.posGraph(
             return@composable
         }
         val context = LocalContext.current
-        val source = remember(context) { com.project.cruise.android.data.repository.PaymentRefundRepository(context) }
+        val source = remember(context) { PaymentRefundRepository(context) }
         val model: com.project.cruise.android.viewmodel.pos.PaymentRefundViewModel = viewModel(
             factory=com.project.cruise.android.viewmodel.pos.PaymentRefundViewModel.Factory(source))
         com.project.cruise.android.ui.screens.pos.PaymentRefundScreen(model) { navController.popBackStack() }
@@ -166,7 +169,12 @@ fun NavGraphBuilder.posGraph(
             return@composable
         }
         val context = LocalContext.current
-        val source = remember(context,role) { com.project.cruise.android.data.repository.LedgerCorrectionRepository(context,role==PosRole.FINANCE) }
+        val source = remember(context,role) {
+            LedgerCorrectionRepository(
+                context,
+                role == PosRole.FINANCE
+            )
+        }
         val model: com.project.cruise.android.viewmodel.pos.LedgerCorrectionViewModel = viewModel(
             key="corrections-${role.name}",factory=com.project.cruise.android.viewmodel.pos.LedgerCorrectionViewModel.Factory(source))
         com.project.cruise.android.ui.screens.pos.LedgerCorrectionScreen(model,role) { navController.popBackStack() }

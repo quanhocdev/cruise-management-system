@@ -10,7 +10,7 @@ import androidx.navigation.compose.composable
 import com.project.cruise.android.data.auth.TokenManager
 import com.project.cruise.android.data.dto.staff.StaffRole
 import com.project.cruise.android.data.network.RetrofitClient
-import com.project.cruise.android.data.repository.StaffAssignmentRepository
+import com.project.cruise.android.data.repository.staff.StaffAssignmentRepository
 import com.project.cruise.android.ui.staff.StaffAssignmentsScreen
 import com.project.cruise.android.viewmodel.auth.AuthViewModel
 import com.project.cruise.android.viewmodel.auth.SessionState

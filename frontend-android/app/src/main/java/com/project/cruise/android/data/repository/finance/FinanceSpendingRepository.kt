@@ -4,7 +4,7 @@ import android.content.Context
 import com.project.cruise.android.data.auth.TokenManager
 import com.project.cruise.android.data.dto.booking.*
 import com.project.cruise.android.data.network.RetrofitClient
-import com.project.cruise.android.data.repository.OnlinePosCommands
+import com.project.cruise.android.data.repository.pos.OnlinePosCommands
 import java.math.BigDecimal
 
 interface FinanceSpendingSource {

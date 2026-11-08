@@ -1,4 +1,4 @@
-package com.project.cruise.android.data.repository
+package com.project.cruise.android.data.repository.pos
 
 import com.google.gson.JsonParser
 

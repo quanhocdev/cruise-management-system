@@ -7,7 +7,7 @@ import com.google.gson.JsonParser
 import com.project.cruise.android.data.auth.TokenManager
 import com.project.cruise.android.data.dto.feedback.*
 import com.project.cruise.android.data.network.api.FeedbackApiService
-import com.project.cruise.android.data.repository.OnlinePosCommands
+import com.project.cruise.android.data.repository.pos.OnlinePosCommands
 import retrofit2.HttpException
 
 fun interface FeedbackSource {

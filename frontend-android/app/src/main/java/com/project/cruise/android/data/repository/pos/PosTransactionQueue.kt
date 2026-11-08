@@ -1,4 +1,4 @@
-package com.project.cruise.android.data.repository
+package com.project.cruise.android.data.repository.pos
 
 import android.content.Context
 import androidx.work.BackoffPolicy
@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit
 
 class PosTransactionQueue(context: Context) {
     private val appContext = context.applicationContext
-    private val dao = CruiseDatabase.getInstance(appContext).posTransactionDao()
+    private val dao = CruiseDatabase.Companion.getInstance(appContext).posTransactionDao()
 
     suspend fun enqueue(
         scanType: PosScanType,
@@ -57,7 +57,7 @@ class PosTransactionQueue(context: Context) {
                 .setConstraints(constraints)
                 .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 15, TimeUnit.SECONDS)
                 .build()
-            WorkManager.getInstance(context.applicationContext).enqueueUniqueWork(
+            WorkManager.Companion.getInstance(context.applicationContext).enqueueUniqueWork(
                 UNIQUE_WORK_NAME,
                 ExistingWorkPolicy.KEEP,
                 request

@@ -11,7 +11,7 @@ import com.project.cruise.android.data.dto.convenience.ServiceUsageResponse
 import com.project.cruise.android.data.dto.nfc.NfcResolveRequest
 import com.project.cruise.android.data.dto.nfc.NfcResolveResponse
 import com.project.cruise.android.data.network.RetrofitClient
-import com.project.cruise.android.data.repository.OnlinePosCommands
+import com.project.cruise.android.data.repository.pos.OnlinePosCommands
 
 class ConvenienceRepository(context: Context) {
 

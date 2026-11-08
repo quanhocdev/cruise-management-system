@@ -37,7 +37,7 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import com.project.cruise.android.data.local.pos.PosScanType
-import com.project.cruise.android.data.repository.PosTransactionQueue
+import com.project.cruise.android.data.repository.pos.PosTransactionQueue
 import kotlinx.coroutines.launch
 import java.util.concurrent.Executors
 

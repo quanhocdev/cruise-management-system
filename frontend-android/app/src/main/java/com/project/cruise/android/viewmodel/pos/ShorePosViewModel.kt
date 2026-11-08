@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.project.cruise.android.data.dto.pos.ShoreVisitTourResponse
-import com.project.cruise.android.data.repository.ShorePosRepository
+import com.project.cruise.android.data.repository.shore.ShorePosRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch

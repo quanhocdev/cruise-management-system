@@ -2,7 +2,7 @@ package com.project.cruise.android.viewmodel.passenger
 
 import androidx.lifecycle.*
 import com.project.cruise.android.data.dto.booking.ActivityNotice
-import com.project.cruise.android.data.repository.ActivityInboxSource
+import com.project.cruise.android.data.repository.notification.ActivityInboxSource
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import retrofit2.HttpException

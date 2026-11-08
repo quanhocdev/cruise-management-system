@@ -1,4 +1,4 @@
-package com.project.cruise.android.data.repository
+package com.project.cruise.android.data.repository.tour
 
 import com.project.cruise.android.data.dto.tour.PublicTourDetailResponse
 import com.project.cruise.android.data.dto.tour.PublicTourSummaryResponse

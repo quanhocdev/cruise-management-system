@@ -1,9 +1,10 @@
-package com.project.cruise.android.data.repository
+package com.project.cruise.android.data.repository.notification
 
 import android.content.Context
 import com.project.cruise.android.data.auth.TokenManager
 import com.project.cruise.android.data.dto.booking.*
 import com.project.cruise.android.data.network.RetrofitClient
+import com.project.cruise.android.data.repository.pos.OnlinePosCommands
 
 interface ActivityInboxSource {
     suspend fun list(page: Int, unreadOnly: Boolean): List<ActivityNotice>

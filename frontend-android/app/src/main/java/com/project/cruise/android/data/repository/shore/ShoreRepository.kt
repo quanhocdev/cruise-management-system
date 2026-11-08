@@ -1,4 +1,4 @@
-package com.project.cruise.android.data.repository
+package com.project.cruise.android.data.repository.shore
 
 import android.content.Context
 import com.project.cruise.android.data.auth.TokenManager
@@ -8,6 +8,7 @@ import com.project.cruise.android.data.dto.shore.ActivityVisitTourResponse
 import com.project.cruise.android.data.dto.shore.ActivityVisitUsageRequest
 import com.project.cruise.android.data.dto.shore.ActivityVisitUsageResponse
 import com.project.cruise.android.data.network.RetrofitClient
+import com.project.cruise.android.data.repository.pos.OnlinePosCommands
 
 class ShoreRepository(context: Context) {
 
