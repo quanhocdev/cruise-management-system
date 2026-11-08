@@ -28,7 +28,7 @@ import com.project.cruise.android.viewmodel.tour.TourViewModel
 import com.project.cruise.android.viewmodel.tour.TourViewModelFactory
 import com.project.cruise.android.viewmodel.chat.ChatViewModel
 import com.project.cruise.android.viewmodel.chat.ChatViewModelFactory
-import com.project.cruise.android.ui.screens.passenger.PassengerMessagesScreen
+import com.project.cruise.android.ui.passenger.screen.PassengerMessagesScreen
 import com.project.cruise.android.ui.passenger.screen.MessageDetailScreen
 import com.project.cruise.android.viewmodel.chat.MessagingViewModel
 import com.project.cruise.android.viewmodel.chat.MessagingViewModelFactory
