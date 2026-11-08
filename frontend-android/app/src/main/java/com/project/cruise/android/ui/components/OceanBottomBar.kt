@@ -24,7 +24,8 @@ fun OceanBottomBar(
     onLoginClick: () -> Unit,
     onUserClick: () -> Unit,
     onMyBookingsClick: () -> Unit,
-) {
+    onMessagesClick: () -> Unit,
+)  {
     OceanTheme {
         Surface(
             Modifier.fillMaxWidth()
@@ -48,6 +49,15 @@ fun OceanBottomBar(
                     Modifier.weight(1f),
                     if (isLoggedIn) onMyBookingsClick else onLoginClick,
                 )
+
+                NavItem(
+                    "Tin nhắn",
+                    PassengerGlyph.MESSAGE,
+                    currentRoute == "passenger_messages",
+                    Modifier.weight(1f),
+                    if (isLoggedIn) onMessagesClick else onLoginClick,
+                )
+
                 NavItem(
                     if (isLoggedIn) "Tài khoản" else "Đăng nhập",
                     PassengerGlyph.PERSON,

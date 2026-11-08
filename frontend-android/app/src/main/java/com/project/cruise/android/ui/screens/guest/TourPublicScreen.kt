@@ -26,6 +26,7 @@ fun TourPublicScreen(
     onLoginClick: () -> Unit,
     onUserClick: () -> Unit,
     onMyBookingsClick: () -> Unit,
+    onMessagesClick: () -> Unit,
     onHomeClick: () -> Unit = {},
 ) {
     val state by viewModel.tourListState.collectAsState()
@@ -39,12 +40,13 @@ fun TourPublicScreen(
             { viewModel.fetchPublicTours() },
             bottomBar = {
                 OceanBottomBar(
-                    loggedIn,
-                    "passenger_tours",
-                    onHomeClick,
-                    onLoginClick,
-                    onUserClick,
+                    isLoggedIn = loggedIn,
+                    currentRoute = "passenger_tours",
+                    onHomeClick = onHomeClick,
+                    onLoginClick = onLoginClick,
+                    onUserClick = onUserClick,
                     onMyBookingsClick = onMyBookingsClick,
+                    onMessagesClick = onMessagesClick,
                 )
             },
         )

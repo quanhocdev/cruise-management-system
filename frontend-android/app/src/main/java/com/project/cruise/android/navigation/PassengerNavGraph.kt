@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.project.cruise.android.data.network.ApiService
 import com.project.cruise.android.data.repository.BookingRepository
+import com.project.cruise.android.data.repository.ChatRepository
 import com.project.cruise.android.data.repository.TourRepository
 import com.project.cruise.android.ui.screens.passenger.ProfileScreen
 import com.project.cruise.android.ui.screens.guest.TourDetailPublicScreen
@@ -36,7 +37,8 @@ import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModelF
 fun NavGraphBuilder.passengerGraph(
     navController: NavHostController,
     authViewModel: AuthViewModel,
-    apiService: ApiService
+    apiService: ApiService,
+    chatRepository: ChatRepository
 ) {
 
     // ----- PROFILE -----

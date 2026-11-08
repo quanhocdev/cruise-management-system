@@ -120,6 +120,7 @@ enum class PassengerGlyph {
     EXPLORE,
     TICKET,
     PERSON,
+    MESSAGE,
     SEARCH,
     CALENDAR,
     ARROW,
@@ -147,6 +148,26 @@ fun PassengerIcon(
                 style = Stroke(1.7f * s),
             )
         when (glyph) {
+            PassengerGlyph.MESSAGE -> {
+                // Khung hội thoại
+                drawRoundRect(
+                    color = tint,
+                    topLeft = p(3f, 4f),
+                    size = androidx.compose.ui.geometry.Size(18f * s, 14f * s),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(4f * s),
+                    style = Stroke(1.7f * s),
+                )
+
+                // Đuôi hội thoại
+                line(7f, 18f, 4f, 21f)
+                line(4f, 21f, 4f, 15f)
+
+                // Ba dấu chấm
+                drawCircle(tint, 1f * s, p(8f, 11f))
+                drawCircle(tint, 1f * s, p(12f, 11f))
+                drawCircle(tint, 1f * s, p(16f, 11f))
+            }
+
             PassengerGlyph.SEARCH -> {
                 drawCircle(tint, 6.5f * s, p(10f, 10f), style = Stroke(1.7f * s))
                 line(15f, 15f, 21f, 21f)
