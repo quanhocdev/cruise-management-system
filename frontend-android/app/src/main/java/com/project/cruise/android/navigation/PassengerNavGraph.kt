@@ -16,7 +16,7 @@ import com.project.cruise.android.data.repository.ChatRepository
 import com.project.cruise.android.data.repository.TourRepository
 import com.project.cruise.android.ui.passenger.screen.ProfileScreen
 import com.project.cruise.android.ui.screens.guest.TourDetailPublicScreen
-import com.project.cruise.android.ui.screens.guest.TourPublicScreen
+import com.project.cruise.android.ui.guest.screen.TourPublicScreen
 import com.project.cruise.android.ui.passenger.screen.Dashboard
 import com.project.cruise.android.ui.passenger.screen.MyBookingDetailScreen
 import com.project.cruise.android.ui.passenger.screen.MyBookingsScreen
