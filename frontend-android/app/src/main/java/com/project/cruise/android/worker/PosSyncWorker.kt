@@ -3,11 +3,10 @@ package com.project.cruise.android.worker
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.project.cruise.android.BuildConfig
 import com.project.cruise.android.data.auth.TokenManager
+import com.project.cruise.android.data.dto.pos.QrScanRequest
 import com.project.cruise.android.data.local.CruiseDatabase
 import com.project.cruise.android.data.local.pos.PosSyncStatus
-import com.project.cruise.android.data.network.QrScanRequest
 import com.project.cruise.android.data.network.RetrofitClient
 import retrofit2.HttpException
 

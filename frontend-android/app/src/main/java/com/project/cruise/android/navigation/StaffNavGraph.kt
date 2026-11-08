@@ -29,7 +29,15 @@ fun NavGraphBuilder.staffGraph(navController: NavHostController, auth: AuthViewM
             }
         } else {
             val repository = remember(role, user.username) {
-                StaffAssignmentRepository(RetrofitClient.createApiService(tokens, retryOnConnectionFailure = false), role)
+                // Khởi tạo đầy đủ các ApiService thành phần cho StaffAssignmentRepository
+                StaffAssignmentRepository(
+                    staffApi = RetrofitClient.createStaffApiService(tokens),
+                    tourApi = RetrofitClient.createTourApiService(tokens),
+                    convenienceApi = RetrofitClient.createConvenienceApiService(tokens),
+                    onboardApi = RetrofitClient.createOnboardApiService(tokens),
+                    shoreApi = RetrofitClient.createShoreApiService(tokens),
+                    role = role
+                )
             }
             val factory = remember(repository) {
                 object : ViewModelProvider.Factory {

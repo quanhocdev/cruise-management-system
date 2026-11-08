@@ -7,8 +7,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.project.cruise.android.data.auth.TokenManager
-import com.project.cruise.android.data.network.ApiService
 import com.project.cruise.android.data.network.RetrofitClient
+import com.project.cruise.android.data.network.api.AuthApiService
 import com.project.cruise.android.data.repository.AuthRepository
 import com.project.cruise.android.viewmodel.auth.AuthViewModel
 import com.project.cruise.android.viewmodel.auth.AuthViewModelFactory
@@ -21,8 +21,9 @@ fun NavGraph() {
 
     val tokenManager = remember { TokenManager(context.applicationContext) }
 
-    val apiService: ApiService = remember(tokenManager) {
-        RetrofitClient.createApiService(tokenManager)
+    // Sử dụng AuthApiService thay cho ApiService chung cũ
+    val authApiService: AuthApiService = remember(tokenManager) {
+        RetrofitClient.createAuthApiService(tokenManager)
     }
 
     val chatRepository = remember(context.applicationContext) {
@@ -30,8 +31,8 @@ fun NavGraph() {
         ChatRepositoryProvider.getInstance()
     }
 
-    val authRepository = remember(apiService, tokenManager) {
-        AuthRepository(apiService = apiService, tokenManager = tokenManager)
+    val authRepository = remember(authApiService, tokenManager) {
+        AuthRepository(apiService = authApiService, tokenManager = tokenManager)
     }
 
     val authViewModel: AuthViewModel = viewModel(
@@ -43,7 +44,10 @@ fun NavGraph() {
         startDestination = Routes.SPLASH
     ) {
         authGraph(navController, authViewModel)
-        passengerGraph(navController, authViewModel, apiService, chatRepository)
+
+        // Lưu ý: passengerGraph nếu cần các ApiService riêng, bạn có thể truyền trực tiếp các service tương ứng (BookingApiService, TourApiService, v.v.)
+        passengerGraph(navController, authViewModel, tokenManager, chatRepository)
+
         posGraph(navController, authViewModel)
         staffGraph(navController, authViewModel, tokenManager)
     }
