@@ -50,7 +50,12 @@ fun NavGraphBuilder.passengerGraph(
                     popUpTo(Routes.PASSENGER_TOURS) { inclusive = true }
                 }
             },
-            onMyBookingsClick = { navController.navigate(Routes.PASSENGER_BOOKINGS) },
+            onMyBookingsClick = {
+                navController.navigate(Routes.PASSENGER_BOOKINGS)
+            },
+            onMessagesClick = {
+                navController.navigate(Routes.PASSENGER_MESSAGES)
+            },
             onLogout = {
                 navController.navigate(Routes.GUEST) {
                     popUpTo(Routes.PASSENGER_TOURS) { inclusive = true }
@@ -96,9 +101,18 @@ fun NavGraphBuilder.passengerGraph(
             onTourClick = { tourId ->
                 navController.navigate(Routes.passengerTourDetail(tourId))
             },
-            onLoginClick = { navController.navigate(Routes.GUEST) },       // Chưa đăng nhập -> Guest
-            onUserClick = { navController.navigate(Routes.PASSENGER_PROFILE) }, // Đã đăng nhập -> Profile
-            onMyBookingsClick = { navController.navigate(Routes.PASSENGER_BOOKINGS) },
+            onLoginClick = {
+                navController.navigate(Routes.GUEST)
+            },
+            onUserClick = {
+                navController.navigate(Routes.PASSENGER_PROFILE)
+            },
+            onMyBookingsClick = {
+                navController.navigate(Routes.PASSENGER_BOOKINGS)
+            },
+            onMessagesClick = {
+                navController.navigate(Routes.PASSENGER_MESSAGES)
+            },
             onHomeClick = {}
         )
     }

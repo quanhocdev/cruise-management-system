@@ -19,16 +19,18 @@ fun ProfileScreen(
     authViewModel: AuthViewModel,
     onHomeClick: () -> Unit,
     onMyBookingsClick: () -> Unit,
+    onMessagesClick: () -> Unit,
     onLogout: () -> Unit,
 ) {
     val state by authViewModel.meState.collectAsState()
     LaunchedEffect(Unit) { authViewModel.getCurrentUser() }
     ProfileContent(
-        state,
-        onHomeClick,
-        onMyBookingsClick,
-        { authViewModel.logout(onLogout) },
-        { authViewModel.getCurrentUser() },
+        state = state,
+        onHomeClick = onHomeClick,
+        onMyBookingsClick = onMyBookingsClick,
+        onMessagesClick = onMessagesClick,
+        onLogout = { authViewModel.logout(onLogout) },
+        onRetry = { authViewModel.getCurrentUser() },
     )
 }
 
@@ -37,6 +39,7 @@ fun ProfileContent(
     state: MeState,
     onHomeClick: () -> Unit,
     onMyBookingsClick: () -> Unit,
+    onMessagesClick: () -> Unit,
     onLogout: () -> Unit,
     onRetry: () -> Unit,
 ) {
@@ -52,6 +55,7 @@ fun ProfileContent(
                 {},
                 {},
                 onMyBookingsClick = onMyBookingsClick,
+                onMessagesClick = onMessagesClick,
             )
         },
     ) {
