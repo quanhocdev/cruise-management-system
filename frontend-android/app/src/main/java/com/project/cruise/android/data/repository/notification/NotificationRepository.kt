@@ -1,8 +1,7 @@
-package com.project.cruise.android.data.repository
+package com.project.cruise.android.data.repository.notification
 
 import com.project.cruise.android.data.dto.passenger.PassengerNotification
 import com.project.cruise.android.data.network.api.NotificationApiService
-import retrofit2.HttpException
 
 interface NotificationSource {
     suspend fun list(): List<PassengerNotification>

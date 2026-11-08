@@ -5,7 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.project.cruise.android.data.dto.onboard.ActivityCruiseTourResponse
 import com.project.cruise.android.data.dto.onboard.ActivityCruiseUsageResponse
-import com.project.cruise.android.data.repository.OnboardRepository
+import com.project.cruise.android.data.repository.onboard.OnboardRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

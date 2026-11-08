@@ -7,7 +7,7 @@ import com.project.cruise.android.data.dto.convenience.ProductTourResponse
 import com.project.cruise.android.data.dto.convenience.ProductUsageResponse
 import com.project.cruise.android.data.dto.convenience.ServiceTourResponse
 import com.project.cruise.android.data.dto.convenience.ServiceUsageResponse
-import com.project.cruise.android.data.repository.ConvenienceRepository
+import com.project.cruise.android.data.repository.convenience.ConvenienceRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

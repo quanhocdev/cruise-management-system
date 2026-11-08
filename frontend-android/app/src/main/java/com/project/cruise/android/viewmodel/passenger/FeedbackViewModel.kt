@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.project.cruise.android.data.dto.feedback.*
-import com.project.cruise.android.data.repository.FeedbackSource
+import com.project.cruise.android.data.repository.feedback.FeedbackSource
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow

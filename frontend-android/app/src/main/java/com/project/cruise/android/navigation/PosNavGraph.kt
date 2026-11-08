@@ -13,6 +13,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.project.cruise.android.data.repository.PosIdentityRepository
 import com.project.cruise.android.data.repository.booking.ActivityRegistrationRepository
+import com.project.cruise.android.data.repository.finance.FinanceReportRepository
+import com.project.cruise.android.data.repository.finance.FinanceSpendingRepository
 import com.project.cruise.android.ui.screens.pos.NfcScanScreen
 import com.project.cruise.android.ui.screens.pos.PosDashboardScreen
 import com.project.cruise.android.ui.screens.pos.PosHistoryScreen
@@ -111,7 +113,7 @@ fun NavGraphBuilder.posGraph(
         val role=(session as? com.project.cruise.android.viewmodel.auth.SessionState.Authenticated)?.role
         if(PosRole.fromApiRole(role)!=PosRole.FINANCE){LaunchedEffect(role){navController.popBackStack()};return@composable}
         val context=LocalContext.current
-        val source=remember(context){com.project.cruise.android.data.repository.FinanceReportRepository(context)}
+        val source=remember(context){ FinanceReportRepository(context) }
         val model:com.project.cruise.android.viewmodel.pos.FinanceReportViewModel=viewModel(factory=com.project.cruise.android.viewmodel.pos.FinanceReportViewModel.Factory(source))
         com.project.cruise.android.ui.screens.pos.FinanceReportScreen(model,
             onBill={navController.navigate("finance_report_bill/$it")},onBack={navController.popBackStack()})
@@ -181,7 +183,7 @@ fun NavGraphBuilder.posGraph(
         }
 
         val context = LocalContext.current
-        val source = remember(context) { com.project.cruise.android.data.repository.FinanceSpendingRepository(context) }
+        val source = remember(context) { FinanceSpendingRepository(context) }
         val model: com.project.cruise.android.viewmodel.pos.FinanceSpendingViewModel = viewModel(
             factory = com.project.cruise.android.viewmodel.pos.FinanceSpendingViewModel.Factory(source)
         )

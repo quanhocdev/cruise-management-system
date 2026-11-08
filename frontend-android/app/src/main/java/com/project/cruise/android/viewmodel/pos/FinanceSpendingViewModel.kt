@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.project.cruise.android.data.dto.booking.FinanceSpendingAccount
-import com.project.cruise.android.data.repository.FinanceSpendingSource
+import com.project.cruise.android.data.repository.finance.FinanceSpendingSource
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

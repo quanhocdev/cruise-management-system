@@ -40,6 +40,7 @@ import com.project.cruise.android.viewmodel.auth.MeState
 
 import com.project.cruise.android.ui.passenger.screen.CreateBookingScreen
 import com.project.cruise.android.data.repository.booking.PassengerBookingRepository
+import com.project.cruise.android.data.repository.feedback.FeedbackRepository
 import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModel
 import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModelFactory
 
@@ -353,7 +354,7 @@ fun NavGraphBuilder.passengerGraph(
     composable("passenger_feedback/{bookingId}", arguments = listOf(navArgument("bookingId") { type = NavType.LongType })) { entry ->
         val bookingId = entry.arguments?.getLong("bookingId") ?: return@composable
         val context=androidx.compose.ui.platform.LocalContext.current
-        val source = remember(apiService,context) { com.project.cruise.android.data.repository.FeedbackRepository(apiService,context) }
+        val source = remember(apiService,context) { FeedbackRepository(apiService, context) }
         val model: com.project.cruise.android.viewmodel.passenger.FeedbackViewModel = viewModel(
             factory = com.project.cruise.android.viewmodel.passenger.FeedbackViewModel.Factory(source))
         com.project.cruise.android.ui.screens.passenger.MyFeedbackScreen(bookingId, model) { navController.popBackStack() }

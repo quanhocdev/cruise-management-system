@@ -1,7 +1,7 @@
 //package com.project.cruise.android.viewmodel.passenger
 //
 //import com.project.cruise.android.data.dto.passenger.PassengerNotification
-//import com.project.cruise.android.data.repository.NotificationSource
+//import com.project.cruise.android.data.repository.notification.NotificationSource
 //import kotlinx.coroutines.CancellationException
 //import kotlinx.coroutines.flow.MutableStateFlow
 //import kotlinx.coroutines.flow.asStateFlow

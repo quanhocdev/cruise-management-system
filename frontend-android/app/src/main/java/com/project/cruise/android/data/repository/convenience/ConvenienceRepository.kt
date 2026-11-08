@@ -1,16 +1,17 @@
-package com.project.cruise.android.data.repository
+package com.project.cruise.android.data.repository.convenience
 
 import android.content.Context
 import com.project.cruise.android.data.auth.TokenManager
-import com.project.cruise.android.data.dto.nfc.NfcResolveRequest
-import com.project.cruise.android.data.dto.nfc.NfcResolveResponse
 import com.project.cruise.android.data.dto.convenience.ProductTourResponse
 import com.project.cruise.android.data.dto.convenience.ProductUsageRequest
 import com.project.cruise.android.data.dto.convenience.ProductUsageResponse
 import com.project.cruise.android.data.dto.convenience.ServiceTourResponse
 import com.project.cruise.android.data.dto.convenience.ServiceUsageRequest
 import com.project.cruise.android.data.dto.convenience.ServiceUsageResponse
+import com.project.cruise.android.data.dto.nfc.NfcResolveRequest
+import com.project.cruise.android.data.dto.nfc.NfcResolveResponse
 import com.project.cruise.android.data.network.RetrofitClient
+import com.project.cruise.android.data.repository.OnlinePosCommands
 
 class ConvenienceRepository(context: Context) {
 

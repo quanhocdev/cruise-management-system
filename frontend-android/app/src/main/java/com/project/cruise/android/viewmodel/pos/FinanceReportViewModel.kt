@@ -2,15 +2,16 @@ package com.project.cruise.android.viewmodel.pos
 
 import androidx.lifecycle.*
 import com.project.cruise.android.data.dto.booking.FinanceReport
-import com.project.cruise.android.data.repository.*
+import com.project.cruise.android.data.repository.finance.FinanceReportSource
+import com.project.cruise.android.data.repository.finance.ReportTour
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import retrofit2.HttpException
 
-data class FinanceReportState(val tours:List<ReportTour> = emptyList(),val tourLoading:Boolean=false,val tourError:String?=null,
-    val selected:ReportTour?=null,val report:FinanceReport?=null,val busy:Boolean=false,val error:String?=null,
-    val page:Int=0,val status:String="ALL",val sort:String="newest")
-class FinanceReportViewModel(private val source:FinanceReportSource):ViewModel() {
+data class FinanceReportState(val tours:List<ReportTour> = emptyList(), val tourLoading:Boolean=false, val tourError:String?=null,
+                              val selected: ReportTour?=null, val report:FinanceReport?=null, val busy:Boolean=false, val error:String?=null,
+                              val page:Int=0, val status:String="ALL", val sort:String="newest")
+class FinanceReportViewModel(private val source: FinanceReportSource):ViewModel() {
     private val mutable=MutableStateFlow(FinanceReportState())
     val state=mutable.asStateFlow()
     private var request:Job?=null
@@ -23,7 +24,7 @@ class FinanceReportViewModel(private val source:FinanceReportSource):ViewModel()
             catch(e:Exception){mutable.value=mutable.value.copy(tourLoading=false,tourError="Chưa tải được danh sách chuyến. Vui lòng thử lại.")}
         }
     }
-    fun select(tour:ReportTour){mutable.value=mutable.value.copy(selected=tour,page=0);refresh()}
+    fun select(tour: ReportTour){mutable.value=mutable.value.copy(selected=tour,page=0);refresh()}
     fun filter(status:String){mutable.value=mutable.value.copy(status=status,page=0);refresh()}
     fun sort(value:String){mutable.value=mutable.value.copy(sort=value,page=0);refresh()}
     fun page(value:Int){if(value<0)return;mutable.value=mutable.value.copy(page=value);refresh()}
@@ -43,7 +44,7 @@ class FinanceReportViewModel(private val source:FinanceReportSource):ViewModel()
                 "Vui lòng đăng nhập tài khoản Finance để xem thống kê." else "Chưa tải được thống kê. Vui lòng thử lại.")}
         }
     }
-    class Factory(private val source:FinanceReportSource):ViewModelProvider.Factory {
+    class Factory(private val source: FinanceReportSource):ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST") override fun <T:ViewModel> create(modelClass:Class<T>):T=FinanceReportViewModel(source) as T
     }
 }

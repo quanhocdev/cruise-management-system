@@ -10,9 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.project.cruise.android.data.repository.feedbackStatusLabel
-import com.project.cruise.android.data.repository.feedbackTargetLabel
-import com.project.cruise.android.data.repository.feedbackAvailability
+import com.project.cruise.android.data.repository.feedback.feedbackStatusLabel
+import com.project.cruise.android.data.repository.feedback.feedbackTargetLabel
+import com.project.cruise.android.data.repository.feedback.feedbackAvailability
 import com.project.cruise.android.data.dto.feedback.FeedbackDraft
 import com.project.cruise.android.ui.components.*
 import com.project.cruise.android.ui.theme.OceanBanner

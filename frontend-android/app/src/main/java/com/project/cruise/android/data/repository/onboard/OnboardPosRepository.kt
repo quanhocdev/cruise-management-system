@@ -1,10 +1,10 @@
-package com.project.cruise.android.data.repository
+package com.project.cruise.android.data.repository.onboard
 
 import android.content.Context
 import com.project.cruise.android.data.local.CruiseDatabase
 
 class OnboardPosRepository(context: Context) {
-    private val transactionDao = CruiseDatabase.getInstance(context.applicationContext).posTransactionDao()
+    private val transactionDao = CruiseDatabase.Companion.getInstance(context.applicationContext).posTransactionDao()
 
     suspend fun readTicketQr(localId: String): String {
         val scan = checkNotNull(transactionDao.findByLocalId(localId)) {

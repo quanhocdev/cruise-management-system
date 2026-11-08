@@ -1,13 +1,14 @@
-package com.project.cruise.android.data.repository
+package com.project.cruise.android.data.repository.onboard
 
 import android.content.Context
+import com.project.cruise.android.data.auth.TokenManager
 import com.project.cruise.android.data.dto.nfc.NfcResolveRequest
 import com.project.cruise.android.data.dto.nfc.NfcResolveResponse
 import com.project.cruise.android.data.dto.onboard.ActivityCruiseTourResponse
 import com.project.cruise.android.data.dto.onboard.ActivityCruiseUsageRequest
 import com.project.cruise.android.data.dto.onboard.ActivityCruiseUsageResponse
 import com.project.cruise.android.data.network.RetrofitClient
-import com.project.cruise.android.data.auth.TokenManager
+import com.project.cruise.android.data.repository.OnlinePosCommands
 
 class OnboardRepository(context: Context) {
 
