@@ -28,7 +28,8 @@ fun MessageDetailScreen(
     error: String?,
     onLoadMessages: () -> Unit,
     onSendMessage: (String) -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    isSendingMessage: Boolean
 ) {
     var messageText by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
@@ -162,7 +163,9 @@ fun MessageDetailScreen(
             Spacer(Modifier.width(8.dp))
 
             Button(
-                enabled = messageText.isNotBlank() && !isLoading,
+                enabled = messageText.isNotBlank() &&
+                        !isLoading &&
+                        !isSendingMessage,
                 onClick = {
                     val content = messageText.trim()
                     if (content.isNotEmpty()) {
@@ -172,7 +175,14 @@ fun MessageDetailScreen(
                 },
                 shape = RoundedCornerShape(50)
             ) {
-                Text("Gửi")
+                if (isSendingMessage) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text("Gửi")
+                }
             }
         }
     }

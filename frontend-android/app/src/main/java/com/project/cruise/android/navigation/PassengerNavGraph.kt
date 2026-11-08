@@ -1,5 +1,6 @@
 package com.project.cruise.android.navigation
 
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -31,6 +32,17 @@ import com.project.cruise.android.ui.screens.passenger.PassengerMessagesScreen
 import com.project.cruise.android.ui.screens.passenger.MessageDetailScreen
 import com.project.cruise.android.viewmodel.chat.MessagingViewModel
 import com.project.cruise.android.viewmodel.chat.MessagingViewModelFactory
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.navArgument
+
+import com.project.cruise.android.ui.screens.passenger.PassengerMessagesScreen
+import com.project.cruise.android.ui.screens.passenger.MessageDetailScreen
+import com.project.cruise.android.viewmodel.auth.MeState
 
 import com.project.cruise.android.ui.screens.passenger.CreateBookingScreen
 import com.project.cruise.android.data.repository.PassengerBookingRepository
@@ -220,11 +232,18 @@ fun NavGraphBuilder.passengerGraph(
         )
     }
     // ----- PASSENGER MESSAGES -----
-    composable(Routes.PASSENGER_MESSAGES) {
+    composable(Routes.PASSENGER_MESSAGES) { backStackEntry ->
 
         val messagingViewModel: MessagingViewModel = viewModel(
+            viewModelStoreOwner = backStackEntry,
             factory = MessagingViewModelFactory(chatRepository)
         )
+
+        LaunchedEffect(Unit) {
+            messagingViewModel.loadConversations()
+            messagingViewModel.loadBookings()
+            authViewModel.getCurrentUser()
+        }
 
         PassengerMessagesScreen(
             viewModel = messagingViewModel,
@@ -261,7 +280,63 @@ fun NavGraphBuilder.passengerGraph(
             factory = MessagingViewModelFactory(chatRepository)
         )
 
-        // Kết nối MessageDetailScreen ở bước tiếp theo.
+        val state by messagingViewModel.uiState.collectAsState()
+        val meState by authViewModel.meState.collectAsState()
+
+        val currentUserId = (meState as? MeState.Success)
+            ?.userId
+            .orEmpty()
+
+        if (currentUserId.isNotBlank()) {
+            MessageDetailScreen(
+                conversationId = conversationId,
+                messages = state.messages,
+                currentUserId = currentUserId,
+                isLoading = state.isLoadingMessages,
+                isSendingMessage = state.isSendingMessage,
+                error = state.error,
+                onLoadMessages = {},
+                onSendMessage = messagingViewModel::sendMessage,
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        } else {
+            CircularProgressIndicator()
+
+        }
+
+            LaunchedEffect(conversationId) {
+            val conversation = state.conversations
+                .firstOrNull { it.id == conversationId }
+
+            if (conversation != null) {
+                messagingViewModel.openConversation(conversation)
+                messagingViewModel.connectChat(conversationId)
+            }
+        }
+
+        DisposableEffect(conversationId) {
+            onDispose {
+                messagingViewModel.disconnectChat()
+            }
+        }
+
+        MessageDetailScreen(
+            conversationId = conversationId,
+            messages = state.messages,
+            currentUserId = currentUserId,
+            isLoading = state.isLoadingMessages,
+            error = state.error,
+            onLoadMessages = {},
+            onSendMessage = { content ->
+                messagingViewModel.sendMessage(content)
+            },
+            onBackClick = {
+                navController.popBackStack()
+            },
+            isSendingMessage = state.isSendingMessage
+        )
     }
     composable(Routes.PASSENGER_ACTIVITIES, arguments = listOf(navArgument("bookingId") { type = NavType.LongType })) { entry ->
         val bookingId = entry.arguments?.getLong("bookingId") ?: return@composable

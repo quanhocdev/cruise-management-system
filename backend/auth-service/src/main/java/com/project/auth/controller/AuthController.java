@@ -129,12 +129,15 @@ public class AuthController {
 
     // Lấy thông tin người dùng hiện tại
     @GetMapping("/me")
-    public ResponseEntity<Map<String, String>> getCurrentUser(Authentication authentication) {
+    public ResponseEntity<Map<String, String>> getCurrentUser(
+            Authentication authentication) {
+
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new AppException("Chưa đăng nhập", HttpStatus.UNAUTHORIZED);
         }
 
-        String username = authentication.getName();
+        Users user = authService.getCurrentUser(authentication.getName());
+
         String role = authentication.getAuthorities().stream()
                 .map(auth -> auth.getAuthority())
                 .filter(authority -> authority.startsWith("ROLE_"))
@@ -143,7 +146,8 @@ public class AuthController {
                 .orElse("GUEST");
 
         return ResponseEntity.ok(Map.of(
-                "username", username,
+                "userId", user.getId().toString(),
+                "username", user.getUsername(),
                 "role", role));
     }
 

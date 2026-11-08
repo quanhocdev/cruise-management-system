@@ -16,4 +16,6 @@ public interface AuthService {
     Users refresh(String refreshToken);
 
     void verifyEmail(VerifyOtpRequest request);
+
+    Users getCurrentUser(String username);
 }

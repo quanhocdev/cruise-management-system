@@ -96,6 +96,7 @@ sealed class MeState {
     object Loading : MeState()
 
     data class Success(
+        val userId: String,
         val username: String,
         val role: String
     ) : MeState()
@@ -493,11 +494,11 @@ class AuthViewModel(
                 val response =
                     repository.getCurrentUser()
 
-                _meState.value =
-                    MeState.Success(
-                        username = response.username,
-                        role = response.role
-                    )
+                _meState.value = MeState.Success(
+                    userId = response.userId,
+                    username = response.username,
+                    role = response.role
+                )
 
             } catch (e: Exception) {
 
