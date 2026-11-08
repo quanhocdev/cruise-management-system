@@ -1,9 +1,11 @@
 package com.project.cruise.android.ui.guest.components.guestwelcome
 
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,10 +19,14 @@ fun GuestActionButtons(
     onPosClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val loginSource = remember { MutableInteractionSource() }
+    val registerSource = remember { MutableInteractionSource() }
+
     Column(modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Button(
             onClick = onLoginClick,
-            modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp),
+            interactionSource = loginSource,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp).pressScale(loginSource),
             shape = RoundedCornerShape(20.dp),
             colors =
                 ButtonDefaults.buttonColors(
@@ -33,7 +39,8 @@ fun GuestActionButtons(
         Spacer(Modifier.height(12.dp))
         OutlinedButton(
             onClick = onRegisterClick,
-            modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp),
+            interactionSource = registerSource,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp).pressScale(registerSource),
             shape = RoundedCornerShape(20.dp),
             colors =
                 ButtonDefaults.outlinedButtonColors(

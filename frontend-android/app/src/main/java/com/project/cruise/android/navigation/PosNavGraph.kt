@@ -186,7 +186,7 @@ fun NavGraphBuilder.posGraph(
         )
         com.project.cruise.android.ui.screens.pos.FinanceSpendingScreen(model) { navController.popBackStack() }
     }
-    
+
     // ----- QR SCAN -----
     composable(Routes.POS_QR_SCAN, arguments = posRoleArguments) { entry ->
         val role = entry.posRole() ?: return@composable

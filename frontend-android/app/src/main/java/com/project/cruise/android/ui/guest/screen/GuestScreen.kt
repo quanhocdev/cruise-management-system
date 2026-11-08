@@ -1,10 +1,11 @@
 package com.project.cruise.android.ui.guest.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
@@ -28,17 +29,25 @@ fun GuestScreen(onLoginClick: () -> Unit, onRegisterClick: () -> Unit, onPosClic
                         .padding(horizontal = 28.dp, vertical = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                GuestBrandHeader()
+                EntranceAnimation(delayMillis = 100) { GuestBrandHeader() }
+
                 Spacer(Modifier.weight(1f))
-                GuestHeadline()
+
+                EntranceAnimation(delayMillis = 350, modifier = Modifier.fillMaxWidth()) {
+                    GuestHeadline()
+                }
                 Spacer(Modifier.height(18.dp))
-                GuestFeatureStrip()
+                EntranceAnimation(delayMillis = 550, modifier = Modifier.fillMaxWidth()) {
+                    GuestFeatureStrip()
+                }
                 Spacer(Modifier.height(20.dp))
-                GuestActionButtons(
-                    onLoginClick = onLoginClick,
-                    onRegisterClick = onRegisterClick,
-                    onPosClick = onPosClick,
-                )
+                EntranceAnimation(delayMillis = 750, modifier = Modifier.fillMaxWidth()) {
+                    GuestActionButtons(
+                        onLoginClick = onLoginClick,
+                        onRegisterClick = onRegisterClick,
+                        onPosClick = onPosClick,
+                    )
+                }
             }
         }
     }
