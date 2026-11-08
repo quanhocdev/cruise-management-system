@@ -1,13 +1,12 @@
-
 package com.project.cruise.android.data.repository
 
 import com.project.cruise.android.data.auth.TokenManager
 import com.project.cruise.android.data.dto.chat.*
-import com.project.cruise.android.data.network.ApiService
 import com.project.cruise.android.data.network.ChatSocketService
+import com.project.cruise.android.data.network.api.ChatApiService
 
 class ChatRepository(
-    private val apiService: ApiService,
+    private val apiService: ChatApiService, // Đổi sang ChatApiService
     private val tokenManager: TokenManager,
     private val chatSocketService: ChatSocketService,
     private val baseUrl: String

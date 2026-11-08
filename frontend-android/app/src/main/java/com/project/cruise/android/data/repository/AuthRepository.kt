@@ -1,4 +1,3 @@
-
 package com.project.cruise.android.data.repository
 
 import com.project.cruise.android.data.auth.TokenManager
@@ -11,10 +10,10 @@ import com.project.cruise.android.data.dto.auth.RegisterRequest
 import com.project.cruise.android.data.dto.auth.RegisterResponse
 import com.project.cruise.android.data.dto.auth.UserInfoResponse
 import com.project.cruise.android.data.dto.auth.VerifyOtpRequest
-import com.project.cruise.android.data.network.ApiService
+import com.project.cruise.android.data.network.api.AuthApiService
 
 class AuthRepository(
-    private val apiService: ApiService,
+    private val apiService: AuthApiService, // Đổi sang AuthApiService
     private val tokenManager: TokenManager
 ) {
 
@@ -39,7 +38,6 @@ class AuthRepository(
     }
 
     // GOOGLE LOGIN
-    // Nếu backend yêu cầu OTP, chưa lưu JWT.
     suspend fun googleLogin(
         firebaseIdToken: String
     ): GoogleLoginResponse {
@@ -58,7 +56,6 @@ class AuthRepository(
                         ?: "Backend không trả về JWT hợp lệ"
                 )
 
-            // Chỉ cho phép hành khách đăng nhập vào ứng dụng này.
             if (!jwt.role.isPassengerRole()) {
                 throw IllegalStateException(
                     "Ứng dụng này chỉ dành cho hành khách"
@@ -116,7 +113,7 @@ class AuthRepository(
         )
     }
 
-    // OTP ĐĂNG KÝ THÔNG THƯỜNG — GIỮ NGUYÊN ENDPOINT CŨ
+    // OTP ĐĂNG KÝ THÔNG THƯỜNG
     suspend fun verifyEmail(
         userId: String,
         otp: String

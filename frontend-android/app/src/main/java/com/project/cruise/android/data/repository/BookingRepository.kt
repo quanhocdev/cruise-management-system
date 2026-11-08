@@ -1,10 +1,10 @@
 package com.project.cruise.android.data.repository
 
 import com.project.cruise.android.data.dto.booking.BookingResponse
-import com.project.cruise.android.data.network.ApiService
+import com.project.cruise.android.data.network.api.BookingApiService
 
 class BookingRepository(
-    private val apiService: ApiService
+    private val apiService: BookingApiService // Đổi sang BookingApiService
 ) {
     suspend fun getPayment(id: Long) = apiService.getBookingPayment(id)
 
