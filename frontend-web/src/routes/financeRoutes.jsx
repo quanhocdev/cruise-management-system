@@ -13,6 +13,7 @@ import FinanceBookings from "../modules/finance/pages/FinanceBookings";
 import FinanceBookingPassengers from "../modules/finance/pages/FinanceBookingPassengers";
 import FinanceCheckIn from "../modules/finance/pages/FinanceCheckIn";
 import FinanceCheckout from "../modules/finance/pages/FinanceCheckout";
+import FinanceMessages from "../modules/finance/pages/FinanceMessages";
 
 const financeRoutes = (
   <Route
@@ -33,6 +34,7 @@ const financeRoutes = (
       path="bookings/:bookingId/passengers"
       element={<FinanceBookingPassengers />}
     />
+    <Route path="messages" element={<FinanceMessages />} />
 
     <Route path="rooms" element={<FinanceRooms />} />
     <Route path="nfc-cards" element={<FinanceNfcCards />} />

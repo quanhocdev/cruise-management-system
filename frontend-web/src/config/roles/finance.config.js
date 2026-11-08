@@ -7,6 +7,7 @@ import {
   TicketCheck,
   QrCode,
   Banknote,
+  MessageCircle,
 } from "lucide-react";
 
 export const financeConfig = {
@@ -53,6 +54,11 @@ export const financeConfig = {
           label: "Danh sách vòng NFC",
           icon: CreditCard,
           path: "/finance/nfc-cards",
+        },
+        {
+          label: "Tin nhắn hành khách",
+          icon: MessageCircle,
+          path: "/finance/messages",
         },
       ],
     },

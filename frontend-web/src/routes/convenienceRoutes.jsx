@@ -11,6 +11,7 @@ import ConvenienceServices from "../modules/convenience/pages/ConvenienceService
 import ConvenienceTourConfigPage from "../modules/convenience/pages/ConvenienceTourConfigPage";
 import ProductUsageHistory from "../modules/convenience/pages/ProductUsageHistory";
 import ServiceUsageHistory from "../modules/convenience/pages/ServiceUsageHistory";
+import ConvenienceMessages from "../modules/convenience/pages/ConvenienceMessages";
 
 const convenienceRoutes = (
   <Route
@@ -28,6 +29,7 @@ const convenienceRoutes = (
     <Route path="product-usage-history" element={<ProductUsageHistory />} />
     <Route path="service-usage-history" element={<ServiceUsageHistory />} />
     <Route index element={<Navigate to="dashboard" replace />} />
+    <Route path="messages" element={<ConvenienceMessages />} />
   </Route>
 );
 
