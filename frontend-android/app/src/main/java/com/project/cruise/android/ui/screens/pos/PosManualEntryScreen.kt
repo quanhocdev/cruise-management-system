@@ -13,7 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.project.cruise.android.data.local.pos.PosScanType
-import com.project.cruise.android.data.repository.PosTransactionQueue
+import com.project.cruise.android.data.repository.pos.PosTransactionQueue
 import kotlinx.coroutines.launch
 
 @Composable

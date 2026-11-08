@@ -3,8 +3,8 @@ package com.project.cruise.android.viewmodel.pos
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.project.cruise.android.data.network.ScanResponse
-import com.project.cruise.android.data.repository.PosIdentityRepository
+import com.project.cruise.android.data.dto.pos.ScanResponse
+import com.project.cruise.android.data.repository.pos.PosIdentityRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

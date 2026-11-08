@@ -3,10 +3,10 @@ package com.project.cruise.android.viewmodel.chat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.project.cruise.android.data.network.ApiService
+import com.project.cruise.android.data.network.api.ChatApiService
 
 class ChatViewModelFactory(
-    private val apiService: ApiService
+    private val apiService: ChatApiService
 ) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")

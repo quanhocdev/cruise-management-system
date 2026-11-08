@@ -10,7 +10,7 @@ import androidx.navigation.compose.composable
 import com.project.cruise.android.data.auth.TokenManager
 import com.project.cruise.android.data.dto.staff.StaffRole
 import com.project.cruise.android.data.network.RetrofitClient
-import com.project.cruise.android.data.repository.StaffAssignmentRepository
+import com.project.cruise.android.data.repository.staff.StaffAssignmentRepository
 import com.project.cruise.android.ui.staff.StaffAssignmentsScreen
 import com.project.cruise.android.viewmodel.auth.AuthViewModel
 import com.project.cruise.android.viewmodel.auth.SessionState
@@ -29,7 +29,15 @@ fun NavGraphBuilder.staffGraph(navController: NavHostController, auth: AuthViewM
             }
         } else {
             val repository = remember(role, user.username) {
-                StaffAssignmentRepository(RetrofitClient.createApiService(tokens, retryOnConnectionFailure = false), role)
+                // Khởi tạo đầy đủ các ApiService thành phần cho StaffAssignmentRepository
+                StaffAssignmentRepository(
+                    staffApi = RetrofitClient.createStaffApiService(tokens),
+                    tourApi = RetrofitClient.createTourApiService(tokens),
+                    convenienceApi = RetrofitClient.createConvenienceApiService(tokens),
+                    onboardApi = RetrofitClient.createOnboardApiService(tokens),
+                    shoreApi = RetrofitClient.createShoreApiService(tokens),
+                    role = role
+                )
             }
             val factory = remember(repository) {
                 object : ViewModelProvider.Factory {

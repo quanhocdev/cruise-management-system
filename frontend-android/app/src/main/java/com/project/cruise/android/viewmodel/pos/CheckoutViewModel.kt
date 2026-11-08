@@ -2,7 +2,7 @@ package com.project.cruise.android.viewmodel.pos
 
 import androidx.lifecycle.*
 import com.project.cruise.android.data.dto.booking.*
-import com.project.cruise.android.data.repository.CheckoutSource
+import com.project.cruise.android.data.repository.finance.CheckoutSource
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import retrofit2.HttpException

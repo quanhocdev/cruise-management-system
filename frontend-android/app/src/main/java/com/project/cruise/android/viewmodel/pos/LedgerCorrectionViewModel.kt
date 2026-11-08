@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.project.cruise.android.data.dto.booking.*
-import com.project.cruise.android.data.repository.LedgerCorrectionSource
+import com.project.cruise.android.data.repository.finance.LedgerCorrectionSource
 import com.google.gson.JsonParser
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -6,7 +6,7 @@ import com.project.cruise.android.data.dto.chat.ConfirmedBookingResponse
 import com.project.cruise.android.data.dto.chat.ConversationResponse
 import com.project.cruise.android.data.dto.chat.ManagerInfoResponse
 import com.project.cruise.android.data.dto.chat.MessageResponse
-import com.project.cruise.android.data.repository.ChatRepository
+import com.project.cruise.android.data.repository.chat.ChatRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

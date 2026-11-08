@@ -3,7 +3,7 @@ package com.project.cruise.android.viewmodel.passenger
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.project.cruise.android.data.dto.booking.BookingResponse
-import com.project.cruise.android.data.repository.BookingRepository
+import com.project.cruise.android.data.repository.booking.BookingRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch

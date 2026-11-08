@@ -2,7 +2,7 @@ package com.project.cruise.android.viewmodel.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.project.cruise.android.data.repository.AuthRepository
+import com.project.cruise.android.data.repository.auth.AuthRepository
 
 class AuthViewModelFactory(
     private val repository: AuthRepository

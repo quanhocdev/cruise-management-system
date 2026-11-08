@@ -2,6 +2,7 @@ package com.project.cruise.android.data.network
 
 import android.util.Log
 import com.project.cruise.android.data.auth.TokenManager
+import com.project.cruise.android.data.network.api.AuthApiService
 import okhttp3.Authenticator
 import okhttp3.Request
 import okhttp3.Response
@@ -9,7 +10,7 @@ import okhttp3.Route
 
 class TokenAuthenticator(
     private val tokenManager: TokenManager,
-    private val refreshApi: ApiService
+    private val refreshApi: AuthApiService // Đã đổi từ ApiService sang AuthApiService
 ) : Authenticator {
 
     override fun authenticate(

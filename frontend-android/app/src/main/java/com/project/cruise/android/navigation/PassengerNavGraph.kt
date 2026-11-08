@@ -11,9 +11,9 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.project.cruise.android.data.network.ApiService
-import com.project.cruise.android.data.repository.BookingRepository
-import com.project.cruise.android.data.repository.ChatRepository
-import com.project.cruise.android.data.repository.TourRepository
+import com.project.cruise.android.data.repository.booking.BookingRepository
+import com.project.cruise.android.data.repository.chat.ChatRepository
+import com.project.cruise.android.data.repository.tour.TourRepository
 import com.project.cruise.android.ui.passenger.screen.ProfileScreen
 import com.project.cruise.android.ui.guest.screen.TourDetailPublicScreen
 import com.project.cruise.android.ui.guest.screen.TourPublicScreen
@@ -34,11 +34,15 @@ import com.project.cruise.android.viewmodel.chat.MessagingViewModel
 import com.project.cruise.android.viewmodel.chat.MessagingViewModelFactory
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.DisposableEffect
+import com.project.cruise.android.data.repository.booking.ActivityRegistrationRepository
 
 import com.project.cruise.android.viewmodel.auth.MeState
 
 import com.project.cruise.android.ui.passenger.screen.CreateBookingScreen
-import com.project.cruise.android.data.repository.PassengerBookingRepository
+import com.project.cruise.android.data.repository.booking.PassengerBookingRepository
+import com.project.cruise.android.data.repository.feedback.FeedbackRepository
+import com.project.cruise.android.data.repository.finance.CheckoutRepository
+import com.project.cruise.android.data.repository.notification.ActivityInboxRepository
 import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModel
 import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModelFactory
 
@@ -334,7 +338,7 @@ fun NavGraphBuilder.passengerGraph(
     composable(Routes.PASSENGER_ACTIVITIES, arguments = listOf(navArgument("bookingId") { type = NavType.LongType })) { entry ->
         val bookingId = entry.arguments?.getLong("bookingId") ?: return@composable
         val context = androidx.compose.ui.platform.LocalContext.current
-        val source = remember(context) { com.project.cruise.android.data.repository.ActivityRegistrationRepository(context) }
+        val source = remember(context) { ActivityRegistrationRepository(context) }
         val model: com.project.cruise.android.viewmodel.passenger.ActivityRegistrationViewModel = viewModel(
             factory = com.project.cruise.android.viewmodel.passenger.ActivityRegistrationViewModel.Factory(source))
         com.project.cruise.android.ui.screens.passenger.ActivityRegistrationScreen(bookingId, model,
@@ -343,7 +347,7 @@ fun NavGraphBuilder.passengerGraph(
     }
     composable(Routes.PASSENGER_ACTIVITY_INBOX) {
         val context=androidx.compose.ui.platform.LocalContext.current
-        val source=remember(context) { com.project.cruise.android.data.repository.ActivityInboxRepository(context) }
+        val source=remember(context) { ActivityInboxRepository(context) }
         val model:com.project.cruise.android.viewmodel.passenger.ActivityInboxViewModel=viewModel(
             factory=com.project.cruise.android.viewmodel.passenger.ActivityInboxViewModel.Factory(source))
         com.project.cruise.android.ui.screens.passenger.ActivityInboxScreen(model,
@@ -352,7 +356,7 @@ fun NavGraphBuilder.passengerGraph(
     composable("passenger_feedback/{bookingId}", arguments = listOf(navArgument("bookingId") { type = NavType.LongType })) { entry ->
         val bookingId = entry.arguments?.getLong("bookingId") ?: return@composable
         val context=androidx.compose.ui.platform.LocalContext.current
-        val source = remember(apiService,context) { com.project.cruise.android.data.repository.FeedbackRepository(apiService,context) }
+        val source = remember(apiService,context) { FeedbackRepository(apiService, context) }
         val model: com.project.cruise.android.viewmodel.passenger.FeedbackViewModel = viewModel(
             factory = com.project.cruise.android.viewmodel.passenger.FeedbackViewModel.Factory(source))
         com.project.cruise.android.ui.screens.passenger.MyFeedbackScreen(bookingId, model) { navController.popBackStack() }
@@ -360,7 +364,7 @@ fun NavGraphBuilder.passengerGraph(
     composable("passenger_bill/{bookingId}", arguments = listOf(navArgument("bookingId") { type = NavType.LongType })) { entry ->
         val bookingId=entry.arguments?.getLong("bookingId")?:return@composable
         val context=androidx.compose.ui.platform.LocalContext.current
-        val source=remember(context){com.project.cruise.android.data.repository.CheckoutRepository(context)}
+        val source=remember(context){ CheckoutRepository(context) }
         val model:com.project.cruise.android.viewmodel.pos.CheckoutViewModel=viewModel(
             factory=com.project.cruise.android.viewmodel.pos.CheckoutViewModel.Factory(source,false))
         com.project.cruise.android.ui.screens.pos.CheckoutScreen(model,false,bookingId){navController.popBackStack()}
@@ -377,6 +381,6 @@ fun NavGraphBuilder.passengerGraph(
 @androidx.compose.runtime.Composable
 private fun ActivityInboxEntry(onClick: ()->Unit) {
     val context=androidx.compose.ui.platform.LocalContext.current
-    val source=remember(context) { com.project.cruise.android.data.repository.ActivityInboxRepository(context) }
+    val source=remember(context) { ActivityInboxRepository(context) }
     com.project.cruise.android.ui.screens.passenger.ActivityInboxButton(source,onClick)
 }

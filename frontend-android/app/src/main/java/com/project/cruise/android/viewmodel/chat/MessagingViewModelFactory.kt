@@ -2,7 +2,7 @@ package com.project.cruise.android.viewmodel.chat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.project.cruise.android.data.repository.ChatRepository
+import com.project.cruise.android.data.repository.chat.ChatRepository
 
 class MessagingViewModelFactory(
     private val repository: ChatRepository

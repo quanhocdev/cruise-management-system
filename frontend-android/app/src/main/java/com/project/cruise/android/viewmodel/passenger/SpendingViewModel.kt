@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.project.cruise.android.data.dto.booking.SpendingSummary
-import com.project.cruise.android.data.network.ApiService
+import com.project.cruise.android.data.network.api.BookingApiService
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 
 data class SpendingState(val summary: SpendingSummary? = null, val loading: Boolean = false, val error: String? = null)
 
-class SpendingViewModel(private val api: ApiService, private val bookingId: Long) : ViewModel() {
+class SpendingViewModel(private val api: BookingApiService, private val bookingId: Long) : ViewModel() {
     private val mutable = MutableStateFlow(SpendingState())
     val state = mutable.asStateFlow()
     init { refresh() }
@@ -40,7 +40,7 @@ class SpendingViewModel(private val api: ApiService, private val bookingId: Long
 
     private fun SpendingSummary?.orEmptyItems() = this?.items.orEmpty()
 
-    class Factory(private val api: ApiService, private val bookingId: Long) : ViewModelProvider.Factory {
+    class Factory(private val api: BookingApiService, private val bookingId: Long) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T = SpendingViewModel(api, bookingId) as T
     }

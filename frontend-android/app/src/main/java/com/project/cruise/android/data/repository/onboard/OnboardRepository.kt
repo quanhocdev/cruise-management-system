@@ -1,0 +1,47 @@
+package com.project.cruise.android.data.repository.onboard
+
+import android.content.Context
+import com.project.cruise.android.data.auth.TokenManager
+import com.project.cruise.android.data.dto.nfc.NfcResolveRequest
+import com.project.cruise.android.data.dto.nfc.NfcResolveResponse
+import com.project.cruise.android.data.dto.onboard.ActivityCruiseTourResponse
+import com.project.cruise.android.data.dto.onboard.ActivityCruiseUsageRequest
+import com.project.cruise.android.data.dto.onboard.ActivityCruiseUsageResponse
+import com.project.cruise.android.data.network.RetrofitClient
+import com.project.cruise.android.data.repository.pos.OnlinePosCommands
+
+class OnboardRepository(context: Context) {
+
+    private val appContext = context.applicationContext
+    private val commands = OnlinePosCommands(appContext)
+
+    // Đổi sang OnboardApiService
+    private val apiService =
+        RetrofitClient.createOnboardApiService(TokenManager(appContext))
+
+    suspend fun resolveNfc(
+        nfcCardUid: String
+    ): NfcResolveResponse {
+        return apiService.resolveOnboardNfc(
+            NfcResolveRequest(
+                nfcCardUid = nfcCardUid
+            )
+        )
+    }
+
+    suspend fun getActivityCruiseTours(
+        tourId: String
+    ): List<ActivityCruiseTourResponse> {
+        return apiService.getOnboardActivityCruiseTours(tourId)
+    }
+
+    suspend fun createActivityCruiseUsage(
+        nfcCardUid: String,
+        activityCruiseTourId: String
+    ): ActivityCruiseUsageResponse {
+        val request = ActivityCruiseUsageRequest(nfcCardUid, activityCruiseTourId)
+        return commands.execute("ACTIVITY_USAGE", request) { requestId ->
+            apiService.createActivityCruiseUsage(request.copy(clientRequestId = requestId))
+        }
+    }
+}

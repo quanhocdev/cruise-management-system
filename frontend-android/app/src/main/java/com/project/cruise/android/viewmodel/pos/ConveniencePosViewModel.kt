@@ -3,9 +3,9 @@ package com.project.cruise.android.viewmodel.pos
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.project.cruise.android.data.network.ConvenienceProductResponse
-import com.project.cruise.android.data.network.ConvenienceServiceResponse
-import com.project.cruise.android.data.repository.ConveniencePosRepository
+import com.project.cruise.android.data.dto.pos.ConvenienceProductResponse
+import com.project.cruise.android.data.dto.pos.ConvenienceServiceResponse
+import com.project.cruise.android.data.repository.convenience.ConveniencePosRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch

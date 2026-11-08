@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.project.cruise.android.data.dto.auth.JwtResponse
 import com.project.cruise.android.data.dto.auth.RegisterResponse
-import com.project.cruise.android.data.repository.AuthRepository
+import com.project.cruise.android.data.repository.auth.AuthRepository
 import com.project.cruise.android.ui.screens.pos.PosRole
 import com.project.cruise.android.data.dto.staff.StaffRole
 import kotlinx.coroutines.flow.MutableStateFlow

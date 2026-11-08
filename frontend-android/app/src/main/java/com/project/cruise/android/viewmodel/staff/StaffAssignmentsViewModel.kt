@@ -5,14 +5,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.project.cruise.android.data.dto.staff.StaffAssignment
 import com.project.cruise.android.data.dto.staff.StaffResponseRequest
-import com.project.cruise.android.data.repository.StaffAssignmentRepository
+import com.project.cruise.android.data.repository.staff.StaffAssignmentRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.util.UUID
-import com.project.cruise.android.viewmodel.staff.StaffAssignmentsState
 
 class StaffAssignmentsViewModel(
     private val repository: StaffAssignmentRepository

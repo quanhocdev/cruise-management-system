@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.project.cruise.android.data.dto.nfc.NfcResolveResponse
-import com.project.cruise.android.data.repository.ConvenienceRepository
+import com.project.cruise.android.data.repository.convenience.ConvenienceRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
