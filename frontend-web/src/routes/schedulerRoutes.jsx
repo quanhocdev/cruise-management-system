@@ -7,6 +7,7 @@ import SchedulerLayout from "../layouts/SchedulerLayout";
 
 import SchedulerDashboard from "../modules/scheduler/pages/Dashboard";
 import ManagerTour from "../modules/scheduler/pages/ManagerTour";
+import TourRoutePlanner from "../modules/scheduler/pages/TourRoutePlanner";
 import ManagerSchedule from "../modules/scheduler/pages/ManagerSchedule";
 import ManagerScheduleStops from "../modules/scheduler/pages/ManagerScheduleStops";
 
@@ -19,6 +20,7 @@ const schedulerRoutes = (
           <Routes>
             <Route path="dashboard" element={<SchedulerDashboard />} />
             <Route path="tours" element={<ManagerTour />} />
+            <Route path="tours/new" element={<TourRoutePlanner />} />
             <Route
               path="tours/:tourId/schedules"
               element={<ManagerSchedule />}

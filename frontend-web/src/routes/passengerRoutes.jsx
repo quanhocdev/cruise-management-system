@@ -9,6 +9,7 @@ import PassengerBookings from "../modules/passenger/pages/MyBookings";
 import PassengerBookingDetail from "../modules/passenger/pages/BookingDetail";
 import PassengerBooking from "../modules/passenger/pages/PassengerBooking";
 import PaymentResultPage from "../modules/passenger/pages/PaymentResultPage";
+import PassengerMessages from "../modules/passenger/pages/PassengerMessages";
 
 const passengerRoutes = (
   <Route
@@ -23,7 +24,12 @@ const passengerRoutes = (
     <Route path="bookings" element={<PassengerBookings />} />
     <Route path="bookings/:bookingId" element={<PassengerBookingDetail />} />
     <Route path="payment/result" element={<PaymentResultPage />} />
+
+    {/* Chat với các phòng ban */}
+    <Route path="messages" element={<PassengerMessages />} />
+
     <Route path="dashboard" element={<Navigate to="/tours" replace />} />
+
     {/* Vào /passenger thì về danh sách bookings */}
     <Route path="" element={<Navigate to="bookings" replace />} />
   </Route>

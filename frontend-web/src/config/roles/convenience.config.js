@@ -6,6 +6,7 @@ import {
   Sparkles,
   History,
   Wrench,
+  MessageCircle,
 } from "lucide-react";
 
 export const convenienceConfig = {
@@ -51,6 +52,11 @@ export const convenienceConfig = {
           label: "Lịch sử dịch vụ",
           icon: Wrench,
           path: "/convenience/service-usage-history",
+        },
+        {
+          label: "Tin nhắn hành khách",
+          icon: MessageCircle,
+          path: "/convenience/messages",
         },
       ],
     },

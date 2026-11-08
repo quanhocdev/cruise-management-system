@@ -8,6 +8,7 @@ import ShoreLayout from "../layouts/ShoreLayout";
 import ShoreDashboard from "../modules/shore/pages/Dashboard";
 import ActivityVisitTour from "../modules/shore/pages/ActivityVisitTour";
 import ActivityVisitUsage from "../modules/shore/pages/ActivityVisitUsage";
+import ShoreMessages from "../modules/shore/pages/ShoreMessages";
 
 const shoreRoutes = (
   <Route
@@ -21,6 +22,8 @@ const shoreRoutes = (
     <Route path="dashboard" element={<ShoreDashboard />} />
     <Route path="tours" element={<ActivityVisitTour />} />
     <Route path="activity-visit-usages" element={<ActivityVisitUsage />} />
+    <Route path="messages" element={<ShoreMessages />} />
+
     <Route index element={<Navigate to="dashboard" replace />} />
   </Route>
 );

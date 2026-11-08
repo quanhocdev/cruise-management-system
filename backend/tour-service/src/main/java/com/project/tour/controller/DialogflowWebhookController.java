@@ -19,7 +19,7 @@ public class DialogflowWebhookController {
     @PostMapping
     public ResponseEntity<DialogflowWebhookResponse> handleWebhook(@RequestBody DialogflowWebhookRequest request) {
         if (request == null || request.queryResult() == null || request.queryResult().intent() == null) {
-            return ResponseEntity.ok(new DialogflowWebhookResponse("Dạ, hệ thống chưa nhận diện được yêu cầu."));
+            return ResponseEntity.ok(new DialogflowWebhookResponse("Hệ thống chưa nhận diện được yêu cầu."));
         }
 
         String intentName = request.queryResult().intent().displayName();

@@ -8,15 +8,12 @@ import java.util.UUID;
 
 public record ProductUsageRequest(
 
-                @NotBlank(message = "NFC card UID không được để trống") String nfcCardUid,
+        @NotBlank(message = "NFC card UID không được để trống") String nfcCardUid,
 
-                @NotNull(message = "Product tour ID không được để trống") UUID productTourId,
+        @NotNull(message = "Product tour ID không được để trống") UUID productTourId,
 
-                @NotNull(message = "Số lượng không được để trống") @Min(value = 1, message = "Số lượng phải lớn hơn 0") Integer quantity,
-                UUID clientRequestId
+        @NotNull(message = "Số lượng không được để trống") @Min(value = 1, message = "Số lượng phải lớn hơn 0") Integer quantity
 
 ) {
-    public ProductUsageRequest(String nfcCardUid, UUID productTourId, Integer quantity) {
-        this(nfcCardUid, productTourId, quantity, null);
-    }
+
 }

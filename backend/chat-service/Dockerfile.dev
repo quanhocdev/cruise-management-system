@@ -1,0 +1,19 @@
+
+FROM maven:3.9.6-eclipse-temurin-17
+
+WORKDIR /app
+
+# Install shared common module
+COPY backend/common/pom.xml ./common/pom.xml
+COPY backend/common/src ./common/src
+
+RUN mvn -f ./common/pom.xml clean install -DskipTests
+
+# Copy chat-service
+COPY backend/chat-service/pom.xml ./chat-service/pom.xml
+COPY backend/chat-service/src ./chat-service/src
+
+# Run chat-service
+WORKDIR /app/chat-service
+
+CMD ["mvn", "spring-boot:run"]

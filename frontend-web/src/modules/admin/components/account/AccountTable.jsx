@@ -1,18 +1,46 @@
 import { Button, Card, Spinner, Table } from "react-bootstrap";
 
+function getStatusBadge(status) {
+  const statusConfig = {
+    ACTIVE: {
+      label: "Đang hoạt động",
+      className: "bg-success",
+    },
+    INVITED: {
+      label: "Chờ kích hoạt",
+      className: "bg-info text-dark",
+    },
+    INACTIVE: {
+      label: "Đã vô hiệu hóa",
+      className: "bg-secondary",
+    },
+    BLOCKED: {
+      label: "Đã khóa",
+      className: "bg-danger",
+    },
+  };
+
+  const config = statusConfig[status] || {
+    label: status || "Không xác định",
+    className: "bg-secondary",
+  };
+
+  return <span className={`badge ${config.className}`}>{config.label}</span>;
+}
+
 export default function AccountTable({
   accounts,
   loading,
   onEdit,
   onDeactivate,
+  emptyMessage = "Không tìm thấy tài khoản phù hợp.",
 }) {
   if (loading) {
     return (
-      <Card>
+      <Card className="manager-account-table-card">
         <Card.Body>
           <div className="text-center py-5">
             <Spinner animation="border" />
-
             <div className="mt-2">Đang tải danh sách tài khoản...</div>
           </div>
         </Card.Body>
@@ -22,24 +50,22 @@ export default function AccountTable({
 
   if (!accounts.length) {
     return (
-      <Card>
+      <Card className="manager-account-table-card">
         <Card.Body>
-          <div className="text-center text-muted py-5">
-            Chưa có tài khoản nhân viên nào.
-          </div>
+          <div className="text-center text-muted py-5">{emptyMessage}</div>
         </Card.Body>
       </Card>
     );
   }
 
   return (
-    <Card>
+    <Card className="manager-account-table-card">
       <Card.Body>
         <div className="table-responsive">
           <Table hover bordered align="middle" className="mb-0">
-            <thead>
+            <thead className="table-light">
               <tr>
-                <th>#</th>
+                <th style={{ width: "55px" }}>#</th>
                 <th>Tài khoản</th>
                 <th>Email</th>
                 <th>Vai trò</th>
@@ -55,9 +81,7 @@ export default function AccountTable({
                 const role =
                   account.role?.name || account.roleName || account.role || "—";
 
-                const status = account.status || account.accountStatus || "—";
-
-                const isActive = status === "ACTIVE";
+                const status = account.status || "—";
 
                 return (
                   <tr key={account.id}>
@@ -73,13 +97,7 @@ export default function AccountTable({
                       <span className="badge bg-primary">{role}</span>
                     </td>
 
-                    <td>
-                      {isActive ? (
-                        <span className="badge bg-success">ACTIVE</span>
-                      ) : (
-                        <span className="badge bg-secondary">{status}</span>
-                      )}
-                    </td>
+                    <td>{getStatusBadge(status)}</td>
 
                     <td>
                       <div className="d-flex gap-2 justify-content-center">
@@ -88,15 +106,17 @@ export default function AccountTable({
                           variant="outline-primary"
                           onClick={() => onEdit(account)}
                         >
+                          <i className="bi bi-pencil me-1" />
                           Sửa
                         </Button>
 
-                        {isActive && (
+                        {status === "ACTIVE" && (
                           <Button
                             size="sm"
                             variant="outline-danger"
                             onClick={() => onDeactivate(account)}
                           >
+                            <i className="bi bi-person-slash me-1" />
                             Vô hiệu hóa
                           </Button>
                         )}

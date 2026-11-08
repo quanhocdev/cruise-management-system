@@ -29,8 +29,16 @@ object Routes {
     const val PASSENGER_TOUR_DETAIL = "passenger_tours/{tourId}"
     const val PASSENGER_ROOMS = "passenger_rooms/{voyageId}"
     const val PASSENGER_CREATE_BOOKING = "passenger_booking/{tourId}/{packageId}"
+
     const val PASSENGER_BOOKINGS = "passenger_bookings"
     const val PASSENGER_BOOKING_DETAIL = "passenger_bookings/{bookingId}"
+
+    const val PASSENGER_MESSAGES = "passenger_messages"
+    const val PASSENGER_MESSAGE_DETAIL =
+        "passenger_message_detail/{conversationId}"
+
+    fun passengerMessageDetail(conversationId: String) =
+        "passenger_message_detail/$conversationId"
     const val PASSENGER_ACTIVITIES = "passenger_activities/{bookingId}"
     const val POS_REGISTRATIONS = "pos_registrations"
     const val PASSENGER_PAYMENT_RESULT =

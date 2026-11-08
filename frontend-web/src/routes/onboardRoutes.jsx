@@ -4,7 +4,7 @@ import { Navigate, Route } from "react-router-dom";
 
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 import OnboardLayout from "../layouts/OnboardLayout";
-
+import OnboardMessages from "../modules/onboard/pages/OnboardMessages";
 import OnboardDashboard from "../modules/onboard/pages/Dashboard";
 import OnboardActivityCruiseTour from "../modules/onboard/pages/ActivityCruiseTour";
 import ActivityCruise from "../modules/onboard/pages/ActivityCruise";
@@ -26,6 +26,7 @@ const onboardRoutes = (
     <Route path="dashboard" element={<OnboardDashboard />} />
     <Route path="activities-catalog" element={<ActivityCruise />} />
     <Route path="tour-config" element={<OnboardTourConfigPage />} />
+    <Route path="messages" element={<OnboardMessages />} />
     <Route path="activity-cruise" element={<OnboardActivityCruiseTour />} />
     <Route path="activity-cruise-usages" element={<ActivityCruiseUsage />} />
 

@@ -1,11 +1,18 @@
 // src/modules/admin/pages/ManagerCruise.jsx
-import { useState } from "react";
-import { Alert, Button } from "react-bootstrap";
+
+import { useMemo, useState } from "react";
+import { Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { Plus } from "lucide-react";
 
 import useCruises from "../hooks/useCruises";
-import CruiseTable from "../components/cruise/CruiseTable";
+import CruiseList from "../components/cruise/CruiseList";
 import CruiseFormModal from "../components/cruise/CruiseFormModal";
+import CruiseDeleteModal from "../components/cruise/CruiseDeleteModal";
+import {
+  CruiseStats,
+  CruiseToolbar,
+} from "../components/cruise/CruiseOverview";
 
 import "../styles/cruise/ManagerCruise.css";
 
@@ -24,152 +31,113 @@ export default function ManagerCruise() {
     deleteCruise,
   } = useCruises();
 
-  const [showModal, setShowModal] = useState(false);
+  const [keyword, setKeyword] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+
+  const [formState, setFormState] = useState({ open: false, cruise: null });
   const [saving, setSaving] = useState(false);
-  const [editingCruise, setEditingCruise] = useState(null);
 
-  const [form, setForm] = useState({
-    name: "",
-    code: "",
-    description: "",
-    maxPassengers: "",
-    image: null,
-    status: "ACTIVE",
-  });
+  const [cruiseToDelete, setCruiseToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
-  const handleOpenCreate = () => {
-    setEditingCruise(null);
+  // ---------- LỌC ----------
+  const counts = useMemo(
+    () => ({
+      ALL: cruises.length,
+      ACTIVE: cruises.filter((c) => c.status === "ACTIVE").length,
+      INACTIVE: cruises.filter((c) => c.status !== "ACTIVE").length,
+    }),
+    [cruises],
+  );
 
-    setForm({
-      name: "",
-      code: "",
-      description: "",
-      maxPassengers: "",
-      image: null,
-      status: "ACTIVE",
+  const filteredCruises = useMemo(() => {
+    const query = keyword.trim().toLowerCase();
+
+    return cruises.filter((cruise) => {
+      if (statusFilter === "ACTIVE" && cruise.status !== "ACTIVE") return false;
+      if (statusFilter === "INACTIVE" && cruise.status === "ACTIVE")
+        return false;
+
+      if (!query) return true;
+
+      return (
+        String(cruise.name || "")
+          .toLowerCase()
+          .includes(query) ||
+        String(cruise.code || "")
+          .toLowerCase()
+          .includes(query)
+      );
     });
+  }, [cruises, keyword, statusFilter]);
 
+  const isFiltered = keyword.trim() !== "" || statusFilter !== "ALL";
+
+  const clearFilter = () => {
+    setKeyword("");
+    setStatusFilter("ALL");
+  };
+
+  // ---------- FORM ----------
+  const openForm = (cruise = null) => {
     setError("");
     setSuccess("");
-    setShowModal(true);
+    setFormState({ open: true, cruise });
   };
 
-  const handleOpenEdit = (cruise) => {
-    setEditingCruise(cruise);
-
-    setForm({
-      name: cruise.name || "",
-      code: cruise.code || "",
-      description: cruise.description || "",
-      maxPassengers: cruise.maxPassengers ?? "",
-      image: null,
-      status: cruise.status || "ACTIVE",
-    });
-
-    setError("");
-    setSuccess("");
-    setShowModal(true);
+  const closeForm = () => {
+    if (saving) return;
+    setFormState((previous) => ({ ...previous, open: false }));
   };
 
-  const handleCloseModal = () => {
-    if (saving) {
-      return;
-    }
-
-    setShowModal(false);
-  };
-
-  const handleChange = (event) => {
-    const { name, value, files } = event.target;
-
-    setForm((previous) => ({
-      ...previous,
-      [name]: files ? files[0] : value,
-    }));
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    console.log("🔥 1. HANDLE SUBMIT");
-
-    setError("");
-    setSuccess("");
-
-    // ...
-
-    const formData = new FormData();
-
-    formData.append("name", form.name.trim());
-    formData.append("code", form.code.trim());
-    formData.append("description", form.description.trim());
-    formData.append("maxPassengers", Number(form.maxPassengers));
-
-    if (form.image) {
-      formData.append("image", form.image);
-    }
-
-    if (editingCruise) {
-      formData.append("status", form.status);
-    }
-
-    console.log("🔥 2. FORM DATA READY");
-    console.log([...formData.entries()]);
-
+  const handleSubmit = async (formData) => {
     setSaving(true);
 
     try {
-      let result;
+      const { cruise } = formState;
 
-      if (!editingCruise) {
-        console.log("🔥 3. CALL createCruise()");
-        result = await createCruise(formData);
-      } else {
-        console.log("🔥 3. CALL updateCruise()");
-        result = await updateCruise(editingCruise.id, formData);
-      }
+      const result = cruise
+        ? await updateCruise(cruise.id, formData)
+        : await createCruise(formData);
 
-      console.log("🔥 4. RESULT:", result);
-
-      if (result) {
-        setShowModal(false);
-      }
+      if (result) setFormState((previous) => ({ ...previous, open: false }));
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDelete = async (cruise) => {
-    const confirmed = window.confirm(
-      `Bạn có chắc muốn xóa du thuyền "${cruise.name}" không?`,
-    );
+  // ---------- XÓA ----------
+  const handleConfirmDelete = async () => {
+    setDeleting(true);
 
-    if (!confirmed) {
-      return;
+    try {
+      await deleteCruise(cruiseToDelete.id);
+    } finally {
+      setDeleting(false);
+      setCruiseToDelete(null);
     }
-
-    await deleteCruise(cruise.id);
-  };
-
-  const handleManageDecks = (cruise) => {
-    navigate(`/admin/cruises/${cruise.id}/decks`);
   };
 
   return (
-    <div className="manager-cruise-page container-fluid py-4">
-      <div className="manager-cruise-header mb-4">
+    <div className="mc-page container-fluid py-4">
+      <header className="mc-header">
         <div>
-          <h2 className="manager-cruise-title">Quản lý du thuyền</h2>
-
-          <p className="manager-cruise-description">
-            Quản lý thông tin các du thuyền trong hệ thống.
+          <h2>Quản lý du thuyền</h2>
+          <p>
+            Quản lý thông tin, sức chứa và trạng thái các du thuyền trong hệ
+            thống.
           </p>
         </div>
 
-        <Button variant="primary" onClick={handleOpenCreate}>
-          + Thêm du thuyền
-        </Button>
-      </div>
+        <button
+          type="button"
+          className="mc-btn mc-btn--primary"
+          onClick={() => openForm()}
+        >
+          <Plus size={18} />
+          Thêm du thuyền
+        </button>
+      </header>
 
       {success && (
         <Alert variant="success" dismissible onClose={() => setSuccess("")}>
@@ -177,29 +145,51 @@ export default function ManagerCruise() {
         </Alert>
       )}
 
-      {error && !showModal && (
+      {error && !formState.open && (
         <Alert variant="danger" dismissible onClose={() => setError("")}>
           {error}
         </Alert>
       )}
 
-      <CruiseTable
-        cruises={cruises}
+      <CruiseStats cruises={cruises} />
+
+      <CruiseToolbar
+        keyword={keyword}
+        onKeywordChange={setKeyword}
+        statusFilter={statusFilter}
+        onStatusChange={setStatusFilter}
+        counts={counts}
+        shown={filteredCruises.length}
+        total={cruises.length}
+      />
+
+      <CruiseList
+        cruises={filteredCruises}
         loading={loading}
-        onEdit={handleOpenEdit}
-        onDelete={handleDelete}
-        onManageDecks={handleManageDecks}
+        isFiltered={isFiltered}
+        onEdit={openForm}
+        onDelete={setCruiseToDelete}
+        onManageDecks={(cruise) =>
+          navigate(`/admin/cruises/${cruise.id}/decks`)
+        }
+        onCreate={() => openForm()}
+        onClearFilter={clearFilter}
       />
 
       <CruiseFormModal
-        show={showModal}
+        show={formState.open}
+        cruise={formState.cruise}
         saving={saving}
-        editingCruise={editingCruise}
-        form={form}
         error={error}
-        onClose={handleCloseModal}
+        onClose={closeForm}
         onSubmit={handleSubmit}
-        onChange={handleChange}
+      />
+
+      <CruiseDeleteModal
+        cruise={cruiseToDelete}
+        loading={deleting}
+        onConfirm={handleConfirmDelete}
+        onClose={() => setCruiseToDelete(null)}
       />
     </div>
   );

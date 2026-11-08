@@ -4,10 +4,10 @@ package com.project.booking.service.shore;
 import com.project.booking.client.VisitTourClient;
 import com.project.booking.client.VisitTourClient.VisitTourUsageInfo;
 import com.project.booking.client.VisitTourManagementClient;
-import com.project.booking.dto.onboard.ActivityVisitUsageRequest;
 import com.project.booking.dto.shore.ActivityVisitUsageResponse;
 import com.project.booking.dto.shore.ActivityVisitUsageManagementInfo;
 import com.project.booking.dto.shore.ActivityVisitUsageManagementResponse;
+import com.project.booking.dto.shore.ActivityVisitUsageRequest;
 import com.project.booking.exception.AppException;
 import com.project.booking.mapper.ActivityVisitUsageMapper;
 import com.project.booking.mapper.ActivityVisitUsageManagementMapper;
@@ -153,7 +153,7 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
 
         @Override
         @Transactional(readOnly = true)
-        public List<ActivityVisitUsageResponse> getByUserId(Long userId) {
+        public List<ActivityVisitUsageResponse> getByUserId(UUID userId) {
 
                 return activityVisitUsageRepository
                                 .findAllByBookingPassenger_Booking_CreatedByUserIdOrderByUsedAtDesc(userId)

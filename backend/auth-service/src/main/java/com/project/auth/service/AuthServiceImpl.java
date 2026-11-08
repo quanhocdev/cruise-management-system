@@ -194,6 +194,14 @@ public class AuthServiceImpl implements AuthService {
         redisService.deleteOtp(request.getUserId());
     }
 
+    @Override
+    public Users getCurrentUser(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(
+                        "Không tìm thấy người dùng",
+                        HttpStatus.NOT_FOUND));
+    }
+
     private String generateOtp() {
         int otp = 100000 + new Random().nextInt(900000);
         return String.valueOf(otp);

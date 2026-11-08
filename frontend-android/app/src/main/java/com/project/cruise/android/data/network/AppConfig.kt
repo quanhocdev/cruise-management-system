@@ -1,11 +1,11 @@
-package com.project.cruise.android.data.network
+    package com.project.cruise.android.data.network
 
-import com.project.cruise.android.BuildConfig
+    import com.project.cruise.android.BuildConfig
 
-object AppConfig {
+    object AppConfig {
 
-    private const val PORT = 8080
+        private const val PORT = 8080
 
-    val HTTP_BASE_URL: String
-        get() = "http://${BuildConfig.BASE_IP}:$PORT"
-}
+        val HTTP_BASE_URL: String
+            get() = "http://${BuildConfig.BASE_IP}:$PORT"
+    }

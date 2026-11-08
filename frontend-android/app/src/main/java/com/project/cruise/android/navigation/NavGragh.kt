@@ -12,6 +12,7 @@ import com.project.cruise.android.data.network.RetrofitClient
 import com.project.cruise.android.data.repository.AuthRepository
 import com.project.cruise.android.viewmodel.auth.AuthViewModel
 import com.project.cruise.android.viewmodel.auth.AuthViewModelFactory
+import com.project.cruise.android.data.repository.ChatRepositoryProvider
 
 @Composable
 fun NavGraph() {
@@ -22,6 +23,11 @@ fun NavGraph() {
 
     val apiService: ApiService = remember(tokenManager) {
         RetrofitClient.createApiService(tokenManager)
+    }
+
+    val chatRepository = remember(context.applicationContext) {
+        ChatRepositoryProvider.initialize(context.applicationContext)
+        ChatRepositoryProvider.getInstance()
     }
 
     val authRepository = remember(apiService, tokenManager) {
@@ -37,7 +43,7 @@ fun NavGraph() {
         startDestination = Routes.SPLASH
     ) {
         authGraph(navController, authViewModel)
-        passengerGraph(navController, authViewModel, apiService)
+        passengerGraph(navController, authViewModel, apiService, chatRepository)
         posGraph(navController, authViewModel)
         staffGraph(navController, authViewModel, tokenManager)
     }

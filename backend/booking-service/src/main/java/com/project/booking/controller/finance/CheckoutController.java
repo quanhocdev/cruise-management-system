@@ -12,11 +12,9 @@ import org.springframework.web.bind.annotation.*;
 public class CheckoutController {
 
     private final CheckoutService checkoutService;
-    private final com.project.booking.service.command.IdempotentCommandService commands;
 
-    public CheckoutController(CheckoutService checkoutService, com.project.booking.service.command.IdempotentCommandService commands) {
+    public CheckoutController(CheckoutService checkoutService) {
         this.checkoutService = checkoutService;
-        this.commands = commands;
     }
 
     @GetMapping("/{bookingId}/checkout-preview")
@@ -29,10 +27,9 @@ public class CheckoutController {
 
     @PostMapping("/{bookingId}/checkout")
     public ResponseEntity<CheckoutResponse> confirmCheckout(
-            @PathVariable Long bookingId,
-            @jakarta.validation.Valid @RequestBody(required=false) com.project.booking.dto.finance.CheckoutConfirmRequest request) {
-        if(request==null) return ResponseEntity.ok(checkoutService.confirmCheckout(bookingId));
-        return commands.execute("CHECKOUT",request.clientRequestId(),java.util.Map.of("bookingId",bookingId,"previewVersion",request.previewVersion()),
-                CheckoutResponse.class,()->checkoutService.prepareCheckout(bookingId,request.previewVersion()));
+            @PathVariable Long bookingId) {
+
+        return ResponseEntity.ok(
+                checkoutService.confirmCheckout(bookingId));
     }
 }

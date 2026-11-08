@@ -8,9 +8,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import java.util.UUID;
-
+import org.springframework.data.repository.query.Param;
 import com.project.auth.dto.ShoreStaffResponse;
+import com.project.auth.dto.response.ManagerInfoResponse;
 import com.project.auth.model.Users;
+import com.project.auth.model.enums.UserStatus;
 
 @Repository
 public interface UserRepository extends JpaRepository<Users, UUID> {
@@ -83,4 +85,24 @@ public interface UserRepository extends JpaRepository<Users, UUID> {
               AND u.enabled = true
             """)
     List<ShoreStaffResponse> findAllOnboardStaffResponses();
+
+    @Query("""
+                SELECT new com.project.auth.dto.response.ManagerInfoResponse(
+                    u.id,
+                    u.username,
+                    u.email,
+                    p.fullName,
+                    p.phone,
+                    p.avatarUrl
+                )
+                FROM Users u
+                LEFT JOIN UserProfile p ON p.user = u
+                WHERE u.role.name = :roleName
+                  AND u.enabled = true
+                  AND u.status = :status
+                ORDER BY u.username ASC
+            """)
+    List<ManagerInfoResponse> findManagerInfoByRoleName(
+            @Param("roleName") String roleName,
+            @Param("status") UserStatus status);
 }

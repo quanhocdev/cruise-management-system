@@ -1,44 +1,92 @@
+
 package com.project.payment.service;
 
 import com.project.common.event.BillPaymentSuccessEvent;
-import com.project.payment.repository.PaymentRepository;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+import com.project.payment.model.Payment;
+import com.project.payment.model.enums.PaymentReferenceType;
+import com.project.payment.model.enums.PaymentStatus;
+
 import java.util.concurrent.TimeUnit;
 
-@Component
-@DependsOn("paymentRefundSchemaInitializer")
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+@Service
 public class BillPaymentDelivery {
-    private final JdbcTemplate jdbc;
-    private final PaymentRepository payments;
-    private final KafkaTemplate<String,Object> kafka;
-    public BillPaymentDelivery(JdbcTemplate jdbc,PaymentRepository payments,KafkaTemplate<String,Object> kafka) {
-        this.jdbc=jdbc; this.payments=payments; this.kafka=kafka;
+
+    private static final String TOPIC = "bill-payment-success-topic";
+
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+
+    public BillPaymentDelivery(
+            KafkaTemplate<String, Object> kafkaTemplate) {
+        this.kafkaTemplate = kafkaTemplate;
     }
-    // Committed SUCCESS rows act as the durable queue; delivery may repeat after a crash.
-    @Scheduled(fixedDelayString="${bill-payment.delivery-delay-ms:15000}")
-    @Transactional
-    public void deliver() {
-        var ids=jdbc.queryForList("""
-            SELECT p.id FROM payment.payments p
-            WHERE p.reference_type='BILL' AND p.status='SUCCESS'
-            AND NOT EXISTS(SELECT 1 FROM payment.bill_payment_deliveries d WHERE d.payment_id=p.id)
-            ORDER BY p.id LIMIT 20 FOR UPDATE OF p SKIP LOCKED
-            """,Long.class);
-        for(Long id:ids) {
-            var p=payments.findById(id).orElseThrow();
-            try {
-                kafka.send("bill-payment-success-topic",p.getReferenceId().toString(),
-                    new BillPaymentSuccessEvent(p.getReferenceId(),p.getId(),p.getPayerId(),p.getStatus().name(),p.getPaidAt())).get(10,TimeUnit.SECONDS);
-                jdbc.update("INSERT INTO payment.bill_payment_deliveries(payment_id) VALUES (?) ON CONFLICT DO NOTHING",id);
-            } catch(Exception e) {
-                if(e instanceof InterruptedException) Thread.currentThread().interrupt();
-                throw new IllegalStateException("Bill payment delivery will be retried",e);
-            }
+
+    public void deliver(Payment payment) {
+
+        if (payment == null || payment.getId() == null) {
+            throw new IllegalArgumentException("Payment is invalid");
+        }
+
+        if (payment.getReferenceType() != PaymentReferenceType.BILL) {
+            throw new IllegalArgumentException(
+                    "Only BILL payments can be delivered");
+        }
+
+        if (payment.getStatus() != PaymentStatus.SUCCESS) {
+            throw new IllegalArgumentException(
+                    "Payment must be SUCCESS before delivery");
+        }
+
+        if (!TransactionSynchronizationManager.isActualTransactionActive()
+                || !TransactionSynchronizationManager.isSynchronizationActive()) {
+            throw new IllegalStateException(
+                    "BillPaymentDelivery must be called inside an active transaction");
+        }
+
+        BillPaymentSuccessEvent event = new BillPaymentSuccessEvent(
+                payment.getReferenceId(),
+                payment.getId(),
+                payment.getPayerId(),
+                payment.getStatus().name(),
+                payment.getPaidAt());
+
+        String key = payment.getReferenceId().toString();
+
+        TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+
+                    @Override
+                    public void afterCommit() {
+                        publish(event, key);
+                    }
+                });
+    }
+
+    private void publish(
+            BillPaymentSuccessEvent event,
+            String key) {
+
+        try {
+            kafkaTemplate.send(TOPIC, key, event)
+                    .get(10, TimeUnit.SECONDS);
+
+        } catch (InterruptedException ex) {
+
+            Thread.currentThread().interrupt();
+
+            throw new IllegalStateException(
+                    "Bill payment event delivery interrupted",
+                    ex);
+
+        } catch (Exception ex) {
+
+            throw new IllegalStateException(
+                    "Cannot publish bill payment success event",
+                    ex);
         }
     }
 }

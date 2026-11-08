@@ -11,7 +11,7 @@ import com.project.cruise.android.data.auth.TokenManager
 import com.project.cruise.android.data.dto.staff.StaffRole
 import com.project.cruise.android.data.network.RetrofitClient
 import com.project.cruise.android.data.repository.StaffAssignmentRepository
-import com.project.cruise.android.ui.screens.staff.StaffAssignmentsScreen
+import com.project.cruise.android.ui.staff.StaffAssignmentsScreen
 import com.project.cruise.android.viewmodel.auth.AuthViewModel
 import com.project.cruise.android.viewmodel.auth.SessionState
 import com.project.cruise.android.viewmodel.staff.StaffAssignmentsViewModel

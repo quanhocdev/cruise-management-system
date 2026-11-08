@@ -21,7 +21,7 @@ spring:
             - id: auth-service
               uri: ${AUTH_SERVICE_URL:http://auth-service:8081}
               predicates:
-                - Path=/api/auth/**,/api/admin/staff/**,/api/admin/roles/**,/api/profile/**
+                - Path=/api/auth/**,/api/admin/staff/**,/api/admin/roles/**,/api/profile/**,/api/admin/accounts/**
 
             # PAYMENT SERVICE
             - id: payment-service
@@ -34,6 +34,19 @@ spring:
               uri: ${NOTIFICATION_SERVICE_URL:http://notification-service:8086}
               predicates:
                 - Path=/api/v1/notifications/**
+
+            # NOTIFICATION SERVICE - SOCKJS HTTP
+            - id: notification-sockjs
+              uri: ${NOTIFICATION_SERVICE_URL:http://notification-service:8086}
+              predicates:
+                - Path=/ws-notification/**
+
+            # NOTIFICATION SERVICE - WEBSOCKET
+            - id: notification-websocket
+              uri: ${NOTIFICATION_SERVICE_WS_URL:ws://notification-service:8086}
+              predicates:
+                - Path=/ws-notification/**
+                - Header=Upgrade,websocket
 
             # FEEDBACK SERVICE
             - id: feedback-service
@@ -95,11 +108,39 @@ spring:
               uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
               predicates:
                 - Path=/api/webhook/**
-            # TOUR SERVICE - CHAT
-            - id: tour-chat-service
+
+            # TOUR SERVICE - CHAT AI (DIALOGFLOW)
+            - id: tour-chat-ai-service
               uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
               predicates:
                 - Path=/api/chat/**
+
+            # CHAT SERVICE - MESSAGING
+            - id: chat-messaging-service
+              uri: ${CHAT_SERVICE_URL:http://chat-service:8091}
+              predicates:
+                - Path=/api/message/**
+
+            # CHAT SERVICE - ANDROID NATIVE WEBSOCKET
+            - id: chat-native-websocket
+              uri: ${CHAT_SERVICE_WS_URL:ws://chat-service:8091}
+              predicates:
+                - Path=/ws-chat-native/**
+                - Header=Upgrade,websocket
+
+            # CHAT SERVICE - WEBSOCKET
+            - id: chat-websocket
+              uri: ${CHAT_SERVICE_WS_URL:ws://chat-service:8091}
+              predicates:
+                - Path=/ws-chat/**
+                - Header=Upgrade,websocket
+
+            # CHAT SERVICE - SOCKJS HTTP
+            - id: chat-sockjs
+              uri: ${CHAT_SERVICE_URL:http://chat-service:8091}
+              predicates:
+                - Path=/ws-chat/**
+
                   # TOUR SERVICE - CONVENIENCE STAFF ASSIGNMENT
             - id: tour-convenience-staff-api
               uri: ${TOUR_SERVICE_URL:http://tour-service:8088}

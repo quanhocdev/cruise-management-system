@@ -1,5 +1,6 @@
 package com.project.cruise.android.navigation
 
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -11,13 +12,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.project.cruise.android.data.network.ApiService
 import com.project.cruise.android.data.repository.BookingRepository
+import com.project.cruise.android.data.repository.ChatRepository
 import com.project.cruise.android.data.repository.TourRepository
-import com.project.cruise.android.ui.screens.passenger.ProfileScreen
-import com.project.cruise.android.ui.screens.guest.TourDetailPublicScreen
-import com.project.cruise.android.ui.screens.guest.TourPublicScreen
-import com.project.cruise.android.ui.screens.passenger.Dashboard
-import com.project.cruise.android.ui.screens.passenger.MyBookingDetailScreen
-import com.project.cruise.android.ui.screens.passenger.MyBookingsScreen
+import com.project.cruise.android.ui.passenger.screen.ProfileScreen
+import com.project.cruise.android.ui.guest.screen.TourDetailPublicScreen
+import com.project.cruise.android.ui.guest.screen.TourPublicScreen
+import com.project.cruise.android.ui.passenger.screen.Dashboard
+import com.project.cruise.android.ui.passenger.screen.MyBookingDetailScreen
+import com.project.cruise.android.ui.passenger.screen.MyBookingsScreen
 import com.project.cruise.android.viewmodel.auth.AuthViewModel
 import com.project.cruise.android.viewmodel.auth.SessionState
 import com.project.cruise.android.viewmodel.passenger.BookingViewModel
@@ -26,9 +28,16 @@ import com.project.cruise.android.viewmodel.tour.TourViewModel
 import com.project.cruise.android.viewmodel.tour.TourViewModelFactory
 import com.project.cruise.android.viewmodel.chat.ChatViewModel
 import com.project.cruise.android.viewmodel.chat.ChatViewModelFactory
+import com.project.cruise.android.ui.passenger.screen.PassengerMessagesScreen
+import com.project.cruise.android.ui.passenger.screen.MessageDetailScreen
+import com.project.cruise.android.viewmodel.chat.MessagingViewModel
+import com.project.cruise.android.viewmodel.chat.MessagingViewModelFactory
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 
+import com.project.cruise.android.viewmodel.auth.MeState
 
-import com.project.cruise.android.ui.screens.passenger.CreateBookingScreen
+import com.project.cruise.android.ui.passenger.screen.CreateBookingScreen
 import com.project.cruise.android.data.repository.PassengerBookingRepository
 import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModel
 import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModelFactory
@@ -36,7 +45,8 @@ import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModelF
 fun NavGraphBuilder.passengerGraph(
     navController: NavHostController,
     authViewModel: AuthViewModel,
-    apiService: ApiService
+    apiService: ApiService,
+    chatRepository: ChatRepository
 ) {
 
     // ----- PROFILE -----
@@ -48,7 +58,12 @@ fun NavGraphBuilder.passengerGraph(
                     popUpTo(Routes.PASSENGER_TOURS) { inclusive = true }
                 }
             },
-            onMyBookingsClick = { navController.navigate(Routes.PASSENGER_BOOKINGS) },
+            onMyBookingsClick = {
+                navController.navigate(Routes.PASSENGER_BOOKINGS)
+            },
+            onMessagesClick = {
+                navController.navigate(Routes.PASSENGER_MESSAGES)
+            },
             onLogout = {
                 navController.navigate(Routes.GUEST) {
                     popUpTo(Routes.PASSENGER_TOURS) { inclusive = true }
@@ -56,6 +71,7 @@ fun NavGraphBuilder.passengerGraph(
             }
         )
     }
+
 
     // ----- DASHBOARD -----
     composable(Routes.PASSENGER_DASHBOARD) {
@@ -94,9 +110,18 @@ fun NavGraphBuilder.passengerGraph(
             onTourClick = { tourId ->
                 navController.navigate(Routes.passengerTourDetail(tourId))
             },
-            onLoginClick = { navController.navigate(Routes.GUEST) },       // Chưa đăng nhập -> Guest
-            onUserClick = { navController.navigate(Routes.PASSENGER_PROFILE) }, // Đã đăng nhập -> Profile
-            onMyBookingsClick = { navController.navigate(Routes.PASSENGER_BOOKINGS) },
+            onLoginClick = {
+                navController.navigate(Routes.GUEST)
+            },
+            onUserClick = {
+                navController.navigate(Routes.PASSENGER_PROFILE)
+            },
+            onMyBookingsClick = {
+                navController.navigate(Routes.PASSENGER_BOOKINGS)
+            },
+            onMessagesClick = {
+                navController.navigate(Routes.PASSENGER_MESSAGES)
+            },
             onHomeClick = {}
         )
     }
@@ -197,6 +222,113 @@ fun NavGraphBuilder.passengerGraph(
             onBill = { navController.navigate("passenger_bill/$bookingId") },
             onFeedback = { navController.navigate("passenger_feedback/$bookingId") },
             notificationButton = { ActivityInboxEntry { navController.navigate(Routes.PASSENGER_ACTIVITY_INBOX) } }
+        )
+    }
+    // ----- PASSENGER MESSAGES -----
+    composable(Routes.PASSENGER_MESSAGES) { backStackEntry ->
+
+        val messagingViewModel: MessagingViewModel = viewModel(
+            viewModelStoreOwner = backStackEntry,
+            factory = MessagingViewModelFactory(chatRepository)
+        )
+
+        LaunchedEffect(Unit) {
+            messagingViewModel.loadConversations()
+            messagingViewModel.loadBookings()
+            authViewModel.getCurrentUser()
+        }
+
+        PassengerMessagesScreen(
+            viewModel = messagingViewModel,
+            onConversationClick = { conversationId ->
+                navController.navigate(
+                    Routes.passengerMessageDetail(conversationId)
+                )
+            },
+            onBackClick = {
+                navController.popBackStack()
+            }
+        )
+    }
+    // ----- PASSENGER MESSAGE DETAIL -----
+    composable(
+        route = Routes.PASSENGER_MESSAGE_DETAIL,
+        arguments = listOf(
+            navArgument("conversationId") {
+                type = NavType.StringType
+            }
+        )
+    ) { backStackEntry ->
+
+        val conversationId = backStackEntry.arguments
+            ?.getString("conversationId")
+            ?: return@composable
+
+        val parentEntry = remember(backStackEntry) {
+            navController.getBackStackEntry(Routes.PASSENGER_MESSAGES)
+        }
+
+        val messagingViewModel: MessagingViewModel = viewModel(
+            viewModelStoreOwner = parentEntry,
+            factory = MessagingViewModelFactory(chatRepository)
+        )
+
+        val state by messagingViewModel.uiState.collectAsState()
+        val meState by authViewModel.meState.collectAsState()
+
+        val currentUserId = (meState as? MeState.Success)
+            ?.userId
+            .orEmpty()
+
+        if (currentUserId.isNotBlank()) {
+            MessageDetailScreen(
+                conversationId = conversationId,
+                messages = state.messages,
+                currentUserId = currentUserId,
+                isLoading = state.isLoadingMessages,
+                isSendingMessage = state.isSendingMessage,
+                error = state.error,
+                onLoadMessages = {},
+                onSendMessage = messagingViewModel::sendMessage,
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        } else {
+            CircularProgressIndicator()
+
+        }
+
+            LaunchedEffect(conversationId) {
+            val conversation = state.conversations
+                .firstOrNull { it.id == conversationId }
+
+            if (conversation != null) {
+                messagingViewModel.openConversation(conversation)
+                messagingViewModel.connectChat(conversationId)
+            }
+        }
+
+        DisposableEffect(conversationId) {
+            onDispose {
+                messagingViewModel.disconnectChat()
+            }
+        }
+
+        MessageDetailScreen(
+            conversationId = conversationId,
+            messages = state.messages,
+            currentUserId = currentUserId,
+            isLoading = state.isLoadingMessages,
+            error = state.error,
+            onLoadMessages = {},
+            onSendMessage = { content ->
+                messagingViewModel.sendMessage(content)
+            },
+            onBackClick = {
+                navController.popBackStack()
+            },
+            isSendingMessage = state.isSendingMessage
         )
     }
     composable(Routes.PASSENGER_ACTIVITIES, arguments = listOf(navArgument("bookingId") { type = NavType.LongType })) { entry ->

@@ -1,0 +1,207 @@
+/* src/modules/passenger/components/messages/MessageBubble.css */
+
+@keyframes passenger-message-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(14px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes passenger-message-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-14px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.passenger-message-row {
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-bottom: 3px;
+}
+
+.passenger-message-row.last {
+  margin-bottom: 14px;
+}
+
+/* Hành khách (mình) -> bên phải */
+.passenger-message-row.mine {
+  justify-content: flex-end;
+  animation: passenger-message-in-right 0.25s ease-out;
+}
+
+/* Nhân viên -> bên trái */
+.passenger-message-row.theirs {
+  justify-content: flex-start;
+  animation: passenger-message-in-left 0.25s ease-out;
+}
+
+.passenger-message-avatar-slot {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+}
+
+.passenger-message-avatar {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12);
+}
+
+.passenger-message-avatar.staff {
+  color: #475569;
+  background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+}
+
+.passenger-message-avatar.me {
+  color: #fff;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.passenger-message-content {
+  display: flex;
+  flex-direction: column;
+  max-width: min(68%, 520px);
+}
+
+.passenger-message-row.mine .passenger-message-content {
+  align-items: flex-end;
+}
+
+.passenger-message-row.theirs .passenger-message-content {
+  align-items: flex-start;
+}
+
+.passenger-message-sender {
+  margin: 0 6px 4px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.passenger-message-bubble {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 15px;
+  overflow-wrap: anywhere;
+  border-radius: 18px;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.passenger-message-bubble:hover {
+  transform: translateY(-1px);
+}
+
+.passenger-message-bubble p {
+  margin: 0;
+  white-space: pre-wrap;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Nhân viên: trắng, bên trái */
+.passenger-message-row.theirs .passenger-message-bubble {
+  color: #1e293b;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+}
+
+.passenger-message-row.theirs:not(.first) .passenger-message-bubble {
+  border-top-left-radius: 5px;
+}
+
+.passenger-message-row.theirs:not(.last) .passenger-message-bubble,
+.passenger-message-row.theirs.last .passenger-message-bubble {
+  border-bottom-left-radius: 5px;
+}
+
+/* Hành khách: gradient xanh, bên phải */
+.passenger-message-row.mine .passenger-message-bubble {
+  color: #fff;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  box-shadow: 0 4px 12px rgba(29, 78, 216, 0.28);
+}
+
+.passenger-message-row.mine:not(.first) .passenger-message-bubble {
+  border-top-right-radius: 5px;
+}
+
+.passenger-message-row.mine:not(.last) .passenger-message-bubble,
+.passenger-message-row.mine.last .passenger-message-bubble {
+  border-bottom-right-radius: 5px;
+}
+
+.passenger-message-file-icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.passenger-message-row.theirs .passenger-message-file-icon {
+  color: #1d4ed8;
+  background: #dbeafe;
+}
+
+.passenger-message-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 6px 0;
+  color: #94a3b8;
+  font-size: 10.5px;
+}
+
+.passenger-message-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: #94a3b8;
+}
+
+.passenger-message-status.read {
+  color: #2563eb;
+}
+
+.passenger-message-status em {
+  font-style: normal;
+  font-weight: 600;
+}
+
+.passenger-message-system {
+  width: fit-content;
+  max-width: 85%;
+  margin: 12px auto;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 11px;
+  text-align: center;
+}
+
+@media (max-width: 767px) {
+  .passenger-message-content {
+    max-width: 78%;
+  }
+}

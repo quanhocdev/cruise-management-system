@@ -1,6 +1,27 @@
+
 FROM maven:3.9.11-eclipse-temurin-17
+
 WORKDIR /app
-COPY pom.xml .
-RUN mvn -B dependency:go-offline
-COPY src src
+
+# ==========================
+# 1. Copy và build thư viện Common trước
+# ==========================
+COPY common/pom.xml ./common/pom.xml
+COPY common/src ./common/src
+
+# Cài đặt thư viện common vào local Maven repository
+RUN mvn -f common/pom.xml clean install -DskipTests
+
+# ==========================
+# 2. Copy và build Feedback Service
+# ==========================
+COPY feedback-service/pom.xml ./feedback-service/pom.xml
+COPY feedback-service/src ./feedback-service/src
+
+WORKDIR /app/feedback-service
+
+# Tải dependency của feedback-service
+RUN mvn dependency:go-offline -B
+
+# Chạy service
 CMD ["mvn", "spring-boot:run", "-Dspring-boot.run.fork=false"]

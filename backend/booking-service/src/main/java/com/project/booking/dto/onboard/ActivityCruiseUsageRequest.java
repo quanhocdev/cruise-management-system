@@ -7,13 +7,9 @@ import java.util.UUID;
 
 public record ActivityCruiseUsageRequest(
 
-                @NotBlank(message = "NFC card UID không được để trống") String nfcCardUid,
+        @NotBlank(message = "NFC card UID không được để trống") String nfcCardUid,
 
-                @NotNull(message = "Activity cruise tour ID không được để trống") UUID activityCruiseTourId,
-                UUID clientRequestId
+        @NotNull(message = "Activity cruise tour ID không được để trống") UUID activityCruiseTourId
 
 ) {
-    public ActivityCruiseUsageRequest(String nfcCardUid, UUID activityCruiseTourId) {
-        this(nfcCardUid, activityCruiseTourId, null);
-    }
 }

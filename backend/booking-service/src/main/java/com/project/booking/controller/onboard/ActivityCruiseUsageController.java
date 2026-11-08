@@ -5,7 +5,6 @@ import com.project.booking.dto.onboard.ActivityCruiseUsageRequest;
 import com.project.booking.dto.onboard.ActivityCruiseUsageResponse;
 import com.project.booking.service.onboard.ActivityCruiseUsageService;
 
-import com.project.booking.service.command.IdempotentCommandService;
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
@@ -20,13 +19,11 @@ import java.util.List;
 public class ActivityCruiseUsageController {
 
     private final ActivityCruiseUsageService activityCruiseUsageService;
-    private final IdempotentCommandService commands;
 
     public ActivityCruiseUsageController(
-            ActivityCruiseUsageService activityCruiseUsageService, IdempotentCommandService commands) {
+            ActivityCruiseUsageService activityCruiseUsageService) {
 
         this.activityCruiseUsageService = activityCruiseUsageService;
-        this.commands = commands;
     }
 
     @PostMapping
@@ -34,7 +31,9 @@ public class ActivityCruiseUsageController {
     public ResponseEntity<ActivityCruiseUsageResponse> create(
             @Valid @RequestBody ActivityCruiseUsageRequest request) {
 
-        return commands.execute("ACTIVITY_USAGE", request.clientRequestId(), request, ActivityCruiseUsageResponse.class, () -> activityCruiseUsageService.create(request));
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(activityCruiseUsageService.create(request));
     }
 
     @GetMapping

@@ -10,7 +10,7 @@ import com.project.cruise.android.data.dto.staff.StaffRole
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-
+import android.util.Log
 sealed class LoginState {
 
     object Idle : LoginState()
@@ -96,6 +96,7 @@ sealed class MeState {
     object Loading : MeState()
 
     data class Success(
+        val userId: String,
         val username: String,
         val role: String
     ) : MeState()
@@ -331,6 +332,9 @@ class AuthViewModel(
             _posLoginState.value = PosLoginState.Loading
             try {
                 val response = repository.login(username, password)
+                Log.d("LOGIN_DEBUG", "Username: ${response.username}")
+                Log.d("LOGIN_DEBUG", "Role: ${response.role}")
+                Log.d("LOGIN_DEBUG", "Token received: ${response.token.isNotBlank()}")
                 if (!response.role.isSupportedPosRole()) {
                     repository.logout()
                     _posLoginState.value = PosLoginState.Error(
@@ -490,11 +494,11 @@ class AuthViewModel(
                 val response =
                     repository.getCurrentUser()
 
-                _meState.value =
-                    MeState.Success(
-                        username = response.username,
-                        role = response.role
-                    )
+                _meState.value = MeState.Success(
+                    userId = response.userId,
+                    username = response.username,
+                    role = response.role
+                )
 
             } catch (e: Exception) {
 
