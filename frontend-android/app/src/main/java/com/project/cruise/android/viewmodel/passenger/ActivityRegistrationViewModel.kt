@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.google.gson.JsonParser
 import com.project.cruise.android.data.dto.booking.*
-import com.project.cruise.android.data.repository.ActivityRegistrationSource
+import com.project.cruise.android.data.repository.booking.ActivityRegistrationSource
 import com.project.cruise.android.data.time.CruiseTime
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow

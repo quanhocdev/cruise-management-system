@@ -1,4 +1,4 @@
-package com.project.cruise.android.data.repository
+package com.project.cruise.android.data.repository.chat
 
 import android.content.Context
 import com.project.cruise.android.data.auth.TokenManager

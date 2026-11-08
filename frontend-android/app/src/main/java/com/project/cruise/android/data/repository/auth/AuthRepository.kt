@@ -1,4 +1,4 @@
-package com.project.cruise.android.data.repository
+package com.project.cruise.android.data.repository.auth
 
 import com.project.cruise.android.data.auth.TokenManager
 import com.project.cruise.android.data.dto.auth.GoogleLoginRequest

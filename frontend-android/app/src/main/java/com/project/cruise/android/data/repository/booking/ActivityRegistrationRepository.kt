@@ -1,9 +1,10 @@
-package com.project.cruise.android.data.repository
+package com.project.cruise.android.data.repository.booking
 
 import android.content.Context
 import com.project.cruise.android.data.auth.TokenManager
 import com.project.cruise.android.data.dto.booking.*
 import com.project.cruise.android.data.network.RetrofitClient
+import com.project.cruise.android.data.repository.OnlinePosCommands
 
 interface ActivityRegistrationSource {
     suspend fun catalog(bookingId: Long): RegistrationCatalog

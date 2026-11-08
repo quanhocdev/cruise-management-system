@@ -12,6 +12,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.project.cruise.android.data.repository.PosIdentityRepository
+import com.project.cruise.android.data.repository.booking.ActivityRegistrationRepository
 import com.project.cruise.android.ui.screens.pos.NfcScanScreen
 import com.project.cruise.android.ui.screens.pos.PosDashboardScreen
 import com.project.cruise.android.ui.screens.pos.PosHistoryScreen
@@ -134,7 +135,7 @@ fun NavGraphBuilder.posGraph(
             return@composable
         }
         val context = LocalContext.current
-        val source = remember(context) { com.project.cruise.android.data.repository.ActivityRegistrationRepository(context) }
+        val source = remember(context) { ActivityRegistrationRepository(context) }
         val model: com.project.cruise.android.viewmodel.passenger.ActivityRegistrationViewModel = viewModel(
             key = "registrations-${role.name}",
             factory = com.project.cruise.android.viewmodel.passenger.ActivityRegistrationViewModel.Factory(source))

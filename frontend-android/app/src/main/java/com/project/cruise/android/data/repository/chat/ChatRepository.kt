@@ -1,7 +1,14 @@
-package com.project.cruise.android.data.repository
+package com.project.cruise.android.data.repository.chat
 
 import com.project.cruise.android.data.auth.TokenManager
-import com.project.cruise.android.data.dto.chat.*
+import com.project.cruise.android.data.dto.chat.ChatPageResponse
+import com.project.cruise.android.data.dto.chat.ConfirmedBookingResponse
+import com.project.cruise.android.data.dto.chat.ConversationResponse
+import com.project.cruise.android.data.dto.chat.CreateConversationRequest
+import com.project.cruise.android.data.dto.chat.ManagerInfoResponse
+import com.project.cruise.android.data.dto.chat.MessageResponse
+import com.project.cruise.android.data.dto.chat.ParticipantResponse
+import com.project.cruise.android.data.dto.chat.SendMessageRequest
 import com.project.cruise.android.data.network.ChatSocketService
 import com.project.cruise.android.data.network.api.ChatApiService
 

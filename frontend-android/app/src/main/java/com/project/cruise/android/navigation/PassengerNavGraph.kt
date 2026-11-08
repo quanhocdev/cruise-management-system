@@ -11,8 +11,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.project.cruise.android.data.network.ApiService
-import com.project.cruise.android.data.repository.BookingRepository
-import com.project.cruise.android.data.repository.ChatRepository
+import com.project.cruise.android.data.repository.booking.BookingRepository
+import com.project.cruise.android.data.repository.chat.ChatRepository
 import com.project.cruise.android.data.repository.TourRepository
 import com.project.cruise.android.ui.passenger.screen.ProfileScreen
 import com.project.cruise.android.ui.guest.screen.TourDetailPublicScreen
@@ -34,11 +34,12 @@ import com.project.cruise.android.viewmodel.chat.MessagingViewModel
 import com.project.cruise.android.viewmodel.chat.MessagingViewModelFactory
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.DisposableEffect
+import com.project.cruise.android.data.repository.booking.ActivityRegistrationRepository
 
 import com.project.cruise.android.viewmodel.auth.MeState
 
 import com.project.cruise.android.ui.passenger.screen.CreateBookingScreen
-import com.project.cruise.android.data.repository.PassengerBookingRepository
+import com.project.cruise.android.data.repository.booking.PassengerBookingRepository
 import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModel
 import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModelFactory
 
@@ -334,7 +335,7 @@ fun NavGraphBuilder.passengerGraph(
     composable(Routes.PASSENGER_ACTIVITIES, arguments = listOf(navArgument("bookingId") { type = NavType.LongType })) { entry ->
         val bookingId = entry.arguments?.getLong("bookingId") ?: return@composable
         val context = androidx.compose.ui.platform.LocalContext.current
-        val source = remember(context) { com.project.cruise.android.data.repository.ActivityRegistrationRepository(context) }
+        val source = remember(context) { ActivityRegistrationRepository(context) }
         val model: com.project.cruise.android.viewmodel.passenger.ActivityRegistrationViewModel = viewModel(
             factory = com.project.cruise.android.viewmodel.passenger.ActivityRegistrationViewModel.Factory(source))
         com.project.cruise.android.ui.screens.passenger.ActivityRegistrationScreen(bookingId, model,

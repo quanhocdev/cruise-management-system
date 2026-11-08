@@ -9,10 +9,10 @@ import androidx.navigation.compose.rememberNavController
 import com.project.cruise.android.data.auth.TokenManager
 import com.project.cruise.android.data.network.RetrofitClient
 import com.project.cruise.android.data.network.api.AuthApiService
-import com.project.cruise.android.data.repository.AuthRepository
+import com.project.cruise.android.data.repository.auth.AuthRepository
 import com.project.cruise.android.viewmodel.auth.AuthViewModel
 import com.project.cruise.android.viewmodel.auth.AuthViewModelFactory
-import com.project.cruise.android.data.repository.ChatRepositoryProvider
+import com.project.cruise.android.data.repository.chat.ChatRepositoryProvider
 
 @Composable
 fun NavGraph() {

@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.project.cruise.android.data.dto.booking.BookingResponse
 import com.project.cruise.android.data.dto.tour.PublicTourDetailResponse
-import com.project.cruise.android.data.repository.PassengerBookingRepository
+import com.project.cruise.android.data.repository.booking.PassengerBookingRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

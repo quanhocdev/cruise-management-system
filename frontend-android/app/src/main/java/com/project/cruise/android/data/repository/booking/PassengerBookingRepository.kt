@@ -1,4 +1,4 @@
-package com.project.cruise.android.data.repository
+package com.project.cruise.android.data.repository.booking
 
 import com.project.cruise.android.data.dto.booking.BookingResponse
 import com.project.cruise.android.data.dto.tour.PublicTourDetailResponse

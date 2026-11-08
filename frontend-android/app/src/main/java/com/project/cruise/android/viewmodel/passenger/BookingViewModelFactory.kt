@@ -2,7 +2,7 @@ package com.project.cruise.android.viewmodel.passenger
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.project.cruise.android.data.repository.BookingRepository
+import com.project.cruise.android.data.repository.booking.BookingRepository
 
 class BookingViewModelFactory(
     private val repository: BookingRepository
