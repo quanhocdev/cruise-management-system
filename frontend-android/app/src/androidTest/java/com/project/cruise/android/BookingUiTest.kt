@@ -4,6 +4,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.project.cruise.android.data.dto.passenger.*
+import com.project.cruise.android.ui.passenger.screen.MyBookingsScreen
 import com.project.cruise.android.ui.screens.passenger.*
 import com.project.cruise.android.viewmodel.passenger.*
 import org.junit.Assert.assertEquals
@@ -20,7 +21,13 @@ class BookingUiTest {
     @Test fun historyKeepsSelectionAndRefresh() {
         var selected = 0L
         var refreshed = false
-        compose.setContent { MyBookingsScreen(BookingHistoryState(bookings = listOf(booking())), { refreshed = true }, { selected = it }, {}) }
+        compose.setContent {
+            MyBookingsScreen(
+                BookingHistoryState(bookings = listOf(booking())),
+                { refreshed = true },
+                { selected = it },
+                {})
+        }
         compose.onNodeWithText("CR007").performScrollTo().performClick()
         compose.onNodeWithText("Tải lại").performScrollTo().performClick()
         compose.runOnIdle { assertEquals(7L, selected); assertEquals(true, refreshed) }

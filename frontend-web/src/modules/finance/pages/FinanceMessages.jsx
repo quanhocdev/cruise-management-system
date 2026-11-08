@@ -1,4 +1,4 @@
-import ChatPage from "../../../chat/pages/ChatPage";
+import ChatPage from "../../chat/pages/ChatPage";
 
 const FinanceMessages = () => {
   return <ChatPage />;

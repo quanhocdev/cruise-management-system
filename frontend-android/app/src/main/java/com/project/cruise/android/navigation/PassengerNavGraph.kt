@@ -19,7 +19,7 @@ import com.project.cruise.android.ui.screens.guest.TourDetailPublicScreen
 import com.project.cruise.android.ui.screens.guest.TourPublicScreen
 import com.project.cruise.android.ui.screens.passenger.Dashboard
 import com.project.cruise.android.ui.screens.passenger.MyBookingDetailScreen
-import com.project.cruise.android.ui.screens.passenger.MyBookingsScreen
+import com.project.cruise.android.ui.passenger.screen.MyBookingsScreen
 import com.project.cruise.android.viewmodel.auth.AuthViewModel
 import com.project.cruise.android.viewmodel.auth.SessionState
 import com.project.cruise.android.viewmodel.passenger.BookingViewModel
@@ -32,16 +32,9 @@ import com.project.cruise.android.ui.screens.passenger.PassengerMessagesScreen
 import com.project.cruise.android.ui.screens.passenger.MessageDetailScreen
 import com.project.cruise.android.viewmodel.chat.MessagingViewModel
 import com.project.cruise.android.viewmodel.chat.MessagingViewModelFactory
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.remember
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.navArgument
 
-import com.project.cruise.android.ui.screens.passenger.PassengerMessagesScreen
-import com.project.cruise.android.ui.screens.passenger.MessageDetailScreen
 import com.project.cruise.android.viewmodel.auth.MeState
 
 import com.project.cruise.android.ui.screens.passenger.CreateBookingScreen
