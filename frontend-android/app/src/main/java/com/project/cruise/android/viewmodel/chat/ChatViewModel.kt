@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.project.cruise.android.data.dto.chat.ChatMessageRequest
 import com.project.cruise.android.data.dto.chat.ChatSessionRequest
-import com.project.cruise.android.data.network.ApiService
+import com.project.cruise.android.data.network.api.ChatApiService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,7 +21,7 @@ data class ChatMessage(
 )
 
 class ChatViewModel(
-    private val apiService: ApiService
+    private val apiService: ChatApiService
 ) : ViewModel() {
 
     private val _isChatOpen = MutableStateFlow(false)

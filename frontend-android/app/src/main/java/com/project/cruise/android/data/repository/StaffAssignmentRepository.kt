@@ -8,16 +8,24 @@ import com.project.cruise.android.data.dto.convenience.ProductTourResponse
 import com.project.cruise.android.data.dto.convenience.ServiceTourResponse
 import com.project.cruise.android.data.dto.onboard.ActivityCruiseTourResponse
 import com.project.cruise.android.data.dto.shore.ActivityVisitTourResponse
-import com.project.cruise.android.data.network.ApiService
+import com.project.cruise.android.data.network.api.StaffApiService
+import com.project.cruise.android.data.network.api.TourApiService
+import com.project.cruise.android.data.network.api.ConvenienceApiService
+import com.project.cruise.android.data.network.api.OnboardApiService
+import com.project.cruise.android.data.network.api.ShoreApiService
 import java.util.UUID
 
 class StaffAssignmentRepository(
-    private val api: ApiService,
+    private val staffApi: StaffApiService,
+    private val tourApi: TourApiService,
+    private val convenienceApi: ConvenienceApiService,
+    private val onboardApi: OnboardApiService,
+    private val shoreApi: ShoreApiService,
     val role: StaffRole
 ) {
 
     suspend fun assignments(): List<StaffAssignment> {
-        return api.getMyStaffAssignments(role.department)
+        return staffApi.getMyStaffAssignments(role.department)
     }
 
     suspend fun respond(
@@ -42,7 +50,7 @@ class StaffAssignmentRepository(
             "Vui lòng nhập lý do từ chối"
         }
 
-        return api.respondToStaffAssignment(
+        return staffApi.respondToStaffAssignment(
             department = role.department,
             id = id,
             request = request
@@ -50,31 +58,31 @@ class StaffAssignmentRepository(
     }
 
     suspend fun tour(id: String): PublicTourDetailResponse {
-        return api.getPublicTourDetail(id)
+        return tourApi.getPublicTourDetail(id)
     }
 
     suspend fun products(
         tourId: String
     ): List<ProductTourResponse> {
-        return api.getConvenienceProductTours(tourId)
+        return convenienceApi.getConvenienceProductTours(tourId)
     }
 
     suspend fun services(
         tourId: String
     ): List<ServiceTourResponse> {
-        return api.getConvenienceServiceTours(tourId)
+        return convenienceApi.getConvenienceServiceTours(tourId)
     }
 
     suspend fun onboardActivities(
         tourId: String
     ): List<ActivityCruiseTourResponse> {
-        return api.getOnboardActivityCruiseTours(tourId)
+        return onboardApi.getOnboardActivityCruiseTours(tourId)
     }
 
     suspend fun shoreActivities(
         tourId: String
     ): List<ActivityVisitTourResponse> {
-        return api.getShoreActivityVisitTours(tourId)
+        return shoreApi.getShoreActivityVisitTours(tourId)
     }
 }
 

@@ -11,16 +11,20 @@ interface PaymentRefundSource {
     suspend fun refund(paymentId: Long, request: PaymentRefundRequest): PaymentRefundReceipt
 }
 
-class PaymentRefundRepository(context: Context): PaymentRefundSource {
-    private val api = RetrofitClient.createApiService(TokenManager(context.applicationContext))
+class PaymentRefundRepository(context: Context) : PaymentRefundSource {
+    // Đổi sang FinanceApiService vì các endpoint spending, payments/refunds thuộc phân hệ finance
+    private val api = RetrofitClient.createFinanceApiService(TokenManager(context.applicationContext))
     private val commands = OnlinePosCommands(context.applicationContext)
+
     override suspend fun find(bookingCode: String): List<RefundPayment> {
         val booking = api.getFinanceSpending(bookingCode)
-        return api.findRefundPayments(booking.bookingId,"BOOKING")
+        return api.findRefundPayments(booking.bookingId, "BOOKING")
     }
-    override suspend fun summary(paymentId: Long,page: Int) = api.getPaymentRefunds(paymentId,page)
-    override suspend fun refund(paymentId: Long,request: PaymentRefundRequest) =
-        commands.execute("PAYMENT_REFUND:$paymentId",request) { key ->
-            api.refundPayment(paymentId,request.copy(clientRequestId=key))
+
+    override suspend fun summary(paymentId: Long, page: Int) = api.getPaymentRefunds(paymentId, page)
+
+    override suspend fun refund(paymentId: Long, request: PaymentRefundRequest) =
+        commands.execute("PAYMENT_REFUND:$paymentId", request) { key ->
+            api.refundPayment(paymentId, request.copy(clientRequestId = key))
         }
 }

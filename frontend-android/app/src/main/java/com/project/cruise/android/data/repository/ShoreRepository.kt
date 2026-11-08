@@ -7,7 +7,6 @@ import com.project.cruise.android.data.dto.nfc.NfcResolveResponse
 import com.project.cruise.android.data.dto.shore.ActivityVisitTourResponse
 import com.project.cruise.android.data.dto.shore.ActivityVisitUsageRequest
 import com.project.cruise.android.data.dto.shore.ActivityVisitUsageResponse
-import com.project.cruise.android.data.network.ApiService
 import com.project.cruise.android.data.network.RetrofitClient
 
 class ShoreRepository(context: Context) {
@@ -15,8 +14,9 @@ class ShoreRepository(context: Context) {
     private val appContext = context.applicationContext
     private val commands = OnlinePosCommands(appContext)
 
-    private val apiService: ApiService =
-        RetrofitClient.createApiService(TokenManager(appContext))
+    // Đổi sang ShoreApiService
+    private val apiService =
+        RetrofitClient.createShoreApiService(TokenManager(appContext))
 
     suspend fun resolveNfc(
         nfcCardUid: String
