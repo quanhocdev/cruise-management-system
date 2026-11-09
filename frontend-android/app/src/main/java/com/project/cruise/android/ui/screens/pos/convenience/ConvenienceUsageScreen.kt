@@ -22,9 +22,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.project.cruise.android.data.dto.convenience.ProductTourResponse
 import com.project.cruise.android.data.dto.convenience.ServiceTourResponse
-import com.project.cruise.android.ui.components.OptionalInfoText
+import com.project.cruise.android.ui.common.OptionalInfoText
 import com.project.cruise.android.ui.components.QuantityStepper
-import com.project.cruise.android.ui.components.SelectableCard
+import com.project.cruise.android.ui.common.SelectableCard
 import com.project.cruise.android.ui.components.SuccessSoundEffect
 import com.project.cruise.android.ui.components.usage.SectionTitle
 import com.project.cruise.android.ui.components.usage.SelectableList

@@ -3,7 +3,7 @@ package com.project.cruise.android.ui.passenger.components.booking
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontWeight
-import com.project.cruise.android.ui.components.*
+import com.project.cruise.android.ui.common.*
 import com.project.cruise.android.ui.theme.*
 import java.math.BigDecimal
 

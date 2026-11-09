@@ -4,6 +4,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.project.cruise.android.data.dto.booking.*
+import com.project.cruise.android.ui.common.OceanBottomBar
 import com.project.cruise.android.ui.components.*
 import com.project.cruise.android.ui.passenger.components.mybooking.*
 import com.project.cruise.android.viewmodel.passenger.*

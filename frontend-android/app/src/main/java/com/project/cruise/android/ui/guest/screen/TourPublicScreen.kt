@@ -7,7 +7,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.project.cruise.android.data.dto.tour.*
-import com.project.cruise.android.ui.components.*
+import com.project.cruise.android.ui.common.*
+import com.project.cruise.android.ui.components.PublicTourChatFloatingWidget
 import com.project.cruise.android.ui.guest.components.tourcatalog.*
 import com.project.cruise.android.viewmodel.auth.*
 import com.project.cruise.android.viewmodel.chat.ChatViewModel
