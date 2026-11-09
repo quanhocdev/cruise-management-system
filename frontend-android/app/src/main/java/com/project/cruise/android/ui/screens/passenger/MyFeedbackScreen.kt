@@ -14,7 +14,7 @@ import com.project.cruise.android.data.repository.feedback.feedbackStatusLabel
 import com.project.cruise.android.data.repository.feedback.feedbackTargetLabel
 import com.project.cruise.android.data.repository.feedback.feedbackAvailability
 import com.project.cruise.android.data.dto.feedback.FeedbackDraft
-import com.project.cruise.android.ui.components.*
+import com.project.cruise.android.ui.common.*
 import com.project.cruise.android.ui.theme.OceanBanner
 import com.project.cruise.android.viewmodel.passenger.FeedbackViewModel
 

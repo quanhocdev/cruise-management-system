@@ -1,7 +1,7 @@
 package com.project.cruise.android.ui.passenger.components.mybooking
 
 import androidx.compose.runtime.Composable
-import com.project.cruise.android.ui.components.*
+import com.project.cruise.android.ui.common.*
 
 @Composable
 fun BookingListEmpty(

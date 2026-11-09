@@ -3,7 +3,7 @@ package com.project.cruise.android.ui.passenger.screen
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.project.cruise.android.ui.common.OceanBottomBar
-import com.project.cruise.android.ui.components.*
+import com.project.cruise.android.ui.common.*
 import com.project.cruise.android.ui.passenger.components.profile.*
 import com.project.cruise.android.viewmodel.auth.*
 

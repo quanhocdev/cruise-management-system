@@ -4,11 +4,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.project.cruise.android.data.dto.booking.*
 import com.project.cruise.android.data.time.CruiseTime
-import com.project.cruise.android.ui.components.*
+import com.project.cruise.android.ui.common.*
 import com.project.cruise.android.ui.theme.OceanBanner
 import com.project.cruise.android.viewmodel.passenger.*
 

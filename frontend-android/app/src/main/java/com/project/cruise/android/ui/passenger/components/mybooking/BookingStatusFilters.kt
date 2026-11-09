@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.project.cruise.android.data.dto.booking.*
-import com.project.cruise.android.ui.components.*
+import com.project.cruise.android.ui.common.*
 import com.project.cruise.android.ui.theme.*
 
 /** [selected] là tên của [BookingStatus], null = "Tất cả". */

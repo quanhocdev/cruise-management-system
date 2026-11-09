@@ -10,7 +10,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import com.project.cruise.android.data.repository.notification.ActivityInboxSource
-import com.project.cruise.android.ui.components.*
+import com.project.cruise.android.ui.common.*
 import com.project.cruise.android.ui.theme.OceanBanner
 import com.project.cruise.android.viewmodel.passenger.ActivityInboxViewModel
 import kotlinx.coroutines.CancellationException
