@@ -24,6 +24,7 @@ fun OtpScreen(userId: String, onBackClick: () -> Unit, onVerify: (String, String
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { ShipEmblem(Modifier.size(80.dp)) }
         Text("Nhập mã OTP", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         Text("Mã gồm 6 chữ số đã được gửi đến email đăng ký.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+
         Card(colors = CardDefaults.cardColors(containerColor = androidx.compose.ui.graphics.Color.White)) {
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
                 OtpCodeField(otp, { otp = it }, enabled = !isLoading)
@@ -31,6 +32,7 @@ fun OtpScreen(userId: String, onBackClick: () -> Unit, onVerify: (String, String
                 OceanPrimaryButton("Xác thực", { onVerify(userId, otp) }, enabled = otp.length == 6, loading = isLoading)
             }
         }
+
         OceanNotice("Kiểm tra cả thư mục spam nếu chưa thấy email xác thực.")
     }
 }

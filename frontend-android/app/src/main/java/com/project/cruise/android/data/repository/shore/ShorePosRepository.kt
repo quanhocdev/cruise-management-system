@@ -4,7 +4,7 @@ import android.content.Context
 import com.project.cruise.android.data.auth.TokenManager
 import com.project.cruise.android.data.dto.pos.ShoreVisitTourResponse
 import com.project.cruise.android.data.local.CruiseDatabase
-import com.project.cruise.android.data.network.RetrofitClient
+import com.project.cruise.android.data.network.core.RetrofitClient
 
 class ShorePosRepository(context: Context) {
     private val appContext = context.applicationContext

@@ -1,5 +1,5 @@
 
-package com.project.cruise.android.data.dto.chat
+package com.project.cruise.android.data.dto.chatbox
 
 data class ChatWelcomeResponse(
     val message: String,

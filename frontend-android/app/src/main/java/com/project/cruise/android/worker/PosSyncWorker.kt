@@ -7,7 +7,7 @@ import com.project.cruise.android.data.auth.TokenManager
 import com.project.cruise.android.data.dto.pos.QrScanRequest
 import com.project.cruise.android.data.local.CruiseDatabase
 import com.project.cruise.android.data.local.pos.PosSyncStatus
-import com.project.cruise.android.data.network.RetrofitClient
+import com.project.cruise.android.data.network.core.RetrofitClient
 import retrofit2.HttpException
 
 class PosSyncWorker(

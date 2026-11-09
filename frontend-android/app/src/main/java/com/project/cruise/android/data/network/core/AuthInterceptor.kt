@@ -1,4 +1,4 @@
-package com.project.cruise.android.data.network
+package com.project.cruise.android.data.network.core
 
 import com.project.cruise.android.data.auth.TokenManager
 import okhttp3.Interceptor

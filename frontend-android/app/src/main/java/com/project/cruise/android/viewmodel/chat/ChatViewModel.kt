@@ -3,8 +3,8 @@ package com.project.cruise.android.viewmodel.chat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.project.cruise.android.data.dto.chat.ChatMessageRequest
-import com.project.cruise.android.data.dto.chat.ChatSessionRequest
+import com.project.cruise.android.data.dto.chatbox.ChatMessageRequest
+import com.project.cruise.android.data.dto.chatbox.ChatSessionRequest
 import com.project.cruise.android.data.network.api.ChatApiService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

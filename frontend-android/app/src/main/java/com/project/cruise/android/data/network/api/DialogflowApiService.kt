@@ -1,7 +1,7 @@
-package com.project.cruise.android.data.remote
+package com.project.cruise.android.data.network.api
 
-import com.project.cruise.android.data.dto.chat.DialogflowDetectIntentRequest
-import com.project.cruise.android.data.dto.chat.DialogflowDetectIntentResponse
+import com.project.cruise.android.data.dto.chatbox.DialogflowDetectIntentRequest
+import com.project.cruise.android.data.dto.chatbox.DialogflowDetectIntentResponse
 import retrofit2.http.Body
 import retrofit2.http.Header
 import retrofit2.http.POST

@@ -1,4 +1,4 @@
-package com.project.cruise.android.data.dto.chat
+package com.project.cruise.android.data.dto.chatbox
 
 // Request gửi lên Dialogflow Cloud
 data class DialogflowDetectIntentRequest(

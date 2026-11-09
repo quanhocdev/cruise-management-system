@@ -1,5 +1,4 @@
-
-package com.project.cruise.android.data.network
+package com.project.cruise.android.data.network.socket
 
 import com.google.gson.Gson
 import com.project.cruise.android.data.dto.chat.MessageResponse
