@@ -1,45 +1,107 @@
+
 package com.project.feedback.config;
 
 import jakarta.servlet.http.Cookie;
-import org.springframework.context.annotation.*;
+import jakarta.servlet.http.HttpServletRequest;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.oauth2.server.resource.authentication.*;
-import org.springframework.security.oauth2.server.resource.web.*;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
+import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.web.SecurityFilterChain;
+
 import java.util.Arrays;
 
 @Configuration
 public class SecurityConfig {
-    @Bean SecurityFilterChain securityFilterChain(org.springframework.security.config.annotation.web.builders.HttpSecurity http,
-        BearerTokenResolver resolver, JwtAuthenticationConverter converter) throws Exception {
-        return http.csrf(csrf -> csrf.disable())
-            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(a -> a
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/feedbacks/tours/**", "/api/v1/feedbacks/cruises/**",
-                    "/api/v1/feedbacks/targets/**").permitAll()
-                .requestMatchers("/api/admin/feedbacks/**").hasRole("ADMIN")
-                .requestMatchers("/api/v1/feedbacks", "/api/v1/feedbacks/**").hasRole("PASSENGER")
-                .anyRequest().authenticated())
-            .oauth2ResourceServer(o -> o.bearerTokenResolver(resolver).jwt(j -> j.jwtAuthenticationConverter(converter))).build();
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(
+            org.springframework.security.config.annotation.web.builders.HttpSecurity http,
+            BearerTokenResolver bearerTokenResolver,
+            JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
+
+        return http
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.disable())
+
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                .authorizeHttpRequests(authorize -> authorize
+
+                        .requestMatchers(HttpMethod.OPTIONS, "/**")
+                        .permitAll()
+
+                        .requestMatchers(
+                                "/actuator/health",
+                                "/actuator/info")
+                        .permitAll()
+
+                        .requestMatchers("/api/admin/**")
+                        .hasRole("ADMIN")
+
+                        .requestMatchers("/api/passenger/**")
+                        .hasRole("PASSENGER")
+
+                        .anyRequest()
+                        .authenticated())
+
+                .oauth2ResourceServer(resourceServer -> resourceServer
+                        .bearerTokenResolver(bearerTokenResolver)
+                        .jwt(jwt -> jwt
+                                .jwtAuthenticationConverter(
+                                        jwtAuthenticationConverter)))
+
+                .build();
     }
-    @Bean BearerTokenResolver bearerTokenResolver() {
-        DefaultBearerTokenResolver header = new DefaultBearerTokenResolver();
+
+    @Bean
+    public BearerTokenResolver bearerTokenResolver() {
+        DefaultBearerTokenResolver headerResolver = new DefaultBearerTokenResolver();
+
         return request -> {
-            Cookie[] cookies = request.getCookies();
-            if (cookies != null) {
-                String token = Arrays.stream(cookies).filter(c -> "accessToken".equals(c.getName()))
-                    .map(Cookie::getValue).filter(v -> !v.isBlank()).findFirst().orElse(null);
-                if (token != null) return token;
+            String cookieToken = findAccessTokenCookie(request);
+
+            if (cookieToken != null) {
+                return cookieToken;
             }
-            return header.resolve(request);
+
+            return headerResolver.resolve(request);
         };
     }
-    @Bean JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter roles = new JwtGrantedAuthoritiesConverter();
-        roles.setAuthoritiesClaimName("scope"); roles.setAuthorityPrefix("ROLE_");
-        JwtAuthenticationConverter converter = new JwtAuthenticationConverter(); converter.setJwtGrantedAuthoritiesConverter(roles); return converter;
+
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
+
+        authoritiesConverter.setAuthoritiesClaimName("scope");
+        authoritiesConverter.setAuthorityPrefix("ROLE_");
+
+        JwtAuthenticationConverter authenticationConverter = new JwtAuthenticationConverter();
+
+        authenticationConverter.setJwtGrantedAuthoritiesConverter(
+                authoritiesConverter);
+
+        return authenticationConverter;
+    }
+
+    private String findAccessTokenCookie(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies == null) {
+            return null;
+        }
+
+        return Arrays.stream(cookies)
+                .filter(cookie -> "accessToken".equals(cookie.getName()))
+                .map(Cookie::getValue)
+                .filter(value -> !value.isBlank())
+                .findFirst()
+                .orElse(null);
     }
 }
