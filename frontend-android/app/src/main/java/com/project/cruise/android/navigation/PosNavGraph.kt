@@ -26,8 +26,8 @@ import com.project.cruise.android.ui.screens.pos.PosLoginScreen
 import com.project.cruise.android.ui.screens.pos.PosManualEntryScreen
 import com.project.cruise.android.ui.screens.pos.PosRole
 import com.project.cruise.android.ui.screens.pos.QrScanScreen
-import com.project.cruise.android.ui.screens.pos.convenience.ConvenienceNfcScanScreen
-import com.project.cruise.android.ui.screens.pos.convenience.ConvenienceUsageScreen
+import com.project.cruise.android.ui.pos.convenience.screen.ConvenienceNfcScanScreen
+import com.project.cruise.android.ui.pos.convenience.screen.ConvenienceUsageScreen
 import com.project.cruise.android.ui.screens.pos.onboard.OnboardNfcScanScreen
 import com.project.cruise.android.ui.screens.pos.onboard.OnboardUsageScreen
 import com.project.cruise.android.ui.screens.pos.shore.ShoreNfcScanScreen

@@ -1,4 +1,4 @@
-package com.project.cruise.android.ui.screens.pos.convenience
+package com.project.cruise.android.ui.pos.convenience.screen
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
