@@ -35,6 +35,9 @@ public class ActivityCruiseUsage {
     @Column(name = "used_at", nullable = false)
     private LocalDateTime usedAt;
 
+    @Column(name = "ended_at")
+    private LocalDateTime endedAt;
+
     public ActivityCruiseUsage() {
     }
 
@@ -100,5 +103,13 @@ public class ActivityCruiseUsage {
 
     public void setUsedAt(LocalDateTime usedAt) {
         this.usedAt = usedAt;
+    }
+
+    public LocalDateTime getEndedAt() {
+        return endedAt;
+    }
+
+    public void setEndedAt(LocalDateTime endedAt) {
+        this.endedAt = endedAt;
     }
 }
