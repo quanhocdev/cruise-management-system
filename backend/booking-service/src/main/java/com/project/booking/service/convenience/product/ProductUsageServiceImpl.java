@@ -132,15 +132,16 @@ public class ProductUsageServiceImpl implements ProductUsageService {
                 ProductUsage savedUsage = productUsageRepository.save(usage);
 
                 // 9. Gửi event sau khi lưu usage
-                // 9. Đăng ký gửi event sau khi transaction commit
                 productUsedEventProducer.sendAfterCommit(
                                 new ProductUsedEvent(
                                                 booking.getId(),
                                                 bookingPassenger.getId(),
+                                                booking.getCreatedByUserId(),
                                                 request.productTourId(),
+                                                savedUsage.getId(),
+                                                product.getName(),
                                                 request.quantity(),
-                                                Instant.now()));
-
+                                                savedUsage.getUsedAt()));
                 return productUsageMapper.toResponse(savedUsage);
         }
 

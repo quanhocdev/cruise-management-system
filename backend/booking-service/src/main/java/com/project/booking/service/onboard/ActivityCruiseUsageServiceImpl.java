@@ -107,13 +107,17 @@ public class ActivityCruiseUsageServiceImpl
                                         .save(activeUsage);
 
                         // Gửi event sau khi transaction commit thành công
+                        // Gửi event sau khi transaction commit thành công
                         activityCruiseCompletedEventProducer.sendAfterCommit(
                                         new ActivityCruiseCompletedEvent(
                                                         booking.getId(),
                                                         bookingPassenger.getId(),
+                                                        booking.getCreatedByUserId(),
                                                         request.activityCruiseTourId(),
-                                                        Instant.now()));
-
+                                                        savedUsage.getId(),
+                                                        activityCruise.getName(),
+                                                        savedUsage.getCreatedAt(),
+                                                        savedUsage.getEndedAt()));
                         return activityCruiseUsageMapper.toResponse(savedUsage);
                 }
 

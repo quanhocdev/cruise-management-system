@@ -103,8 +103,12 @@ public class ServiceUsageServiceImpl implements ServiceUsageService {
                                         new ServiceCompletedEvent(
                                                         booking.getId(),
                                                         bookingPassenger.getId(),
+                                                        booking.getCreatedByUserId(),
                                                         request.serviceTourId(),
-                                                        Instant.now()));
+                                                        savedUsage.getId(),
+                                                        service.getName(),
+                                                        savedUsage.getUsedAt(),
+                                                        savedUsage.getEndedAt()));
 
                         return serviceUsageMapper.toResponse(savedUsage);
                 }

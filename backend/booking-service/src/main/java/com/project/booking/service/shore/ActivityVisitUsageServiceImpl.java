@@ -118,12 +118,17 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
                                         .save(activeUsage);
 
                         // Gửi Kafka sau khi transaction commit thành công
+                        // Gửi Kafka sau khi transaction commit thành công
                         activityVisitCompletedEventProducer.sendAfterCommit(
                                         new ActivityVisitCompletedEvent(
                                                         booking.getId(),
                                                         bookingPassenger.getId(),
+                                                        booking.getCreatedByUserId(),
                                                         request.visitTourId(),
-                                                        Instant.now()));
+                                                        savedUsage.getId(),
+                                                        activityVisit.getName(),
+                                                        savedUsage.getCreatedAt(),
+                                                        savedUsage.getEndedAt()));
 
                         return activityVisitUsageMapper.toResponse(savedUsage);
                 }
