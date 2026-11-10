@@ -25,8 +25,6 @@ import com.project.common.event.ActivityVisitCompletedEvent;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -118,7 +116,6 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
                                         .save(activeUsage);
 
                         // Gửi Kafka sau khi transaction commit thành công
-                        // Gửi Kafka sau khi transaction commit thành công
                         activityVisitCompletedEventProducer.sendAfterCommit(
                                         new ActivityVisitCompletedEvent(
                                                         booking.getId(),
@@ -126,13 +123,12 @@ public class ActivityVisitUsageServiceImpl implements ActivityVisitUsageService 
                                                         booking.getCreatedByUserId(),
                                                         request.visitTourId(),
                                                         savedUsage.getId(),
-                                                        activityVisit.getName(),
-                                                        savedUsage.getCreatedAt(),
+                                                        visitInfo.name(),
+                                                        savedUsage.getUsedAt(),
                                                         savedUsage.getEndedAt()));
 
                         return activityVisitUsageMapper.toResponse(savedUsage);
                 }
-
                 // ================= CHECK-IN =================
 
                 // 5. Kiểm tra trạng thái, thời gian, giá và discount

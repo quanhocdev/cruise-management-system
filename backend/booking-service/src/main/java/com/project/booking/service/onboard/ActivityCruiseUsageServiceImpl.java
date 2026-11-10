@@ -21,7 +21,6 @@ import com.project.common.event.ActivityCruiseCompletedEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -106,8 +105,7 @@ public class ActivityCruiseUsageServiceImpl
                         ActivityCruiseUsage savedUsage = activityCruiseUsageRepository
                                         .save(activeUsage);
 
-                        // Gửi event sau khi transaction commit thành công
-                        // Gửi event sau khi transaction commit thành công
+                        // Gửi event sau khi transaction commit
                         activityCruiseCompletedEventProducer.sendAfterCommit(
                                         new ActivityCruiseCompletedEvent(
                                                         booking.getId(),
@@ -115,9 +113,10 @@ public class ActivityCruiseUsageServiceImpl
                                                         booking.getCreatedByUserId(),
                                                         request.activityCruiseTourId(),
                                                         savedUsage.getId(),
-                                                        activityCruise.getName(),
-                                                        savedUsage.getCreatedAt(),
+                                                        activityInfo.activityName(),
+                                                        savedUsage.getUsedAt(),
                                                         savedUsage.getEndedAt()));
+
                         return activityCruiseUsageMapper.toResponse(savedUsage);
                 }
 

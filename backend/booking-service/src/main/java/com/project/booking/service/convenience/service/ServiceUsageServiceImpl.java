@@ -28,7 +28,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import com.project.booking.kafka.ServiceCompletedEventProducer;
 import com.project.common.event.ServiceCompletedEvent;
-import java.time.Instant;
 
 @Service
 public class ServiceUsageServiceImpl implements ServiceUsageService {
@@ -91,26 +90,26 @@ public class ServiceUsageServiceImpl implements ServiceUsageService {
                                 now).orElse(null);
 
                 // 5. Đang sử dụng -> CHECK-OUT
-                // 5. Đang sử dụng -> CHECK-OUT
-                if (activeUsage != null) {
+if (activeUsage != null) {
 
-                        activeUsage.setEndedAt(now);
+        activeUsage.setEndedAt(now);
 
-                        ServiceUsage savedUsage = serviceUsageRepository.save(activeUsage);
+        ServiceUsage savedUsage = serviceUsageRepository.save(activeUsage);
 
-                        // Phát event sau khi transaction commit thành công
-                        serviceCompletedEventProducer.sendAfterCommit(
-                                        new ServiceCompletedEvent(
-                                                        booking.getId(),
-                                                        bookingPassenger.getId(),
-                                                        booking.getCreatedByUserId(),
-                                                        request.serviceTourId(),
-                                                        savedUsage.getId(),
-                                                        service.getName(),
-                                                        savedUsage.getUsedAt(),
-                                                        savedUsage.getEndedAt()));
+        // Phát event sau khi transaction commit thành công
+        serviceCompletedEventProducer.sendAfterCommit(
+                        new ServiceCompletedEvent(
+                                        booking.getId(),
+                                        bookingPassenger.getId(),
+                                        booking.getCreatedByUserId(),
+                                        request.serviceTourId(),
+                                        savedUsage.getId(),
+                                        serviceInfo.serviceName(),
+                                        savedUsage.getUsedAt(),
+                                        savedUsage.getEndedAt()));
 
-                        return serviceUsageMapper.toResponse(savedUsage);
+        return serviceUsageMapper.toResponse(savedUsage);
+
                 }
                 // 6. Chưa sử dụng -> CHECK-IN: kiểm tra sức chứa và thời hạn
                 serviceValidator.validateCapacity(

@@ -1,7 +1,6 @@
-
 package com.project.common.event;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record ActivityVisitCompletedEvent(
@@ -9,8 +8,8 @@ public record ActivityVisitCompletedEvent(
                 Long bookingPassengerId,
                 UUID bookingOwnerUserId,
                 UUID visitTourId,
-                UUID sourceUsageId,
+                Long sourceUsageId,
                 String activityName,
-                Instant checkedInAt,
-                Instant completedAt) {
+                LocalDateTime checkedInAt,
+                LocalDateTime completedAt) {
 }
