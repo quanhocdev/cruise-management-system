@@ -1,5 +1,8 @@
 package com.project.feedback.model.enums;
 
-public class FeedbackType {
-
+public enum FeedbackType {
+    PRODUCT,
+    SERVICE,
+    ACTIVITY_CRUISE,
+    ACTIVITY_VISIT
 }
