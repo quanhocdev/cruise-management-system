@@ -1,8 +1,7 @@
 package com.project.cruise.android.ui.pos.convenience.screen
 
-import com.project.cruise.android.ui.screens.pos.*
-
 import androidx.compose.runtime.Composable
+import com.project.cruise.android.ui.screens.pos.*
 
 @Composable
 fun ConveniencePosDashboardScreen(
@@ -23,7 +22,12 @@ fun ConveniencePosDashboardScreen(
                 "NFC",
                 onNfcClick
             ),
-            PosDashboardAction("Điều chỉnh chi tiêu", "Hủy khoản bạn ghi trong 10 phút", "123", onCorrectionClick)
+            PosDashboardAction(
+                "Điều chỉnh chi tiêu",
+                "Hủy khoản bạn ghi trong 10 phút",
+                "123",
+                onCorrectionClick
+            )
         ),
         notice = "Đọc vòng NFC để lưu mã nhận diện. Việc đọc vòng chưa xác nhận sử dụng dịch vụ hoặc phát sinh chi phí.",
         onLogoutClick = onLogoutClick,

@@ -1,13 +1,7 @@
 package com.project.cruise.android.ui.pos.convenience.screen
 
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -17,18 +11,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.project.cruise.android.data.dto.convenience.ProductTourResponse
 import com.project.cruise.android.data.dto.convenience.ServiceTourResponse
-import com.project.cruise.android.ui.common.OptionalInfoText
 import com.project.cruise.android.ui.components.QuantityStepper
-import com.project.cruise.android.ui.common.SelectableCard
 import com.project.cruise.android.ui.components.SuccessSoundEffect
 import com.project.cruise.android.ui.components.usage.SectionTitle
 import com.project.cruise.android.ui.components.usage.SelectableList
 import com.project.cruise.android.ui.components.usage.UsageScreenScaffold
+import com.project.cruise.android.ui.pos.convenience.components.usage.*
 import com.project.cruise.android.viewmodel.convenience.ConvenienceUsageViewModel
 
 @Composable
@@ -97,25 +89,12 @@ fun ConvenienceUsageScreen(
     ) {
         SectionTitle("Loại tiện ích")
 
-        Row(modifier = Modifier.fillMaxWidth()) {
-            FilterChip(
-                selected = isProduct,
-                onClick = { selectedType = ConvenienceUsageType.PRODUCT },
-                label = { Text("Sản phẩm") },
-                modifier = Modifier.weight(1f)
-            )
+        ConvenienceTypeSelector(
+            selected = selectedType,
+            onSelect = { selectedType = it },
+        )
 
-            Spacer(modifier = Modifier.width(8.dp))
-
-            FilterChip(
-                selected = !isProduct,
-                onClick = { selectedType = ConvenienceUsageType.SERVICE },
-                label = { Text("Dịch vụ") },
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(Modifier.height(16.dp))
 
         SectionTitle(if (isProduct) "Chọn sản phẩm" else "Chọn dịch vụ")
 
@@ -148,7 +127,7 @@ fun ConvenienceUsageScreen(
         }
 
         if (isProduct && selectedProduct != null) {
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(Modifier.height(12.dp))
 
             SectionTitle("Số lượng")
 
@@ -159,52 +138,4 @@ fun ConvenienceUsageScreen(
             )
         }
     }
-}
-
-@Composable
-private fun ConvenienceProductCard(
-    product: ProductTourResponse,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    SelectableCard(selected = selected, onClick = onClick) {
-        Text(
-            text = product.productName ?: "Không có tên sản phẩm",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
-        )
-
-        OptionalInfoText(
-            value = product.productDescription,
-            style = MaterialTheme.typography.bodyMedium
-        )
-        OptionalInfoText(product.quantity, prefix = "Số lượng cấu hình: ", topSpace = 8.dp)
-    }
-}
-
-@Composable
-private fun ConvenienceServiceCard(
-    service: ServiceTourResponse,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    SelectableCard(selected = selected, onClick = onClick) {
-        Text(
-            text = service.serviceName ?: "Không có tên dịch vụ",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
-        )
-
-        OptionalInfoText(
-            value = service.serviceDescription,
-            style = MaterialTheme.typography.bodyMedium
-        )
-        OptionalInfoText(service.servicePrice, topSpace = 8.dp, emphasized = true)
-        OptionalInfoText(service.durationMinutes, prefix = "Thời lượng: ", suffix = " phút")
-    }
-}
-
-enum class ConvenienceUsageType {
-    PRODUCT,
-    SERVICE
 }
