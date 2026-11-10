@@ -4,6 +4,7 @@ package com.project.feedback.repository;
 import com.project.feedback.model.FeedbackInvitation;
 import com.project.feedback.model.enums.FeedbackInvitationStatus;
 import com.project.feedback.model.enums.FeedbackType;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -13,11 +14,12 @@ import java.util.UUID;
 public interface FeedbackInvitationRepository
         extends JpaRepository<FeedbackInvitation, UUID> {
 
-    Optional<FeedbackInvitation> findByBookingIdAndFeedbackTypeAndTargetId(
-            Long bookingId,
+    // Tìm invitation của đúng lượt sử dụng
+    Optional<FeedbackInvitation> findByFeedbackTypeAndSourceUsageId(
             FeedbackType feedbackType,
-            UUID targetId);
+            Long sourceUsageId);
 
+    // Danh sách invitation của người đại diện booking
     List<FeedbackInvitation> findByReviewerUserIdOrderByCreatedAtDesc(
             UUID reviewerUserId);
 
@@ -29,8 +31,8 @@ public interface FeedbackInvitationRepository
             UUID id,
             UUID reviewerUserId);
 
-    boolean existsByBookingIdAndFeedbackTypeAndTargetId(
-            Long bookingId,
+    // Chống Kafka redelivery tạo invitation trùng
+    boolean existsByFeedbackTypeAndSourceUsageId(
             FeedbackType feedbackType,
-            UUID targetId);
+            Long sourceUsageId);
 }

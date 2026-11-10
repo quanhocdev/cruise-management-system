@@ -5,6 +5,7 @@ import com.project.feedback.dto.response.FeedbackInvitationResponse;
 import com.project.feedback.dto.response.FeedbackResponse;
 import com.project.feedback.model.Feedback;
 import com.project.feedback.model.FeedbackInvitation;
+
 import org.springframework.stereotype.Component;
 
 @Component
@@ -12,6 +13,7 @@ public class FeedbackMapper {
 
     public FeedbackInvitationResponse toInvitationResponse(
             FeedbackInvitation invitation) {
+
         if (invitation == null) {
             return null;
         }
@@ -19,13 +21,16 @@ public class FeedbackMapper {
         return new FeedbackInvitationResponse(
                 invitation.getId(),
                 invitation.getBookingId(),
+                invitation.getBookingPassengerId(),
                 invitation.getFeedbackType(),
                 invitation.getTargetId(),
+                invitation.getTargetName(),
                 invitation.getStatus(),
                 invitation.getCreatedAt());
     }
 
     public FeedbackResponse toFeedbackResponse(Feedback feedback) {
+
         if (feedback == null) {
             return null;
         }
@@ -36,8 +41,10 @@ public class FeedbackMapper {
                 feedback.getId(),
                 invitation.getId(),
                 invitation.getBookingId(),
+                invitation.getBookingPassengerId(),
                 invitation.getFeedbackType(),
                 invitation.getTargetId(),
+                invitation.getTargetName(),
                 feedback.getRating(),
                 feedback.getComment(),
                 feedback.getCreatedAt());

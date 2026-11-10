@@ -11,8 +11,10 @@ public record FeedbackInvitationResponse(
 
         UUID id,
         Long bookingId,
+        Long bookingPassengerId,
         FeedbackType feedbackType,
         UUID targetId,
+        String targetName,
         FeedbackInvitationStatus status,
         Instant createdAt
 

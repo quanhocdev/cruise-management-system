@@ -1,3 +1,4 @@
+
 package com.project.feedback.model;
 
 import com.project.feedback.model.enums.FeedbackInvitationStatus;
@@ -9,8 +10,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "feedback_invitations", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_feedback_invitation_booking_type_target", columnNames = { "booking_id",
-                "feedback_type", "target_id" })
+        @UniqueConstraint(name = "uk_feedback_invitation_type_source_usage", columnNames = { "feedback_type",
+                "source_usage_id" })
 })
 public class FeedbackInvitation {
 
@@ -21,9 +22,11 @@ public class FeedbackInvitation {
     @Column(name = "booking_id", nullable = false)
     private Long bookingId;
 
+    // Hành khách thực tế đã sử dụng trải nghiệm
     @Column(name = "booking_passenger_id")
     private Long bookingPassengerId;
 
+    // Tài khoản đại diện booking nhận lời mời đánh giá
     @Column(name = "reviewer_user_id")
     private UUID reviewerUserId;
 
@@ -31,8 +34,17 @@ public class FeedbackInvitation {
     @Column(name = "feedback_type", nullable = false, length = 30)
     private FeedbackType feedbackType;
 
+    // ID sản phẩm / dịch vụ / hoạt động được đánh giá
     @Column(name = "target_id", nullable = false)
     private UUID targetId;
+
+    // Snapshot tên đối tượng tại thời điểm sử dụng
+    @Column(name = "target_name", length = 255)
+    private String targetName;
+
+    // ID lượt sử dụng nguồn, dùng để chống tạo invitation trùng
+    @Column(name = "source_usage_id", nullable = false)
+    private Long sourceUsageId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
@@ -109,6 +121,22 @@ public class FeedbackInvitation {
 
     public void setTargetId(UUID targetId) {
         this.targetId = targetId;
+    }
+
+    public String getTargetName() {
+        return targetName;
+    }
+
+    public void setTargetName(String targetName) {
+        this.targetName = targetName;
+    }
+
+    public Long getSourceUsageId() {
+        return sourceUsageId;
+    }
+
+    public void setSourceUsageId(Long sourceUsageId) {
+        this.sourceUsageId = sourceUsageId;
     }
 
     public FeedbackInvitationStatus getStatus() {

@@ -11,8 +11,10 @@ public record FeedbackResponse(
         UUID id,
         UUID invitationId,
         Long bookingId,
+        Long bookingPassengerId,
         FeedbackType feedbackType,
         UUID targetId,
+        String targetName,
         Integer rating,
         String comment,
         Instant createdAt

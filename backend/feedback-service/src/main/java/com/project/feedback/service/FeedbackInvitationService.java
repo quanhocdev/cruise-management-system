@@ -32,16 +32,16 @@ public class FeedbackInvitationService {
      * =====================================================
      */
     @Transactional
-    public void createProductInvitation(
-            ProductUsedEvent event,
-            UUID reviewerUserId) {
+    public void createProductInvitation(ProductUsedEvent event) {
 
         createInvitation(
                 event.bookingId(),
                 event.bookingPassengerId(),
-                reviewerUserId,
+                event.bookingOwnerUserId(),
                 FeedbackType.PRODUCT,
-                event.productTourId());
+                event.productTourId(),
+                event.productName(),
+                event.sourceUsageId());
     }
 
     /*
@@ -50,16 +50,16 @@ public class FeedbackInvitationService {
      * =====================================================
      */
     @Transactional
-    public void createServiceInvitation(
-            ServiceCompletedEvent event,
-            UUID reviewerUserId) {
+    public void createServiceInvitation(ServiceCompletedEvent event) {
 
         createInvitation(
                 event.bookingId(),
                 event.bookingPassengerId(),
-                reviewerUserId,
+                event.bookingOwnerUserId(),
                 FeedbackType.SERVICE,
-                event.serviceTourId());
+                event.serviceTourId(),
+                event.serviceName(),
+                event.sourceUsageId());
     }
 
     /*
@@ -69,15 +69,16 @@ public class FeedbackInvitationService {
      */
     @Transactional
     public void createActivityCruiseInvitation(
-            ActivityCruiseCompletedEvent event,
-            UUID reviewerUserId) {
+            ActivityCruiseCompletedEvent event) {
 
         createInvitation(
                 event.bookingId(),
                 event.bookingPassengerId(),
-                reviewerUserId,
+                event.bookingOwnerUserId(),
                 FeedbackType.ACTIVITY_CRUISE,
-                event.activityCruiseTourId());
+                event.activityCruiseTourId(),
+                event.activityName(),
+                event.sourceUsageId());
     }
 
     /*
@@ -87,15 +88,16 @@ public class FeedbackInvitationService {
      */
     @Transactional
     public void createActivityVisitInvitation(
-            ActivityVisitCompletedEvent event,
-            UUID reviewerUserId) {
+            ActivityVisitCompletedEvent event) {
 
         createInvitation(
                 event.bookingId(),
                 event.bookingPassengerId(),
-                reviewerUserId,
+                event.bookingOwnerUserId(),
                 FeedbackType.ACTIVITY_VISIT,
-                event.visitTourId());
+                event.visitTourId(),
+                event.activityName(),
+                event.sourceUsageId());
     }
 
     /*
@@ -108,12 +110,27 @@ public class FeedbackInvitationService {
             Long bookingPassengerId,
             UUID reviewerUserId,
             FeedbackType feedbackType,
-            UUID targetId) {
+            UUID targetId,
+            String targetName,
+            Long sourceUsageId) {
 
-        if (invitationRepository.existsByBookingIdAndFeedbackTypeAndTargetId(
-                bookingId,
+        // Kiểm tra event hợp lệ
+        if (bookingId == null
+                || bookingPassengerId == null
+                || reviewerUserId == null
+                || feedbackType == null
+                || targetId == null
+                || sourceUsageId == null) {
+
+            throw new IllegalArgumentException(
+                    "Feedback invitation event contains missing required fields");
+        }
+
+        // Chống Kafka redelivery tạo invitation trùng
+        // Chỉ kiểm tra cùng loại trải nghiệm + cùng lượt sử dụng
+        if (invitationRepository.existsByFeedbackTypeAndSourceUsageId(
                 feedbackType,
-                targetId)) {
+                sourceUsageId)) {
             return;
         }
 
@@ -124,6 +141,8 @@ public class FeedbackInvitationService {
         invitation.setReviewerUserId(reviewerUserId);
         invitation.setFeedbackType(feedbackType);
         invitation.setTargetId(targetId);
+        invitation.setTargetName(targetName);
+        invitation.setSourceUsageId(sourceUsageId);
         invitation.setStatus(FeedbackInvitationStatus.PENDING);
 
         invitationRepository.save(invitation);
