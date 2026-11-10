@@ -50,9 +50,10 @@ spring:
 
             # FEEDBACK SERVICE
             - id: feedback-service
+              order: -1
               uri: ${FEEDBACK_SERVICE_URL:http://feedback-service:8089}
               predicates:
-                - Path=/api/v1/feedbacks/**,/api/admin/feedbacks/**
+                - Path=/api/passengers/feedback/**,/api/admin/feedback/**
 
             # TOUR SERVICE - ADMIN
             - id: tour-admin-service

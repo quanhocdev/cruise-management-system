@@ -17,7 +17,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/passengers/feedback")
-@PreAuthorize("hasRole('PASSENGER')")
 public class PassengerFeedbackController {
 
     private final FeedbackService feedbackService;
