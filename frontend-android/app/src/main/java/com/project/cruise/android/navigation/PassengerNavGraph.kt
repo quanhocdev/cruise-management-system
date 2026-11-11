@@ -42,13 +42,16 @@ import com.project.cruise.android.data.repository.booking.PassengerBookingReposi
 import com.project.cruise.android.data.repository.feedback.FeedbackRepository
 import com.project.cruise.android.data.repository.finance.CheckoutRepository
 import com.project.cruise.android.data.repository.notification.ActivityInboxRepository
+import com.project.cruise.android.data.repository.notification.NotificationRepository
+import com.project.cruise.android.ui.screens.passenger.NotificationScreen
+import com.project.cruise.android.viewmodel.passenger.NotificationViewModel
 import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModel
 import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModelFactory
 
 fun NavGraphBuilder.passengerGraph(
     navController: NavHostController,
     authViewModel: AuthViewModel,
-    tokenManager: TokenManager, // Nhận TokenManager thay vì ApiService chung
+    tokenManager: TokenManager, 
     chatRepository: ChatRepository
 ) {
 
@@ -148,6 +151,48 @@ fun NavGraphBuilder.passengerGraph(
                 navController.navigate(Routes.passengerCreateBooking(tourId, packageId))
             },
             onLoginRequired = { navController.navigate(Routes.LOGIN) },
+            onBack = { navController.popBackStack() }
+        )
+    }
+
+    // ----- NOTIFICATIONS SCREEN -----
+    composable(Routes.PASSENGER_NOTIFICATIONS) { backStackEntry ->
+        val context = androidx.compose.ui.platform.LocalContext.current
+
+        // Khởi tạo NotificationApiService từ RetrofitClient
+        val notificationApi = remember(tokenManager) {
+            RetrofitClient.createNotificationApiService(tokenManager)
+        }
+
+        // Khởi tạo Repository
+        val notificationRepo = remember(notificationApi) {
+            NotificationRepository(notificationApi)
+        }
+
+        // Khởi tạo ViewModel qua Factory
+        val notificationViewModel: NotificationViewModel = viewModel(
+            viewModelStoreOwner = backStackEntry,
+            factory = NotificationViewModel.Factory(
+                repository = notificationRepo,
+                tokenManager = tokenManager
+            )
+        )
+
+        val notificationState by notificationViewModel.state.collectAsState()
+
+        NotificationScreen(
+            state = notificationState,
+            onMarkAsRead = { notificationId ->
+                notificationViewModel.markAsRead(notificationId)
+            },
+            onMarkAllAsRead = {
+                notificationViewModel.markAllAsRead()
+            },
+            onNotificationClick = { notification ->
+                if (notification.referenceType == "FEEDBACK_INVITATION" && notification.referenceId != null) {
+                    navController.navigate("passenger_feedback/${notification.referenceId}")
+                }
+            },
             onBack = { navController.popBackStack() }
         )
     }

@@ -17,6 +17,8 @@ fun MyBookingsScreen(
     onBrowseTours: () -> Unit = onBack,
     onAccount: (() -> Unit)? = null,
     onMessagesClick: () -> Unit = {},
+    onNotificationClick: () -> Unit = {}, // Thêm tham số này
+    unreadCount: Long = 0L, // Thêm tham số nhận số lượng chưa đọc nếu có
 ) {
     val state by viewModel.bookingListState.collectAsState()
     LaunchedEffect(Unit) { viewModel.fetchMyBookings() }
@@ -29,18 +31,19 @@ fun MyBookingsScreen(
         bottomBar = {
             if (onAccount != null)
                 OceanBottomBar(
-                    true,
-                    "passenger_bookings",
-                    onBrowseTours,
-                    {},
-                    onAccount,
-                    {},
-                    onMessagesClick = onMessagesClick
+                    isLoggedIn = true,
+                    currentRoute = "passenger_bookings",
+                    unreadCount = unreadCount,
+                    onHomeClick = onBrowseTours,
+                    onLoginClick = {},
+                    onUserClick = onAccount,
+                    onMyBookingsClick = {},
+                    onMessagesClick = onMessagesClick,
+                    onNotificationClick = onNotificationClick // Truyền trực tiếp vào đây
                 )
         },
     )
 }
-
 @Composable
 fun MyBookingsContent(
     state: BookingListState,

@@ -24,6 +24,8 @@ fun TourPublicScreen(
     onUserClick: () -> Unit,
     onMyBookingsClick: () -> Unit,
     onMessagesClick: () -> Unit,
+    onNotificationClick: () -> Unit = {}, // Thêm callback thông báo
+    unreadCount: Long = 0L,              // Thêm số lượng chưa đọc
     onHomeClick: () -> Unit = {},
 ) {
     val state by viewModel.tourListState.collectAsState()
@@ -40,11 +42,13 @@ fun TourPublicScreen(
                 OceanBottomBar(
                     isLoggedIn = loggedIn,
                     currentRoute = "passenger_tours",
+                    unreadCount = unreadCount,
                     onHomeClick = onHomeClick,
                     onLoginClick = onLoginClick,
                     onUserClick = onUserClick,
                     onMyBookingsClick = onMyBookingsClick,
                     onMessagesClick = onMessagesClick,
+                    onNotificationClick = onNotificationClick,
                 )
             },
         )
