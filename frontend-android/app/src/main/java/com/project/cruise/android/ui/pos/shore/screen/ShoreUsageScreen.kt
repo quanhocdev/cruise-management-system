@@ -1,7 +1,5 @@
-package com.project.cruise.android.ui.screens.pos.shore
+package com.project.cruise.android.ui.pos.shore.screen
 
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -9,16 +7,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.project.cruise.android.data.dto.shore.ActivityVisitTourResponse
-import com.project.cruise.android.ui.common.OptionalInfoText
-import com.project.cruise.android.ui.common.SelectableCard
 import com.project.cruise.android.ui.components.SuccessSoundEffect
 import com.project.cruise.android.ui.components.usage.SectionTitle
 import com.project.cruise.android.ui.components.usage.SelectableList
 import com.project.cruise.android.ui.components.usage.UsageScreenScaffold
+import com.project.cruise.android.ui.pos.shore.components.ShoreActivityVisitCard
 import com.project.cruise.android.viewmodel.shore.ShoreUsageViewModel
 
 @Composable
@@ -79,30 +74,5 @@ fun ShoreUsageScreen(
                 onClick = { selectedActivity = activity }
             )
         }
-    }
-}
-
-@Composable
-private fun ShoreActivityVisitCard(
-    activity: ActivityVisitTourResponse,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    SelectableCard(selected = selected, onClick = onClick) {
-        Text(
-            text = activity.name ?: "Không có tên chuyến tham quan",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
-        )
-
-        OptionalInfoText(
-            value = activity.description,
-            style = MaterialTheme.typography.bodyMedium
-        )
-        OptionalInfoText(activity.startTime, prefix = "Bắt đầu: ", topSpace = 8.dp)
-        OptionalInfoText(activity.endTime, prefix = "Kết thúc: ")
-        OptionalInfoText(activity.maxPassengers, prefix = "Số người tối đa: ")
-        OptionalInfoText(activity.price, prefix = "Giá: ", topSpace = 8.dp, emphasized = true)
-        OptionalInfoText(activity.status, prefix = "Trạng thái: ")
     }
 }

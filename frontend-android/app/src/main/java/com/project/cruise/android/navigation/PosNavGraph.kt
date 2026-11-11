@@ -30,8 +30,8 @@ import com.project.cruise.android.ui.pos.convenience.screen.ConvenienceNfcScanSc
 import com.project.cruise.android.ui.pos.convenience.screen.ConvenienceUsageScreen
 import com.project.cruise.android.ui.pos.onboard.screen.OnboardNfcScanScreen
 import com.project.cruise.android.ui.pos.onboard.screen.OnboardUsageScreen
-import com.project.cruise.android.ui.screens.pos.shore.ShoreNfcScanScreen
-import com.project.cruise.android.ui.screens.pos.shore.ShoreUsageScreen
+import com.project.cruise.android.ui.pos.shore.screen.ShoreNfcScanScreen
+import com.project.cruise.android.ui.pos.shore.screen.ShoreUsageScreen
 import com.project.cruise.android.viewmodel.auth.AuthViewModel
 import com.project.cruise.android.viewmodel.auth.PosLoginState
 import com.project.cruise.android.viewmodel.pos.PosIdentityViewModel

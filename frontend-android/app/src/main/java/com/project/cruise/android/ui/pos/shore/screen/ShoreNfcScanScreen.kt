@@ -1,4 +1,4 @@
-package com.project.cruise.android.ui.screens.pos.shore
+package com.project.cruise.android.ui.pos.shore.screen
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
