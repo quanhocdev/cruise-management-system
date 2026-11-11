@@ -2,16 +2,19 @@
 package com.project.notification.service;
 
 import com.project.common.event.FeedbackInvitationCreatedEvent;
+import com.project.notification.dto.response.NotificationRealtimePayload;
 import com.project.notification.dto.response.NotificationResponse;
 import com.project.notification.mapper.NotificationMapper;
 import com.project.notification.model.Notification;
 import com.project.notification.model.NotificationType;
 import com.project.notification.repository.NotificationRepository;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -22,20 +25,27 @@ public class NotificationService {
 
     private static final String FEEDBACK_REFERENCE_TYPE = "FEEDBACK_INVITATION";
 
+    private static final String USER_NOTIFICATION_DESTINATION = "/queue/notifications";
+
+    private static final String EVENT_NEW_NOTIFICATION = "NEW_NOTIFICATION";
+
+    private static final String EVENT_UNREAD_COUNT_UPDATED = "UNREAD_COUNT_UPDATED";
+
     private final NotificationRepository notificationRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     public NotificationService(
-            NotificationRepository notificationRepository) {
+            NotificationRepository notificationRepository,
+            SimpMessagingTemplate messagingTemplate) {
         this.notificationRepository = notificationRepository;
+        this.messagingTemplate = messagingTemplate;
     }
 
-    // =====================================================
     // 1. CREATE FEEDBACK INVITATION NOTIFICATION
-    // =====================================================
-
     @Transactional
     public void createFeedbackInvitationNotification(
             FeedbackInvitationCreatedEvent event) {
+
         if (event == null) {
             throw new IllegalArgumentException(
                     "Feedback invitation event must not be null");
@@ -79,30 +89,22 @@ public class NotificationService {
         notification.setReferenceId(invitationId);
         notification.setRead(false);
 
-        try {
-            notificationRepository.save(notification);
-        } catch (DataIntegrityViolationException exception) {
+        Notification savedNotification = notificationRepository.save(notification);
 
-            // Kiểm tra lại nếu event đã được xử lý đồng thời.
-            boolean duplicate = notificationRepository
-                    .existsByRecipientUserIdAndReferenceTypeAndReferenceId(
-                            recipientUserId,
-                            FEEDBACK_REFERENCE_TYPE,
-                            invitationId);
+        NotificationResponse response = NotificationMapper.toResponse(savedNotification);
 
-            if (!duplicate) {
-                throw exception;
-            }
-        }
+        // Chỉ gửi socket sau khi DB commit thành công.
+        sendAfterCommit(
+                recipientUserId,
+                EVENT_NEW_NOTIFICATION,
+                response);
     }
 
-    // =====================================================
     // 2. GET ALL NOTIFICATIONS
-    // =====================================================
-
     @Transactional(readOnly = true)
     public List<NotificationResponse> getAllNotifications(
             UUID recipientUserId) {
+
         return notificationRepository
                 .findByRecipientUserIdOrderByCreatedAtDesc(recipientUserId)
                 .stream()
@@ -110,43 +112,44 @@ public class NotificationService {
                 .toList();
     }
 
-    // =====================================================
     // 3. GET UNREAD NOTIFICATION COUNT
-    // =====================================================
-
     @Transactional(readOnly = true)
     public long countUnreadNotifications(UUID recipientUserId) {
+
         return notificationRepository
                 .countByRecipientUserIdAndIsReadFalse(recipientUserId);
     }
 
-    // =====================================================
     // 4. MARK ONE NOTIFICATION AS READ
-    // =====================================================
-
     @Transactional
     public NotificationResponse markAsRead(
             UUID notificationId,
             UUID recipientUserId) {
+
         Notification notification = notificationRepository
                 .findById(notificationId)
-                .filter(item -> item.getRecipientUserId().equals(recipientUserId))
+                .filter(item -> item.getRecipientUserId()
+                        .equals(recipientUserId))
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Notification not found"));
 
         if (!notification.isRead()) {
+
             notification.setRead(true);
+
             notification = notificationRepository.save(notification);
+
+            sendAfterCommit(
+                    recipientUserId,
+                    EVENT_UNREAD_COUNT_UPDATED,
+                    null);
         }
 
         return NotificationMapper.toResponse(notification);
     }
 
-    // =====================================================
     // 5. MARK ALL NOTIFICATIONS AS READ
-    // =====================================================
-
     @Transactional
     public int markAllAsRead(UUID recipientUserId) {
 
@@ -164,6 +167,46 @@ public class NotificationService {
 
         notificationRepository.saveAll(unreadNotifications);
 
+        sendAfterCommit(
+                recipientUserId,
+                EVENT_UNREAD_COUNT_UPDATED,
+                null);
+
         return unreadNotifications.size();
+    }
+
+    // 6. SEND WEBSOCKET AFTER TRANSACTION COMMIT
+    private void sendAfterCommit(
+            UUID recipientUserId,
+            String eventType,
+            NotificationResponse notificationResponse) {
+
+        if (!TransactionSynchronizationManager
+                .isSynchronizationActive()) {
+            throw new IllegalStateException(
+                    "Transaction synchronization is not active");
+        }
+
+        TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+
+                    @Override
+                    public void afterCommit() {
+
+                        long unreadCount = notificationRepository
+                                .countByRecipientUserIdAndIsReadFalse(
+                                        recipientUserId);
+
+                        NotificationRealtimePayload payload = new NotificationRealtimePayload(
+                                eventType,
+                                notificationResponse,
+                                unreadCount);
+
+                        messagingTemplate.convertAndSendToUser(
+                                recipientUserId.toString(),
+                                USER_NOTIFICATION_DESTINATION,
+                                payload);
+                    }
+                });
     }
 }
