@@ -24,8 +24,8 @@ fun TourPublicScreen(
     onUserClick: () -> Unit,
     onMyBookingsClick: () -> Unit,
     onMessagesClick: () -> Unit,
-    onNotificationClick: () -> Unit = {}, // Thêm callback thông báo
-    unreadCount: Long = 0L,              // Thêm số lượng chưa đọc
+    onNotificationClick: () -> Unit = {},
+    unreadCount: Long = 0L,
     onHomeClick: () -> Unit = {},
 ) {
     val state by viewModel.tourListState.collectAsState()
@@ -113,7 +113,13 @@ private fun List<PublicTourSummaryResponse>.filterTours(
 ): List<PublicTourSummaryResponse> = filter { tour ->
     (!openOnly || tour.statusBooking == TourBookingStatus.OPEN) &&
             (query.isBlank() ||
-                    listOf(tour.name, tour.code, tour.cruiseName).any {
+                    listOf(
+                        tour.name,
+                        tour.code,
+                        tour.cruiseName,
+                        tour.departurePort?.name,
+                        tour.departurePort?.city
+                    ).any {
                         it?.contains(query.trim(), ignoreCase = true) == true
                     })
 }

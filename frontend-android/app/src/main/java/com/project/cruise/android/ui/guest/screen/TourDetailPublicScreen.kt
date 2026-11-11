@@ -63,9 +63,10 @@ fun TourDetailContent(
                         startDate = passengerDate(tour.startDate),
                         endDate = passengerDate(tour.endDate),
                         cruiseCapacity = tour.cruise?.maxPassengers,
+                        departurePort = tour.departurePort,
+                        arrivalPort = tour.arrivalPort
                     )
                 }
-
                 // --- Gói hành trình ---
                 item {
                     PassengerSection(

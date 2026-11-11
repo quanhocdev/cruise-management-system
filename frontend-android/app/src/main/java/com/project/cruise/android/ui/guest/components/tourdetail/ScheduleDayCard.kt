@@ -12,6 +12,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.project.cruise.android.ui.common.PassengerCard
+import com.project.cruise.android.ui.common.PassengerPill
 import com.project.cruise.android.ui.components.*
 import com.project.cruise.android.ui.theme.*
 

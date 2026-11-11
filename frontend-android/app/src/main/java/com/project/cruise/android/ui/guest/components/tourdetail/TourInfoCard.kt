@@ -8,6 +8,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.project.cruise.android.data.dto.tour.PortInfoResponse
+import com.project.cruise.android.ui.common.PassengerCard
+import com.project.cruise.android.ui.common.PassengerGlyph
+import com.project.cruise.android.ui.common.PassengerIcon
 import com.project.cruise.android.ui.components.*
 import com.project.cruise.android.ui.theme.*
 
@@ -17,6 +21,8 @@ fun TourInfoCard(
     startDate: String,
     endDate: String,
     cruiseCapacity: Number?,
+    departurePort: PortInfoResponse? = null,
+    arrivalPort: PortInfoResponse? = null,
 ) {
     PassengerCard {
         Row(
@@ -39,6 +45,52 @@ fun TourInfoCard(
             DateTile("Khởi hành", startDate, Modifier.weight(1f))
             DateTile("Kết thúc", endDate, Modifier.weight(1f))
         }
+
+        // --- Hiển thị thông tin Cảng check-in & Cảng kết thúc ---
+        if (departurePort != null || arrivalPort != null) {
+            HorizontalDivider(color = OceanLine)
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                departurePort?.let { port ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        PassengerIcon(PassengerGlyph.EXPLORE, OceanTeal, Modifier.size(20.dp))
+                        Column {
+                            Text("Điểm tập trung check-in", style = MaterialTheme.typography.labelSmall, color = OceanSlate)
+                            Text(
+                                "${port.name} (${port.city})",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = OceanNavy,
+                            )
+                            port.address?.takeIf { it.isNotBlank() }?.let {
+                                Text(it, style = MaterialTheme.typography.bodySmall, color = OceanSlate)
+                            }
+                        }
+                    }
+                }
+
+                arrivalPort?.let { port ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        PassengerIcon(PassengerGlyph.ARROW, OceanTeal, Modifier.size(20.dp))
+                        Column {
+                            Text("Cảng kết thúc hành trình", style = MaterialTheme.typography.labelSmall, color = OceanSlate)
+                            Text(
+                                "${port.name} (${port.city})",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = OceanNavy,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
         cruiseCapacity?.let {
             Text(
                 "Sức chứa du thuyền · $it khách",
