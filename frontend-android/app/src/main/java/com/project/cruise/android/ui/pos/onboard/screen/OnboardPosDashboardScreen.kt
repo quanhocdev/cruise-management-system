@@ -1,8 +1,7 @@
-package com.project.cruise.android.ui.screens.pos.onboard
-
-import com.project.cruise.android.ui.screens.pos.*
+package com.project.cruise.android.ui.pos.onboard.screen
 
 import androidx.compose.runtime.Composable
+import com.project.cruise.android.ui.screens.pos.*
 
 @Composable
 fun OnboardPosDashboardScreen(
@@ -19,8 +18,18 @@ fun OnboardPosDashboardScreen(
         role = PosRole.ONBOARD,
         accent = PosRole.ONBOARD.accent(),
         actions = listOf(
-            PosDashboardAction("Khách đăng ký hoạt động", "Tra cứu và xác nhận khách tham gia", "DS", onRegistrationsClick),
-            PosDashboardAction("Quét NFC dịch vụ", "Nhận diện khách và ghi nhận lượt sử dụng", "NFC", onNfcClick),
+            PosDashboardAction(
+                "Khách đăng ký hoạt động",
+                "Tra cứu và xác nhận khách tham gia",
+                "DS",
+                onRegistrationsClick
+            ),
+            PosDashboardAction(
+                "Quét NFC dịch vụ",
+                "Nhận diện khách và ghi nhận lượt sử dụng",
+                "NFC",
+                onNfcClick
+            ),
             PosDashboardAction(
                 "Quét QR vé khách",
                 "Đọc mã vé để kiểm tra hành khách và chuyến tàu",

@@ -2,7 +2,7 @@ package com.project.cruise.android.ui.screens.pos
 
 import androidx.compose.runtime.Composable
 import com.project.cruise.android.ui.pos.convenience.screen.ConveniencePosDashboardScreen
-import com.project.cruise.android.ui.screens.pos.onboard.OnboardPosDashboardScreen
+import com.project.cruise.android.ui.pos.onboard.screen.OnboardPosDashboardScreen
 import com.project.cruise.android.ui.screens.pos.shore.ShorePosDashboardScreen
 
 @Composable

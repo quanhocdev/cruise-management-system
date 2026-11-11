@@ -10,7 +10,8 @@ import com.project.feedback.model.FeedbackInvitation;
 import com.project.feedback.model.enums.FeedbackInvitationStatus;
 import com.project.feedback.model.enums.FeedbackType;
 import com.project.feedback.repository.FeedbackInvitationRepository;
-
+import com.project.common.event.FeedbackInvitationCreatedEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,10 +21,13 @@ import java.util.UUID;
 public class FeedbackInvitationService {
 
     private final FeedbackInvitationRepository invitationRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public FeedbackInvitationService(
-            FeedbackInvitationRepository invitationRepository) {
+            FeedbackInvitationRepository invitationRepository,
+            ApplicationEventPublisher eventPublisher) {
         this.invitationRepository = invitationRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     /*
@@ -145,6 +149,17 @@ public class FeedbackInvitationService {
         invitation.setSourceUsageId(sourceUsageId);
         invitation.setStatus(FeedbackInvitationStatus.PENDING);
 
-        invitationRepository.save(invitation);
+        FeedbackInvitation savedInvitation = invitationRepository.save(invitation);
+
+        FeedbackInvitationCreatedEvent event = new FeedbackInvitationCreatedEvent(
+                savedInvitation.getId(),
+                savedInvitation.getReviewerUserId(),
+                savedInvitation.getBookingId(),
+                savedInvitation.getFeedbackType().name(),
+                savedInvitation.getTargetId(),
+                savedInvitation.getTargetName(),
+                savedInvitation.getCreatedAt());
+
+        eventPublisher.publishEvent(event);
     }
 }
