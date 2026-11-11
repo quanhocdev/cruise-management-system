@@ -6,5 +6,7 @@ public enum NotificationType {
     BOOKING_CANCELLED,
     BOOKING_CONFIRMED,
     TOUR_REMINDER,
-    BILL_PAID
+    BILL_PAID,
+
+    FEEDBACK_INVITATION
 }
