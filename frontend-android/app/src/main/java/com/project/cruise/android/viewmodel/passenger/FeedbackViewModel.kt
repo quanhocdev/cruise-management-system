@@ -3,7 +3,9 @@ package com.project.cruise.android.viewmodel.passenger
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.project.cruise.android.data.dto.feedback.*
+import com.project.cruise.android.data.dto.passenger.feedback.FeedbackInvitationResponse
+import com.project.cruise.android.data.dto.passenger.feedback.FeedbackResponse
+import com.project.cruise.android.data.dto.passenger.feedback.SubmitFeedbackRequest
 import com.project.cruise.android.data.repository.feedback.FeedbackSource
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -11,74 +13,94 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
+import java.util.UUID
 
 data class FeedbackState(
-    val loading: Boolean = true,
-    val items: List<MyFeedback> = emptyList(),
-    val error: String? = null,
-    val options: FeedbackOptions? = null,
-    val optionsError: String? = null,
-    val pending: FeedbackDraft? = null,
+    val loading: Boolean = false,
+    val invitations: List<FeedbackInvitationResponse> = emptyList(),
+    val pendingInvitations: List<FeedbackInvitationResponse> = emptyList(),
+    val selectedFeedback: FeedbackResponse? = null,
     val sending: Boolean = false,
-    val message: String? = null,
+    val error: String? = null,
+    val message: String? = null
 )
 
 class FeedbackViewModel(private val source: FeedbackSource) : ViewModel() {
     private val mutableState = MutableStateFlow(FeedbackState())
     val state = mutableState.asStateFlow()
-    private var request: Job? = null
+    private var job: Job? = null
 
-    fun load(bookingId: Long) {
-        if(mutableState.value.sending)return
-        request?.cancel()
-        mutableState.value = FeedbackState()
-        request = viewModelScope.launch {
+    // Tải tất cả lời mời đánh giá
+    fun loadInvitations() {
+        job?.cancel()
+        mutableState.value = mutableState.value.copy(loading = true, error = null)
+        job = viewModelScope.launch {
             try {
-                val items=source.mine(bookingId)
-                val pending=source.pending(bookingId)
-                mutableState.value = FeedbackState(loading = false, items = items,pending=pending)
-                try { mutableState.value=mutableState.value.copy(options=source.options(bookingId)) }
-                catch(e: CancellationException){throw e}
-                catch(e: Exception){mutableState.value=mutableState.value.copy(optionsError="Chưa kiểm tra được điều kiện đánh giá. Vui lòng tải lại.")}
+                val invitations = source.getMyInvitations()
+                val pending = source.getMyPendingInvitations()
+                mutableState.value = mutableState.value.copy(
+                    loading = false,
+                    invitations = invitations,
+                    pendingInvitations = pending
+                )
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                mutableState.value = FeedbackState(
+                mutableState.value = mutableState.value.copy(
                     loading = false,
                     error = if (e is HttpException && e.code() in setOf(401, 403))
-                        "Vui lòng đăng nhập bằng tài khoản hành khách để xem đánh giá."
-                    else "Chưa tải được đánh giá. Vui lòng thử lại.",
+                        "Vui lòng đăng nhập lại để xem lời mời đánh giá."
+                    else "Không thể tải danh sách đánh giá. Vui lòng thử lại."
                 )
             }
         }
     }
 
-    fun submit(draft: FeedbackDraft) {
-        val state=mutableState.value
-        if(state.loading || state.sending || draft.rating !in 1..5 || draft.content.isBlank() || draft.content.length>5000)return
-        if(state.pending==null && (state.options?.state!="READY" || state.options.bookingId!=draft.bookingId ||
-            state.options.passengers.none{it.bookingPassengerId==draft.bookingPassengerId && it.participated}))return
-        if(state.pending!=null && state.pending!=draft)return
-        request?.cancel()
-        mutableState.value=state.copy(sending=true,error=null,message=null,pending=draft)
-        request=viewModelScope.launch {
+    // Gửi đánh giá cho một lời mời
+    fun submitFeedback(invitationId: UUID, rating: Int, comment: String) {
+        if (rating !in 1..5) {
+            mutableState.value = mutableState.value.copy(message = "Vui lòng chọn số sao từ 1 đến 5.")
+            return
+        }
+
+        job?.cancel()
+        mutableState.value = mutableState.value.copy(sending = true, message = null)
+        job = viewModelScope.launch {
             try {
-                val review=source.submit(draft)
-                mutableState.value=mutableState.value.copy(sending=false,pending=null,
-                    items=listOf(review)+mutableState.value.items.filter{it.id!=review.id},
-                    options=mutableState.value.options?.copy(state="ALREADY_REVIEWED"),message="Đã gửi đánh giá. Cảm ơn bạn đã chia sẻ!")
-            } catch(e: CancellationException){throw e}
-            catch(e: Exception){
-                val definitive=e is HttpException && e.code() in setOf(400,401,403,404,422)
-                mutableState.value=mutableState.value.copy(sending=false,pending=if(definitive)null else draft,
-                    message=if(definitive)"Chưa thể gửi đánh giá. Hãy cập nhật điều kiện chuyến đi và kiểm tra nội dung."
-                    else "Chưa nhận được kết quả. Nội dung đã được giữ lại; hãy gửi lại đúng bản này hoặc kiểm tra lịch sử.")
+                val request = SubmitFeedbackRequest(rating = rating, comment = comment)
+                source.submitFeedback(invitationId, request)
+
+                // Sau khi gửi thành công, tải lại danh sách
+                loadInvitations()
+                mutableState.value = mutableState.value.copy(
+                    sending = false,
+                    message = "Gửi đánh giá thành công! Cảm ơn bạn."
+                )
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                mutableState.value = mutableState.value.copy(
+                    sending = false,
+                    message = "Gửi đánh giá thất bại. Vui lòng kiểm tra lại."
+                )
             }
+        }
+    }
+
+    // Bỏ qua lời mời
+    fun skipInvitation(invitationId: UUID) {
+        viewModelScope.launch {
+            try {
+                source.skipInvitation(invitationId)
+                loadInvitations()
+            } catch (_: Exception) {}
         }
     }
 
     class Factory(private val source: FeedbackSource) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T = FeedbackViewModel(source) as T
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return FeedbackViewModel(source) as T
+        }
     }
 }

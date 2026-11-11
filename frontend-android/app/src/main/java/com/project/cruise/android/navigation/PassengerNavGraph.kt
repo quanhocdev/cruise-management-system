@@ -343,14 +343,30 @@ fun NavGraphBuilder.passengerGraph(
             onBooking = { navController.navigate(Routes.passengerBookingDetail(it)) }, onBack = { navController.popBackStack() })
     }
 
-    composable("passenger_feedback/{bookingId}", arguments = listOf(navArgument("bookingId") { type = NavType.LongType })) { entry ->
-        val bookingId = entry.arguments?.getLong("bookingId") ?: return@composable
-        val context = androidx.compose.ui.platform.LocalContext.current
-        val feedbackApi = remember(tokenManager) { RetrofitClient.createFeedbackApiService(tokenManager) }
-        val source = remember(feedbackApi, context) { FeedbackRepository(feedbackApi, context) }
+    composable(
+        route = "passenger_feedback/{bookingId}",
+        arguments = listOf(navArgument("bookingId") { type = NavType.LongType })
+    ) { entry ->
+        // Khởi tạo FeedbackApiService thông qua RetrofitClient với tokenManager
+        val feedbackApi = remember(tokenManager) {
+            RetrofitClient.createFeedbackApiService(tokenManager)
+        }
+
+        // Khởi tạo FeedbackRepository với chỉ api
+        val source = remember(feedbackApi) {
+            FeedbackRepository(feedbackApi)
+        }
+
+        // Khởi tạo FeedbackViewModel qua Factory
         val model: com.project.cruise.android.viewmodel.passenger.FeedbackViewModel = viewModel(
-            factory = com.project.cruise.android.viewmodel.passenger.FeedbackViewModel.Factory(source))
-        com.project.cruise.android.ui.screens.passenger.MyFeedbackScreen(bookingId, model) { navController.popBackStack() }
+            factory = com.project.cruise.android.viewmodel.passenger.FeedbackViewModel.Factory(source)
+        )
+
+        // Gọi MyFeedbackScreen chuẩn theo màn hình danh sách invitation chúng ta vừa làm
+        com.project.cruise.android.ui.screens.passenger.MyFeedbackScreen(
+            model = model,
+            onBack = { navController.popBackStack() }
+        )
     }
 
     composable("passenger_bill/{bookingId}", arguments = listOf(navArgument("bookingId") { type = NavType.LongType })) { entry ->
