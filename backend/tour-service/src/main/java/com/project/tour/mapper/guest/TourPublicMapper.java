@@ -1,5 +1,6 @@
 package com.project.tour.mapper.guest;
 
+import com.project.tour.dto.guest.PortInfoRecord; // Import record cảng mới tạo
 import com.project.tour.dto.guest.PublicTourDetailResponse;
 import com.project.tour.dto.guest.PublicTourSummaryResponse;
 import com.project.tour.model.admin.Cruise;
@@ -21,7 +22,21 @@ import java.util.UUID;
 
 public class TourPublicMapper {
 
-        // 1. Map danh sách tóm tắt cho trang chủ
+        // Helper chuyển đổi entity Port sang PortInfoRecord
+        // Helper chuyển đổi entity Port sang PortInfoRecord
+        private static PortInfoRecord toPortRecord(Port port) {
+            if (port == null) return null;
+            return new PortInfoRecord(
+                    port.getId(),
+                    port.getName(),
+                    port.getId().toString(), // Dùng ID hoặc truyền tạm chuỗi rỗng/null nếu không dùng mã code
+                    port.getCity(),
+                    port.getCountry(),
+                    port.getAddress()        // Dùng getAddress() đúng với entity Port của bạn
+            );
+        }
+
+        // 1. Map danh sách tóm tắt cho trang chủ (Đã bổ sung Cảng đi & Cảng đến)
         public static PublicTourSummaryResponse toSummaryResponse(
                         Tour tour,
                         BigDecimal startingPrice) {
@@ -37,6 +52,10 @@ public class TourPublicMapper {
                                 ? tour.getCruise().getImageUrl()
                                 : null;
 
+                // Lấy thông tin cảng đi và cảng đến từ helper của Tour
+                PortInfoRecord departurePortRecord = toPortRecord(tour.getDeparturePort());
+                PortInfoRecord arrivalPortRecord = toPortRecord(tour.getArrivalPort());
+
                 return new PublicTourSummaryResponse(
                                 tour.getId(),
                                 tour.getCode(),
@@ -50,10 +69,13 @@ public class TourPublicMapper {
                                 tour.getStatusTrip(),
                                 tour.getBookingStart(),
                                 tour.getBookingEnd(),
-                                startingPrice);
+                                startingPrice,
+                                departurePortRecord, // Bổ sung
+                                arrivalPortRecord // Bổ sung
+                );
         }
 
-        // 2. Map chi tiết đầy đủ cho trang product page
+        // 2. Map chi tiết đầy đủ cho trang product page (Đã bổ sung Cảng đi & Cảng đến)
         public static PublicTourDetailResponse toDetailResponse(
                         Tour tour,
                         List<Schedule> schedules,
@@ -81,17 +103,19 @@ public class TourPublicMapper {
                                                 cruise.getImageUrl())
                                 : null;
 
+                // Lấy thông tin cảng đi và cảng đến cho chi tiết tour
+                PortInfoRecord departurePortRecord = toPortRecord(tour.getDeparturePort());
+                PortInfoRecord arrivalPortRecord = toPortRecord(tour.getArrivalPort());
+
                 // Schedules & Stops & Visit Activities
                 List<PublicTourDetailResponse.ScheduleDetailRecord> scheduleRecords = schedules.stream()
                                 .map(schedule -> {
-
                                         List<ScheduleStop> stops = scheduleIdToStopsMap.getOrDefault(
                                                         schedule.getId(),
                                                         List.of());
 
                                         List<PublicTourDetailResponse.ScheduleStopRecord> stopRecords = stops.stream()
                                                         .map(stop -> {
-
                                                                 VisitTour visit = stopIdToVisitMap.get(stop.getId());
 
                                                                 PublicTourDetailResponse.VisitActivityRecord visitRecord = visit != null
@@ -146,7 +170,6 @@ public class TourPublicMapper {
                                                         benefit.getDiscountPercent()))
                                         .toList();
 
-                        // Lấy capacity trực tiếp từ RoomType liên kết với TourPackage
                         Integer roomCapacity = (pkg.getRoomType() != null)
                                         ? pkg.getRoomType().getCapacity()
                                         : 2;
@@ -176,49 +199,31 @@ public class TourPublicMapper {
                 // Products
                 List<PublicTourDetailResponse.ProductRecord> productRecords = products.stream()
                                 .map(productTour -> {
-
                                         var product = productTour.getProduct();
 
                                         return new PublicTourDetailResponse.ProductRecord(
                                                         productTour.getId(),
-                                                        product != null
-                                                                        ? product.getName()
-                                                                        : null,
-                                                        product != null
-                                                                        ? product.getDescription()
-                                                                        : null,
-                                                        product != null
-                                                                        ? product.getPrice()
-                                                                        : null,
+                                                        product != null ? product.getName() : null,
+                                                        product != null ? product.getDescription() : null,
+                                                        product != null ? product.getPrice() : null,
                                                         productTour.getQuantity(),
-                                                        product != null
-                                                                        ? product.getImageUrl()
-                                                                        : null);
+                                                        product != null ? product.getImageUrl() : null);
                                 })
                                 .toList();
 
                 // Services
                 List<PublicTourDetailResponse.ServiceRecord> serviceRecords = services.stream()
                                 .map(serviceTour -> {
-
                                         var service = serviceTour.getService();
 
                                         return new PublicTourDetailResponse.ServiceRecord(
                                                         serviceTour.getId(),
-                                                        service != null
-                                                                        ? service.getName()
-                                                                        : null,
-                                                        service != null
-                                                                        ? service.getDescription()
-                                                                        : null,
-                                                        service != null
-                                                                        ? service.getPrice()
-                                                                        : null,
+                                                        service != null ? service.getName() : null,
+                                                        service != null ? service.getDescription() : null,
+                                                        service != null ? service.getPrice() : null,
                                                         serviceTour.getMaxPassengers(),
                                                         serviceTour.getDurationMinutes(),
-                                                        service != null
-                                                                        ? service.getImageUrl()
-                                                                        : null);
+                                                        service != null ? service.getImageUrl() : null);
                                 })
                                 .toList();
 
@@ -232,6 +237,8 @@ public class TourPublicMapper {
                                 tour.getStatusBooking(),
                                 tour.getBookingStart(),
                                 tour.getBookingEnd(),
+                                departurePortRecord, // Bổ sung
+                                arrivalPortRecord, // Bổ sung
                                 cruiseRecord,
                                 scheduleRecords,
                                 packageRecords,

@@ -51,7 +51,7 @@ import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModelF
 fun NavGraphBuilder.passengerGraph(
     navController: NavHostController,
     authViewModel: AuthViewModel,
-    tokenManager: TokenManager, 
+    tokenManager: TokenManager,
     chatRepository: ChatRepository
 ) {
 

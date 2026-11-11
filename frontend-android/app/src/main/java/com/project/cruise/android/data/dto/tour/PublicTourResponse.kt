@@ -2,6 +2,16 @@ package com.project.cruise.android.data.dto.tour
 
 import java.math.BigDecimal
 
+// --- 1. Tạo mới data class PortInfoResponse để hứng dữ liệu cảng ---
+data class PortInfoResponse(
+    val id: String,
+    val name: String?,
+    val code: String?,
+    val city: String?,
+    val country: String?,
+    val address: String?
+)
+
 data class PublicTourSummaryResponse(
     val id: String,
     val code: String?,
@@ -15,7 +25,9 @@ data class PublicTourSummaryResponse(
     val statusTrip: TourStatusTrip?,
     val bookingStart: String?,
     val bookingEnd: String?,
-    val startingPrice: BigDecimal?
+    val startingPrice: BigDecimal?,
+    val departurePort: PortInfoResponse?, // <-- Bổ sung cảng đi / check-in
+    val arrivalPort: PortInfoResponse?    // <-- Bổ sung cảng đến
 )
 
 data class PublicTourDetailResponse(
@@ -28,6 +40,8 @@ data class PublicTourDetailResponse(
     val statusBooking: TourBookingStatus?,
     val bookingStart: String?,
     val bookingEnd: String?,
+    val departurePort: PortInfoResponse?, // <-- Bổ sung cảng đi cho trang chi tiết
+    val arrivalPort: PortInfoResponse?,   // <-- Bổ sung cảng đến cho trang chi tiết
     val cruise: CruiseDetailRecord?,
     val schedules: List<ScheduleDetailRecord>?,
     val packages: List<TourPackageRecord>?,

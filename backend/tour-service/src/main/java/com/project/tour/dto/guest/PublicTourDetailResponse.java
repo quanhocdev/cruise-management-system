@@ -18,6 +18,9 @@ public record PublicTourDetailResponse(
                 LocalDateTime bookingStart,
                 LocalDateTime bookingEnd,
 
+                PortInfoRecord departurePort,
+                PortInfoRecord arrivalPort,
+
                 // 1. Thông tin du thuyền
                 CruiseDetailRecord cruise,
 

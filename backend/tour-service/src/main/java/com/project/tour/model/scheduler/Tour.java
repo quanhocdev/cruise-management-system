@@ -3,9 +3,8 @@ package com.project.tour.model.scheduler;
 import com.project.tour.model.admin.Cruise;
 import com.project.tour.model.enums.tour.TourBookingStatus;
 import com.project.tour.model.enums.tour.TourStatusTrip;
-
+import com.project.tour.model.admin.Port;
 import jakarta.persistence.*;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -196,5 +195,13 @@ public class Tour {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public Port getDeparturePort() {
+        return (this.tourRoute != null) ? this.tourRoute.getDeparturePort() : null;
+    }
+
+    public Port getArrivalPort() {
+        return (this.tourRoute != null) ? this.tourRoute.getDestinationPort() : null;
     }
 }

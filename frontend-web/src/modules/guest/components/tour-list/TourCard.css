@@ -206,3 +206,24 @@
     transform: none;
   }
 }
+@media (prefers-reduced-motion: reduce) {
+  .tour-card,
+  .tour-card__cta {
+    transition: none;
+  }
+  .tour-card:hover {
+    transform: none;
+  }
+}
+
+/* --- BỔ SUNG CSS CHO CẢNG CHECK-IN TRÊN TOUR CARD --- */
+.tour-card__port {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--td-accent, #12808a) !important;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 60%;
+}
