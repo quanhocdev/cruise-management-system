@@ -1,3 +1,4 @@
+// src/modules/chat/services/chatSocketService.js
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 

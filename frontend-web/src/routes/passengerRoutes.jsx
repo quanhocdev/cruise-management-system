@@ -1,5 +1,3 @@
-// src/routes/passengerRoutes.jsx
-
 import { Navigate, Route } from "react-router-dom";
 
 import ProtectedRoute from "../components/auth/ProtectedRoute";
@@ -10,6 +8,7 @@ import PassengerBookingDetail from "../modules/passenger/pages/BookingDetail";
 import PassengerBooking from "../modules/passenger/pages/PassengerBooking";
 import PaymentResultPage from "../modules/passenger/pages/PaymentResultPage";
 import PassengerMessages from "../modules/passenger/pages/PassengerMessages";
+import PassengerFeedback from "../modules/passenger/pages/PassengerFeedback";
 
 const passengerRoutes = (
   <Route
@@ -27,6 +26,9 @@ const passengerRoutes = (
 
     {/* Chat với các phòng ban */}
     <Route path="messages" element={<PassengerMessages />} />
+
+    {/* Đánh giá trải nghiệm */}
+    <Route path="feedback" element={<PassengerFeedback />} />
 
     <Route path="dashboard" element={<Navigate to="/tours" replace />} />
 

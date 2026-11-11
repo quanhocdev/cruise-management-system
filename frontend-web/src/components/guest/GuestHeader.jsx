@@ -122,13 +122,23 @@ export default function GuestHeader() {
 
                   <Dropdown.Menu className="shadow border-0 py-2 rounded-3 mt-2">
                     {user.role === "PASSENGER" && (
-                      <Dropdown.Item
-                        as={Link}
-                        to="/passenger/bookings"
-                        className="py-2 small fw-medium"
-                      >
-                        🎫 Tour đã đặt của tôi
-                      </Dropdown.Item>
+                      <>
+                        <Dropdown.Item
+                          as={Link}
+                          to="/passenger/bookings"
+                          className="py-2 small fw-medium"
+                        >
+                          🎫 Tour đã đặt của tôi
+                        </Dropdown.Item>
+
+                        <Dropdown.Item
+                          as={Link}
+                          to="/passenger/feedback"
+                          className="py-2 small fw-medium"
+                        >
+                          ⭐ Đánh giá của tôi
+                        </Dropdown.Item>
+                      </>
                     )}
 
                     <Dropdown.Item

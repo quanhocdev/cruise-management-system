@@ -1,0 +1,50 @@
+.feedback-form__target {
+  padding: 12px 14px;
+  margin-bottom: 22px;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.feedback-form__label {
+  margin-bottom: 4px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.feedback-form__name {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.feedback-form__stars {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.feedback-form__star {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #cbd5e1;
+  font-size: 34px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.feedback-form__star.selected {
+  color: #f59e0b;
+}
+
+.feedback-form__rating-text {
+  margin-top: 8px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.feedback-form__character-count {
+  margin-top: 5px;
+  color: #94a3b8;
+  font-size: 12px;
+  text-align: right;
+}
