@@ -15,7 +15,7 @@ public class WeatherCacheConfig {
     public Cache<String, WeatherResponse> weatherCache() {
         return Caffeine.newBuilder()
                 .maximumSize(50)
-                .expireAfterWrite(Duration.ofMinutes(1))
+                .expireAfterWrite(Duration.ofDays(1))
                 .build();
     }
 }

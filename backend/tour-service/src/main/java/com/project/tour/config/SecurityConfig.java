@@ -121,6 +121,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/passengers/**")
                         .hasRole("PASSENGER")
 
+                        .requestMatchers("/api/vessel-tracking/**")
+                        .authenticated()
+
                         // Internal service-to-service endpoints
                         .requestMatchers("/internal/**")
                         .hasAuthority("SCOPE_tour.read")

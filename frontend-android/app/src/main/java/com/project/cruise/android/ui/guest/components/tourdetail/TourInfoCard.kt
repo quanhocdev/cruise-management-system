@@ -12,7 +12,6 @@ import com.project.cruise.android.data.dto.tour.PortInfoResponse
 import com.project.cruise.android.ui.common.PassengerCard
 import com.project.cruise.android.ui.common.PassengerGlyph
 import com.project.cruise.android.ui.common.PassengerIcon
-import com.project.cruise.android.ui.components.*
 import com.project.cruise.android.ui.theme.*
 
 @Composable

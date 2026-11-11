@@ -33,7 +33,7 @@ spring:
             - id: notification-service
               uri: ${NOTIFICATION_SERVICE_URL:http://notification-service:8086}
               predicates:
-                - Path=/api/v1/notifications/**
+                - Path=/api/v1/notifications/**,/api/passenger/notifications/**
 
             # NOTIFICATION SERVICE - SOCKJS HTTP
             - id: notification-sockjs
@@ -60,6 +60,12 @@ spring:
               uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
               predicates:
                 - Path=/api/admin/**
+
+            # VESSEL TRACKING SERVICE (GPS Real-time)
+            - id: vessel-tracking-service
+              uri: ${TOUR_SERVICE_URL:http://tour-service:8088}
+              predicates:
+                - Path=/api/vessel-tracking/**
 
             # TOUR SERVICE - SCHEDULER
             - id: tour-scheduler-service
