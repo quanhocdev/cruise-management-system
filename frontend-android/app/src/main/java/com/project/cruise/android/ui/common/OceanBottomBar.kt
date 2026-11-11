@@ -21,17 +21,21 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.background
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Notifications
 import com.project.cruise.android.ui.theme.*
 
 @Composable
 fun OceanBottomBar(
     isLoggedIn: Boolean,
     currentRoute: String,
+    unreadCount: Long = 0L,
     onHomeClick: () -> Unit,
     onLoginClick: () -> Unit,
     onUserClick: () -> Unit,
     onMyBookingsClick: () -> Unit,
     onMessagesClick: () -> Unit,
+    onNotificationClick: () -> Unit,
 ) {
     OceanTheme {
         Surface(
@@ -44,32 +48,39 @@ fun OceanBottomBar(
         ) {
             Row(Modifier.padding(8.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 NavItem(
-                    "Khám phá",
-                    PassengerGlyph.EXPLORE,
-                    currentRoute == "passenger_tours",
-                    Modifier.weight(1f),
-                    onHomeClick,
+                    label = "Khám phá",
+                    glyph = PassengerGlyph.EXPLORE,
+                    isSelected = currentRoute == "passenger_tours",
+                    modifier = Modifier.weight(1f),
+                    onClick = onHomeClick,
                 )
                 NavItem(
-                    "Chuyến đi",
-                    PassengerGlyph.TICKET,
-                    currentRoute == "passenger_bookings",
-                    Modifier.weight(1f),
-                    if (isLoggedIn) onMyBookingsClick else onLoginClick,
+                    label = "Chuyến đi",
+                    glyph = PassengerGlyph.TICKET,
+                    isSelected = currentRoute == "passenger_bookings",
+                    modifier = Modifier.weight(1f),
+                    onClick = if (isLoggedIn) onMyBookingsClick else onLoginClick,
                 )
                 NavItem(
-                    "Tin nhắn",
-                    PassengerGlyph.MESSAGE,
-                    currentRoute == "passenger_messages",
-                    Modifier.weight(1f),
-                    if (isLoggedIn) onMessagesClick else onLoginClick,
+                    label = "Tin nhắn",
+                    glyph = PassengerGlyph.MESSAGE,
+                    isSelected = currentRoute == "passenger_messages",
+                    modifier = Modifier.weight(1f),
+                    onClick = if (isLoggedIn) onMessagesClick else onLoginClick,
+                )
+                NavNotificationItem(
+                    label = "Thông báo",
+                    unreadCount = unreadCount,
+                    isSelected = currentRoute == "passenger_notifications",
+                    modifier = Modifier.weight(1f),
+                    onClick = if (isLoggedIn) onNotificationClick else onLoginClick,
                 )
                 NavItem(
-                    if (isLoggedIn) "Tài khoản" else "Đăng nhập",
-                    PassengerGlyph.PERSON,
-                    currentRoute == "passenger_profile",
-                    Modifier.weight(1f),
-                    if (isLoggedIn) onUserClick else onLoginClick,
+                    label = if (isLoggedIn) "Tài khoản" else "Đăng nhập",
+                    glyph = PassengerGlyph.PERSON,
+                    isSelected = currentRoute == "passenger_profile",
+                    modifier = Modifier.weight(1f),
+                    onClick = if (isLoggedIn) onUserClick else onLoginClick,
                 )
             }
         }
@@ -84,18 +95,15 @@ private fun NavItem(
     modifier: Modifier,
     onClick: () -> Unit,
 ) {
-    val background by
-    animateColorAsState(
+    val background by animateColorAsState(
         if (isSelected) OceanMint.copy(alpha = .20f) else Color.Transparent,
         label = "navBackground",
     )
-    val tint by
-    animateColorAsState(
+    val tint by animateColorAsState(
         if (isSelected) OceanMint else Color.White.copy(alpha = .75f),
         label = "navTint",
     )
-    val iconScale by
-    animateFloatAsState(
+    val iconScale by animateFloatAsState(
         targetValue = if (isSelected) 1.12f else 1f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
         label = "navIconScale",
@@ -118,6 +126,74 @@ private fun NavItem(
             }
         ) {
             PassengerIcon(glyph, tint)
+        }
+        Text(
+            label,
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+            color = tint,
+            maxLines = 1,
+        )
+    }
+}
+
+@Composable
+private fun NavNotificationItem(
+    label: String,
+    unreadCount: Long,
+    isSelected: Boolean,
+    modifier: Modifier,
+    onClick: () -> Unit,
+) {
+    val background by animateColorAsState(
+        if (isSelected) OceanMint.copy(alpha = .20f) else Color.Transparent,
+        label = "notifNavBackground",
+    )
+    val tint by animateColorAsState(
+        if (isSelected) OceanMint else Color.White.copy(alpha = .75f),
+        label = "notifNavTint",
+    )
+    val iconScale by animateFloatAsState(
+        targetValue = if (isSelected) 1.12f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "notifIconScale",
+    )
+
+    Column(
+        modifier
+            .clip(RoundedCornerShape(20.dp))
+            .background(background)
+            .semantics { selected = isSelected }
+            .clickable(role = Role.Tab, onClick = onClick)
+            .padding(vertical = 12.dp, horizontal = 2.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(5.dp),
+    ) {
+        Box(
+            modifier = Modifier.graphicsLayer {
+                scaleX = iconScale
+                scaleY = iconScale
+            },
+            contentAlignment = Alignment.TopEnd
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Notifications,
+                contentDescription = label,
+                tint = tint,
+                modifier = Modifier.size(24.dp)
+            )
+            if (unreadCount > 0) {
+                Badge(
+                    containerColor = Color.Red,
+                    contentColor = Color.White,
+                    modifier = Modifier.offset(x = 8.dp, y = (-4).dp)
+                ) {
+                    Text(
+                        text = if (unreadCount > 99) "99+" else unreadCount.toString(),
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+            }
         }
         Text(
             label,
