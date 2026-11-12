@@ -25,6 +25,7 @@ fun TourPublicScreen(
     onMyBookingsClick: () -> Unit,
     onMessagesClick: () -> Unit,
     onNotificationClick: () -> Unit = {},
+    onVesselTrackingClick: () -> Unit = {},
     unreadCount: Long = 0L,
     onHomeClick: () -> Unit = {},
 ) {
@@ -49,6 +50,7 @@ fun TourPublicScreen(
                     onMyBookingsClick = onMyBookingsClick,
                     onMessagesClick = onMessagesClick,
                     onNotificationClick = onNotificationClick,
+                    onVesselTrackingClick = onVesselTrackingClick,
                 )
             },
         )

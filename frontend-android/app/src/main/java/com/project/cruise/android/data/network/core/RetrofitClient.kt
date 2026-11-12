@@ -1,6 +1,7 @@
 package com.project.cruise.android.data.network.core
 
 import com.project.cruise.android.data.auth.TokenManager
+import com.project.cruise.android.data.network.VesselTrackingApi
 import com.project.cruise.android.data.network.core.TokenAuthenticator
 import com.project.cruise.android.data.network.api.AuthApiService
 import com.project.cruise.android.data.network.api.BookingApiService
@@ -78,6 +79,9 @@ object RetrofitClient {
 
     fun createConvenienceApiService(tokenManager: TokenManager): ConvenienceApiService =
         createService(tokenManager, ConvenienceApiService::class.java)
+
+    fun createVesselTrackingApiService(tokenManager: TokenManager): VesselTrackingApi =
+        createService(tokenManager, VesselTrackingApi::class.java)
 
     fun createFeedbackApiService(tokenManager: TokenManager): FeedbackApiService =
         createService(tokenManager, FeedbackApiService::class.java)

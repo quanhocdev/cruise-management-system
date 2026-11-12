@@ -13,8 +13,9 @@ fun ProfileScreen(
     onHomeClick: () -> Unit,
     onMyBookingsClick: () -> Unit,
     onMessagesClick: () -> Unit,
-    onNotificationClick: () -> Unit = {}, // Thêm callback thông báo
-    unreadCount: Long = 0L,              // Thêm số lượng chưa đọc
+    onNotificationClick: () -> Unit = {},
+    onVesselTrackingClick: () -> Unit = {}, // <--- Thêm callback giám sát
+    unreadCount: Long = 0L,
     onLogout: () -> Unit,
 ) {
     val state by authViewModel.meState.collectAsState()
@@ -25,6 +26,7 @@ fun ProfileScreen(
         onMyBookingsClick = onMyBookingsClick,
         onMessagesClick = onMessagesClick,
         onNotificationClick = onNotificationClick,
+        onVesselTrackingClick = onVesselTrackingClick, // <--- Truyền xuống Content
         unreadCount = unreadCount,
         onLogout = { authViewModel.logout(onLogout) },
         onRetry = { authViewModel.getCurrentUser() },
@@ -38,6 +40,7 @@ fun ProfileContent(
     onMyBookingsClick: () -> Unit,
     onMessagesClick: () -> Unit,
     onNotificationClick: () -> Unit,
+    onVesselTrackingClick: () -> Unit, // <--- Nhận callback giám sát
     unreadCount: Long,
     onLogout: () -> Unit,
     onRetry: () -> Unit,
@@ -54,10 +57,11 @@ fun ProfileContent(
                 unreadCount = unreadCount,
                 onHomeClick = onHomeClick,
                 onLoginClick = {},
-                onUserClick = {}, // Đang ở trang tài khoản rồi nên để trống
+                onUserClick = {},
                 onMyBookingsClick = onMyBookingsClick,
                 onMessagesClick = onMessagesClick,
                 onNotificationClick = onNotificationClick,
+                onVesselTrackingClick = onVesselTrackingClick, // <--- Gắn vào OceanBottomBar
             )
         },
     ) {

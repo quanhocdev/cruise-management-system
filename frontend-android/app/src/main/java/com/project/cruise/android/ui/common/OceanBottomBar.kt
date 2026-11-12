@@ -36,6 +36,7 @@ fun OceanBottomBar(
     onMyBookingsClick: () -> Unit,
     onMessagesClick: () -> Unit,
     onNotificationClick: () -> Unit,
+    onVesselTrackingClick: () -> Unit,
 ) {
     OceanTheme {
         Surface(
@@ -61,6 +62,16 @@ fun OceanBottomBar(
                     modifier = Modifier.weight(1f),
                     onClick = if (isLoggedIn) onMyBookingsClick else onLoginClick,
                 )
+
+                // --- ĐẶT ICON GIÁM SÁT NGAY CHÍNH GIỮA (VỊ TRÍ THỨ 3) ---
+                NavItem(
+                    label = "Giám sát",
+                    glyph = PassengerGlyph.COMPASS, // Hoặc thay bằng tên hằng số đúng có trong enum PassengerGlyph của bạn
+                    isSelected = currentRoute == "vessel_tracking",
+                    modifier = Modifier.weight(1f),
+                    onClick = if (isLoggedIn) onVesselTrackingClick else onLoginClick,
+                )
+
                 NavItem(
                     label = "Tin nhắn",
                     glyph = PassengerGlyph.MESSAGE,
@@ -158,7 +169,6 @@ private fun NavNotificationItem(
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
         label = "notifIconScale",
     )
-
     Column(
         modifier
             .clip(RoundedCornerShape(20.dp))
@@ -179,7 +189,7 @@ private fun NavNotificationItem(
             Icon(
                 imageVector = Icons.Filled.Notifications,
                 contentDescription = label,
-                tint = tint,
+                tint = tint, // <--- Đã xóa chữ "kotlin" thừa ở đây
                 modifier = Modifier.size(24.dp)
             )
             if (unreadCount > 0) {

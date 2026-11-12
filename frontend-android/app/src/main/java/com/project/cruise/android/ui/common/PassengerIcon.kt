@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
@@ -20,6 +22,8 @@ enum class PassengerGlyph {
     ARROW,
     BACK,
     EXIT,
+    MAP,      // Đã thêm biểu tượng MAP dùng cho icon Giám sát
+    COMPASS   // Đã thêm biểu tượng COMPASS la bàn tùy chọn
 }
 
 @Composable
@@ -37,31 +41,25 @@ fun PassengerIcon(
             drawRoundRect(
                 tint,
                 p(x, y),
-                androidx.compose.ui.geometry.Size(w * s, h * s),
-                androidx.compose.ui.geometry.CornerRadius(2 * s),
+                Size(w * s, h * s),
+                CornerRadius(2f * s),
                 style = Stroke(1.7f * s),
             )
         when (glyph) {
             PassengerGlyph.MESSAGE -> {
-                // Khung hội thoại
                 drawRoundRect(
                     color = tint,
                     topLeft = p(3f, 4f),
-                    size = androidx.compose.ui.geometry.Size(18f * s, 14f * s),
-                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(4f * s),
+                    size = Size(18f * s, 14f * s),
+                    cornerRadius = CornerRadius(4f * s),
                     style = Stroke(1.7f * s),
                 )
-
-                // Đuôi hội thoại
                 line(7f, 18f, 4f, 21f)
                 line(4f, 21f, 4f, 15f)
-
-                // Ba dấu chấm
                 drawCircle(tint, 1f * s, p(8f, 11f))
                 drawCircle(tint, 1f * s, p(12f, 11f))
                 drawCircle(tint, 1f * s, p(16f, 11f))
             }
-
             PassengerGlyph.SEARCH -> {
                 drawCircle(tint, 6.5f * s, p(10f, 10f), style = Stroke(1.7f * s))
                 line(15f, 15f, 21f, 21f)
@@ -74,7 +72,7 @@ fun PassengerIcon(
                     180f,
                     false,
                     p(4f, 12f),
-                    androidx.compose.ui.geometry.Size(16 * s, 16 * s),
+                    Size(16f * s, 16f * s),
                     style = Stroke(1.7f * s),
                 )
             }
@@ -111,16 +109,27 @@ fun PassengerIcon(
                 line(17f, 16f, 21f, 12f)
             }
             PassengerGlyph.EXPLORE -> {
-                drawCircle(tint, 9 * s, p(12f, 12f), style = Stroke(1.7f * s))
-                val path =
-                    Path().apply {
-                        moveTo(16 * s, 8 * s)
-                        lineTo(14 * s, 14 * s)
-                        lineTo(8 * s, 16 * s)
-                        lineTo(10 * s, 10 * s)
-                        close()
-                    }
+                drawCircle(tint, 9f * s, p(12f, 12f), style = Stroke(1.7f * s))
+                val path = Path().apply {
+                    moveTo(16f * s, 8f * s)
+                    lineTo(14f * s, 14f * s)
+                    lineTo(8f * s, 16f * s)
+                    lineTo(10f * s, 10f * s)
+                    close()
+                }
                 drawPath(path, tint, style = Stroke(1.7f * s))
+            }
+            PassengerGlyph.MAP -> {
+                // Vẽ biểu tượng bản đồ / định vị cho tính năng Giám sát tàu
+                box(3f, 4f, 18f, 16f)
+                line(8f, 4f, 8f, 20f)
+                line(16f, 4f, 16f, 20f)
+            }
+            PassengerGlyph.COMPASS -> {
+                // Vẽ biểu tượng la bàn thay thế tùy chọn
+                drawCircle(tint, 9f * s, p(12f, 12f), style = Stroke(1.7f * s))
+                line(12f, 7f, 12f, 17f)
+                line(7f, 12f, 17f, 12f)
             }
         }
     }

@@ -17,8 +17,9 @@ fun MyBookingsScreen(
     onBrowseTours: () -> Unit = onBack,
     onAccount: (() -> Unit)? = null,
     onMessagesClick: () -> Unit = {},
-    onNotificationClick: () -> Unit = {}, // Thêm tham số này
-    unreadCount: Long = 0L, // Thêm tham số nhận số lượng chưa đọc nếu có
+    onNotificationClick: () -> Unit = {},
+    onVesselTrackingClick: () -> Unit = {},
+    unreadCount: Long = 0L,
 ) {
     val state by viewModel.bookingListState.collectAsState()
     LaunchedEffect(Unit) { viewModel.fetchMyBookings() }
@@ -39,7 +40,8 @@ fun MyBookingsScreen(
                     onUserClick = onAccount,
                     onMyBookingsClick = {},
                     onMessagesClick = onMessagesClick,
-                    onNotificationClick = onNotificationClick // Truyền trực tiếp vào đây
+                    onNotificationClick = onNotificationClick,
+                    onVesselTrackingClick = onVesselTrackingClick
                 )
         },
     )
