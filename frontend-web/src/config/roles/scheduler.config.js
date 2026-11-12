@@ -1,4 +1,4 @@
-// src/layouts/schedulerConfig.js (hoặc file cấu hình tương ứng của bạn)
+// src/layouts/schedulerConfig.js
 import { LayoutDashboard, Map, Navigation, Ship } from "lucide-react";
 
 export const schedulerConfig = {
@@ -24,7 +24,7 @@ export const schedulerConfig = {
         {
           label: "Giám sát Tour",
           icon: Navigation,
-          path: "/scheduler/monitoring",
+          path: "/scheduler/vessels/monitoring",
         },
       ],
     },

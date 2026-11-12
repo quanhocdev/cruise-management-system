@@ -5,16 +5,15 @@ const vesselTrackingService = {
   // 1. Lấy danh sách tour Scheduler (Endpoint #4)
   getActiveTours: async (statuses) => {
     const params = statuses ? { statuses: statuses.join(",") } : {};
-    const response = await api.get("/scheduler/tours", { params });
+    const response = await api.get("/scheduler/tours/summary", { params });
     return response.data;
   },
 
   // 2. Lấy chi tiết tour kèm cảng, lịch trình, stops (Endpoint #5)
   getTourDetails: async (tourId) => {
-    const response = await api.get(`/scheduler/tours/${tourId}`);
+    const response = await api.get(`/scheduler/tours/${tourId}/details`); // <-- Lưu ý: nếu tour details bên Controller bạn để là /{tourId}/details thì cập nhật luôn ở đây cho khớp
     return response.data;
   },
-
   // 3. Lấy riêng tọa độ GPS real-time từ Redis (Endpoint #2)
   getVesselLocation: async (tourId) => {
     const response = await api.get(`/vessel-tracking/tours/${tourId}/location`);

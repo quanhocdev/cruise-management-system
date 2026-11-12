@@ -32,6 +32,19 @@ public class TourController {
                 this.schedulerTourService = schedulerTourService;
         }
 
+        // --- SCHEDULER DASHBOARD / TRACKING ENDPOINTS (Gộp từ SchedulerTourController)
+        // ---
+
+        @GetMapping("/summary")
+        public ResponseEntity<List<TourSummaryResponse>> getActiveTours(
+                        @RequestParam(required = false) List<String> statuses) {
+                return ResponseEntity.ok(schedulerTourService.getToursByStatuses(statuses));
+        }
+
+        @GetMapping("/{tourId}/details")
+        public ResponseEntity<TourDetailResponse> getTourDetails(@PathVariable UUID tourId) {
+                return ResponseEntity.ok(schedulerTourService.getTourDetailsWithTracking(tourId));
+        }
         // --- TOUR BASIC CRUD & WORKFLOW ---
 
         @PostMapping
@@ -83,17 +96,4 @@ public class TourController {
                 return ResponseEntity.ok(tourService.submitForApproval(id));
         }
 
-        // --- SCHEDULER DASHBOARD / TRACKING ENDPOINTS (Gộp từ SchedulerTourController)
-        // ---
-
-        @GetMapping("/summary")
-        public ResponseEntity<List<TourSummaryResponse>> getActiveTours(
-                        @RequestParam(required = false) List<String> statuses) {
-                return ResponseEntity.ok(schedulerTourService.getToursByStatuses(statuses));
-        }
-
-        @GetMapping("/{tourId}/details")
-        public ResponseEntity<TourDetailResponse> getTourDetails(@PathVariable UUID tourId) {
-                return ResponseEntity.ok(schedulerTourService.getTourDetailsWithTracking(tourId));
-        }
 }

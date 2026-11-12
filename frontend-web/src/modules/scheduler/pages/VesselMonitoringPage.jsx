@@ -12,6 +12,7 @@ import VesselDetailModal from "./VesselDetailModal";
 import "../styles/VesselMonitoringPage.css";
 
 export default function VesselMonitoringPage() {
+  console.log("VESSEL MONITORING PAGE RENDERED!");
   const { tours, loading, error, loadActiveTours } = useVesselTours();
   const [selectedTourId, setSelectedTourId] = useState(null);
 
