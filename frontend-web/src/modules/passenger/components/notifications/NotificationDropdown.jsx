@@ -1,5 +1,4 @@
-import { Bell, CheckCheck, RefreshCw, X } from "react-bootstrap-icons";
-
+import { Bell, CheckAll, ArrowRepeat, X } from "react-bootstrap-icons";
 import "./NotificationDropdown.css";
 
 const getNotificationIcon = (type) => {
@@ -52,7 +51,7 @@ const NotificationDropdown = ({
 
         <div className="notification-dropdown__actions">
           <button type="button" title="Làm mới" onClick={onRefresh}>
-            <RefreshCw size={16} />
+            <ArrowRepeat size={16} /> {/* Đổi RefreshCw thành ArrowRepeat */}
           </button>
 
           <button type="button" title="Đóng" onClick={onClose}>
@@ -64,7 +63,7 @@ const NotificationDropdown = ({
       {unreadCount > 0 && (
         <div className="notification-dropdown__toolbar">
           <button type="button" onClick={onMarkAllAsRead}>
-            <CheckCheck size={15} />
+            <CheckAll size={15} />
             Đánh dấu tất cả đã đọc
           </button>
         </div>

@@ -71,7 +71,7 @@ fun NavGraphBuilder.passengerGraph(
                 navController.navigate(Routes.PASSENGER_MESSAGES)
             },
             onVesselTrackingClick = {
-                navController.navigate(Routes.VESSEL_TRACKING) 
+                navController.navigate(Routes.VESSEL_TRACKING)
             },
 
             onLogout = {
@@ -168,7 +168,7 @@ fun NavGraphBuilder.passengerGraph(
 
         // 1. Tạo Retrofit API service cho Vessel Tracking
         val vesselApi = remember(tokenManager) {
-            RetrofitClient.createVesselTrackingApiService(tokenManager) // Hoặc hàm khởi tạo tương ứng trong RetrofitClient của bạn
+            RetrofitClient.createVesselTrackingApiService(tokenManager)
         }
 
         // 2. Khởi tạo ViewModel cho Tracking

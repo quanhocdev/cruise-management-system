@@ -476,36 +476,36 @@ services:
   # ==========================
   # Feedback Service
   # ==========================
-  # feedback-service:
-  #   build:
-  #     context: ./backend
-  #     dockerfile: feedback-service/Dockerfile.dev
-  #   container_name: feedback-service
-  #   restart: always
-  #   ports:
-  #     - "8089:8089"
-  #   working_dir: /app/feedback-service
-  #   volumes:
-  #     - ./backend/feedback-service/src:/app/feedback-service/src
-  #     - ./backend/common/src:/app/common/src
-  #     - /app/feedback-service/target
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-feedback:5432/feedback_service_db
-  #     SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
-  #     SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-  #     BOOKING_SERVICE_URL: http://booking-service:8082
-  #     TOUR_SERVICE_URL: http://tour-service:8088
-  #   depends_on:
-  #     postgres-feedback:
-  #       condition: service_healthy
-  #     booking-service:
-  #       condition: service_started
-  #     tour-service:
-  #       condition: service_started
-  #     kafka:
-  #       condition: service_started
+  feedback-service:
+    build:
+      context: ./backend
+      dockerfile: feedback-service/Dockerfile.dev
+    container_name: feedback-service
+    restart: always
+    ports:
+      - "8089:8089"
+    working_dir: /app/feedback-service
+    volumes:
+      - ./backend/feedback-service/src:/app/feedback-service/src
+      - ./backend/common/src:/app/common/src
+      - /app/feedback-service/target
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-feedback:5432/feedback_service_db
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      BOOKING_SERVICE_URL: http://booking-service:8082
+      TOUR_SERVICE_URL: http://tour-service:8088
+    depends_on:
+      postgres-feedback:
+        condition: service_healthy
+      booking-service:
+        condition: service_started
+      tour-service:
+        condition: service_started
+      kafka:
+        condition: service_started
 
   # React Frontend
   frontend-web:

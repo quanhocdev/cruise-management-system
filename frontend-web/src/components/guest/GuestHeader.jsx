@@ -1,7 +1,5 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
 import {
   Container,
   Navbar,
@@ -24,7 +22,6 @@ import "../../styles/guest/GuestHeader.css";
 export default function GuestHeader() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  
 
   const [showLoginModal, setShowLoginModal] = useState(false);
 
@@ -56,32 +53,32 @@ export default function GuestHeader() {
     setShowLoginModal(true);
   };
   const handleNotificationClick = async (notification) => {
-  if (!notification) return;
+    if (!notification) return;
 
-  // Đánh dấu đã đọc trước khi điều hướng.
-  if (!notification.isRead) {
-    await markAsRead(notification.id);
-  }
+    // Đánh dấu đã đọc trước khi điều hướng.
+    if (!notification.isRead) {
+      await markAsRead(notification.id);
+    }
 
-  // Đóng dropdown thông báo sẽ được xử lý ở component Bell.
-  switch (notification.referenceType) {
-    case "FEEDBACK_INVITATION":
-      navigate("/passenger/feedback");
-      break;
+    // Đóng dropdown thông báo sẽ được xử lý ở component Bell.
+    switch (notification.referenceType) {
+      case "FEEDBACK_INVITATION":
+        navigate("/passenger/feedback");
+        break;
 
-    case "BOOKING":
-      if (notification.referenceId) {
-        navigate(`/passenger/bookings/${notification.referenceId}`);
-      } else {
-        navigate("/passenger/bookings");
-      }
-      break;
+      case "BOOKING":
+        if (notification.referenceId) {
+          navigate(`/passenger/bookings/${notification.referenceId}`);
+        } else {
+          navigate("/passenger/bookings");
+        }
+        break;
 
-    default:
-      // Chưa xác định màn hình đích thì không điều hướng.
-      break;
-  }
-};
+      default:
+        // Chưa xác định màn hình đích thì không điều hướng.
+        break;
+    }
+  };
 
   const handleGoToLogin = () => {
     setShowLoginModal(false);
@@ -155,14 +152,14 @@ export default function GuestHeader() {
                   {/* Chuông thông báo chỉ dành cho Passenger */}
                   {user.role === "PASSENGER" && (
                     <NotificationBell
-  notifications={notifications}
-  unreadCount={unreadCount}
-  loading={notificationLoading}
-  onMarkAsRead={markAsRead}
-  onMarkAllAsRead={markAllAsRead}
-  onRefresh={loadNotifications}
-  onNotificationClick={handleNotificationClick}
-/>
+                      notifications={notifications}
+                      unreadCount={unreadCount}
+                      loading={notificationLoading}
+                      onMarkAsRead={markAsRead}
+                      onMarkAllAsRead={markAllAsRead}
+                      onRefresh={loadNotifications}
+                      onNotificationClick={handleNotificationClick}
+                    />
                   )}
 
                   <Dropdown align="end">
