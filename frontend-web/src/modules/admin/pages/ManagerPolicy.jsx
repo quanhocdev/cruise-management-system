@@ -5,7 +5,6 @@ import { Alert, Button, Form, Spinner } from "react-bootstrap";
 
 import usePolicies from "../hooks/usePolicies";
 import useBookingPolicies from "../hooks/useBookingPolicies";
-import useCancelPolicies from "../hooks/useCancelPolicies";
 
 import PolicyTable from "../components/policy/PolicyTable";
 import PolicyFormModal from "../components/policy/PolicyFormModal";
@@ -14,10 +13,6 @@ import PolicyRuleModal from "../components/policy/PolicyRuleModal";
 import "../styles/ManagerPolicy.css";
 
 export default function ManagerPolicy() {
-  // =====================================================
-  // POLICY HOOK
-  // =====================================================
-
   const {
     policies,
     loading: policyLoading,
@@ -35,30 +30,14 @@ export default function ManagerPolicy() {
     loadPolicies,
   } = usePolicies();
 
-  // =====================================================
-  // FILTER
-  // =====================================================
-
   const [typeFilter, setTypeFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-
-  // =====================================================
-  // POLICY MODAL
-  // =====================================================
 
   const [showPolicyModal, setShowPolicyModal] = useState(false);
   const [editingPolicy, setEditingPolicy] = useState(null);
 
-  // =====================================================
-  // RULE MODAL
-  // =====================================================
-
   const [showRuleModal, setShowRuleModal] = useState(false);
   const [selectedPolicy, setSelectedPolicy] = useState(null);
-
-  // =====================================================
-  // BOOKING RULE HOOK
-  // =====================================================
 
   const {
     bookingPolicies,
@@ -75,47 +54,12 @@ export default function ManagerPolicy() {
     selectedPolicy?.type === "BOOKING" ? selectedPolicy.id : null,
   );
 
-  // =====================================================
-  // CANCEL RULE HOOK
-  // =====================================================
+  const ruleLoading = bookingLoading;
+  const ruleSaving = bookingSaving;
+  const ruleError = bookingError;
 
-  const {
-    cancelPolicies,
-
-    loading: cancelLoading,
-    saving: cancelSaving,
-
-    error: cancelError,
-
-    createCancelPolicy,
-    updateCancelPolicy,
-    deleteCancelPolicy,
-  } = useCancelPolicies(
-    selectedPolicy?.type === "CANCEL" ? selectedPolicy.id : null,
-  );
-
-  // =====================================================
-  // RULE LOADING / SAVING
-  // =====================================================
-
-  const ruleLoading =
-    selectedPolicy?.type === "BOOKING" ? bookingLoading : cancelLoading;
-
-  const ruleSaving =
-    selectedPolicy?.type === "BOOKING" ? bookingSaving : cancelSaving;
-
-  const ruleError =
-    selectedPolicy?.type === "BOOKING" ? bookingError : cancelError;
-
-  // =====================================================
   // COMBINED SAVING
-  // =====================================================
-
   const saving = policySaving || ruleSaving;
-
-  // =====================================================
-  // FILTER
-  // =====================================================
 
   const handleTypeFilterChange = (event) => {
     setTypeFilter(event.target.value);
@@ -125,25 +69,12 @@ export default function ManagerPolicy() {
     setStatusFilter(event.target.value);
   };
 
-  /*
-   * Filter được xử lý bởi BACKEND.
-   *
-   * Khi người dùng đổi filter:
-   * - UI đổi ngay lập tức
-   * - useEffect gọi API
-   * - Không cần await trong event handler
-   */
-
   useEffect(() => {
     loadPolicies({
       type: typeFilter || undefined,
       status: statusFilter || undefined,
     });
   }, [typeFilter, statusFilter, loadPolicies]);
-
-  // =====================================================
-  // CREATE POLICY
-  // =====================================================
 
   const handleOpenCreate = () => {
     setPolicyError("");
@@ -153,10 +84,6 @@ export default function ManagerPolicy() {
     setShowPolicyModal(true);
   };
 
-  // =====================================================
-  // EDIT POLICY
-  // =====================================================
-
   const handleOpenEdit = (policy) => {
     setPolicyError("");
     setPolicySuccess("");
@@ -164,10 +91,6 @@ export default function ManagerPolicy() {
     setEditingPolicy(policy);
     setShowPolicyModal(true);
   };
-
-  // =====================================================
-  // CLOSE POLICY MODAL
-  // =====================================================
 
   const handleClosePolicyModal = () => {
     if (policySaving) {
@@ -179,10 +102,6 @@ export default function ManagerPolicy() {
 
     setPolicyError("");
   };
-
-  // =====================================================
-  // CREATE / UPDATE POLICY
-  // =====================================================
 
   const handlePolicySubmit = async (data) => {
     let result;
@@ -197,24 +116,12 @@ export default function ManagerPolicy() {
       setShowPolicyModal(false);
       setEditingPolicy(null);
 
-      /*
-       * Không cần reload nếu usePolicies đã cập nhật state.
-       *
-       * Tuy nhiên sau CREATE/UPDATE có thể filter hiện tại
-       * không còn phù hợp.
-       *
-       * Reload lại theo filter hiện tại để backend quyết định.
-       */
       await loadPolicies({
         type: typeFilter || undefined,
         status: statusFilter || undefined,
       });
     }
   };
-
-  // =====================================================
-  // DELETE POLICY
-  // =====================================================
 
   const handleDelete = async (policy) => {
     const confirmed = window.confirm(
@@ -236,10 +143,6 @@ export default function ManagerPolicy() {
     }
   };
 
-  // =====================================================
-  // OPEN RULE MODAL
-  // =====================================================
-
   const handleOpenRules = (policy) => {
     setPolicyError("");
     setPolicySuccess("");
@@ -247,10 +150,6 @@ export default function ManagerPolicy() {
     setSelectedPolicy(policy);
     setShowRuleModal(true);
   };
-
-  // =====================================================
-  // CLOSE RULE MODAL
-  // =====================================================
 
   const handleCloseRuleModal = () => {
     if (ruleSaving) {
@@ -261,64 +160,20 @@ export default function ManagerPolicy() {
     setSelectedPolicy(null);
   };
 
-  // =====================================================
-  // CREATE BOOKING RULE
-  // =====================================================
-
   const handleCreateBookingRule = async (policyId, data) => {
     return await createBookingPolicy(data);
   };
-
-  // =====================================================
-  // UPDATE BOOKING RULE
-  // =====================================================
 
   const handleUpdateBookingRule = async (policyId, ruleId, data) => {
     return await updateBookingPolicy(ruleId, data);
   };
 
-  // =====================================================
-  // DELETE BOOKING RULE
-  // =====================================================
-
   const handleDeleteBookingRule = async (policyId, ruleId) => {
     return await deleteBookingPolicy(ruleId);
   };
 
-  // =====================================================
-  // CREATE CANCEL RULE
-  // =====================================================
-
-  const handleCreateCancelRule = async (policyId, data) => {
-    return await createCancelPolicy(data);
-  };
-
-  // =====================================================
-  // UPDATE CANCEL RULE
-  // =====================================================
-
-  const handleUpdateCancelRule = async (policyId, ruleId, data) => {
-    return await updateCancelPolicy(ruleId, data);
-  };
-
-  // =====================================================
-  // DELETE CANCEL RULE
-  // =====================================================
-
-  const handleDeleteCancelRule = async (policyId, ruleId) => {
-    return await deleteCancelPolicy(ruleId);
-  };
-
-  // =====================================================
-  // RENDER
-  // =====================================================
-
   return (
     <div className="manager-policy-page container-fluid py-4">
-      {/* =================================================
-          HEADER
-         ================================================= */}
-
       <div className="manager-policy-header">
         <div>
           <h2 className="manager-policy-title">Quản lý chính sách</h2>
@@ -333,10 +188,6 @@ export default function ManagerPolicy() {
         </Button>
       </div>
 
-      {/* =================================================
-          SUCCESS
-         ================================================= */}
-
       {policySuccess && (
         <Alert
           variant="success"
@@ -346,10 +197,6 @@ export default function ManagerPolicy() {
           {policySuccess}
         </Alert>
       )}
-
-      {/* =================================================
-          ERROR
-         ================================================= */}
 
       {(policyError || ruleError) && !showPolicyModal && !showRuleModal && (
         <Alert
@@ -364,10 +211,6 @@ export default function ManagerPolicy() {
             : policyError?.message || ruleError || "Có lỗi xảy ra."}
         </Alert>
       )}
-
-      {/* =================================================
-          FILTER
-         ================================================= */}
 
       <div className="manager-policy-filter-card">
         <div className="manager-policy-filter-header">
@@ -436,10 +279,6 @@ export default function ManagerPolicy() {
         onManageRules={handleOpenRules}
       />
 
-      {/* =================================================
-          POLICY FORM
-         ================================================= */}
-
       <PolicyFormModal
         show={showPolicyModal}
         saving={policySaving}
@@ -449,10 +288,6 @@ export default function ManagerPolicy() {
         onSubmit={handlePolicySubmit}
       />
 
-      {/* =================================================
-          RULE MODAL
-         ================================================= */}
-
       <PolicyRuleModal
         show={showRuleModal}
         policy={selectedPolicy}
@@ -460,14 +295,10 @@ export default function ManagerPolicy() {
         saving={ruleSaving}
         error={ruleError}
         bookingRules={bookingPolicies}
-        cancelRules={cancelPolicies}
         onClose={handleCloseRuleModal}
         onCreateBookingRule={handleCreateBookingRule}
         onUpdateBookingRule={handleUpdateBookingRule}
         onDeleteBookingRule={handleDeleteBookingRule}
-        onCreateCancelRule={handleCreateCancelRule}
-        onUpdateCancelRule={handleUpdateCancelRule}
-        onDeleteCancelRule={handleDeleteCancelRule}
       />
     </div>
   );
