@@ -10,6 +10,7 @@ import {
   Tabs,
   Tab,
 } from "react-bootstrap";
+
 import { usePublicTourDetail } from "../hooks/usePublicTours";
 import { useAuth } from "../../../context/AuthContext";
 
@@ -18,6 +19,7 @@ import TourBookingCard from "../components/tour-detail/TourBookingCard";
 import TourCruiseCard from "../components/tour-detail/TourCruiseCard";
 import TourScheduleTab from "../components/tour-detail/TourScheduleTab";
 import TourPackagesTab from "../components/tour-detail/TourPackagesTab";
+import TourAmenitiesTab from "../components/tour-detail/TourAmenitiesTab";
 import TourActivitiesTab from "../components/tour-detail/TourActivitiesTab";
 import LoginRequiredModal from "../components/tour-detail/LoginRequiredModal";
 
@@ -26,8 +28,10 @@ import "../styles/TourPublicDetail.css";
 export default function TourPublicDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+
   const { tour, loading, error } = usePublicTourDetail(id);
   const { user } = useAuth();
+
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   const handleBookingClick = () => {
@@ -35,6 +39,7 @@ export default function TourPublicDetail() {
       setShowLoginModal(true);
       return;
     }
+
     if (user.role === "PASSENGER") {
       navigate(`/passenger/bookings/new?tourId=${id}`);
     } else {
@@ -46,6 +51,7 @@ export default function TourPublicDetail() {
 
   const handleLogin = () => {
     setShowLoginModal(false);
+
     navigate("/login", {
       state: {
         from: {
@@ -69,6 +75,7 @@ export default function TourPublicDetail() {
     return (
       <Container className="py-5">
         <Alert variant="danger">{error}</Alert>
+
         <Button as={Link} to="/tours" variant="outline-primary">
           Quay lại danh sách tour
         </Button>
@@ -84,10 +91,11 @@ export default function TourPublicDetail() {
         <TourHeader tour={tour} />
 
         <Row className="g-4">
-          {/* Cột phải: đặt tour + du thuyền (hiện trước trên mobile) */}
+          {/* Cột phải: đặt tour + du thuyền */}
           <Col lg={4} className="order-1 order-lg-2">
             <aside className="tour-detail-aside">
               <TourBookingCard tour={tour} onBook={handleBookingClick} />
+
               <TourCruiseCard
                 cruise={tour.cruise}
                 maxPassengers={tour.maxPassengers}
@@ -106,11 +114,23 @@ export default function TourPublicDetail() {
                 <Tab eventKey="schedules" title="Lịch trình">
                   <TourScheduleTab schedules={tour.schedules} />
                 </Tab>
+
                 <Tab eventKey="packages" title="Gói tour & quyền lợi">
                   <TourPackagesTab packages={tour.packages} />
                 </Tab>
-                <Tab eventKey="onboard" title="Tiện ích & hoạt động">
-                  <TourActivitiesTab activities={tour.onboardActivities} />
+
+                <Tab eventKey="amenities" title="Tiện ích">
+                  <TourAmenitiesTab
+                    products={tour.products}
+                    services={tour.services}
+                  />
+                </Tab>
+
+                <Tab eventKey="activities" title="Hoạt động">
+                  <TourActivitiesTab
+                    onboardActivities={tour.onboardActivities}
+                    schedules={tour.schedules}
+                  />
                 </Tab>
               </Tabs>
             </div>
