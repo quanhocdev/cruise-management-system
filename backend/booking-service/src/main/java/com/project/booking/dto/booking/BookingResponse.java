@@ -2,22 +2,24 @@ package com.project.booking.dto.booking;
 
 import com.project.booking.model.enums.BookingStatus;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 public record BookingResponse(
-                Long id,
-                UUID createdByUserId,
-                UUID tourId,
-                UUID tourPackageId,
-                String bookingCode,
-                Integer numberPassengers,
-                String primaryContactName,
-                String primaryContactPhone,
-                BigDecimal totalAmount,
-                BookingStatus status,
-                List<BookingPassengerInfoResponse> bookingPassengers,
-                LocalDateTime createdAt,
-                LocalDateTime updatedAt) {
+        Long id,
+        UUID createdByUserId,
+        UUID tourId,
+        UUID tourPackageId,
+        String bookingCode,
+        Integer numberPassengers,
+        String primaryContactName,
+        String primaryContactPhone,
+        BigDecimal totalAmount,
+        BookingStatus status,
+        LocalDate departureDate,
+        List<BookingPassengerInfoResponse> bookingPassengers,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt) {
 }

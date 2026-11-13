@@ -65,6 +65,7 @@ export default function useBookingDetail(bookingId) {
     cancelling,
     error,
     success,
+    fetchBooking,
     cancelBooking,
     savePassenger,
   };
