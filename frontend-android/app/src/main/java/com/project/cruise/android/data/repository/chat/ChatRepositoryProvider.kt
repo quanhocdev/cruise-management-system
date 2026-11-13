@@ -2,9 +2,9 @@ package com.project.cruise.android.data.repository.chat
 
 import android.content.Context
 import com.project.cruise.android.data.auth.TokenManager
-import com.project.cruise.android.data.network.AppConfig
-import com.project.cruise.android.data.network.ChatSocketService
-import com.project.cruise.android.data.network.RetrofitClient
+import com.project.cruise.android.data.network.core.AppConfig
+import com.project.cruise.android.data.network.socket.ChatSocketService
+import com.project.cruise.android.data.network.core.RetrofitClient
 
 object ChatRepositoryProvider {
 

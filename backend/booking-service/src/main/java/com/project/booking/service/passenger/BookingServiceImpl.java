@@ -1,9 +1,7 @@
 package com.project.booking.service.passenger;
 
-import com.project.common.dto.UploadResult;
-import com.project.common.event.BookingConfirmedEvent;
-import com.project.common.event.BookingCreatedEvent;
-import com.project.common.service.file.FileStorageService;
+import com.project.booking.client.TourClient;
+import com.project.booking.client.TourPackageClient;
 import com.project.booking.dto.booking.*;
 import com.project.booking.dto.passenger.PassengerRequest;
 import com.project.booking.exception.AppException;
@@ -15,19 +13,27 @@ import com.project.booking.model.enums.BookingPassengerStatus;
 import com.project.booking.model.enums.BookingStatus;
 import com.project.booking.repository.BookingRepository;
 import com.project.booking.repository.PassengerRepository;
-import com.project.booking.service.redis.TourRedisService;
 import com.project.booking.repository.BookingPassengerRepository;
+import com.project.booking.service.redis.TourRedisService;
+
+import com.project.common.dto.UploadResult;
+import com.project.common.event.BookingConfirmedEvent;
+import com.project.common.event.BookingCreatedEvent;
+import com.project.common.service.file.FileStorageService;
+
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import com.project.booking.client.TourPackageClient;
 
 @Service
 @Transactional
@@ -43,15 +49,19 @@ public class BookingServiceImpl implements BookingService {
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final TourRedisService tourRedisService;
     private final TourPackageClient tourPackageClient;
+    private final TourClient tourClient;
 
-    public BookingServiceImpl(BookingRepository bookingRepository,
+    public BookingServiceImpl(
+            BookingRepository bookingRepository,
             PassengerRepository passengerRepository,
             BookingPassengerRepository bookingPassengerRepository,
             BookingMapper bookingMapper,
             FileStorageService fileStorageService,
             KafkaTemplate<String, Object> kafkaTemplate,
             TourRedisService tourRedisService,
-            TourPackageClient tourPackageClient) {
+            TourPackageClient tourPackageClient,
+            TourClient tourClient) {
+
         this.bookingRepository = bookingRepository;
         this.passengerRepository = passengerRepository;
         this.bookingPassengerRepository = bookingPassengerRepository;
@@ -60,20 +70,28 @@ public class BookingServiceImpl implements BookingService {
         this.kafkaTemplate = kafkaTemplate;
         this.tourRedisService = tourRedisService;
         this.tourPackageClient = tourPackageClient;
+        this.tourClient = tourClient;
     }
 
     @Override
-    public synchronized BookingResponse create(CreateBookingRequest request, UUID userId, String email) {
+    public synchronized BookingResponse create(
+            CreateBookingRequest request,
+            UUID userId,
+            String email) {
+
         try {
             System.out.println(">>> [SERVICE] Bắt đầu xử lý create booking theo kho phòng...");
 
             UUID packageId = UUID.fromString(request.getTourPackageId());
+            UUID tourId = UUID.fromString(request.getTourId());
+
             int requestedRooms = request.getNumberOfRooms() != null
                     ? request.getNumberOfRooms()
                     : 1;
+
             int passengerCount = request.getPassengers().size();
 
-            // 1. Lấy thông tin gói tour từ Tour service thông qua TourPackageClient
+            // 1. Lấy thông tin gói Tour
             TourPackageClient.BookingPackageInfo packageInfo = tourPackageClient.getBookingPackageInfo(packageId);
 
             Integer roomCapacity = packageInfo.roomCapacity();
@@ -85,7 +103,16 @@ public class BookingServiceImpl implements BookingService {
                         HttpStatus.BAD_REQUEST);
             }
 
-            // 2. Kiểm tra sức chứa hành khách
+            // 2. Lấy thông tin Tour
+            TourClient.TourInfo tourInfo = getTourInfo(tourId);
+
+            if (tourInfo == null) {
+                throw new AppException(
+                        "Không thể lấy thông tin Tour!",
+                        HttpStatus.BAD_GATEWAY);
+            }
+
+            // 3. Kiểm tra sức chứa hành khách
             int totalAllowedPassengers = roomCapacity * requestedRooms;
 
             if (passengerCount > totalAllowedPassengers) {
@@ -98,8 +125,10 @@ public class BookingServiceImpl implements BookingService {
                         HttpStatus.BAD_REQUEST);
             }
 
-            // 3. Trừ kho phòng đồng thời trên Redis qua Lua script
-            Long redisResult = tourRedisService.reservePackageRooms(packageId, requestedRooms);
+            // 4. Trừ kho phòng đồng thời trên Redis
+            Long redisResult = tourRedisService.reservePackageRooms(
+                    packageId,
+                    requestedRooms);
 
             if (redisResult == null || redisResult == -1) {
                 throw new AppException(
@@ -113,14 +142,16 @@ public class BookingServiceImpl implements BookingService {
                         HttpStatus.BAD_REQUEST);
             }
 
-            // 4. Tính tổng tiền = Giá gói * Số lượng phòng
-            BigDecimal totalAmount = packagePrice.multiply(BigDecimal.valueOf(requestedRooms));
+            // 5. Tính tổng tiền
+            BigDecimal totalAmount = packagePrice.multiply(
+                    BigDecimal.valueOf(requestedRooms));
 
-            // 5. Lưu thông tin Booking
+            // 6. Lưu Booking
             Booking booking = new Booking();
+
             booking.setCreatedByUserId(userId);
             booking.setPrimaryContactEmail(email);
-            booking.setTourId(UUID.fromString(request.getTourId()));
+            booking.setTourId(tourId);
             booking.setTourPackageId(packageId);
             booking.setBookingCode(generateBookingCode());
             booking.setNumberOfRooms(requestedRooms);
@@ -135,27 +166,32 @@ public class BookingServiceImpl implements BookingService {
             System.out.println(
                     ">>> [SERVICE] Đã lưu xong Booking ID: " + savedBooking.getId());
 
-            // 6. Lưu danh sách hành khách
-            for (int i = 0; i < request.getPassengers().size(); i++) {
-                PassengerRequest pReq = request.getPassengers().get(i);
+            // 7. Lưu danh sách hành khách
+            for (PassengerRequest pReq : request.getPassengers()) {
 
                 Passenger passenger = new Passenger();
+
                 passenger.setFullName(
                         pReq.getFullName() != null
                                 ? pReq.getFullName().trim()
                                 : null);
+
                 passenger.setDateOfBirth(pReq.getDateOfBirth());
+
                 passenger.setGender(
                         pReq.getGender() != null
                                 ? pReq.getGender().trim()
                                 : null);
+
                 passenger.setPhoneNumber(pReq.getPhoneNumber());
                 passenger.setEmail(pReq.getEmail());
                 passenger.setIdCardType(pReq.getIdCardType());
+
                 passenger.setIdentificationNumber(
                         pReq.getIdentificationNumber() != null
                                 ? pReq.getIdentificationNumber().trim()
                                 : null);
+
                 passenger.setDocumentNote(pReq.getDocumentNote());
 
                 if (pReq.getIdCardImage() != null
@@ -166,13 +202,13 @@ public class BookingServiceImpl implements BookingService {
                             "passengers");
 
                     passenger.setIdCardImageUrl(uploadResult.getUrl());
-                    passenger.setIdCardImagePublicId(
-                            uploadResult.getPublicId());
+                    passenger.setIdCardImagePublicId(uploadResult.getPublicId());
                 }
 
                 Passenger savedPassenger = passengerRepository.save(passenger);
 
                 BookingPassenger link = new BookingPassenger();
+
                 link.setBooking(savedBooking);
                 link.setPassenger(savedPassenger);
                 link.setStatus(BookingPassengerStatus.PENDING);
@@ -180,7 +216,7 @@ public class BookingServiceImpl implements BookingService {
                 bookingPassengerRepository.save(link);
             }
 
-            // 7. Bắn Kafka Event
+            // 8. Bắn Kafka Event
             BookingCreatedEvent event = new BookingCreatedEvent(
                     savedBooking.getId(),
                     userId,
@@ -199,11 +235,15 @@ public class BookingServiceImpl implements BookingService {
                     ">>> [KAFKA PRODUCER] Đã bắn event PENDING_PAYMENT cho Booking ID: "
                             + savedBooking.getId());
 
-            // 8. Lấy danh sách hành khách
+            // 9. Lấy danh sách hành khách
             List<BookingPassenger> links = bookingPassengerRepository
                     .findAllByBooking_IdOrderByIdAsc(savedBooking.getId());
 
-            return bookingMapper.toResponse(savedBooking, links);
+            // 10. Trả BookingResponse kèm thông tin Tour
+            return bookingMapper.toResponse(
+                    savedBooking,
+                    links,
+                    tourInfo);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -213,44 +253,91 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public BookingResponse get(Long id, UUID requesterId, boolean privileged) {
+    public BookingResponse get(
+            Long id,
+            UUID requesterId,
+            boolean privileged) {
+
         Booking booking = findBookingById(id);
-        if (!privileged && !Objects.equals(booking.getCreatedByUserId(), requesterId)) {
-            throw new AppException("You cannot access this booking", HttpStatus.FORBIDDEN);
+
+        if (!privileged
+                && !Objects.equals(booking.getCreatedByUserId(), requesterId)) {
+
+            throw new AppException(
+                    "You cannot access this booking",
+                    HttpStatus.FORBIDDEN);
         }
-        List<BookingPassenger> links = bookingPassengerRepository.findAllByBooking_IdOrderByIdAsc(booking.getId());
-        return bookingMapper.toResponse(booking, links);
+
+        List<BookingPassenger> links = bookingPassengerRepository
+                .findAllByBooking_IdOrderByIdAsc(booking.getId());
+
+        TourClient.TourInfo tourInfo = getTourInfo(booking.getTourId());
+
+        return bookingMapper.toResponse(
+                booking,
+                links,
+                tourInfo);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<BookingResponse> getMine(UUID userId) {
-        return bookingRepository.findAllByCreatedByUserIdOrderByCreatedAtDesc(userId)
-                .stream()
+
+        List<Booking> bookings = bookingRepository
+                .findAllByCreatedByUserIdOrderByCreatedAtDesc(userId);
+
+        // Cache TourInfo trong phạm vi request.
+        // Những booking cùng Tour chỉ gọi Tour Service một lần.
+        Map<UUID, TourClient.TourInfo> tourInfoMap = new HashMap<>();
+
+        return bookings.stream()
                 .map(booking -> {
+
                     List<BookingPassenger> links = bookingPassengerRepository
                             .findAllByBooking_IdOrderByIdAsc(booking.getId());
-                    return bookingMapper.toResponse(booking, links);
+
+                    TourClient.TourInfo tourInfo = tourInfoMap.computeIfAbsent(
+                            booking.getTourId(),
+                            this::getTourInfo);
+
+                    return bookingMapper.toResponse(
+                            booking,
+                            links,
+                            tourInfo);
                 })
                 .toList();
     }
 
     @Override
     public BookingResponse cancel(Long id, UUID userId) {
+
         Booking booking = findBookingById(id);
+
         if (!Objects.equals(booking.getCreatedByUserId(), userId)) {
-            throw new AppException("You cannot cancel this booking", HttpStatus.FORBIDDEN);
+            throw new AppException(
+                    "You cannot cancel this booking",
+                    HttpStatus.FORBIDDEN);
         }
 
         if (booking.getStatus() != BookingStatus.CONFIRMED) {
-            throw new AppException("Only CONFIRMED bookings can be cancelled", HttpStatus.CONFLICT);
+            throw new AppException(
+                    "Only CONFIRMED bookings can be cancelled",
+                    HttpStatus.CONFLICT);
         }
 
         booking.setStatus(BookingStatus.CANCELLED);
+
         Booking saved = bookingRepository.save(booking);
 
-        List<BookingPassenger> links = bookingPassengerRepository.findAllByBooking_IdOrderByIdAsc(saved.getId());
-        return bookingMapper.toResponse(saved, links);
+        List<BookingPassenger> links = bookingPassengerRepository
+                .findAllByBooking_IdOrderByIdAsc(saved.getId());
+
+        TourClient.TourInfo tourInfo = getTourInfo(saved.getTourId());
+
+        return bookingMapper.toResponse(
+                saved,
+                links,
+                tourInfo);
     }
 
     @Override
@@ -260,34 +347,72 @@ public class BookingServiceImpl implements BookingService {
 
     private Booking findBookingById(Long id) {
         return bookingRepository.findById(id)
-                .orElseThrow(() -> new AppException("Booking not found: " + id, HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new AppException(
+                        "Booking not found: " + id,
+                        HttpStatus.NOT_FOUND));
+    }
+
+    /**
+     * Lấy thông tin Tour từ Tour Service.
+     */
+    private TourClient.TourInfo getTourInfo(UUID tourId) {
+
+        if (tourId == null) {
+            throw new AppException(
+                    "Booking does not have a valid tour ID",
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        TourClient.TourInfo tourInfo = tourClient.getTourInfo(tourId);
+
+        if (tourInfo == null) {
+            throw new AppException(
+                    "Unable to retrieve tour information",
+                    HttpStatus.BAD_GATEWAY);
+        }
+
+        return tourInfo;
     }
 
     private String generateBookingCode() {
+
         for (int attempt = 0; attempt < 10; attempt++) {
-            String code = "BK-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+
+            String code = "BK-" + UUID.randomUUID()
+                    .toString()
+                    .substring(0, 8)
+                    .toUpperCase();
+
             if (!bookingRepository.existsByBookingCode(code)) {
                 return code;
             }
         }
-        throw new AppException("Cannot generate a unique booking code", HttpStatus.INTERNAL_SERVER_ERROR);
+
+        throw new AppException(
+                "Cannot generate a unique booking code",
+                HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Override
     @Transactional
     public void processPaymentSuccess(Long bookingId) {
+
         Booking booking = bookingRepository.findById(bookingId).orElse(null);
 
         if (booking == null) {
-            System.out.println(">>> [SERVICE] Không tìm thấy Booking ID: " + bookingId);
+            System.out.println(
+                    ">>> [SERVICE] Không tìm thấy Booking ID: " + bookingId);
             return;
         }
 
         if (booking.getStatus() == BookingStatus.PENDING_PAYMENT) {
+
             booking.setStatus(BookingStatus.CONFIRMED);
+
             Booking savedBooking = bookingRepository.save(booking);
 
-            System.out.println(">>> [SERVICE] Đã cập nhật đơn hàng #" + bookingId + " thành CONFIRMED.");
+            System.out.println(
+                    ">>> [SERVICE] Đã cập nhật đơn hàng #" + bookingId + " thành CONFIRMED.");
 
             BookingConfirmedEvent confirmedEvent = new BookingConfirmedEvent(
                     savedBooking.getId(),
@@ -298,11 +423,20 @@ public class BookingServiceImpl implements BookingService {
                     savedBooking.getNumberPassengers(),
                     savedBooking.getTotalAmount());
 
-            kafkaTemplate.send("booking-confirmed-topic", savedBooking.getBookingCode(), confirmedEvent);
+            kafkaTemplate.send(
+                    "booking-confirmed-topic",
+                    savedBooking.getBookingCode(),
+                    confirmedEvent);
+
             System.out.println(
-                    ">>> [KAFKA PRODUCER] Đã bắn event BookingConfirmedEvent cho mã: " + savedBooking.getBookingCode());
+                    ">>> [KAFKA PRODUCER] Đã bắn event BookingConfirmedEvent cho mã: "
+                            + savedBooking.getBookingCode());
+
         } else {
-            System.out.println(">>> [SERVICE] Đơn hàng #" + bookingId + " đã ở trạng thái: " + booking.getStatus());
+
+            System.out.println(
+                    ">>> [SERVICE] Đơn hàng #" + bookingId
+                            + " đã ở trạng thái: " + booking.getStatus());
         }
     }
 }

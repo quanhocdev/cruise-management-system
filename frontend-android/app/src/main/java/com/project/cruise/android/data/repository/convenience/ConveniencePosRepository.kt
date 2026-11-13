@@ -5,7 +5,7 @@ import com.project.cruise.android.data.auth.TokenManager
 import com.project.cruise.android.data.dto.pos.ConvenienceProductResponse
 import com.project.cruise.android.data.dto.pos.ConvenienceServiceResponse
 import com.project.cruise.android.data.local.CruiseDatabase
-import com.project.cruise.android.data.network.RetrofitClient
+import com.project.cruise.android.data.network.core.RetrofitClient
 
 class ConveniencePosRepository(context: Context) {
     private val appContext = context.applicationContext

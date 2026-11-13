@@ -8,7 +8,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.project.cruise.android.ui.components.passengerMoney
+import com.project.cruise.android.ui.common.passengerMoney
 import com.project.cruise.android.viewmodel.pos.*
 
 @Composable

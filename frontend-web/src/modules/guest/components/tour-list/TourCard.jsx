@@ -3,7 +3,6 @@ import { TRIP_STATUS, BOOKING_STATUS } from "./constants";
 import { formatDate, formatDateTime, formatCurrency } from "./formatters";
 import "./TourCard.css";
 
-// Hiện đúng mốc thời gian mà người xem quan tâm theo trạng thái vé
 const getBookingDeadline = (tour) => {
   switch (tour.statusBooking) {
     case "OPEN":
@@ -69,6 +68,15 @@ export default function TourCard({ tour }) {
               {formatDate(tour.startDate)} – {formatDate(tour.endDate)}
             </dd>
           </div>
+          {/* --- BỔ SUNG: Hiển thị cảng check-in khởi hành --- */}
+          {tour.departurePort && (
+            <div>
+              <dt>Check-in</dt>
+              <dd className="tour-card__port">
+                {tour.departurePort.name} ({tour.departurePort.city})
+              </dd>
+            </div>
+          )}
           <div>
             <dt>{deadline.label}</dt>
             <dd className={deadline.urgent ? "is-urgent" : ""}>

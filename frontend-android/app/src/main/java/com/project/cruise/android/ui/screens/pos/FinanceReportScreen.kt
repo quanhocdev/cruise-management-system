@@ -8,6 +8,14 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.project.cruise.android.ui.common.PassengerCard
+import com.project.cruise.android.ui.common.PassengerEmpty
+import com.project.cruise.android.ui.common.PassengerError
+import com.project.cruise.android.ui.common.PassengerLoading
+import com.project.cruise.android.ui.common.PassengerPage
+import com.project.cruise.android.ui.common.PassengerSection
+import com.project.cruise.android.ui.common.passengerDate
+import com.project.cruise.android.ui.common.passengerMoney
 import com.project.cruise.android.ui.components.*
 import com.project.cruise.android.ui.theme.OceanBanner
 import com.project.cruise.android.viewmodel.pos.FinanceReportViewModel

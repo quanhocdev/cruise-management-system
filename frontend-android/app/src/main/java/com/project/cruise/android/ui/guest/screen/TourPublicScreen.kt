@@ -7,7 +7,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.project.cruise.android.data.dto.tour.*
-import com.project.cruise.android.ui.components.*
+import com.project.cruise.android.ui.common.*
+import com.project.cruise.android.ui.chatbox.screen.PublicTourChatFloatingWidget
 import com.project.cruise.android.ui.guest.components.tourcatalog.*
 import com.project.cruise.android.viewmodel.auth.*
 import com.project.cruise.android.viewmodel.chat.ChatViewModel
@@ -23,6 +24,9 @@ fun TourPublicScreen(
     onUserClick: () -> Unit,
     onMyBookingsClick: () -> Unit,
     onMessagesClick: () -> Unit,
+    onNotificationClick: () -> Unit = {},
+    onVesselTrackingClick: () -> Unit = {},
+    unreadCount: Long = 0L,
     onHomeClick: () -> Unit = {},
 ) {
     val state by viewModel.tourListState.collectAsState()
@@ -39,11 +43,14 @@ fun TourPublicScreen(
                 OceanBottomBar(
                     isLoggedIn = loggedIn,
                     currentRoute = "passenger_tours",
+                    unreadCount = unreadCount,
                     onHomeClick = onHomeClick,
                     onLoginClick = onLoginClick,
                     onUserClick = onUserClick,
                     onMyBookingsClick = onMyBookingsClick,
                     onMessagesClick = onMessagesClick,
+                    onNotificationClick = onNotificationClick,
+                    onVesselTrackingClick = onVesselTrackingClick,
                 )
             },
         )
@@ -108,7 +115,13 @@ private fun List<PublicTourSummaryResponse>.filterTours(
 ): List<PublicTourSummaryResponse> = filter { tour ->
     (!openOnly || tour.statusBooking == TourBookingStatus.OPEN) &&
             (query.isBlank() ||
-                    listOf(tour.name, tour.code, tour.cruiseName).any {
+                    listOf(
+                        tour.name,
+                        tour.code,
+                        tour.cruiseName,
+                        tour.departurePort?.name,
+                        tour.departurePort?.city
+                    ).any {
                         it?.contains(query.trim(), ignoreCase = true) == true
                     })
 }

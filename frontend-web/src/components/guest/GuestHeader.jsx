@@ -10,8 +10,13 @@ import {
   Dropdown,
   Modal,
 } from "react-bootstrap";
+
 import { useAuth } from "../../context/AuthContext";
 import { getRedirectPathByRole } from "../../routes/roleRoutes";
+
+import useNotifications from "../../modules/passenger/hooks/useNotifications";
+import NotificationBell from "../../modules/passenger/components/notifications/NotificationBell";
+
 import "../../styles/guest/GuestHeader.css";
 
 export default function GuestHeader() {
@@ -19,6 +24,16 @@ export default function GuestHeader() {
   const navigate = useNavigate();
 
   const [showLoginModal, setShowLoginModal] = useState(false);
+
+  // Notification dành riêng cho Passenger.
+  const {
+    notifications,
+    unreadCount,
+    loading: notificationLoading,
+    markAsRead,
+    markAllAsRead,
+    loadNotifications,
+  } = useNotifications();
 
   const handleLogout = async () => {
     await logout();
@@ -35,8 +50,34 @@ export default function GuestHeader() {
       return;
     }
 
-    // Tài khoản không phải Passenger không sử dụng chức năng này.
     setShowLoginModal(true);
+  };
+  const handleNotificationClick = async (notification) => {
+    if (!notification) return;
+
+    // Đánh dấu đã đọc trước khi điều hướng.
+    if (!notification.isRead) {
+      await markAsRead(notification.id);
+    }
+
+    // Đóng dropdown thông báo sẽ được xử lý ở component Bell.
+    switch (notification.referenceType) {
+      case "FEEDBACK_INVITATION":
+        navigate("/passenger/feedback");
+        break;
+
+      case "BOOKING":
+        if (notification.referenceId) {
+          navigate(`/passenger/bookings/${notification.referenceId}`);
+        } else {
+          navigate("/passenger/bookings");
+        }
+        break;
+
+      default:
+        // Chưa xác định màn hình đích thì không điều hướng.
+        break;
+    }
   };
 
   const handleGoToLogin = () => {
@@ -107,48 +148,73 @@ export default function GuestHeader() {
             {/* Khu vực tài khoản */}
             <div className="d-flex align-items-center gap-2 mt-3 mt-lg-0">
               {user ? (
-                <Dropdown align="end">
-                  <Dropdown.Toggle
-                    variant="outline-primary"
-                    size="sm"
-                    className="rounded-pill px-3 fw-semibold d-flex align-items-center gap-2"
-                  >
-                    <span>👤 {user.username}</span>
+                <>
+                  {/* Chuông thông báo chỉ dành cho Passenger */}
+                  {user.role === "PASSENGER" && (
+                    <NotificationBell
+                      notifications={notifications}
+                      unreadCount={unreadCount}
+                      loading={notificationLoading}
+                      onMarkAsRead={markAsRead}
+                      onMarkAllAsRead={markAllAsRead}
+                      onRefresh={loadNotifications}
+                      onNotificationClick={handleNotificationClick}
+                    />
+                  )}
 
-                    <span className="badge bg-primary text-light small">
-                      {user.role}
-                    </span>
-                  </Dropdown.Toggle>
+                  <Dropdown align="end">
+                    <Dropdown.Toggle
+                      variant="outline-primary"
+                      size="sm"
+                      className="rounded-pill px-3 fw-semibold d-flex align-items-center gap-2"
+                    >
+                      <span>👤 {user.username}</span>
 
-                  <Dropdown.Menu className="shadow border-0 py-2 rounded-3 mt-2">
-                    {user.role === "PASSENGER" && (
+                      <span className="badge bg-primary text-light small">
+                        {user.role}
+                      </span>
+                    </Dropdown.Toggle>
+
+                    <Dropdown.Menu className="shadow border-0 py-2 rounded-3 mt-2">
+                      {user.role === "PASSENGER" && (
+                        <>
+                          <Dropdown.Item
+                            as={Link}
+                            to="/passenger/bookings"
+                            className="py-2 small fw-medium"
+                          >
+                            🎫 Tour đã đặt của tôi
+                          </Dropdown.Item>
+
+                          <Dropdown.Item
+                            as={Link}
+                            to="/passenger/feedback"
+                            className="py-2 small fw-medium"
+                          >
+                            ⭐ Đánh giá của tôi
+                          </Dropdown.Item>
+                        </>
+                      )}
+
                       <Dropdown.Item
                         as={Link}
-                        to="/passenger/bookings"
+                        to={getRedirectPathByRole(user.role)}
                         className="py-2 small fw-medium"
                       >
-                        🎫 Tour đã đặt của tôi
+                        📊 Trang Dashboard
                       </Dropdown.Item>
-                    )}
 
-                    <Dropdown.Item
-                      as={Link}
-                      to={getRedirectPathByRole(user.role)}
-                      className="py-2 small fw-medium"
-                    >
-                      📊 Trang Dashboard
-                    </Dropdown.Item>
+                      <Dropdown.Divider />
 
-                    <Dropdown.Divider />
-
-                    <Dropdown.Item
-                      onClick={handleLogout}
-                      className="py-2 small text-danger fw-semibold"
-                    >
-                      🚪 Đăng xuất
-                    </Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown>
+                      <Dropdown.Item
+                        onClick={handleLogout}
+                        className="py-2 small text-danger fw-semibold"
+                      >
+                        🚪 Đăng xuất
+                      </Dropdown.Item>
+                    </Dropdown.Menu>
+                  </Dropdown>
+                </>
               ) : (
                 <>
                   <Button

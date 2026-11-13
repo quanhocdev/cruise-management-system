@@ -1,6 +1,7 @@
 package com.project.cruise.android.ui.guest.components.tourcatalog
 
 import androidx.compose.runtime.Composable
+import com.project.cruise.android.ui.common.PassengerEmpty
 import com.project.cruise.android.ui.components.*
 
 @Composable

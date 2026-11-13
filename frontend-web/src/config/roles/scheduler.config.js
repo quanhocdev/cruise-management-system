@@ -1,4 +1,5 @@
-import { LayoutDashboard, Map, Ship } from "lucide-react";
+// src/layouts/schedulerConfig.js
+import { LayoutDashboard, Map, Navigation, Ship } from "lucide-react";
 
 export const schedulerConfig = {
   theme: "scheduler",
@@ -20,6 +21,11 @@ export const schedulerConfig = {
           path: "/scheduler/dashboard",
         },
         { label: "Quản lý Tour", icon: Map, path: "/scheduler/tours" },
+        {
+          label: "Giám sát Tour",
+          icon: Navigation,
+          path: "/scheduler/vessels/monitoring",
+        },
       ],
     },
   ],

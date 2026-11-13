@@ -7,7 +7,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.project.cruise.android.data.auth.TokenManager
-import com.project.cruise.android.data.network.RetrofitClient
+import com.project.cruise.android.data.network.core.RetrofitClient
 import com.project.cruise.android.data.network.api.AuthApiService
 import com.project.cruise.android.data.repository.auth.AuthRepository
 import com.project.cruise.android.viewmodel.auth.AuthViewModel

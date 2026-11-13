@@ -7,7 +7,7 @@ import com.project.cruise.android.data.dto.nfc.NfcResolveResponse
 import com.project.cruise.android.data.dto.onboard.ActivityCruiseTourResponse
 import com.project.cruise.android.data.dto.onboard.ActivityCruiseUsageRequest
 import com.project.cruise.android.data.dto.onboard.ActivityCruiseUsageResponse
-import com.project.cruise.android.data.network.RetrofitClient
+import com.project.cruise.android.data.network.core.RetrofitClient
 import com.project.cruise.android.data.repository.pos.OnlinePosCommands
 
 class OnboardRepository(context: Context) {

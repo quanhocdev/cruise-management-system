@@ -10,6 +10,7 @@ import ManagerTour from "../modules/scheduler/pages/ManagerTour";
 import TourRoutePlanner from "../modules/scheduler/pages/TourRoutePlanner";
 import ManagerSchedule from "../modules/scheduler/pages/ManagerSchedule";
 import ManagerScheduleStops from "../modules/scheduler/pages/ManagerScheduleStops";
+import VesselMonitoringPage from "../modules/scheduler/pages/VesselMonitoringPage";
 
 const schedulerRoutes = (
   <Route
@@ -24,6 +25,10 @@ const schedulerRoutes = (
             <Route
               path="tours/:tourId/schedules"
               element={<ManagerSchedule />}
+            />
+            <Route
+              path="vessels/monitoring"
+              element={<VesselMonitoringPage />}
             />
             <Route
               path="tours/:tourId/schedules/:scheduleId/stops"

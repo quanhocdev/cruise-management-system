@@ -1,24 +1,35 @@
 package com.project.cruise.android.data.network.api
 
-import com.project.cruise.android.data.dto.feedback.FeedbackDraft
-import com.project.cruise.android.data.dto.feedback.FeedbackOptions
-import com.project.cruise.android.data.dto.feedback.MyFeedback
+import com.project.cruise.android.data.dto.passenger.feedback.FeedbackInvitationResponse
+import com.project.cruise.android.data.dto.passenger.feedback.FeedbackResponse
+import com.project.cruise.android.data.dto.passenger.feedback.SubmitFeedbackRequest
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import java.util.UUID
 
 interface FeedbackApiService {
-    @GET("api/v1/feedbacks/me")
-    suspend fun getMyFeedback(): List<MyFeedback>
 
-    @GET("api/v1/feedbacks/bookings/{id}/options")
-    suspend fun getFeedbackOptions(
-        @Path("id") id: Long
-    ): FeedbackOptions
+    @GET("api/passengers/feedback/invitations")
+    suspend fun getMyInvitations(): List<FeedbackInvitationResponse>
 
-    @POST("api/v1/feedbacks")
-    suspend fun createFeedback(
-        @Body request: FeedbackDraft
-    ): MyFeedback
+    @GET("api/passengers/feedback/invitations/pending")
+    suspend fun getMyPendingInvitations(): List<FeedbackInvitationResponse>
+
+    @POST("api/passengers/feedback/invitations/{id}/submit")
+    suspend fun submitFeedback(
+        @Path("id") id: UUID,
+        @Body request: SubmitFeedbackRequest
+    ): FeedbackResponse
+
+    @POST("api/passengers/feedback/invitations/{id}/skip")
+    suspend fun skipInvitation(
+        @Path("id") id: UUID
+    ): FeedbackInvitationResponse
+
+    @GET("api/passengers/feedback/invitations/{id}/feedback")
+    suspend fun getMyFeedback(
+        @Path("id") id: UUID
+    ): FeedbackResponse
 }

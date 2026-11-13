@@ -3,7 +3,7 @@ package com.project.cruise.android.data.repository.finance
 import android.content.Context
 import com.project.cruise.android.data.auth.TokenManager
 import com.project.cruise.android.data.dto.booking.FinanceReport
-import com.project.cruise.android.data.network.RetrofitClient
+import com.project.cruise.android.data.network.core.RetrofitClient
 
 data class ReportTour(val id: String, val name: String, val code: String?, val startDate: String?)
 

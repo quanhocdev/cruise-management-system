@@ -1,9 +1,9 @@
 package com.project.cruise.android.ui.passenger.screen
 
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import com.project.cruise.android.ui.components.*
+import com.project.cruise.android.ui.common.OceanBottomBar
+import com.project.cruise.android.ui.common.*
 import com.project.cruise.android.ui.passenger.components.profile.*
 import com.project.cruise.android.viewmodel.auth.*
 
@@ -13,6 +13,9 @@ fun ProfileScreen(
     onHomeClick: () -> Unit,
     onMyBookingsClick: () -> Unit,
     onMessagesClick: () -> Unit,
+    onNotificationClick: () -> Unit = {},
+    onVesselTrackingClick: () -> Unit = {}, // <--- Thêm callback giám sát
+    unreadCount: Long = 0L,
     onLogout: () -> Unit,
 ) {
     val state by authViewModel.meState.collectAsState()
@@ -22,6 +25,9 @@ fun ProfileScreen(
         onHomeClick = onHomeClick,
         onMyBookingsClick = onMyBookingsClick,
         onMessagesClick = onMessagesClick,
+        onNotificationClick = onNotificationClick,
+        onVesselTrackingClick = onVesselTrackingClick, // <--- Truyền xuống Content
+        unreadCount = unreadCount,
         onLogout = { authViewModel.logout(onLogout) },
         onRetry = { authViewModel.getCurrentUser() },
     )
@@ -33,6 +39,9 @@ fun ProfileContent(
     onHomeClick: () -> Unit,
     onMyBookingsClick: () -> Unit,
     onMessagesClick: () -> Unit,
+    onNotificationClick: () -> Unit,
+    onVesselTrackingClick: () -> Unit, // <--- Nhận callback giám sát
+    unreadCount: Long,
     onLogout: () -> Unit,
     onRetry: () -> Unit,
 ) {
@@ -43,13 +52,16 @@ fun ProfileContent(
         "Không gian cá nhân của bạn",
         bottomBar = {
             OceanBottomBar(
-                true,
-                "passenger_profile",
-                onHomeClick,
-                {},
-                {},
+                isLoggedIn = true,
+                currentRoute = "passenger_profile",
+                unreadCount = unreadCount,
+                onHomeClick = onHomeClick,
+                onLoginClick = {},
+                onUserClick = {},
                 onMyBookingsClick = onMyBookingsClick,
                 onMessagesClick = onMessagesClick,
+                onNotificationClick = onNotificationClick,
+                onVesselTrackingClick = onVesselTrackingClick, // <--- Gắn vào OceanBottomBar
             )
         },
     ) {

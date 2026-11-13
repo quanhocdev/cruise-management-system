@@ -1,8 +1,11 @@
+
 package com.project.booking.kafka;
 
 import com.project.common.event.ProductUsedEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Service
 public class ProductUsedEventProducer {
@@ -16,8 +19,24 @@ public class ProductUsedEventProducer {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public void send(ProductUsedEvent event) {
+    /**
+     * Gửi event sau khi transaction database commit thành công.
+     */
+    public void sendAfterCommit(ProductUsedEvent event) {
 
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            throw new IllegalStateException(
+                    "No active transaction synchronization");
+        }
+
+        TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+
+                    @Override
+                    public void afterCommit() {
+                        publish(event);
+                    }
+                });
     }
 
     private void publish(ProductUsedEvent event) {

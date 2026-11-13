@@ -1,3 +1,4 @@
+// src/modules/chat/services/chatMessageService.js
 import api from "../../../api/axios";
 
 const BASE_URL = "/message";

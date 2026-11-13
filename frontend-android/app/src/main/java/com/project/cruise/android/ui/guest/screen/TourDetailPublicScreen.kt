@@ -3,7 +3,7 @@ package com.project.cruise.android.ui.guest.screen
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.*
 import com.project.cruise.android.data.dto.tour.*
-import com.project.cruise.android.ui.components.*
+import com.project.cruise.android.ui.common.*
 import com.project.cruise.android.ui.guest.components.tourdetail.*
 import com.project.cruise.android.viewmodel.tour.*
 
@@ -63,9 +63,10 @@ fun TourDetailContent(
                         startDate = passengerDate(tour.startDate),
                         endDate = passengerDate(tour.endDate),
                         cruiseCapacity = tour.cruise?.maxPassengers,
+                        departurePort = tour.departurePort,
+                        arrivalPort = tour.arrivalPort
                     )
                 }
-
                 // --- Gói hành trình ---
                 item {
                     PassengerSection(

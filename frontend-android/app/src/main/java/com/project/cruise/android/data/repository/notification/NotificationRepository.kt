@@ -1,29 +1,35 @@
 package com.project.cruise.android.data.repository.notification
 
-import com.project.cruise.android.data.dto.passenger.PassengerNotification
+import com.project.cruise.android.data.dto.passenger.notification.NotificationResponse
 import com.project.cruise.android.data.network.api.NotificationApiService
-
-interface NotificationSource {
-    suspend fun list(): List<PassengerNotification>
-    suspend fun read(id: Long): PassengerNotification
-    suspend fun readAll()
-}
+import java.util.UUID
 
 class NotificationRepository(
-    private val api: NotificationApiService // Đổi sang NotificationApiService
-) : NotificationSource {
-    // Lưu ý: Đảm bảo trong NotificationApiService hoặc endpoint tương ứng có các hàm này,
-    // nếu các hàm getNotifications() / readNotification() nằm ở service khác, bạn có thể trỏ đúng service đó.
-    override suspend fun list(): List<PassengerNotification> {
-        // Nếu dùng getActivityNotices() thì điều chỉnh lại theo model DTO thực tế của bạn
-        TODO("Mapping lại hàm gọi tương ứng từ NotificationApiService")
+    private val api: NotificationApiService
+) {
+    suspend fun getAllNotifications(): List<NotificationResponse> {
+        return api.getAllNotifications()
     }
 
-    override suspend fun read(id: Long): PassengerNotification {
-        TODO("Mapping lại hàm gọi tương ứng từ NotificationApiService")
+    suspend fun getUnreadCount(): Long {
+        return try {
+            val response = api.countUnreadNotifications()
+            response["unreadCount"] ?: 0L
+        } catch (_: Exception) {
+            0L
+        }
     }
 
-    override suspend fun readAll() {
-        TODO("Mapping lại hàm gọi tương ứng từ NotificationApiService")
+    suspend fun markAsRead(id: UUID): NotificationResponse {
+        return api.markAsRead(id)
+    }
+
+    suspend fun markAllAsRead(): Int {
+        return try {
+            val response = api.markAllAsRead()
+            response["updatedCount"] ?: 0
+        } catch (_: Exception) {
+            0
+        }
     }
 }

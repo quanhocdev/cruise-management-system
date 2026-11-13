@@ -4,7 +4,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.project.cruise.android.data.dto.booking.*
-import com.project.cruise.android.ui.components.*
+import com.project.cruise.android.ui.common.OceanBottomBar
+import com.project.cruise.android.ui.common.*
 import com.project.cruise.android.ui.passenger.components.mybooking.*
 import com.project.cruise.android.viewmodel.passenger.*
 
@@ -16,6 +17,9 @@ fun MyBookingsScreen(
     onBrowseTours: () -> Unit = onBack,
     onAccount: (() -> Unit)? = null,
     onMessagesClick: () -> Unit = {},
+    onNotificationClick: () -> Unit = {},
+    onVesselTrackingClick: () -> Unit = {},
+    unreadCount: Long = 0L,
 ) {
     val state by viewModel.bookingListState.collectAsState()
     LaunchedEffect(Unit) { viewModel.fetchMyBookings() }
@@ -28,18 +32,20 @@ fun MyBookingsScreen(
         bottomBar = {
             if (onAccount != null)
                 OceanBottomBar(
-                    true,
-                    "passenger_bookings",
-                    onBrowseTours,
-                    {},
-                    onAccount,
-                    {},
-                    onMessagesClick = onMessagesClick
+                    isLoggedIn = true,
+                    currentRoute = "passenger_bookings",
+                    unreadCount = unreadCount,
+                    onHomeClick = onBrowseTours,
+                    onLoginClick = {},
+                    onUserClick = onAccount,
+                    onMyBookingsClick = {},
+                    onMessagesClick = onMessagesClick,
+                    onNotificationClick = onNotificationClick,
+                    onVesselTrackingClick = onVesselTrackingClick
                 )
         },
     )
 }
-
 @Composable
 fun MyBookingsContent(
     state: BookingListState,

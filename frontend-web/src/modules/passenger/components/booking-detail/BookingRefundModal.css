@@ -1,0 +1,69 @@
+.refund-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 35px 0;
+  color: #64748b;
+}
+
+.refund-loading p {
+  margin: 0;
+}
+
+.refund-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.refund-preview__item,
+.refund-preview__total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+}
+
+.refund-preview__item {
+  border-bottom: 1px solid #e2e8f0;
+  color: #475569;
+  font-size: 14px;
+}
+
+.refund-preview__item strong {
+  color: #1e293b;
+  text-align: right;
+}
+
+.refund-preview__total {
+  margin-top: 8px;
+  color: #334155;
+  font-weight: 600;
+}
+
+.refund-preview__total strong {
+  color: #dc3545;
+  font-size: 21px;
+  text-align: right;
+}
+
+@media (max-width: 576px) {
+  .refund-preview__item,
+  .refund-preview__total {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .refund-preview__item strong,
+  .refund-preview__total strong {
+    text-align: left;
+  }
+}

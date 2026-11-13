@@ -1,0 +1,163 @@
+/* src/modules/admin/styles/RefundRules.css */
+
+.refund-rule-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.refund-rule-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 40px 16px;
+  text-align: center;
+  color: #6c757d;
+}
+
+.refund-rule-empty {
+  border: 1px dashed #ced4da;
+  border-radius: 12px;
+  background: #f8f9fa;
+}
+
+.refund-rule-empty-icon {
+  font-size: 36px;
+}
+
+.refund-rule-empty h5 {
+  margin: 0;
+  color: #212529;
+}
+
+.refund-rule-empty p {
+  margin: 0;
+}
+
+.refund-rule-table-wrapper {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.refund-rule-table {
+  margin-bottom: 0;
+}
+
+.refund-rule-table th {
+  white-space: nowrap;
+  background: #f8f9fa;
+}
+
+.refund-rule-action-column {
+  width: 150px;
+}
+
+.refund-rule-percent {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #e7f6ec;
+  color: #1a7f45;
+  font-weight: 600;
+}
+
+.refund-rule-description {
+  max-width: 360px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.refund-rule-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.refund-rule-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* ---------- Tablet ---------- */
+@media (max-width: 991.98px) {
+  .refund-rule-description {
+    max-width: 220px;
+  }
+}
+
+/* ---------- Mobile: bảng chuyển thành thẻ ---------- */
+@media (max-width: 767.98px) {
+  .refund-rule-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .refund-rule-header .btn {
+    width: 100%;
+  }
+
+  .refund-rule-form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .refund-rule-table thead {
+    display: none;
+  }
+
+  .refund-rule-table,
+  .refund-rule-table tbody,
+  .refund-rule-table tr,
+  .refund-rule-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .refund-rule-table tr {
+    margin-bottom: 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  .refund-rule-table td {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    border: 0;
+    border-bottom: 1px solid #f1f3f5;
+    text-align: right;
+  }
+
+  .refund-rule-table td:last-child {
+    border-bottom: 0;
+  }
+
+  .refund-rule-table td::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    font-weight: 600;
+    color: #6c757d;
+    text-align: left;
+  }
+
+  .refund-rule-description {
+    max-width: none;
+  }
+
+  .refund-rule-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

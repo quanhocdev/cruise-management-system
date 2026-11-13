@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import com.project.cruise.android.data.dto.booking.BookingStatus
-import com.project.cruise.android.ui.components.PassengerCard
+import com.project.cruise.android.ui.common.PassengerCard
 import com.project.cruise.android.viewmodel.passenger.BookingAccessState
 
 @Composable

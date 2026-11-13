@@ -7,7 +7,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.project.cruise.android.ui.components.*
+import com.project.cruise.android.ui.common.*
 import com.project.cruise.android.viewmodel.passenger.SpendingViewModel
 import com.project.cruise.android.viewmodel.passenger.SpendingState
 import java.math.BigDecimal

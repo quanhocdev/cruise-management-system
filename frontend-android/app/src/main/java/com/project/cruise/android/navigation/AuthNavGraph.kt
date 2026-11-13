@@ -15,10 +15,10 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.project.cruise.android.ui.guest.screen.GuestScreen
-import com.project.cruise.android.ui.screens.auth.LoginScreen
-import com.project.cruise.android.ui.screens.auth.OtpScreen
-import com.project.cruise.android.ui.screens.auth.RegisterScreen
-import com.project.cruise.android.ui.screens.auth.GoogleOtpScreen
+import com.project.cruise.android.ui.auth.screen.LoginScreen
+import com.project.cruise.android.ui.auth.screen.OtpScreen
+import com.project.cruise.android.ui.auth.screen.RegisterScreen
+import com.project.cruise.android.ui.auth.screen.GoogleOtpScreen
 import com.project.cruise.android.ui.screens.pos.PosRole
 import com.project.cruise.android.data.dto.staff.StaffRole
 import com.project.cruise.android.viewmodel.auth.AuthViewModel

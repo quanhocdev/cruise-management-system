@@ -7,7 +7,7 @@ import com.project.cruise.android.data.dto.nfc.NfcResolveResponse
 import com.project.cruise.android.data.dto.shore.ActivityVisitTourResponse
 import com.project.cruise.android.data.dto.shore.ActivityVisitUsageRequest
 import com.project.cruise.android.data.dto.shore.ActivityVisitUsageResponse
-import com.project.cruise.android.data.network.RetrofitClient
+import com.project.cruise.android.data.network.core.RetrofitClient
 import com.project.cruise.android.data.repository.pos.OnlinePosCommands
 
 class ShoreRepository(context: Context) {

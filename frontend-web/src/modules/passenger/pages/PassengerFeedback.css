@@ -1,0 +1,133 @@
+.passenger-feedback-page {
+  min-height: 100vh;
+  padding: 28px;
+  background: #f8fafc;
+}
+
+.feedback-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 26px;
+}
+
+.feedback-page-eyebrow {
+  margin-bottom: 7px;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.feedback-page-header h2 {
+  margin: 0;
+  color: #1e293b;
+  font-size: 27px;
+  font-weight: 700;
+}
+
+.feedback-page-header p {
+  margin: 8px 0 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.feedback-statistics {
+  margin-bottom: 30px;
+  row-gap: 12px;
+}
+
+.feedback-stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+  padding: 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.feedback-stat-card span {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.feedback-stat-card strong {
+  color: #1e293b;
+  font-size: 27px;
+  font-weight: 700;
+}
+
+.feedback-list-section {
+  padding: 22px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.feedback-list-heading {
+  margin-bottom: 20px;
+}
+
+.feedback-list-heading h4 {
+  margin: 0;
+  color: #1e293b;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.feedback-list-heading p {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.feedback-page-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 55px 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.feedback-empty-state {
+  padding: 55px 15px;
+  text-align: center;
+}
+
+.feedback-empty-state h5 {
+  margin-bottom: 8px;
+  color: #334155;
+  font-weight: 650;
+}
+
+.feedback-empty-state p {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+@media (max-width: 767.98px) {
+  .passenger-feedback-page {
+    padding: 18px 12px;
+  }
+
+  .feedback-page-header h2 {
+    font-size: 23px;
+  }
+
+  .feedback-list-section {
+    padding: 16px;
+  }
+
+  .feedback-stat-card {
+    padding: 14px;
+  }
+
+  .feedback-stat-card strong {
+    font-size: 23px;
+  }
+}

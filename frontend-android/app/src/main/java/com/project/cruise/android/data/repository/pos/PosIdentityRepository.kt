@@ -6,7 +6,7 @@ import com.project.cruise.android.data.auth.TokenManager
 import com.project.cruise.android.data.dto.pos.QrScanRequest
 import com.project.cruise.android.data.dto.pos.ScanResponse
 import com.project.cruise.android.data.local.CruiseDatabase
-import com.project.cruise.android.data.network.RetrofitClient
+import com.project.cruise.android.data.network.core.RetrofitClient
 
 class PosIdentityRepository(context: Context, private val operatorRole: String) {
     private val appContext = context.applicationContext

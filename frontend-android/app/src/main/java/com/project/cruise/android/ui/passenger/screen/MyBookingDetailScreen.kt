@@ -4,7 +4,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import com.project.cruise.android.data.dto.booking.*
-import com.project.cruise.android.ui.components.*
+import com.project.cruise.android.ui.common.*
 import com.project.cruise.android.ui.passenger.components.mybookingdetail.*
 import com.project.cruise.android.ui.screens.passenger.BookingTicketPanel
 import com.project.cruise.android.viewmodel.passenger.*

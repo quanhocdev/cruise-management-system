@@ -6,6 +6,7 @@ import com.project.booking.dto.onboard.ActivityCruiseUsageManagementInfo;
 import com.project.booking.dto.onboard.ActivityCruiseUsageManagementResponse;
 import com.project.booking.dto.onboard.ActivityCruiseUsageRequest;
 import com.project.booking.dto.onboard.ActivityCruiseUsageResponse;
+import com.project.booking.kafka.ActivityCruiseCompletedEventProducer;
 import com.project.booking.mapper.ActivityCruiseUsageManagementMapper;
 import com.project.booking.mapper.ActivityCruiseUsageMapper;
 import com.project.booking.model.ActivityCruiseUsage;
@@ -15,6 +16,7 @@ import com.project.booking.model.BookingPassenger;
 import com.project.booking.repository.ActivityCruiseUsageRepository;
 import com.project.booking.service.common.benefit.BenefitConsumptionService;
 import com.project.booking.service.common.pricing.PricingCalculator;
+import com.project.common.event.ActivityCruiseCompletedEvent;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +40,7 @@ public class ActivityCruiseUsageServiceImpl
         private final BenefitConsumptionService benefitConsumptionService;
         private final ActivityCruiseValidator activityCruiseValidator;
         private final PricingCalculator pricingCalculator;
+        private final ActivityCruiseCompletedEventProducer activityCruiseCompletedEventProducer;
 
         public ActivityCruiseUsageServiceImpl(
                         ActivityCruiseUsageRepository activityCruiseUsageRepository,
@@ -47,7 +50,8 @@ public class ActivityCruiseUsageServiceImpl
                         ActivityCruiseManagementClient activityCruiseManagementClient,
                         BenefitConsumptionService benefitConsumptionService,
                         ActivityCruiseValidator activityCruiseValidator,
-                        PricingCalculator pricingCalculator) {
+                        PricingCalculator pricingCalculator,
+                        ActivityCruiseCompletedEventProducer activityCruiseCompletedEventProducer) {
 
                 this.activityCruiseUsageRepository = activityCruiseUsageRepository;
                 this.activityCruiseUsageMapper = activityCruiseUsageMapper;
@@ -57,6 +61,7 @@ public class ActivityCruiseUsageServiceImpl
                 this.benefitConsumptionService = benefitConsumptionService;
                 this.activityCruiseValidator = activityCruiseValidator;
                 this.pricingCalculator = pricingCalculator;
+                this.activityCruiseCompletedEventProducer = activityCruiseCompletedEventProducer;
         }
 
         @Override
@@ -76,14 +81,54 @@ public class ActivityCruiseUsageServiceImpl
                                                 request.activityCruiseTourId(),
                                                 booking.getTourPackageId());
 
-                // 3 -> 7. Validate nghiệp vụ
+                // 3. Validate booking và activity
                 activityCruiseValidator.validateBookingAndActivity(
                                 booking,
                                 activityInfo,
                                 request.activityCruiseTourId());
 
-                // 8 & 9. Benefit + lock row
+                // 4. Tìm lượt đang mở: chưa checkout (endedAt IS NULL)
+                List<ActivityCruiseUsage> activeUsages = activityCruiseUsageRepository
+                                .findActiveUsagesForUpdate(
+                                                bookingPassenger.getId(),
+                                                request.activityCruiseTourId());
+
+                if (!activeUsages.isEmpty()) {
+
+                        // CHECK-OUT
+                        // Lấy lượt đang mở mới nhất
+                        ActivityCruiseUsage activeUsage = activeUsages.get(0);
+
+                        LocalDateTime checkoutTime = LocalDateTime.now();
+                        activeUsage.setEndedAt(checkoutTime);
+
+                        ActivityCruiseUsage savedUsage = activityCruiseUsageRepository
+                                        .save(activeUsage);
+
+                        // Gửi event sau khi transaction commit
+                        activityCruiseCompletedEventProducer.sendAfterCommit(
+                                        new ActivityCruiseCompletedEvent(
+                                                        booking.getId(),
+                                                        bookingPassenger.getId(),
+                                                        booking.getCreatedByUserId(),
+                                                        request.activityCruiseTourId(),
+                                                        savedUsage.getId(),
+                                                        activityInfo.activityName(),
+                                                        savedUsage.getUsedAt(),
+                                                        savedUsage.getEndedAt()));
+
+                        return activityCruiseUsageMapper.toResponse(savedUsage);
+                }
+
+                // CHECK-IN
+                activityCruiseValidator.validateCheckIn(
+                                activityInfo,
+                                request.activityCruiseTourId());
+
+                // 5. Lấy thông tin benefit
+
                 UUID packageBenefitId = activityInfo.packageBenefitId();
+
                 int benefitQuantity = activityInfo.benefitQuantity() == null
                                 ? 0
                                 : Math.max(activityInfo.benefitQuantity(), 0);
@@ -91,7 +136,9 @@ public class ActivityCruiseUsageServiceImpl
                 BenefitConsumption benefitConsumption = null;
                 long usedBenefitQuantity = 0;
 
+                // 6. Lock BenefitConsumption
                 if (packageBenefitId != null && benefitQuantity > 0) {
+
                         benefitConsumption = benefitConsumptionService.getForUpdate(
                                         booking.getId(),
                                         packageBenefitId);
@@ -101,7 +148,7 @@ public class ActivityCruiseUsageServiceImpl
                                         : benefitConsumption.getUsedQuantity();
                 }
 
-                // 10 -> 15. Tính tiền
+                // 7. Tính tiền
                 var pricingResult = pricingCalculator.calculate(
                                 activityInfo.price(),
                                 activityInfo.discountPercent(),
@@ -109,15 +156,16 @@ public class ActivityCruiseUsageServiceImpl
                                 benefitQuantity,
                                 usedBenefitQuantity);
 
-                // 16. Cập nhật lượt benefit đã dùng
+                // 8. Cập nhật lượt benefit đã dùng
                 if (benefitConsumption != null) {
                         benefitConsumptionService.consume(
                                         benefitConsumption,
                                         pricingResult.discountedQuantity());
                 }
 
-                // 17 & 18. Lưu usage
+                // 9. Tạo usage mới - CHECK-IN
                 ActivityCruiseUsage usage = new ActivityCruiseUsage();
+
                 usage.setBookingPassenger(bookingPassenger);
                 usage.setActivityCruiseTourId(request.activityCruiseTourId());
                 usage.setQuantity(1);
@@ -125,6 +173,7 @@ public class ActivityCruiseUsageServiceImpl
                 usage.setDiscountAmount(pricingResult.discountAmount());
                 usage.setFinalAmount(pricingResult.finalAmount());
                 usage.setUsedAt(LocalDateTime.now());
+                usage.setEndedAt(null);
 
                 ActivityCruiseUsage savedUsage = activityCruiseUsageRepository.save(usage);
 
@@ -146,8 +195,7 @@ public class ActivityCruiseUsageServiceImpl
 
         @Override
         @Transactional(readOnly = true)
-        public List<ActivityCruiseUsageResponse> getByUserId(
-                        UUID userId) {
+        public List<ActivityCruiseUsageResponse> getByUserId(UUID userId) {
 
                 return activityCruiseUsageRepository
                                 .findAllByBookingPassenger_Booking_CreatedByUserIdOrderByUsedAtDesc(
@@ -174,8 +222,7 @@ public class ActivityCruiseUsageServiceImpl
                                 .toList();
 
                 List<ActivityCruiseUsageManagementInfo> activityInfos = activityCruiseManagementClient
-                                .getActivityCruiseUsageInfo(
-                                                activityCruiseTourIds);
+                                .getActivityCruiseUsageInfo(activityCruiseTourIds);
 
                 Map<UUID, ActivityCruiseUsageManagementInfo> activityInfoMap = activityInfos.stream()
                                 .collect(Collectors.toMap(
@@ -185,8 +232,7 @@ public class ActivityCruiseUsageServiceImpl
                 return usages.stream()
                                 .map(usage -> activityCruiseUsageManagementMapper.toResponse(
                                                 usage,
-                                                activityInfoMap.get(
-                                                                usage.getActivityCruiseTourId())))
+                                                activityInfoMap.get(usage.getActivityCruiseTourId())))
                                 .toList();
         }
 }

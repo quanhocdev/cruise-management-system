@@ -20,8 +20,6 @@ import com.project.common.event.ProductUsedEvent;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -131,16 +129,30 @@ public class ProductUsageServiceImpl implements ProductUsageService {
 
                 ProductUsage savedUsage = productUsageRepository.save(usage);
 
-                // 9. Gửi event sau khi lưu usage
-                productUsedEventProducer.send(
+                // 9. Lấy tên sản phẩm từ Tour Service
+                List<ProductUsageManagementInfo> productInfos = productTourManagementClient
+                                .getProductUsageInfo(List.of(request.productTourId()));
+
+                ProductUsageManagementInfo productUsageInfo = productInfos.stream()
+                                .filter(info -> request.productTourId().equals(info.productTourId()))
+                                .findFirst()
+                                .orElseThrow(() -> new IllegalStateException(
+                                                "Không tìm thấy thông tin sản phẩm: " + request.productTourId()));
+
+                // 10. Gửi event sau khi transaction commit
+                productUsedEventProducer.sendAfterCommit(
                                 new ProductUsedEvent(
                                                 booking.getId(),
                                                 bookingPassenger.getId(),
+                                                booking.getCreatedByUserId(),
                                                 request.productTourId(),
+                                                savedUsage.getId(),
+                                                productUsageInfo.productName(),
                                                 request.quantity(),
-                                                Instant.now()));
+                                                savedUsage.getUsedAt()));
 
                 return productUsageMapper.toResponse(savedUsage);
+
         }
 
         @Override

@@ -7,7 +7,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import com.project.cruise.android.data.dto.booking.ActivityRegistration
 import com.project.cruise.android.data.time.CruiseTime
-import com.project.cruise.android.ui.components.passengerMoney
+import com.project.cruise.android.ui.common.passengerMoney
 import com.project.cruise.android.viewmodel.passenger.*
 
 @Composable

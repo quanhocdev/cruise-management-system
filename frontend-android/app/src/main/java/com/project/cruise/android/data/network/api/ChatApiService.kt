@@ -1,10 +1,6 @@
 package com.project.cruise.android.data.network.api
 
-import com.project.cruise.android.data.dto.chat.ChatMessageRequest
-import com.project.cruise.android.data.dto.chat.ChatMessageResponse
 import com.project.cruise.android.data.dto.chat.ChatPageResponse
-import com.project.cruise.android.data.dto.chat.ChatSessionRequest
-import com.project.cruise.android.data.dto.chat.ChatWelcomeResponse
 import com.project.cruise.android.data.dto.chat.ConfirmedBookingResponse
 import com.project.cruise.android.data.dto.chat.ConversationResponse
 import com.project.cruise.android.data.dto.chat.CreateConversationRequest
@@ -12,6 +8,10 @@ import com.project.cruise.android.data.dto.chat.ManagerInfoResponse
 import com.project.cruise.android.data.dto.chat.MessageResponse
 import com.project.cruise.android.data.dto.chat.ParticipantResponse
 import com.project.cruise.android.data.dto.chat.SendMessageRequest
+import com.project.cruise.android.data.dto.chatbox.ChatMessageRequest
+import com.project.cruise.android.data.dto.chatbox.ChatMessageResponse
+import com.project.cruise.android.data.dto.chatbox.ChatSessionRequest
+import com.project.cruise.android.data.dto.chatbox.ChatWelcomeResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST

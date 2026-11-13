@@ -1,55 +1,90 @@
 package com.project.feedback.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+
 import java.time.Instant;
-import java.util.*;
+import java.util.UUID;
 
 @Entity
-@Table(name = "feedbacks", uniqueConstraints = @UniqueConstraint(
-    name = "uk_feedback_booking_target", columnNames = {"booking_id", "reviewer_user_id", "feedback_type", "target_type", "target_id"}), indexes = {
-    @Index(name = "idx_feedback_tour_status", columnList = "tour_id,status"),
-    @Index(name = "idx_feedback_cruise_status", columnList = "cruise_id,status"),
-    @Index(name = "idx_feedback_target_status", columnList = "target_type,target_id,status")
-})
+@Table(name = "feedbacks")
 public class Feedback {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
-    @Column(name = "booking_id", nullable = false) private Long bookingId;
-    @Column(name = "passenger_voyage_id") private Long passengerVoyageId;
-    @Column(name = "booking_passenger_id") private Long bookingPassengerId;
-    @Column(name = "reviewer_user_id", nullable = false) private UUID reviewerUserId;
-    @Column(name = "tour_id", nullable = false) private UUID tourId;
-    @Column(name = "cruise_id", nullable = false) private UUID cruiseId;
-    @Enumerated(EnumType.STRING) @Column(name = "feedback_type", length = 20) private FeedbackType feedbackType;
-    @Enumerated(EnumType.STRING) @Column(name = "target_type", length = 30) private FeedbackTargetType targetType;
-    @Column(name = "target_id") private UUID targetId;
-    @Column(nullable = false) private Integer rating;
-    @Column(nullable = false, columnDefinition = "TEXT") private String content;
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "feedback_images", joinColumns = @JoinColumn(name = "feedback_id"))
-    @Column(name = "image_url", nullable = false, length = 1000)
-    @OrderColumn(name = "display_order") private List<String> imageUrls = new ArrayList<>();
-    @Enumerated(EnumType.STRING) @Column(nullable = false, length = 20) private FeedbackStatus status;
-    @Column(name = "moderation_reason", length = 1000) private String moderationReason;
-    @Column(name = "moderated_by_user_id") private UUID moderatedByUserId;
-    @Column(name = "created_at", nullable = false) private Instant createdAt;
-    @Column(name = "updated_at", nullable = false) private Instant updatedAt;
-    @Version private long version;
-    public Long getId() { return id; } public void setId(Long v) { id = v; }
-    public Long getBookingId() { return bookingId; } public void setBookingId(Long v) { bookingId = v; }
-    public Long getPassengerVoyageId() { return passengerVoyageId; } public void setPassengerVoyageId(Long v) { passengerVoyageId = v; }
-    public Long getBookingPassengerId() { return bookingPassengerId; } public void setBookingPassengerId(Long v) { bookingPassengerId = v; }
-    public UUID getReviewerUserId() { return reviewerUserId; } public void setReviewerUserId(UUID v) { reviewerUserId = v; }
-    public UUID getTourId() { return tourId; } public void setTourId(UUID v) { tourId = v; }
-    public UUID getCruiseId() { return cruiseId; } public void setCruiseId(UUID v) { cruiseId = v; }
-    public FeedbackType getFeedbackType() { return feedbackType; } public void setFeedbackType(FeedbackType v) { feedbackType = v; }
-    public FeedbackTargetType getTargetType() { return targetType; } public void setTargetType(FeedbackTargetType v) { targetType = v; }
-    public UUID getTargetId() { return targetId; } public void setTargetId(UUID v) { targetId = v; }
-    public Integer getRating() { return rating; } public void setRating(Integer v) { rating = v; }
-    public String getContent() { return content; } public void setContent(String v) { content = v; }
-    public List<String> getImageUrls() { return imageUrls; } public void setImageUrls(List<String> v) { imageUrls = v; }
-    public FeedbackStatus getStatus() { return status; } public void setStatus(FeedbackStatus v) { status = v; }
-    public String getModerationReason() { return moderationReason; } public void setModerationReason(String v) { moderationReason = v; }
-    public UUID getModeratedByUserId() { return moderatedByUserId; } public void setModeratedByUserId(UUID v) { moderatedByUserId = v; }
-    public Instant getCreatedAt() { return createdAt; } public void setCreatedAt(Instant v) { createdAt = v; }
-    public Instant getUpdatedAt() { return updatedAt; } public void setUpdatedAt(Instant v) { updatedAt = v; }
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "invitation_id", nullable = false, unique = true, foreignKey = @ForeignKey(name = "fk_feedback_invitation"))
+    private FeedbackInvitation invitation;
+
+    @Min(1)
+    @Max(5)
+    @Column(name = "rating", nullable = false)
+    private Integer rating;
+
+    @Column(name = "comment", columnDefinition = "TEXT")
+    private String comment;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        Instant now = Instant.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = Instant.now();
+    }
+
+    public Feedback() {
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public FeedbackInvitation getInvitation() {
+        return invitation;
+    }
+
+    public void setInvitation(FeedbackInvitation invitation) {
+        this.invitation = invitation;
+    }
+
+    public Integer getRating() {
+        return rating;
+    }
+
+    public void setRating(Integer rating) {
+        this.rating = rating;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
 }

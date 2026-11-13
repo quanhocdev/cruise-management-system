@@ -122,6 +122,7 @@ public class SecurityConfig {
                                                 .pathMatchers("/ws-booking/**").permitAll()
                                                 .pathMatchers("/ws-notification/**").permitAll()
                                                 .pathMatchers(PUBLIC_ENDPOINTS).permitAll()
+                                                .pathMatchers("/api/vessel-tracking/**").authenticated()
                                                 .anyExchange().authenticated())
                                 .oauth2ResourceServer(resourceServer -> resourceServer
                                                 .bearerTokenConverter(bearerTokenConverter)
