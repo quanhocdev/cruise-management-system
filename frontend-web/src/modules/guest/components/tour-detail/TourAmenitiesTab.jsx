@@ -1,4 +1,3 @@
-
 import { formatCurrency } from "./formatters";
 import "./TourAmenitiesTab.css";
 
@@ -32,9 +31,7 @@ function ProductCard({ product }) {
 
         <div className="amenity-card__footer">
           <span className="amenity-card__price">
-            {product.price != null
-              ? formatCurrency(product.price)
-              : "Liên hệ"}
+            {product.price != null ? formatCurrency(product.price) : "Liên hệ"}
           </span>
 
           <span className="amenity-card__quantity">
@@ -74,16 +71,12 @@ function ServiceCard({ service }) {
 
         <div className="amenity-card__footer">
           <span className="amenity-card__price">
-            {service.price != null
-              ? formatCurrency(service.price)
-              : "Liên hệ"}
+            {service.price != null ? formatCurrency(service.price) : "Liên hệ"}
           </span>
 
           <div className="amenity-card__metadata">
             {service.maxPassengers != null && (
-              <span>
-                Tối đa {service.maxPassengers} khách
-              </span>
+              <span>Tối đa {service.maxPassengers} khách</span>
             )}
 
             {service.durationMinutes != null && (
@@ -96,10 +89,7 @@ function ServiceCard({ service }) {
   );
 }
 
-export default function TourAmenitiesTab({
-  products = [],
-  services = [],
-}) {
+export default function TourAmenitiesTab({ products = [], services = [] }) {
   const hasProducts = products.length > 0;
   const hasServices = services.length > 0;
 
@@ -122,10 +112,7 @@ export default function TourAmenitiesTab({
 
           <div className="amenities__grid">
             {products.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-              />
+              <ProductCard key={product.id} product={product} />
             ))}
           </div>
         </section>
@@ -140,10 +127,7 @@ export default function TourAmenitiesTab({
 
           <div className="amenities__grid">
             {services.map((service) => (
-              <ServiceCard
-                key={service.id}
-                service={service}
-              />
+              <ServiceCard key={service.id} service={service} />
             ))}
           </div>
         </section>
