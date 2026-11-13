@@ -15,6 +15,29 @@ import BookingRefundModal from "../components/booking-detail/BookingRefundModal"
 
 import "../styles/BookingDetail.css";
 
+function isFutureVietnamDate(dateValue) {
+  if (typeof dateValue !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
+    return false;
+  }
+
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+
+  const values = Object.fromEntries(
+    parts
+      .filter((part) => part.type !== "literal")
+      .map((part) => [part.type, part.value]),
+  );
+
+  const today = `${values.year}-${values.month}-${values.day}`;
+
+  return dateValue > today;
+}
+
 export default function BookingDetail() {
   const { bookingId } = useParams();
 
@@ -53,6 +76,10 @@ export default function BookingDetail() {
     }
   }, [bookingId]);
 
+  const canRequestRefund =
+    booking?.status === "CONFIRMED" &&
+    isFutureVietnamDate(booking?.departureDate);
+
   const handleConfirmCancel = async () => {
     const result = await cancelBooking();
 
@@ -62,6 +89,8 @@ export default function BookingDetail() {
   };
 
   const handleOpenRefund = async () => {
+    if (!canRequestRefund) return;
+
     clearRefundMessages();
     setShowRefundModal(true);
     await loadRefundPreview(bookingId);
@@ -162,6 +191,7 @@ export default function BookingDetail() {
               cancelling={cancelling}
               onCancel={() => setShowCancelModal(true)}
               latestRefund={latestRefund}
+              canRequestRefund={canRequestRefund}
               onRefund={handleOpenRefund}
             />
           </Col>

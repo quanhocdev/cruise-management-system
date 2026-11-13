@@ -16,6 +16,7 @@ export default function PaymentSummary({
   cancelling,
   onCancel,
   latestRefund,
+  canRequestRefund,
   onRefund,
 }) {
   const refundStatus = latestRefund?.status;
@@ -61,13 +62,15 @@ export default function PaymentSummary({
             Đơn hàng đã được xác nhận thành công.
           </p>
 
-          <Button
-            variant="outline-danger"
-            className="w-100 mt-3"
-            onClick={onRefund}
-          >
-            Yêu cầu hoàn tiền
-          </Button>
+          {canRequestRefund && (
+            <Button
+              variant="outline-danger"
+              className="w-100 mt-3"
+              onClick={onRefund}
+            >
+              Yêu cầu hoàn tiền
+            </Button>
+          )}
         </>
       )}
 
