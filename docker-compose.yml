@@ -497,6 +497,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       BOOKING_SERVICE_URL: http://booking-service:8082
       TOUR_SERVICE_URL: http://tour-service:8088
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
     depends_on:
       postgres-feedback:
         condition: service_healthy
