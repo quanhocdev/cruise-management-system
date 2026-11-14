@@ -1,11 +1,13 @@
 
 package com.project.payment.service.refund;
 
+import com.project.common.event.RefundResultEvent;
 import com.project.payment.dto.refund.RefundModels.Accepted;
 import com.project.payment.dto.refund.RefundModels.Outcome;
 import com.project.payment.dto.refund.RefundModels.Refund;
 import com.project.payment.dto.refund.RefundModels.Request;
 import com.project.payment.dto.refund.RefundModels.Summary;
+import com.project.payment.kafka.RefundResultEventProducer;
 import com.project.payment.model.Payment;
 import com.project.payment.model.PaymentRefund;
 import com.project.payment.model.enums.PaymentStatus;
@@ -45,6 +47,8 @@ public class RefundService {
         private final RefundValidator refundValidator;
         private final RefundMapper refundMapper;
 
+        private final RefundResultEventProducer refundResultEventProducer;
+
         @PersistenceContext
         private EntityManager entityManager;
 
@@ -52,12 +56,14 @@ public class RefundService {
                         PaymentRefundRepository refundRepository,
                         PaymentRepository paymentRepository,
                         RefundValidator refundValidator,
-                        RefundMapper refundMapper) {
+                        RefundMapper refundMapper,
+                        RefundResultEventProducer refundResultEventProducer) {
 
                 this.refundRepository = refundRepository;
                 this.paymentRepository = paymentRepository;
                 this.refundValidator = refundValidator;
                 this.refundMapper = refundMapper;
+                this.refundResultEventProducer = refundResultEventProducer;
         }
 
         // Tạo yêu cầu hoàn tiền
@@ -280,18 +286,21 @@ public class RefundService {
                         return;
                 }
 
+                // Lưu trạng thái trước khi cập nhật
+                String previousStatus = refund.getStatus();
+
                 refund.setStatus(outcome.status());
                 refund.setProviderCode(outcome.code());
 
                 if (outcome.transactionNo() != null) {
-                        refund.setProviderTransactionNo(
-                                        outcome.transactionNo());
+                        refund.setProviderTransactionNo(outcome.transactionNo());
                 }
 
                 refund.setUpdatedAt(Instant.now());
 
                 refundRepository.saveAndFlush(refund);
 
+                // Cập nhật trạng thái Payment nếu tổng tiền đã hoàn đủ
                 if (STATUS_SUCCEEDED.equals(outcome.status())) {
 
                         BigDecimal refundedAmount = refundRepository.sumSucceededAmount(
@@ -304,6 +313,18 @@ public class RefundService {
 
                                 paymentRepository.save(payment);
                         }
+                }
+
+                // Chỉ gửi event khi trạng thái refund thực sự thay đổi
+                if (!previousStatus.equals(refund.getStatus())) {
+
+                        refundResultEventProducer.sendAfterCommit(
+                                        new RefundResultEvent(
+                                                        refund.getId(),
+                                                        refund.getClientRequestId(),
+                                                        refund.getStatus(),
+                                                        refund.getProviderCode(),
+                                                        refund.getProviderTransactionNo()));
                 }
         }
 
