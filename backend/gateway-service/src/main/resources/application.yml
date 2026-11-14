@@ -96,7 +96,7 @@ spring:
             - id: booking-finance-service
               uri: ${BOOKING_SERVICE_URL:http://booking-service:8082}
               predicates:
-                - Path=/api/finance/scan,/api/finance/bookings,/api/finance/bookings/**,/api/finance/check-passenger/**
+                - Path=/api/finance/scan,/api/finance/bookings,/api/finance/bookings/**,/api/finance/check-passenger/**,/api/finance/refunds,/api/finance/refunds/**
 
             # TOUR SERVICE - FINANCE
             - id: tour-finance-service

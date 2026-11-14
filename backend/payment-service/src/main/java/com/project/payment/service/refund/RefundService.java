@@ -31,10 +31,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class RefundService {
 
+        private static final Logger log = LoggerFactory.getLogger(RefundService.class);
         private static final String STATUS_QUEUED = "QUEUED";
         private static final String STATUS_SENDING = "SENDING";
         private static final String STATUS_PROCESSING = "PROCESSING";
@@ -154,14 +157,19 @@ public class RefundService {
                 refund.setOriginalTransactionNo(
                                 payment.getTransactionCode());
 
-                refund.setOriginalCreatedAt(
-                                payment.getCreatedAt());
+                if (payment.getCreatedAt() == null) {
+                        throw new RefundException(422, "PAYMENT_CREATED_AT_MISSING");
+                }
+
+                refund.setOriginalCreatedAt(payment.getCreatedAt());
 
                 Instant now = Instant.now();
 
                 refund.setCreatedAt(now);
                 refund.setUpdatedAt(now);
-
+                log.info("[REFUND CREATE] paymentId={}, txnNo={}, createdAt={}, amount={}, type={}",
+                                paymentId, payment.getTransactionCode(), payment.getCreatedAt(),
+                                payment.getAmount(), refund.getTransactionType());
                 refundRepository.saveAndFlush(refund);
 
                 return new Accepted(

@@ -2,16 +2,12 @@ package com.project.booking.controller.finance;
 
 import com.project.booking.dto.refund.BookingRefundResponse;
 import com.project.booking.dto.refund.FinanceRefundRejectRequest;
-import com.project.booking.exception.AppException;
 import com.project.booking.model.enums.BookingRefundStatus;
 import com.project.booking.service.finance.refund.FinanceBookingRefundService;
-
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import java.security.Principal;
 import jakarta.validation.Valid;
-
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +15,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/finance/refunds")
-@PreAuthorize("hasAnyRole('FINANCE', 'ADMIN')")
 public class FinanceBookingRefundController {
 
     private final FinanceBookingRefundService refundService;
@@ -52,31 +47,24 @@ public class FinanceBookingRefundController {
                 refundService.getRefundDetail(refundId));
     }
 
-    /**
-     * Finance xác nhận hoàn tiền.
-     * Đây là thời điểm Booking Service phát event sang Payment Service.
-     */
     @PostMapping("/{refundId}/approve")
     public ResponseEntity<BookingRefundResponse> approveRefund(
             @PathVariable Long refundId,
-            Authentication authentication) {
+            Principal principal) {
 
-        UUID reviewerId = getCurrentUserId(authentication);
+        UUID reviewerId = extractUserId(principal);
 
         return ResponseEntity.ok(
                 refundService.approveRefund(refundId, reviewerId));
     }
 
-    /**
-     * Finance từ chối yêu cầu hoàn tiền.
-     */
     @PostMapping("/{refundId}/reject")
     public ResponseEntity<BookingRefundResponse> rejectRefund(
             @PathVariable Long refundId,
             @Valid @RequestBody FinanceRefundRejectRequest request,
-            Authentication authentication) {
+            Principal principal) {
 
-        UUID reviewerId = getCurrentUserId(authentication);
+        UUID reviewerId = extractUserId(principal);
 
         return ResponseEntity.ok(
                 refundService.rejectRefund(
@@ -85,23 +73,27 @@ public class FinanceBookingRefundController {
                         request));
     }
 
-    private UUID getCurrentUserId(Authentication authentication) {
+    private UUID extractUserId(Principal principal) {
 
-        if (authentication == null
-                || authentication.getName() == null
-                || authentication.getName().isBlank()) {
+        if (principal instanceof JwtAuthenticationToken jwtAuth) {
 
-            throw new AppException(
-                    "Unauthenticated user",
-                    HttpStatus.UNAUTHORIZED);
+            Object userIdClaim = jwtAuth.getTokenAttributes().get("userId");
+
+            if (userIdClaim != null) {
+                try {
+                    return UUID.fromString(userIdClaim.toString());
+                } catch (IllegalArgumentException e) {
+                    throw new RuntimeException(
+                            "userId trong token không đúng định dạng UUID.");
+                }
+            }
         }
 
         try {
-            return UUID.fromString(authentication.getName());
-        } catch (IllegalArgumentException exception) {
-            throw new AppException(
-                    "Invalid authenticated user ID",
-                    HttpStatus.UNAUTHORIZED);
+            return UUID.fromString(principal.getName());
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    "Không thể xác định userId dạng UUID từ token xác thực.");
         }
     }
 }
