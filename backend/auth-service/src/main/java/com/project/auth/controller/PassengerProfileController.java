@@ -10,7 +10,6 @@ import jakarta.validation.Valid;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,8 +17,7 @@ import java.security.Principal;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/profile/me")
-@PreAuthorize("hasRole('PASSENGER')")
+@RequestMapping("/api/passenger/profiles")
 public class PassengerProfileController {
 
     private final UserProfileService userProfileService;
