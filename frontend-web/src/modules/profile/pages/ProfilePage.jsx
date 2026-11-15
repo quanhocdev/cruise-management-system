@@ -7,6 +7,7 @@ import useProfileForm from "../hooks/useProfileForm";
 import ProfileSummaryCard from "../components/ProfileSummaryCard";
 import ProfileForm from "../components/ProfileForm";
 import "../styles/ProfilePage.css";
+import ProfileAvatar from "../components/ProfileAvatar";
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -78,11 +79,22 @@ export default function ProfilePage() {
 
       <div className="pf-layout">
         <aside className="pf-card">
+          <ProfileAvatar
+            profile={profile}
+            editable={user?.role === "PASSENGER"}
+            avatarLoading={formState.avatarLoading}
+            onUpload={formState.handleUploadAvatar}
+            onDelete={formState.handleDeleteAvatar}
+          />
+
           <ProfileSummaryCard profile={profile} user={user} />
         </aside>
 
         <section className="pf-card">
-          <ProfileForm formState={formState} readOnly={!isPassenger} />
+          <ProfileForm
+            formState={formState}
+            readOnly={user?.role !== "PASSENGER"}
+          />
         </section>
       </div>
     </div>

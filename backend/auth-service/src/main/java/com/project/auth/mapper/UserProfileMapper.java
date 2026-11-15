@@ -66,8 +66,13 @@ public final class UserProfileMapper {
                 profile.getGender(),
                 profile.getNationality(),
                 profile.getIdentityNumber(),
-                profile.getAvatarPublicId(),
+
+                // URL đầy đủ để frontend hiển thị ảnh.
                 profile.getAvatarUrl(),
+
+                // Public ID để xóa ảnh trên Cloudinary.
+                profile.getAvatarPublicId(),
+
                 profile.getCreatedAt(),
                 profile.getUpdatedAt());
     }
