@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Alert, Button, Form, InputGroup } from "react-bootstrap";
-
+import { useNavigate } from "react-router-dom";
 import useAccounts from "../hooks/useAccounts";
 
 import AccountTable from "../components/account/AccountTable";
@@ -63,6 +63,12 @@ export default function ManagerAccount() {
     updateAccount,
     deactivateAccount,
   } = useAccounts();
+
+  const navigate = useNavigate();
+
+  const handleViewProfile = (account) => {
+    navigate(`/admin/profiles/${account.id}`);
+  };
 
   const [showModal, setShowModal] = useState(false);
   const [editingAccount, setEditingAccount] = useState(null);
@@ -293,6 +299,7 @@ export default function ManagerAccount() {
         loading={loading}
         onEdit={handleOpenEdit}
         onDeactivate={handleDeactivate}
+        onViewProfile={handleViewProfile}
         emptyMessage={
           searchTerm
             ? "Không tìm thấy tài khoản phù hợp với từ khóa."

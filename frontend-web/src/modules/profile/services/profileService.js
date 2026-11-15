@@ -48,20 +48,6 @@ export async function getMyProfile() {
   return request("/profile/me");
 }
 
-/**
- * Cập nhật một phần hồ sơ (chỉ gửi các field thay đổi).
- *
- * PATCH /api/profile/me
- *
- * @param {Object} payload
- */
-export async function updateMyProfile(payload) {
-  return request("/profile/me", {
-    method: "PATCH",
-    body: JSON.stringify(payload),
-  });
-}
-
 // request() đã ném Error(message) nên chỉ cần lấy message
 export const extractErrorMessage = (error, fallback) =>
   error?.message || fallback;

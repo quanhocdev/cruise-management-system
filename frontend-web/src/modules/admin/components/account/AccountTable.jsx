@@ -33,6 +33,7 @@ export default function AccountTable({
   loading,
   onEdit,
   onDeactivate,
+  onViewProfile,
   emptyMessage = "Không tìm thấy tài khoản phù hợp.",
 }) {
   if (loading) {
@@ -70,9 +71,7 @@ export default function AccountTable({
                 <th>Email</th>
                 <th>Vai trò</th>
                 <th>Trạng thái</th>
-                <th className="text-center" style={{ width: "190px" }}>
-                  Thao tác
-                </th>
+                <th className="text-center">Thao tác</th>
               </tr>
             </thead>
 
@@ -100,7 +99,16 @@ export default function AccountTable({
                     <td>{getStatusBadge(status)}</td>
 
                     <td>
-                      <div className="d-flex gap-2 justify-content-center">
+                      <div className="d-flex gap-2 justify-content-center flex-wrap">
+                        <Button
+                          size="sm"
+                          variant="outline-info"
+                          onClick={() => onViewProfile(account)}
+                        >
+                          <i className="bi bi-person-vcard me-1" />
+                          Xem hồ sơ
+                        </Button>
+
                         <Button
                           size="sm"
                           variant="outline-primary"

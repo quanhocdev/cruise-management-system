@@ -5,7 +5,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 import AdminLayout from "../layouts/AdminLayout";
 import ProfilePage from "../modules/profile/pages/ProfilePage";
-
+import AdminProfilePage from "../modules/admin/pages/AdminProfilePage";
 import AdminDashboard from "../modules/admin/pages/Dashboard";
 import ManagerAccount from "../modules/admin/pages/ManagerAccount";
 import ManagerPort from "../modules/admin/pages/ManagerPort";
@@ -29,6 +29,7 @@ const adminRoutes = (
           <Routes>
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="accounts" element={<ManagerAccount />} />
+            <Route path="profiles/:userId" element={<AdminProfilePage />} />
             <Route path="ports" element={<ManagerPort />} />
             <Route path="nfc-cards" element={<ManagerNfcCard />} />
 
