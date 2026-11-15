@@ -61,7 +61,7 @@ export default function VesselMonitoringPage() {
               <TourCard
                 key={tour.id}
                 tour={tour}
-                onOpen={(id) => navigate(`/scheduler/vessels/${id}`)}
+                onOpen={(id) => navigate(`/scheduler/vessels/monitoring/${id}`)}
               />
             ))}
           </div>

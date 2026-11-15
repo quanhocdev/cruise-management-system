@@ -1,4 +1,3 @@
-// src/components/management/ManagementUserMenu.jsx
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronDown, LogOut, UserCircle, UserRound } from "lucide-react";
@@ -40,7 +39,6 @@ export default function ManagementUserMenu({ config }) {
 
   return (
     <div className="mgmt-user-menu" ref={ref}>
-      {/* Giữ class cũ để không đổi giao diện hiện tại */}
       <button
         type="button"
         className="mgmt-header-user mgmt-user-trigger"

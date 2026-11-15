@@ -27,7 +27,7 @@ export default function VesselDetailPage() {
       <DetailHero
         tour={tourDetails}
         loading={loading}
-        onBack={() => navigate("/scheduler/vessels")}
+        onBack={() => navigate("/scheduler/vessels/monitoring")}
         onReload={reload}
       />
 

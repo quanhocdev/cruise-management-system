@@ -1,7 +1,6 @@
-// ManagementHeader.jsx
-// components/management/ManagementHeader.jsx
-import { Menu, UserCircle } from "lucide-react";
+import { Menu } from "lucide-react";
 import NotificationBell from "./NotificationBell";
+import ManagementUserMenu from "./ManagementUserMenu";
 import "../../styles/management/header.css";
 
 function ManagementHeader({
@@ -35,17 +34,7 @@ function ManagementHeader({
 
       <div className="mgmt-header-right">
         {notificationProps && <NotificationBell {...notificationProps} />}
-        <div className="mgmt-header-user">
-          {config.user.initials ? (
-            <div className="mgmt-avatar">{config.user.initials}</div>
-          ) : (
-            <UserCircle size={32} />
-          )}
-          <div className="mgmt-header-user-info">
-            <strong>{config.user.name}</strong>
-            <span>{config.user.role}</span>
-          </div>
-        </div>
+        <ManagementUserMenu config={config} />
       </div>
     </header>
   );
