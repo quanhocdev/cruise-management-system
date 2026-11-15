@@ -8,6 +8,7 @@ import {
   QrCode,
   Banknote,
   MessageCircle,
+  RotateCcw,
 } from "lucide-react";
 
 export const financeConfig = {
@@ -59,6 +60,11 @@ export const financeConfig = {
           label: "Tin nhắn hành khách",
           icon: MessageCircle,
           path: "/finance/messages",
+        },
+        {
+          label: "Quản lý hoàn tiền",
+          icon: RotateCcw,
+          path: "/finance/refunds",
         },
       ],
     },

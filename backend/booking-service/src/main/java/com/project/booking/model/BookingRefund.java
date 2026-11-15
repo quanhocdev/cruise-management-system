@@ -37,6 +37,10 @@ public class BookingRefund {
     @Column(name = "policy_refund_rule_id")
     private UUID policyRefundRuleId;
 
+    // UUID cố định dùng làm clientRequestId khi tạo PaymentRefund
+    @Column(name = "payment_client_request_id", unique = true)
+    private UUID paymentClientRequestId;
+
     // Ngày khởi hành tại thời điểm yêu cầu
     @Column(name = "departure_date")
     private LocalDate departureDate;
@@ -176,6 +180,14 @@ public class BookingRefund {
 
     public void setCalculatedRefundAmount(BigDecimal calculatedRefundAmount) {
         this.calculatedRefundAmount = calculatedRefundAmount;
+    }
+
+    public UUID getPaymentClientRequestId() {
+        return paymentClientRequestId;
+    }
+
+    public void setPaymentClientRequestId(UUID paymentClientRequestId) {
+        this.paymentClientRequestId = paymentClientRequestId;
     }
 
     public BookingRefundStatus getStatus() {

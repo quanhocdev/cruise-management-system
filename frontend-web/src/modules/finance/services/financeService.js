@@ -98,6 +98,32 @@ const financeService = {
     const res = await api.post(`${BASE_URL}/bookings/${bookingId}/checkout`);
     return res.data;
   },
+
+  // ==================== REFUNDS ====================
+
+  // Lấy danh sách yêu cầu hoàn tiền
+  getRefunds: async (status = "PENDING") => {
+    const res = await api.get(`${BASE_URL}/refunds`, {
+      params: status && status !== "ALL" ? { status } : undefined,
+    });
+    return res.data;
+  },
+
+  // Lấy chi tiết yêu cầu hoàn tiền
+  getRefundDetail: async (refundId) =>
+    (await api.get(`${BASE_URL}/refunds/${refundId}`)).data,
+
+  // Finance duyệt yêu cầu hoàn tiền
+  approveRefund: async (refundId) =>
+    (await api.post(`${BASE_URL}/refunds/${refundId}/approve`)).data,
+
+  // Finance từ chối yêu cầu hoàn tiền
+  rejectRefund: async (refundId, reason) =>
+    (
+      await api.post(`${BASE_URL}/refunds/${refundId}/reject`, {
+        reason,
+      })
+    ).data,
 };
 
 export default financeService;

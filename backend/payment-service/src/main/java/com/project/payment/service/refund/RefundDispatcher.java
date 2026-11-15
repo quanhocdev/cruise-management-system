@@ -58,33 +58,53 @@ public class RefundDispatcher {
     @Scheduled(fixedDelayString = "${payment.refunds.poll-ms:10000}", initialDelayString = "${payment.refunds.poll-ms:10000}")
     public void recover() {
 
-        for (UUID id : refundService.queued()) {
+        LOG.info("[REFUND SCHEDULER] Started");
+
+        var queuedRefunds = refundService.queued();
+
+        LOG.info(
+                "[REFUND SCHEDULER] Queued refunds found: {}",
+                queuedRefunds.size());
+
+        for (UUID id : queuedRefunds) {
+            LOG.info("[REFUND SCHEDULER] Dispatching refund: {}", id);
 
             try {
                 dispatch(id);
-
             } catch (Exception e) {
-
                 LOG.warn(
-                        "Refund dispatch requires reconciliation: {}",
+                        "[REFUND SCHEDULER] Dispatch failed: {}",
                         id,
                         e);
             }
         }
 
-        for (UUID id : refundService.awaitingReconciliation()) {
+        var pendingRefunds = refundService.awaitingReconciliation();
+
+        LOG.info(
+                "[REFUND SCHEDULER] Refunds awaiting reconciliation: {}",
+                pendingRefunds.size());
+
+        for (UUID id : pendingRefunds) {
+
+            LOG.info("[REFUND SCHEDULER] Reconciling refund: {}", id);
 
             try {
                 Refund refund = refundService.read(id);
 
                 Outcome result = refundProvider.reconcile(refund);
 
+                LOG.info(
+                        "[REFUND SCHEDULER] Reconciliation result: id={}, status={}, code={}",
+                        id,
+                        result.status(),
+                        result.code());
+
                 refundService.complete(id, result);
 
             } catch (Exception e) {
-
                 LOG.warn(
-                        "Refund reconciliation remains pending: {}",
+                        "[REFUND SCHEDULER] Reconciliation failed: {}",
                         id,
                         e);
             }

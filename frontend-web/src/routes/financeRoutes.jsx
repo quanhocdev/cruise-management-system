@@ -14,6 +14,8 @@ import FinanceBookingPassengers from "../modules/finance/pages/FinanceBookingPas
 import FinanceCheckIn from "../modules/finance/pages/FinanceCheckIn";
 import FinanceCheckout from "../modules/finance/pages/FinanceCheckout";
 import FinanceMessages from "../modules/finance/pages/FinanceMessages";
+import FinanceRefunds from "../modules/finance/pages/FinanceRefunds";
+import FinanceRefundDetail from "../modules/finance/pages/FinanceRefundDetail";
 
 const financeRoutes = (
   <Route
@@ -39,6 +41,8 @@ const financeRoutes = (
     <Route path="rooms" element={<FinanceRooms />} />
     <Route path="nfc-cards" element={<FinanceNfcCards />} />
 
+    <Route path="refunds" element={<FinanceRefunds />} />
+    <Route path="refunds/:refundId" element={<FinanceRefundDetail />} />
     <Route index element={<Navigate to="dashboard" replace />} />
   </Route>
 );

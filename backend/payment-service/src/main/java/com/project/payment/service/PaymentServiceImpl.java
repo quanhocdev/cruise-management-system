@@ -7,7 +7,9 @@ import com.project.payment.model.Payment;
 import com.project.payment.model.enums.*;
 import com.project.payment.repository.PaymentRepository;
 import com.project.common.event.PaymentSuccessEvent;
-
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -15,12 +17,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
 
+    private static final Logger log = LoggerFactory.getLogger(PaymentServiceImpl.class);
     private final PaymentRepository repository;
     private final PaymentMapper mapper;
     private final Map<PaymentMethod, PaymentProvider> providers;
@@ -126,6 +132,8 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     public PaymentResponse handleVnPayReturn(Map<String, String> params) {
 
+        log.info("[VNPAY CALLBACK][RETURN] params={}", params);
+
         if (!provider().verifyCallback(params)) {
             throw new PaymentException("Invalid VNPay signature");
         }
@@ -139,6 +147,8 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @Transactional
     public VnPayIpnResponse handleVnPayIpn(Map<String, String> params) {
+
+        log.info("[VNPAY CALLBACK][IPN] params={}", params);
 
         if (!provider().verifyCallback(params)) {
             return new VnPayIpnResponse("97", "Invalid checksum");
@@ -187,10 +197,13 @@ public class PaymentServiceImpl implements PaymentService {
                 : PaymentStatus.FAILED);
 
         if (success) {
-            payment.setPaidAt(Instant.now());
+            payment.setPaidAt(
+                    parseVnPayPayDate(params.get("vnp_PayDate")));
         }
 
         payment.setTransactionCode(provider().getTransactionCode(params));
+        log.info("[PAYMENT RESULT] paymentId={}, success={}, createdAt={}, paidAt={}, txnNo={}",
+                payment.getId(), success, payment.getCreatedAt(), payment.getPaidAt(), payment.getTransactionCode());
         payment.setResponseCode(params.get("vnp_ResponseCode"));
         payment.setUpdatedAt(Instant.now());
 
@@ -232,6 +245,18 @@ public class PaymentServiceImpl implements PaymentService {
         } catch (NumberFormatException ex) {
             throw new PaymentException("Invalid VNPay transaction reference");
         }
+    }
+
+    private Instant parseVnPayPayDate(String payDate) {
+        if (payDate == null || !payDate.matches("\\d{14}")) {
+            throw new PaymentException("Invalid VNPay payment date");
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+
+        return LocalDateTime.parse(payDate, formatter)
+                .atZone(ZoneId.of("Asia/Ho_Chi_Minh"))
+                .toInstant();
     }
 
     private void validateAmount(

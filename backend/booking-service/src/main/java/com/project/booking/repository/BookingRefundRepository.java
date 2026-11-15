@@ -29,4 +29,6 @@ public interface BookingRefundRepository extends JpaRepository<BookingRefund, Lo
 
     // Lấy danh sách yêu cầu theo trạng thái
     List<BookingRefund> findByStatusOrderByCreatedAtAsc(BookingRefundStatus status);
+
+    Optional<BookingRefund> findByPaymentClientRequestId(UUID paymentClientRequestId);
 }

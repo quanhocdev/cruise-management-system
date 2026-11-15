@@ -105,6 +105,8 @@ public class PassengerRefundServiceImpl implements PassengerRefundService {
                 // 6. Tạo yêu cầu hoàn tiền và lưu snapshot chính sách
                 BookingRefund refund = new BookingRefund();
 
+                refund.setPaymentClientRequestId(UUID.randomUUID());
+
                 refund.setBookingId(booking.getId());
                 refund.setRequestedByUserId(userId);
                 refund.setReason(
