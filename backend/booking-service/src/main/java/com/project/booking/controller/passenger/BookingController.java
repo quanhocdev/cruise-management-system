@@ -4,6 +4,7 @@ package com.project.booking.controller.passenger;
 import com.project.booking.dto.booking.BookingResponse;
 import com.project.booking.dto.booking.CreateBookingRequest;
 import com.project.booking.dto.booking.PassengerBookedTourResponse;
+import com.project.booking.dto.booking.PassengerTourTrackingResponse;
 import com.project.booking.service.passenger.BookingService;
 
 import org.springframework.http.MediaType;
@@ -61,7 +62,7 @@ public class BookingController {
     }
 
     @GetMapping("/tours/{tourId}/details")
-    public ResponseEntity<TourDetailResponse> getMyBookedTourDetails(
+    public ResponseEntity<PassengerTourTrackingResponse> getMyBookedTourDetails(
             @PathVariable UUID tourId,
             Principal principal) {
 

@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
-
+import com.project.booking.dto.booking.PassengerTourTrackingResponse;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
