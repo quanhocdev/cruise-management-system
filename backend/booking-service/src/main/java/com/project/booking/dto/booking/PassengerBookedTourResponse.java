@@ -8,5 +8,6 @@ public record PassengerBookedTourResponse(
         String tourCode,
         String tourName,
         LocalDate departureDate,
-        LocalDate endDate) {
+        LocalDate endDate,
+        String statusTrip) {
 }

@@ -92,6 +92,7 @@ public class TourInternalServiceImpl implements TourInternalService {
                 tour.getCode(),
                 tour.getName(),
                 tour.getStartDate(),
-                tour.getEndDate());
+                tour.getEndDate(),
+                tour.getStatusTrip());
     }
 }

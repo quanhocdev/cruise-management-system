@@ -467,7 +467,8 @@ public class BookingServiceImpl implements BookingService {
                                                 tour.tourCode(),
                                                 tour.tourName(),
                                                 tour.departureDate(),
-                                                tour.endDate()))
+                                                tour.endDate(),
+                                                tour.statusTrip()))
                                 .toList();
         }
 
