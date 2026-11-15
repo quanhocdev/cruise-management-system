@@ -4,6 +4,7 @@ import { Navigate, Route } from "react-router-dom";
 
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 import FinanceLayout from "../layouts/FinanceLayout";
+import ProfilePage from "../modules/profile/pages/ProfilePage";
 
 import FinanceDashboard from "../modules/finance/pages/Dashboard";
 import FinanceTourSchedule from "../modules/finance/pages/FinanceTourSchedule";
@@ -26,6 +27,7 @@ const financeRoutes = (
       </ProtectedRoute>
     }
   >
+    <Route path="profile" element={<ProfilePage />} />
     <Route path="dashboard" element={<FinanceDashboard />} />
     <Route path="check-in" element={<FinanceCheckIn />} />
     <Route path="checkout" element={<FinanceCheckout />} />

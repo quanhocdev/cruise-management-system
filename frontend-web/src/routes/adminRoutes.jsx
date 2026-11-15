@@ -4,6 +4,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 import AdminLayout from "../layouts/AdminLayout";
+import ProfilePage from "../modules/profile/pages/ProfilePage";
 
 import AdminDashboard from "../modules/admin/pages/Dashboard";
 import ManagerAccount from "../modules/admin/pages/ManagerAccount";
@@ -41,7 +42,7 @@ const adminRoutes = (
             <Route path="products" element={<ManagerProduct />} />
             <Route path="services" element={<ManagerService />} />
             <Route path="policies" element={<ManagerPolicy />} />
-
+            <Route path="profile" element={<ProfilePage />} />
             <Route path="" element={<Navigate to="dashboard" replace />} />
           </Routes>
         </AdminLayout>

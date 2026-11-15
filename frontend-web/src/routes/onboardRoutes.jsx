@@ -10,8 +10,8 @@ import OnboardActivityCruiseTour from "../modules/onboard/pages/ActivityCruiseTo
 import ActivityCruise from "../modules/onboard/pages/ActivityCruise";
 import ActivityCruiseUsage from "../modules/onboard/pages/ActivityCruiseUsage";
 import OnboardTourConfigPage from "../modules/onboard/pages/OnboardTourConfigPage";
+import ProfilePage from "../modules/profile/pages/ProfilePage";
 
-// Các trang chưa làm: dùng chung một placeholder
 const comingSoon = (title) => <div>Trang {title} (Đang phát triển)</div>;
 
 const onboardRoutes = (
@@ -29,7 +29,7 @@ const onboardRoutes = (
     <Route path="messages" element={<OnboardMessages />} />
     <Route path="activity-cruise" element={<OnboardActivityCruiseTour />} />
     <Route path="activity-cruise-usages" element={<ActivityCruiseUsage />} />
-
+    <Route path="profile" element={<ProfilePage />} />
     <Route path="schedules" element={comingSoon("Lịch trình")} />
     <Route path="cruises" element={comingSoon("Du thuyền")} />
     <Route path="bookings" element={comingSoon("Booking")} />

@@ -4,6 +4,7 @@ import { Navigate, Route } from "react-router-dom";
 
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 import ConvenienceLayout from "../layouts/ConvenienceLayout";
+import ProfilePage from "../modules/profile/pages/ProfilePage";
 
 import ConvenienceDashboard from "../modules/convenience/pages/Dashboard";
 import ConvenienceProducts from "../modules/convenience/pages/ConvenienceProducts";
@@ -22,6 +23,7 @@ const convenienceRoutes = (
       </ProtectedRoute>
     }
   >
+    <Route path="profile" element={<ProfilePage />} />
     <Route path="dashboard" element={<ConvenienceDashboard />} />
     <Route path="products" element={<ConvenienceProducts />} />
     <Route path="services" element={<ConvenienceServices />} />

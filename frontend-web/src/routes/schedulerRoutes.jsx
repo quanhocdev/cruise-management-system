@@ -12,6 +12,7 @@ import ManagerSchedule from "../modules/scheduler/pages/ManagerSchedule";
 import ManagerScheduleStops from "../modules/scheduler/pages/ManagerScheduleStops";
 import VesselMonitoringPage from "../modules/scheduler/pages/VesselMonitoringPage";
 import VesselDetailPage from "../modules/scheduler/pages/VesselDetailPage";
+import ProfilePage from "../modules/profile/pages/ProfilePage";
 
 const schedulerRoutes = (
   <Route
@@ -39,6 +40,7 @@ const schedulerRoutes = (
               path="tours/:tourId/schedules/:scheduleId/stops"
               element={<ManagerScheduleStops />}
             />
+            <Route path="profile" element={<ProfilePage />} />
             <Route path="" element={<Navigate to="dashboard" replace />} />
           </Routes>
         </SchedulerLayout>

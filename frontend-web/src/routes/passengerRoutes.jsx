@@ -2,6 +2,7 @@ import { Navigate, Route } from "react-router-dom";
 
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 import GuestLayout from "../layouts/GuestLayout";
+import ProfilePage from "../modules/profile/pages/ProfilePage";
 
 import PassengerBookings from "../modules/passenger/pages/MyBookings";
 import PassengerBookingDetail from "../modules/passenger/pages/BookingDetail";
@@ -23,7 +24,7 @@ const passengerRoutes = (
     <Route path="bookings" element={<PassengerBookings />} />
     <Route path="bookings/:bookingId" element={<PassengerBookingDetail />} />
     <Route path="payment/result" element={<PaymentResultPage />} />
-
+    <Route path="profile" element={<ProfilePage />} />
     {/* Chat với các phòng ban */}
     <Route path="messages" element={<PassengerMessages />} />
 
