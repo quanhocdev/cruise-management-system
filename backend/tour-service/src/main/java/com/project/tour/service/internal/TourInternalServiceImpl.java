@@ -2,9 +2,11 @@
 package com.project.tour.service.internal;
 
 import com.project.tour.dto.internal.TourBookingInfoResponse;
+import com.project.tour.dto.scheduler.SchedulerTourDtos.TourDetailResponse;
 import com.project.tour.exception.AppException;
 import com.project.tour.model.scheduler.Tour;
 import com.project.tour.repository.scheduler.TourRepository;
+import com.project.tour.service.scheduler.SchedulerTourService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -21,9 +23,11 @@ import java.util.stream.Collectors;
 public class TourInternalServiceImpl implements TourInternalService {
 
     private final TourRepository tourRepository;
+    private final SchedulerTourService schedulerTourService;
 
-    public TourInternalServiceImpl(TourRepository tourRepository) {
+    public TourInternalServiceImpl(TourRepository tourRepository, SchedulerTourService schedulerTourService) {
         this.tourRepository = tourRepository;
+        this.schedulerTourService = schedulerTourService;
     }
 
     @Override
@@ -74,6 +78,12 @@ public class TourInternalServiceImpl implements TourInternalService {
                 .map(tourMap::get)
                 .map(this::toResponse)
                 .toList();
+    }
+
+    @Override
+    public TourDetailResponse getTourTrackingDetails(UUID tourId) {
+        return schedulerTourService.getTourDetailsWithTracking(tourId);
+
     }
 
     private TourBookingInfoResponse toResponse(Tour tour) {

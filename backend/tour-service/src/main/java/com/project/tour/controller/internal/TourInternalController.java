@@ -1,6 +1,7 @@
 package com.project.tour.controller.internal;
 
 import com.project.tour.dto.internal.TourBookingInfoResponse;
+import com.project.tour.dto.scheduler.SchedulerTourDtos.TourDetailResponse;
 import com.project.tour.service.internal.TourInternalService;
 
 import org.springframework.http.ResponseEntity;
@@ -27,12 +28,19 @@ public class TourInternalController {
                 tourInternalService.getTourBookingInfo(tourId));
     }
 
-    
-@GetMapping("/booking-info/batch")
-public ResponseEntity<List<TourBookingInfoResponse>> getToursBookingInfo(
-        @RequestParam List<UUID> tourIds) {
-    return ResponseEntity.ok(
-            tourInternalService.getToursBookingInfo(tourIds));
-}
+    @GetMapping("/booking-info/batch")
+    public ResponseEntity<List<TourBookingInfoResponse>> getToursBookingInfo(
+            @RequestParam List<UUID> tourIds) {
+        return ResponseEntity.ok(
+                tourInternalService.getToursBookingInfo(tourIds));
+    }
+
+    @GetMapping("/{tourId}/tracking-details")
+    public ResponseEntity<TourDetailResponse> getTourTrackingDetails(
+            @PathVariable UUID tourId) {
+
+        return ResponseEntity.ok(
+                tourInternalService.getTourTrackingDetails(tourId));
+    }
 
 }

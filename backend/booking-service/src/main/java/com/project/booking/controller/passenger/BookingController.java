@@ -60,6 +60,17 @@ public class BookingController {
 
     }
 
+    @GetMapping("/tours/{tourId}/details")
+    public ResponseEntity<TourDetailResponse> getMyBookedTourDetails(
+            @PathVariable UUID tourId,
+            Principal principal) {
+
+        UUID userId = extractUserId(principal);
+
+        return ResponseEntity.ok(
+                bookingService.getMyBookedTourDetails(userId, tourId));
+    }
+
     @GetMapping
     public ResponseEntity<List<BookingResponse>> getMine(Principal principal) {
         UUID userId = extractUserId(principal);
