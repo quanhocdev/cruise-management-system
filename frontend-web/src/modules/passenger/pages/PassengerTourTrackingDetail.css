@@ -1,0 +1,38 @@
+/* src/modules/passenger/pages/PassengerTourTrackingDetail.css */
+.ptd-body {
+  padding-top: 8px;
+  padding-bottom: 40px;
+}
+.ptd-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.ptd-duo {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+.ptd-live {
+  color: #0c7c76;
+  font-weight: 600;
+}
+.ptd-desc {
+  background: #fff;
+  border: 1px solid var(--vm-line);
+  border-radius: 16px;
+  padding: 18px 22px;
+  color: var(--vm-mute);
+  line-height: 1.6;
+}
+.ptd-state {
+  padding: 48px 16px;
+  text-align: center;
+  color: var(--vm-mute);
+}
+
+@media (max-width: 900px) {
+  .ptd-duo {
+    grid-template-columns: 1fr;
+  }
+}
