@@ -1,3 +1,4 @@
+
 package com.project.auth.mapper;
 
 import com.project.auth.dto.UserProfileRequest;
@@ -19,13 +20,33 @@ public final class UserProfileMapper {
             UserProfile profile,
             UserProfileRequest request) {
 
-        profile.setFullName(request.fullName());
-        profile.setDateOfBirth(request.dateOfBirth());
-        profile.setPhone(request.phone());
-        profile.setAddress(request.address());
-        profile.setGender(request.gender());
-        profile.setNationality(request.nationality());
-        profile.setIdentityNumber(request.identityNumber());
+        if (request.fullName() != null) {
+            profile.setFullName(request.fullName());
+        }
+
+        if (request.dateOfBirth() != null) {
+            profile.setDateOfBirth(request.dateOfBirth());
+        }
+
+        if (request.phone() != null) {
+            profile.setPhone(request.phone());
+        }
+
+        if (request.address() != null) {
+            profile.setAddress(request.address());
+        }
+
+        if (request.gender() != null) {
+            profile.setGender(request.gender());
+        }
+
+        if (request.nationality() != null) {
+            profile.setNationality(request.nationality());
+        }
+
+        if (request.identityNumber() != null) {
+            profile.setIdentityNumber(request.identityNumber());
+        }
     }
 
     /**
@@ -46,6 +67,7 @@ public final class UserProfileMapper {
                 profile.getNationality(),
                 profile.getIdentityNumber(),
                 profile.getAvatarPublicId(),
+                profile.getAvatarUrl(),
                 profile.getCreatedAt(),
                 profile.getUpdatedAt());
     }
