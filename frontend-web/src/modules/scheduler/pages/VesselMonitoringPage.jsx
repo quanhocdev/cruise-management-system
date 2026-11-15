@@ -1,87 +1,72 @@
 // src/modules/scheduler/pages/VesselMonitoringPage.jsx
-import React, { useState } from "react";
-import {
-  Ship,
-  Navigation,
-  RefreshCw,
-  Calendar,
-  ArrowRight,
-} from "lucide-react";
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { RefreshCw, Compass } from "lucide-react";
 import useVesselTours from "../hooks/useVesselTours";
-import VesselDetailModal from "./VesselDetailModal";
+import TourCard from "../components/vessel/TourCard";
+import "../styles/vessel-shared.css";
 import "../styles/VesselMonitoringPage.css";
 
 export default function VesselMonitoringPage() {
-  console.log("VESSEL MONITORING PAGE RENDERED!");
+  const navigate = useNavigate();
   const { tours, loading, error, loadActiveTours } = useVesselTours();
-  const [selectedTourId, setSelectedTourId] = useState(null);
+
+  const sailing = tours.filter((t) => t.statusTrip === "IN_PROGRESS").length;
+  const ready = tours.filter((t) => t.statusTrip === "READY").length;
 
   return (
-    <div className="vessel-monitoring-container">
-      <div className="vessel-monitoring-header">
-        <div>
+    <div className="vm-page">
+      <header className="vm-hero vmp-hero">
+        <div className="vmp-hero-text">
           <h1>Giám sát đội tàu & Tuyến đường</h1>
           <p>
-            Danh sách các tour đang sẵn sàng (READY) hoặc đang thực hiện
-            (IN_PROGRESS).
+            Theo dõi vị trí, hành trình và thời tiết của các tour đang hoạt
+            động.
           </p>
+          <div className="vmp-stats">
+            <span>
+              <strong>{sailing}</strong> đang hành trình
+            </span>
+            <span>
+              <strong>{ready}</strong> sẵn sàng khởi hành
+            </span>
+          </div>
         </div>
-        <button
-          className="vessel-refresh-btn"
-          onClick={() => loadActiveTours()}
-          disabled={loading}
-        >
-          <RefreshCw size={18} className={loading ? "spin" : ""} />
-          <span>Làm mới</span>
-        </button>
-      </div>
 
-      {error && <div className="vessel-error-box">{error}</div>}
-
-      {loading && tours.length === 0 ? (
-        <div className="vessel-loading">Đang tải danh sách tour...</div>
-      ) : tours.length === 0 ? (
-        <div className="vessel-empty">
-          Không có tour nào ở trạng thái READY hoặc IN_PROGRESS.
+        <div className="vmp-hero-actions">
+          <Compass size={64} className="vmp-compass" aria-hidden="true" />
+          <button
+            className="vmp-refresh"
+            onClick={() => loadActiveTours()}
+            disabled={loading}
+          >
+            <RefreshCw size={16} className={loading ? "vm-spin" : ""} />
+            <span>Làm mới</span>
+          </button>
         </div>
-      ) : (
-        <div className="vessel-tour-grid">
-          {tours.map((tour) => (
-            <div key={tour.id} className="vessel-tour-card">
-              <div className="card-top">
-                <span className="tour-code">{tour.code}</span>
-                <span
-                  className={`status-badge ${tour.statusTrip.toLowerCase()}`}
-                >
-                  {tour.statusTrip}
-                </span>
-              </div>
-              <h3 className="tour-name">{tour.name}</h3>
-              <div className="tour-dates">
-                <Calendar size={14} />
-                <span>
-                  {tour.startDate} ➔ {tour.endDate}
-                </span>
-              </div>
-              <button
-                className="select-tour-btn"
-                onClick={() => setSelectedTourId(tour.id)}
-              >
-                <span>Xem giám sát chi tiết</span>
-                <ArrowRight size={16} />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
+      </header>
 
-      {/* Hiển thị phần chi tiết tour được chọn */}
-      {selectedTourId && (
-        <VesselDetailModal
-          tourId={selectedTourId}
-          onClose={() => setSelectedTourId(null)}
-        />
-      )}
+      <main className="vmp-body">
+        {error && <div className="vmp-error">{error}</div>}
+
+        {loading && tours.length === 0 ? (
+          <div className="vmp-state">Đang tải danh sách tour...</div>
+        ) : tours.length === 0 ? (
+          <div className="vmp-state">
+            Chưa có tour nào ở trạng thái Sẵn sàng hoặc Đang hành trình.
+          </div>
+        ) : (
+          <div className="vmp-grid">
+            {tours.map((tour) => (
+              <TourCard
+                key={tour.id}
+                tour={tour}
+                onOpen={(id) => navigate(`/scheduler/vessels/${id}`)}
+              />
+            ))}
+          </div>
+        )}
+      </main>
     </div>
   );
 }
