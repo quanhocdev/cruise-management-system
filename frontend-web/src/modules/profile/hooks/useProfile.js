@@ -1,5 +1,3 @@
-// src/modules/profile/hooks/useProfile.js
-// Hook tải hồ sơ của người đang đăng nhập.
 import { useCallback, useEffect, useState } from "react";
 import { getMyProfile, extractErrorMessage } from "../services/profileService";
 
@@ -11,10 +9,28 @@ export default function useProfile() {
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
+
     try {
-      setProfile(await getMyProfile());
+      const data = await getMyProfile();
+      setProfile(data);
     } catch (err) {
-      setError(extractErrorMessage(err, "Không tải được thông tin tài khoản"));
+      console.log("HTTP STATUS:", err.status);
+      console.log("ERROR MESSAGE:", err.message);
+
+      const isProfileNotFound =
+        Number(err.status) === 404 ||
+        err.message?.includes("404 NOT_FOUND") ||
+        err.message?.includes("Không tìm thấy hồ sơ cá nhân");
+
+      if (isProfileNotFound) {
+        // Chưa có hồ sơ: hiển thị form rỗng.
+        setProfile(null);
+        setError(null);
+      } else {
+        setError(
+          extractErrorMessage(err, "Không tải được thông tin tài khoản"),
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -24,5 +40,11 @@ export default function useProfile() {
     load();
   }, [load]);
 
-  return { profile, setProfile, loading, error, reload: load };
+  return {
+    profile,
+    setProfile,
+    loading,
+    error,
+    reload: load,
+  };
 }

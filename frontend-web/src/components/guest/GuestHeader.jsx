@@ -180,6 +180,14 @@ export default function GuestHeader() {
                         <>
                           <Dropdown.Item
                             as={Link}
+                            to="/passenger/profile"
+                            className="py-2 small fw-medium"
+                          >
+                            <i className="bi bi-person-vcard me-2" />
+                            Hồ sơ cá nhân
+                          </Dropdown.Item>
+                          <Dropdown.Item
+                            as={Link}
                             to="/passenger/bookings"
                             className="py-2 small fw-medium"
                           >

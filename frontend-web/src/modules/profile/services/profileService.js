@@ -1,8 +1,9 @@
 // src/modules/profile/services/profileService.js
-
-const API_BASE_URL = `${(
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080"
-).replace(/\/$/, "")}/api`;
+const API_BASE_URL =
+  (import.meta.env.VITE_API_BASE_URL || "http://localhost:8080").replace(
+    /\/+$/,
+    "",
+  ) + "/api";
 
 async function request(path, options = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
@@ -33,22 +34,33 @@ async function request(path, options = {}) {
       (typeof data === "string" ? data : null) ||
       `Yêu cầu thất bại (${response.status})`;
 
-    throw new Error(message);
-  }
+    const error = new Error(message);
+    error.status = response.status;
 
+    throw error;
+  }
   return data;
 }
 
 /**
  * Lấy hồ sơ của người đang đăng nhập.
- *
  * GET /api/profile/me
  */
 export async function getMyProfile() {
   return request("/profile/me");
 }
 
-// request() đã ném Error(message) nên chỉ cần lấy message
+/**
+ * Cập nhật hồ sơ của người đang đăng nhập.
+ * PATCH /api/profile/me
+ */
+export async function updateMyProfile(requestData) {
+  return request("/profile/me", {
+    method: "PATCH",
+    body: JSON.stringify(requestData),
+  });
+}
+
 export const extractErrorMessage = (error, fallback) =>
   error?.message || fallback;
 
