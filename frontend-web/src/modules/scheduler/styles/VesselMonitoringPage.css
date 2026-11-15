@@ -1,179 +1,104 @@
 /* src/modules/scheduler/styles/VesselMonitoringPage.css */
-
-.vessel-monitoring-container {
-  padding: 24px;
-  background: #f8fafc;
-  min-height: 100vh;
-}
-
-.vessel-monitoring-header {
+.vmp-hero {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  gap: 24px;
 }
-
-.vessel-monitoring-header h1 {
-  font-size: 22px;
+.vmp-hero h1 {
+  font-size: 26px;
   font-weight: 700;
-  color: #0f172a;
+  margin: 0 0 6px;
 }
-
-.vessel-monitoring-header p {
+.vmp-hero p {
+  margin: 0;
+  color: #b8cfe0;
   font-size: 14px;
-  color: #64748b;
-  margin-top: 4px;
+}
+.vmp-stats {
+  display: flex;
+  gap: 24px;
+  margin-top: 18px;
+  font-size: 13px;
+  color: #b8cfe0;
+}
+.vmp-stats strong {
+  font-size: 24px;
+  color: #fff;
+  margin-right: 6px;
 }
 
-.vessel-refresh-btn {
+.vmp-hero-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-weight: 600;
-  color: #334155;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.vessel-refresh-btn:hover {
-  background: #f1f5f9;
-}
-
-.spin {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.vessel-tour-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
 }
-
-.vessel-tour-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  transition: transform 0.2s, box-shadow 0.2s;
+.vmp-compass {
+  color: rgba(255, 255, 255, 0.16);
 }
-
-.vessel-tour-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}
-
-.card-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.tour-code {
-  font-size: 12px;
-  font-weight: 700;
-  color: #2563eb;
-  background: #eff6ff;
-  padding: 2px 8px;
-  border-radius: 4px;
-}
-
-.status-badge {
-  font-size: 11px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 12px;
-}
-
-.status-badge.ready {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.status-badge.in_progress {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.tour-name {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1e293b;
-  margin-bottom: 12px;
-  line-height: 1.4;
-}
-
-.tour-dates {
+.vmp-refresh {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: #64748b;
-  margin-bottom: 16px;
-}
-
-.select-tour-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   gap: 8px;
-  width: 100%;
-  background: #2563eb;
-  color: #ffffff;
-  border: none;
-  padding: 10px;
-  border-radius: 8px;
+  padding: 9px 16px;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
 }
-
-.select-tour-btn:hover {
-  background: #1d4ed8;
+.vmp-refresh:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+.vmp-refresh:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
-.vessel-error-box {
-  background: #fef2f2;
-  color: #991b1b;
-  padding: 12px;
-  border-radius: 8px;
+.vmp-body {
+  padding: 8px 32px 40px;
+}
+.vmp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+.vmp-state {
+  padding: 48px 16px;
+  text-align: center;
+  color: var(--vm-mute);
+}
+.vmp-error {
+  background: #fdecea;
+  color: #8f2a1a;
+  border: 1px solid #f5c2b8;
+  padding: 12px 14px;
+  border-radius: 10px;
   margin-bottom: 16px;
-  border: 1px solid #fecaca;
 }
 
-/* ========================================== */
-/* RESPONSIVE MEDIA QUERIES - TRANG DANH SÁCH */
-/* ========================================== */
 @media (max-width: 768px) {
-  .vessel-monitoring-container {
-    padding: 16px;
-  }
-
-  .vessel-monitoring-header {
+  .vmp-hero {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
   }
-
-  .vessel-refresh-btn {
+  .vmp-hero h1 {
+    font-size: 21px;
+  }
+  .vmp-compass {
+    display: none;
+  }
+  .vmp-hero-actions,
+  .vmp-refresh {
     width: 100%;
     justify-content: center;
   }
-
-  .vessel-tour-grid {
+  .vmp-body {
+    padding: 8px 16px 32px;
+  }
+  .vmp-grid {
     grid-template-columns: 1fr;
   }
 }

@@ -1,0 +1,109 @@
+/* src/modules/scheduler/styles/vessel-shared.css
+   Design tokens + tiện ích dùng chung cho cả 2 trang giám sát tàu */
+:root {
+  --vm-abyss: #0a2540;
+  --vm-deep: #0f3a5f;
+  --vm-teal: #1fb5ad;
+  --vm-foam: #eef4f6;
+  --vm-ink: #12263a;
+  --vm-mute: #5d7185;
+  --vm-line: #d5e0e6;
+  --vm-amber: #f2a93b;
+  --vm-coral: #e5674e;
+  --vm-card: #ffffff;
+}
+
+.vm-page {
+  background: var(--vm-foam);
+  min-height: 100vh;
+  color: var(--vm-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Nền biển + sóng ở mép dưới của khối hero */
+.vm-hero {
+  position: relative;
+  color: #fff;
+  background:
+    radial-gradient(
+      900px 300px at 85% -20%,
+      rgba(31, 181, 173, 0.35),
+      transparent 60%
+    ),
+    linear-gradient(135deg, var(--vm-abyss), var(--vm-deep));
+  padding: 28px 32px 64px;
+}
+.vm-hero::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 32px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 60' preserveAspectRatio='none'%3E%3Cpath d='M0 30 Q150 0 300 30 T600 30 T900 30 T1200 30 V60 H0Z' fill='%23eef4f6'/%3E%3C/svg%3E")
+    center / 100% 100% no-repeat;
+}
+
+.vm-spin {
+  animation: vm-spin 1s linear infinite;
+}
+@keyframes vm-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.vm-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+.vm-badge::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.vm-badge.ready {
+  background: rgba(242, 169, 59, 0.18);
+  color: #b36f08;
+}
+.vm-badge.in_progress {
+  background: rgba(31, 181, 173, 0.18);
+  color: #0c7c76;
+}
+.vm-badge.in_progress::before {
+  animation: vm-blink 1.6s ease-in-out infinite;
+}
+.vm-badge.completed {
+  background: #e3e9ee;
+  color: var(--vm-mute);
+}
+@keyframes vm-blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+button:focus-visible {
+  outline: 2px solid var(--vm-teal);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vm-spin,
+  .vm-badge::before {
+    animation: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .vm-hero {
+    padding: 20px 16px 56px;
+  }
+}

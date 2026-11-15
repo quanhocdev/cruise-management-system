@@ -1,0 +1,104 @@
+/* src/modules/scheduler/styles/LivePositionPanel.css */
+.lp-panel {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 22px;
+  border-radius: 16px;
+  background: var(--vm-abyss);
+  color: #fff;
+  height: 100%;
+}
+.lp-panel h4 {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #9fc2d9;
+}
+.lp-panel p {
+  margin: 0;
+  font-size: 13px;
+  color: #9fc2d9;
+}
+
+/* Radar: 2 vòng sóng lan ra từ tâm */
+.lp-radar {
+  position: relative;
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--vm-teal);
+  color: var(--vm-abyss);
+}
+.lp-radar::before,
+.lp-radar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--vm-teal);
+  animation: lp-ping 2.4s ease-out infinite;
+}
+.lp-radar::after {
+  animation-delay: 1.2s;
+}
+.lp-radar.off {
+  background: #3b536a;
+  color: #9fc2d9;
+}
+.lp-radar.off::before,
+.lp-radar.off::after {
+  display: none;
+}
+@keyframes lp-ping {
+  from {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+
+.lp-coords {
+  display: flex;
+  gap: 28px;
+}
+.lp-coords span {
+  display: block;
+  font-size: 11px;
+  color: #9fc2d9;
+  margin-bottom: 2px;
+}
+.lp-coords strong {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.lp-time {
+  margin-top: 10px !important;
+}
+.lp-panel.stale .lp-time {
+  color: var(--vm-amber);
+}
+
+@media (max-width: 768px) {
+  .lp-coords {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .lp-coords strong {
+    font-size: 17px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lp-radar::before,
+  .lp-radar::after {
+    animation: none;
+    opacity: 0.35;
+  }
+}

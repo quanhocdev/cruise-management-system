@@ -1,0 +1,83 @@
+/* src/modules/scheduler/styles/DetailHero.css */
+.dh-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+}
+.dh-back,
+.dh-reload {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.dh-back:hover,
+.dh-reload:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+.dh-reload:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.dh-tags {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.dh-code {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.14);
+}
+.dh-title h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 16px;
+  line-height: 1.25;
+}
+
+.dh-route {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 14px;
+  color: #cfe3f1;
+}
+.dh-route span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.dh-route-line {
+  flex: 0 1 140px;
+  height: 0;
+  border-top: 2px dashed rgba(255, 255, 255, 0.4);
+}
+
+@media (max-width: 768px) {
+  .dh-title h1 {
+    font-size: 21px;
+  }
+  .dh-route {
+    flex-wrap: wrap;
+  }
+  .dh-route-line {
+    display: none;
+  }
+  .dh-back span {
+    display: none;
+  }
+}

@@ -1,0 +1,137 @@
+/* src/modules/scheduler/styles/WeatherPanel.css */
+.wp-panel {
+  height: 100%;
+  padding: 22px;
+  border-radius: 16px;
+  color: #fff;
+  background: linear-gradient(160deg, #1b6f8f 0%, #0f3a5f 100%);
+}
+.wp-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.wp-head h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+.wp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.wp-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.32);
+}
+.wp-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.wp-note {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: #cde4f2;
+  line-height: 1.5;
+}
+
+.wp-now {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.wp-icon {
+  color: #ffd98a;
+}
+.wp-temp {
+  font-size: 44px;
+  font-weight: 700;
+  line-height: 1;
+}
+.wp-temp small {
+  font-size: 20px;
+  font-weight: 500;
+  margin-left: 2px;
+}
+.wp-cond {
+  margin-top: 6px;
+  font-size: 14px;
+  color: #cde4f2;
+}
+
+.wp-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 10px;
+  margin-top: 20px;
+}
+.wp-metrics > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.12);
+}
+.wp-metrics span {
+  font-size: 11px;
+  color: #cde4f2;
+}
+.wp-metrics strong {
+  font-size: 15px;
+}
+
+.wp-daily {
+  display: flex;
+  gap: 8px;
+  margin-top: 18px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.wp-daily > div {
+  flex: 0 0 62px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+}
+.wp-daily span {
+  font-size: 11px;
+  color: #cde4f2;
+}
+.wp-daily strong {
+  font-size: 15px;
+}
+.wp-daily em {
+  font-style: normal;
+  font-size: 12px;
+  color: #a9cbe0;
+}
+
+@media (max-width: 768px) {
+  .wp-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .wp-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
