@@ -71,6 +71,22 @@ public class TourClient {
                                 });
         }
 
+        /**
+         * Lấy chi tiết lịch trình và vị trí tàu của Tour.
+         */
+        @Retry(name = "tourService")
+        @CircuitBreaker(name = "tourService")
+        public PassengerTourTrackingResponse getTourTrackingDetails(UUID tourId) {
+
+                String accessToken = serviceTokenClient.getAccessToken();
+
+                return restClient.get()
+                                .uri("/internal/tours/{tourId}/tracking-details", tourId)
+                                .headers(headers -> headers.setBearerAuth(accessToken))
+                                .retrieve()
+                                .body(PassengerTourTrackingResponse.class);
+        }
+
         public record TourInfo(
                         UUID tourId,
                         String tourCode,

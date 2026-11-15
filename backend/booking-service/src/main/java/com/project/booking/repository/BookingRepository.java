@@ -1,4 +1,3 @@
-
 package com.project.booking.repository;
 
 import com.project.booking.model.Booking;
@@ -22,5 +21,11 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findAllByCreatedByUserIdAndStatusOrderByCreatedAtDesc(
             UUID userId,
+            BookingStatus status);
+
+    // Kiểm tra user có booking CONFIRMED của một Tour hay không.
+    boolean existsByCreatedByUserIdAndTourIdAndStatus(
+            UUID userId,
+            UUID tourId,
             BookingStatus status);
 }

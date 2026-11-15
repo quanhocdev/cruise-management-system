@@ -470,4 +470,43 @@ public class BookingServiceImpl implements BookingService {
                                                 tour.endDate()))
                                 .toList();
         }
+
+        @Override
+        @Transactional(readOnly = true)
+        public PassengerTourTrackingResponse getMyBookedTourDetails(
+                        UUID userId,
+                        UUID tourId) {
+
+                if (userId == null || tourId == null) {
+                        throw new AppException(
+                                        "Invalid user ID or tour ID",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                // Kiểm tra user có booking đã thanh toán thành công
+                // thuộc Tour này hay không.
+                boolean hasConfirmedBooking = bookingRepository
+                                .existsByCreatedByUserIdAndTourIdAndStatus(
+                                                userId,
+                                                tourId,
+                                                BookingStatus.CONFIRMED);
+
+                if (!hasConfirmedBooking) {
+                        throw new AppException(
+                                        "You do not have a confirmed booking for this tour",
+                                        HttpStatus.FORBIDDEN);
+                }
+
+                // Lấy lịch trình và vị trí tàu từ Tour Service.
+                PassengerTourTrackingResponse response = tourClient
+                                .getTourTrackingDetails(tourId);
+
+                if (response == null) {
+                        throw new AppException(
+                                        "Unable to retrieve tour tracking details",
+                                        HttpStatus.BAD_GATEWAY);
+                }
+
+                return response;
+        }
 }
