@@ -1,5 +1,5 @@
 // src/modules/profile/pages/ProfilePage.jsx
-// Trang dùng chung cho mọi role: đặt route "profile" bên trong layout của từng role.
+
 import { Alert, Button, Spinner } from "react-bootstrap";
 import { useAuth } from "../../../context/AuthContext";
 import useProfile from "../hooks/useProfile";
@@ -10,7 +10,16 @@ import "../styles/ProfilePage.css";
 
 export default function ProfilePage() {
   const { user } = useAuth();
-  const { profile, setProfile, loading, error, reload } = useProfile();
+  const isPassenger = user?.role === "PASSENGER";
+
+  const {
+    profile,
+    setProfile,
+    loading,
+    error: loadError,
+    reload,
+  } = useProfile();
+
   const formState = useProfileForm(profile, setProfile);
 
   if (loading) {
@@ -21,17 +30,16 @@ export default function ProfilePage() {
     );
   }
 
-  if (error) {
+  if (loadError) {
     return (
       <div className="pf-page">
-        <Alert
-          variant="danger"
-          className="d-flex justify-content-between align-items-center"
-        >
-          <span>{error}</span>
-          <Button size="sm" variant="danger" onClick={reload}>
-            Thử lại
-          </Button>
+        <Alert variant="danger">
+          <div className="d-flex justify-content-between align-items-center">
+            <span>{loadError}</span>
+            <Button size="sm" variant="danger" onClick={reload}>
+              Thử lại
+            </Button>
+          </div>
         </Alert>
       </div>
     );
@@ -40,12 +48,41 @@ export default function ProfilePage() {
   return (
     <div className="pf-page">
       <h1 className="pf-title">Thông tin tài khoản</h1>
+
+      {formState.error && (
+        <Alert
+          variant="danger"
+          dismissible
+          onClose={() => formState.setError("")}
+        >
+          {formState.error}
+        </Alert>
+      )}
+
+      {formState.success && (
+        <Alert
+          variant="success"
+          dismissible
+          onClose={() => formState.setSuccess("")}
+        >
+          {formState.success}
+        </Alert>
+      )}
+
+      {!profile && (
+        <Alert variant="info">
+          Bạn chưa tạo hồ sơ cá nhân. Vui lòng nhập thông tin bên dưới và nhấn
+          Lưu hồ sơ.
+        </Alert>
+      )}
+
       <div className="pf-layout">
         <aside className="pf-card">
           <ProfileSummaryCard profile={profile} user={user} />
         </aside>
+
         <section className="pf-card">
-          <ProfileForm formState={formState} />
+          <ProfileForm formState={formState} readOnly={!isPassenger} />
         </section>
       </div>
     </div>

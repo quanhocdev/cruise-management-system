@@ -1,3 +1,5 @@
+// src/modules/profile/hooks/useProfile.js
+
 import { useCallback, useEffect, useState } from "react";
 import { getMyProfile, extractErrorMessage } from "../services/profileService";
 
@@ -14,16 +16,12 @@ export default function useProfile() {
       const data = await getMyProfile();
       setProfile(data);
     } catch (err) {
-      console.log("HTTP STATUS:", err.status);
-      console.log("ERROR MESSAGE:", err.message);
-
-      const isProfileNotFound =
+      const isNotFound =
         Number(err.status) === 404 ||
         err.message?.includes("404 NOT_FOUND") ||
         err.message?.includes("Không tìm thấy hồ sơ cá nhân");
 
-      if (isProfileNotFound) {
-        // Chưa có hồ sơ: hiển thị form rỗng.
+      if (isNotFound) {
         setProfile(null);
         setError(null);
       } else {
@@ -43,8 +41,10 @@ export default function useProfile() {
   return {
     profile,
     setProfile,
+    hasProfile: Boolean(profile),
     loading,
     error,
+    setError,
     reload: load,
   };
 }
