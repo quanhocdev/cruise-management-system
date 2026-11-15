@@ -188,6 +188,14 @@ export default function GuestHeader() {
 
                           <Dropdown.Item
                             as={Link}
+                            to="/passenger/tracking"
+                            className="py-2 small fw-medium"
+                          >
+                            🧭 Theo dõi hành trình
+                          </Dropdown.Item>
+
+                          <Dropdown.Item
+                            as={Link}
                             to="/passenger/feedback"
                             className="py-2 small fw-medium"
                           >

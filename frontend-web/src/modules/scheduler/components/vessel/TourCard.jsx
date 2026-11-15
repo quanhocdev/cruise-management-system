@@ -4,7 +4,11 @@ import { Calendar, ArrowRight, Ship } from "lucide-react";
 import { STATUS_LABEL } from "../../utils/vesselFormat";
 import "../../styles/TourCard.css";
 
-export default function TourCard({ tour, onOpen }) {
+export default function TourCard({
+  tour,
+  onOpen,
+  actionLabel = "Xem giám sát chi tiết",
+}) {
   const status = (tour.statusTrip || "").toLowerCase();
   const active = tour.statusTrip === "IN_PROGRESS";
 
@@ -36,7 +40,7 @@ export default function TourCard({ tour, onOpen }) {
       </div>
 
       <button className="tc-open" onClick={() => onOpen(tour.id)}>
-        <span>Xem giám sát chi tiết</span>
+        <span>{actionLabel}</span>
         <ArrowRight size={16} />
       </button>
     </article>
