@@ -3,6 +3,7 @@ package com.project.booking.controller.passenger;
 
 import com.project.booking.dto.booking.BookingResponse;
 import com.project.booking.dto.booking.CreateBookingRequest;
+import com.project.booking.dto.booking.PassengerBookedTourResponse;
 import com.project.booking.service.passenger.BookingService;
 
 import org.springframework.http.MediaType;
@@ -46,6 +47,17 @@ public class BookingController {
             throw new RuntimeException(
                     "Không thể xác định userId dạng UUID từ token xác thực.");
         }
+    }
+
+    @GetMapping("/tours")
+    public ResponseEntity<List<PassengerBookedTourResponse>> getMyBookedTours(
+            Principal principal) {
+
+        UUID userId = extractUserId(principal);
+
+        return ResponseEntity.ok(
+                bookingService.getMyBookedTours(userId));
+
     }
 
     @GetMapping

@@ -2,12 +2,14 @@ package com.project.booking.client;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -29,7 +31,7 @@ public class TourClient {
         }
 
         /**
-         * Lấy thông tin Tour theo ID.
+         * Lấy thông tin một Tour theo ID.
          */
         @Retry(name = "tourService")
         @CircuitBreaker(name = "tourService")
@@ -45,14 +47,25 @@ public class TourClient {
                                 .body(TourInfo.class);
         }
 
+        /**
+         * Lấy thông tin nhiều Tour theo danh sách ID.
+         */
+        @Retry(name = "tourService")
+        @CircuitBreaker(name = "tourService")
         public List<TourInfo> getToursInfo(List<UUID> tourIds) {
+
+                if (tourIds == null || tourIds.isEmpty()) {
+                        return List.of();
+                }
+
                 String accessToken = serviceTokenClient.getAccessToken();
 
-                return restClient
-                                .post()
-                                .uri("/internal/tours/booking-info/batch")
+                return restClient.get()
+                                .uri(uriBuilder -> uriBuilder
+                                                .path("/internal/tours/booking-info/batch")
+                                                .queryParam("tourIds", tourIds.toArray())
+                                                .build())
                                 .headers(headers -> headers.setBearerAuth(accessToken))
-                                .body(tourIds)
                                 .retrieve()
                                 .body(new ParameterizedTypeReference<List<TourInfo>>() {
                                 });

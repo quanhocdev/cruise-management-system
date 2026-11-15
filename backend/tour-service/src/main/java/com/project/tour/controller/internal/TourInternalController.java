@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
+import java.util.List;
 
 @RestController
 @RequestMapping("/internal/tours")
@@ -25,4 +26,13 @@ public class TourInternalController {
         return ResponseEntity.ok(
                 tourInternalService.getTourBookingInfo(tourId));
     }
+
+    
+@GetMapping("/booking-info/batch")
+public ResponseEntity<List<TourBookingInfoResponse>> getToursBookingInfo(
+        @RequestParam List<UUID> tourIds) {
+    return ResponseEntity.ok(
+            tourInternalService.getToursBookingInfo(tourIds));
+}
+
 }
