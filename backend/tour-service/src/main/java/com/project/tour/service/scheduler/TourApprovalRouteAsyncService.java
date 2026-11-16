@@ -7,7 +7,9 @@ import com.project.tour.model.scheduler.Schedule;
 import com.project.tour.model.scheduler.ScheduleStop;
 import com.project.tour.model.scheduler.Tour;
 import com.project.tour.model.scheduler.TourRoute;
+import com.project.tour.model.scheduler.TourRouteLeg;
 import com.project.tour.repository.scheduler.TourRepository;
+import com.project.tour.repository.scheduler.TourRouteLegRepository;
 import com.project.tour.repository.scheduler.TourRouteRepository;
 import com.project.tour.repository.tour.schedule.ScheduleRepository;
 import com.project.tour.repository.tour.schedule.ScheduleStopRepository;
@@ -23,6 +25,7 @@ public class TourApprovalRouteAsyncService {
 
     private final TourRepository tourRepository;
     private final TourRouteRepository tourRouteRepository;
+    private final TourRouteLegRepository tourRouteLegRepository;
     private final ScheduleRepository scheduleRepository;
     private final ScheduleStopRepository scheduleStopRepository;
     private final RouteService routeService;
@@ -30,11 +33,13 @@ public class TourApprovalRouteAsyncService {
     public TourApprovalRouteAsyncService(
             TourRepository tourRepository,
             TourRouteRepository tourRouteRepository,
+            TourRouteLegRepository tourRouteLegRepository,
             ScheduleRepository scheduleRepository,
             ScheduleStopRepository scheduleStopRepository,
             RouteService routeService) {
         this.tourRepository = tourRepository;
         this.tourRouteRepository = tourRouteRepository;
+        this.tourRouteLegRepository = tourRouteLegRepository;
         this.scheduleRepository = scheduleRepository;
         this.scheduleStopRepository = scheduleStopRepository;
         this.routeService = routeService;
@@ -57,17 +62,16 @@ public class TourApprovalRouteAsyncService {
                 return;
             }
 
+            // Xóa các chặng cũ nếu có (đề phòng trường hợp tính toán lại)
+            tourRouteLegRepository.deleteByTourRoute_Id(tourRoute.getId());
+
             // 1. Gom mảng các cảng theo thứ tự: Departure -> ScheduleStops -> Destination
             List<Port> orderedPorts = new ArrayList<>();
             orderedPorts.add(departurePort);
 
-            // Lấy danh sách Schedule thuộc tour này theo thứ tự dayNumber tăng dần
             List<Schedule> schedules = scheduleRepository.findAllByTour_IdOrderByDayNumberAsc(tourId);
             if (schedules != null && !schedules.isEmpty()) {
                 List<UUID> scheduleIds = schedules.stream().map(Schedule::getId).toList();
-
-                // Lấy tất cả các điểm dừng thuộc các schedule trên, đã sắp xếp theo ngày và
-                // stopOrder
                 List<ScheduleStop> stops = scheduleStopRepository
                         .findAllBySchedule_IdInOrderBySchedule_DayNumberAscStopOrderAsc(scheduleIds);
                 if (stops != null) {
@@ -79,12 +83,12 @@ public class TourApprovalRouteAsyncService {
                 }
             }
 
-            // Chốt hạ bằng cảng đến của tour
             orderedPorts.add(destinationPort);
 
-            // 2. Tính toán từng chặng kề nhau và gộp tọa độ
+            // 2. Tính toán từng chặng kề nhau, lưu bảng phụ và gộp tọa độ tổng quan
             List<List<List<Double>>> allCoordinates = new ArrayList<>();
             double totalDistanceKm = 0.0;
+            int legOrder = 1;
 
             for (int i = 0; i < orderedPorts.size() - 1; i++) {
                 Port from = orderedPorts.get(i);
@@ -102,14 +106,27 @@ public class TourApprovalRouteAsyncService {
 
                 RouteResponse legResponse = routeService.calculateRoute(req);
                 if (legResponse != null) {
-                    if (legResponse.getDistanceKm() != null) {
-                        totalDistanceKm += legResponse.getDistanceKm();
+                    double legDistance = legResponse.getDistanceKm() != null ? legResponse.getDistanceKm() : 0.0;
+                    totalDistanceKm += legDistance;
+
+                    Map<String, Object> legGeoJson = legResponse.getGeoJson();
+
+                    // Lưu từng chặng lẻ vào bảng phụ `tour_route_legs`
+                    if (legGeoJson != null) {
+                        TourRouteLeg routeLeg = new TourRouteLeg();
+                        routeLeg.setTourRoute(tourRoute);
+                        routeLeg.setLegOrder(legOrder++);
+                        routeLeg.setFromPort(from);
+                        routeLeg.setToPort(to);
+                        routeLeg.setRouteGeoJson(legGeoJson);
+                        routeLeg.setDistanceKm(legDistance);
+                        tourRouteLegRepository.save(routeLeg);
                     }
 
-                    Map<String, Object> geoJson = legResponse.getGeoJson();
-                    if (geoJson != null && geoJson.get("geometry") instanceof Map) {
+                    // Trích xuất tọa độ để gom vào MultiLineString tổng quan
+                    if (legGeoJson != null && legGeoJson.get("geometry") instanceof Map) {
                         @SuppressWarnings("unchecked")
-                        Map<String, Object> geom = (Map<String, Object>) geoJson.get("geometry");
+                        Map<String, Object> geom = (Map<String, Object>) legGeoJson.get("geometry");
                         Object coordsObj = geom.get("coordinates");
                         String type = (String) geom.get("type");
 
@@ -126,7 +143,7 @@ public class TourApprovalRouteAsyncService {
                 }
             }
 
-            // 3. Đóng gói kết quả thành GeoJSON MultiLineString hoàn chỉnh
+            // 3. Đóng gói kết quả tổng quan thành GeoJSON MultiLineString hoàn chỉnh
             Map<String, Object> finalGeoJson = new LinkedHashMap<>();
             finalGeoJson.put("type", "Feature");
 
@@ -140,13 +157,11 @@ public class TourApprovalRouteAsyncService {
             geometry.put("coordinates", allCoordinates);
             finalGeoJson.put("geometry", geometry);
 
-            // 4. Lưu lại vào TourRoute
+            // 4. Lưu thông tin tổng quan vào bảng chính `tour_routes`
             tourRoute.setRouteGeoJson(finalGeoJson);
             tourRoute.setDistanceKm(totalDistanceKm);
-
             tourRoute.setDistanceFromDepartureKm(0.0);
             tourRoute.setDistanceToDestinationKm(totalDistanceKm);
-
             tourRouteRepository.save(tourRoute);
 
         } catch (Exception e) {
