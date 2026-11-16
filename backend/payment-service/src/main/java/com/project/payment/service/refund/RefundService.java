@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 public class RefundService {
 
         private static final Logger log = LoggerFactory.getLogger(RefundService.class);
+        private static final long RECONCILIATION_DELAY_SECONDS = 360;
         private static final String STATUS_QUEUED = "QUEUED";
         private static final String STATUS_SENDING = "SENDING";
         private static final String STATUS_PROCESSING = "PROCESSING";
@@ -357,7 +358,8 @@ public class RefundService {
         @Transactional(readOnly = true)
         public List<UUID> awaitingReconciliation() {
 
-                Instant cutoff = Instant.now().minusSeconds(60);
+                Instant cutoff = Instant.now()
+                                .minusSeconds(RECONCILIATION_DELAY_SECONDS);
 
                 return refundRepository
                                 .findTop10ByStatusInAndUpdatedAtBeforeOrderByUpdatedAtAsc(
@@ -366,6 +368,17 @@ public class RefundService {
                                 .stream()
                                 .map(PaymentRefund::getId)
                                 .toList();
+        }
+
+        @Transactional
+        public boolean claimReconciliation(UUID refundId) {
+
+                Instant now = Instant.now();
+
+                return refundRepository.claimReconciliation(
+                                refundId,
+                                now.minusSeconds(RECONCILIATION_DELAY_SECONDS),
+                                now) == 1;
         }
 
         // Tạo hash để kiểm tra idempotency

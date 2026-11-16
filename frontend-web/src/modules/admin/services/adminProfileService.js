@@ -24,7 +24,9 @@ const adminProfileService = {
   // Tải ảnh đại diện lên
   uploadAvatar(userId, file) {
     const formData = new FormData();
-    formData.append("file", file);
+
+    // Phải trùng với @RequestParam("avatar") ở backend
+    formData.append("avatar", file);
 
     return api.post(`/admin/profiles/${userId}/avatar`, formData);
   },

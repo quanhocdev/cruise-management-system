@@ -87,6 +87,10 @@ public class RefundDispatcher {
 
         for (UUID id : pendingRefunds) {
 
+            if (!refundService.claimReconciliation(id)) {
+                continue;
+            }
+
             LOG.info("[REFUND SCHEDULER] Reconciling refund: {}", id);
 
             try {

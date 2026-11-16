@@ -1,5 +1,7 @@
 package com.project.tour.dto.route;
 
+import java.math.BigDecimal;
+
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
@@ -59,5 +61,22 @@ public class RouteRequest {
 
     public void setDestinationLatitude(Double destinationLatitude) {
         this.destinationLatitude = destinationLatitude;
+    }
+
+    // Thêm các setter nhận BigDecimal để tương thích trực tiếp với Entity Port
+    public void setDepartureLongitude(BigDecimal departureLongitude) {
+        this.departureLongitude = departureLongitude != null ? departureLongitude.doubleValue() : null;
+    }
+
+    public void setDepartureLatitude(BigDecimal departureLatitude) {
+        this.departureLatitude = departureLatitude != null ? departureLatitude.doubleValue() : null;
+    }
+
+    public void setDestinationLongitude(BigDecimal destinationLongitude) {
+        this.destinationLongitude = destinationLongitude != null ? destinationLongitude.doubleValue() : null;
+    }
+
+    public void setDestinationLatitude(BigDecimal destinationLatitude) {
+        this.destinationLatitude = destinationLatitude != null ? destinationLatitude.doubleValue() : null;
     }
 }

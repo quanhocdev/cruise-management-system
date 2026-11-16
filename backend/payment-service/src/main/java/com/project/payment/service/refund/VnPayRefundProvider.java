@@ -224,6 +224,14 @@ public class VnPayRefundProvider implements RefundProvider {
             return Outcome.unknown("PROVIDER_REFERENCE_MISMATCH");
         }
         String code = p.getOrDefault("vnp_ResponseCode", "");
+
+        if (query && "94".equals(code)) {
+            LOG.warn(
+                    "[VNPAY VERIFY] QueryDr duplicate, refundId={}",
+                    r.id());
+
+            return Outcome.unknown("QUERY_DUPLICATE");
+        }
         String state = p.getOrDefault("vnp_TransactionStatus", "");
         String number = p.get("vnp_TransactionNo");
         if ("00".equals(code)) {
