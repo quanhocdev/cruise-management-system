@@ -17,7 +17,7 @@ import com.project.tour.service.route.RouteService;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import com.project.tour.mapper.route.RouteRequestMapper;
 import java.util.*;
 
 @Service
@@ -29,6 +29,7 @@ public class TourApprovalRouteAsyncService {
     private final ScheduleRepository scheduleRepository;
     private final ScheduleStopRepository scheduleStopRepository;
     private final RouteService routeService;
+    private final RouteRequestMapper routeRequestMapper;
 
     public TourApprovalRouteAsyncService(
             TourRepository tourRepository,
@@ -36,13 +37,15 @@ public class TourApprovalRouteAsyncService {
             TourRouteLegRepository tourRouteLegRepository,
             ScheduleRepository scheduleRepository,
             ScheduleStopRepository scheduleStopRepository,
-            RouteService routeService) {
+            RouteService routeService,
+            RouteRequestMapper routeRequestMapper) {
         this.tourRepository = tourRepository;
         this.tourRouteRepository = tourRouteRepository;
         this.tourRouteLegRepository = tourRouteLegRepository;
         this.scheduleRepository = scheduleRepository;
         this.scheduleStopRepository = scheduleStopRepository;
         this.routeService = routeService;
+        this.routeRequestMapper = routeRequestMapper;
     }
 
     @Async
@@ -97,19 +100,37 @@ public class TourApprovalRouteAsyncService {
                 if (Objects.equals(from.getId(), to.getId())) {
                     continue;
                 }
+                if (from.getLongitude() == null || from.getLatitude() == null
+                        || to.getLongitude() == null || to.getLatitude() == null) {
+                    continue;
+                }
 
-                RouteRequest req = new RouteRequest();
-                req.setDepartureLongitude(from.getLongitude());
-                req.setDepartureLatitude(from.getLatitude());
-                req.setDestinationLongitude(to.getLongitude());
-                req.setDestinationLatitude(to.getLatitude());
+                RouteRequest req = routeRequestMapper.fromPorts(from, to);
 
                 RouteResponse legResponse = routeService.calculateRoute(req);
                 if (legResponse != null) {
+                    // 1. Lấy trực tiếp từ Response của RouteService
                     double legDistance = legResponse.getDistanceKm() != null ? legResponse.getDistanceKm() : 0.0;
-                    totalDistanceKm += legDistance;
-
                     Map<String, Object> legGeoJson = legResponse.getGeoJson();
+
+                    // 2. Nếu bằng 0, bóc tách trực tiếp từ attributes/properties do SeaRoute trả về trong GeoJSON
+                    if (legDistance == 0.0 && legGeoJson != null && legGeoJson.get("properties") instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> props = (Map<String, Object>) legGeoJson.get("properties");
+                        
+                        // Thử tìm các tên trường phổ biến mà SeaRoute hay gạt vào properties
+                        Object distProp = props.get("distKM");
+                        if (distProp == null) distProp = props.get("distance");
+                        if (distProp == null) distProp = props.get("DIST");
+
+                        if (distProp != null) {
+                            try {
+                                legDistance = Double.parseDouble(distProp.toString());
+                            } catch (Exception ignored) {}
+                        }
+                    }
+
+                    totalDistanceKm += legDistance;
 
                     // Lưu từng chặng lẻ vào bảng phụ `tour_route_legs`
                     if (legGeoJson != null) {
@@ -119,7 +140,7 @@ public class TourApprovalRouteAsyncService {
                         routeLeg.setFromPort(from);
                         routeLeg.setToPort(to);
                         routeLeg.setRouteGeoJson(legGeoJson);
-                        routeLeg.setDistanceKm(legDistance);
+                        routeLeg.setDistanceKm(legDistance); 
                         tourRouteLegRepository.save(routeLeg);
                     }
 
