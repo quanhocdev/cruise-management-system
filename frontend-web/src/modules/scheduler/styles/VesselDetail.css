@@ -303,3 +303,146 @@
     gap: 12px;
   }
 }
+/* src/modules/scheduler/styles/VesselDetail.css */
+
+.route-progress-section {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.progress-section-title {
+  margin: 0 0 16px 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-bar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  position: relative;
+  margin-top: 25px; /* Chừa chỗ cho badge ngày nằm phía trên */
+  padding: 0 10px;
+}
+
+/* Đường nối ngang giữa các node */
+.progress-line {
+  position: absolute;
+  top: 42px; /* Canh giữa ngay vị trí icon tròn */
+  left: 40px;
+  right: 40px;
+  height: 3px;
+  background: #cbd5e1;
+  z-index: 1;
+}
+
+.progress-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  flex: 1;
+}
+
+/* Badge ngày tháng nằm phía trên icon */
+.node-date-badge {
+  position: absolute;
+  top: -28px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.node-date-badge.start {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.node-date-badge.stop-date {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.node-date-badge.end {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+/* Icon tròn đại diện cho từng cảng */
+.progress-node .node-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  color: #475569;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 8px;
+  transition: all 0.2s;
+}
+
+/* Màu sắc riêng cho node khởi hành và đích đến */
+.progress-node.departure .node-icon {
+  border-color: #16a34a;
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.progress-node.arrival .node-icon {
+  border-color: #dc2626;
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.progress-node.stop .node-icon {
+  border-color: #0284c7;
+  background: #f0f9ff;
+  color: #0284c7;
+}
+
+/* Nhãn tên cảng bên dưới */
+.node-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 140px;
+}
+
+.node-tag {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.5px;
+}
+
+.node-label strong {
+  font-size: 13px;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.node-label span {
+  font-size: 11px;
+  color: #64748b;
+}

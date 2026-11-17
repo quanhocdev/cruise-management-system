@@ -12,13 +12,15 @@ function buildNodes(tour) {
       type: "departure",
       name: tour.departurePort?.name,
       sub: tour.departurePort?.city,
+      dateText: tour.startDate ? fmtDate(tour.startDate) : "Ngày đi",
     },
     ...stops.map((s, i) => ({
       key: s.stopId || i,
       type: "stop",
       order: s.stopOrder || i + 1,
       name: s.port?.name,
-      sub: fmtDate(s.arriveAt),
+      sub: s.port?.city,
+      dateText: fmtDate(s.arriveAt),
       at: s.arriveAt,
     })),
     {
@@ -26,6 +28,7 @@ function buildNodes(tour) {
       type: "arrival",
       name: tour.arrivalPort?.name,
       sub: tour.arrivalPort?.city,
+      dateText: tour.endDate ? fmtDate(tour.endDate) : "Ngày về",
     },
   ];
 }
@@ -35,7 +38,7 @@ export default function RouteProgress({ tour }) {
     const nodes = buildNodes(tour);
     const status = tour.statusTrip || tour.status;
     const now = Date.now();
-    let idx = 0; // vị trí tàu: 0 = cảng đi
+    let idx = 0;
 
     if (
       status === "COMPLETED" ||
@@ -92,6 +95,9 @@ export default function RouteProgress({ tour }) {
               </div>
               <strong title={node.name}>{node.name || "—"}</strong>
               <span>{node.sub}</span>
+
+              {/* Thẻ badge ngày tháng được đặt xuống dưới cùng của node */}
+              <div className="rp-date-badge">{node.dateText || "—"}</div>
             </div>
           ))}
         </div>

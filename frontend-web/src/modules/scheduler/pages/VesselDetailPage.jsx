@@ -98,6 +98,8 @@ export default function VesselDetailPage() {
                 selectedLegId={selectedLeg?.legId}
                 onSelectOverview={() => setSelectedLeg(null)}
                 onSelectLeg={(leg) => setSelectedLeg(leg)}
+                tourStartDate={tourDetails?.startDate}
+                tourEndDate={tourDetails?.endDate}
               />
             </div>
 
