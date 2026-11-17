@@ -27,6 +27,13 @@ public class RouteServiceImpl implements RouteService {
 
     @Override
     public RouteResponse calculateRoute(RouteRequest request) {
+
+        System.out.println("\n========== SEAROUTE REQUEST ==========");
+        System.out.println("Departure Longitude: " + request.getDepartureLongitude());
+        System.out.println("Departure Latitude: " + request.getDepartureLatitude());
+        System.out.println("Destination Longitude: " + request.getDestinationLongitude());
+        System.out.println("Destination Latitude: " + request.getDestinationLatitude());
+
         Feature route = seaRouting.getRoute(
                 request.getDepartureLongitude(),
                 request.getDepartureLatitude(),
@@ -39,12 +46,23 @@ public class RouteServiceImpl implements RouteService {
         }
 
         Geometry geometry = route.getGeometry();
+        Map<String, Object> attributes = route.getAttributes();
+
+        System.out.println("========== SEAROUTE RESPONSE ==========");
+        System.out.println("Geometry type: " + geometry.getGeometryType());
+        System.out.println("Geometry: " + geometry);
+        System.out.println("Attributes: " + attributes);
+
+        Double distanceKm = getNumericAttribute(attributes, "distKM");
+
+        System.out.println("Distance from SeaRoute: " + distanceKm);
+        System.out.println("Geometry calculated distance: "
+                + calculateGeometryDistanceKm(geometry));
+
+        System.out.println("========================================\n");
 
         Map<String, Object> geoJson = createGeoJson(route);
 
-        Map<String, Object> attributes = route.getAttributes();
-
-        Double distanceKm = getNumericAttribute(attributes, "distKM");
         Double distanceFromDepartureKm = getNumericAttribute(attributes, "dFromKM");
         Double distanceToDestinationKm = getNumericAttribute(attributes, "dToKM");
 
@@ -124,5 +142,42 @@ public class RouteServiceImpl implements RouteService {
         }
 
         return null;
+    }
+
+    private double calculateGeometryDistanceKm(Geometry geometry) {
+        double total = 0.0;
+
+        for (int i = 0; i < geometry.getNumGeometries(); i++) {
+            Geometry part = geometry.getGeometryN(i);
+            Coordinate[] coordinates = part.getCoordinates();
+
+            for (int j = 0; j < coordinates.length - 1; j++) {
+                total += haversineKm(
+                        coordinates[j].y,
+                        coordinates[j].x,
+                        coordinates[j + 1].y,
+                        coordinates[j + 1].x);
+            }
+        }
+
+        return total;
+    }
+
+    private double haversineKm(
+            double lat1, double lon1,
+            double lat2, double lon2) {
+
+        double earthRadius = 6371.0;
+
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                + Math.cos(Math.toRadians(lat1))
+                        * Math.cos(Math.toRadians(lat2))
+                        * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+        return 2 * earthRadius
+                * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 }
