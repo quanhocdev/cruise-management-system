@@ -16,7 +16,7 @@ import com.project.tour.repository.scheduler.TourRouteRepository;
 import com.project.tour.repository.tour.schedule.ScheduleRepository;
 import com.project.tour.repository.tour.schedule.ScheduleStopRepository;
 import com.project.tour.service.route.RouteService;
-
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,7 +53,7 @@ public class TourApprovalRouteAsyncService {
         this.routeRequestMapper = routeRequestMapper;
     }
 
-    // @Async
+    @Async
     @Transactional
     public void calculateAndSaveRouteForTour(UUID tourId) {
         try {

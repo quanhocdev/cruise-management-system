@@ -2,7 +2,6 @@
 import { Alert, Container, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import useBookedTours from "../hooks/useBookedTours";
-// Dùng lại component/CSS của module scheduler (nên dời sang src/components/vessel/ về sau)
 import TourCard from "../../scheduler/components/vessel/TourCard";
 import "../../scheduler/styles/vessel-shared.css";
 import "./PassengerTourTracking.css";
