@@ -1,5 +1,13 @@
 package com.project.tour.dto.passenger.route;
 
-public class PassengerRouteLegDTO {
+import java.util.Map;
+import java.util.UUID;
 
+public record PassengerRouteLegDTO(
+        UUID id,
+        Integer legOrder,
+        PassengerPortDTO fromPort,
+        PassengerPortDTO toPort,
+        Map<String, Object> routeGeoJson,
+        Double distanceKm) {
 }
