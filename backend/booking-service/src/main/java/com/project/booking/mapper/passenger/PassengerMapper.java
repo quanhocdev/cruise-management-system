@@ -1,9 +1,12 @@
 
 package com.project.booking.mapper.passenger;
 
+import org.springframework.stereotype.Component;
+
 import com.project.booking.dto.passenger.passenger.PassengerProfileDTO;
 import com.project.booking.model.Passenger;
 
+@Component("passengerProfileMapper")
 public class PassengerMapper {
 
     public PassengerProfileDTO toDTO(Passenger passenger) {

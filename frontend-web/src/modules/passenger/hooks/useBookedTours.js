@@ -1,11 +1,12 @@
 // src/modules/passenger/hooks/useBookedTours.js
-// Danh sách tour đã đặt (booking CONFIRMED) kèm statusTrip.
 import { useCallback, useEffect, useState } from "react";
 import bookingService from "../services/bookingService";
 
-// Đổi tên field của API sang shape mà TourCard đang dùng
+// Chuẩn hóa dữ liệu API sang shape mà TourCard sử dụng
 const toCardShape = (t) => ({
+  ...t,
   id: t.tourId,
+  bookingId: t.bookingId,
   code: t.tourCode,
   name: t.tourName,
   startDate: t.departureDate,
@@ -21,6 +22,7 @@ export default function useBookedTours() {
   const loadTours = useCallback(async () => {
     setLoading(true);
     setError("");
+
     try {
       const data = await bookingService.getMyBookedTours();
       const list = Array.isArray(data) ? data : data?.content || [];

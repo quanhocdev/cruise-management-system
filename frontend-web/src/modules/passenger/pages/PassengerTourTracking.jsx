@@ -10,6 +10,15 @@ export default function PassengerTourTracking() {
   const navigate = useNavigate();
   const { tours, loading, error } = useBookedTours();
 
+  const handleOpenTour = (tour) => {
+    if (!tour.id || !tour.bookingId) {
+      console.error("Thiếu tourId hoặc bookingId:", tour);
+      return;
+    }
+
+    navigate(`/passenger/tracking/${tour.id}/${tour.bookingId}`);
+  };
+
   return (
     <div className="vm-page ptt-page">
       <header className="vm-hero ptt-hero">
@@ -42,7 +51,7 @@ export default function PassengerTourTracking() {
                 key={tour.id}
                 tour={tour}
                 actionLabel="Theo dõi hành trình"
-                onOpen={(id) => navigate(`/passenger/tracking/${id}`)}
+                onOpen={() => handleOpenTour(tour)}
               />
             ))}
           </div>

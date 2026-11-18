@@ -12,6 +12,9 @@ import com.project.booking.model.ServiceUsage;
 
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
+@Component("passengerUsageMapper")
 public class UsageMapper {
 
     public PassengerProductUsageDTO toProductUsageDTO(ProductUsage usage) {

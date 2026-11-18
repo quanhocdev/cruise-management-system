@@ -4,10 +4,11 @@ import com.project.tour.dto.passenger.itinerary.PassengerScheduleDTO;
 import com.project.tour.dto.passenger.itinerary.PassengerScheduleStopDTO;
 import com.project.tour.model.scheduler.Schedule;
 import com.project.tour.model.scheduler.ScheduleStop;
-
+import org.springframework.stereotype.Component;
 import java.util.Comparator;
 import java.util.List;
 
+@Component("passengerScheduleMapper")
 public class ScheduleMapper {
 
     private final PortMapper portMapper;

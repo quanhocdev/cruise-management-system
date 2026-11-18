@@ -2,7 +2,9 @@ package com.project.tour.mapper.passenger;
 
 import com.project.tour.dto.passenger.service.PassengerServiceDTO;
 import com.project.tour.model.convenience.service.ServiceTour;
+import org.springframework.stereotype.Component;
 
+@Component("passengerServiceTourMapper")
 public class ServiceTourMapper {
 
     public PassengerServiceDTO toDTO(ServiceTour serviceTour) {

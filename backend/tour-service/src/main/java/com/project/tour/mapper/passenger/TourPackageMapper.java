@@ -4,11 +4,12 @@ import com.project.tour.dto.passenger.tourpackage.PassengerPackageBenefitDTO;
 import com.project.tour.dto.passenger.tourpackage.PassengerTourPackageDTO;
 import com.project.tour.model.operation.PackageBenefit;
 import com.project.tour.model.operation.TourPackage;
-
+import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@Component("passengerTourPackageMapper")
 public class TourPackageMapper {
 
     public PassengerPackageBenefitDTO toBenefitDTO(

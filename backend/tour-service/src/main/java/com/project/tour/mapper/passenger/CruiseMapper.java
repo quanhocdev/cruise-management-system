@@ -1,3 +1,4 @@
+
 package com.project.tour.mapper.passenger;
 
 import com.project.tour.dto.passenger.cruise.PassengerCruiseDTO;
@@ -7,8 +8,11 @@ import com.project.tour.model.admin.Cruise;
 import com.project.tour.model.admin.CruiseDeck;
 import com.project.tour.model.admin.CruiseArea;
 
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 
+@Component("passengerCruiseMapper")
 public class CruiseMapper {
 
     public PassengerCruiseDTO toDTO(Cruise cruise) {

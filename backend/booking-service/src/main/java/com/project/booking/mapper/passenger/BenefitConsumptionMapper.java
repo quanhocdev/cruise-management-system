@@ -7,6 +7,9 @@ import com.project.booking.model.BenefitConsumption;
 
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
+@Component("passengerBenefitConsumptionMapper")
 public class BenefitConsumptionMapper {
 
     public PassengerBenefitConsumptionDTO toDTO(

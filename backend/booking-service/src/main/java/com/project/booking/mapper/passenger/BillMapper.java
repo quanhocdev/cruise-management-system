@@ -5,9 +5,10 @@ import com.project.booking.dto.passenger.bill.PassengerBillDTO;
 import com.project.booking.dto.passenger.bill.PassengerBillItemDTO;
 import com.project.booking.model.Bill;
 import com.project.booking.model.BillItem;
-
+import org.springframework.stereotype.Component;
 import java.util.List;
 
+@Component("passengerBillMapper")
 public class BillMapper {
 
     public PassengerBillItemDTO toBillItemDTO(BillItem item) {

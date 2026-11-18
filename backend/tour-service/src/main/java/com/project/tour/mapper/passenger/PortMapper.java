@@ -2,7 +2,9 @@ package com.project.tour.mapper.passenger;
 
 import com.project.tour.dto.passenger.route.PassengerPortDTO;
 import com.project.tour.model.admin.Port;
+import org.springframework.stereotype.Component;
 
+@Component("passengerPortMapper")
 public class PortMapper {
 
     public PassengerPortDTO toDTO(Port port) {

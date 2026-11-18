@@ -1,0 +1,87 @@
+/* =========================================
+   Passenger Trip Detail - Main Page
+========================================= */
+
+.passenger-trip-detail-page {
+  min-height: 100vh;
+  padding-bottom: 48px;
+  background: #f8fafc;
+  color: #172033;
+}
+
+/* Main content */
+
+.passenger-trip-detail-content {
+  width: 100%;
+  max-width: 1200px;
+  padding-top: 28px;
+  padding-bottom: 24px;
+}
+
+/* Loading state */
+
+.passenger-trip-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 180px;
+  margin-bottom: 24px;
+  padding: 24px;
+  background: #fff;
+  border: 1px solid #e7eaf0;
+  border-radius: 14px;
+}
+
+.passenger-trip-loading p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+/* Section spacing */
+
+.passenger-trip-detail-content > section {
+  margin-bottom: 32px;
+}
+
+.passenger-trip-detail-content > section:last-child {
+  margin-bottom: 0;
+}
+
+/* Shared section heading */
+
+.passenger-trip-detail-content section h2 {
+  color: #172033;
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+  .passenger-trip-detail-page {
+    padding-bottom: 28px;
+  }
+
+  .passenger-trip-detail-content {
+    padding-top: 20px;
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .passenger-trip-detail-content > section {
+    margin-bottom: 26px;
+  }
+
+  .passenger-trip-loading {
+    min-height: 140px;
+  }
+}
+
+@media (max-width: 576px) {
+  .passenger-trip-detail-content {
+    padding-top: 16px;
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+}

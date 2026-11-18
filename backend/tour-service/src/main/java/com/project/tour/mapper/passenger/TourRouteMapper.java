@@ -4,10 +4,11 @@ import com.project.tour.dto.passenger.route.PassengerRouteLegDTO;
 import com.project.tour.dto.passenger.route.PassengerTourRouteDTO;
 import com.project.tour.model.scheduler.TourRoute;
 import com.project.tour.model.scheduler.TourRouteLeg;
-
+import org.springframework.stereotype.Component;
 import java.util.Comparator;
 import java.util.List;
 
+@Component("passengerTourRouteMapper")
 public class TourRouteMapper {
 
     private final PortMapper portMapper;
