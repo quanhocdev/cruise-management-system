@@ -130,6 +130,11 @@ const passengerTripService = {
     return unwrap(response);
   },
 
+  // Alias tương thích với usePassengerBookingBills
+  async getBookingBills(bookingId) {
+    return passengerTripService.getBills(bookingId);
+  },
+
   // ==========================================
   // SHARED APIs
   // ==========================================
