@@ -91,10 +91,10 @@ export default function PassengerTripDetail({
         />
 
         <TripItinerarySection
-          itinerary={tour.itinerary.itinerary}
-          loading={tour.itinerary.loading}
-          error={tour.itinerary.error}
-          onReload={tour.itinerary.loadItinerary}
+          itinerary={trip.tour.itinerary.data}
+          loading={trip.tour.itinerary.loading}
+          error={trip.tour.itinerary.error}
+          onReload={trip.tour.itinerary.load}
         />
 
         <TripCruiseSection
