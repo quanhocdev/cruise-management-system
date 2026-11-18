@@ -10,8 +10,9 @@ import PassengerBooking from "../modules/passenger/pages/PassengerBooking";
 import PaymentResultPage from "../modules/passenger/pages/PaymentResultPage";
 import PassengerMessages from "../modules/passenger/pages/PassengerMessages";
 import PassengerFeedback from "../modules/passenger/pages/PassengerFeedback";
+
 import PassengerTourTracking from "../modules/passenger/pages/PassengerTourTracking";
-import PassengerTourTrackingDetail from "../modules/passenger/pages/PassengerTourTrackingDetail";
+import PassengerTripDetail from "../modules/passenger/pages/PassengerTripDetail";
 
 const passengerRoutes = (
   <Route
@@ -30,7 +31,7 @@ const passengerRoutes = (
 
     {/* Theo dõi hành trình tàu */}
     <Route path="tracking" element={<PassengerTourTracking />} />
-    <Route path="tracking/:tourId" element={<PassengerTourTrackingDetail />} />
+    <Route path="tracking/:tourId" element={<PassengerTripDetail />} />
 
     {/* Chat với các phòng ban */}
     <Route path="messages" element={<PassengerMessages />} />
