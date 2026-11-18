@@ -445,11 +445,17 @@ public class BookingServiceImpl implements BookingService {
         @Transactional(readOnly = true)
         public List<PassengerBookedTourResponse> getMyBookedTours(UUID userId) {
 
+                // Lấy tất cả booking CONFIRMED của passenger.
                 List<Booking> bookings = bookingRepository
                                 .findAllByCreatedByUserIdAndStatusOrderByCreatedAtDesc(
                                                 userId,
                                                 BookingStatus.CONFIRMED);
 
+                if (bookings.isEmpty()) {
+                        return List.of();
+                }
+
+                // Lấy các tourId duy nhất để tránh gọi Tour Service trùng lặp.
                 List<UUID> tourIds = bookings.stream()
                                 .map(Booking::getTourId)
                                 .filter(Objects::nonNull)
@@ -460,15 +466,41 @@ public class BookingServiceImpl implements BookingService {
                         return List.of();
                 }
 
-                return tourClient.getToursInfo(tourIds)
-                                .stream()
-                                .map(tour -> new PassengerBookedTourResponse(
-                                                tour.tourId(),
-                                                tour.tourCode(),
-                                                tour.tourName(),
-                                                tour.departureDate(),
-                                                tour.endDate(),
-                                                tour.statusTrip()))
+                // Gọi Tour Service một lần và lập bản đồ TourInfo theo tourId.
+                Map<UUID, TourClient.TourInfo> tourInfoMap = new HashMap<>();
+
+                List<TourClient.TourInfo> tourInfos = tourClient.getToursInfo(tourIds);
+
+                if (tourInfos != null) {
+                        for (TourClient.TourInfo tourInfo : tourInfos) {
+                                if (tourInfo != null && tourInfo.tourId() != null) {
+                                        tourInfoMap.putIfAbsent(tourInfo.tourId(), tourInfo);
+                                }
+                        }
+                }
+
+                // Trả về từng booking, không gom theo tourId.
+                return bookings.stream()
+                                .filter(booking -> booking.getTourId() != null)
+                                .map(booking -> {
+                                        TourClient.TourInfo tourInfo = tourInfoMap.get(booking.getTourId());
+
+                                        if (tourInfo == null) {
+                                                throw new AppException(
+                                                                "Unable to retrieve tour information for booking: "
+                                                                                + booking.getId(),
+                                                                HttpStatus.BAD_GATEWAY);
+                                        }
+
+                                        return new PassengerBookedTourResponse(
+                                                        booking.getId(),
+                                                        tourInfo.tourId(),
+                                                        tourInfo.tourCode(),
+                                                        tourInfo.tourName(),
+                                                        tourInfo.departureDate(),
+                                                        tourInfo.endDate(),
+                                                        tourInfo.statusTrip());
+                                })
                                 .toList();
         }
 

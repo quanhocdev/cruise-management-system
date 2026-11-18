@@ -1,250 +1,407 @@
+/* =========================================================
+   TRIP ROUTE SECTION
+========================================================= */
+
 .trip-route-section {
-  padding: 24px;
-  border: 1px solid #e8edf3;
-  border-radius: 18px;
-  background: #fff;
-  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.035);
-}
-
-.trip-route-section__header {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 22px;
-}
-
-.trip-route-section__heading {
-  margin: 0;
-  color: #172b4d;
-  font-size: 19px;
-  font-weight: 750;
-}
-
-.trip-route-section__description {
-  margin: 6px 0 0;
-  color: #718096;
-  font-size: 13px;
-}
-
-.trip-route-section__distance {
-  flex-shrink: 0;
-  padding: 8px 12px;
-  border-radius: 10px;
-  color: #176b87;
-  background: #eaf6fa;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.trip-route-section__ports {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 22px;
-  padding: 18px;
-  border: 1px solid #e7edf3;
-  border-radius: 14px;
-  background: #f8fafc;
-}
-
-.trip-route-section__port {
+  flex-direction: column;
+  gap: 24px;
+  padding: 28px;
+  background: #ffffff;
+  border: 1px solid #e8edf3;
+  border-radius: 20px;
+  box-shadow: 0 8px 28px rgba(15, 41, 68, 0.045);
   min-width: 0;
 }
 
-.trip-route-section__port:last-child {
-  text-align: right;
-}
+/* HEADER */
 
-.trip-route-section__port-label {
-  display: block;
-  margin-bottom: 6px;
-  color: #8a98a9;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-}
-
-.trip-route-section__port-name {
-  overflow: hidden;
-  color: #263b53;
-  font-size: 15px;
-  font-weight: 700;
-  text-overflow: ellipsis;
-}
-
-.trip-route-section__port-icon {
+.trip-route-section .trip-detail-section__header {
   display: flex;
-  width: 38px;
-  height: 38px;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.trip-route-section .trip-detail-section__eyebrow {
+  display: inline-block;
+  margin-bottom: 8px;
+  color: #0d9488;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+}
+
+.trip-route-section .trip-detail-section__header h2 {
+  margin: 0;
+  color: #142b45;
+  font-size: 23px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.trip-route-section .trip-detail-section__header p {
+  margin: 7px 0 0;
+  color: #758397;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.trip-route-section .trip-detail-section__reload {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #d9eaf0;
-  border-radius: 50%;
-  color: #147b98;
-  background: #fff;
+  gap: 8px;
+  flex-shrink: 0;
+  min-height: 40px;
+  padding: 0 15px;
+  color: #2563eb;
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
 }
 
-.trip-route-section__map-wrapper {
-  position: relative;
-  margin-top: 16px;
+.trip-route-section .trip-detail-section__reload:hover:not(:disabled) {
+  color: #ffffff;
+  background: #2563eb;
+  border-color: #2563eb;
 }
+
+.trip-route-section .trip-detail-section__reload:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.trip-route-section .trip-detail-section__reload:disabled svg {
+  animation: trip-route-spin 1.2s linear infinite;
+}
+
+@keyframes trip-route-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ERROR */
+
+.trip-route-section .trip-detail-error {
+  padding: 13px 16px;
+  color: #b42318;
+  background: #fef3f2;
+  border: 1px solid #fecdca;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* SUMMARY */
+
+.trip-route-section__summary {
+  display: grid;
+  grid-template-columns: 1fr 0.85fr 1fr;
+  gap: 14px;
+}
+
+.trip-route-section__port,
+.trip-route-section__distance {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+  padding: 17px;
+  background: #f8fafc;
+  border: 1px solid #edf1f5;
+  border-radius: 13px;
+}
+
+.trip-route-section__port > svg {
+  flex-shrink: 0;
+  color: #0d9488;
+}
+
+.trip-route-section__distance > svg {
+  flex-shrink: 0;
+  color: #2563eb;
+}
+
+.trip-route-section__port > div,
+.trip-route-section__distance > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.trip-route-section__port span,
+.trip-route-section__distance span {
+  color: #8491a3;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.trip-route-section__port strong,
+.trip-route-section__distance strong {
+  overflow-wrap: anywhere;
+  color: #203750;
+  font-size: 14px;
+  font-weight: 750;
+}
+
+/* MAP
+   Container của bản đồ do TripRouteMap quản lý.
+   Chỉ định dạng vùng bao bên ngoài nếu component có class riêng.
+*/
+
+.trip-route-section > * {
+  min-width: 0;
+}
+
+.trip-route-section .trip-route-map {
+  overflow: hidden;
+  min-height: 320px;
+  border: 1px solid #e5ebf2;
+  border-radius: 15px;
+}
+
+/* GPS STATUS */
 
 .trip-route-section__gps {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  margin-top: 12px;
-  color: #718096;
+  flex-wrap: wrap;
+  gap: 9px;
+  padding: 11px 14px;
+  color: #087e65;
+  background: #ecfdf5;
+  border: 1px solid #d1fae5;
+  border-radius: 10px;
   font-size: 12px;
+  font-weight: 650;
 }
 
-.trip-route-section__gps-indicator {
+.trip-route-section__gps-dot {
   width: 8px;
   height: 8px;
+  flex-shrink: 0;
+  background: #10b981;
   border-radius: 50%;
-  background: #16a36a;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
 }
 
-.trip-route-section__gps-indicator--stale {
-  background: #d97706;
+.trip-route-section__gps time {
+  margin-left: auto;
+  color: #648477;
+  font-size: 11px;
+  font-weight: 500;
 }
 
-.trip-route-section__gps-indicator--unavailable {
-  background: #94a3b8;
+.trip-route-section__gps--muted {
+  color: #8491a3;
+  background: #f8fafc;
+  border-color: #edf1f5;
+  font-weight: 500;
 }
 
-.trip-route-section__legs {
-  margin-top: 24px;
+/* ROUTE LEGS */
+
+.trip-route-legs {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
-.trip-route-section__legs-title {
-  margin: 0 0 12px;
-  color: #263b53;
-  font-size: 15px;
-  font-weight: 700;
+.trip-route-legs__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
-.trip-route-section__leg-list {
+.trip-route-legs__header h3 {
+  margin: 0;
+  color: #203750;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.trip-route-legs__header > span {
+  padding: 5px 11px;
+  color: #2563eb;
+  background: #eff6ff;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.trip-route-legs__empty {
+  padding: 24px 16px;
+  color: #8491a3;
+  background: #f8fafc;
+  border: 1px dashed #dbe3ec;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 13px;
+}
+
+.trip-route-legs__list {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.trip-route-section__leg {
+.trip-route-leg {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 14px;
   width: 100%;
   padding: 14px 16px;
+  color: inherit;
+  background: #ffffff;
   border: 1px solid #e8edf3;
   border-radius: 12px;
-  background: #fff;
   text-align: left;
+  cursor: pointer;
   transition:
-    border-color 0.2s ease,
     background 0.2s ease,
-    box-shadow 0.2s ease;
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
-.trip-route-section__leg:hover {
-  border-color: #b7dce8;
-  background: #f8fcfd;
+.trip-route-leg:hover {
+  background: #f8fbff;
+  border-color: #bfdbfe;
+  transform: translateY(-1px);
 }
 
-.trip-route-section__leg--active {
-  border-color: #2585a1;
-  background: #f0f9fc;
-  box-shadow: 0 0 0 2px rgba(37, 133, 161, 0.08);
+.trip-route-leg--active {
+  background: #eff6ff;
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.07);
 }
 
-.trip-route-section__leg-main {
+.trip-route-leg__order {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  color: #2563eb;
+  background: #eff6ff;
+  border-radius: 11px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.trip-route-leg--active .trip-route-leg__order {
+  color: #ffffff;
+  background: #2563eb;
+}
+
+.trip-route-leg__content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 5px;
   min-width: 0;
 }
 
-.trip-route-section__leg-order {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 25px;
-  height: 25px;
-  margin-right: 10px;
-  border-radius: 50%;
-  color: #176b87;
-  background: #e4f3f7;
-  font-size: 12px;
+.trip-route-leg__content strong {
+  overflow-wrap: anywhere;
+  color: #203750;
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.5;
+}
+
+.trip-route-leg__content strong span {
+  color: #0d9488;
+  padding: 0 3px;
+}
+
+.trip-route-leg__content small {
+  color: #8491a3;
+  font-size: 11px;
+}
+
+.trip-route-leg__action {
+  flex-shrink: 0;
+  color: #2563eb;
+  font-size: 11px;
   font-weight: 750;
 }
 
-.trip-route-section__leg-route {
-  color: #34465c;
-  font-size: 13px;
-  font-weight: 650;
-}
-
-.trip-route-section__leg-distance {
-  flex-shrink: 0;
-  color: #64748b;
-  font-size: 12px;
-  font-weight: 650;
-}
-
-.trip-route-section__empty {
-  padding: 18px;
-  border: 1px dashed #d7e0e9;
-  border-radius: 12px;
-  color: #718096;
-  background: #f8fafc;
-  font-size: 13px;
-  text-align: center;
-}
+/* RESPONSIVE */
 
 @media (max-width: 768px) {
   .trip-route-section {
-    padding: 18px;
-    border-radius: 14px;
+    gap: 19px;
+    padding: 20px;
+    border-radius: 16px;
   }
 
-  .trip-route-section__header {
-    flex-direction: column;
+  .trip-route-section .trip-detail-section__header h2 {
+    font-size: 20px;
+  }
+
+  .trip-route-section__summary {
+    grid-template-columns: 1fr;
     gap: 10px;
   }
 
-  .trip-route-section__ports {
+  .trip-route-section__port,
+  .trip-route-section__distance {
     padding: 14px;
+  }
+
+  .trip-route-section .trip-route-map {
+    min-height: 280px;
   }
 }
 
 @media (max-width: 480px) {
   .trip-route-section {
-    padding: 14px;
+    padding: 15px;
+    gap: 17px;
   }
 
-  .trip-route-section__ports {
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    gap: 8px;
+  .trip-route-section .trip-detail-section__header {
+    flex-direction: column;
+  }
+
+  .trip-route-section .trip-detail-section__reload {
+    width: 100%;
+  }
+
+  .trip-route-section .trip-detail-section__header h2 {
+    font-size: 18px;
+  }
+
+  .trip-route-leg {
+    gap: 10px;
     padding: 12px 10px;
   }
 
-  .trip-route-section__port-name {
-    font-size: 12px;
-  }
-
-  .trip-route-section__port-icon {
+  .trip-route-leg__order {
     width: 32px;
     height: 32px;
   }
 
-  .trip-route-section__leg {
-    align-items: flex-start;
-    padding: 12px;
+  .trip-route-leg__content strong {
+    font-size: 12px;
   }
 
-  .trip-route-section__leg-route {
-    font-size: 12px;
+  .trip-route-leg__action {
+    font-size: 10px;
+  }
+
+  .trip-route-section__gps time {
+    width: 100%;
+    margin-left: 17px;
   }
 }

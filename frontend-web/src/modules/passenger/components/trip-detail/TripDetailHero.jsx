@@ -97,7 +97,7 @@ export default function TripDetailHero({ booking, cruise, onReload }) {
             <div className="trip-detail-hero__meta-item">
               <Ship size={19} />
               <div>
-                <span>Tàu du lịch</span>
+                <span>Du thuyền: </span>
                 <strong>{cruiseName}</strong>
               </div>
             </div>
@@ -105,7 +105,7 @@ export default function TripDetailHero({ booking, cruise, onReload }) {
             <div className="trip-detail-hero__meta-item">
               <CalendarDays size={19} />
               <div>
-                <span>Thời gian chuyến đi</span>
+                <span>Thời gian chuyến đi: </span>
                 <strong>
                   {formatDate(startDate)} – {formatDate(endDate)}
                 </strong>
@@ -115,7 +115,7 @@ export default function TripDetailHero({ booking, cruise, onReload }) {
             {booking?.bookingCode && (
               <div className="trip-detail-hero__meta-item">
                 <div>
-                  <span>Mã đặt chỗ</span>
+                  <span>Mã đặt chỗ: </span>
                   <strong>{booking.bookingCode}</strong>
                 </div>
               </div>
