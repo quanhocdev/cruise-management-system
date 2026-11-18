@@ -31,7 +31,10 @@ const passengerRoutes = (
 
     {/* Theo dõi hành trình tàu */}
     <Route path="tracking" element={<PassengerTourTracking />} />
-    <Route path="tracking/:tourId" element={<PassengerTripDetail />} />
+    <Route
+      path="tracking/:tourId/:bookingId"
+      element={<PassengerTripDetail />}
+    />
 
     {/* Chat với các phòng ban */}
     <Route path="messages" element={<PassengerMessages />} />

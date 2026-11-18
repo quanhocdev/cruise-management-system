@@ -1,0 +1,217 @@
+.trip-packages-section {
+  margin-bottom: 30px;
+}
+
+.trip-packages-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.trip-packages-eyebrow {
+  display: block;
+  margin-bottom: 6px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+}
+
+.trip-packages-heading h3 {
+  margin: 0;
+  color: #172554;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.trip-packages-heading p {
+  margin: 7px 0 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.trip-packages-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 30px 16px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.trip-packages-alert {
+  border-radius: 12px;
+}
+
+.trip-packages-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 36px 20px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 14px;
+  color: #94a3b8;
+  text-align: center;
+  background: #f8fafc;
+}
+
+.trip-packages-empty h5 {
+  margin: 12px 0 5px;
+  color: #334155;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.trip-packages-empty p {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.trip-package-card {
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.trip-package-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+}
+
+.trip-package-card .card-body {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.trip-package-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.trip-package-icon {
+  display: flex;
+  flex: 0 0 44px;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  color: #2563eb;
+  background: #eff6ff;
+}
+
+.trip-package-title {
+  min-width: 0;
+  flex: 1;
+}
+
+.trip-package-title h5 {
+  margin: 2px 0 5px;
+  color: #1e293b;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.trip-package-status {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 20px;
+  color: #475569;
+  background: #f1f5f9;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.trip-package-description {
+  margin: 16px 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.trip-package-benefits {
+  margin-bottom: 16px;
+}
+
+.trip-package-benefits h6 {
+  margin-bottom: 10px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.trip-package-benefits ul {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.trip-package-benefits li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: #475569;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.trip-package-benefits li svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: #16a34a;
+}
+
+.trip-package-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.trip-package-meta > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.trip-package-price {
+  color: #1d4ed8 !important;
+  font-size: 14px !important;
+  font-weight: 700;
+}
+
+@media (max-width: 576px) {
+  .trip-packages-heading {
+    flex-direction: column;
+  }
+
+  .trip-packages-heading > button {
+    align-self: flex-start;
+  }
+
+  .trip-package-card .card-body {
+    padding: 16px;
+  }
+}

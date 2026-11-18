@@ -58,8 +58,8 @@ export default function PassengerTripDetail({
   }
 
   const initialLoading =
-    tour.route.overviewLoading &&
-    tour.itinerary.loading &&
+    tour.route.overviewLoading ||
+    tour.itinerary.loading ||
     booking.detail.loading;
 
   return (
@@ -91,10 +91,10 @@ export default function PassengerTripDetail({
         />
 
         <TripItinerarySection
-          itinerary={trip.tour.itinerary.data}
-          loading={trip.tour.itinerary.loading}
-          error={trip.tour.itinerary.error}
-          onReload={trip.tour.itinerary.load}
+          itinerary={tour.itinerary.data}
+          loading={tour.itinerary.loading}
+          error={tour.itinerary.error}
+          onReload={tour.itinerary.load}
         />
 
         <TripCruiseSection
@@ -113,18 +113,6 @@ export default function PassengerTripDetail({
           services={tour.facilities.services}
           cruiseActivities={tour.facilities.cruiseActivities}
           visits={tour.facilities.visits}
-          loading={{
-            products: tour.facilities.productsLoading,
-            services: tour.facilities.servicesLoading,
-            activities: tour.facilities.activitiesLoading,
-            visits: tour.facilities.visitsLoading,
-          }}
-          errors={{
-            products: tour.facilities.productsError,
-            services: tour.facilities.servicesError,
-            activities: tour.facilities.activitiesError,
-            visits: tour.facilities.visitsError,
-          }}
         />
 
         <TripPackagesSection
