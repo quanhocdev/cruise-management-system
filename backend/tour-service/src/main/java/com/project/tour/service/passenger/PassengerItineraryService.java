@@ -10,6 +10,7 @@ import com.project.tour.repository.tour.schedule.ScheduleStopRepository;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -34,6 +35,7 @@ public class PassengerItineraryService {
         this.scheduleMapper = scheduleMapper;
     }
 
+    @Transactional(readOnly = true)
     public List<PassengerScheduleDTO> getItinerary(UUID tourId) {
 
         if (!tourRepository.existsById(tourId)) {

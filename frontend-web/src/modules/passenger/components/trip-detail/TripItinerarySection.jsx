@@ -23,14 +23,27 @@ function getItems(data) {
 }
 
 function getStops(day) {
-  if (Array.isArray(day?.stops)) return day.stops;
-  if (Array.isArray(day?.scheduleStops)) return day.scheduleStops;
-  if (Array.isArray(day?.activities)) return day.activities;
-  return [];
+  return Array.isArray(day?.stops) ? day.stops : [];
 }
 
 function formatDate(value) {
   if (!value) return null;
+
+  // Backend trả LocalDate dạng yyyy-MM-dd.
+  // Tạo Date theo local time để tránh lệch ngày do UTC.
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
+
+  if (match) {
+    const [, year, month, day] = match;
+    const date = new Date(Number(year), Number(month) - 1, Number(day));
+
+    return new Intl.DateTimeFormat("vi-VN", {
+      weekday: "long",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }).format(date);
+  }
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
@@ -43,71 +56,69 @@ function formatDate(value) {
   }).format(date);
 }
 
-function getDayTitle(day, index) {
-  return (
-    day?.title ||
-    day?.name ||
-    day?.dayName ||
-    `Ngày ${day?.dayNumber ?? index + 1}`
-  );
-}
-
-function getStopTitle(stop) {
-  return (
-    stop?.portName ||
-    stop?.locationName ||
-    stop?.destinationName ||
-    stop?.activityName ||
-    stop?.name ||
-    stop?.title ||
-    "Điểm dừng"
-  );
-}
-
-function getStopDescription(stop) {
-  return (
-    stop?.description ||
-    stop?.content ||
-    stop?.note ||
-    stop?.activityDescription ||
-    ""
-  );
-}
-
-function getTime(value) {
+function formatTime(value) {
   if (!value) return null;
 
+  // Backend trả LocalDateTime dạng yyyy-MM-ddTHH:mm:ss.
   if (typeof value === "string") {
-    if (/^\d{2}:\d{2}/.test(value)) return value.slice(0, 5);
+    const match = /T(\d{2}):(\d{2})/.exec(value);
 
-    const date = new Date(value);
-    if (!Number.isNaN(date.getTime())) {
-      return date.toLocaleTimeString("vi-VN", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+    if (match) {
+      return `${match[1]}:${match[2]}`;
+    }
+
+    if (/^\d{2}:\d{2}/.test(value)) {
+      return value.slice(0, 5);
     }
   }
 
   return value;
 }
 
-function ItineraryStop({ stop, index }) {
-  const title = getStopTitle(stop);
-  const description = getStopDescription(stop);
+function getDayTitle(day, index) {
+  return day?.name || `Ngày ${day?.dayNumber ?? index + 1}`;
+}
 
-  const arrivalTime = getTime(
-    stop?.arrivalTime || stop?.startTime || stop?.time,
+function getPort(stop) {
+  return stop?.port || null;
+}
+
+function getStopTitle(stop) {
+  const port = getPort(stop);
+
+  return (
+    port?.name || stop?.portName || stop?.name || stop?.title || "Điểm dừng"
   );
+}
 
-  const departureTime = getTime(stop?.departureTime || stop?.endTime);
+function getStopDescription(stop) {
+  const port = getPort(stop);
 
-  const location =
-    stop?.portName ||
-    stop?.locationName ||
+  return (
+    stop?.description || stop?.content || stop?.note || port?.description || ""
+  );
+}
+
+function getStopLocation(stop) {
+  const port = getPort(stop);
+
+  return (
+    port?.address ||
+    [port?.city, port?.country].filter(Boolean).join(", ") ||
     stop?.address ||
     stop?.location ||
-    null;
+    null
+  );
+}
+
+function ItineraryStop({ stop, index, isLast }) {
+  const port = getPort(stop);
+  const title = getStopTitle(stop);
+  const description = getStopDescription(stop);
+  const location = getStopLocation(stop);
+
+  const arrivalTime = formatTime(stop?.arriveAt);
+  const departureTime = formatTime(stop?.leaveAt);
 
   return (
     <div className="trip-itinerary-stop">
@@ -115,7 +126,8 @@ function ItineraryStop({ stop, index }) {
         <span className="trip-itinerary-stop__dot">
           {index === 0 ? <Anchor size={14} /> : <CircleDot size={13} />}
         </span>
-        {index !== -1 && <span className="trip-itinerary-stop__line" />}
+
+        {!isLast && <span className="trip-itinerary-stop__line" />}
       </div>
 
       <div className="trip-itinerary-stop__content">
@@ -125,7 +137,7 @@ function ItineraryStop({ stop, index }) {
           {(arrivalTime || departureTime) && (
             <span className="trip-itinerary-stop__time">
               <Clock3 size={13} />
-              {arrivalTime}
+              {arrivalTime || "Chưa cập nhật"}
               {departureTime && departureTime !== arrivalTime
                 ? ` - ${departureTime}`
                 : ""}
@@ -151,9 +163,9 @@ function ItineraryStop({ stop, index }) {
 function ItineraryDay({ day, index, expanded, onToggle }) {
   const stops = getStops(day);
 
-  const date = formatDate(day?.date || day?.scheduleDate || day?.startDate);
-
-  const description = day?.description || day?.summary || day?.note || "";
+  // Đúng tên trường từ PassengerScheduleDTO.
+  const date = formatDate(day?.realDay);
+  const description = day?.description || "";
 
   return (
     <article
@@ -206,11 +218,10 @@ function ItineraryDay({ day, index, expanded, onToggle }) {
             <div className="trip-itinerary-day__stops">
               {stops.map((stop, stopIndex) => (
                 <ItineraryStop
-                  key={
-                    stop?.id || stop?.scheduleStopId || `${index}-${stopIndex}`
-                  }
+                  key={stop?.id || `${index}-${stopIndex}`}
                   stop={stop}
                   index={stopIndex}
+                  isLast={stopIndex === stops.length - 1}
                 />
               ))}
             </div>
@@ -271,6 +282,7 @@ export default function TripItinerarySection({
             <button type="button" onClick={expandAll}>
               Mở tất cả
             </button>
+
             <button type="button" onClick={collapseAll}>
               Thu gọn
             </button>
@@ -286,6 +298,7 @@ export default function TripItinerarySection({
       ) : error ? (
         <Alert variant="danger" className="trip-itinerary-section__alert">
           <div>{error}</div>
+
           {onReload && (
             <button type="button" onClick={onReload}>
               Thử tải lại
@@ -304,7 +317,7 @@ export default function TripItinerarySection({
         <div className="trip-itinerary-section__list">
           {days.map((day, index) => (
             <ItineraryDay
-              key={day?.id || day?.scheduleId || day?.dayNumber || index}
+              key={day?.id || day?.dayNumber || index}
               day={day}
               index={index}
               expanded={expandedDays[index] ?? index === 0}

@@ -66,6 +66,8 @@ export default function PassengerTripDetail({
     <div className="passenger-trip-detail-page">
       <TripDetailHero
         booking={booking.detail.booking}
+        tourOverview={tour.route.overview}
+        itinerary={tour.itinerary.data}
         cruise={tour.cruise.cruise}
         onReload={() => {
           reloadTour();

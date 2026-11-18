@@ -1,15 +1,26 @@
-// src/modules/passenger/components/trip-detail/TripDetailHero.jsx
 import React from "react";
 import { ArrowLeft, RefreshCw, Ship, CalendarDays } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+
 import "./TripDetailHero.css";
 
 const formatDate = (value) => {
   if (!value) return "Chưa cập nhật";
 
+  // LocalDate: yyyy-MM-dd
+  if (typeof value === "string") {
+    const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
+
+    if (match) {
+      return `${match[3]}/${match[2]}/${match[1]}`;
+    }
+  }
+
   const date = new Date(value);
 
-  if (Number.isNaN(date.getTime())) return "Chưa cập nhật";
+  if (Number.isNaN(date.getTime())) {
+    return "Chưa cập nhật";
+  }
 
   return date.toLocaleDateString("vi-VN", {
     day: "2-digit",
@@ -28,27 +39,64 @@ const STATUS_LABEL = {
   CANCELLED: "Đã hủy",
 };
 
-export default function TripDetailHero({ booking, cruise, onReload }) {
+function getItineraryDays(itinerary) {
+  if (Array.isArray(itinerary)) return itinerary;
+  if (Array.isArray(itinerary?.days)) return itinerary.days;
+  if (Array.isArray(itinerary?.schedules)) return itinerary.schedules;
+  return [];
+}
+
+export default function TripDetailHero({
+  booking,
+  tourOverview,
+  itinerary,
+  cruise,
+  onReload,
+}) {
   const navigate = useNavigate();
 
-  const status = booking?.status;
+  const days = getItineraryDays(itinerary).filter((day) => day?.realDay);
+
+  const sortedDays = [...days].sort(
+    (a, b) => (a.dayNumber ?? 0) - (b.dayNumber ?? 0),
+  );
+
+  const firstDay = sortedDays[0];
+  const lastDay = sortedDays[sortedDays.length - 1];
+
+  const status =
+    tourOverview?.statusTrip || tourOverview?.status || booking?.status;
+
   const tourName =
+    tourOverview?.tourName ||
+    tourOverview?.name ||
     booking?.tourName ||
     booking?.tour?.name ||
     cruise?.tourName ||
     "Chi tiết chuyến đi";
 
   const cruiseName =
+    tourOverview?.cruiseName ||
     cruise?.cruiseName ||
     cruise?.name ||
     cruise?.cruise?.name ||
     "Thông tin tàu đang được cập nhật";
 
+  // Ưu tiên overview, sau đó itinerary, cuối cùng mới booking.
   const startDate =
-    booking?.startDate || booking?.tourStartDate || booking?.tour?.startDate;
+    tourOverview?.startDate ||
+    tourOverview?.departureDate ||
+    firstDay?.realDay ||
+    booking?.startDate ||
+    booking?.tourStartDate ||
+    booking?.tour?.startDate;
 
   const endDate =
-    booking?.endDate || booking?.tourEndDate || booking?.tour?.endDate;
+    tourOverview?.endDate ||
+    lastDay?.realDay ||
+    booking?.endDate ||
+    booking?.tourEndDate ||
+    booking?.tour?.endDate;
 
   return (
     <section className="trip-detail-hero">
