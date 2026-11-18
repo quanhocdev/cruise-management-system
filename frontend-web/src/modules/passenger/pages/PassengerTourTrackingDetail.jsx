@@ -82,6 +82,7 @@ export default function PassengerTourTrackingDetail() {
           <div className="vdp-grid">
             {/* 1. Thanh tiến trình ngang (Route Progress Bar) */}
             <div className="vdp-full">
+              {/* Truyền thêm overview và legs vào RouteProgress */}
               <RouteProgress tour={tourDetails} />
             </div>
 
