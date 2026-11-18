@@ -1,0 +1,222 @@
+.trip-benefits-section {
+  margin-bottom: 30px;
+}
+
+.trip-benefits-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.trip-benefits-eyebrow {
+  display: block;
+  margin-bottom: 6px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+}
+
+.trip-benefits-heading h3 {
+  margin: 0;
+  color: #172554;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.trip-benefits-heading p {
+  margin: 7px 0 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.trip-benefits-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 30px 16px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.trip-benefits-alert {
+  border-radius: 12px;
+}
+
+.trip-benefits-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 36px 20px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 14px;
+  color: #94a3b8;
+  background: #f8fafc;
+  text-align: center;
+}
+
+.trip-benefits-empty h5 {
+  margin: 12px 0 5px;
+  color: #334155;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.trip-benefits-empty p {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.trip-benefits-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+  background: #eff6ff;
+}
+
+.trip-benefits-summary-icon {
+  display: flex;
+  flex: 0 0 38px;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  color: #2563eb;
+  background: #dbeafe;
+}
+
+.trip-benefits-summary > div:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.trip-benefits-summary strong {
+  color: #1e40af;
+  font-size: 14px;
+}
+
+.trip-benefits-summary span {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.trip-benefit-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.trip-benefit-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+}
+
+.trip-benefit-card .card-body {
+  display: flex;
+  flex-direction: column;
+  padding: 18px;
+}
+
+.trip-benefit-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.trip-benefit-icon {
+  display: flex;
+  flex: 0 0 42px;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  color: #2563eb;
+  background: #eff6ff;
+}
+
+.trip-benefit-title {
+  min-width: 0;
+  flex: 1;
+}
+
+.trip-benefit-title h5 {
+  overflow-wrap: anywhere;
+  margin: 2px 0 5px;
+  color: #1e293b;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.trip-benefit-type {
+  display: inline-block;
+  color: #64748b;
+  font-size: 11px;
+}
+
+.trip-benefit-description {
+  margin: 15px 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.trip-benefit-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 13px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.trip-benefit-quantity {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.trip-benefit-quantity strong {
+  color: #1e293b;
+}
+
+.trip-benefit-included {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #15803d;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.trip-benefit-status {
+  margin-top: 12px;
+  color: #64748b;
+  font-size: 11px;
+}
+
+@media (max-width: 576px) {
+  .trip-benefits-heading {
+    flex-direction: column;
+  }
+
+  .trip-benefit-card .card-body {
+    padding: 16px;
+  }
+}

@@ -1,0 +1,356 @@
+.trip-bills-section {
+  margin-bottom: 32px;
+}
+
+.trip-bills-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.trip-bills-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.trip-bills-section-icon {
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #2563eb;
+  background: #eff6ff;
+  border-radius: 12px;
+}
+
+.trip-bills-title-group h2 {
+  margin: 0 0 4px;
+  color: #172033;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.trip-bills-title-group p {
+  margin: 0;
+  color: #7b8495;
+  font-size: 13px;
+}
+
+.trip-bills-reload {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.trip-bill-card {
+  height: 100%;
+  border: 1px solid #e7eaf0;
+  border-radius: 14px;
+  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.035);
+}
+
+.trip-bill-card .card-body {
+  padding: 20px;
+}
+
+.trip-bill-card-header {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.trip-bill-icon {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #2563eb;
+  background: #eff6ff;
+  border-radius: 11px;
+}
+
+.trip-bill-heading {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.trip-bill-heading strong {
+  color: #172033;
+  font-size: 15px;
+}
+
+.trip-bill-heading span {
+  color: #8a93a3;
+  font-size: 12px;
+}
+
+.trip-bill-status {
+  flex-shrink: 0;
+  padding: 6px 9px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.trip-bill-summary {
+  margin-top: 16px;
+  padding: 15px;
+  background: #f8fafc;
+  border-radius: 10px;
+}
+
+.trip-bill-summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.trip-bill-summary-item > span {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.trip-bill-summary-item > strong {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #344054;
+  font-size: 14px;
+}
+
+.trip-bill-summary-item > .trip-bill-total {
+  color: #1d4ed8;
+  font-size: 19px;
+}
+
+.trip-bill-information {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px 36px;
+  margin-top: 18px;
+}
+
+.trip-bill-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  color: #7b8495;
+}
+
+.trip-bill-info-item > svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.trip-bill-info-item div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.trip-bill-info-item span {
+  color: #8a93a3;
+  font-size: 12px;
+}
+
+.trip-bill-info-item strong {
+  color: #344054;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.trip-bill-details-toggle {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+  border-top: 1px solid #edf0f4;
+}
+
+.trip-bill-details-toggle .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 0 0;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.trip-bill-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.trip-bill-item {
+  padding: 14px;
+  background: #f8fafc;
+  border: 1px solid #edf0f4;
+  border-radius: 10px;
+}
+
+.trip-bill-item-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.trip-bill-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  color: #2563eb;
+  background: #eff6ff;
+  border-radius: 9px;
+}
+
+.trip-bill-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.trip-bill-item-info strong {
+  color: #344054;
+  font-size: 13px;
+}
+
+.trip-bill-item-info span {
+  color: #8a93a3;
+  font-size: 11px;
+}
+
+.trip-bill-item-pricing {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #e7eaf0;
+}
+
+.trip-bill-item-pricing > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.trip-bill-item-pricing span {
+  color: #8a93a3;
+  font-size: 11px;
+}
+
+.trip-bill-item-pricing strong {
+  color: #344054;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.trip-bill-item-pricing .trip-bill-item-final strong {
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.trip-bill-no-items {
+  padding: 14px;
+  color: #8a93a3;
+  font-size: 13px;
+  text-align: center;
+  background: #f8fafc;
+  border-radius: 9px;
+}
+
+.trip-bills-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 150px;
+  color: #7b8495;
+  font-size: 14px;
+}
+
+.trip-bills-error {
+  border-radius: 12px;
+}
+
+.trip-bills-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 190px;
+  padding: 28px 20px;
+  background: #f8fafc;
+  border: 1px dashed #d9e0e9;
+  border-radius: 14px;
+  text-align: center;
+}
+
+.trip-bills-empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 58px;
+  margin-bottom: 12px;
+  color: #94a3b8;
+  background: #eaf0f6;
+  border-radius: 50%;
+}
+
+.trip-bills-empty h5 {
+  margin: 0 0 6px;
+  color: #344054;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.trip-bills-empty p {
+  max-width: 360px;
+  margin: 0;
+  color: #8a93a3;
+  font-size: 13px;
+}
+
+@media (max-width: 576px) {
+  .trip-bills-section-header {
+    align-items: flex-start;
+  }
+
+  .trip-bills-title-group h2 {
+    font-size: 18px;
+  }
+
+  .trip-bills-title-group p {
+    max-width: 230px;
+    line-height: 1.5;
+  }
+
+  .trip-bill-card .card-body {
+    padding: 16px;
+  }
+
+  .trip-bill-item-pricing {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .trip-bill-status {
+    font-size: 10px;
+  }
+}

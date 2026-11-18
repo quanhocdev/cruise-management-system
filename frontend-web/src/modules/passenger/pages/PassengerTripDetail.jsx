@@ -160,6 +160,12 @@ export default function PassengerTripDetail({
             activities: booking.usages.activityCruiseUsagesError,
             visits: booking.usages.visitUsagesError,
           }}
+          onReload={{
+            products: booking.usages.loadProductUsages,
+            services: booking.usages.loadServiceUsages,
+            activities: booking.usages.loadActivityCruiseUsages,
+            visits: booking.usages.loadVisitUsages,
+          }}
         />
 
         <TripBillsSection
