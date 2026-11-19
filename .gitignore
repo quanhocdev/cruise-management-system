@@ -5,6 +5,7 @@
 *.env.local
 # (Giữ lại .env.example để push lên GitHub)
 !.env.example
+ngrok-policy.yml
 
 # ==========================================
 # 2. Cấu hình IDE / Editor & Hệ điều hành

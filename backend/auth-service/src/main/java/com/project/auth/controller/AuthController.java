@@ -19,6 +19,8 @@ import com.project.auth.util.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -27,6 +29,7 @@ public class AuthController {
     private final AuthService authService;
     private final JwtService jwtService;
     private final TokenRedisService tokenRedisService;
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
     public AuthController(
             AuthService authService,
@@ -50,6 +53,10 @@ public class AuthController {
         if (clientIp == null || clientIp.isBlank()) {
             clientIp = httpRequest.getRemoteAddr();
         }
+        log.info("[AUTH LOGIN IP] X-Client-IP: {}, Remote IP: {}, Final Client IP: {}",
+                httpRequest.getHeader("X-Client-IP"),
+                httpRequest.getRemoteAddr(),
+                clientIp);
 
         Users user = authService.login(request, clientIp);
 
