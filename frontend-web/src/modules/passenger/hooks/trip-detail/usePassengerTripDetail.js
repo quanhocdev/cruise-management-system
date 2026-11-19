@@ -1,5 +1,5 @@
 // src/modules/passenger/hooks/trip-detail/usePassengerTripDetail.js
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 
 import usePassengerTripRoute from "./usePassengerTripRoute";
 import usePassengerTripItinerary from "./usePassengerTripItinerary";
@@ -19,6 +19,7 @@ import usePassengerTripWeather from "./usePassengerTripWeather";
 export default function usePassengerTripDetail({
   tourId,
   bookingId,
+  activeSection = "tracking",
   weatherLocation = {},
 }) {
   // =========================
@@ -45,7 +46,11 @@ export default function usePassengerTripDetail({
   // SHARED APIs
   // =========================
 
-  const vessel = usePassengerVesselLocation(tourId);
+  // GPS chỉ polling khi activeSection === "tracking".
+  const vessel = usePassengerVesselLocation(
+    tourId,
+    activeSection === "tracking",
+  );
 
   const weather = usePassengerTripWeather({
     latitude: weatherLocation.latitude,
@@ -55,58 +60,86 @@ export default function usePassengerTripDetail({
   });
 
   // =========================
-  // LOAD TOUR DATA
+  // CACHE LOADED SECTIONS
   // =========================
 
-  const loadTourData = useCallback(async () => {
-    if (!tourId) return;
+  const loadedSectionsRef = useRef(new Set());
 
-    await Promise.allSettled([
-      route.loadRoute(),
-      itinerary.loadItinerary(),
-      cruise.loadCruise(),
-      facilities.loadFacilities(),
-      packages.loadPackages(),
-    ]);
-  }, [
-    tourId,
-    route.loadRoute,
-    itinerary.loadItinerary,
-    cruise.loadCruise,
-    facilities.loadFacilities,
-    packages.loadPackages,
-  ]);
+  const loadSection = useCallback(
+    async (section, { force = false } = {}) => {
+      if (!section) return;
 
-  // =========================
-  // LOAD BOOKING DATA
-  // =========================
+      if (loadedSectionsRef.current.has(section) && !force) {
+        return;
+      }
 
-  const loadBookingData = useCallback(async () => {
-    if (!bookingId) return;
+      if (section === "tracking") {
+        const tasks = [route.loadRoute()];
 
-    await Promise.allSettled([
-      booking.loadBooking(),
-      passengers.loadPassengers(),
-      benefits.loadBenefits(),
-      usages.loadUsages(),
-      bills.loadBills(),
-    ]);
-  }, [
-    bookingId,
-    booking.loadBooking,
-    passengers.loadPassengers,
-    benefits.loadBenefits,
-    usages.loadUsages,
-    bills.loadBills,
-  ]);
+        if (weather.hasValidCoordinates) {
+          tasks.push(weather.loadWeather());
+        }
 
-  // =========================
-  // LOAD ALL
-  // =========================
+        await Promise.all(tasks);
+      } else if (section === "itinerary") {
+        if (!tourId) return;
+        await itinerary.loadItinerary();
+      } else if (section === "cruise") {
+        if (!tourId) return;
+        await cruise.loadCruise();
+      } else if (section === "facilities") {
+        if (!tourId) return;
 
-  const loadAll = useCallback(async () => {
-    await Promise.allSettled([loadTourData(), loadBookingData()]);
-  }, [loadTourData, loadBookingData]);
+        await Promise.all([
+          facilities.loadFacilities(),
+          packages.loadPackages(),
+        ]);
+      } else if (section === "booking") {
+        if (!bookingId) return;
+        await booking.loadBooking();
+      } else if (section === "passengers") {
+        if (!bookingId) return;
+        await passengers.loadPassengers();
+      } else if (section === "benefits") {
+        if (!bookingId) return;
+        await benefits.loadBenefits();
+      } else if (section === "usages") {
+        if (!bookingId) return;
+        await usages.loadUsages();
+      } else if (section === "bills") {
+        if (!bookingId) return;
+        await bills.loadBills();
+      } else {
+        return;
+      }
+
+      // Chỉ đánh dấu đã tải sau khi loader hoàn tất thành công.
+      loadedSectionsRef.current.add(section);
+    },
+    [
+      tourId,
+      bookingId,
+      route.loadRoute,
+      itinerary.loadItinerary,
+      cruise.loadCruise,
+      facilities.loadFacilities,
+      packages.loadPackages,
+      booking.loadBooking,
+      passengers.loadPassengers,
+      benefits.loadBenefits,
+      usages.loadUsages,
+      bills.loadBills,
+      weather.hasValidCoordinates,
+      weather.loadWeather,
+    ],
+  );
+
+  const reloadSection = useCallback(
+    async (section) => {
+      return loadSection(section, { force: true });
+    },
+    [loadSection],
+  );
 
   return {
     tour: {
@@ -128,8 +161,7 @@ export default function usePassengerTripDetail({
     vessel,
     weather,
 
-    loadTourData,
-    loadBookingData,
-    loadAll,
+    loadSection,
+    reloadSection,
   };
 }

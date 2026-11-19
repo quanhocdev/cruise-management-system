@@ -5,7 +5,7 @@ import usePassengerResource from "./usePassengerResource";
 
 const GPS_POLLING_INTERVAL = 10000;
 
-export default function usePassengerVesselLocation(tourId) {
+export default function usePassengerVesselLocation(tourId, enabled = false) {
   const fetcher = useCallback(() => {
     if (!tourId) return Promise.resolve(null);
     return passengerTripService.getVesselLocation(tourId);
@@ -13,8 +13,9 @@ export default function usePassengerVesselLocation(tourId) {
 
   const resource = usePassengerResource(fetcher, null);
 
+  // Chỉ lấy GPS và polling khi người dùng đang mở mục Theo dõi.
   useEffect(() => {
-    if (!tourId) return undefined;
+    if (!tourId || !enabled) return undefined;
 
     resource.load().catch(() => {});
 
@@ -23,7 +24,7 @@ export default function usePassengerVesselLocation(tourId) {
     }, GPS_POLLING_INTERVAL);
 
     return () => clearInterval(intervalId);
-  }, [tourId, resource.load]);
+  }, [tourId, enabled, resource.load]);
 
   return {
     vesselLocation: resource.data,
