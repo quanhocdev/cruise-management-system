@@ -1,22 +1,13 @@
-// src/modules/admin/pages/ManagerRoomType.jsx
 import { useMemo, useState } from "react";
 import { Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import {
-  Plus,
-  Tag,
-  Users,
-  Search,
-  X,
-  Pencil,
-  Trash2,
-  ArrowLeft,
-} from "lucide-react";
+import { Plus, Tag, Search, X, ArrowLeft } from "lucide-react";
 
 import useRoomTypes from "../hooks/useRoomTypes";
 import RoomTypeFormModal from "../components/room/RoomTypeFormModal";
+import RoomTypeTable from "../components/room/RoomTypeTable";
 
-import "../styles/cruise/ManagerCruise.css"; // Dùng chung hệ thống thiết kế hiện đại
+import "../styles/cruise/ManagerCruise.css";
 
 export default function ManagerRoomType() {
   const navigate = useNavigate();
@@ -37,6 +28,7 @@ export default function ManagerRoomType() {
   const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editingRoomType, setEditingRoomType] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
 
   const [form, setForm] = useState({
     name: "",
@@ -66,6 +58,7 @@ export default function ManagerRoomType() {
   const handleOpenCreate = () => {
     setEditingRoomType(null);
     setForm({ name: "", description: "", capacity: 1 });
+    setImageFile(null);
     setError("");
     setSuccess("");
     setShowModal(true);
@@ -78,6 +71,7 @@ export default function ManagerRoomType() {
       description: roomType.description || "",
       capacity: roomType.capacity || 1,
     });
+    setImageFile(null);
     setError("");
     setSuccess("");
     setShowModal(true);
@@ -85,6 +79,7 @@ export default function ManagerRoomType() {
 
   const handleCloseModal = () => {
     if (saving) return;
+    setImageFile(null);
     setShowModal(false);
   };
 
@@ -94,6 +89,11 @@ export default function ManagerRoomType() {
       ...previous,
       [name]: name === "capacity" ? (value === "" ? "" : Number(value)) : value,
     }));
+  };
+
+  const handleFileChange = (event) => {
+    const file = event.target.files?.[0] || null;
+    setImageFile(file);
   };
 
   const handleSubmit = async (event) => {
@@ -125,7 +125,12 @@ export default function ManagerRoomType() {
       return;
     }
 
-    const data = { name, description, capacity };
+    const data = {
+      name,
+      description,
+      capacity,
+      image: imageFile,
+    };
 
     setSaving(true);
     try {
@@ -137,6 +142,7 @@ export default function ManagerRoomType() {
       }
 
       if (result) {
+        setImageFile(null);
         setShowModal(false);
       }
     } finally {
@@ -232,13 +238,8 @@ export default function ManagerRoomType() {
         </p>
       </section>
 
-      {/* CONTENT GRID */}
-      {loading ? (
-        <div className="text-center py-5">
-          <div className="spinner-border text-primary" role="status" />
-          <p className="mt-2 text-muted">Đang tải danh sách loại phòng...</p>
-        </div>
-      ) : filteredRoomTypes.length === 0 ? (
+      {/* CONTENT TABLE */}
+      {!loading && filteredRoomTypes.length === 0 ? (
         <div className="mc-empty">
           <Tag size={44} />
           <h3>
@@ -270,62 +271,13 @@ export default function ManagerRoomType() {
           )}
         </div>
       ) : (
-        <div className="mc-grid">
-          {filteredRoomTypes.map((roomType, index) => (
-            <article
-              key={roomType.id}
-              className="mc-card"
-              style={{ padding: "4px 0 0" }}
-            >
-              <div className="mc-card-body" style={{ gap: "12px" }}>
-                <div className="mc-card-title">
-                  <h3 style={{ fontSize: "1.15rem" }}>{roomType.name}</h3>
-                  <span className="badge bg-info text-dark d-inline-flex align-items-center gap-1 px-2.5 py-1.5 rounded-pill">
-                    <Users size={13} /> {roomType.capacity || 1} khách
-                  </span>
-                </div>
-
-                <p
-                  className="mc-card-desc"
-                  style={{ WebkitLineClamp: 3, minHeight: "42px" }}
-                >
-                  {roomType.description ||
-                    "Chưa có mô tả chi tiết cho loại phòng này."}
-                </p>
-
-                <div className="text-muted" style={{ fontSize: "12px" }}>
-                  STT danh mục: #{index + 1}
-                </div>
-              </div>
-
-              <footer
-                className="mc-card-actions"
-                style={{
-                  borderTop: "1px solid var(--mc-border)",
-                  marginTop: "12px",
-                }}
-              >
-                <button
-                  type="button"
-                  className="mc-icon-btn"
-                  style={{ flex: 1 }}
-                  onClick={() => handleOpenEdit(roomType)}
-                >
-                  <Pencil size={16} />
-                  <span>Chỉnh sửa</span>
-                </button>
-
-                <button
-                  type="button"
-                  className="mc-icon-btn mc-icon-btn--danger"
-                  onClick={() => handleDelete(roomType)}
-                  title="Xóa loại phòng"
-                >
-                  <Trash2 size={17} />
-                </button>
-              </footer>
-            </article>
-          ))}
+        <div className="bg-white rounded-3 p-3 border">
+          <RoomTypeTable
+            roomTypes={filteredRoomTypes}
+            loading={loading}
+            onEdit={handleOpenEdit}
+            onDelete={handleDelete}
+          />
         </div>
       )}
 
@@ -335,10 +287,12 @@ export default function ManagerRoomType() {
         saving={saving}
         editingRoomType={editingRoomType}
         form={form}
+        imageFile={imageFile}
         error={error}
         onClose={handleCloseModal}
         onSubmit={handleSubmit}
         onChange={handleChange}
+        onFileChange={handleFileChange}
       />
     </div>
   );

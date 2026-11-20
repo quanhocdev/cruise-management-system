@@ -1,16 +1,35 @@
-import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap";
+import { useEffect, useState } from "react";
+import { Alert, Button, Form, Image, Modal, Spinner } from "react-bootstrap";
 
 export default function RoomTypeFormModal({
   show,
   saving,
   editingRoomType,
   form,
+  imageFile,
   error,
   onClose,
   onSubmit,
   onChange,
+  onFileChange,
 }) {
   const isEditing = Boolean(editingRoomType);
+  const [previewUrl, setPreviewUrl] = useState(null);
+
+  useEffect(() => {
+    if (!imageFile) {
+      setPreviewUrl(null);
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(imageFile);
+    setPreviewUrl(objectUrl);
+
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [imageFile]);
+
+  const displayedImage =
+    previewUrl || (isEditing ? editingRoomType?.imageUrl : null);
 
   return (
     <Modal
@@ -48,7 +67,7 @@ export default function RoomTypeFormModal({
             </Form.Text>
           </Form.Group>
 
-          {/* CAPACITY (THÊM MỚI) */}
+          {/* CAPACITY */}
           <Form.Group className="mb-3">
             <Form.Label>Sức chứa tối đa (người)</Form.Label>
             <Form.Control
@@ -80,6 +99,34 @@ export default function RoomTypeFormModal({
             />
             <Form.Text className="text-muted">Tối đa 5000 ký tự.</Form.Text>
           </Form.Group>
+
+          {/* IMAGE (OPTIONAL) */}
+          <Form.Group className="mb-2">
+            <Form.Label>Ảnh đại diện (không bắt buộc)</Form.Label>
+            <Form.Control
+              type="file"
+              name="image"
+              accept="image/*"
+              onChange={onFileChange}
+              disabled={saving}
+            />
+            <Form.Text className="text-muted">
+              {isEditing
+                ? "Chọn ảnh mới nếu muốn thay ảnh đại diện hiện tại."
+                : "Có thể bỏ qua nếu chưa có ảnh đại diện."}
+            </Form.Text>
+          </Form.Group>
+
+          {displayedImage && (
+            <div className="mt-2">
+              <Image
+                src={displayedImage}
+                alt={form.name || "Ảnh loại phòng"}
+                thumbnail
+                style={{ maxHeight: "140px", objectFit: "cover" }}
+              />
+            </div>
+          )}
         </Modal.Body>
 
         <Modal.Footer>
