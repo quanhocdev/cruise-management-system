@@ -204,4 +204,30 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity.badRequest().body(response);
         }
+        /*
+ * =====================================================
+ * BOOKING QUEUE FULL
+ * =====================================================
+ */
+@ExceptionHandler(
+        com.project.booking.service.queue.BookingQueueManager.QueueFullException.class
+)
+public ResponseEntity<ApiErrorResponse> handleBookingQueueFull(
+        com.project.booking.service.queue.BookingQueueManager.QueueFullException exception,
+        HttpServletRequest request) {
+
+    HttpStatus status = HttpStatus.TOO_MANY_REQUESTS;
+
+    ApiErrorResponse response = buildResponse(
+            status,
+            exception.getMessage(),
+            request.getRequestURI(),
+            null
+    );
+
+    return ResponseEntity
+            .status(status)
+            .body(response);
+}
+
 }
