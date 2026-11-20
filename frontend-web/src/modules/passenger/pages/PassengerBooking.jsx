@@ -11,6 +11,7 @@ import {
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import useBookings from "../hooks/useBookings";
+import useBookingQueue from "../hooks/useBookingQueue";
 import usePassengers from "../hooks/usePassengers";
 import passengerTripService from "../services/passengerTripService";
 import useBookingForm from "../hooks/useBookingForm";
@@ -41,6 +42,8 @@ export default function PassengerBooking() {
     success,
   } = useBookings();
   const { passengers: savedPassengers, loadPassengers } = usePassengers();
+  // BOOKING QUEUE WEBSOCKET
+  const { socketConnected, queueStatus, socketError } = useBookingQueue(true);
 
   const [tourPackages, setTourPackages] = useState([]);
 
@@ -146,6 +149,27 @@ export default function PassengerBooking() {
           <h1 className="booking-page-title">Đặt vé trực tuyến</h1>
           {tour?.name && <p className="booking-page-sub">{tour.name}</p>}
         </header>
+
+        {/* BOOKING QUEUE SOCKET TEST */}
+        <Alert variant={socketConnected ? "success" : "warning"}>
+          Booking Socket: {socketConnected ? "Đã kết nối" : "Đang kết nối..."}
+        </Alert>
+
+        {socketError && (
+          <Alert variant="danger">
+            Không thể kết nối Booking Socket. Kiểm tra Console.
+          </Alert>
+        )}
+
+        {queueStatus && (
+          <Alert variant="info">
+            <strong>Trạng thái:</strong> {queueStatus.status}
+            <br />
+            <strong>Thông báo:</strong> {queueStatus.message}
+            <br />
+            <strong>Vị trí:</strong> {queueStatus.queuePosition ?? "-"}
+          </Alert>
+        )}
 
         {bookingError && <Alert variant="danger">{bookingError}</Alert>}
         {success && <Alert variant="success">{success}</Alert>}

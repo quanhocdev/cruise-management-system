@@ -86,6 +86,7 @@ public class BookingQueueManager {
      *
      * @return BookingQueueTask để Controller chờ kết quả.
      */
+
     public BookingQueueTask submit(
             UUID userId,
             String email,
@@ -93,17 +94,13 @@ public class BookingQueueManager {
             throws IOException {
 
         if (userId == null) {
-            throw new IllegalArgumentException(
-                    "User ID không được null.");
+            throw new IllegalArgumentException("User ID không được null.");
         }
 
         if (request == null) {
-            throw new IllegalArgumentException(
-                    "Booking request không được null.");
+            throw new IllegalArgumentException("Booking request không được null.");
         }
 
-        // Sao chép độc lập DTO và nội dung file upload.
-        // Không giữ MultipartFile gốc của HTTP request.
         var requestSnapshot = BookingRequestSnapshot.copy(request);
 
         UUID requestId = UUID.randomUUID();
@@ -114,8 +111,6 @@ public class BookingQueueManager {
                 email,
                 requestSnapshot);
 
-        List<BookingQueueTask> waitingSnapshot;
-
         synchronized (queueLock) {
 
             int currentSize = waitingQueue.size()
@@ -124,39 +119,29 @@ public class BookingQueueManager {
             if (!running || currentSize >= MAX_CAPACITY) {
 
                 log.warn(
-                        "[BOOKING QUEUE] REJECTED | requestId={} | userId={} | " +
-                                "currentSize={} | capacity={}",
-                        requestId,
-                        userId,
-                        currentSize,
-                        MAX_CAPACITY);
+                        "[BOOKING QUEUE] REJECTED | requestId={} | userId={} | currentSize={} | capacity={}",
+                        requestId, userId, currentSize, MAX_CAPACITY);
 
                 throw new QueueFullException(
-                        "Hệ thống đang xử lý quá nhiều yêu cầu đặt tour. " +
-                                "Vui lòng thử lại sau.");
+                        "Hệ thống đang xử lý quá nhiều yêu cầu đặt tour. Vui lòng thử lại sau.");
             }
 
             waitingQueue.addLast(task);
 
-            int queuePosition = waitingQueue.size();
-
             log.info(
-                    "[BOOKING QUEUE] ACCEPTED | requestId={} | userId={} | " +
-                            "status={} | queuePosition={} | active={} | waiting={}",
+                    "[BOOKING QUEUE] ACCEPTED | requestId={} | userId={} | status={} | active={} | waiting={}",
                     requestId,
                     userId,
                     task.getStatus(),
-                    queuePosition,
                     activeTask != null,
                     waitingQueue.size());
 
-            waitingSnapshot = new ArrayList<>(waitingQueue);
+            // Gửi WAITING và vị trí khi vẫn đang giữ queueLock.
+            // Worker chưa thể lấy request trước khi gửi xong.
+            publishWaitingPositionsLocked();
 
             queueLock.notifyAll();
         }
-
-        // Gửi trạng thái và vị trí chờ cho từng người dùng.
-        publishWaitingPositions(waitingSnapshot);
 
         return task;
     }
@@ -194,6 +179,16 @@ public class BookingQueueManager {
                 activeTask = task;
 
                 task.setStatus(BookingQueueStatus.PROCESSING);
+
+                // Gửi PROCESSING trước khi cho request mới thay đổi Queue.
+                publishStatus(
+                        task,
+                        BookingQueueStatus.PROCESSING,
+                        0,
+                        "Đang xử lý yêu cầu đặt tour.");
+
+                // Cập nhật lại vị trí các request còn chờ.
+                publishWaitingPositionsLocked();
             }
 
             Instant processingStartedAt = Instant.now();
@@ -206,14 +201,6 @@ public class BookingQueueManager {
                     task.getReceivedAt(),
                     processingStartedAt,
                     getWaitingCount());
-
-            publishStatus(
-                    task,
-                    BookingQueueStatus.PROCESSING,
-                    0,
-                    "Đang xử lý yêu cầu đặt tour.");
-
-            publishCurrentWaitingPositions();
 
             try {
 
@@ -304,41 +291,26 @@ public class BookingQueueManager {
 
     /**
      * Gửi lại vị trí FIFO của toàn bộ request đang chờ.
+     *
+     * Phương thức này phải được gọi khi đang giữ queueLock.
      */
-    private void publishCurrentWaitingPositions() {
+    private void publishWaitingPositionsLocked() {
 
-        List<BookingQueueTask> snapshot;
+        int position = 1;
 
-        synchronized (queueLock) {
-            snapshot = new ArrayList<>(waitingQueue);
-        }
+        for (BookingQueueTask task : waitingQueue) {
 
-        publishWaitingPositions(snapshot);
-    }
-
-    private void publishWaitingPositions(
-            List<BookingQueueTask> tasks) {
-
-        synchronized (queueLock) {
-
-            int position = 1;
-
-            for (BookingQueueTask task : tasks) {
-
-                // Chỉ gửi WAITING nếu task vẫn thực sự nằm trong Queue.
-                if (task.getStatus() != BookingQueueStatus.WAITING
-                        || !waitingQueue.contains(task)) {
-                    continue;
-                }
-
-                publishStatus(
-                        task,
-                        BookingQueueStatus.WAITING,
-                        position,
-                        "Vui lòng chờ. Vị trí trong hàng đợi: " + position);
-
-                position++;
+            if (task.getStatus() != BookingQueueStatus.WAITING) {
+                continue;
             }
+
+            publishStatus(
+                    task,
+                    BookingQueueStatus.WAITING,
+                    position,
+                    "Vui lòng chờ. Vị trí trong hàng đợi: " + position);
+
+            position++;
         }
     }
 
