@@ -8,6 +8,7 @@ import com.project.tour.service.admin.room.RoomTypeService;
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,9 +27,9 @@ public class RoomTypeController {
         this.roomTypeService = roomTypeService;
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<RoomTypeResponse> createRoomType(
-            @Valid @RequestBody CreateRoomTypeRequest request) {
+            @Valid @ModelAttribute CreateRoomTypeRequest request) {
 
         RoomTypeResponse response = roomTypeService.createRoomType(request);
 
@@ -52,10 +53,10 @@ public class RoomTypeController {
                 roomTypeService.getRoomTypeById(id));
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<RoomTypeResponse> updateRoomType(
             @PathVariable UUID id,
-            @Valid @RequestBody UpdateRoomTypeRequest request) {
+            @Valid @ModelAttribute UpdateRoomTypeRequest request) {
 
         return ResponseEntity.ok(
                 roomTypeService.updateRoomType(

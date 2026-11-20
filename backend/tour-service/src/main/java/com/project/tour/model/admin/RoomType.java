@@ -2,8 +2,10 @@ package com.project.tour.model.admin;
 
 import jakarta.persistence.*;
 
-import java.util.UUID;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "room_types", uniqueConstraints = {
@@ -27,12 +29,34 @@ public class RoomType {
     @Column
     private Integer capacity = 1;
 
+    @Column(length = 500)
+    private String imageUrl;
+
+    @Column(length = 255)
+    private String imagePublicId;
+
+    @OneToMany(mappedBy = "roomType", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("sortOrder ASC")
+    private List<RoomTypeImage> images = new ArrayList<>();
+
     @PrePersist
     protected void onCreate() {
-        if (price == null)
+        if (price == null) {
             price = BigDecimal.ZERO;
-        if (capacity == null)
+        }
+        if (capacity == null) {
             capacity = 1;
+        }
+    }
+
+    public void addImage(RoomTypeImage image) {
+        images.add(image);
+        image.setRoomType(this);
+    }
+
+    public void removeImage(RoomTypeImage image) {
+        images.remove(image);
+        image.setRoomType(null);
     }
 
     public UUID getId() {
@@ -73,5 +97,29 @@ public class RoomType {
 
     public void setCapacity(Integer capacity) {
         this.capacity = capacity;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public String getImagePublicId() {
+        return imagePublicId;
+    }
+
+    public void setImagePublicId(String imagePublicId) {
+        this.imagePublicId = imagePublicId;
+    }
+
+    public List<RoomTypeImage> getImages() {
+        return images;
+    }
+
+    public void setImages(List<RoomTypeImage> images) {
+        this.images = images;
     }
 }

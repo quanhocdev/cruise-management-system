@@ -9,10 +9,12 @@ public class RoomTypeMapper {
     }
 
     public static RoomTypeResponse toResponse(RoomType roomType) {
-        RoomTypeResponse dto = new RoomTypeResponse();
-        dto.setId(roomType.getId());
-        dto.setName(roomType.getName());
-        dto.setDescription(roomType.getDescription());
-        return dto;
+        return new RoomTypeResponse(
+                roomType.getId(),
+                roomType.getName(),
+                roomType.getDescription(),
+                roomType.getPrice(),
+                roomType.getCapacity(),
+                roomType.getImageUrl());
     }
 }
