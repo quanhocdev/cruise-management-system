@@ -32,3 +32,211 @@
     margin-bottom: 1rem;
   }
 }
+
+/* Thanh tìm kiếm dạng pill bên trái chuông */
+.guest-search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 280px;
+}
+
+.guest-search-box__icon {
+  position: absolute;
+  left: 14px;
+  color: #6b7280;
+  pointer-events: none;
+}
+
+.guest-search-box__input {
+  width: 100%;
+  padding: 8px 16px 8px 40px !important;
+  font-size: 14px;
+  background-color: #f3f4f6 !important;
+  border: 1px solid transparent !important;
+  border-radius: 999px !important;
+  color: #1f2937;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.guest-search-box__input:hover,
+.guest-search-box__input:focus {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06) !important;
+}
+
+/* Nút icon tròn mở menu tài khoản */
+.guest-account-trigger {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  color: #1e293b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.guest-account-trigger::after {
+  display: none !important; /* Ẩn mũi tên mặc định của Bootstrap Dropdown */
+}
+
+.guest-account-trigger:hover,
+.guest-account-trigger[aria-expanded="true"] {
+  background-color: #eff6ff;
+  border-color: #93c5fd;
+  color: #0d6efd;
+}
+
+/* Khung Dropdown tài khoản */
+.guest-account-menu {
+  width: 310px;
+  padding: 12px !important;
+  border-radius: 16px !important;
+  margin-top: 10px !important;
+}
+
+/* Phần đầu hiển thị Tên & Role */
+.guest-account-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background-color: #f8fafc;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.guest-account-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0d6efd, #3b82f6);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.guest-account-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.guest-account-name {
+  font-weight: 700;
+  font-size: 15px;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.guest-account-role {
+  display: inline-block;
+  margin-top: 2px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #0d6efd;
+  background-color: #e0edff;
+  border-radius: 999px;
+  letter-spacing: 0.3px;
+}
+
+/* Lưới 4 card (2 cột x 2 hàng) */
+.guest-account-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.guest-grid-card {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+  padding: 12px 8px !important;
+  border-radius: 12px !important;
+  background-color: #f8fafc !important;
+  border: 1px solid #f1f5f9 !important;
+  white-space: normal !important;
+  transition: all 0.18s ease;
+}
+
+.guest-grid-card:hover {
+  background-color: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+  transform: translateY(-1px);
+}
+
+.guest-grid-card__icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.guest-grid-card__label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #334155;
+  line-height: 1.25;
+}
+
+/* Danh sách 4 mục bên dưới */
+.guest-account-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.guest-list-item {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px !important;
+  border-radius: 10px !important;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #334155 !important;
+  transition: background-color 0.15s ease;
+}
+
+.guest-list-item:hover {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+.guest-list-item__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+}
+
+.guest-list-item--danger {
+  color: #dc2626 !important;
+  font-weight: 600;
+}
+
+.guest-list-item--danger .guest-list-item__icon {
+  color: #dc2626;
+}
+
+.guest-list-item--danger:hover {
+  background-color: #fef2f2 !important;
+  color: #b91c1c !important;
+}
