@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Container,
   Row,
@@ -12,9 +12,11 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import useBookings from "../hooks/useBookings";
 import usePassengers from "../hooks/usePassengers";
+import passengerTripService from "../services/passengerTripService";
 import useBookingForm from "../hooks/useBookingForm";
 import { usePublicTourDetail } from "../../guest/hooks/usePublicTours";
-
+import usePassengerRoomType from "../hooks/usePassengerRoomType";
+import SelectedRoomPreview from "../components/booking/SelectedRoomPreview";
 import BookingSection from "../components/booking/BookingSection";
 import PackageSelector from "../components/booking/PackageSelector";
 import RoomStepper from "../components/booking/RoomStepper";
@@ -40,9 +42,36 @@ export default function PassengerBooking() {
   } = useBookings();
   const { passengers: savedPassengers, loadPassengers } = usePassengers();
 
+  const [tourPackages, setTourPackages] = useState([]);
+
   useEffect(() => {
     loadPassengers();
   }, [loadPassengers]);
+
+  useEffect(() => {
+    if (!tourId) {
+      setTourPackages([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    passengerTripService
+      .getPackages(tourId)
+      .then((data) => {
+        if (!cancelled) {
+          setTourPackages(Array.isArray(data) ? data : []);
+        }
+      })
+      .catch((err) => {
+        console.error("Không tải được danh sách gói của tour:", err);
+        if (!cancelled) setTourPackages([]);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [tourId]);
 
   const form = useBookingForm({
     user,
@@ -50,6 +79,20 @@ export default function PassengerBooking() {
     packageIdFromUrl,
     savedPassengers,
   });
+
+  const packagesForSelect =
+    tourPackages.length > 0 ? tourPackages : tour?.packages || [];
+
+  const activePackage =
+    packagesForSelect.find(
+      (pkg) => String(pkg.id) === String(form.tourPackageId),
+    ) || form.selectedPackage;
+
+  const selectedRoomTypeId =
+    activePackage?.roomTypeId || activePackage?.roomType?.id;
+
+  const { roomType: selectedRoomType, loading: roomTypeLoading } =
+    usePassengerRoomType(selectedRoomTypeId);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -116,9 +159,13 @@ export default function PassengerBooking() {
                 hint="Giá được tính theo phòng. Chọn gói phù hợp với nhu cầu của bạn."
               >
                 <PackageSelector
-                  packages={tour?.packages}
+                  packages={packagesForSelect}
                   selectedId={form.tourPackageId}
                   onSelect={form.setTourPackageId}
+                />
+                <SelectedRoomPreview
+                  roomType={selectedRoomType}
+                  loading={roomTypeLoading}
                 />
                 <RoomStepper
                   value={form.numberOfRooms}
@@ -168,7 +215,7 @@ export default function PassengerBooking() {
               <BookingSummary
                 tour={tour}
                 tourId={tourId}
-                pkg={form.selectedPackage}
+                pkg={activePackage}
                 rooms={form.numberOfRooms}
                 passengerCount={form.passengers.length}
                 totalPrice={form.totalPrice}
