@@ -1,10 +1,12 @@
 import { Button, Image, Spinner, Table } from "react-bootstrap";
+import { Images } from "lucide-react";
 
 export default function RoomTypeTable({
   roomTypes,
   loading,
   onEdit,
   onDelete,
+  onManageImages,
 }) {
   if (loading) {
     return (
@@ -35,7 +37,7 @@ export default function RoomTypeTable({
               Sức chứa
             </th>
             <th>Mô tả</th>
-            <th className="text-center" style={{ width: "200px" }}>
+            <th className="text-center" style={{ width: "260px" }}>
               Thao tác
             </th>
           </tr>
@@ -77,7 +79,18 @@ export default function RoomTypeTable({
                 )}
               </td>
               <td>
-                <div className="d-flex justify-content-center gap-2">
+                <div className="d-flex justify-content-center flex-wrap gap-2">
+                  {onManageImages && (
+                    <Button
+                      size="sm"
+                      variant="outline-secondary"
+                      className="d-inline-flex align-items-center gap-1"
+                      onClick={() => onManageImages(roomType)}
+                    >
+                      <Images size={14} />
+                      <span>Ảnh chi tiết</span>
+                    </Button>
+                  )}
                   <Button
                     size="sm"
                     variant="outline-primary"

@@ -6,6 +6,7 @@ import { Plus, Tag, Search, X, ArrowLeft } from "lucide-react";
 import useRoomTypes from "../hooks/useRoomTypes";
 import RoomTypeFormModal from "../components/room/RoomTypeFormModal";
 import RoomTypeTable from "../components/room/RoomTypeTable";
+import RoomTypeImagesModal from "../components/room/RoomTypeImagesModal";
 
 import "../styles/cruise/ManagerCruise.css";
 
@@ -29,6 +30,8 @@ export default function ManagerRoomType() {
   const [saving, setSaving] = useState(false);
   const [editingRoomType, setEditingRoomType] = useState(null);
   const [imageFile, setImageFile] = useState(null);
+  const [selectedRoomTypeForImages, setSelectedRoomTypeForImages] =
+    useState(null);
 
   const [form, setForm] = useState({
     name: "",
@@ -75,6 +78,10 @@ export default function ManagerRoomType() {
     setError("");
     setSuccess("");
     setShowModal(true);
+  };
+
+  const handleOpenImages = (roomType) => {
+    setSelectedRoomTypeForImages(roomType);
   };
 
   const handleCloseModal = () => {
@@ -277,6 +284,7 @@ export default function ManagerRoomType() {
             loading={loading}
             onEdit={handleOpenEdit}
             onDelete={handleDelete}
+            onManageImages={handleOpenImages}
           />
         </div>
       )}
@@ -293,6 +301,13 @@ export default function ManagerRoomType() {
         onSubmit={handleSubmit}
         onChange={handleChange}
         onFileChange={handleFileChange}
+      />
+
+      {/* MODAL ẢNH CHI TIẾT */}
+      <RoomTypeImagesModal
+        show={Boolean(selectedRoomTypeForImages)}
+        roomType={selectedRoomTypeForImages}
+        onClose={() => setSelectedRoomTypeForImages(null)}
       />
     </div>
   );
