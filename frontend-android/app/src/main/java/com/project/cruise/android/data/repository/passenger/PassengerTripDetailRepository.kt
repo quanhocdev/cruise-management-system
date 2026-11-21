@@ -10,7 +10,7 @@ class PassengerTripDetailRepository(
     suspend fun getMyBookedTours(): List<BookedTourItemDto> =
         api.getMyBookedTours()
 
-    
+
     suspend fun getRouteOverview(tourId: String): TripRouteOverviewDto =
         api.getRouteOverview(tourId)
 

@@ -26,6 +26,18 @@ import com.project.cruise.android.ui.theme.OceanNavy
 import com.project.cruise.android.viewmodel.passenger.TripSectionKey
 import java.text.NumberFormat
 import java.util.Locale
+import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Star
 
 private fun formatVnd(amount: Double?): String {
     if (amount == null) return "Chưa cập nhật"
@@ -372,7 +384,7 @@ fun TripRouteSection(
                 )
                 val updatedTime = vesselLocation?.updatedAt ?: vesselLocation?.timestamp
                 if (!updatedTime.isNullOrBlank()) {
-                    InfoRowItem(icon = Icons.Outlined.Schedule, label = "Cập nhật lúc", value = updatedTime)
+                    InfoRowItem(icon = Icons.Default.DateRange, label = "Cập nhật lúc", value = updatedTime)
                 }
                 weather?.let { w ->
                     val summary = buildList {
@@ -381,7 +393,7 @@ fun TripRouteSection(
                         w.windSpeed?.let { add("Gió ${it} m/s") }
                     }.joinToString(" • ")
                     if (summary.isNotBlank()) {
-                        InfoRowItem(icon = Icons.Outlined.WbSunny, label = "Thời tiết khu vực", value = summary)
+                        InfoRowItem(icon = Icons.Default.Star, label = "Thời tiết khu vực", value = summary)
                     }
                 }
             }

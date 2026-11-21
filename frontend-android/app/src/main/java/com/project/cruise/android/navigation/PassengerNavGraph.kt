@@ -229,36 +229,45 @@ fun NavGraphBuilder.passengerGraph(
         )
     }
 
-    // ----- VESSEL TRACKING (GIÁM SÁT TÀU THỜI GIAN THỰC) -----
+    // ----- DANH SÁCH HÀNH TRÌNH ĐÃ ĐẶT (TAB GIÁM SÁT) -----
     composable(Routes.VESSEL_TRACKING) { backStackEntry ->
-        val context = androidx.compose.ui.platform.LocalContext.current
-
-        // 1. Tạo Retrofit API service cho Vessel Tracking
-        val vesselApi = remember(tokenManager) {
-            RetrofitClient.createVesselTrackingApiService(tokenManager)
+        val tripDetailRepo = remember(tokenManager) {
+            com.project.cruise.android.data.repository.passenger.PassengerTripDetailRepository(
+                RetrofitClient.createPassengerTripDetailApiService(tokenManager)
+            )
         }
+        val bookedToursViewModel: com.project.cruise.android.viewmodel.passenger.PassengerBookedToursViewModel =
+            viewModel(
+                viewModelStoreOwner = backStackEntry,
+                factory = com.project.cruise.android.viewmodel.passenger.PassengerBookedToursViewModel.Factory(
+                    tripDetailRepo
+                )
+            )
 
-        // 2. Khởi tạo ViewModel cho Tracking
-        val trackingViewModel: com.project.cruise.android.viewmodel.VesselTrackingViewModel = viewModel(
-            factory = object : androidx.lifecycle.ViewModelProvider.Factory {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
-                    return com.project.cruise.android.viewmodel.VesselTrackingViewModel(context, vesselApi) as T
+        com.project.cruise.android.ui.passenger.screen.PassengerBookedToursScreen(
+            viewModel = bookedToursViewModel,
+            onOpenTour = { tourId, bookingId ->
+                navController.navigate(Routes.passengerTripDetail(tourId, bookingId))
+            },
+            onHomeClick = {
+                navController.navigate(Routes.PASSENGER_TOURS) {
+                    popUpTo(Routes.PASSENGER_TOURS) { inclusive = true }
                 }
+            },
+            onMyBookingsClick = {
+                navController.navigate(Routes.PASSENGER_BOOKINGS)
+            },
+            onMessagesClick = {
+                navController.navigate(Routes.PASSENGER_MESSAGES)
+            },
+            onNotificationClick = {
+                navController.navigate(Routes.PASSENGER_NOTIFICATIONS) {
+                    launchSingleTop = true
+                }
+            },
+            onUserClick = {
+                navController.navigate(Routes.PASSENGER_PROFILE)
             }
-        )
-
-        // Lấy token hiện tại từ TokenManager để gửi kèm Header
-        val token = tokenManager.getAccessToken().orEmpty()
-
-        val currentTourId = 1L // Thay bằng ID tour thực tế đang hoạt động của bạn
-
-        // Gọi màn hình UI Jetpack Compose đã thiết kế
-        com.project.cruise.android.ui.screen.VesselTrackingScreen(
-            viewModel = trackingViewModel,
-            tourId = currentTourId,
-            token = token,
-            context = context
         )
     }
 
