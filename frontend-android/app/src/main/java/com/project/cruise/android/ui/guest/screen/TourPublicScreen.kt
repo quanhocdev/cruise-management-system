@@ -39,6 +39,11 @@ fun TourPublicScreen(
             state,
             onTourClick,
             { viewModel.fetchPublicTours() },
+            chatWidget = {
+                if (loggedIn) {
+                    PublicTourChatFloatingWidget(chatViewModel)
+                }
+            },
             bottomBar = {
                 OceanBottomBar(
                     isLoggedIn = loggedIn,
@@ -54,11 +59,7 @@ fun TourPublicScreen(
                 )
             },
         )
-        if (loggedIn) {
-            Box(Modifier.fillMaxSize().padding(bottom = 90.dp)) {
-                PublicTourChatFloatingWidget(chatViewModel)
-            }
-        }
+
     }
 }
 
@@ -68,15 +69,29 @@ fun TourCatalogContent(
     onTourClick: (String) -> Unit,
     onRetry: () -> Unit,
     bottomBar: @Composable () -> Unit = {},
+    chatWidget: @Composable () -> Unit = {},
 ) {
     var query by rememberSaveable { mutableStateOf("") }
     var openOnly by rememberSaveable { mutableStateOf(false) }
     val tours = (state as? TourListState.Success)?.tours.orEmpty()
     val filtered = remember(tours, query, openOnly) { tours.filterTours(query, openOnly) }
 
-    PassengerPage("Khám phá", "OCEANCRUISE · HÀNH TRÌNH TRÊN BIỂN", bottomBar = bottomBar) {
-        item { PassengerDiscoveryHero() }
-        item { TourSearchField(query = query, onQueryChange = { query = it }) }
+    PassengerPage(
+        title = "Khám phá",
+        subtitle = "HÀNH TRÌNH TRÊN BIỂN",
+        bottomBar = bottomBar,
+        headerAction = chatWidget,
+    ) {
+        item {
+            PassengerDiscoveryHero()
+        }
+
+        item {
+            TourSearchField(
+                query = query,
+                onQueryChange = { query = it }
+            )
+        }
         item { TourFilterChips(openOnly = openOnly, onChange = { openOnly = it }) }
         item {
             PassengerSection(

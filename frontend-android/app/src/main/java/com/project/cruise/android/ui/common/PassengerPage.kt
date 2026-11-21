@@ -1,3 +1,4 @@
+
 package com.project.cruise.android.ui.common
 
 import androidx.compose.foundation.BorderStroke
@@ -22,6 +23,7 @@ fun PassengerPage(
     subtitle: String? = null,
     onBack: (() -> Unit)? = null,
     bottomBar: @Composable () -> Unit = {},
+    headerAction: @Composable () -> Unit = {},
     content: LazyListScope.() -> Unit,
 ) {
     OceanTheme {
@@ -31,15 +33,31 @@ fun PassengerPage(
             contentWindowInsets = WindowInsets.safeDrawing,
         ) { padding ->
             Box(
-                Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding).imePadding(),
+                Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .consumeWindowInsets(padding)
+                    .imePadding(),
                 contentAlignment = Alignment.TopCenter,
             ) {
                 LazyColumn(
-                    Modifier.widthIn(max = 600.dp).fillMaxWidth(),
-                    contentPadding = PaddingValues(20.dp, 16.dp, 20.dp, 28.dp),
+                    Modifier
+                        .widthIn(max = 600.dp)
+                        .fillMaxWidth(),
+                    contentPadding = PaddingValues(
+                        20.dp, 16.dp, 20.dp, 28.dp
+                    ),
                     verticalArrangement = Arrangement.spacedBy(18.dp),
                 ) {
-                    item { PageHeader(title, subtitle, onBack) }
+                    item {
+                        PageHeader(
+                            title = title,
+                            subtitle = subtitle,
+                            onBack = onBack,
+                            headerAction = headerAction,
+                        )
+                    }
+
                     content()
                 }
             }
@@ -48,32 +66,51 @@ fun PassengerPage(
 }
 
 @Composable
-private fun PageHeader(title: String, subtitle: String?, onBack: (() -> Unit)?) {
+private fun PageHeader(
+    title: String,
+    subtitle: String?,
+    onBack: (() -> Unit)?,
+    headerAction: @Composable () -> Unit,
+) {
     Row(
+        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        if (onBack != null)
+        if (onBack != null) {
             Surface(
                 onClick = onBack,
-                modifier =
-                    Modifier.size(46.dp).semantics { contentDescription = "Quay lại" },
+                modifier = Modifier
+                    .size(46.dp)
+                    .semantics {
+                        contentDescription = "Quay lại"
+                    },
                 shape = CircleShape,
                 color = Color.White,
                 border = BorderStroke(1.dp, OceanLine),
                 shadowElevation = 2.dp,
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    PassengerIcon(PassengerGlyph.BACK, OceanNavy, Modifier.size(22.dp))
+                    PassengerIcon(
+                        PassengerGlyph.BACK,
+                        OceanNavy,
+                        Modifier.size(22.dp)
+                    )
                 }
             }
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+        }
+
+        Column(
+            Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(3.dp)
+        ) {
             Text(
                 title,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 color = OceanNavy,
             )
+
             subtitle?.let {
                 Text(
                     it,
@@ -82,5 +119,7 @@ private fun PageHeader(title: String, subtitle: String?, onBack: (() -> Unit)?) 
                 )
             }
         }
+
+        headerAction()
     }
 }

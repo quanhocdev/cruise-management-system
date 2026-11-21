@@ -5,13 +5,13 @@ import java.util.UUID
 
 data class FeedbackResponse(
     val id: UUID,
-    val invitationId: UUID?,
-    val bookingId: Long?,
-    val bookingPassengerId: Long?,
-    val feedbackType: String?,
-    val targetId: UUID?,
-    val targetName: String?,
-    val rating: Int?,
-    val comment: String?,
-    val createdAt: Instant?
+    val invitationId: UUID,
+    val bookingId: Long,
+    val bookingPassengerId: Long,
+    val feedbackType: String,
+    val targetId: UUID,
+    val targetName: String,
+    val rating: Int,
+    val comment: String,
+    val createdAt: Instant
 )

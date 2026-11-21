@@ -9,6 +9,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.project.cruise.android.ui.common.PassengerCard
+import com.project.cruise.android.ui.common.passengerMoney
 import com.project.cruise.android.ui.components.*
 import com.project.cruise.android.ui.theme.*
 import java.math.BigDecimal

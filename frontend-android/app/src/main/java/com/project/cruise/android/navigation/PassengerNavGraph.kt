@@ -47,41 +47,65 @@ import com.project.cruise.android.ui.screens.passenger.NotificationScreen
 import com.project.cruise.android.viewmodel.passenger.NotificationViewModel
 import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModel
 import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModelFactory
-
+import com.project.cruise.android.ui.screens.passenger.MyFeedbackScreen
+import com.project.cruise.android.viewmodel.passenger.FeedbackViewModel
 fun NavGraphBuilder.passengerGraph(
     navController: NavHostController,
     authViewModel: AuthViewModel,
     tokenManager: TokenManager,
-    chatRepository: ChatRepository
+    chatRepository: ChatRepository,
+    feedbackViewModel: FeedbackViewModel,
 ) {
 
     // ----- PROFILE -----
     composable(Routes.PASSENGER_PROFILE) {
         ProfileScreen(
             authViewModel = authViewModel,
+
             onHomeClick = {
                 navController.navigate(Routes.PASSENGER_TOURS) {
-                    popUpTo(Routes.PASSENGER_TOURS) { inclusive = true }
+                    popUpTo(Routes.PASSENGER_TOURS) {
+                        inclusive = true
+                    }
                 }
             },
+
             onMyBookingsClick = {
                 navController.navigate(Routes.PASSENGER_BOOKINGS)
             },
+
             onMessagesClick = {
                 navController.navigate(Routes.PASSENGER_MESSAGES)
             },
+
             onVesselTrackingClick = {
                 navController.navigate(Routes.VESSEL_TRACKING)
             },
 
+            // Mở trang đánh giá của tôi
+            onMyFeedbackClick = {
+                navController.navigate(Routes.PASSENGER_FEEDBACK)
+            },
+
             onLogout = {
                 navController.navigate(Routes.GUEST) {
-                    popUpTo(Routes.PASSENGER_TOURS) { inclusive = true }
+                    popUpTo(Routes.PASSENGER_TOURS) {
+                        inclusive = true
+                    }
                 }
             }
         )
     }
 
+// ----- MY FEEDBACK -----
+    composable(Routes.PASSENGER_FEEDBACK) {
+        MyFeedbackScreen(
+            model = feedbackViewModel,
+            onBack = {
+                navController.popBackStack()
+            }
+        )
+    }
     // ----- DASHBOARD -----
     composable(Routes.PASSENGER_DASHBOARD) {
         Dashboard(

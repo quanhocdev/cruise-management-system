@@ -45,6 +45,6 @@ fun ChatFloatingButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
         shape = CircleShape,
         elevation = FloatingActionButtonDefaults.elevation(8.dp),
     ) {
-        PassengerIcon(PassengerGlyph.MESSAGE, Color.White, Modifier.size(28.dp))
+        PassengerIcon(PassengerGlyph.ROBOT, Color.White, Modifier.size(28.dp))
     }
 }

@@ -29,7 +29,9 @@ object Routes {
     const val PASSENGER_TOUR_DETAIL = "passenger_tours/{tourId}"
     const val PASSENGER_ROOMS = "passenger_rooms/{voyageId}"
     const val PASSENGER_CREATE_BOOKING = "passenger_booking/{tourId}/{packageId}"
-        const val VESSEL_TRACKING = "vessel_tracking"
+    const val VESSEL_TRACKING = "vessel_tracking"
+
+    const val PASSENGER_FEEDBACK = "passenger_feedback"
 
 
 

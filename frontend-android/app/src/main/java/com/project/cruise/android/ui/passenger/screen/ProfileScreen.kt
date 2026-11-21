@@ -14,22 +14,32 @@ fun ProfileScreen(
     onMyBookingsClick: () -> Unit,
     onMessagesClick: () -> Unit,
     onNotificationClick: () -> Unit = {},
-    onVesselTrackingClick: () -> Unit = {}, // <--- Thêm callback giám sát
+    onVesselTrackingClick: () -> Unit = {},
+    onMyFeedbackClick: () -> Unit = {}, // Thêm callback
     unreadCount: Long = 0L,
     onLogout: () -> Unit,
 ) {
     val state by authViewModel.meState.collectAsState()
-    LaunchedEffect(Unit) { authViewModel.getCurrentUser() }
+
+    LaunchedEffect(Unit) {
+        authViewModel.getCurrentUser()
+    }
+
     ProfileContent(
         state = state,
         onHomeClick = onHomeClick,
         onMyBookingsClick = onMyBookingsClick,
         onMessagesClick = onMessagesClick,
         onNotificationClick = onNotificationClick,
-        onVesselTrackingClick = onVesselTrackingClick, // <--- Truyền xuống Content
+        onVesselTrackingClick = onVesselTrackingClick,
+        onMyFeedbackClick = onMyFeedbackClick, // Truyền xuống
         unreadCount = unreadCount,
-        onLogout = { authViewModel.logout(onLogout) },
-        onRetry = { authViewModel.getCurrentUser() },
+        onLogout = {
+            authViewModel.logout(onLogout)
+        },
+        onRetry = {
+            authViewModel.getCurrentUser()
+        },
     )
 }
 
@@ -44,6 +54,7 @@ fun ProfileContent(
     unreadCount: Long,
     onLogout: () -> Unit,
     onRetry: () -> Unit,
+    onMyFeedbackClick: () -> Unit = {},
 ) {
     var confirmLogout by rememberSaveable { mutableStateOf(false) }
 
@@ -80,6 +91,14 @@ fun ProfileContent(
                 subtitle = "Xem booking, hành khách và trạng thái đặt chỗ",
                 glyph = PassengerGlyph.TICKET,
                 onClick = onMyBookingsClick,
+            )
+        }
+        item {
+            ProfileActionItem(
+                title = "Đánh giá của tôi",
+                subtitle = "Xem lời mời đánh giá và chia sẻ cảm nhận về chuyến đi",
+                glyph = PassengerGlyph.MESSAGE,
+                onClick = onMyFeedbackClick,
             )
         }
         item {
