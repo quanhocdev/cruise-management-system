@@ -31,6 +31,9 @@ import com.mapbox.maps.plugin.annotation.generated.createPolylineAnnotationManag
 import com.project.cruise.android.data.dto.passenger.tripdetail.TripRouteLegDto
 import com.project.cruise.android.data.dto.passenger.tripdetail.TripRouteOverviewDto
 import com.project.cruise.android.data.dto.passenger.tripdetail.VesselLocationDto
+import android.util.Log
+import com.mapbox.common.MapboxOptions
+import com.project.cruise.android.BuildConfig
 
 private fun createCircleMarkerBitmap(
     colorInt: Int,
@@ -65,6 +68,7 @@ fun TripMapboxCard(
     overview: TripRouteOverviewDto?,
     legs: List<TripRouteLegDto>,
     vesselLocation: VesselLocationDto?,
+    routeGeoJson: com.google.gson.JsonElement? = null,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -90,21 +94,29 @@ fun TripMapboxCard(
         if (lat != null && lon != null) Point.fromLngLat(lon, lat) else null
     }
 
-    val routePoints = remember(depPoint, legs, arrPoint, vesselPoint) {
-        buildList {
-            depPoint?.let { add(it) }
-            legs.forEach { leg ->
-                val fLat = leg.fromPort?.latitude
-                val fLon = leg.fromPort?.longitude
-                if (fLat != null && fLon != null) add(Point.fromLngLat(fLon, fLat))
+    val geoJsonPoints = remember(routeGeoJson) {
+        extractGeoJsonPoints(routeGeoJson)
+    }
 
-                val tLat = leg.toPort?.latitude
-                val tLon = leg.toPort?.longitude
-                if (tLat != null && tLon != null) add(Point.fromLngLat(tLon, tLat))
-            }
-            arrPoint?.let { add(it) }
-            if (isEmpty()) {
-                vesselPoint?.let { add(it) }
+    val routePoints = remember(geoJsonPoints, depPoint, legs, arrPoint, vesselPoint) {
+        if (geoJsonPoints.isNotEmpty()) {
+            geoJsonPoints
+        } else {
+            buildList {
+                depPoint?.let { add(it) }
+                legs.forEach { leg ->
+                    val fLat = leg.fromPort?.latitude
+                    val fLon = leg.fromPort?.longitude
+                    if (fLat != null && fLon != null) add(Point.fromLngLat(fLon, fLat))
+
+                    val tLat = leg.toPort?.latitude
+                    val tLon = leg.toPort?.longitude
+                    if (tLat != null && tLon != null) add(Point.fromLngLat(tLon, tLat))
+                }
+                arrPoint?.let { add(it) }
+                if (isEmpty()) {
+                    vesselPoint?.let { add(it) }
+                }
             }
         }
     }
@@ -136,7 +148,7 @@ fun TripMapboxCard(
         }
     }
 
-    LaunchedEffect(pointManager, polylineManager, vesselPoint, depPoint, arrPoint, routePoints) {
+    LaunchedEffect(pointManager, polylineManager, vesselPoint, depPoint, arrPoint, routePoints, routeGeoJson) {
         val pm = pointManager ?: return@LaunchedEffect
         val lm = polylineManager ?: return@LaunchedEffect
 
@@ -202,9 +214,18 @@ fun TripMapboxCard(
         AndroidView(
             modifier = Modifier.fillMaxWidth().height(260.dp),
             factory = { ctx ->
+                val rawToken = BuildConfig.MAPBOX_PUBLIC_TOKEN.trim()
+                if (rawToken.isEmpty()) {
+                    Log.e("TripMapboxCard", "MAPBOX_PUBLIC_TOKEN đang rỗng! Kiểm tra local.properties và app/build.gradle.kts")
+                } else {
+                    MapboxOptions.accessToken = rawToken
+                    Log.d("TripMapboxCard", "Đã gán MapboxOptions.accessToken (len=${rawToken.length})")
+                }
+
                 MapView(ctx).apply {
                     mapViewRef = this
-                    mapboxMap.loadStyle(Style.MAPBOX_STREETS) {
+                    mapboxMap.loadStyle(Style.MAPBOX_STREETS) { style ->
+                        Log.d("TripMapboxCard", "Mapbox style loaded: ${style.styleURI}")
                         pointManager = annotations.createPointAnnotationManager()
                         polylineManager = annotations.createPolylineAnnotationManager()
                     }
@@ -212,4 +233,45 @@ fun TripMapboxCard(
             }
         )
     }
+}
+private fun extractGeoJsonPoints(element: com.google.gson.JsonElement?): List<Point> {
+    if (element == null || element.isJsonNull) return emptyList()
+    val result = mutableListOf<Point>()
+
+    fun walkCoords(arr: com.google.gson.JsonArray?) {
+        if (arr == null || arr.size() == 0) return
+        val first = arr[0]
+        if (first.isJsonPrimitive && arr.size() >= 2) {
+            val lon = runCatching { arr[0].asDouble }.getOrNull()
+            val lat = runCatching { arr[1].asDouble }.getOrNull()
+            if (lon != null && lat != null && lat in -90.0..90.0 && lon in -180.0..180.0) {
+                result.add(Point.fromLngLat(lon, lat))
+            }
+            return
+        }
+        for (item in arr) {
+            if (item.isJsonArray) walkCoords(item.asJsonArray)
+        }
+    }
+
+    fun walkGeo(obj: com.google.gson.JsonObject?) {
+        if (obj == null) return
+        val type = obj.get("type")?.asString.orEmpty()
+        when (type) {
+            "FeatureCollection" -> {
+                obj.getAsJsonArray("features")?.forEach { feat ->
+                    if (feat.isJsonObject) {
+                        walkGeo(feat.asJsonObject.getAsJsonObject("geometry"))
+                    }
+                }
+            }
+            "Feature" -> walkGeo(obj.getAsJsonObject("geometry"))
+            else -> walkCoords(obj.getAsJsonArray("coordinates"))
+        }
+    }
+
+    if (element.isJsonObject) {
+        walkGeo(element.asJsonObject)
+    }
+    return result
 }

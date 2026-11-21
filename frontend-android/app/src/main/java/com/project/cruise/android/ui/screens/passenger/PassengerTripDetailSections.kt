@@ -9,6 +9,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
+import androidx.compose.foundation.clickable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -345,11 +350,17 @@ fun TripRouteSection(
     error: String?,
     onReload: () -> Unit
 ) {
+    var selectedLegKey by remember { mutableStateOf<String?>(null) }
+    val selectedLeg = remember(legs, selectedLegKey) {
+        legs.firstOrNull { it.resolvedKey == selectedLegKey }
+    }
+    val activeGeoJson = selectedLeg?.routeGeoJson ?: overview?.routeGeoJson
+
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         SectionHeader(
-            eyebrow = "THEO DÕI HÀNH TRÌNH",
-            title = "Vị trí tàu & chặng hành trình",
-            subtitle = "Tự động cập nhật tọa độ GPS mỗi 10 giây khi mở tab.",
+            eyebrow = "HÀNH TRÌNH",
+            title = "Tuyến đường chuyến đi",
+            subtitle = "Theo dõi lộ trình và các chặng di chuyển của tàu (GPS tự cập nhật mỗi 10s).",
             loading = loading,
             onReload = onReload
         )
@@ -363,10 +374,40 @@ fun TripRouteSection(
             SectionErrorBox(error, onRetry = onReload)
             return
         }
+
+        // Card tổng quan cảng khởi hành - tổng khoảng cách - cảng đích
+        ElevatedCard(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(14.dp),
+            colors = CardDefaults.elevatedCardColors(containerColor = Color.White)
+        ) {
+            Column(
+                modifier = Modifier.padding(14.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                InfoRowItem(
+                    icon = Icons.Default.Place,
+                    label = "Cảng khởi hành",
+                    value = overview?.resolvedDepartureName ?: "Chưa cập nhật"
+                )
+                InfoRowItem(
+                    icon = Icons.Default.Star,
+                    label = "Tổng khoảng cách",
+                    value = formatDistanceKm(overview?.distanceKm)
+                )
+                InfoRowItem(
+                    icon = Icons.Default.Place,
+                    label = "Cảng đích",
+                    value = overview?.resolvedDestinationName ?: "Chưa cập nhật"
+                )
+            }
+        }
+
         TripMapboxCard(
             overview = overview,
             legs = legs,
-            vesselLocation = vesselLocation
+            vesselLocation = vesselLocation,
+            routeGeoJson = activeGeoJson
         )
 
         ElevatedCard(
@@ -401,31 +442,79 @@ fun TripRouteSection(
         }
 
         if (legs.isNotEmpty()) {
-            Text("Các chặng tuyến (${legs.size})", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Các chặng hành trình", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                Text("${legs.size} chặng", style = MaterialTheme.typography.labelMedium, color = Color(0xFF64748B))
+            }
+
             legs.forEachIndexed { index, leg ->
+                val selected = selectedLegKey == leg.resolvedKey
                 ElevatedCard(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            selectedLegKey = if (selected) null else leg.resolvedKey
+                        },
                     shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.elevatedCardColors(containerColor = Color.White)
+                    colors = CardDefaults.elevatedCardColors(
+                        containerColor = if (selected) Color(0xFFEFF6FF) else Color.White
+                    )
                 ) {
-                    Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        val fromName = leg.fromPortName ?: leg.fromPort?.name ?: "Điểm xuất phát"
-                        val toName = leg.toPortName ?: leg.toPort?.name ?: "Điểm đến"
-                        Text(
-                            text = "Chặng ${leg.legOrder ?: (index + 1)}: $fromName → $toName",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        leg.status?.let {
-                            Text("Trạng thái: $it", style = MaterialTheme.typography.bodySmall, color = Color(0xFF475569))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(30.dp)
+                                .clip(CircleShape)
+                                .background(if (selected) Color(0xFF0284C7) else Color(0xFFE2E8F0)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = (leg.legOrder ?: (index + 1)).toString(),
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = if (selected) Color.White else Color(0xFF0F172A)
+                            )
                         }
+
+                        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Text(
+                                text = "${leg.resolvedFromName} → ${leg.resolvedToName}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color(0xFF0F172A)
+                            )
+                            Text(
+                                text = formatDistanceKm(leg.distanceKm),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color(0xFF64748B)
+                            )
+                            leg.status?.let {
+                                Text("Trạng thái: $it", style = MaterialTheme.typography.labelSmall, color = Color(0xFF475569))
+                            }
+                        }
+
+                        Text(
+                            text = if (selected) "Bỏ chọn" else "Xem chặng",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(0xFF0284C7)
+                        )
                     }
                 }
             }
         }
     }
 }
-
 // ==========================================
 // 2. ĐƠN ĐẶT CHỖ
 // ==========================================
@@ -776,4 +865,13 @@ fun TripBenefitsSection(
             }
         }
     }
+
+}
+private fun formatDistanceKm(value: Double?): String {
+    if (value == null || !value.isFinite()) return "Chưa cập nhật"
+    val formatted = String.format(Locale("vi", "VN"), "%.2f", value)
+        .trimEnd('0')
+        .trimEnd(',')
+        .trimEnd('.')
+    return "$formatted km"
 }

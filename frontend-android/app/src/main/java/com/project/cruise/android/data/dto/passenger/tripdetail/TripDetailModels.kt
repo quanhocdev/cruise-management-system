@@ -30,11 +30,47 @@ data class TripRouteOverviewDto(
     val statusTrip: String? = null,
     val startDate: String? = null,
     val endDate: String? = null,
+    @SerializedName(value = "departurePortName", alternate = ["originPortName"])
+    val departurePortName: String? = null,
+    @SerializedName(value = "destinationPortName", alternate = ["arrivalPortName"])
+    val destinationPortName: String? = null,
     val departurePort: TripPortDto? = null,
     val arrivalPort: TripPortDto? = null,
+    val distanceKm: Double? = null,
+    val routeGeoJson: com.google.gson.JsonElement? = null,
     val currentLatitude: Double? = null,
     val currentLongitude: Double? = null
-)
+) {
+    val resolvedDepartureName: String?
+        get() = departurePortName ?: departurePort?.name
+
+    val resolvedDestinationName: String?
+        get() = destinationPortName ?: arrivalPort?.name
+}
+
+data class TripRouteLegDto(
+    @SerializedName(value = "legId", alternate = ["id"])
+    val legId: String? = null,
+    val legOrder: Int? = null,
+    val fromPortName: String? = null,
+    val toPortName: String? = null,
+    val fromPort: TripPortDto? = null,
+    val toPort: TripPortDto? = null,
+    val distanceKm: Double? = null,
+    val routeGeoJson: com.google.gson.JsonElement? = null,
+    val departureTime: String? = null,
+    val arrivalTime: String? = null,
+    val status: String? = null
+) {
+    val resolvedKey: String
+        get() = legId ?: "leg-${legOrder ?: 0}"
+
+    val resolvedFromName: String
+        get() = fromPortName ?: fromPort?.name ?: "Chưa xác định"
+
+    val resolvedToName: String
+        get() = toPortName ?: toPort?.name ?: "Chưa xác định"
+}
 
 data class TripPortDto(
     val id: String? = null,
@@ -47,17 +83,6 @@ data class TripPortDto(
     val longitude: Double? = null
 )
 
-data class TripRouteLegDto(
-    val id: String? = null,
-    val legOrder: Int? = null,
-    val fromPortName: String? = null,
-    val toPortName: String? = null,
-    val fromPort: TripPortDto? = null,
-    val toPort: TripPortDto? = null,
-    val departureTime: String? = null,
-    val arrivalTime: String? = null,
-    val status: String? = null
-)
 
 data class VesselLocationDto(
     val latitude: Double? = null,
