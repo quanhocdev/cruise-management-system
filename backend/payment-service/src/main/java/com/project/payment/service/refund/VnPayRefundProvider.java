@@ -188,7 +188,7 @@ public class VnPayRefundProvider implements RefundProvider {
             p.put("vnp_TransactionType", r.transactionType());
             p.put("vnp_Amount", r.amount().movePointRight(2).toBigIntegerExact().toString());
             p.put("vnp_TransactionNo", r.originalTransactionNo());
-            p.put("vnp_CreateBy", r.actorId().toString());
+            p.put("vnp_CreateBy", r.actorId().toString().replace("-", ""));
         } else if (r.providerTransactionNo() != null)
             p.put("vnp_TransactionNo", r.providerTransactionNo());
         p.put("vnp_SecureHash",
@@ -206,6 +206,17 @@ public class VnPayRefundProvider implements RefundProvider {
             LOG.warn("[VNPAY VERIFY] invalid response signature, refundId={}, hasSignature={}, code={}, message={}",
                     r.id(), signature != null, p.get("vnp_ResponseCode"), p.get("vnp_Message"));
             return Outcome.unknown("INVALID_PROVIDER_SIGNATURE");
+        }
+        String code = p.getOrDefault("vnp_ResponseCode", "");
+        if (!query && !"00".equals(code)) {
+            LOG.warn("[VNPAY VERIFY] refund not accepted, refundId={}, code={}, message={}",
+                    r.id(), code, p.get("vnp_Message"));
+            if (Set.of("02", "03", "91", "95", "97").contains(code))
+                return new Outcome("REJECTED", code, null);
+            // 94: VNPay already holds a refund request for this transaction and is processing it.
+            if ("94".equals(code))
+                return new Outcome("PROCESSING", code, null);
+            return Outcome.unknown(code.matches("[0-9]{2}") ? "VNPAY_" + code : "PROVIDER_UNCONFIRMED");
         }
         String expectedAmount = r.amount().movePointRight(2).toBigIntegerExact().toString();
         if (!Objects.equals(p.get("vnp_Command"), query ? "querydr" : "refund")
@@ -242,8 +253,6 @@ public class VnPayRefundProvider implements RefundProvider {
             if (Set.of("01", "05", "06").contains(state))
                 return new Outcome("PROCESSING", code, number);
         }
-        if (!query && Set.of("02", "03", "91", "95", "97").contains(code))
-            return new Outcome("REJECTED", code, null);
         LOG.warn("[VNPAY VERIFY] unconfirmed, refundId={}, code={}, state={}, message={}",
                 r.id(), code, state, p.get("vnp_Message"));
         return Outcome.unknown("PROVIDER_UNCONFIRMED");

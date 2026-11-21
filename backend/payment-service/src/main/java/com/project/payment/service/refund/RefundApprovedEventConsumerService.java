@@ -19,6 +19,9 @@ public class RefundApprovedEventConsumerService {
 
     private static final Logger log = LoggerFactory.getLogger(RefundApprovedEventConsumerService.class);
 
+    // Hành khách không bắt buộc nhập lý do, nhưng RefundService yêu cầu lý do khác rỗng (tối đa 1000 ký tự).
+    private static final String DEFAULT_REASON = "Hoàn tiền theo chính sách hủy";
+
     private final PaymentRepository paymentRepository;
     private final RefundService refundService;
 
@@ -83,7 +86,7 @@ public class RefundApprovedEventConsumerService {
         RefundModels.Request request = new RefundModels.Request(
                 event.paymentClientRequestId(),
                 event.amount(),
-                event.reason());
+                normalizeReason(event.reason()));
 
         RefundModels.Accepted accepted = refundService.create(
                 payment.getId(),
@@ -97,5 +100,13 @@ public class RefundApprovedEventConsumerService {
                 accepted.receipt().refundId(),
                 accepted.receipt().status(),
                 accepted.replay());
+    }
+
+    private static String normalizeReason(String reason) {
+        if (reason == null || reason.isBlank()) {
+            return DEFAULT_REASON;
+        }
+        String trimmed = reason.trim();
+        return trimmed.length() > 1000 ? trimmed.substring(0, 1000) : trimmed;
     }
 }
