@@ -17,6 +17,7 @@ enum class PassengerGlyph {
     TICKET,
     PERSON,
     MESSAGE,
+    ROBOT,
     SEARCH,
     CALENDAR,
     ARROW,
@@ -59,6 +60,35 @@ fun PassengerIcon(
                 drawCircle(tint, 1f * s, p(8f, 11f))
                 drawCircle(tint, 1f * s, p(12f, 11f))
                 drawCircle(tint, 1f * s, p(16f, 11f))
+            }
+            PassengerGlyph.ROBOT -> {
+                // Ăng-ten
+                line(12f, 2f, 12f, 5f)
+                drawCircle(tint, 1.3f * s, p(12f, 2f))
+
+                // Đầu robot
+                drawRoundRect(
+                    color = tint,
+                    topLeft = p(4f, 5f),
+                    size = Size(16f * s, 14f * s),
+                    cornerRadius = CornerRadius(4f * s),
+                    style = Stroke(1.7f * s)
+                )
+
+                // Hai mắt
+                drawCircle(tint, 1.5f * s, p(9f, 11f))
+                drawCircle(tint, 1.5f * s, p(15f, 11f))
+
+                // Miệng
+                line(9f, 16f, 15f, 16f)
+
+                // Tai robot
+                line(2f, 9f, 4f, 9f)
+                line(20f, 9f, 22f, 9f)
+
+                // Cổ và thân robot
+                line(12f, 19f, 12f, 21f)
+                line(7f, 22f, 17f, 22f)
             }
             PassengerGlyph.SEARCH -> {
                 drawCircle(tint, 6.5f * s, p(10f, 10f), style = Stroke(1.7f * s))

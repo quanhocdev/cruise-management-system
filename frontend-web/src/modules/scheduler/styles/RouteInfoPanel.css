@@ -1,0 +1,214 @@
+/* src/modules/scheduler/styles/RouteInfoPanel.css */
+.route-info-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.route-info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.route-info-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.route-overview-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  fontsize: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.route-overview-btn.active {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
+.route-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.route-overview-item {
+  background: #f8fafc;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.route-overview-item.departure {
+  border-left: 4px solid #16a34a;
+}
+
+.route-overview-item.destination {
+  border-left: 4px solid #dc2626;
+}
+
+.route-overview-item span.label {
+  font-size: 12px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+}
+
+.route-overview-item .port-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* Badge ngày tháng nổi bật ở cảng đầu và cuối */
+.port-date-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  width: fit-content;
+  margin-top: 4px;
+}
+
+.port-date-badge.start {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.port-date-badge.end {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.route-overview-item span.sub {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.summary-metric .metric-value {
+  font-size: 20px;
+  font-weight: 800;
+  color: #2563eb;
+}
+
+.route-legs-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #334155;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.route-legs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.route-leg-item {
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #fdfdfd;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.route-leg-item:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.route-leg-item.selected {
+  border: 2px solid #2563eb;
+  background: #eff6ff;
+}
+
+/* Đưa thông tin badge ngày lên trên cho nổi bật */
+.leg-badge-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.leg-order-tag {
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.leg-date-highlight {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.route-leg-title {
+  font-weight: 700;
+  font-size: 14px;
+  color: #1e293b;
+}
+
+.route-leg-title .arrow {
+  color: #2563eb;
+  padding: 0 4px;
+}
+
+.route-leg-subtitle {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.route-leg-right {
+  text-align: right;
+}
+
+.route-leg-distance {
+  font-weight: 800;
+  font-size: 14px;
+  color: #0284c7;
+  background: #f0f9ff;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid #bae6fd;
+}

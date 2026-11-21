@@ -46,6 +46,13 @@ android {
             "POS_API_KEY",
             "\"${localProperties.getProperty("POS_API_KEY") ?: ""}\""
         )
+        manifestPlaceholders["MAPBOX_PUBLIC_TOKEN"] =
+            localProperties.getProperty("MAPBOX_PUBLIC_TOKEN") ?: ""
+        buildConfigField(
+            "String",
+            "MAPBOX_PUBLIC_TOKEN",
+            "\"${localProperties.getProperty("MAPBOX_PUBLIC_TOKEN") ?: ""}\""
+        )
     }
 
     buildTypes {
@@ -77,6 +84,8 @@ android {
 }
 
 dependencies {
+    implementation("com.mapbox.maps:android:11.8.0")
+    implementation("androidx.compose.material:material-icons-extended")
     implementation("com.google.android.gms:play-services-location:21.2.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("io.coil-kt:coil-compose:2.7.0")

@@ -5,6 +5,8 @@ import com.project.booking.dto.booking.BookingResponse;
 import java.util.List;
 import java.time.LocalDate;
 import java.util.UUID;
+import com.project.booking.dto.booking.PassengerBookedTourResponse;
+import com.project.booking.dto.booking.PassengerTourTrackingResponse;
 
 public interface BookingService {
     // 1. Tạo đơn đặt tour mới
@@ -23,4 +25,10 @@ public interface BookingService {
     int sendDepartureReminders(LocalDate departureDate);
 
     void processPaymentSuccess(Long bookingId);
+
+    List<PassengerBookedTourResponse> getMyBookedTours(UUID userId);
+
+    PassengerTourTrackingResponse getMyBookedTourDetails(
+            UUID userId,
+            UUID tourId);
 }

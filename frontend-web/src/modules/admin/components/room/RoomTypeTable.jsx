@@ -1,10 +1,12 @@
-import { Button, Spinner, Table } from "react-bootstrap";
+import { Button, Image, Spinner, Table } from "react-bootstrap";
+import { Images } from "lucide-react";
 
 export default function RoomTypeTable({
   roomTypes,
   loading,
   onEdit,
   onDelete,
+  onManageImages,
 }) {
   if (loading) {
     return (
@@ -26,13 +28,16 @@ export default function RoomTypeTable({
       <Table bordered hover responsive className="align-middle">
         <thead>
           <tr>
-            <th style={{ width: "80px" }}>STT</th>
+            <th style={{ width: "70px" }}>STT</th>
+            <th style={{ width: "110px" }} className="text-center">
+              Ảnh
+            </th>
             <th style={{ width: "220px" }}>Tên loại phòng</th>
             <th style={{ width: "130px" }} className="text-center">
               Sức chứa
             </th>
             <th>Mô tả</th>
-            <th className="text-center" style={{ width: "200px" }}>
+            <th className="text-center" style={{ width: "260px" }}>
               Thao tác
             </th>
           </tr>
@@ -42,6 +47,22 @@ export default function RoomTypeTable({
           {roomTypes.map((roomType, index) => (
             <tr key={roomType.id}>
               <td>{index + 1}</td>
+              <td className="text-center">
+                {roomType.imageUrl ? (
+                  <Image
+                    src={roomType.imageUrl}
+                    alt={roomType.name}
+                    rounded
+                    style={{
+                      width: "72px",
+                      height: "48px",
+                      objectFit: "cover",
+                    }}
+                  />
+                ) : (
+                  <span className="text-muted small">Chưa có</span>
+                )}
+              </td>
               <td>
                 <strong>{roomType.name}</strong>
               </td>
@@ -58,7 +79,18 @@ export default function RoomTypeTable({
                 )}
               </td>
               <td>
-                <div className="d-flex justify-content-center gap-2">
+                <div className="d-flex justify-content-center flex-wrap gap-2">
+                  {onManageImages && (
+                    <Button
+                      size="sm"
+                      variant="outline-secondary"
+                      className="d-inline-flex align-items-center gap-1"
+                      onClick={() => onManageImages(roomType)}
+                    >
+                      <Images size={14} />
+                      <span>Ảnh chi tiết</span>
+                    </Button>
+                  )}
                   <Button
                     size="sm"
                     variant="outline-primary"

@@ -5,6 +5,12 @@ spring:
   application:
     name: gateway-service
 
+    # REDIS
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:cruise_redis}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+
   webflux:
     codec:
       max-in-memory-size: 10MB
@@ -21,7 +27,7 @@ spring:
             - id: auth-service
               uri: ${AUTH_SERVICE_URL:http://auth-service:8081}
               predicates:
-                - Path=/api/auth/**,/api/admin/staff/**,/api/admin/roles/**,/api/profile/**,/api/admin/accounts/**
+                - Path=/api/auth/**,/api/admin/staff/**,/api/admin/roles/**,/api/profile/**,/api/admin/accounts/**, /api/admin/profiles/**, /api/passenger/profiles/**
 
             # PAYMENT SERVICE
             - id: payment-service
@@ -242,3 +248,28 @@ logging:
     org.springframework.cloud.gateway: INFO
     org.springframework.web: INFO
     org.springframework.security: INFO
+
+# TRUSTED NGROK PROXY
+
+# TRUSTED NGROK PROXY
+app:
+  security:
+    trusted-ngrok:
+      secret: ${NGROK_TRUSTED_PROXY_SECRET:}
+
+  rate-limit:
+    enabled: true
+    rules:
+      - id: booking-create
+        method: POST
+        path: /api/passengers/bookings
+        user-limit: 10
+        ip-limit: 10
+        window: 1m
+
+      - id: booking-cancel
+        method: PATCH
+        path: /api/passengers/bookings/*/cancel
+        user-limit: 5
+        ip-limit: 10
+        window: 1m

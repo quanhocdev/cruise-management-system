@@ -1,0 +1,194 @@
+.trip-booking-section {
+  margin-bottom: 30px;
+}
+
+.trip-booking-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.trip-booking-eyebrow {
+  display: block;
+  margin-bottom: 6px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+}
+
+.trip-booking-heading h3 {
+  margin: 0;
+  color: #172554;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.trip-booking-heading p {
+  margin: 7px 0 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.trip-booking-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 30px 16px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.trip-booking-alert {
+  border-radius: 12px;
+}
+
+.trip-booking-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04);
+}
+
+.trip-booking-card .card-body {
+  padding: 22px;
+}
+
+.trip-booking-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.trip-booking-code {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+}
+
+.trip-booking-ticket-icon {
+  display: flex;
+  flex: 0 0 46px;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  color: #2563eb;
+  background: #eff6ff;
+}
+
+.trip-booking-code span {
+  display: block;
+  margin-bottom: 4px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.trip-booking-code h4 {
+  overflow-wrap: anywhere;
+  margin: 0;
+  color: #1e293b;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.trip-booking-status {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 12px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.trip-booking-status-pending {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.trip-booking-status-confirmed {
+  color: #1d4ed8;
+  background: #dbeafe;
+}
+
+.trip-booking-status-success {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.trip-booking-status-danger {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+.trip-booking-status-secondary {
+  color: #475569;
+  background: #f1f5f9;
+}
+
+.trip-booking-divider {
+  height: 1px;
+  margin: 20px 0;
+  background: #e2e8f0;
+}
+
+.trip-booking-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  height: 100%;
+}
+
+.trip-booking-info-icon {
+  display: flex;
+  flex: 0 0 36px;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  color: #64748b;
+  background: #f1f5f9;
+}
+
+.trip-booking-info-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 5px;
+}
+
+.trip-booking-info-content > span {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.trip-booking-info-content > strong {
+  overflow-wrap: anywhere;
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+@media (max-width: 576px) {
+  .trip-booking-heading {
+    flex-direction: column;
+  }
+
+  .trip-booking-card .card-body {
+    padding: 16px;
+  }
+
+  .trip-booking-top {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

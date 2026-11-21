@@ -1,0 +1,48 @@
+/* src/modules/scheduler/styles/VesselDetailPage.css */
+.vdp-body {
+  padding: 8px 32px 40px;
+}
+.vdp-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+.vdp-full {
+  grid-column: 1 / -1;
+}
+.vdp-state {
+  padding: 48px 16px;
+  text-align: center;
+  color: var(--vm-mute);
+}
+.vdp-error {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background: #fdecea;
+  color: #8f2a1a;
+  border: 1px solid #f5c2b8;
+  padding: 12px 14px;
+  border-radius: 10px;
+}
+.vdp-error button {
+  border: none;
+  background: #8f2a1a;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  .vdp-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 768px) {
+  .vdp-body {
+    padding: 8px 16px 32px;
+  }
+}

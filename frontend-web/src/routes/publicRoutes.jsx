@@ -5,6 +5,7 @@ import { Route } from "react-router-dom";
 import GuestLayout from "../layouts/GuestLayout";
 import TourPublic from "../modules/guest/pages/TourPublic";
 import TourPublicDetail from "../modules/guest/pages/TourPublicDetail";
+import ProfilePage from "../modules/profile/pages/ProfilePage";
 
 import RegisterPage from "../modules/auth/pages/RegisterPage";
 import LoginPage from "../modules/auth/pages/LoginPage";
@@ -27,6 +28,7 @@ const publicRoutes = (
     <Route path="/verify-email" element={<VerifyOtpPage />} />
     <Route path="/google-verify-otp" element={<GoogleVerifyOtpPage />} />
     <Route path="/payment/result" element={<PaymentResultPage />} />
+    <Route path="profile" element={<ProfilePage />} />
   </>
 );
 

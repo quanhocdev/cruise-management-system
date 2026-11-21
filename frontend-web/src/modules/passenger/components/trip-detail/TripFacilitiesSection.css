@@ -1,0 +1,343 @@
+.trip-facilities-section {
+  padding: 24px;
+  border: 1px solid #e8edf3;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.035);
+}
+
+.trip-facilities-section__header {
+  margin-bottom: 22px;
+}
+
+.trip-facilities-section__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 8px;
+  color: #16809b;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.7px;
+}
+
+.trip-facilities-section__title {
+  margin: 0;
+  color: #172b4d;
+  font-size: 20px;
+  font-weight: 750;
+}
+
+.trip-facilities-section__subtitle {
+  margin: 7px 0 0;
+  color: #718096;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.trip-facilities-section__groups {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.trip-facility-group {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid #e7edf2;
+  border-radius: 14px;
+  background: #fcfdfe;
+}
+
+.trip-facility-group__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.trip-facility-group__icon {
+  display: flex;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 11px;
+  color: #147b98;
+  background: #eaf6fa;
+}
+
+.trip-facility-group__heading {
+  flex: 1;
+  min-width: 0;
+}
+
+.trip-facility-group__heading h3 {
+  margin: 0;
+  color: #263b53;
+  font-size: 15px;
+  font-weight: 750;
+}
+
+.trip-facility-group__heading p {
+  margin: 5px 0 0;
+  color: #8492a3;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.trip-facility-group__count {
+  display: flex;
+  flex-shrink: 0;
+  min-width: 27px;
+  height: 27px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 7px;
+  border-radius: 8px;
+  color: #176b87;
+  background: #eaf6fa;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.trip-facility-group__list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.trip-facility-card {
+  display: flex;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #e7edf2;
+  border-radius: 11px;
+  background: #fff;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.trip-facility-card:hover {
+  border-color: #c7dfe8;
+  box-shadow: 0 5px 14px rgba(15, 45, 65, 0.055);
+  transform: translateY(-2px);
+}
+
+.trip-facility-card__image {
+  position: relative;
+  flex-shrink: 0;
+  width: 112px;
+  min-height: 125px;
+  overflow: hidden;
+  background: #edf3f6;
+}
+
+.trip-facility-card__image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 125px;
+  object-fit: cover;
+}
+
+.trip-facility-card__image--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8aa7b6;
+  background: linear-gradient(145deg, #edf6f8, #e4eef3);
+}
+
+.trip-facility-card__body {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  padding: 13px;
+}
+
+.trip-facility-card__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.trip-facility-card__heading h4 {
+  min-width: 0;
+  margin: 0;
+  color: #34465c;
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.5;
+}
+
+.trip-facility-card__status {
+  flex-shrink: 0;
+  max-width: 105px;
+  overflow: hidden;
+  border: 1px solid #e5ebf0;
+  font-size: 9px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+}
+
+.trip-facility-card__description {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 7px 0 0;
+  color: #718096;
+  font-size: 11px;
+  line-height: 1.55;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.trip-facility-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 12px;
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+.trip-facility-card__meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  color: #8492a3;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.trip-facility-card__meta svg {
+  flex-shrink: 0;
+  color: #7897a8;
+}
+
+.trip-facility-card__meta .trip-facility-card__price {
+  color: #16805d;
+  font-weight: 750;
+}
+
+.trip-facility-card__price svg {
+  color: #16805d;
+}
+
+.trip-facility-group__state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 100px;
+  color: #718096;
+  font-size: 12px;
+}
+
+.trip-facility-group__empty {
+  padding: 17px;
+  border: 1px dashed #dce5ed;
+  border-radius: 10px;
+  color: #8492a3;
+  background: #fff;
+  font-size: 12px;
+  text-align: center;
+}
+
+.trip-facility-group__alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  font-size: 12px;
+}
+
+.trip-facility-group__alert button {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid #e5b8b8;
+  border-radius: 7px;
+  color: #a33b3b;
+  background: #fff;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.trip-facility-group__alert button:hover {
+  background: #fff5f5;
+}
+
+@media (max-width: 992px) {
+  .trip-facility-group__list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .trip-facilities-section {
+    padding: 18px;
+    border-radius: 14px;
+  }
+
+  .trip-facility-group {
+    padding: 14px;
+  }
+
+  .trip-facility-card__image {
+    width: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .trip-facilities-section {
+    padding: 14px;
+  }
+
+  .trip-facilities-section__title {
+    font-size: 18px;
+  }
+
+  .trip-facility-group {
+    padding: 12px;
+  }
+
+  .trip-facility-group__header {
+    gap: 9px;
+  }
+
+  .trip-facility-group__icon {
+    width: 35px;
+    height: 35px;
+  }
+
+  .trip-facility-group__heading h3 {
+    font-size: 13px;
+  }
+
+  .trip-facility-card {
+    flex-direction: column;
+  }
+
+  .trip-facility-card__image {
+    width: 100%;
+    height: 145px;
+    min-height: 145px;
+  }
+
+  .trip-facility-card__image img {
+    min-height: 145px;
+  }
+
+  .trip-facility-card__body {
+    min-height: 125px;
+  }
+}

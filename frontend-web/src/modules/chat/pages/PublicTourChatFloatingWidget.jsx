@@ -195,17 +195,38 @@ export default function PublicTourChatFloatingWidget() {
             fill="none"
             aria-hidden="true"
           >
+            {/* Ăng-ten */}
             <path
-              d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H5l1.3-3.2A7.5 7.5 0 1 1 20 11.5Z"
+              d="M12 3v3M9.5 3h5"
               stroke="currentColor"
               strokeWidth="1.8"
               strokeLinecap="round"
-              strokeLinejoin="round"
             />
-            <path
-              d="M8 11h.01M12 11h.01M16 11h.01"
+            {/* Khung đầu robot */}
+            <rect
+              x="5"
+              y="6.5"
+              width="14"
+              height="11.5"
+              rx="3.2"
               stroke="currentColor"
-              strokeWidth="2.5"
+              strokeWidth="1.8"
+            />
+            {/* Tai trái / phải */}
+            <path
+              d="M3 11v2.5M21 11v2.5"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+            />
+            {/* Mắt robot */}
+            <circle cx="9.5" cy="11.8" r="1.2" fill="currentColor" />
+            <circle cx="14.5" cy="11.8" r="1.2" fill="currentColor" />
+            {/* Miệng / đèn trạng thái */}
+            <path
+              d="M9.5 15.2h5"
+              stroke="currentColor"
+              strokeWidth="1.8"
               strokeLinecap="round"
             />
           </svg>

@@ -37,7 +37,7 @@ fun ChatPanelHeader(onClose: () -> Unit, modifier: Modifier = Modifier) {
             Modifier.size(40.dp).clip(CircleShape).background(Color.White.copy(alpha = .16f)),
             contentAlignment = Alignment.Center,
         ) {
-            PassengerIcon(PassengerGlyph.MESSAGE, OceanMint, Modifier.size(22.dp))
+            PassengerIcon(PassengerGlyph.ROBOT, OceanMint, Modifier.size(22.dp))
         }
         Column(Modifier.weight(1f)) {
             Text(

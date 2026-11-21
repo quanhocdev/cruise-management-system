@@ -1,0 +1,455 @@
+.trip-cruise-section {
+  padding: 24px;
+  border: 1px solid #e8edf3;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.035);
+}
+
+.trip-cruise-section__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.trip-cruise-section__heading-icon {
+  display: flex;
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 13px;
+  color: #147b98;
+  background: #eaf6fa;
+}
+
+.trip-cruise-section__heading-content {
+  min-width: 0;
+}
+
+.trip-cruise-section__eyebrow {
+  display: block;
+  margin-bottom: 5px;
+  color: #16809b;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.7px;
+}
+
+.trip-cruise-section__title {
+  margin: 0;
+  color: #172b4d;
+  font-size: 20px;
+  font-weight: 750;
+}
+
+.trip-cruise-section__subtitle {
+  margin: 6px 0 0;
+  color: #718096;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.trip-cruise-info {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px;
+  border: 1px solid #e1edf2;
+  border-radius: 14px;
+  background: linear-gradient(120deg, #f5fafc, #f8fbfd);
+}
+
+.trip-cruise-info__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.trip-cruise-info__name-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.trip-cruise-info__name-row h3 {
+  margin: 0;
+  color: #263b53;
+  font-size: 18px;
+  font-weight: 750;
+}
+
+.trip-cruise-info__code {
+  padding: 4px 8px;
+  border: 1px solid #d7e8ef;
+  border-radius: 6px;
+  color: #53758a;
+  background: #fff;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.trip-cruise-info__description {
+  max-width: 700px;
+  margin: 10px 0 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.trip-cruise-info__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  margin-top: 16px;
+}
+
+.trip-cruise-info__meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #60758a;
+  font-size: 12px;
+}
+
+.trip-cruise-info__meta svg {
+  color: #16809b;
+}
+
+.trip-cruise-info__image {
+  flex-shrink: 0;
+  width: 190px;
+  min-height: 125px;
+  overflow: hidden;
+  border-radius: 11px;
+  background: #e5edf2;
+}
+
+.trip-cruise-info__image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 125px;
+  object-fit: cover;
+}
+
+.trip-cruise-decks {
+  margin-top: 26px;
+}
+
+.trip-cruise-decks__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.trip-cruise-decks__header h3 {
+  margin: 0;
+  color: #263b53;
+  font-size: 16px;
+  font-weight: 750;
+}
+
+.trip-cruise-decks__header p {
+  margin: 5px 0 0;
+  color: #8492a3;
+  font-size: 12px;
+}
+
+.trip-cruise-decks__count {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border-radius: 8px;
+  color: #176b87;
+  background: #eaf6fa;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.trip-cruise-decks__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.trip-cruise-deck {
+  overflow: hidden;
+  border: 1px solid #e5ebf1;
+  border-radius: 12px;
+  background: #fff;
+  transition: border-color 0.2s ease;
+}
+
+.trip-cruise-deck--selected {
+  border-color: #b9dce7;
+}
+
+.trip-cruise-deck__button {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  padding: 14px 16px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.trip-cruise-deck__button:hover {
+  background: #f8fbfc;
+}
+
+.trip-cruise-deck--selected .trip-cruise-deck__button {
+  background: #f2f9fb;
+}
+
+.trip-cruise-deck__icon {
+  display: flex;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  color: #16809b;
+  background: #eaf6fa;
+}
+
+.trip-cruise-deck__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.trip-cruise-deck__content h4 {
+  margin: 0;
+  color: #34465c;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.trip-cruise-deck__content p {
+  margin: 5px 0 0;
+  color: #8492a3;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.trip-cruise-deck__toggle {
+  display: flex;
+  flex-shrink: 0;
+  color: #718096;
+}
+
+.trip-cruise-deck__areas {
+  padding: 14px 16px 16px;
+  border-top: 1px solid #e8eef3;
+  background: #fbfdfe;
+}
+
+.trip-cruise-deck__areas-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.trip-cruise-area {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid #e7edf2;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.trip-cruise-area__icon {
+  display: flex;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  color: #4d7892;
+  background: #edf5f8;
+}
+
+.trip-cruise-area__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.trip-cruise-area__heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.trip-cruise-area__heading h4 {
+  margin: 0;
+  color: #34465c;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.trip-cruise-area__heading span {
+  padding: 3px 6px;
+  border-radius: 5px;
+  color: #52778b;
+  background: #eef5f8;
+  font-size: 9px;
+  font-weight: 650;
+}
+
+.trip-cruise-area__description {
+  margin: 6px 0 0;
+  color: #718096;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.trip-cruise-area__location {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 7px;
+  color: #8492a3;
+  font-size: 10px;
+}
+
+.trip-cruise-deck__areas-empty,
+.trip-cruise-decks__empty {
+  padding: 16px;
+  border: 1px dashed #dce5ed;
+  border-radius: 9px;
+  color: #8492a3;
+  background: #fff;
+  font-size: 12px;
+  text-align: center;
+}
+
+.trip-cruise-section__state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 100px;
+  color: #718096;
+  font-size: 13px;
+}
+
+.trip-cruise-section__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 170px;
+  padding: 24px;
+  border: 1px dashed #dce5ed;
+  border-radius: 12px;
+  color: #8492a3;
+  background: #fafcfd;
+  text-align: center;
+}
+
+.trip-cruise-section__empty svg {
+  color: #9aafbd;
+}
+
+.trip-cruise-section__empty strong {
+  color: #40546a;
+  font-size: 14px;
+}
+
+.trip-cruise-section__empty span {
+  font-size: 12px;
+}
+
+.trip-cruise-section__alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.trip-cruise-section__alert button {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border: 1px solid #e5b8b8;
+  border-radius: 7px;
+  color: #a33b3b;
+  background: #fff;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+@media (max-width: 768px) {
+  .trip-cruise-section {
+    padding: 18px;
+    border-radius: 14px;
+  }
+
+  .trip-cruise-info {
+    flex-direction: column;
+  }
+
+  .trip-cruise-info__image {
+    width: 100%;
+    max-height: 190px;
+  }
+
+  .trip-cruise-deck__areas-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .trip-cruise-section {
+    padding: 14px;
+  }
+
+  .trip-cruise-section__header {
+    gap: 10px;
+  }
+
+  .trip-cruise-section__heading-icon {
+    width: 39px;
+    height: 39px;
+  }
+
+  .trip-cruise-section__title {
+    font-size: 18px;
+  }
+
+  .trip-cruise-info {
+    padding: 14px;
+  }
+
+  .trip-cruise-info__name-row h3 {
+    font-size: 16px;
+  }
+
+  .trip-cruise-decks__header {
+    align-items: flex-start;
+  }
+
+  .trip-cruise-deck__button {
+    gap: 9px;
+    padding: 12px;
+  }
+
+  .trip-cruise-deck__areas {
+    padding: 12px;
+  }
+}

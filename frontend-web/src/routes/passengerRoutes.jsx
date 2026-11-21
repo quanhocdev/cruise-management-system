@@ -2,6 +2,7 @@ import { Navigate, Route } from "react-router-dom";
 
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 import GuestLayout from "../layouts/GuestLayout";
+import ProfilePage from "../modules/profile/pages/ProfilePage";
 
 import PassengerBookings from "../modules/passenger/pages/MyBookings";
 import PassengerBookingDetail from "../modules/passenger/pages/BookingDetail";
@@ -9,6 +10,9 @@ import PassengerBooking from "../modules/passenger/pages/PassengerBooking";
 import PaymentResultPage from "../modules/passenger/pages/PaymentResultPage";
 import PassengerMessages from "../modules/passenger/pages/PassengerMessages";
 import PassengerFeedback from "../modules/passenger/pages/PassengerFeedback";
+
+import PassengerTourTracking from "../modules/passenger/pages/PassengerTourTracking";
+import PassengerTripDetail from "../modules/passenger/pages/PassengerTripDetail";
 
 const passengerRoutes = (
   <Route
@@ -23,6 +27,14 @@ const passengerRoutes = (
     <Route path="bookings" element={<PassengerBookings />} />
     <Route path="bookings/:bookingId" element={<PassengerBookingDetail />} />
     <Route path="payment/result" element={<PaymentResultPage />} />
+    <Route path="profile" element={<ProfilePage />} />
+
+    {/* Theo dõi hành trình tàu */}
+    <Route path="tracking" element={<PassengerTourTracking />} />
+    <Route
+      path="tracking/:tourId/:bookingId"
+      element={<PassengerTripDetail />}
+    />
 
     {/* Chat với các phòng ban */}
     <Route path="messages" element={<PassengerMessages />} />

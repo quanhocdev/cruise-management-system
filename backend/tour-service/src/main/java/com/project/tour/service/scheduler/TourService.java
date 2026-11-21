@@ -33,19 +33,22 @@ public class TourService {
         private final TourRedisService tourRedisService;
         private final TourPackageRepository tourPackageRepository;
         private final TourRouteService tourRouteService;
+        private final TourApprovalRouteAsyncService tourApprovalRouteAsyncService;
 
         public TourService(
                         TourRepository tourRepository,
                         TourStatusValidator tourStatusValidator,
                         TourRedisService tourRedisService,
                         TourPackageRepository tourPackageRepository,
-                        TourRouteService tourRouteService) {
+                        TourRouteService tourRouteService,
+                        TourApprovalRouteAsyncService tourApprovalRouteAsyncService) {
 
                 this.tourRepository = tourRepository;
                 this.tourStatusValidator = tourStatusValidator;
                 this.tourRedisService = tourRedisService;
                 this.tourPackageRepository = tourPackageRepository;
                 this.tourRouteService = tourRouteService;
+                this.tourApprovalRouteAsyncService = tourApprovalRouteAsyncService;
         }
 
         // CREATE TOUR - GIỮ API CŨ
@@ -234,6 +237,8 @@ public class TourService {
                 tour.setStatusTrip(TourStatusTrip.APPROVAL_PENDING);
 
                 Tour updatedTour = tourRepository.save(tour);
+
+                tourApprovalRouteAsyncService.calculateAndSaveRouteForTour(updatedTour.getId());
 
                 return TourMapper.toResponse(updatedTour);
         }

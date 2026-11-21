@@ -1,0 +1,106 @@
+.trip-route-map {
+  position: relative;
+  width: 100%;
+  height: 430px;
+  overflow: hidden;
+  border: 1px solid #e5eaf0;
+  border-radius: 16px;
+  background: #eef3f7;
+}
+
+.trip-route-map__canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.trip-route-map__loading,
+.trip-route-map__error,
+.trip-route-map__empty {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px;
+  color: #64748b;
+  background: #f8fafc;
+  text-align: center;
+}
+
+.trip-route-map__error {
+  color: #b42318;
+  background: #fff8f7;
+}
+
+.trip-route-map__empty {
+  color: #64748b;
+}
+
+.passenger-vessel-marker {
+  position: relative;
+  display: flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+}
+
+.passenger-vessel-marker__icon {
+  position: relative;
+  z-index: 2;
+  font-size: 25px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 3px rgba(15, 23, 42, 0.35));
+}
+
+.passenger-vessel-marker__pulse {
+  position: absolute;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(37, 99, 235, 0.2);
+  animation: passenger-vessel-pulse 1.8s infinite;
+}
+
+@keyframes passenger-vessel-pulse {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+
+.trip-route-map .mapboxgl-ctrl-group {
+  overflow: hidden;
+  border-radius: 9px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+}
+
+.trip-route-map .mapboxgl-ctrl-group button {
+  width: 32px;
+  height: 32px;
+}
+
+.trip-route-map .mapboxgl-ctrl-attrib {
+  font-size: 10px;
+}
+
+@media (max-width: 768px) {
+  .trip-route-map {
+    height: 340px;
+    border-radius: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .trip-route-map {
+    height: 280px;
+  }
+}

@@ -39,404 +39,507 @@ import java.util.UUID;
 @Transactional
 public class BookingServiceImpl implements BookingService {
 
-    private static final String BOOKING_CREATED_TOPIC = "booking-created-topic";
+        private static final String BOOKING_CREATED_TOPIC = "booking-created-topic";
 
-    private final BookingRepository bookingRepository;
-    private final PassengerRepository passengerRepository;
-    private final BookingPassengerRepository bookingPassengerRepository;
-    private final BookingMapper bookingMapper;
-    private final FileStorageService fileStorageService;
-    private final KafkaTemplate<String, Object> kafkaTemplate;
-    private final TourRedisService tourRedisService;
-    private final TourPackageClient tourPackageClient;
-    private final TourClient tourClient;
+        private final BookingRepository bookingRepository;
+        private final PassengerRepository passengerRepository;
+        private final BookingPassengerRepository bookingPassengerRepository;
+        private final BookingMapper bookingMapper;
+        private final FileStorageService fileStorageService;
+        private final KafkaTemplate<String, Object> kafkaTemplate;
+        private final TourRedisService tourRedisService;
+        private final TourPackageClient tourPackageClient;
+        private final TourClient tourClient;
 
-    public BookingServiceImpl(
-            BookingRepository bookingRepository,
-            PassengerRepository passengerRepository,
-            BookingPassengerRepository bookingPassengerRepository,
-            BookingMapper bookingMapper,
-            FileStorageService fileStorageService,
-            KafkaTemplate<String, Object> kafkaTemplate,
-            TourRedisService tourRedisService,
-            TourPackageClient tourPackageClient,
-            TourClient tourClient) {
+        public BookingServiceImpl(
+                        BookingRepository bookingRepository,
+                        PassengerRepository passengerRepository,
+                        BookingPassengerRepository bookingPassengerRepository,
+                        BookingMapper bookingMapper,
+                        FileStorageService fileStorageService,
+                        KafkaTemplate<String, Object> kafkaTemplate,
+                        TourRedisService tourRedisService,
+                        TourPackageClient tourPackageClient,
+                        TourClient tourClient) {
 
-        this.bookingRepository = bookingRepository;
-        this.passengerRepository = passengerRepository;
-        this.bookingPassengerRepository = bookingPassengerRepository;
-        this.bookingMapper = bookingMapper;
-        this.fileStorageService = fileStorageService;
-        this.kafkaTemplate = kafkaTemplate;
-        this.tourRedisService = tourRedisService;
-        this.tourPackageClient = tourPackageClient;
-        this.tourClient = tourClient;
-    }
+                this.bookingRepository = bookingRepository;
+                this.passengerRepository = passengerRepository;
+                this.bookingPassengerRepository = bookingPassengerRepository;
+                this.bookingMapper = bookingMapper;
+                this.fileStorageService = fileStorageService;
+                this.kafkaTemplate = kafkaTemplate;
+                this.tourRedisService = tourRedisService;
+                this.tourPackageClient = tourPackageClient;
+                this.tourClient = tourClient;
+        }
 
-    @Override
-    public synchronized BookingResponse create(
-            CreateBookingRequest request,
-            UUID userId,
-            String email) {
+        @Override
+        public synchronized BookingResponse create(
+                        CreateBookingRequest request,
+                        UUID userId,
+                        String email) {
 
-        try {
-            System.out.println(">>> [SERVICE] Bắt đầu xử lý create booking theo kho phòng...");
+                try {
+                        System.out.println(">>> [SERVICE] Bắt đầu xử lý create booking theo kho phòng...");
 
-            UUID packageId = UUID.fromString(request.getTourPackageId());
-            UUID tourId = UUID.fromString(request.getTourId());
+                        UUID packageId = UUID.fromString(request.getTourPackageId());
+                        UUID tourId = UUID.fromString(request.getTourId());
 
-            int requestedRooms = request.getNumberOfRooms() != null
-                    ? request.getNumberOfRooms()
-                    : 1;
+                        int requestedRooms = request.getNumberOfRooms() != null
+                                        ? request.getNumberOfRooms()
+                                        : 1;
 
-            int passengerCount = request.getPassengers().size();
+                        int passengerCount = request.getPassengers().size();
 
-            // 1. Lấy thông tin gói Tour
-            TourPackageClient.BookingPackageInfo packageInfo = tourPackageClient.getBookingPackageInfo(packageId);
+                        // 1. Lấy thông tin gói Tour
+                        TourPackageClient.BookingPackageInfo packageInfo = tourPackageClient
+                                        .getBookingPackageInfo(packageId);
 
-            Integer roomCapacity = packageInfo.roomCapacity();
-            BigDecimal packagePrice = packageInfo.price();
+                        Integer roomCapacity = packageInfo.roomCapacity();
+                        BigDecimal packagePrice = packageInfo.price();
 
-            if (roomCapacity == null || roomCapacity <= 0) {
-                throw new AppException(
-                        "Không thể xác định sức chứa của loại phòng!",
-                        HttpStatus.BAD_REQUEST);
-            }
+                        if (roomCapacity == null || roomCapacity <= 0) {
+                                throw new AppException(
+                                                "Không thể xác định sức chứa của loại phòng!",
+                                                HttpStatus.BAD_REQUEST);
+                        }
 
-            // 2. Lấy thông tin Tour
-            TourClient.TourInfo tourInfo = getTourInfo(tourId);
+                        // 2. Lấy thông tin Tour
+                        TourClient.TourInfo tourInfo = getTourInfo(tourId);
 
-            if (tourInfo == null) {
-                throw new AppException(
-                        "Không thể lấy thông tin Tour!",
-                        HttpStatus.BAD_GATEWAY);
-            }
+                        if (tourInfo == null) {
+                                throw new AppException(
+                                                "Không thể lấy thông tin Tour!",
+                                                HttpStatus.BAD_GATEWAY);
+                        }
 
-            // 3. Kiểm tra sức chứa hành khách
-            int totalAllowedPassengers = roomCapacity * requestedRooms;
+                        // 3. Kiểm tra sức chứa hành khách
+                        int totalAllowedPassengers = roomCapacity * requestedRooms;
 
-            if (passengerCount > totalAllowedPassengers) {
-                throw new AppException(
-                        String.format(
-                                "Số lượng hành khách (%d người) vượt quá sức chứa của %d phòng (%d người).",
-                                passengerCount,
-                                requestedRooms,
-                                totalAllowedPassengers),
-                        HttpStatus.BAD_REQUEST);
-            }
+                        if (passengerCount > totalAllowedPassengers) {
+                                throw new AppException(
+                                                String.format(
+                                                                "Số lượng hành khách (%d người) vượt quá sức chứa của %d phòng (%d người).",
+                                                                passengerCount,
+                                                                requestedRooms,
+                                                                totalAllowedPassengers),
+                                                HttpStatus.BAD_REQUEST);
+                        }
 
-            // 4. Trừ kho phòng đồng thời trên Redis
-            Long redisResult = tourRedisService.reservePackageRooms(
-                    packageId,
-                    requestedRooms);
+                        // 4. Trừ kho phòng đồng thời trên Redis
+                        Long redisResult = tourRedisService.reservePackageRooms(
+                                        packageId,
+                                        requestedRooms);
 
-            if (redisResult == null || redisResult == -1) {
-                throw new AppException(
-                        "Kho phòng của gói tour này chưa được khởi tạo hoặc không tồn tại!",
-                        HttpStatus.BAD_REQUEST);
-            }
+                        if (redisResult == null || redisResult == -1) {
+                                throw new AppException(
+                                                "Kho phòng của gói tour này chưa được khởi tạo hoặc không tồn tại!",
+                                                HttpStatus.BAD_REQUEST);
+                        }
 
-            if (redisResult == -2) {
-                throw new AppException(
-                        "Rất tiếc, số lượng phòng trống của gói này không đủ đáp ứng yêu cầu!",
-                        HttpStatus.BAD_REQUEST);
-            }
+                        if (redisResult == -2) {
+                                throw new AppException(
+                                                "Rất tiếc, số lượng phòng trống của gói này không đủ đáp ứng yêu cầu!",
+                                                HttpStatus.BAD_REQUEST);
+                        }
 
-            // 5. Tính tổng tiền
-            BigDecimal totalAmount = packagePrice.multiply(
-                    BigDecimal.valueOf(requestedRooms));
+                        // 5. Tính tổng tiền
+                        BigDecimal totalAmount = packagePrice.multiply(
+                                        BigDecimal.valueOf(requestedRooms));
 
-            // 6. Lưu Booking
-            Booking booking = new Booking();
+                        // 6. Lưu Booking
+                        Booking booking = new Booking();
 
-            booking.setCreatedByUserId(userId);
-            booking.setPrimaryContactEmail(email);
-            booking.setTourId(tourId);
-            booking.setTourPackageId(packageId);
-            booking.setBookingCode(generateBookingCode());
-            booking.setNumberOfRooms(requestedRooms);
-            booking.setNumberPassengers(passengerCount);
-            booking.setPrimaryContactName(request.getPrimaryContactName().trim());
-            booking.setPrimaryContactPhone(request.getPrimaryContactPhone().trim());
-            booking.setTotalAmount(totalAmount);
-            booking.setStatus(BookingStatus.PENDING_PAYMENT);
+                        booking.setCreatedByUserId(userId);
+                        booking.setPrimaryContactEmail(email);
+                        booking.setTourId(tourId);
+                        booking.setTourPackageId(packageId);
+                        booking.setBookingCode(generateBookingCode());
+                        booking.setNumberOfRooms(requestedRooms);
+                        booking.setNumberPassengers(passengerCount);
+                        booking.setPrimaryContactName(request.getPrimaryContactName().trim());
+                        booking.setPrimaryContactPhone(request.getPrimaryContactPhone().trim());
+                        booking.setTotalAmount(totalAmount);
+                        booking.setStatus(BookingStatus.PENDING_PAYMENT);
 
-            Booking savedBooking = bookingRepository.save(booking);
+                        Booking savedBooking = bookingRepository.save(booking);
 
-            System.out.println(
-                    ">>> [SERVICE] Đã lưu xong Booking ID: " + savedBooking.getId());
+                        System.out.println(
+                                        ">>> [SERVICE] Đã lưu xong Booking ID: " + savedBooking.getId());
 
-            // 7. Lưu danh sách hành khách
-            for (PassengerRequest pReq : request.getPassengers()) {
+                        // 7. Lưu danh sách hành khách
+                        for (PassengerRequest pReq : request.getPassengers()) {
 
-                Passenger passenger = new Passenger();
+                                Passenger passenger = new Passenger();
 
-                passenger.setFullName(
-                        pReq.getFullName() != null
-                                ? pReq.getFullName().trim()
-                                : null);
+                                passenger.setFullName(
+                                                pReq.getFullName() != null
+                                                                ? pReq.getFullName().trim()
+                                                                : null);
 
-                passenger.setDateOfBirth(pReq.getDateOfBirth());
+                                passenger.setDateOfBirth(pReq.getDateOfBirth());
 
-                passenger.setGender(
-                        pReq.getGender() != null
-                                ? pReq.getGender().trim()
-                                : null);
+                                passenger.setGender(
+                                                pReq.getGender() != null
+                                                                ? pReq.getGender().trim()
+                                                                : null);
 
-                passenger.setPhoneNumber(pReq.getPhoneNumber());
-                passenger.setEmail(pReq.getEmail());
-                passenger.setIdCardType(pReq.getIdCardType());
+                                passenger.setPhoneNumber(pReq.getPhoneNumber());
+                                passenger.setEmail(pReq.getEmail());
+                                passenger.setIdCardType(pReq.getIdCardType());
 
-                passenger.setIdentificationNumber(
-                        pReq.getIdentificationNumber() != null
-                                ? pReq.getIdentificationNumber().trim()
-                                : null);
+                                passenger.setIdentificationNumber(
+                                                pReq.getIdentificationNumber() != null
+                                                                ? pReq.getIdentificationNumber().trim()
+                                                                : null);
 
-                passenger.setDocumentNote(pReq.getDocumentNote());
+                                passenger.setDocumentNote(pReq.getDocumentNote());
 
-                if (pReq.getIdCardImage() != null
-                        && !pReq.getIdCardImage().isEmpty()) {
+                                if (pReq.getIdCardImage() != null
+                                                && !pReq.getIdCardImage().isEmpty()) {
 
-                    UploadResult uploadResult = fileStorageService.saveMultipart(
-                            pReq.getIdCardImage(),
-                            "passengers");
+                                        UploadResult uploadResult = fileStorageService.saveMultipart(
+                                                        pReq.getIdCardImage(),
+                                                        "passengers");
 
-                    passenger.setIdCardImageUrl(uploadResult.getUrl());
-                    passenger.setIdCardImagePublicId(uploadResult.getPublicId());
+                                        passenger.setIdCardImageUrl(uploadResult.getUrl());
+                                        passenger.setIdCardImagePublicId(uploadResult.getPublicId());
+                                }
+
+                                Passenger savedPassenger = passengerRepository.save(passenger);
+
+                                BookingPassenger link = new BookingPassenger();
+
+                                link.setBooking(savedBooking);
+                                link.setPassenger(savedPassenger);
+                                link.setStatus(BookingPassengerStatus.PENDING);
+
+                                bookingPassengerRepository.save(link);
+                        }
+
+                        // 8. Bắn Kafka Event
+                        BookingCreatedEvent event = new BookingCreatedEvent(
+                                        savedBooking.getId(),
+                                        userId,
+                                        savedBooking.getTourId(),
+                                        savedBooking.getTourPackageId(),
+                                        passengerCount,
+                                        savedBooking.getTotalAmount(),
+                                        LocalDateTime.now());
+
+                        kafkaTemplate.send(
+                                        BOOKING_CREATED_TOPIC,
+                                        savedBooking.getId().toString(),
+                                        event);
+
+                        System.out.println(
+                                        ">>> [KAFKA PRODUCER] Đã bắn event PENDING_PAYMENT cho Booking ID: "
+                                                        + savedBooking.getId());
+
+                        // 9. Lấy danh sách hành khách
+                        List<BookingPassenger> links = bookingPassengerRepository
+                                        .findAllByBooking_IdOrderByIdAsc(savedBooking.getId());
+
+                        // 10. Trả BookingResponse kèm thông tin Tour
+                        return bookingMapper.toResponse(
+                                        savedBooking,
+                                        links,
+                                        tourInfo);
+
+                } catch (Exception e) {
+                        e.printStackTrace();
+                        throw e;
+                }
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public BookingResponse get(
+                        Long id,
+                        UUID requesterId,
+                        boolean privileged) {
+
+                Booking booking = findBookingById(id);
+
+                if (!privileged
+                                && !Objects.equals(booking.getCreatedByUserId(), requesterId)) {
+
+                        throw new AppException(
+                                        "You cannot access this booking",
+                                        HttpStatus.FORBIDDEN);
                 }
 
-                Passenger savedPassenger = passengerRepository.save(passenger);
+                List<BookingPassenger> links = bookingPassengerRepository
+                                .findAllByBooking_IdOrderByIdAsc(booking.getId());
 
-                BookingPassenger link = new BookingPassenger();
+                TourClient.TourInfo tourInfo = getTourInfo(booking.getTourId());
 
-                link.setBooking(savedBooking);
-                link.setPassenger(savedPassenger);
-                link.setStatus(BookingPassengerStatus.PENDING);
-
-                bookingPassengerRepository.save(link);
-            }
-
-            // 8. Bắn Kafka Event
-            BookingCreatedEvent event = new BookingCreatedEvent(
-                    savedBooking.getId(),
-                    userId,
-                    savedBooking.getTourId(),
-                    savedBooking.getTourPackageId(),
-                    passengerCount,
-                    savedBooking.getTotalAmount(),
-                    LocalDateTime.now());
-
-            kafkaTemplate.send(
-                    BOOKING_CREATED_TOPIC,
-                    savedBooking.getId().toString(),
-                    event);
-
-            System.out.println(
-                    ">>> [KAFKA PRODUCER] Đã bắn event PENDING_PAYMENT cho Booking ID: "
-                            + savedBooking.getId());
-
-            // 9. Lấy danh sách hành khách
-            List<BookingPassenger> links = bookingPassengerRepository
-                    .findAllByBooking_IdOrderByIdAsc(savedBooking.getId());
-
-            // 10. Trả BookingResponse kèm thông tin Tour
-            return bookingMapper.toResponse(
-                    savedBooking,
-                    links,
-                    tourInfo);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public BookingResponse get(
-            Long id,
-            UUID requesterId,
-            boolean privileged) {
-
-        Booking booking = findBookingById(id);
-
-        if (!privileged
-                && !Objects.equals(booking.getCreatedByUserId(), requesterId)) {
-
-            throw new AppException(
-                    "You cannot access this booking",
-                    HttpStatus.FORBIDDEN);
+                return bookingMapper.toResponse(
+                                booking,
+                                links,
+                                tourInfo);
         }
 
-        List<BookingPassenger> links = bookingPassengerRepository
-                .findAllByBooking_IdOrderByIdAsc(booking.getId());
+        @Override
+        @Transactional(readOnly = true)
+        public List<BookingResponse> getMine(UUID userId) {
 
-        TourClient.TourInfo tourInfo = getTourInfo(booking.getTourId());
+                List<Booking> bookings = bookingRepository
+                                .findAllByCreatedByUserIdOrderByCreatedAtDesc(userId);
 
-        return bookingMapper.toResponse(
-                booking,
-                links,
-                tourInfo);
-    }
+                // Cache TourInfo trong phạm vi request.
+                // Những booking cùng Tour chỉ gọi Tour Service một lần.
+                Map<UUID, TourClient.TourInfo> tourInfoMap = new HashMap<>();
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<BookingResponse> getMine(UUID userId) {
+                return bookings.stream()
+                                .map(booking -> {
 
-        List<Booking> bookings = bookingRepository
-                .findAllByCreatedByUserIdOrderByCreatedAtDesc(userId);
+                                        List<BookingPassenger> links = bookingPassengerRepository
+                                                        .findAllByBooking_IdOrderByIdAsc(booking.getId());
 
-        // Cache TourInfo trong phạm vi request.
-        // Những booking cùng Tour chỉ gọi Tour Service một lần.
-        Map<UUID, TourClient.TourInfo> tourInfoMap = new HashMap<>();
+                                        TourClient.TourInfo tourInfo = tourInfoMap.computeIfAbsent(
+                                                        booking.getTourId(),
+                                                        this::getTourInfo);
 
-        return bookings.stream()
-                .map(booking -> {
-
-                    List<BookingPassenger> links = bookingPassengerRepository
-                            .findAllByBooking_IdOrderByIdAsc(booking.getId());
-
-                    TourClient.TourInfo tourInfo = tourInfoMap.computeIfAbsent(
-                            booking.getTourId(),
-                            this::getTourInfo);
-
-                    return bookingMapper.toResponse(
-                            booking,
-                            links,
-                            tourInfo);
-                })
-                .toList();
-    }
-
-    @Override
-    public BookingResponse cancel(Long id, UUID userId) {
-
-        Booking booking = findBookingById(id);
-
-        if (!Objects.equals(booking.getCreatedByUserId(), userId)) {
-            throw new AppException(
-                    "You cannot cancel this booking",
-                    HttpStatus.FORBIDDEN);
+                                        return bookingMapper.toResponse(
+                                                        booking,
+                                                        links,
+                                                        tourInfo);
+                                })
+                                .toList();
         }
 
-        if (booking.getStatus() != BookingStatus.CONFIRMED) {
-            throw new AppException(
-                    "Only CONFIRMED bookings can be cancelled",
-                    HttpStatus.CONFLICT);
+        @Override
+        public BookingResponse cancel(Long id, UUID userId) {
+
+                Booking booking = findBookingById(id);
+
+                if (!Objects.equals(booking.getCreatedByUserId(), userId)) {
+                        throw new AppException(
+                                        "You cannot cancel this booking",
+                                        HttpStatus.FORBIDDEN);
+                }
+
+                if (booking.getStatus() != BookingStatus.CONFIRMED) {
+                        throw new AppException(
+                                        "Only CONFIRMED bookings can be cancelled",
+                                        HttpStatus.CONFLICT);
+                }
+
+                booking.setStatus(BookingStatus.CANCELLED);
+
+                Booking saved = bookingRepository.save(booking);
+
+                List<BookingPassenger> links = bookingPassengerRepository
+                                .findAllByBooking_IdOrderByIdAsc(saved.getId());
+
+                TourClient.TourInfo tourInfo = getTourInfo(saved.getTourId());
+
+                return bookingMapper.toResponse(
+                                saved,
+                                links,
+                                tourInfo);
         }
 
-        booking.setStatus(BookingStatus.CANCELLED);
-
-        Booking saved = bookingRepository.save(booking);
-
-        List<BookingPassenger> links = bookingPassengerRepository
-                .findAllByBooking_IdOrderByIdAsc(saved.getId());
-
-        TourClient.TourInfo tourInfo = getTourInfo(saved.getTourId());
-
-        return bookingMapper.toResponse(
-                saved,
-                links,
-                tourInfo);
-    }
-
-    @Override
-    public int sendDepartureReminders(LocalDate departureDate) {
-        return 0;
-    }
-
-    private Booking findBookingById(Long id) {
-        return bookingRepository.findById(id)
-                .orElseThrow(() -> new AppException(
-                        "Booking not found: " + id,
-                        HttpStatus.NOT_FOUND));
-    }
-
-    /**
-     * Lấy thông tin Tour từ Tour Service.
-     */
-    private TourClient.TourInfo getTourInfo(UUID tourId) {
-
-        if (tourId == null) {
-            throw new AppException(
-                    "Booking does not have a valid tour ID",
-                    HttpStatus.BAD_REQUEST);
+        @Override
+        public int sendDepartureReminders(LocalDate departureDate) {
+                return 0;
         }
 
-        TourClient.TourInfo tourInfo = tourClient.getTourInfo(tourId);
-
-        if (tourInfo == null) {
-            throw new AppException(
-                    "Unable to retrieve tour information",
-                    HttpStatus.BAD_GATEWAY);
+        private Booking findBookingById(Long id) {
+                return bookingRepository.findById(id)
+                                .orElseThrow(() -> new AppException(
+                                                "Booking not found: " + id,
+                                                HttpStatus.NOT_FOUND));
         }
 
-        return tourInfo;
-    }
+        /**
+         * Lấy thông tin Tour từ Tour Service.
+         */
+        private TourClient.TourInfo getTourInfo(UUID tourId) {
 
-    private String generateBookingCode() {
+                if (tourId == null) {
+                        throw new AppException(
+                                        "Booking does not have a valid tour ID",
+                                        HttpStatus.BAD_REQUEST);
+                }
 
-        for (int attempt = 0; attempt < 10; attempt++) {
+                TourClient.TourInfo tourInfo = tourClient.getTourInfo(tourId);
 
-            String code = "BK-" + UUID.randomUUID()
-                    .toString()
-                    .substring(0, 8)
-                    .toUpperCase();
+                if (tourInfo == null) {
+                        throw new AppException(
+                                        "Unable to retrieve tour information",
+                                        HttpStatus.BAD_GATEWAY);
+                }
 
-            if (!bookingRepository.existsByBookingCode(code)) {
-                return code;
-            }
+                return tourInfo;
         }
 
-        throw new AppException(
-                "Cannot generate a unique booking code",
-                HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+        private String generateBookingCode() {
 
-    @Override
-    @Transactional
-    public void processPaymentSuccess(Long bookingId) {
+                for (int attempt = 0; attempt < 10; attempt++) {
 
-        Booking booking = bookingRepository.findById(bookingId).orElse(null);
+                        String code = "BK-" + UUID.randomUUID()
+                                        .toString()
+                                        .substring(0, 8)
+                                        .toUpperCase();
 
-        if (booking == null) {
-            System.out.println(
-                    ">>> [SERVICE] Không tìm thấy Booking ID: " + bookingId);
-            return;
+                        if (!bookingRepository.existsByBookingCode(code)) {
+                                return code;
+                        }
+                }
+
+                throw new AppException(
+                                "Cannot generate a unique booking code",
+                                HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        if (booking.getStatus() == BookingStatus.PENDING_PAYMENT) {
+        @Override
+        @Transactional
+        public void processPaymentSuccess(Long bookingId) {
 
-            booking.setStatus(BookingStatus.CONFIRMED);
+                Booking booking = bookingRepository.findById(bookingId).orElse(null);
 
-            Booking savedBooking = bookingRepository.save(booking);
+                if (booking == null) {
+                        System.out.println(
+                                        ">>> [SERVICE] Không tìm thấy Booking ID: " + bookingId);
+                        return;
+                }
 
-            System.out.println(
-                    ">>> [SERVICE] Đã cập nhật đơn hàng #" + bookingId + " thành CONFIRMED.");
+                if (booking.getStatus() == BookingStatus.PENDING_PAYMENT) {
 
-            BookingConfirmedEvent confirmedEvent = new BookingConfirmedEvent(
-                    savedBooking.getId(),
-                    savedBooking.getCreatedByUserId(),
-                    savedBooking.getPrimaryContactEmail(),
-                    savedBooking.getPrimaryContactName(),
-                    savedBooking.getBookingCode(),
-                    savedBooking.getNumberPassengers(),
-                    savedBooking.getTotalAmount());
+                        booking.setStatus(BookingStatus.CONFIRMED);
 
-            kafkaTemplate.send(
-                    "booking-confirmed-topic",
-                    savedBooking.getBookingCode(),
-                    confirmedEvent);
+                        Booking savedBooking = bookingRepository.save(booking);
 
-            System.out.println(
-                    ">>> [KAFKA PRODUCER] Đã bắn event BookingConfirmedEvent cho mã: "
-                            + savedBooking.getBookingCode());
+                        System.out.println(
+                                        ">>> [SERVICE] Đã cập nhật đơn hàng #" + bookingId + " thành CONFIRMED.");
 
-        } else {
+                        BookingConfirmedEvent confirmedEvent = new BookingConfirmedEvent(
+                                        savedBooking.getId(),
+                                        savedBooking.getCreatedByUserId(),
+                                        savedBooking.getPrimaryContactEmail(),
+                                        savedBooking.getPrimaryContactName(),
+                                        savedBooking.getBookingCode(),
+                                        savedBooking.getNumberPassengers(),
+                                        savedBooking.getTotalAmount());
 
-            System.out.println(
-                    ">>> [SERVICE] Đơn hàng #" + bookingId
-                            + " đã ở trạng thái: " + booking.getStatus());
+                        kafkaTemplate.send(
+                                        "booking-confirmed-topic",
+                                        savedBooking.getBookingCode(),
+                                        confirmedEvent);
+
+                        System.out.println(
+                                        ">>> [KAFKA PRODUCER] Đã bắn event BookingConfirmedEvent cho mã: "
+                                                        + savedBooking.getBookingCode());
+
+                } else {
+
+                        System.out.println(
+                                        ">>> [SERVICE] Đơn hàng #" + bookingId
+                                                        + " đã ở trạng thái: " + booking.getStatus());
+                }
         }
-    }
+
+        @Override
+        @Transactional(readOnly = true)
+        public List<PassengerBookedTourResponse> getMyBookedTours(UUID userId) {
+
+                // Lấy tất cả booking CONFIRMED của passenger.
+                List<Booking> bookings = bookingRepository
+                                .findAllByCreatedByUserIdAndStatusOrderByCreatedAtDesc(
+                                                userId,
+                                                BookingStatus.CONFIRMED);
+
+                if (bookings.isEmpty()) {
+                        return List.of();
+                }
+
+                // Lấy các tourId duy nhất để tránh gọi Tour Service trùng lặp.
+                List<UUID> tourIds = bookings.stream()
+                                .map(Booking::getTourId)
+                                .filter(Objects::nonNull)
+                                .distinct()
+                                .toList();
+
+                if (tourIds.isEmpty()) {
+                        return List.of();
+                }
+
+                // Gọi Tour Service một lần và lập bản đồ TourInfo theo tourId.
+                Map<UUID, TourClient.TourInfo> tourInfoMap = new HashMap<>();
+
+                List<TourClient.TourInfo> tourInfos = tourClient.getToursInfo(tourIds);
+
+                if (tourInfos != null) {
+                        for (TourClient.TourInfo tourInfo : tourInfos) {
+                                if (tourInfo != null && tourInfo.tourId() != null) {
+                                        tourInfoMap.putIfAbsent(tourInfo.tourId(), tourInfo);
+                                }
+                        }
+                }
+
+                // Trả về từng booking, không gom theo tourId.
+                return bookings.stream()
+                                .filter(booking -> booking.getTourId() != null)
+                                .map(booking -> {
+                                        TourClient.TourInfo tourInfo = tourInfoMap.get(booking.getTourId());
+
+                                        if (tourInfo == null) {
+                                                throw new AppException(
+                                                                "Unable to retrieve tour information for booking: "
+                                                                                + booking.getId(),
+                                                                HttpStatus.BAD_GATEWAY);
+                                        }
+
+                                        return new PassengerBookedTourResponse(
+                                                        booking.getId(),
+                                                        tourInfo.tourId(),
+                                                        tourInfo.tourCode(),
+                                                        tourInfo.tourName(),
+                                                        tourInfo.departureDate(),
+                                                        tourInfo.endDate(),
+                                                        tourInfo.statusTrip());
+                                })
+                                .toList();
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public PassengerTourTrackingResponse getMyBookedTourDetails(
+                        UUID userId,
+                        UUID tourId) {
+
+                if (userId == null || tourId == null) {
+                        throw new AppException(
+                                        "Invalid user ID or tour ID",
+                                        HttpStatus.BAD_REQUEST);
+                }
+
+                // Kiểm tra user có booking đã thanh toán thành công
+                // thuộc Tour này hay không.
+                boolean hasConfirmedBooking = bookingRepository
+                                .existsByCreatedByUserIdAndTourIdAndStatus(
+                                                userId,
+                                                tourId,
+                                                BookingStatus.CONFIRMED);
+
+                if (!hasConfirmedBooking) {
+                        throw new AppException(
+                                        "You do not have a confirmed booking for this tour",
+                                        HttpStatus.FORBIDDEN);
+                }
+
+                // Lấy lịch trình và vị trí tàu từ Tour Service.
+                PassengerTourTrackingResponse response = tourClient
+                                .getTourTrackingDetails(tourId);
+
+                if (response == null) {
+                        throw new AppException(
+                                        "Unable to retrieve tour tracking details",
+                                        HttpStatus.BAD_GATEWAY);
+                }
+
+                return response;
+        }
 }

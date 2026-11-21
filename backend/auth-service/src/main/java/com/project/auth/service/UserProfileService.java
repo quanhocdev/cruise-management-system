@@ -1,16 +1,21 @@
+
 package com.project.auth.service;
 
 import com.project.auth.dto.UserProfileRequest;
 import com.project.auth.dto.UserProfileResponse;
 import com.project.auth.mapper.UserProfileMapper;
 import com.project.auth.model.UserProfile;
+import com.project.auth.model.Users;
 import com.project.auth.repository.UserProfileRepository;
+import com.project.auth.repository.UserRepository;
 import com.project.common.dto.UploadResult;
 import com.project.common.service.file.FileStorageService;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
@@ -18,74 +23,108 @@ import java.util.UUID;
 public class UserProfileService {
 
     private final UserProfileRepository userProfileRepository;
+    private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
 
     public UserProfileService(
             UserProfileRepository userProfileRepository,
+            UserRepository userRepository,
             FileStorageService fileStorageService) {
+
         this.userProfileRepository = userProfileRepository;
+        this.userRepository = userRepository;
         this.fileStorageService = fileStorageService;
     }
 
+    /**
+     * Tạo profile cho tài khoản đang đăng nhập.
+     * Không tạo tài khoản Users mới.
+     */
+    @Transactional
+    public UserProfileResponse createMyProfile(
+            UUID userId,
+            UserProfileRequest request) {
+
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Không tìm thấy tài khoản người dùng"));
+
+        if (userProfileRepository.existsByUser_Id(userId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Hồ sơ cá nhân đã tồn tại");
+        }
+
+        UserProfile profile = new UserProfile();
+        profile.setUser(user);
+
+        UserProfileMapper.updateEntity(profile, request);
+
+        UserProfile savedProfile = userProfileRepository.save(profile);
+
+        return UserProfileMapper.toResponse(savedProfile);
+    }
+
+    /**
+     * Lấy profile của người dùng.
+     */
     @Transactional(readOnly = true)
     public UserProfileResponse getMyProfile(UUID userId) {
 
-        UserProfile profile = userProfileRepository
-                .findByUser_Id(userId)
-                .orElseThrow(() -> new RuntimeException(
-                        "Không tìm thấy hồ sơ của người dùng: " + userId));
+        UserProfile profile = getProfileOrThrow(userId);
 
         return UserProfileMapper.toResponse(profile);
     }
 
     /**
-     * Cập nhật thông tin cá nhân, không thay đổi avatar.
+     * Cập nhật thông tin cá nhân.
+     * Không thay đổi avatar.
      */
     @Transactional
     public UserProfileResponse updateMyProfile(
             UUID userId,
             UserProfileRequest request) {
-        return updateMyProfile(userId, request, null);
+
+        UserProfile profile = getProfileOrThrow(userId);
+
+        UserProfileMapper.updateEntity(profile, request);
+
+        UserProfile savedProfile = userProfileRepository.save(profile);
+
+        return UserProfileMapper.toResponse(savedProfile);
     }
 
     /**
-     * Cập nhật thông tin cá nhân và avatar nếu có ảnh mới.
+     * Upload hoặc thay avatar của người dùng.
      */
     @Transactional
-    public UserProfileResponse updateMyProfile(
+    public UserProfileResponse uploadMyAvatar(
             UUID userId,
-            UserProfileRequest request,
             MultipartFile avatar) {
 
-        UserProfile profile = userProfileRepository
-                .findByUser_Id(userId)
-                .orElseThrow(() -> new RuntimeException(
-                        "Không tìm thấy hồ sơ của người dùng: " + userId));
+        UserProfile profile = getProfileOrThrow(userId);
 
-        // Cập nhật thông tin cá nhân
-        UserProfileMapper.updateEntity(profile, request);
+        if (avatar == null || avatar.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Vui lòng chọn ảnh đại diện");
+        }
 
         String oldAvatarPublicId = profile.getAvatarPublicId();
 
-        // Nếu có avatar mới thì upload lên Cloudinary
-        UploadResult uploadResult = null;
+        UploadResult uploadResult = fileStorageService.saveMultipart(
+                avatar,
+                "avatars");
 
-        if (avatar != null && !avatar.isEmpty()) {
-
-            uploadResult = fileStorageService.saveMultipart(
-                    avatar,
-                    "avatars");
-
-            profile.setAvatarUrl(uploadResult.getUrl());
-            profile.setAvatarPublicId(uploadResult.getPublicId());
-        }
+        profile.setAvatarUrl(uploadResult.getUrl());
+        profile.setAvatarPublicId(uploadResult.getPublicId());
 
         try {
             UserProfile savedProfile = userProfileRepository.save(profile);
 
-            // Chỉ xóa ảnh cũ sau khi đã lưu thông tin avatar mới
-            if (uploadResult != null
-                    && oldAvatarPublicId != null
+            // Xóa ảnh cũ sau khi đã lưu avatar mới.
+            if (oldAvatarPublicId != null
                     && !oldAvatarPublicId.isBlank()
                     && !oldAvatarPublicId.equals(uploadResult.getPublicId())) {
 
@@ -96,9 +135,8 @@ public class UserProfileService {
 
         } catch (RuntimeException exception) {
 
-            // Nếu lưu database thất bại, dọn ảnh mới vừa upload
-            if (uploadResult != null
-                    && uploadResult.getPublicId() != null
+            // Nếu lưu DB thất bại thì dọn ảnh vừa upload.
+            if (uploadResult.getPublicId() != null
                     && !uploadResult.getPublicId().isBlank()) {
 
                 fileStorageService.delete(uploadResult.getPublicId());
@@ -109,15 +147,12 @@ public class UserProfileService {
     }
 
     /**
-     * Xóa avatar nhưng vẫn giữ nguyên hồ sơ người dùng.
+     * Xóa avatar nhưng vẫn giữ nguyên profile.
      */
     @Transactional
     public UserProfileResponse deleteMyAvatar(UUID userId) {
 
-        UserProfile profile = userProfileRepository
-                .findByUser_Id(userId)
-                .orElseThrow(() -> new RuntimeException(
-                        "Không tìm thấy hồ sơ của người dùng: " + userId));
+        UserProfile profile = getProfileOrThrow(userId);
 
         String oldAvatarPublicId = profile.getAvatarPublicId();
 
@@ -131,5 +166,13 @@ public class UserProfileService {
         }
 
         return UserProfileMapper.toResponse(savedProfile);
+    }
+
+    private UserProfile getProfileOrThrow(UUID userId) {
+
+        return userProfileRepository.findByUser_Id(userId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Không tìm thấy hồ sơ cá nhân"));
     }
 }

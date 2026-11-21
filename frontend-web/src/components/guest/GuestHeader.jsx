@@ -3,16 +3,13 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   Container,
   Navbar,
-  Nav,
   Button,
   Form,
-  InputGroup,
   Dropdown,
   Modal,
 } from "react-bootstrap";
 
 import { useAuth } from "../../context/AuthContext";
-import { getRedirectPathByRole } from "../../routes/roleRoutes";
 
 import useNotifications from "../../modules/passenger/hooks/useNotifications";
 import NotificationBell from "../../modules/passenger/components/notifications/NotificationBell";
@@ -52,6 +49,7 @@ export default function GuestHeader() {
 
     setShowLoginModal(true);
   };
+
   const handleNotificationClick = async (notification) => {
     if (!notification) return;
 
@@ -60,7 +58,6 @@ export default function GuestHeader() {
       await markAsRead(notification.id);
     }
 
-    // Đóng dropdown thông báo sẽ được xử lý ở component Bell.
     switch (notification.referenceType) {
       case "FEEDBACK_INVITATION":
         navigate("/passenger/feedback");
@@ -75,7 +72,6 @@ export default function GuestHeader() {
         break;
 
       default:
-        // Chưa xác định màn hình đích thì không điều hướng.
         break;
     }
   };
@@ -90,156 +86,329 @@ export default function GuestHeader() {
       <Navbar
         bg="white"
         expand="lg"
-        className="guest-header shadow-sm sticky-top"
+        className="guest-header shadow-sm sticky-top py-2"
       >
-        <Container>
-          <Navbar.Brand as={Link} to="/" className="fw-bold text-primary fs-4">
-            🚢 CruiseTour
+        <Container className="d-flex align-items-center justify-content-between gap-2">
+          {/* Logo bên trái */}
+          <Navbar.Brand
+            as={Link}
+            to="/"
+            className="fw-bold text-primary fs-4 m-0 d-flex align-items-center gap-2"
+          >
+            <span>🚢</span>
+            <span>CruiseTour</span>
           </Navbar.Brand>
 
-          <Navbar.Toggle aria-controls="guest-navbar-nav" />
-
-          <Navbar.Collapse id="guest-navbar-nav">
-            <Nav className="me-auto ms-4 gap-3">
-              <Nav.Link as={Link} to="/" className="fw-medium">
-                Trang chủ
-              </Nav.Link>
-
-              <Nav.Link as={Link} to="/tours" className="fw-medium">
-                Khám phá Tour
-              </Nav.Link>
-
-              <Nav.Link as={Link} to="/about" className="fw-medium">
-                Về chúng tôi
-              </Nav.Link>
-
-              <Nav.Link as={Link} to="/contact" className="fw-medium">
-                Liên hệ
-              </Nav.Link>
-
-              {(!user || user.role === "PASSENGER") && (
-                <Nav.Link
-                  as="button"
-                  type="button"
-                  onClick={handleMessagesClick}
-                  className="fw-medium border-0 bg-transparent"
+          {/* Cụm bên phải: Tìm kiếm + Chuông + Tài khoản */}
+          <div className="d-flex align-items-center gap-2 gap-md-3 ms-auto">
+            {/* Thanh tìm kiếm làm đẹp dạng pill bên trái chuông */}
+            <Form className="d-none d-md-block">
+              <div className="guest-search-box">
+                <svg
+                  className="guest-search-box__icon"
+                  viewBox="0 0 24 24"
+                  width="17"
+                  height="17"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
-                  💬 Tin nhắn
-                </Nav.Link>
-              )}
-            </Nav>
-
-            {/* Thanh tìm kiếm */}
-            <Form className="d-none d-lg-flex me-3">
-              <InputGroup className="search-input-group">
-                <InputGroup.Text className="bg-light border-end-0">
-                  🔍
-                </InputGroup.Text>
-
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.3-4.3" />
+                </svg>
                 <Form.Control
                   type="text"
                   placeholder="Tìm kiếm điểm đến, du thuyền..."
-                  className="bg-light border-start-0 shadow-none"
+                  className="guest-search-box__input"
                   readOnly
                 />
-              </InputGroup>
+              </div>
             </Form>
 
-            {/* Khu vực tài khoản */}
-            <div className="d-flex align-items-center gap-2 mt-3 mt-lg-0">
-              {user ? (
-                <>
-                  {/* Chuông thông báo chỉ dành cho Passenger */}
-                  {user.role === "PASSENGER" && (
-                    <NotificationBell
-                      notifications={notifications}
-                      unreadCount={unreadCount}
-                      loading={notificationLoading}
-                      onMarkAsRead={markAsRead}
-                      onMarkAllAsRead={markAllAsRead}
-                      onRefresh={loadNotifications}
-                      onNotificationClick={handleNotificationClick}
-                    />
-                  )}
+            {user ? (
+              <>
+                {/* Chuông thông báo chỉ dành cho Passenger */}
+                {user.role === "PASSENGER" && (
+                  <NotificationBell
+                    notifications={notifications}
+                    unreadCount={unreadCount}
+                    loading={notificationLoading}
+                    onMarkAsRead={markAsRead}
+                    onMarkAllAsRead={markAllAsRead}
+                    onRefresh={loadNotifications}
+                    onNotificationClick={handleNotificationClick}
+                  />
+                )}
 
-                  <Dropdown align="end">
-                    <Dropdown.Toggle
-                      variant="outline-primary"
-                      size="sm"
-                      className="rounded-pill px-3 fw-semibold d-flex align-items-center gap-2"
+                {/* Nút icon tài khoản (không hiện tên/role bên ngoài) */}
+                <Dropdown align="end">
+                  <Dropdown.Toggle
+                    as="button"
+                    type="button"
+                    className="guest-account-trigger"
+                    aria-label="Menu tài khoản"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="20"
+                      height="20"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     >
-                      <span>👤 {user.username}</span>
+                      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                  </Dropdown.Toggle>
 
-                      <span className="badge bg-primary text-light small">
-                        {user.role}
-                      </span>
-                    </Dropdown.Toggle>
+                  <Dropdown.Menu className="guest-account-menu shadow-lg border-0">
+                    {/* 1. Thông tin tài khoản (Tên & Role) */}
+                    <div className="guest-account-header">
+                      <div className="guest-account-avatar">
+                        {user.username?.charAt(0)?.toUpperCase() || "U"}
+                      </div>
+                      <div className="guest-account-info">
+                        <div className="guest-account-name">
+                          {user.username}
+                        </div>
+                        <span className="guest-account-role">{user.role}</span>
+                      </div>
+                    </div>
 
-                    <Dropdown.Menu className="shadow border-0 py-2 rounded-3 mt-2">
-                      {user.role === "PASSENGER" && (
-                        <>
-                          <Dropdown.Item
-                            as={Link}
-                            to="/passenger/bookings"
-                            className="py-2 small fw-medium"
+                    {/* 2. Lưới 4 card (2 cột x 2 hàng): Icon trên, tên dưới */}
+                    <div className="guest-account-grid">
+                      <Dropdown.Item
+                        as={Link}
+                        to="/passenger/bookings"
+                        className="guest-grid-card"
+                      >
+                        <div className="guest-grid-card__icon bg-primary-subtle text-primary">
+                          <svg
+                            viewBox="0 0 24 24"
+                            width="20"
+                            height="20"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
                           >
-                            🎫 Tour đã đặt của tôi
-                          </Dropdown.Item>
-
-                          <Dropdown.Item
-                            as={Link}
-                            to="/passenger/feedback"
-                            className="py-2 small fw-medium"
-                          >
-                            ⭐ Đánh giá của tôi
-                          </Dropdown.Item>
-                        </>
-                      )}
+                            <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />
+                            <path d="M13 5v2" />
+                            <path d="M13 17v2" />
+                            <path d="M13 11v2" />
+                          </svg>
+                        </div>
+                        <span className="guest-grid-card__label">
+                          Tour đã đặt
+                        </span>
+                      </Dropdown.Item>
 
                       <Dropdown.Item
                         as={Link}
-                        to={getRedirectPathByRole(user.role)}
-                        className="py-2 small fw-medium"
+                        to="/passenger/tracking"
+                        className="guest-grid-card"
                       >
-                        📊 Trang Dashboard
+                        <div className="guest-grid-card__icon bg-info-subtle text-info">
+                          <svg
+                            viewBox="0 0 24 24"
+                            width="20"
+                            height="20"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <circle cx="12" cy="12" r="10" />
+                            <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+                          </svg>
+                        </div>
+                        <span className="guest-grid-card__label">
+                          Giám sát hành trình
+                        </span>
                       </Dropdown.Item>
-
-                      <Dropdown.Divider />
 
                       <Dropdown.Item
-                        onClick={handleLogout}
-                        className="py-2 small text-danger fw-semibold"
+                        as={Link}
+                        to="/passenger/feedback"
+                        className="guest-grid-card"
                       >
-                        🚪 Đăng xuất
+                        <div className="guest-grid-card__icon bg-warning-subtle text-warning">
+                          <svg
+                            viewBox="0 0 24 24"
+                            width="20"
+                            height="20"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                          </svg>
+                        </div>
+                        <span className="guest-grid-card__label">Đánh giá</span>
                       </Dropdown.Item>
-                    </Dropdown.Menu>
-                  </Dropdown>
-                </>
-              ) : (
-                <>
-                  <Button
-                    as={Link}
-                    to="/login"
-                    variant="outline-primary"
-                    size="sm"
-                    className="px-3"
-                  >
-                    Đăng nhập
-                  </Button>
 
-                  <Button
-                    as={Link}
-                    to="/register"
-                    variant="primary"
-                    size="sm"
-                    className="px-3"
-                  >
-                    Đăng ký
-                  </Button>
-                </>
-              )}
-            </div>
-          </Navbar.Collapse>
+                      <Dropdown.Item
+                        as="button"
+                        type="button"
+                        onClick={handleMessagesClick}
+                        className="guest-grid-card"
+                      >
+                        <div className="guest-grid-card__icon bg-success-subtle text-success">
+                          <svg
+                            viewBox="0 0 24 24"
+                            width="20"
+                            height="20"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                          </svg>
+                        </div>
+                        <span className="guest-grid-card__label">Nhắn tin</span>
+                      </Dropdown.Item>
+                    </div>
+
+                    <Dropdown.Divider className="my-2" />
+
+                    {/* 3. Danh sách 4 mục: Icon bên trái, chữ bên phải */}
+                    <div className="guest-account-list">
+                      <Dropdown.Item
+                        as="button"
+                        type="button"
+                        onClick={(e) => e.preventDefault()}
+                        className="guest-list-item"
+                      >
+                        <span className="guest-list-item__icon">
+                          <svg
+                            viewBox="0 0 24 24"
+                            width="18"
+                            height="18"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                            <path d="M12 17h.01" />
+                          </svg>
+                        </span>
+                        <span>Trợ giúp</span>
+                      </Dropdown.Item>
+
+                      <Dropdown.Item
+                        as="button"
+                        type="button"
+                        onClick={(e) => e.preventDefault()}
+                        className="guest-list-item"
+                      >
+                        <span className="guest-list-item__icon">
+                          <svg
+                            viewBox="0 0 24 24"
+                            width="18"
+                            height="18"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+                          </svg>
+                        </span>
+                        <span>Giao diện: Sáng</span>
+                      </Dropdown.Item>
+
+                      <Dropdown.Item
+                        as={Link}
+                        to="/passenger/profile"
+                        className="guest-list-item"
+                      >
+                        <span className="guest-list-item__icon">
+                          <svg
+                            viewBox="0 0 24 24"
+                            width="18"
+                            height="18"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <rect width="18" height="18" x="3" y="3" rx="2" />
+                            <circle cx="12" cy="10" r="3" />
+                            <path d="M7 21v-2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2" />
+                          </svg>
+                        </span>
+                        <span>Hồ sơ cá nhân</span>
+                      </Dropdown.Item>
+
+                      <Dropdown.Divider className="my-1" />
+
+                      <Dropdown.Item
+                        as="button"
+                        type="button"
+                        onClick={handleLogout}
+                        className="guest-list-item guest-list-item--danger"
+                      >
+                        <span className="guest-list-item__icon">
+                          <svg
+                            viewBox="0 0 24 24"
+                            width="18"
+                            height="18"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                            <polyline points="16 17 21 12 16 7" />
+                            <line x1="21" x2="9" y1="12" y2="12" />
+                          </svg>
+                        </span>
+                        <span>Đăng xuất</span>
+                      </Dropdown.Item>
+                    </div>
+                  </Dropdown.Menu>
+                </Dropdown>
+              </>
+            ) : (
+              <div className="d-flex align-items-center gap-2">
+                <Button
+                  as={Link}
+                  to="/login"
+                  variant="outline-primary"
+                  size="sm"
+                  className="rounded-pill px-3 fw-medium"
+                >
+                  Đăng nhập
+                </Button>
+
+                <Button
+                  as={Link}
+                  to="/register"
+                  variant="primary"
+                  size="sm"
+                  className="rounded-pill px-3 fw-medium"
+                >
+                  Đăng ký
+                </Button>
+              </div>
+            )}
+          </div>
         </Container>
       </Navbar>
 

@@ -7,42 +7,42 @@ import com.project.tour.model.admin.RoomType;
 
 public class RoomTypeMapper {
 
+    private RoomTypeMapper() {
+    }
+
     public static RoomType toEntity(CreateRoomTypeRequest request) {
-
         RoomType roomType = new RoomType();
-
-        roomType.setName(request.getName());
-        roomType.setDescription(request.getDescription());
-        if (request.getPrice() != null)
-            roomType.setPrice(request.getPrice());
-        if (request.getCapacity() != null)
-            roomType.setCapacity(request.getCapacity());
-
+        roomType.setName(request.name());
+        roomType.setDescription(request.description());
+        if (request.price() != null) {
+            roomType.setPrice(request.price());
+        }
+        if (request.capacity() != null) {
+            roomType.setCapacity(request.capacity());
+        }
         return roomType;
     }
 
     public static void updateEntity(
             RoomType roomType,
             UpdateRoomTypeRequest request) {
-
-        roomType.setName(request.getName());
-        roomType.setDescription(request.getDescription());
-        if (request.getPrice() != null)
-            roomType.setPrice(request.getPrice());
-        if (request.getCapacity() != null)
-            roomType.setCapacity(request.getCapacity());
+        roomType.setName(request.name());
+        roomType.setDescription(request.description());
+        if (request.price() != null) {
+            roomType.setPrice(request.price());
+        }
+        if (request.capacity() != null) {
+            roomType.setCapacity(request.capacity());
+        }
     }
 
     public static RoomTypeResponse toResponse(RoomType roomType) {
-
-        RoomTypeResponse response = new RoomTypeResponse();
-
-        response.setId(roomType.getId());
-        response.setName(roomType.getName());
-        response.setDescription(roomType.getDescription());
-        response.setPrice(roomType.getPrice());
-        response.setCapacity(roomType.getCapacity());
-
-        return response;
+        return new RoomTypeResponse(
+                roomType.getId(),
+                roomType.getName(),
+                roomType.getDescription(),
+                roomType.getPrice(),
+                roomType.getCapacity(),
+                roomType.getImageUrl());
     }
 }

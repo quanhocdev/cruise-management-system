@@ -1,7 +1,8 @@
-
 package com.project.booking.repository;
 
 import com.project.booking.model.Booking;
+import com.project.booking.model.enums.BookingStatus;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -17,4 +18,14 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     Optional<Booking> findByBookingCodeIgnoreCase(String bookingCode);
 
     List<Booking> findAllByTourId(UUID tourId);
+
+    List<Booking> findAllByCreatedByUserIdAndStatusOrderByCreatedAtDesc(
+            UUID userId,
+            BookingStatus status);
+
+    // Kiểm tra user có booking CONFIRMED của một Tour hay không.
+    boolean existsByCreatedByUserIdAndTourIdAndStatus(
+            UUID userId,
+            UUID tourId,
+            BookingStatus status);
 }

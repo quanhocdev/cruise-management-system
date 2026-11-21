@@ -1,0 +1,181 @@
+/* src/modules/scheduler/styles/RouteProgress.css */
+.rp-section {
+  background: var(--vm-card);
+  border: 1px solid var(--vm-line);
+  border-radius: 16px;
+  padding: 22px 24px 26px;
+}
+.rp-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.rp-head h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 650;
+}
+.rp-hint {
+  font-size: 13px;
+  color: var(--vm-mute);
+}
+
+.rp-scroll {
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+.rp-board {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--n), 1fr);
+  min-width: calc(var(--n) * 112px);
+  padding-top: 46px; /* chừa chỗ cho tàu */
+}
+
+/* Đường kẻ nối giữa tâm node đầu và node cuối */
+.rp-track {
+  position: absolute;
+  top: calc(46px + 16px);
+  left: calc(50% / var(--n));
+  right: calc(50% / var(--n));
+  height: 4px;
+  border-radius: 2px;
+  background: #dbe5ea;
+}
+.rp-fill {
+  height: 100%;
+  border-radius: 2px;
+  width: calc(var(--idx) / (var(--n) - 1) * 100%);
+  background: linear-gradient(90deg, var(--vm-deep), var(--vm-teal));
+  transition: width 0.8s ease;
+}
+
+.rp-ship {
+  position: absolute;
+  top: 0;
+  left: calc((var(--idx) + 0.5) / var(--n) * 100%);
+  transform: translateX(-50%);
+  color: var(--vm-deep);
+  transition: left 0.8s ease;
+}
+.rp-ship.moving {
+  color: var(--vm-teal);
+  animation: rp-bob 3s ease-in-out infinite;
+}
+@keyframes rp-bob {
+  50% {
+    transform: translateX(-50%) translateY(-4px) rotate(-4deg);
+  }
+}
+
+.rp-node {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0 4px;
+}
+.rp-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  background: #fff;
+  color: var(--vm-mute);
+  border: 3px solid #dbe5ea;
+}
+.rp-node.done .rp-icon {
+  background: var(--vm-deep);
+  border-color: var(--vm-deep);
+  color: #fff;
+}
+.rp-node.current .rp-icon {
+  background: var(--vm-teal);
+  border-color: #b8ece8;
+  color: var(--vm-abyss);
+  box-shadow: 0 0 0 4px rgba(31, 181, 173, 0.2);
+}
+.rp-node.arrival.todo .rp-icon {
+  border-color: #b8dcc9;
+  color: #2c8a5f;
+}
+
+.rp-node strong {
+  margin-top: 10px;
+  max-width: 104px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rp-node.todo strong {
+  color: var(--vm-mute);
+}
+.rp-node span {
+  font-size: 12px;
+  color: var(--vm-mute);
+}
+
+@media (max-width: 768px) {
+  .rp-section {
+    padding: 18px 16px 20px;
+  }
+  .rp-head {
+    flex-direction: column;
+    gap: 2px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rp-ship.moving {
+    animation: none;
+  }
+  .rp-fill,
+  .rp-ship {
+    transition: none;
+  }
+}
+/* Đảm bảo node căn giữa các phần tử theo chiều dọc */
+.rp-node {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2px; /* Tạo khoảng cách đều giữa tên cảng, thành phố và badge ngày */
+}
+
+/* Thẻ badge ngày tháng nằm ở phía dưới cùng */
+.rp-date-badge {
+  margin-top: 6px; /* Khoảng cách cách ra so với dòng thành phố phía trên */
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  z-index: 3;
+}
+
+/* Tùy chọn màu nổi bật riêng cho Cảng đi và Cảng đến ở dưới */
+.rp-node.departure .rp-date-badge {
+  background: #dcfce7;
+  color: #15803d;
+  border-color: #bbf7d0;
+}
+
+.rp-node.arrival .rp-date-badge {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}

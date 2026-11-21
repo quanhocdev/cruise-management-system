@@ -169,21 +169,6 @@ public class SecurityConfig {
         return converter;
     }
 
-    /**
-     * Chuyển scope trong JWT thành authority phù hợp.
-     *
-     * User JWT:
-     * scope = ADMIN
-     * scope = PASSENGER
-     *
-     * -> ROLE_ADMIN
-     * -> ROLE_PASSENGER
-     *
-     * Service JWT:
-     * scope = tour.read
-     *
-     * -> SCOPE_tour.read
-     */
     private static class MixedScopeAuthoritiesConverter
             implements Converter<Jwt, Collection<GrantedAuthority>> {
 
@@ -223,14 +208,6 @@ public class SecurityConfig {
 
             for (String scope : scopes) {
 
-                /*
-                 * OAuth2 service scopes
-                 *
-                 * tour.read
-                 * tour.write
-                 *
-                 * -> SCOPE_tour.read
-                 */
                 if (scope.contains(".")) {
 
                     authorities.add(
@@ -238,18 +215,6 @@ public class SecurityConfig {
                                     "SCOPE_" + scope));
                 }
 
-                /*
-                 * Application roles
-                 *
-                 * ADMIN
-                 * PASSENGER
-                 * OPERATION
-                 * ...
-                 *
-                 * -> ROLE_ADMIN
-                 * -> ROLE_PASSENGER
-                 * -> ROLE_OPERATION
-                 */
                 else {
 
                     authorities.add(

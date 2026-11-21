@@ -43,6 +43,15 @@ const bookingService = {
     const response = await api.patch(`${BASE_URL}/${id}/cancel`);
     return normalizeBooking(response.data?.data ?? response.data);
   },
+  getMyBookedTours: async () => {
+    const response = await api.get(`${BASE_URL}/tours`);
+    return response.data?.data ?? response.data;
+  },
+
+  getMyBookedTourDetails: async (tourId) => {
+    const response = await api.get(`${BASE_URL}/tours/${tourId}/details`);
+    return response.data?.data ?? response.data;
+  },
 };
 
 export default bookingService;

@@ -1,0 +1,118 @@
+/* src/modules/scheduler/styles/TourCard.css */
+.tc-card {
+  background: var(--vm-card);
+  border: 1px solid var(--vm-line);
+  border-top: 4px solid var(--vm-line);
+  border-radius: 14px;
+  padding: 18px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 6px 18px -12px rgba(10, 37, 64, 0.35);
+}
+.tc-card.in_progress {
+  border-top-color: var(--vm-teal);
+}
+.tc-card.ready {
+  border-top-color: var(--vm-amber);
+}
+
+.tc-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.tc-code {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--vm-deep);
+  background: #e4eef5;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+.tc-name {
+  font-size: 17px;
+  font-weight: 650;
+  line-height: 1.35;
+  margin: 0 0 16px;
+  min-height: 46px;
+}
+
+.tc-mini-route {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.tc-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 2px solid var(--vm-deep);
+  background: #fff;
+}
+.tc-dot.end {
+  background: var(--vm-deep);
+}
+.tc-line {
+  position: relative;
+  flex: 1;
+  height: 0;
+  border-top: 2px dashed #b9c9d3;
+}
+.tc-ship {
+  position: absolute;
+  top: -9px;
+  left: 0;
+  color: var(--vm-mute);
+  background: var(--vm-card);
+  padding: 0 2px;
+}
+.tc-ship.sailing {
+  color: var(--vm-teal);
+  animation: tc-sail 5s ease-in-out infinite alternate;
+}
+@keyframes tc-sail {
+  to {
+    left: calc(100% - 20px);
+  }
+}
+
+.tc-dates {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--vm-mute);
+  margin-bottom: 18px;
+}
+
+.tc-open {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 9px;
+  background: var(--vm-abyss);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    gap 0.2s;
+}
+.tc-open:hover {
+  background: var(--vm-deep);
+  gap: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tc-ship.sailing {
+    animation: none;
+  }
+}

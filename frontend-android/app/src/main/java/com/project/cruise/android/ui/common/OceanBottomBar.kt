@@ -55,22 +55,6 @@ fun OceanBottomBar(
                     modifier = Modifier.weight(1f),
                     onClick = onHomeClick,
                 )
-                NavItem(
-                    label = "Chuyến đi",
-                    glyph = PassengerGlyph.TICKET,
-                    isSelected = currentRoute == "passenger_bookings",
-                    modifier = Modifier.weight(1f),
-                    onClick = if (isLoggedIn) onMyBookingsClick else onLoginClick,
-                )
-
-                // --- ĐẶT ICON GIÁM SÁT NGAY CHÍNH GIỮA (VỊ TRÍ THỨ 3) ---
-                NavItem(
-                    label = "Giám sát",
-                    glyph = PassengerGlyph.COMPASS, // Hoặc thay bằng tên hằng số đúng có trong enum PassengerGlyph của bạn
-                    isSelected = currentRoute == "vessel_tracking",
-                    modifier = Modifier.weight(1f),
-                    onClick = if (isLoggedIn) onVesselTrackingClick else onLoginClick,
-                )
 
                 NavItem(
                     label = "Tin nhắn",
@@ -79,6 +63,15 @@ fun OceanBottomBar(
                     modifier = Modifier.weight(1f),
                     onClick = if (isLoggedIn) onMessagesClick else onLoginClick,
                 )
+                NavItem(
+                    label = "Giám sát",
+                    glyph = PassengerGlyph.COMPASS,
+                    isSelected = currentRoute == "vessel_tracking",
+                    modifier = Modifier.weight(1f),
+                    onClick = if (isLoggedIn) onVesselTrackingClick else onLoginClick,
+                )
+
+
                 NavNotificationItem(
                     label = "Thông báo",
                     unreadCount = unreadCount,
@@ -86,6 +79,9 @@ fun OceanBottomBar(
                     modifier = Modifier.weight(1f),
                     onClick = if (isLoggedIn) onNotificationClick else onLoginClick,
                 )
+
+
+
                 NavItem(
                     label = if (isLoggedIn) "Tài khoản" else "Đăng nhập",
                     glyph = PassengerGlyph.PERSON,

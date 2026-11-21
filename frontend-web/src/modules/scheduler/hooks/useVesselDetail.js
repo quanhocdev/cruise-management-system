@@ -1,9 +1,11 @@
-// src/modules/scheduler/hooks/useVesselDetail.js
 import { useCallback, useEffect, useState } from "react";
 import vesselTrackingService from "../services/vesselTrackingService";
 
 export default function useVesselDetail(tourId) {
   const [tourDetails, setTourDetails] = useState(null);
+  const [routeOverview, setRouteOverview] = useState(null);
+  const [routeLegs, setRouteLegs] = useState([]);
+  const [vesselPosition, setVesselPosition] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -17,8 +19,18 @@ export default function useVesselDetail(tourId) {
     setError("");
 
     try {
-      const data = await vesselTrackingService.getTourDetails(tourId);
-      setTourDetails(data);
+      // Gọi đồng thời thông tin chi tiết tour, tổng quan route và danh sách chặng
+      const [detailsData, overviewData, legsData, posData] = await Promise.all([
+        vesselTrackingService.getTourDetails(tourId),
+        vesselTrackingService.getTourRouteOverview(tourId).catch(() => null),
+        vesselTrackingService.getTourRouteLegs(tourId).catch(() => []),
+        vesselTrackingService.getVesselLocation(tourId).catch(() => null),
+      ]);
+
+      setTourDetails(detailsData);
+      setRouteOverview(overviewData);
+      setRouteLegs(legsData);
+      if (posData) setVesselPosition(posData);
     } catch (err) {
       console.error("LOAD VESSEL TOUR DETAILS ERROR:", err);
       setError(err.response?.data?.message || "Không thể tải chi tiết tour.");
@@ -31,7 +43,7 @@ export default function useVesselDetail(tourId) {
     loadTourDetails();
   }, [loadTourDetails]);
 
-  // Polling riêng tọa độ GPS từ Redis định kỳ mỗi 10 giây để cập nhật icon tàu real-time
+  // Polling tọa độ GPS thực tế từ Redis mỗi 10 giây
   useEffect(() => {
     if (!tourId) return;
 
@@ -39,12 +51,10 @@ export default function useVesselDetail(tourId) {
       try {
         const position = await vesselTrackingService.getVesselLocation(tourId);
         if (position) {
-          setTourDetails((prev) =>
-            prev ? { ...prev, currentPosition: position } : prev,
-          );
+          setVesselPosition(position);
         }
       } catch (err) {
-        // Bỏ qua lỗi ngầm nếu Redis chưa có tọa độ đẩy lên
+        // Bỏ qua nếu Redis chưa có
       }
     };
 
@@ -54,6 +64,9 @@ export default function useVesselDetail(tourId) {
 
   return {
     tourDetails,
+    routeOverview,
+    routeLegs,
+    vesselPosition,
     loading,
     error,
     reload: loadTourDetails,

@@ -84,25 +84,38 @@ export default function VesselDetailModal({ tourId, onClose }) {
 
             {/* THANH TIẾN TRÌNH NGANG (ROUTE PROGRESS BAR) */}
             <div className="route-progress-section">
-              <h4>
-                <Anchor size={16} /> Hành trình Tuyến đường (Cảng Đi ➔ Cảng Đến)
+              <h4 className="progress-section-title">
+                <Anchor size={16} /> Hành trình Tuyến đường & Mốc Thời gian
               </h4>
 
               <div className="progress-bar-container">
                 <div className="progress-line" />
 
-                {/* Cảng đi */}
+                {/* 1. Cảng Khởi Hành (Bắt đầu) */}
                 <div className="progress-node departure">
+                  <div className="node-date-badge start">
+                    {tourDetails.startDate
+                      ? new Date(tourDetails.startDate).toLocaleDateString(
+                          "vi-VN",
+                          {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                          },
+                        )
+                      : "Chưa có ngày"}
+                  </div>
                   <div className="node-icon">
                     <Anchor size={16} />
                   </div>
                   <div className="node-label">
+                    <span className="node-tag">Khởi hành</span>
                     <strong>{tourDetails.departurePort?.name}</strong>
                     <span>{tourDetails.departurePort?.city}</span>
                   </div>
                 </div>
 
-                {/* Các điểm dừng chân */}
+                {/* 2. Các điểm dừng chân trung gian */}
                 {tourDetails.schedules
                   ?.flatMap((s) => s.stops || [])
                   .map((stop, idx) => (
@@ -110,36 +123,59 @@ export default function VesselDetailModal({ tourId, onClose }) {
                       key={stop.stopId || idx}
                       className="progress-node stop"
                     >
+                      <div className="node-date-badge stop-date">
+                        {stop.arriveAt
+                          ? new Date(stop.arriveAt).toLocaleDateString(
+                              "vi-VN",
+                              {
+                                day: "2-digit",
+                                month: "2-digit",
+                              },
+                            )
+                          : `Chặng ${idx + 1}`}
+                      </div>
                       <div className="node-icon">
                         {stop.stopOrder || idx + 1}
                       </div>
                       <div className="node-label">
+                        <span className="node-tag">Điểm dừng {idx + 1}</span>
                         <strong>{stop.port?.name}</strong>
-                        <span>
-                          {stop.arriveAt
-                            ? new Date(stop.arriveAt).toLocaleDateString(
-                                "vi-VN",
-                                { day: "2-digit", month: "2-digit" },
-                              )
-                            : ""}
-                        </span>
+                        <span>{stop.port?.city}</span>
                       </div>
                     </div>
                   ))}
 
-                {/* Cảng đến */}
+                {/* 3. Cảng Đích Đến (Kết thúc) */}
                 <div className="progress-node arrival">
+                  <div className="node-date-badge end">
+                    {tourDetails.endDate
+                      ? new Date(tourDetails.endDate).toLocaleDateString(
+                          "vi-VN",
+                          {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                          },
+                        )
+                      : "Chưa có ngày"}
+                  </div>
                   <div className="node-icon">
                     <MapPin size={16} />
                   </div>
                   <div className="node-label">
-                    <strong>{tourDetails.arrivalPort?.name}</strong>
-                    <span>{tourDetails.arrivalPort?.city}</span>
+                    <span className="node-tag">Đích đến</span>
+                    <strong>
+                      {tourDetails.arrivalPort?.name ||
+                        tourDetails.destinationPort?.name}
+                    </strong>
+                    <span>
+                      {tourDetails.arrivalPort?.city ||
+                        tourDetails.destinationPort?.city}
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
-
             {/* PHẦN THỜI TIẾT VỚI NÚT BẤM */}
             <div className="weather-section">
               <div className="weather-header">

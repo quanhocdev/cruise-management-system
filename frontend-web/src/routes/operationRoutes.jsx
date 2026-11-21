@@ -4,6 +4,7 @@ import { Navigate, Route } from "react-router-dom";
 
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 import OperationLayout from "../layouts/OperationLayout";
+import ProfilePage from "../modules/profile/pages/ProfilePage";
 
 import OperationDashboard from "../modules/operation/pages/Dashboard";
 import OperationManagerTour from "../modules/operation/pages/ManagerTour";
@@ -20,6 +21,7 @@ const operationRoutes = (
       </ProtectedRoute>
     }
   >
+    <Route path="profile" element={<ProfilePage />} />
     <Route path="dashboard" element={<OperationDashboard />} />
     <Route path="tours" element={<OperationManagerTour />} />
     <Route path="tour-configuration" element={<OperationTourConfiguration />} />

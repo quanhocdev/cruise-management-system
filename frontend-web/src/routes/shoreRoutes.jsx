@@ -4,6 +4,7 @@ import { Navigate, Route } from "react-router-dom";
 
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 import ShoreLayout from "../layouts/ShoreLayout";
+import ProfilePage from "../modules/profile/pages/ProfilePage";
 
 import ShoreDashboard from "../modules/shore/pages/Dashboard";
 import ActivityVisitTour from "../modules/shore/pages/ActivityVisitTour";
@@ -23,7 +24,7 @@ const shoreRoutes = (
     <Route path="tours" element={<ActivityVisitTour />} />
     <Route path="activity-visit-usages" element={<ActivityVisitUsage />} />
     <Route path="messages" element={<ShoreMessages />} />
-
+    <Route path="profile" element={<ProfilePage />} />
     <Route index element={<Navigate to="dashboard" replace />} />
   </Route>
 );

@@ -20,6 +20,18 @@ const vesselTrackingService = {
     return response.data;
   },
 
+  // 6. Lấy tổng quan lộ trình của tour (bảng chính `tour_routes`) để vẽ Mapbox
+  getTourRouteOverview: async (tourId) => {
+    const response = await api.get(`/tours/routes/tours/${tourId}/overview`);
+    return response.data;
+  },
+
+  // 7. Lấy danh sách chi tiết các chặng của tour (bảng phụ `tour_route_legs`)
+  getTourRouteLegs: async (tourId) => {
+    const response = await api.get(`/tours/routes/tours/${tourId}/legs`);
+    return response.data;
+  },
+
   // 4. (Dành cho Android app, hoặc web test) Đẩy tọa độ lên Redis (Endpoint #1)
   updateVesselLocation: async (tourId, latitude, longitude) => {
     const response = await api.post(

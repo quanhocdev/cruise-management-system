@@ -1,0 +1,66 @@
+/* src/modules/profile/styles/ProfilePage.css */
+.pf-page {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+}
+.pf-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+.pf-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+.pf-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 24px;
+}
+.pf-summary {
+  text-align: center;
+}
+.pf-summary h2 {
+  font-size: 18px;
+  font-weight: 650;
+  margin: 14px 0 2px;
+}
+.pf-username {
+  color: #64748b;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+.pf-updated {
+  margin: 16px 0 0;
+  font-size: 12px;
+  color: #64748b;
+}
+.pf-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.pf-avatar-fallback {
+  display: inline-grid;
+  place-items: center;
+  background: #0d6efd;
+  color: #fff;
+  font-size: 32px;
+  font-weight: 700;
+}
+.pf-state {
+  padding: 48px 16px;
+  text-align: center;
+  color: #64748b;
+}
+
+@media (max-width: 768px) {
+  .pf-layout {
+    grid-template-columns: 1fr;
+  }
+}

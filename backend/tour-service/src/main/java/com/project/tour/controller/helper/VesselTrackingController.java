@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 import com.project.tour.dto.VesselPositionDto;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/vessel-tracking")
@@ -21,7 +22,7 @@ public class VesselTrackingController {
     // 1. Android gọi định kỳ 30s/lần để đẩy tọa độ lên
     @PostMapping("/tours/{tourId}/location")
     public ResponseEntity<Void> updateLocation(
-            @PathVariable Long tourId,
+            @PathVariable UUID tourId,
             @RequestParam double latitude,
             @RequestParam double longitude) {
 
@@ -29,13 +30,16 @@ public class VesselTrackingController {
         return ResponseEntity.ok().build();
     }
 
-    // 2. Web Dashboard của Scheduler gọi để lấy tọa độ mới nhất vẽ icon thuyền
     @GetMapping("/tours/{tourId}/location")
-    public ResponseEntity<VesselPositionDto> getCurrentLocation(@PathVariable Long tourId) {
+    public ResponseEntity<VesselPositionDto> getCurrentLocation(
+            @PathVariable UUID tourId) {
+
         VesselPositionDto position = trackingService.getVesselPosition(tourId);
+
         if (position == null) {
             return ResponseEntity.noContent().build();
         }
+
         return ResponseEntity.ok(position);
     }
 
@@ -52,7 +56,7 @@ public class VesselTrackingController {
             this.objectMapper = objectMapper;
         }
 
-        public void saveVesselPosition(Long tourId, double latitude, double longitude) {
+        public void saveVesselPosition(UUID tourId, double latitude, double longitude) {
             String key = KEY_PREFIX + tourId;
             try {
                 var position = new VesselPositionDto(latitude, longitude, LocalDateTime.now());
@@ -65,7 +69,7 @@ public class VesselTrackingController {
             }
         }
 
-        public VesselPositionDto getVesselPosition(Long tourId) {
+        public VesselPositionDto getVesselPosition(UUID tourId) {
             String key = KEY_PREFIX + tourId;
             String jsonValue = redisTemplate.opsForValue().get(key);
 
