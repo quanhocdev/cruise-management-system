@@ -29,13 +29,9 @@ import java.util.Locale
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Star
 
@@ -367,6 +363,11 @@ fun TripRouteSection(
             SectionErrorBox(error, onRetry = onReload)
             return
         }
+        TripMapboxCard(
+            overview = overview,
+            legs = legs,
+            vesselLocation = vesselLocation
+        )
 
         ElevatedCard(
             modifier = Modifier.fillMaxWidth(),
@@ -378,7 +379,7 @@ fun TripRouteSection(
                 val lat = vesselLocation?.latitude ?: overview?.currentLatitude
                 val lon = vesselLocation?.longitude ?: overview?.currentLongitude
                 InfoRowItem(
-                    icon = Icons.Outlined.MyLocation,
+                    icon = Icons.Default.Place,
                     label = "Tọa độ",
                     value = if (lat != null && lon != null) "${String.format(Locale.US, "%.6f", lat)}, ${String.format(Locale.US, "%.6f", lon)}" else "Chưa có tín hiệu GPS"
                 )
@@ -455,6 +456,8 @@ fun TripBookingSection(
             return
         }
 
+
+
         if (booking == null) return
 
         ElevatedCard(
@@ -493,24 +496,24 @@ fun TripBookingSection(
                 HorizontalDivider(color = Color(0xFFE2E8F0))
 
                 InfoRowItem(
-                    icon = Icons.Outlined.CalendarMonth,
+                    icon = Icons.Default.DateRange,
                     label = "Ngày đặt",
                     value = booking.createdAt ?: "Chưa cập nhật"
                 )
                 InfoRowItem(
-                    icon = Icons.Outlined.Groups,
+                    icon = Icons.Default.Person,
                     label = "Số lượng hành khách",
                     value = booking.numberPassengers?.toString() ?: "Chưa cập nhật"
                 )
                 booking.numberOfRooms?.let { rooms ->
-                    InfoRowItem(icon = Icons.Outlined.MeetingRoom, label = "Số phòng", value = rooms.toString())
+                    InfoRowItem(icon = Icons.Default.Home, label = "Số phòng", value = rooms.toString())
                 }
                 val resolvedPackageName = booking.packageName ?: packageName
                 if (!resolvedPackageName.isNullOrBlank()) {
-                    InfoRowItem(icon = Icons.Outlined.CardGiftcard, label = "Gói tour", value = resolvedPackageName)
+                    InfoRowItem(icon = Icons.Default.Star, label = "Gói tour", value = resolvedPackageName)
                 }
                 booking.totalAmount?.let { amount ->
-                    InfoRowItem(icon = Icons.Outlined.Payments, label = "Tổng giá trị", value = formatVnd(amount))
+                    InfoRowItem(icon = Icons.Default.ShoppingCart, label = "Tổng giá trị", value = formatVnd(amount))
                 }
             }
         }
@@ -589,10 +592,10 @@ fun TripPassengersSection(
 
                             profile?.email?.let { InfoRowItem(Icons.Outlined.Email, "Email", it) }
                             profile?.phoneNumber?.let { InfoRowItem(Icons.Outlined.Phone, "Số điện thoại", it) }
-                            profile?.dateOfBirth?.let { InfoRowItem(Icons.Outlined.Cake, "Ngày sinh", it) }
+                            profile?.dateOfBirth?.let { InfoRowItem(Icons.Default.DateRange, "Ngày sinh", it) }
                             profile?.identificationNumber?.let { idNum ->
                                 val label = profile.idCardType?.let { "Giấy tờ ($it)" } ?: "Giấy tờ tùy thân"
-                                InfoRowItem(Icons.Outlined.Badge, label, idNum)
+                                InfoRowItem(Icons.Default.AccountBox, label, idNum)
                             }
                         }
                     }
@@ -615,15 +618,15 @@ private data class BenefitPalette(
 
 private fun benefitPaletteFor(type: String?): BenefitPalette = when {
     type.orEmpty().contains("PRODUCT", true) || type.orEmpty().contains("FOOD", true) ->
-        BenefitPalette(Color(0xFFD97706), Color(0xFFFFFBEB), Color(0xFFFDE68A), Color(0xFFFEF3C7), Icons.Outlined.Inventory2)
+        BenefitPalette(Color(0xFFD97706), Color(0xFFFFFBEB), Color(0xFFFDE68A), Color(0xFFFEF3C7), Icons.Default.ShoppingCart)
     type.orEmpty().contains("SERVICE", true) || type.orEmpty().contains("RESTAURANT", true) ->
-        BenefitPalette(Color(0xFF0D9488), Color(0xFFF0FDFA), Color(0xFF99F6E4), Color(0xFFCCFBF1), Icons.Outlined.Restaurant)
+        BenefitPalette(Color(0xFF0D9488), Color(0xFFF0FDFA), Color(0xFF99F6E4), Color(0xFFCCFBF1), Icons.Default.Star)
     type.orEmpty().contains("ACTIVITY", true) || type.orEmpty().contains("CRUISE", true) ->
-        BenefitPalette(Color(0xFF4F46E5), Color(0xFFEEF2FF), Color(0xFFC7D2FE), Color(0xFFE0E7FF), Icons.Outlined.DirectionsBoat)
+        BenefitPalette(Color(0xFF4F46E5), Color(0xFFEEF2FF), Color(0xFFC7D2FE), Color(0xFFE0E7FF), Icons.Default.CheckCircle)
     type.orEmpty().contains("VISIT", true) || type.orEmpty().contains("SHORE", true) ->
-        BenefitPalette(Color(0xFF16A34A), Color(0xFFF0FDF4), Color(0xFFBBF7D0), Color(0xFFDCFCE7), Icons.Outlined.LocationOn)
+        BenefitPalette(Color(0xFF16A34A), Color(0xFFF0FDF4), Color(0xFFBBF7D0), Color(0xFFDCFCE7), Icons.Default.Place)
     else ->
-        BenefitPalette(Color(0xFF0284C7), Color(0xFFF0F9FF), Color(0xFFBAE6FD), Color(0xFFE0F2FE), Icons.Outlined.CardGiftcard)
+        BenefitPalette(Color(0xFF0284C7), Color(0xFFF0F9FF), Color(0xFFBAE6FD), Color(0xFFE0F2FE), Icons.Default.Star)
 }
 
 @Composable
