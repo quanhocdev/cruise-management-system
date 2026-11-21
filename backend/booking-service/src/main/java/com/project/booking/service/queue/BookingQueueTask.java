@@ -3,7 +3,6 @@ package com.project.booking.service.queue;
 import com.project.booking.dto.booking.CreateBookingRequest;
 import com.project.booking.dto.booking.BookingResponse;
 import com.project.booking.model.enums.BookingQueueStatus;
-
 import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;

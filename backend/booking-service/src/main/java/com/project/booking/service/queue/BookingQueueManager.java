@@ -5,7 +5,7 @@ import com.project.booking.dto.booking.BookingRequestSnapshot;
 import com.project.booking.dto.booking.BookingResponse;
 import com.project.booking.model.enums.BookingQueueStatus;
 import com.project.booking.service.passenger.BookingService;
-
+import org.springframework.beans.factory.annotation.Value;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
@@ -35,6 +35,13 @@ public class BookingQueueManager {
      * 1 request đang xử lý + 4 request đang chờ.
      */
     private static final int MAX_CAPACITY = 5;
+
+    /**
+     * Thời gian giả lập xử lý để kiểm thử Queue.
+     * Mặc định 0ms, không ảnh hưởng hoạt động bình thường.
+     */
+    @Value("${booking.queue.test-processing-delay-ms:0}")
+    private long testProcessingDelayMs;
 
     private static final String STATUS_DESTINATION = "/queue/booking-status";
 
@@ -204,8 +211,18 @@ public class BookingQueueManager {
 
             try {
 
-                // BookingService được inject qua Spring Bean Proxy.
-                // Transaction của create() bắt đầu trong Worker thread.
+                // Chỉ dùng để kiểm thử Queue trong môi trường local.
+                // Giữ slot PROCESSING trong khoảng thời gian cấu hình.
+                if (testProcessingDelayMs > 0) {
+
+                    log.info(
+                            "[BOOKING QUEUE TEST] Simulating processing delay: {} ms | requestId={}",
+                            testProcessingDelayMs,
+                            task.getRequestId());
+
+                    Thread.sleep(testProcessingDelayMs);
+                }
+
                 BookingResponse response = bookingService.create(
                         task.getRequest(),
                         task.getUserId(),

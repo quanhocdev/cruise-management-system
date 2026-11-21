@@ -250,7 +250,26 @@ logging:
     org.springframework.security: INFO
 
 # TRUSTED NGROK PROXY
+
+# TRUSTED NGROK PROXY
 app:
   security:
     trusted-ngrok:
       secret: ${NGROK_TRUSTED_PROXY_SECRET:}
+
+  rate-limit:
+    enabled: true
+    rules:
+      - id: booking-create
+        method: POST
+        path: /api/passengers/bookings
+        user-limit: 10
+        ip-limit: 10
+        window: 1m
+
+      - id: booking-cancel
+        method: PATCH
+        path: /api/passengers/bookings/*/cancel
+        user-limit: 5
+        ip-limit: 10
+        window: 1m
