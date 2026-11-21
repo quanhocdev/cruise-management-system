@@ -8,6 +8,9 @@ import retrofit2.http.Query
 
 interface PassengerTripDetailApiService {
 
+    @GET("api/passengers/bookings/tours")
+    suspend fun getMyBookedTours(): List<BookedTourItemDto>
+
     // ==========================================
     // TOUR SERVICE - ROUTE
     // ==========================================

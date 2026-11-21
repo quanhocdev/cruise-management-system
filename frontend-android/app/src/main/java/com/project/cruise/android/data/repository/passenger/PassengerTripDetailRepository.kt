@@ -6,6 +6,11 @@ import com.project.cruise.android.data.network.api.PassengerTripDetailApiService
 class PassengerTripDetailRepository(
     private val api: PassengerTripDetailApiService
 ) {
+
+    suspend fun getMyBookedTours(): List<BookedTourItemDto> =
+        api.getMyBookedTours()
+
+    
     suspend fun getRouteOverview(tourId: String): TripRouteOverviewDto =
         api.getRouteOverview(tourId)
 

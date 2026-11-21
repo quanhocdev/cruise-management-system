@@ -128,43 +128,51 @@ fun PassengerTripDetailScreen(
                                 onReload = onReload
                             )
 
-                            TripSectionKey.ITINERARY -> SectionHeader(
-                                eyebrow = "LỊCH TRÌNH",
-                                title = "Lịch trình chuyến đi (${uiState.schedules.size} ngày)",
-                                subtitle = "Các chặng dừng và hoạt động theo từng ngày.",
+                            TripSectionKey.ITINERARY -> TripItinerarySection(
+                                schedules = uiState.schedules,
                                 loading = uiState.itineraryLoading,
+                                error = uiState.itineraryError,
                                 onReload = onReload
                             )
 
-                            TripSectionKey.CRUISE -> SectionHeader(
-                                eyebrow = "DU THUYỀN",
-                                title = uiState.cruise?.name ?: "Thông tin du thuyền",
-                                subtitle = "Số tầng: ${uiState.decks.size}",
+                            TripSectionKey.CRUISE -> TripCruiseSection(
+                                cruise = uiState.cruise,
+                                decks = uiState.decks,
+                                deckAreas = uiState.deckAreas,
+                                areasLoading = uiState.areasLoading,
+                                onLoadDeckAreas = { deckId ->
+                                    viewModel.loadDeckAreas(tourId = tourId, deckId = deckId)
+                                },
                                 loading = uiState.cruiseLoading,
+                                error = uiState.cruiseError,
                                 onReload = onReload
                             )
 
-                            TripSectionKey.FACILITIES -> SectionHeader(
-                                eyebrow = "LOẠI HÌNH PHỤC VỤ",
-                                title = "Tiện ích & gói tour",
-                                subtitle = "Sản phẩm: ${uiState.products.size} • Dịch vụ: ${uiState.services.size} • Gói: ${uiState.packages.size}",
+                            TripSectionKey.FACILITIES -> TripFacilitiesAndPackagesSection(
+                                products = uiState.products,
+                                services = uiState.services,
+                                cruiseActivities = uiState.cruiseActivities,
+                                visits = uiState.visits,
+                                packages = uiState.packages,
                                 loading = uiState.facilitiesLoading,
+                                error = uiState.facilitiesError,
                                 onReload = onReload
                             )
 
-                            TripSectionKey.USAGES -> SectionHeader(
-                                eyebrow = "LƯỢT SỬ DỤNG",
-                                title = "Lịch sử sử dụng quyền lợi & dịch vụ",
-                                subtitle = "Sản phẩm: ${uiState.productUsages.size} • Dịch vụ: ${uiState.serviceUsages.size} • Hoạt động: ${uiState.activityCruiseUsages.size} • Tham quan: ${uiState.visitUsages.size}",
+                            TripSectionKey.USAGES -> TripUsagesSection(
+                                productUsages = uiState.productUsages,
+                                serviceUsages = uiState.serviceUsages,
+                                activityCruiseUsages = uiState.activityCruiseUsages,
+                                visitUsages = uiState.visitUsages,
                                 loading = uiState.usagesLoading,
+                                error = uiState.usagesError,
                                 onReload = onReload
                             )
 
-                            TripSectionKey.BILLS -> SectionHeader(
-                                eyebrow = "HÓA ĐƠN",
-                                title = "Hóa đơn thanh toán (${uiState.bills.size})",
-                                subtitle = "Danh sách hóa đơn thuộc đơn đặt chỗ.",
+                            TripSectionKey.BILLS -> TripBillsSection(
+                                bills = uiState.bills,
                                 loading = uiState.billsLoading,
+                                error = uiState.billsError,
                                 onReload = onReload
                             )
                         }

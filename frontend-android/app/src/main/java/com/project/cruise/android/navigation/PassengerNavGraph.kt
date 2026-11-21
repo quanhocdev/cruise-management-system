@@ -199,6 +199,36 @@ fun NavGraphBuilder.passengerGraph(
         )
     }
 
+    composable(
+        route = Routes.PASSENGER_TRIP_DETAIL,
+        arguments = listOf(
+            navArgument("tourId") { type = NavType.StringType },
+            navArgument("bookingId") { type = NavType.LongType }
+        )
+    ) { backStackEntry ->
+        val tourId = backStackEntry.arguments?.getString("tourId") ?: return@composable
+        val bookingId = backStackEntry.arguments?.getLong("bookingId") ?: return@composable
+
+        val tripDetailRepo = remember(tokenManager) {
+            com.project.cruise.android.data.repository.passenger.PassengerTripDetailRepository(
+                RetrofitClient.createPassengerTripDetailApiService(tokenManager)
+            )
+        }
+        val tripDetailViewModel: com.project.cruise.android.viewmodel.passenger.PassengerTripDetailViewModel =
+            viewModel(
+                viewModelStoreOwner = backStackEntry,
+                factory = com.project.cruise.android.viewmodel.passenger.PassengerTripDetailViewModel.Factory(
+                    tripDetailRepo
+                )
+            )
+
+        com.project.cruise.android.ui.screens.passenger.PassengerTripDetailScreen(
+            tourId = tourId,
+            bookingId = bookingId,
+            viewModel = tripDetailViewModel
+        )
+    }
+
     // ----- VESSEL TRACKING (GIÁM SÁT TÀU THỜI GIAN THỰC) -----
     composable(Routes.VESSEL_TRACKING) { backStackEntry ->
         val context = androidx.compose.ui.platform.LocalContext.current

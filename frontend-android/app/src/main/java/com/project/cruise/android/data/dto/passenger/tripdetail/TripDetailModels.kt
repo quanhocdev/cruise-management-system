@@ -2,6 +2,27 @@ package com.project.cruise.android.data.dto.passenger.tripdetail
 
 import com.google.gson.annotations.SerializedName
 
+
+// Khớp JSON trả về từ GET /api/passengers/bookings/tours
+data class BookedTourItemDto(
+    val tourId: String? = null,
+    val bookingId: Long? = null,
+    val tourCode: String? = null,
+    val tourName: String? = null,
+    val departureDate: String? = null,
+    val startDate: String? = null,
+    val endDate: String? = null,
+    val statusTrip: String? = null,
+    val departurePortName: String? = null,
+    val arrivalPortName: String? = null,
+    val cruiseName: String? = null,
+    val imageUrl: String? = null
+) {
+    val resolvedStartDate: String?
+        get() = departureDate ?: startDate
+}
+
+
 data class TripRouteOverviewDto(
     val tourId: String? = null,
     val tourCode: String? = null,

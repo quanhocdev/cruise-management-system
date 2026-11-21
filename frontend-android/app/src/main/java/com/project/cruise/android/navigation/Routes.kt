@@ -33,6 +33,8 @@ object Routes {
 
     const val PASSENGER_FEEDBACK = "passenger_feedback"
 
+    const val PASSENGER_TRIP_DETAIL = "passenger_trip_detail/{tourId}/{bookingId}"
+
 
 
     const val PASSENGER_BOOKINGS = "passenger_bookings"
@@ -54,6 +56,9 @@ object Routes {
         "passenger_booking/$tourId/$packageId"
     fun passengerBookingDetail(bookingId: Any) = "passenger_bookings/$bookingId"
     fun passengerActivities(bookingId: Long) = "passenger_activities/$bookingId"
+
+    fun passengerTripDetail(tourId: String, bookingId: Long) =
+        "passenger_trip_detail/$tourId/$bookingId"
 
     // =================================================
     // POS
