@@ -13,11 +13,12 @@ import {
 
 import "./TripBenefitsSection.css";
 
-function unwrapList(value) {
+function unwrapBenefits(value) {
   if (Array.isArray(value)) return value;
   if (!value || typeof value !== "object") return [];
 
   if (Array.isArray(value.benefits)) return value.benefits;
+  if (Array.isArray(value.consumptions)) return value.consumptions;
   if (Array.isArray(value.items)) return value.items;
   if (Array.isArray(value.content)) return value.content;
   if (Array.isArray(value.data)) return value.data;
@@ -27,6 +28,7 @@ function unwrapList(value) {
 
 function getBenefitName(benefit) {
   return (
+    benefit?.resolvedName ||
     benefit?.benefitName ||
     benefit?.name ||
     benefit?.productName ||
@@ -34,17 +36,30 @@ function getBenefitName(benefit) {
     benefit?.activityName ||
     benefit?.visitName ||
     benefit?.title ||
-    "Quyền lợi"
+    (benefit?.type ? `Quyền lợi ${benefit.type}` : "Quyền lợi")
   );
 }
 
 function getBenefitDescription(benefit) {
-  return (
+  const parts = [];
+  const baseDesc =
+    benefit?.resolvedDescription ||
     benefit?.description ||
     benefit?.benefitDescription ||
     benefit?.content ||
-    ""
-  );
+    "";
+
+  if (baseDesc) parts.push(baseDesc);
+
+  if (
+    benefit?.discountPercent !== undefined &&
+    benefit?.discountPercent !== null &&
+    Number(benefit.discountPercent) > 0
+  ) {
+    parts.push(`Ưu đãi giảm ${benefit.discountPercent}%`);
+  }
+
+  return parts.join(" • ");
 }
 
 function getBenefitType(benefit) {
@@ -73,26 +88,37 @@ function getBenefitId(benefit, index) {
   );
 }
 
-function getBenefitIcon(type) {
+function normalizeBenefitTone(type) {
   const normalized = String(type || "").toUpperCase();
 
   if (normalized.includes("PRODUCT") || normalized.includes("FOOD")) {
-    return Package;
+    return "product";
   }
-
   if (normalized.includes("SERVICE") || normalized.includes("RESTAURANT")) {
-    return Utensils;
+    return "service";
   }
-
   if (normalized.includes("ACTIVITY") || normalized.includes("CRUISE")) {
-    return Ship;
+    return "activity";
   }
-
   if (normalized.includes("VISIT") || normalized.includes("SHORE")) {
-    return MapPin;
+    return "visit";
   }
+  return "default";
+}
 
-  return Gift;
+function getBenefitIcon(tone) {
+  switch (tone) {
+    case "product":
+      return Package;
+    case "service":
+      return Utensils;
+    case "activity":
+      return Ship;
+    case "visit":
+      return MapPin;
+    default:
+      return Gift;
+  }
 }
 
 function BenefitCard({ benefit }) {
@@ -100,12 +126,13 @@ function BenefitCard({ benefit }) {
   const description = getBenefitDescription(benefit);
   const type = getBenefitType(benefit);
   const quantity = getBenefitQuantity(benefit);
-  const Icon = getBenefitIcon(type);
+  const tone = normalizeBenefitTone(type);
+  const Icon = getBenefitIcon(tone);
 
   const status = benefit?.status || benefit?.benefitStatus;
 
   return (
-    <Card className="trip-benefit-card h-100">
+    <Card className="trip-benefit-card h-100" data-benefit-tone={tone}>
       <Card.Body>
         <div className="trip-benefit-card-header">
           <div className="trip-benefit-icon">
@@ -146,11 +173,32 @@ function BenefitCard({ benefit }) {
 
 export default function TripBenefitsSection({
   benefits,
+  packageId = null,
+  packageName = "",
+  packageDescription = "",
   loading = false,
   error = "",
   onReload,
 }) {
-  const items = unwrapList(benefits);
+  const resolvedPackageId =
+    packageId ??
+    (!Array.isArray(benefits) && benefits && typeof benefits === "object"
+      ? (benefits.id ?? benefits.packageId ?? null)
+      : null);
+
+  const resolvedPackageName =
+    packageName ||
+    (!Array.isArray(benefits) && benefits && typeof benefits === "object"
+      ? benefits.name || benefits.packageName || ""
+      : "");
+
+  const resolvedPackageDescription =
+    packageDescription ||
+    (!Array.isArray(benefits) && benefits && typeof benefits === "object"
+      ? benefits.description || ""
+      : "");
+
+  const items = unwrapBenefits(benefits);
 
   return (
     <section className="trip-benefits-section">
@@ -175,6 +223,30 @@ export default function TripBenefitsSection({
           </Button>
         )}
       </div>
+
+      {(resolvedPackageName || resolvedPackageId) && (
+        <Card className="trip-benefit-package-banner mb-3">
+          <Card.Body className="d-flex flex-wrap justify-content-between align-items-start gap-2">
+            <div>
+              <span className="trip-benefit-banner-label">Gói tour đã đặt</span>
+              <strong className="trip-benefit-banner-name">
+                {resolvedPackageName || "Chưa cập nhật tên gói"}
+              </strong>
+              {resolvedPackageDescription && (
+                <p className="trip-benefit-banner-desc">
+                  {resolvedPackageDescription}
+                </p>
+              )}
+            </div>
+
+            {resolvedPackageId && (
+              <span className="trip-benefit-banner-id">
+                ID gói: <code>{resolvedPackageId}</code>
+              </span>
+            )}
+          </Card.Body>
+        </Card>
+      )}
 
       {loading && (
         <div className="trip-benefits-state">
@@ -204,7 +276,7 @@ export default function TripBenefitsSection({
         <div className="trip-benefits-empty">
           <ShieldCheck size={32} />
           <h5>Chưa có thông tin quyền lợi</h5>
-          <p>Chưa tìm thấy quyền lợi nào được ghi nhận cho booking này.</p>
+          <p>Chưa tìm thấy quyền lợi nào được ghi nhận cho gói này.</p>
         </div>
       )}
 
@@ -217,7 +289,7 @@ export default function TripBenefitsSection({
 
             <div>
               <strong>{items.length} quyền lợi</strong>
-              <span>Được ghi nhận trong đơn đặt chỗ</span>
+              <span>Được bao gồm trong gói đặt chỗ</span>
             </div>
           </div>
 

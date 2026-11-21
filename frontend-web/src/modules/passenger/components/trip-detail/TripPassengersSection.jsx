@@ -17,11 +17,19 @@ function unwrapList(value) {
   if (!value || typeof value !== "object") return [];
 
   if (Array.isArray(value.passengers)) return value.passengers;
+  if (Array.isArray(value.bookingPassengers)) return value.bookingPassengers;
   if (Array.isArray(value.items)) return value.items;
   if (Array.isArray(value.content)) return value.content;
   if (Array.isArray(value.data)) return value.data;
 
   return [];
+}
+
+function getPassengerProfile(item) {
+  if (!item || typeof item !== "object") return {};
+  return item.passenger && typeof item.passenger === "object"
+    ? item.passenger
+    : item;
 }
 
 function formatDate(value) {
@@ -38,29 +46,31 @@ function formatDate(value) {
   });
 }
 
-function getPassengerName(passenger) {
+function getPassengerName(profile) {
   return (
-    passenger?.fullName ||
-    passenger?.passengerName ||
-    passenger?.name ||
-    [passenger?.lastName, passenger?.firstName].filter(Boolean).join(" ") ||
+    profile?.fullName ||
+    profile?.passengerName ||
+    profile?.name ||
+    [profile?.lastName, profile?.firstName].filter(Boolean).join(" ") ||
     "Hành khách"
   );
 }
 
-function getPassengerId(passenger, index) {
+function getPassengerId(item, profile, index) {
   return (
-    passenger?.id ??
-    passenger?.passengerId ??
-    passenger?.bookingPassengerId ??
+    item?.id ??
+    profile?.id ??
+    item?.passengerId ??
+    item?.bookingPassengerId ??
     index
   );
 }
 
-function getPassengerType(passenger) {
-  return (
-    passenger?.passengerType || passenger?.type || passenger?.category || ""
-  );
+function getPassengerBadge(item, profile) {
+  const parts = [];
+  if (profile?.gender) parts.push(profile.gender);
+  if (item?.status) parts.push(item.status);
+  return parts.join(" • ");
 }
 
 function PassengerInfo({ icon: Icon, label, value }) {
@@ -77,21 +87,24 @@ function PassengerInfo({ icon: Icon, label, value }) {
   );
 }
 
-function PassengerCard({ passenger, index }) {
-  const name = getPassengerName(passenger);
+function PassengerCard({ item, index }) {
+  const profile = getPassengerProfile(item);
 
-  const email = passenger?.email || passenger?.passengerEmail;
+  const name = getPassengerName(profile);
 
-  const phone = passenger?.phone || passenger?.phoneNumber;
+  const email = profile?.email || profile?.passengerEmail;
 
-  const dateOfBirth = passenger?.dateOfBirth || passenger?.birthDate;
+  const phone = profile?.phoneNumber || profile?.phone;
+
+  const dateOfBirth = profile?.dateOfBirth || profile?.birthDate;
 
   const identityNumber =
-    passenger?.identityNumber ||
-    passenger?.citizenId ||
-    passenger?.passportNumber;
+    profile?.identificationNumber ||
+    profile?.identityNumber ||
+    profile?.citizenId ||
+    profile?.passportNumber;
 
-  const passengerType = getPassengerType(passenger);
+  const badgeText = getPassengerBadge(item, profile);
 
   return (
     <Card className="trip-passenger-card h-100">
@@ -107,9 +120,7 @@ function PassengerCard({ passenger, index }) {
           </div>
         </div>
 
-        {passengerType && (
-          <div className="trip-passenger-type">{passengerType}</div>
-        )}
+        {badgeText && <div className="trip-passenger-type">{badgeText}</div>}
 
         <div className="trip-passenger-details">
           <PassengerInfo icon={Mail} label="Email" value={email} />
@@ -207,9 +218,14 @@ export default function TripPassengersSection({
           </div>
 
           <Row className="g-3">
-            {items.map((passenger, index) => (
-              <Col key={getPassengerId(passenger, index)} xs={12} md={6} xl={4}>
-                <PassengerCard passenger={passenger} index={index} />
+            {items.map((item, index) => (
+              <Col
+                key={getPassengerId(item, getPassengerProfile(item), index)}
+                xs={12}
+                md={6}
+                xl={4}
+              >
+                <PassengerCard item={item} index={index} />
               </Col>
             ))}
           </Row>

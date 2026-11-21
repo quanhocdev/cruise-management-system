@@ -78,11 +78,17 @@ fun NavGraphBuilder.passengerGraph(
                 navController.navigate(Routes.PASSENGER_MESSAGES)
             },
 
+            // MỞ TRANG THÔNG BÁO
+            onNotificationClick = {
+                navController.navigate(Routes.PASSENGER_NOTIFICATIONS) {
+                    launchSingleTop = true
+                }
+            },
+
             onVesselTrackingClick = {
                 navController.navigate(Routes.VESSEL_TRACKING)
             },
 
-            // Mở trang đánh giá của tôi
             onMyFeedbackClick = {
                 navController.navigate(Routes.PASSENGER_FEEDBACK)
             },
@@ -155,6 +161,13 @@ fun NavGraphBuilder.passengerGraph(
             onMessagesClick = {
                 navController.navigate(Routes.PASSENGER_MESSAGES)
             },
+
+            onNotificationClick = {
+                navController.navigate(Routes.PASSENGER_NOTIFICATIONS) {
+                    launchSingleTop = true
+                }
+            },
+
             onVesselTrackingClick = {
                 navController.navigate(Routes.VESSEL_TRACKING)
             },

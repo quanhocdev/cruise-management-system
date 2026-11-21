@@ -139,6 +139,7 @@ export default function TripBookingSection({
     booking.createdAt || booking.createdDate || booking.bookingDate;
 
   const numberOfPassengers =
+    booking.numberPassengers ??
     booking.numberOfPassengers ??
     booking.passengerCount ??
     booking.totalPassengers ??

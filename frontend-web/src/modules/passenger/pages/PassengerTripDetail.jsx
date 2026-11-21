@@ -1,5 +1,5 @@
 // src/modules/passenger/pages/PassengerTripDetail.jsx
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Container, Alert, Nav } from "react-bootstrap";
 
@@ -23,13 +23,123 @@ const TRIP_SECTIONS = [
   { key: "tracking", label: "Theo dõi hành trình" },
   { key: "itinerary", label: "Lịch trình" },
   { key: "cruise", label: "Du thuyền" },
-  { key: "facilities", label: "Dịch vụ & tiện ích" },
-  { key: "booking", label: "Đặt chỗ" },
+  { key: "facilities", label: "Loại hình phục vụ" },
+  { key: "booking", label: "Đơn đặt" },
   { key: "passengers", label: "Hành khách" },
-  { key: "benefits", label: "Quyền lợi" },
+  { key: "benefits", label: "Quyền lợi gói" },
   { key: "usages", label: "Lượt sử dụng" },
   { key: "bills", label: "Hóa đơn" },
 ];
+
+function unwrapArray(value) {
+  if (Array.isArray(value)) return value;
+  if (!value || typeof value !== "object") return [];
+  return (
+    value.items ||
+    value.content ||
+    value.data ||
+    value.packages ||
+    value.benefits ||
+    []
+  );
+}
+
+function resolveBookingPackageBenefits(tourState, bookingDetail) {
+  const packages = unwrapArray(tourState?.packages?.packages);
+  const targetPackageId =
+    bookingDetail?.tourPackageId ??
+    bookingDetail?.packageId ??
+    bookingDetail?.tourPackage?.id ??
+    null;
+
+  const matchedPackage =
+    packages.find((pkg) => String(pkg?.id) === String(targetPackageId)) ?? null;
+
+  if (!matchedPackage) {
+    return {
+      packageId: targetPackageId,
+      packageName:
+        bookingDetail?.packageName || bookingDetail?.tourPackageName || "",
+      packageDescription: "",
+      benefits: [],
+    };
+  }
+
+  // Tạo bảng tra cứu tên/mô tả từ referenceId trong tour.facilities
+  const referenceLookup = new Map();
+
+  for (const p of unwrapArray(tourState?.facilities?.products)) {
+    const id = p?.id ?? p?.productId;
+    if (id) {
+      referenceLookup.set(String(id), {
+        title: p.productName || p.name,
+        description: p.productDescription || p.description,
+      });
+    }
+  }
+
+  for (const s of unwrapArray(tourState?.facilities?.services)) {
+    const id = s?.id ?? s?.serviceId;
+    if (id) {
+      referenceLookup.set(String(id), {
+        title: s.serviceName || s.name,
+        description: s.serviceDescription || s.description,
+      });
+    }
+  }
+
+  for (const act of unwrapArray(tourState?.facilities?.cruiseActivities)) {
+    const id = act?.id ?? act?.activityId;
+    if (id) {
+      referenceLookup.set(String(id), {
+        title: act.activityName || act.name,
+        description: act.activityDescription || act.description,
+      });
+    }
+  }
+
+  for (const v of unwrapArray(tourState?.facilities?.visits)) {
+    const id = v?.id ?? v?.visitId;
+    if (id) {
+      referenceLookup.set(String(id), {
+        title: v.visitName || v.name,
+        description: v.visitDescription || v.description,
+      });
+    }
+  }
+
+  const rawBenefits = unwrapArray(matchedPackage.benefits);
+
+  const enrichedBenefits = rawBenefits.map((benefit, index) => {
+    const refInfo = benefit?.referenceId
+      ? referenceLookup.get(String(benefit.referenceId))
+      : null;
+
+    return {
+      ...benefit,
+      id: benefit?.id ?? `${matchedPackage.id}-${index}`,
+      resolvedName:
+        benefit?.benefitName ||
+        benefit?.name ||
+        refInfo?.title ||
+        (benefit?.type
+          ? `Quyền lợi (${benefit.type})`
+          : `Quyền lợi #${index + 1}`),
+      resolvedDescription:
+        benefit?.description ||
+        benefit?.benefitDescription ||
+        refInfo?.description ||
+        "",
+    };
+  });
+
+  return {
+    packageId: matchedPackage.id,
+    packageName: matchedPackage.name || matchedPackage.packageName || "",
+    packageDescription: matchedPackage.description || "",
+    benefits: enrichedBenefits,
+  };
+}
 
 export default function PassengerTripDetail({
   tourId: propTourId,
@@ -53,11 +163,38 @@ export default function PassengerTripDetail({
     if (!tourId || !bookingId) return;
 
     loadSection(activeSection).catch(() => {});
+
+    // Khi xem đơn đặt hoặc quyền lợi, tải kèm dữ liệu gói & dịch vụ để map tên gói + quyền lợi
+    if (activeSection === "benefits" || activeSection === "booking") {
+      loadSection("facilities").catch(() => {});
+    }
   }, [tourId, bookingId, activeSection, loadSection]);
 
   const handleReload = () => {
     reloadSection(activeSection).catch(() => {});
+    if (activeSection === "benefits" || activeSection === "booking") {
+      reloadSection("facilities").catch(() => {});
+    }
   };
+
+  const packageBenefitData = useMemo(
+    () => resolveBookingPackageBenefits(tour, booking.detail.booking),
+    [tour, booking.detail.booking],
+  );
+
+  // Gắn thêm packageName vào booking để TripBookingSection cũng hiện tên gói tour
+  const enrichedBooking = useMemo(() => {
+    const raw = booking.detail.booking;
+    if (!raw) return null;
+    return {
+      ...raw,
+      packageName:
+        raw.packageName ||
+        raw.tourPackageName ||
+        packageBenefitData.packageName ||
+        undefined,
+    };
+  }, [booking.detail.booking, packageBenefitData.packageName]);
 
   if (!tourId || !bookingId) {
     return (
@@ -163,7 +300,7 @@ export default function PassengerTripDetail({
         {/* ĐẶT CHỖ */}
         {activeSection === "booking" && (
           <TripBookingSection
-            booking={booking.detail.booking}
+            booking={enrichedBooking}
             loading={booking.detail.loading}
             error={booking.detail.error}
             onReload={handleReload}
@@ -183,9 +320,12 @@ export default function PassengerTripDetail({
         {/* QUYỀN LỢI */}
         {activeSection === "benefits" && (
           <TripBenefitsSection
-            benefits={booking.benefits.benefits}
-            loading={booking.benefits.loading}
-            error={booking.benefits.error}
+            packageId={packageBenefitData.packageId}
+            packageName={packageBenefitData.packageName}
+            packageDescription={packageBenefitData.packageDescription}
+            benefits={packageBenefitData.benefits}
+            loading={booking.detail.loading || tour.packages.loading}
+            error={booking.detail.error || tour.packages.error}
             onReload={handleReload}
           />
         )}
