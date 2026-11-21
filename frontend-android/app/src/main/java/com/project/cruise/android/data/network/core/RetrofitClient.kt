@@ -18,6 +18,7 @@ import com.project.cruise.android.data.network.api.TourApiService
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import com.project.cruise.android.data.network.api.PassengerTripDetailApiService
 
 object RetrofitClient {
 
@@ -103,4 +104,9 @@ object RetrofitClient {
 
     fun createPosApiService(tokenManager: TokenManager): PosApiService =
         createService(tokenManager, PosApiService::class.java)
+
+    fun createPassengerTripDetailApiService(
+        tokenManager: TokenManager
+    ): PassengerTripDetailApiService =
+        createService(tokenManager, PassengerTripDetailApiService::class.java)
 }
