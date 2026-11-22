@@ -51,6 +51,20 @@ object Routes {
     const val PASSENGER_PAYMENT_RESULT =
         "passenger_payment_result?paymentId={paymentId}&status={status}"
 
+    const val PASSENGER_TOUR_LIST =
+        "passenger_tour_list?departure={departure}&destination={destination}&date={date}"
+
+    fun passengerTourList(
+        departure: String = "",
+        destination: String = "",
+        date: String = "",
+    ): String {
+        val encDep = android.net.Uri.encode(departure)
+        val encDest = android.net.Uri.encode(destination)
+        val encDate = android.net.Uri.encode(date)
+        return "passenger_tour_list?departure=$encDep&destination=$encDest&date=$encDate"
+    }
+
     fun passengerTourDetail(tourId: String) = "passenger_tours/$tourId"
     fun passengerCreateBooking(tourId: String, packageId: Any) =
         "passenger_booking/$tourId/$packageId"

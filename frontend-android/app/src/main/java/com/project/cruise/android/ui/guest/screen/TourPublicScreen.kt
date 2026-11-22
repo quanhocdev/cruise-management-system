@@ -20,6 +20,7 @@ fun TourPublicScreen(
     authViewModel: AuthViewModel,
     chatViewModel: ChatViewModel,
     onTourClick: (String) -> Unit,
+    onNavigateToTourList: (TourSearchCriteria) -> Unit,
     onLoginClick: () -> Unit,
     onUserClick: () -> Unit,
     onMyBookingsClick: () -> Unit,
@@ -34,16 +35,22 @@ fun TourPublicScreen(
     LaunchedEffect(Unit) { viewModel.fetchPublicTours() }
     val loggedIn = session is SessionState.Authenticated
 
+    var departure by rememberSaveable { mutableStateOf("") }
+    var destination by rememberSaveable { mutableStateOf("") }
+    var date by rememberSaveable { mutableStateOf("") }
+
+    val criteria = TourSearchCriteria(
+        departure = departure,
+        destination = destination,
+        date = date,
+    )
+
+    val tours = (state as? TourListState.Success)?.tours.orEmpty()
+
     Box(Modifier.fillMaxSize()) {
-        TourCatalogContent(
-            state,
-            onTourClick,
-            { viewModel.fetchPublicTours() },
-            chatWidget = {
-                if (loggedIn) {
-                    PublicTourChatFloatingWidget(chatViewModel)
-                }
-            },
+        PassengerPage(
+            title = "CruiseTour",
+            subtitle = "HÀNH TRÌNH TRÊN BIỂN",
             bottomBar = {
                 OceanBottomBar(
                     isLoggedIn = loggedIn,
@@ -58,85 +65,159 @@ fun TourPublicScreen(
                     onVesselTrackingClick = onVesselTrackingClick,
                 )
             },
-        )
+            headerAction = {
+                if (loggedIn) {
+                    PublicTourChatFloatingWidget(chatViewModel)
+                }
+            },
+        ) {
+            item {
+                PassengerDiscoveryHero()
+            }
+            item {
+                TourSearchBox(
+                    criteria = criteria,
+                    onCriteriaChange = { updated ->
+                        departure = updated.departure
+                        destination = updated.destination
+                        date = updated.date
+                    },
+                    onSearchClick = { onNavigateToTourList(criteria) },
+                    onBrowseAllClick = { onNavigateToTourList(TourSearchCriteria()) },
+                    searchButtonLabel = "Tìm tour",
+                )
+            }
 
-    }
-}
+            val currentState = state
+            when (currentState) {
+                TourListState.Idle,
+                TourListState.Loading -> item { PassengerLoading() }
 
-@Composable
-fun TourCatalogContent(
-    state: TourListState,
-    onTourClick: (String) -> Unit,
-    onRetry: () -> Unit,
-    bottomBar: @Composable () -> Unit = {},
-    chatWidget: @Composable () -> Unit = {},
-) {
-    var query by rememberSaveable { mutableStateOf("") }
-    var openOnly by rememberSaveable { mutableStateOf(false) }
-    val tours = (state as? TourListState.Success)?.tours.orEmpty()
-    val filtered = remember(tours, query, openOnly) { tours.filterTours(query, openOnly) }
+                is TourListState.Error -> item {
+                    PassengerError(currentState.message) { viewModel.fetchPublicTours() }
+                }
 
-    PassengerPage(
-        title = "Khám phá",
-        subtitle = "HÀNH TRÌNH TRÊN BIỂN",
-        bottomBar = bottomBar,
-        headerAction = chatWidget,
-    ) {
-        item {
-            PassengerDiscoveryHero()
-        }
-
-        item {
-            TourSearchField(
-                query = query,
-                onQueryChange = { query = it }
-            )
-        }
-        item { TourFilterChips(openOnly = openOnly, onChange = { openOnly = it }) }
-        item {
-            PassengerSection(
-                "Hành trình dành cho bạn",
-                if (state is TourListState.Success) "${filtered.size} hành trình phù hợp"
-                else "Khám phá những chuyến đi mới",
-            )
-        }
-        when (state) {
-            TourListState.Idle,
-            TourListState.Loading -> item { PassengerLoading() }
-            is TourListState.Error -> item { PassengerError(state.message, onRetry) }
-            is TourListState.Success -> {
-                if (filtered.isEmpty())
-                    item {
-                        TourCatalogEmpty(
-                            hasTours = tours.isNotEmpty(),
-                            onRetry = onRetry,
-                            onClearFilters = {
-                                query = ""
-                                openOnly = false
-                            },
-                        )
+                is TourListState.Success -> {
+                    val featured = selectTop3UpcomingTours(currentState.tours)
+                    if (featured.isEmpty()) {
+                        item {
+                            PassengerEmpty(
+                                "Chưa có hành trình mới chưa bắt đầu",
+                                "Bấm \"Xem các tour hiện tại\" để xem toàn bộ danh sách tour.",
+                            )
+                        }
+                    } else {
+                        item {
+                            UpcomingFeaturedCarousel(
+                                tours = featured,
+                                onTourClick = onTourClick,
+                            )
+                        }
                     }
-                items(filtered, key = { it.id }) { tour ->
-                    TourSummaryCard(tour) { onTourClick(tour.id) }
                 }
             }
         }
     }
 }
 
-private fun List<PublicTourSummaryResponse>.filterTours(
-    query: String,
-    openOnly: Boolean,
-): List<PublicTourSummaryResponse> = filter { tour ->
-    (!openOnly || tour.statusBooking == TourBookingStatus.OPEN) &&
-            (query.isBlank() ||
-                    listOf(
-                        tour.name,
-                        tour.code,
-                        tour.cruiseName,
-                        tour.departurePort?.name,
-                        tour.departurePort?.city
-                    ).any {
-                        it?.contains(query.trim(), ignoreCase = true) == true
-                    })
+@Composable
+fun TourListScreen(
+    state: TourListState,
+    initialCriteria: TourSearchCriteria = TourSearchCriteria(),
+    onTourClick: (String) -> Unit,
+    onRetry: () -> Unit,
+    onBack: () -> Unit,
+) {
+    var departure by rememberSaveable { mutableStateOf(initialCriteria.departure) }
+    var destination by rememberSaveable { mutableStateOf(initialCriteria.destination) }
+    var date by rememberSaveable { mutableStateOf(initialCriteria.date) }
+    var selectedTrip by rememberSaveable { mutableStateOf(TripFilterOption.ALL) }
+    var selectedBooking by rememberSaveable { mutableStateOf(BookingFilterOption.ALL) }
+
+    val criteria = TourSearchCriteria(
+        departure = departure,
+        destination = destination,
+        date = date,
+    )
+
+    val tours = (state as? TourListState.Success)?.tours.orEmpty()
+    val filtered = remember(tours, criteria, selectedTrip, selectedBooking) {
+        tours.filter { tour ->
+            val matchSearch = matchesTourSearch(tour, criteria)
+            val matchTrip = selectedTrip == TripFilterOption.ALL ||
+                    tour.statusTrip == TourStatusTrip.valueOf(selectedTrip.apiValue!!)
+            val matchBooking = selectedBooking == BookingFilterOption.ALL ||
+                    tour.statusBooking == TourBookingStatus.valueOf(selectedBooking.apiValue!!)
+            matchSearch && matchTrip && matchBooking
+        }
+    }
+
+    val isLoading = state is TourListState.Idle || state is TourListState.Loading
+
+    PassengerPage(
+        title = "Danh sách tour",
+        subtitle = "TÌM KIẾM & BỘ LỌC",
+        onBack = onBack,
+    ) {
+        item {
+            TourSearchBox(
+                criteria = criteria,
+                onCriteriaChange = { updated ->
+                    departure = updated.departure
+                    destination = updated.destination
+                    date = updated.date
+                },
+                onSearchClick = {},
+                searchButtonLabel = "Lọc",
+            )
+        }
+
+        item {
+            TourFilterChips(
+                tours = tours,
+                loading = isLoading,
+                shownCount = filtered.size,
+                selectedTrip = selectedTrip,
+                selectedBooking = selectedBooking,
+                onTripChange = { selectedTrip = it },
+                onBookingChange = { selectedBooking = it },
+                onReset = {
+                    departure = ""
+                    destination = ""
+                    date = ""
+                    selectedTrip = TripFilterOption.ALL
+                    selectedBooking = BookingFilterOption.ALL
+                },
+            )
+        }
+
+        when (state) {
+            TourListState.Idle,
+            TourListState.Loading -> item { PassengerLoading() }
+
+            is TourListState.Error -> item { PassengerError(state.message, onRetry) }
+
+            is TourListState.Success -> {
+                if (filtered.isEmpty()) {
+                    item {
+                        TourCatalogEmpty(
+                            hasTours = tours.isNotEmpty(),
+                            onRetry = onRetry,
+                            onClearFilters = {
+                                departure = ""
+                                destination = ""
+                                date = ""
+                                selectedTrip = TripFilterOption.ALL
+                                selectedBooking = BookingFilterOption.ALL
+                            },
+                        )
+                    }
+                } else {
+                    items(filtered, key = { it.id }) { tour ->
+                        TourSummaryCard(tour) { onTourClick(tour.id) }
+                    }
+                }
+            }
+        }
+    }
 }

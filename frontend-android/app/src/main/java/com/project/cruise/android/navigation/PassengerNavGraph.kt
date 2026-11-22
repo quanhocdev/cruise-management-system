@@ -126,28 +126,51 @@ fun NavGraphBuilder.passengerGraph(
             }
         )
     }
-
-    // ----- TOURS (PUBLIC - MÀN HÌNH CHÍNH) -----
-    composable(Routes.PASSENGER_TOURS) {
+// ----- TOURS (PUBLIC - MÀN HÌNH CHÍNH) -----
+    composable(Routes.PASSENGER_TOURS) { backStackEntry ->
         val context = androidx.compose.ui.platform.LocalContext.current
         val tourRepo = remember(tokenManager) {
             TourRepository(RetrofitClient.createTourApiService(tokenManager))
         }
 
         val tourViewModel: TourViewModel = viewModel(
+            viewModelStoreOwner = backStackEntry,
             factory = TourViewModelFactory(tourRepo)
         )
 
         val chatViewModel: ChatViewModel = viewModel(
+            viewModelStoreOwner = backStackEntry,
             factory = ChatViewModelFactory(RetrofitClient.createChatApiService(tokenManager))
         )
+
+        val notificationRepo = remember(tokenManager) {
+            NotificationRepository(RetrofitClient.createNotificationApiService(tokenManager))
+        }
+        val notificationViewModel: NotificationViewModel = viewModel(
+            viewModelStoreOwner = backStackEntry,
+            factory = NotificationViewModel.Factory(
+                repository = notificationRepo,
+                tokenManager = tokenManager
+            )
+        )
+        val notificationState by notificationViewModel.state.collectAsState()
 
         TourPublicScreen(
             viewModel = tourViewModel,
             authViewModel = authViewModel,
             chatViewModel = chatViewModel,
+            unreadCount = notificationState.unreadCount,
             onTourClick = { tourId ->
                 navController.navigate(Routes.passengerTourDetail(tourId))
+            },
+            onNavigateToTourList = { criteria ->
+                navController.navigate(
+                    Routes.passengerTourList(
+                        departure = criteria.departure,
+                        destination = criteria.destination,
+                        date = criteria.date,
+                    )
+                )
             },
             onLoginClick = {
                 navController.navigate(Routes.GUEST)
@@ -161,13 +184,11 @@ fun NavGraphBuilder.passengerGraph(
             onMessagesClick = {
                 navController.navigate(Routes.PASSENGER_MESSAGES)
             },
-
             onNotificationClick = {
                 navController.navigate(Routes.PASSENGER_NOTIFICATIONS) {
                     launchSingleTop = true
                 }
             },
-
             onVesselTrackingClick = {
                 navController.navigate(Routes.VESSEL_TRACKING)
             },
@@ -175,6 +196,97 @@ fun NavGraphBuilder.passengerGraph(
         )
     }
 
+    // ----- DANH SÁCH TOUR & BỘ LỌC -----
+    composable(
+        route = Routes.PASSENGER_TOUR_LIST,
+        arguments = listOf(
+            navArgument("departure") { type = NavType.StringType; defaultValue = "" },
+            navArgument("destination") { type = NavType.StringType; defaultValue = "" },
+            navArgument("date") { type = NavType.StringType; defaultValue = "" },
+        )
+    ) { backStackEntry ->
+        val toursEntry = remember(backStackEntry) {
+            runCatching { navController.getBackStackEntry(Routes.PASSENGER_TOURS) }
+                .getOrDefault(backStackEntry)
+        }
+        val tourRepo = remember(tokenManager) {
+            TourRepository(RetrofitClient.createTourApiService(tokenManager))
+        }
+        val tourViewModel: TourViewModel = viewModel(
+            viewModelStoreOwner = toursEntry,
+            factory = TourViewModelFactory(tourRepo)
+        )
+        val listState by tourViewModel.tourListState.collectAsState()
+
+        val initialCriteria = com.project.cruise.android.ui.guest.components.tourcatalog.TourSearchCriteria(
+            departure = backStackEntry.arguments?.getString("departure").orEmpty(),
+            destination = backStackEntry.arguments?.getString("destination").orEmpty(),
+            date = backStackEntry.arguments?.getString("date").orEmpty(),
+        )
+
+        com.project.cruise.android.ui.guest.screen.TourListScreen(
+            state = listState,
+            initialCriteria = initialCriteria,
+            onTourClick = { tourId ->
+                navController.navigate(Routes.passengerTourDetail(tourId))
+            },
+            onRetry = { tourViewModel.fetchPublicTours() },
+            onBack = { navController.popBackStack() },
+        )
+    }
+
+    // ----- NOTIFICATIONS SCREEN -----
+    composable(Routes.PASSENGER_NOTIFICATIONS) { backStackEntry ->
+        val toursEntry = remember(backStackEntry) {
+            runCatching { navController.getBackStackEntry(Routes.PASSENGER_TOURS) }
+                .getOrDefault(backStackEntry)
+        }
+        val notificationRepo = remember(tokenManager) {
+            NotificationRepository(RetrofitClient.createNotificationApiService(tokenManager))
+        }
+        val notificationViewModel: NotificationViewModel = viewModel(
+            viewModelStoreOwner = toursEntry,
+            factory = NotificationViewModel.Factory(
+                repository = notificationRepo,
+                tokenManager = tokenManager
+            )
+        )
+        val notificationState by notificationViewModel.state.collectAsState()
+
+        NotificationScreen(
+            state = notificationState,
+            onRefresh = { notificationViewModel.loadInitialData() },
+            onMarkAsRead = { notificationId ->
+                notificationViewModel.markAsRead(notificationId)
+            },
+            onMarkAllAsRead = {
+                notificationViewModel.markAllAsRead()
+            },
+            onNotificationClick = { notification ->
+                if (!notification.isRead) {
+                    notificationViewModel.markAsRead(notification.id)
+                }
+                val refType = notification.referenceType?.uppercase()
+                val notifType = notification.type?.uppercase()
+                when {
+                    refType == "FEEDBACK_INVITATION" || notifType == "FEEDBACK_INVITATION" -> {
+                        navController.navigate(Routes.PASSENGER_FEEDBACK) {
+                            launchSingleTop = true
+                        }
+                    }
+                    refType == "BOOKING" -> {
+                        val refId = notification.referenceId?.takeIf { it.isNotBlank() }
+                        if (refId != null) {
+                            navController.navigate(Routes.passengerBookingDetail(refId))
+                        } else {
+                            navController.navigate(Routes.PASSENGER_BOOKINGS)
+                        }
+                    }
+                }
+            },
+            onBack = { navController.popBackStack() }
+        )
+    }
     // ----- TOUR DETAIL (PUBLIC) -----
     composable(
         route = Routes.PASSENGER_TOUR_DETAIL,
@@ -271,57 +383,7 @@ fun NavGraphBuilder.passengerGraph(
         )
     }
 
-    // ----- NOTIFICATIONS SCREEN -----
-    composable(Routes.PASSENGER_NOTIFICATIONS) { backStackEntry ->
-        val notificationApi = remember(tokenManager) {
-            RetrofitClient.createNotificationApiService(tokenManager)
-        }
-        val notificationRepo = remember(notificationApi) {
-            NotificationRepository(notificationApi)
-        }
-        val notificationViewModel: NotificationViewModel = viewModel(
-            viewModelStoreOwner = backStackEntry,
-            factory = NotificationViewModel.Factory(
-                repository = notificationRepo,
-                tokenManager = tokenManager
-            )
-        )
-        val notificationState by notificationViewModel.state.collectAsState()
 
-        NotificationScreen(
-            state = notificationState,
-            onRefresh = { notificationViewModel.loadInitialData() },
-            onMarkAsRead = { notificationId ->
-                notificationViewModel.markAsRead(notificationId)
-            },
-            onMarkAllAsRead = {
-                notificationViewModel.markAllAsRead()
-            },
-            onNotificationClick = { notification ->
-                if (!notification.isRead) {
-                    notificationViewModel.markAsRead(notification.id)
-                }
-                val refType = notification.referenceType?.uppercase()
-                val notifType = notification.type?.uppercase()
-                when {
-                    refType == "FEEDBACK_INVITATION" || notifType == "FEEDBACK_INVITATION" -> {
-                        navController.navigate(Routes.PASSENGER_FEEDBACK) {
-                            launchSingleTop = true
-                        }
-                    }
-                    refType == "BOOKING" -> {
-                        val refId = notification.referenceId?.takeIf { it.isNotBlank() }
-                        if (refId != null) {
-                            navController.navigate(Routes.passengerBookingDetail(refId))
-                        } else {
-                            navController.navigate(Routes.PASSENGER_BOOKINGS)
-                        }
-                    }
-                }
-            },
-            onBack = { navController.popBackStack() }
-        )
-    }
     composable(
         route = Routes.PASSENGER_CREATE_BOOKING,
         arguments = listOf(
