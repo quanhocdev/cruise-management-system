@@ -53,27 +53,42 @@ public class BookingMapper {
     }
 
     public BookingPassengerInfoResponse toPassengerInfoResponse(BookingPassenger link) {
+        if (link == null) {
+            return null;
+        }
         var p = link.getPassenger();
 
         return new BookingPassengerInfoResponse(
                 link.getId(),
-                p.getFullName(),
-                p.getGender(),
-                p.getPhoneNumber(),
-                p.getEmail(),
+                p != null ? p.getFullName() : null,
+                p != null ? p.getGender() : null,
+                p != null ? p.getPhoneNumber() : null,
+                p != null ? p.getEmail() : null,
+                p != null ? p.getIdCardType() : null,
+                p != null ? p.getIdentificationNumber() : null,
+                p != null ? p.getDocumentNote() : null,
                 link.getRoomId(),
                 link.getStatus() != null ? link.getStatus().name() : null,
                 link.getCheckedInAt());
     }
 
     public BookingPassengerResponse toPassengerResponse(BookingPassenger link) {
+        if (link == null) {
+            return null;
+        }
+        var p = link.getPassenger();
+
         return new BookingPassengerResponse(
                 link.getId(),
-                link.getPassenger().getId(),
-                link.getBooking().getId(),
+                p != null ? p.getId() : null,
+                link.getBooking() != null ? link.getBooking().getId() : null,
                 link.getRoomId(),
                 link.getStatus() != null ? link.getStatus().name() : null,
-                link.getCheckedInAt());
+                link.getCheckedInAt(),
+                p != null ? p.getIdCardType() : null,
+                p != null ? p.getIdentificationNumber() : null,
+                p != null ? p.getDocumentNote() : null,
+                p != null ? p.getDateOfBirth() : null);
     }
 
     public BookingSummaryResponse toSummaryResponse(Booking booking) {

@@ -1,10 +1,11 @@
-
 package com.project.cruise.android.ui.common
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -24,6 +25,7 @@ fun PassengerPage(
     onBack: (() -> Unit)? = null,
     bottomBar: @Composable () -> Unit = {},
     headerAction: @Composable () -> Unit = {},
+    listState: LazyListState = rememberLazyListState(),
     content: LazyListScope.() -> Unit,
 ) {
     OceanTheme {
@@ -44,6 +46,7 @@ fun PassengerPage(
                     Modifier
                         .widthIn(max = 600.dp)
                         .fillMaxWidth(),
+                    state = listState,
                     contentPadding = PaddingValues(
                         20.dp, 16.dp, 20.dp, 28.dp
                     ),

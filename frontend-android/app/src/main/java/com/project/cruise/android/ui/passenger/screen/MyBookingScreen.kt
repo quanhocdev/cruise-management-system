@@ -4,6 +4,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.project.cruise.android.data.dto.booking.*
+import com.project.cruise.android.data.dto.passenger.tripdetail.BookedTourItemDto
 import com.project.cruise.android.ui.common.OceanBottomBar
 import com.project.cruise.android.ui.common.*
 import com.project.cruise.android.ui.passenger.components.mybooking.*
@@ -12,23 +13,30 @@ import com.project.cruise.android.viewmodel.passenger.*
 @Composable
 fun MyBookingsScreen(
     viewModel: BookingViewModel,
+    tripsViewModel: PassengerBookedToursViewModel,
     onBookingClick: (Long) -> Unit,
     onBack: () -> Unit,
     onBrowseTours: () -> Unit = onBack,
     onAccount: (() -> Unit)? = null,
-    onMessagesClick: () -> Unit = {},
     onNotificationClick: () -> Unit = {},
-    onVesselTrackingClick: () -> Unit = {},
     unreadCount: Long = 0L,
 ) {
     val state by viewModel.bookingListState.collectAsState()
+    val trips by tripsViewModel.uiState.collectAsState()
     LaunchedEffect(Unit) { viewModel.fetchMyBookings() }
+
+    // Ghép thông tin chuyến (ảnh, tuyến, ngày, trạng thái) vào booking đã thanh toán theo bookingId.
+    val tripsByBooking = remember(trips.tours) {
+        trips.tours.filter { it.bookingId != null }.associateBy { it.bookingId!! }
+    }
+
     MyBookingsContent(
-        state,
-        onBookingClick,
-        onBack,
-        { viewModel.fetchMyBookings() },
-        onBrowseTours,
+        state = state,
+        tripsByBooking = tripsByBooking,
+        onBookingClick = onBookingClick,
+        onBack = onBack,
+        onRetry = { viewModel.fetchMyBookings() },
+        onBrowseTours = onBrowseTours,
         bottomBar = {
             if (onAccount != null)
                 OceanBottomBar(
@@ -38,14 +46,12 @@ fun MyBookingsScreen(
                     onHomeClick = onBrowseTours,
                     onLoginClick = {},
                     onUserClick = onAccount,
-                    onMyBookingsClick = {},
-                    onMessagesClick = onMessagesClick,
                     onNotificationClick = onNotificationClick,
-                    onVesselTrackingClick = onVesselTrackingClick
                 )
         },
     )
 }
+
 @Composable
 fun MyBookingsContent(
     state: BookingListState,
@@ -53,6 +59,7 @@ fun MyBookingsContent(
     onBack: () -> Unit,
     onRetry: () -> Unit,
     onBrowseTours: (() -> Unit)? = null,
+    tripsByBooking: Map<Long, BookedTourItemDto> = emptyMap(),
     bottomBar: @Composable () -> Unit = {},
 ) {
     var query by rememberSaveable { mutableStateOf("") }
@@ -64,7 +71,7 @@ fun MyBookingsContent(
 
     PassengerPage(
         "Chuyến đi của tôi",
-        "Theo dõi đặt chỗ và thông tin hành khách",
+        "Theo dõi đặt chỗ và hành trình",
         onBack,
         bottomBar,
     ) {
@@ -95,7 +102,12 @@ fun MyBookingsContent(
                         )
                     }
                 items(filtered, key = { it.id }) { booking ->
-                    BookingCard(booking) { onBookingClick(booking.id) }
+                    val trip = tripsByBooking[booking.id]
+                    if (booking.status == BookingStatus.CONFIRMED && trip != null) {
+                        ConfirmedTripCard(booking, trip) { onBookingClick(booking.id) }
+                    } else {
+                        BookingCard(booking) { onBookingClick(booking.id) }
+                    }
                 }
             }
         }

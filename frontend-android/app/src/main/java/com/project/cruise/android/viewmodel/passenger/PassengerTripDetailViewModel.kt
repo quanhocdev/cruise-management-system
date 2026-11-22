@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.project.cruise.android.data.dto.passenger.tripdetail.*
 import com.project.cruise.android.data.repository.passenger.PassengerTripDetailRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,7 +52,8 @@ data class PassengerTripDetailUiState(
     val deckAreas: Map<String, List<TripCruiseDeckAreaDto>> = emptyMap(),
     val cruiseLoading: Boolean = false,
     val cruiseError: String? = null,
-    val areasLoading: Boolean = false,
+    /** Các tầng đang tải khu vực (mỗi tầng một spinner riêng). */
+    val loadingDeckIds: Set<String> = emptySet(),
     val areasError: String? = null,
 
     // Facilities & Packages
@@ -103,20 +105,35 @@ class PassengerTripDetailViewModel(
     val uiState: StateFlow<PassengerTripDetailUiState> = _uiState.asStateFlow()
 
     private val loadedSections = mutableSetOf<TripSectionKey>()
+    private val sectionJobs = mutableMapOf<TripSectionKey, Job>()
+    private val deckJobs = mutableMapOf<String, Job>()
     private var vesselPollingJob: Job? = null
     private var currentTourId: String? = null
     private var currentBookingId: Long? = null
+    private var pollingPaused = false
 
+    /** Đổi booking/tour: hủy mọi request đang chạy để dữ liệu cũ không ghi đè state mới. */
     fun bindContext(tourId: String?, bookingId: Long?) {
         val contextChanged = currentTourId != tourId || currentBookingId != bookingId
         currentTourId = tourId
         currentBookingId = bookingId
 
         if (contextChanged) {
+            sectionJobs.values.forEach { it.cancel() }
+            sectionJobs.clear()
+            deckJobs.values.forEach { it.cancel() }
+            deckJobs.clear()
             loadedSections.clear()
             _uiState.value = PassengerTripDetailUiState(activeSection = _uiState.value.activeSection)
             updateVesselPollingState()
         }
+    }
+
+    /** UI gọi khi màn hình không còn hiển thị (sang màn khác, app vào nền) để dừng polling GPS. */
+    fun setPollingPaused(paused: Boolean) {
+        if (pollingPaused == paused) return
+        pollingPaused = paused
+        updateVesselPollingState()
     }
 
     fun selectSection(section: TripSectionKey, tourId: String?, bookingId: Long?) {
@@ -124,11 +141,6 @@ class PassengerTripDetailViewModel(
         _uiState.update { it.copy(activeSection = section) }
         updateVesselPollingState()
         loadSection(section, tourId = tourId, bookingId = bookingId, force = false)
-
-        // Tải kèm gói & danh mục dịch vụ khi mở booking/benefits để map tên gói và quyền lợi
-        if (section == TripSectionKey.BOOKING || section == TripSectionKey.BENEFITS) {
-            loadSection(TripSectionKey.FACILITIES, tourId = tourId, bookingId = bookingId, force = false)
-        }
     }
 
     fun loadSection(
@@ -138,7 +150,7 @@ class PassengerTripDetailViewModel(
         force: Boolean = false
     ) {
         bindContext(tourId, bookingId)
-        if (!force && loadedSections.contains(section)) return
+        if (!force && (loadedSections.contains(section) || sectionJobs[section]?.isActive == true)) return
 
         when (section) {
             TripSectionKey.TRACKING -> loadTracking(tourId)
@@ -148,8 +160,8 @@ class PassengerTripDetailViewModel(
             TripSectionKey.BOOKING -> loadBooking(bookingId)
             TripSectionKey.PASSENGERS -> loadPassengers(bookingId)
             TripSectionKey.BENEFITS -> {
-                loadBooking(bookingId)
-                loadFacilitiesAndPackages(tourId)
+                loadSection(TripSectionKey.BOOKING, tourId, bookingId, force)
+                loadSection(TripSectionKey.FACILITIES, tourId, bookingId, force)
             }
             TripSectionKey.USAGES -> loadUsages(bookingId)
             TripSectionKey.BILLS -> loadBills(bookingId)
@@ -157,29 +169,34 @@ class PassengerTripDetailViewModel(
     }
 
     fun reloadSection(section: TripSectionKey, tourId: String?, bookingId: Long?) {
-        loadedSections.remove(section)
-        if (section == TripSectionKey.BOOKING || section == TripSectionKey.BENEFITS) {
-            loadedSections.remove(TripSectionKey.FACILITIES)
+        val related = when (section) {
+            TripSectionKey.BENEFITS -> setOf(section, TripSectionKey.BOOKING, TripSectionKey.FACILITIES)
+            else -> setOf(section)
         }
+        loadedSections.removeAll(related)
         loadSection(section, tourId = tourId, bookingId = bookingId, force = true)
     }
 
-    fun loadDeckAreas(tourId: String?, deckId: String) {
+    fun loadDeckAreas(tourId: String?, deckId: String, force: Boolean = false) {
         if (tourId.isNullOrBlank() || deckId.isBlank()) return
-        viewModelScope.launch {
-            _uiState.update { it.copy(areasLoading = true, areasError = null) }
+        if (!force && (_uiState.value.deckAreas.containsKey(deckId) || deckJobs[deckId]?.isActive == true)) return
+        deckJobs[deckId]?.cancel()
+        deckJobs[deckId] = viewModelScope.launch {
+            _uiState.update { it.copy(loadingDeckIds = it.loadingDeckIds + deckId, areasError = null) }
             try {
                 val areas = repository.getCruiseDeckAreas(tourId, deckId)
                 _uiState.update { state ->
                     state.copy(
                         deckAreas = state.deckAreas + (deckId to areas),
-                        areasLoading = false
+                        loadingDeckIds = state.loadingDeckIds - deckId
                     )
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
-                        areasLoading = false,
+                        loadingDeckIds = it.loadingDeckIds - deckId,
                         areasError = e.message ?: "Không thể tải khu vực của tầng tàu."
                     )
                 }
@@ -187,17 +204,24 @@ class PassengerTripDetailViewModel(
         }
     }
 
-    private fun updateVesselPollingState() {
-        vesselPollingJob?.cancel()
-        vesselPollingJob = null
+    // ---------------------------------------------------------------- GPS polling
 
+    private fun updateVesselPollingState() {
         val tourId = currentTourId
-        val shouldPoll = _uiState.value.activeSection == TripSectionKey.TRACKING && !tourId.isNullOrBlank()
-        if (!shouldPoll) return
+        val shouldPoll = !pollingPaused &&
+                _uiState.value.activeSection == TripSectionKey.TRACKING &&
+                !tourId.isNullOrBlank()
+
+        if (!shouldPoll) {
+            vesselPollingJob?.cancel()
+            vesselPollingJob = null
+            return
+        }
+        if (vesselPollingJob?.isActive == true) return
 
         vesselPollingJob = viewModelScope.launch {
             while (true) {
-                fetchVesselOnce(tourId)
+                fetchVesselOnce(tourId!!)
                 delay(GPS_POLLING_INTERVAL_MS)
             }
         }
@@ -208,12 +232,10 @@ class PassengerTripDetailViewModel(
         try {
             val location = repository.getVesselLocation(tourId)
             _uiState.update {
-                it.copy(
-                    vesselLocation = location,
-                    vesselLoading = false,
-                    vesselError = null
-                )
+                it.copy(vesselLocation = location, vesselLoading = false, vesselError = null)
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             _uiState.update {
                 it.copy(
@@ -224,39 +246,52 @@ class PassengerTripDetailViewModel(
         }
     }
 
+    // ---------------------------------------------------------------- loaders
+
+    private fun launchSection(section: TripSectionKey, block: suspend () -> Unit) {
+        sectionJobs[section]?.cancel()
+        sectionJobs[section] = viewModelScope.launch { block() }
+    }
+
+    /** Như runCatching nhưng không nuốt CancellationException. */
+    private suspend fun <T> attempt(block: suspend () -> T): Result<T> =
+        try {
+            Result.success(block())
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+
     private fun loadTracking(tourId: String?) {
         if (tourId.isNullOrBlank()) return
-        viewModelScope.launch {
+        launchSection(TripSectionKey.TRACKING) {
             _uiState.update { it.copy(routeLoading = true, routeError = null) }
-            try {
-                val overview = runCatching { repository.getRouteOverview(tourId) }.getOrNull()
-                val legs = runCatching { repository.getRouteLegs(tourId) }.getOrDefault(emptyList())
+            val overviewResult = attempt { repository.getRouteOverview(tourId) }
+            val legsResult = attempt { repository.getRouteLegs(tourId) }
+            val overview = overviewResult.getOrNull()
+            val legs = legsResult.getOrDefault(emptyList())
 
+            if (overview == null && legs.isEmpty()) {
+                val message = overviewResult.exceptionOrNull()?.message
+                    ?: legsResult.exceptionOrNull()?.message
+                    ?: "Không thể tải dữ liệu hành trình."
+                _uiState.update { it.copy(routeLoading = false, routeError = message) }
+            } else {
                 val lat = overview?.departurePort?.latitude ?: overview?.currentLatitude
                 val lon = overview?.departurePort?.longitude ?: overview?.currentLongitude
-                val weatherData = if (lat != null && lon != null) {
-                    runCatching {
-                        repository.getWeather(lat, lon, overview?.startDate, overview?.endDate)
-                    }.getOrNull()
-                } else {
-                    null
-                }
+                val weather = if (lat != null && lon != null) {
+                    attempt { repository.getWeather(lat, lon, overview?.startDate, overview?.endDate) }.getOrNull()
+                } else null
 
                 loadedSections.add(TripSectionKey.TRACKING)
                 _uiState.update {
                     it.copy(
                         routeOverview = overview,
                         routeLegs = legs,
-                        weather = weatherData,
+                        weather = weather,
                         routeLoading = false,
-                        routeError = if (overview == null && legs.isEmpty()) "Không thể tải dữ liệu hành trình." else null
-                    )
-                }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        routeLoading = false,
-                        routeError = e.message ?: "Không thể tải dữ liệu hành trình."
+                        routeError = null
                     )
                 }
             }
@@ -265,23 +300,17 @@ class PassengerTripDetailViewModel(
 
     private fun loadItinerary(tourId: String?) {
         if (tourId.isNullOrBlank()) return
-        viewModelScope.launch {
+        launchSection(TripSectionKey.ITINERARY) {
             _uiState.update { it.copy(itineraryLoading = true, itineraryError = null) }
             try {
                 val schedules = repository.getItinerary(tourId)
                 loadedSections.add(TripSectionKey.ITINERARY)
-                _uiState.update {
-                    it.copy(
-                        schedules = schedules,
-                        itineraryLoading = false
-                    )
-                }
+                _uiState.update { it.copy(schedules = schedules, itineraryLoading = false) }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _uiState.update {
-                    it.copy(
-                        itineraryLoading = false,
-                        itineraryError = e.message ?: "Không thể tải lịch trình."
-                    )
+                    it.copy(itineraryLoading = false, itineraryError = e.message ?: "Không thể tải lịch trình.")
                 }
             }
         }
@@ -289,45 +318,50 @@ class PassengerTripDetailViewModel(
 
     private fun loadCruise(tourId: String?) {
         if (tourId.isNullOrBlank()) return
-        viewModelScope.launch {
+        launchSection(TripSectionKey.CRUISE) {
             _uiState.update { it.copy(cruiseLoading = true, cruiseError = null) }
-            try {
-                val cruise = runCatching { repository.getCruise(tourId) }.getOrNull()
-                val decks = runCatching { repository.getCruiseDecks(tourId) }.getOrDefault(emptyList())
+            val cruiseResult = attempt { repository.getCruise(tourId) }
+            val decksResult = attempt { repository.getCruiseDecks(tourId) }
+            val cruise = cruiseResult.getOrNull()
+            val decks = decksResult.getOrDefault(emptyList())
+
+            if (cruise == null && decks.isEmpty()) {
+                val message = cruiseResult.exceptionOrNull()?.message
+                    ?: decksResult.exceptionOrNull()?.message
+                    ?: "Không thể tải thông tin du thuyền."
+                _uiState.update { it.copy(cruiseLoading = false, cruiseError = message) }
+            } else {
                 loadedSections.add(TripSectionKey.CRUISE)
-                _uiState.update {
-                    it.copy(
-                        cruise = cruise,
-                        decks = decks,
-                        cruiseLoading = false,
-                        cruiseError = if (cruise == null && decks.isEmpty()) "Không thể tải thông tin du thuyền." else null
-                    )
-                }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        cruiseLoading = false,
-                        cruiseError = e.message ?: "Không thể tải thông tin du thuyền."
-                    )
-                }
+                _uiState.update { it.copy(cruise = cruise, decks = decks, cruiseLoading = false, cruiseError = null) }
             }
         }
     }
 
     private fun loadFacilitiesAndPackages(tourId: String?) {
         if (tourId.isNullOrBlank()) return
-        viewModelScope.launch {
+        launchSection(TripSectionKey.FACILITIES) {
             _uiState.update { it.copy(facilitiesLoading = true, facilitiesError = null) }
-            try {
-                val products = runCatching { repository.getProducts(tourId) }.getOrDefault(emptyList())
-                val services = runCatching { repository.getServices(tourId) }.getOrDefault(emptyList())
-                val activities = runCatching { repository.getCruiseActivities(tourId) }.getOrDefault(emptyList())
-                val visits = runCatching { repository.getVisits(tourId) }.getOrDefault(emptyList())
-                val packages = runCatching { repository.getPackages(tourId) }.getOrDefault(emptyList())
+            val productsR = attempt { repository.getProducts(tourId) }
+            val servicesR = attempt { repository.getServices(tourId) }
+            val activitiesR = attempt { repository.getCruiseActivities(tourId) }
+            val visitsR = attempt { repository.getVisits(tourId) }
+            val packagesR = attempt { repository.getPackages(tourId) }
+
+            val results = listOf(productsR, servicesR, activitiesR, visitsR, packagesR)
+            if (results.all { it.isFailure }) {
+                val message = results.firstNotNullOfOrNull { it.exceptionOrNull()?.message }
+                    ?: "Không thể tải tiện ích và gói tour."
+                _uiState.update { it.copy(facilitiesLoading = false, facilitiesError = message) }
+            } else {
+                val products = productsR.getOrDefault(emptyList())
+                val services = servicesR.getOrDefault(emptyList())
+                val activities = activitiesR.getOrDefault(emptyList())
+                val visits = visitsR.getOrDefault(emptyList())
+                val packages = packagesR.getOrDefault(emptyList())
 
                 loadedSections.add(TripSectionKey.FACILITIES)
                 _uiState.update { state ->
-                    val (matchedPkg, resolvedBens) = resolveBookingPackageBenefits(
+                    val (matchedPkg, resolved) = resolveBookingPackageBenefits(
                         booking = state.booking,
                         packages = packages,
                         products = products,
@@ -342,15 +376,9 @@ class PassengerTripDetailViewModel(
                         visits = visits,
                         packages = packages,
                         matchedPackage = matchedPkg,
-                        resolvedBenefits = resolvedBens,
-                        facilitiesLoading = false
-                    )
-                }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
+                        resolvedBenefits = resolved,
                         facilitiesLoading = false,
-                        facilitiesError = e.message ?: "Không thể tải tiện ích và gói tour."
+                        facilitiesError = null
                     )
                 }
             }
@@ -359,13 +387,13 @@ class PassengerTripDetailViewModel(
 
     private fun loadBooking(bookingId: Long?) {
         if (bookingId == null || bookingId <= 0L) return
-        viewModelScope.launch {
+        launchSection(TripSectionKey.BOOKING) {
             _uiState.update { it.copy(bookingLoading = true, bookingError = null) }
             try {
                 val detail = repository.getBookingTripDetail(bookingId)
                 loadedSections.add(TripSectionKey.BOOKING)
                 _uiState.update { state ->
-                    val (matchedPkg, resolvedBens) = resolveBookingPackageBenefits(
+                    val (matchedPkg, resolved) = resolveBookingPackageBenefits(
                         booking = detail,
                         packages = state.packages,
                         products = state.products,
@@ -376,16 +404,15 @@ class PassengerTripDetailViewModel(
                     state.copy(
                         booking = detail,
                         matchedPackage = matchedPkg,
-                        resolvedBenefits = resolvedBens,
+                        resolvedBenefits = resolved,
                         bookingLoading = false
                     )
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _uiState.update {
-                    it.copy(
-                        bookingLoading = false,
-                        bookingError = e.message ?: "Không thể tải thông tin đơn đặt chỗ."
-                    )
+                    it.copy(bookingLoading = false, bookingError = e.message ?: "Không thể tải thông tin đơn đặt chỗ.")
                 }
             }
         }
@@ -393,23 +420,17 @@ class PassengerTripDetailViewModel(
 
     private fun loadPassengers(bookingId: Long?) {
         if (bookingId == null || bookingId <= 0L) return
-        viewModelScope.launch {
+        launchSection(TripSectionKey.PASSENGERS) {
             _uiState.update { it.copy(passengersLoading = true, passengersError = null) }
             try {
                 val list = repository.getBookingPassengers(bookingId)
                 loadedSections.add(TripSectionKey.PASSENGERS)
-                _uiState.update {
-                    it.copy(
-                        passengers = list,
-                        passengersLoading = false
-                    )
-                }
+                _uiState.update { it.copy(passengers = list, passengersLoading = false) }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _uiState.update {
-                    it.copy(
-                        passengersLoading = false,
-                        passengersError = e.message ?: "Không thể tải danh sách hành khách."
-                    )
+                    it.copy(passengersLoading = false, passengersError = e.message ?: "Không thể tải danh sách hành khách.")
                 }
             }
         }
@@ -417,29 +438,28 @@ class PassengerTripDetailViewModel(
 
     private fun loadUsages(bookingId: Long?) {
         if (bookingId == null || bookingId <= 0L) return
-        viewModelScope.launch {
+        launchSection(TripSectionKey.USAGES) {
             _uiState.update { it.copy(usagesLoading = true, usagesError = null) }
-            try {
-                val prodUsages = runCatching { repository.getProductUsages(bookingId) }.getOrDefault(emptyList())
-                val servUsages = runCatching { repository.getServiceUsages(bookingId) }.getOrDefault(emptyList())
-                val actUsages = runCatching { repository.getCruiseActivityUsages(bookingId) }.getOrDefault(emptyList())
-                val visUsages = runCatching { repository.getVisitUsages(bookingId) }.getOrDefault(emptyList())
+            val prodR = attempt { repository.getProductUsages(bookingId) }
+            val servR = attempt { repository.getServiceUsages(bookingId) }
+            val actR = attempt { repository.getCruiseActivityUsages(bookingId) }
+            val visR = attempt { repository.getVisitUsages(bookingId) }
 
+            val results = listOf(prodR, servR, actR, visR)
+            if (results.all { it.isFailure }) {
+                val message = results.firstNotNullOfOrNull { it.exceptionOrNull()?.message }
+                    ?: "Không thể tải lượt sử dụng."
+                _uiState.update { it.copy(usagesLoading = false, usagesError = message) }
+            } else {
                 loadedSections.add(TripSectionKey.USAGES)
                 _uiState.update {
                     it.copy(
-                        productUsages = prodUsages,
-                        serviceUsages = servUsages,
-                        activityCruiseUsages = actUsages,
-                        visitUsages = visUsages,
-                        usagesLoading = false
-                    )
-                }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
+                        productUsages = prodR.getOrDefault(emptyList()),
+                        serviceUsages = servR.getOrDefault(emptyList()),
+                        activityCruiseUsages = actR.getOrDefault(emptyList()),
+                        visitUsages = visR.getOrDefault(emptyList()),
                         usagesLoading = false,
-                        usagesError = e.message ?: "Không thể tải lượt sử dụng."
+                        usagesError = null
                     )
                 }
             }
@@ -448,23 +468,17 @@ class PassengerTripDetailViewModel(
 
     private fun loadBills(bookingId: Long?) {
         if (bookingId == null || bookingId <= 0L) return
-        viewModelScope.launch {
+        launchSection(TripSectionKey.BILLS) {
             _uiState.update { it.copy(billsLoading = true, billsError = null) }
             try {
                 val billList = repository.getBills(bookingId)
                 loadedSections.add(TripSectionKey.BILLS)
-                _uiState.update {
-                    it.copy(
-                        bills = billList,
-                        billsLoading = false
-                    )
-                }
+                _uiState.update { it.copy(bills = billList, billsLoading = false) }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _uiState.update {
-                    it.copy(
-                        billsLoading = false,
-                        billsError = e.message ?: "Không thể tải danh sách hóa đơn."
-                    )
+                    it.copy(billsLoading = false, billsError = e.message ?: "Không thể tải danh sách hóa đơn.")
                 }
             }
         }

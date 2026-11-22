@@ -29,14 +29,10 @@ object Routes {
     const val PASSENGER_TOUR_DETAIL = "passenger_tours/{tourId}"
     const val PASSENGER_ROOMS = "passenger_rooms/{voyageId}"
     const val PASSENGER_CREATE_BOOKING = "passenger_booking/{tourId}/{packageId}"
-    const val VESSEL_TRACKING = "vessel_tracking"
 
     const val PASSENGER_FEEDBACK = "passenger_feedback"
 
-    const val PASSENGER_TRIP_DETAIL = "passenger_trip_detail/{tourId}/{bookingId}"
-
-
-
+    // Giám sát hành trình nay nằm trong chi tiết booking đã thanh toán (PASSENGER_BOOKING_DETAIL).
     const val PASSENGER_BOOKINGS = "passenger_bookings"
     const val PASSENGER_BOOKING_DETAIL = "passenger_bookings/{bookingId}"
 
@@ -51,14 +47,25 @@ object Routes {
     const val PASSENGER_PAYMENT_RESULT =
         "passenger_payment_result?paymentId={paymentId}&status={status}"
 
+    const val PASSENGER_TOUR_LIST =
+        "passenger_tour_list?departure={departure}&destination={destination}&date={date}"
+
+    fun passengerTourList(
+        departure: String = "",
+        destination: String = "",
+        date: String = "",
+    ): String {
+        val encDep = android.net.Uri.encode(departure)
+        val encDest = android.net.Uri.encode(destination)
+        val encDate = android.net.Uri.encode(date)
+        return "passenger_tour_list?departure=$encDep&destination=$encDest&date=$encDate"
+    }
+
     fun passengerTourDetail(tourId: String) = "passenger_tours/$tourId"
     fun passengerCreateBooking(tourId: String, packageId: Any) =
         "passenger_booking/$tourId/$packageId"
     fun passengerBookingDetail(bookingId: Any) = "passenger_bookings/$bookingId"
     fun passengerActivities(bookingId: Long) = "passenger_activities/$bookingId"
-
-    fun passengerTripDetail(tourId: String, bookingId: Long) =
-        "passenger_trip_detail/$tourId/$bookingId"
 
     // =================================================
     // POS

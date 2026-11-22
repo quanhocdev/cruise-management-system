@@ -1,3 +1,4 @@
+
 package com.project.chat.client;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,14 +13,14 @@ import org.springframework.web.client.RestClient;
 @Component
 public class ServiceTokenClient {
 
-    private static final String CACHE_KEY = "chat-service-token";
+    private static final String CACHE_KEY_PREFIX = "chat-service-token:";
 
     private final RestClient restClient;
     private final Cache<String, String> serviceTokenCache;
 
     private final String clientId;
     private final String clientSecret;
-    private final String scope;
+    private final String defaultScope;
 
     public ServiceTokenClient(
             RestClient.Builder restClientBuilder,
@@ -27,7 +28,8 @@ public class ServiceTokenClient {
             @Value("${auth-service.url}") String authServiceUrl,
             @Value("${service.oauth2.client-id}") String clientId,
             @Value("${service.oauth2.client-secret}") String clientSecret,
-            @Value("${service.oauth2.scope}") String scope) {
+            @Value("${service.oauth2.scope}") String defaultScope) {
+
         this.restClient = restClientBuilder
                 .baseUrl(authServiceUrl)
                 .build();
@@ -35,24 +37,46 @@ public class ServiceTokenClient {
         this.serviceTokenCache = serviceTokenCache;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
-        this.scope = scope;
+        this.defaultScope = defaultScope;
     }
 
+    /**
+     * Giữ tương thích với code cũ.
+     * Mặc định sử dụng scope manager.read.
+     */
     public String getAccessToken() {
-        String cachedToken = serviceTokenCache.getIfPresent(CACHE_KEY);
+        return getAccessToken(defaultScope);
+    }
+
+    /**
+     * Lấy access token theo scope yêu cầu.
+     * Mỗi scope có cache key riêng.
+     */
+    public String getAccessToken(String scope) {
+
+        if (scope == null || scope.isBlank()) {
+            throw new IllegalArgumentException(
+                    "OAuth2 scope must not be blank");
+        }
+
+        String cacheKey = CACHE_KEY_PREFIX + scope.trim();
+
+        String cachedToken = serviceTokenCache.getIfPresent(cacheKey);
 
         if (cachedToken != null) {
             return cachedToken;
         }
 
-        return requestNewAccessToken();
+        return requestNewAccessToken(scope.trim(), cacheKey);
     }
 
-    private synchronized String requestNewAccessToken() {
+    private synchronized String requestNewAccessToken(
+            String scope,
+            String cacheKey) {
 
-        // Kiểm tra lại để tránh nhiều request cùng xin token
-        // khi có nhiều request đến Chat Service đồng thời.
-        String cachedToken = serviceTokenCache.getIfPresent(CACHE_KEY);
+        // Kiểm tra lại cache để tránh nhiều request
+        // đồng thời cùng xin một token.
+        String cachedToken = serviceTokenCache.getIfPresent(cacheKey);
 
         if (cachedToken != null) {
             return cachedToken;
@@ -74,13 +98,15 @@ public class ServiceTokenClient {
         if (response == null
                 || response.getAccessToken() == null
                 || response.getAccessToken().isBlank()) {
+
             throw new IllegalStateException(
-                    "Cannot obtain access token from Auth Service");
+                    "Cannot obtain access token from Auth Service for scope: "
+                            + scope);
         }
 
         String accessToken = response.getAccessToken();
 
-        serviceTokenCache.put(CACHE_KEY, accessToken);
+        serviceTokenCache.put(cacheKey, accessToken);
 
         return accessToken;
     }

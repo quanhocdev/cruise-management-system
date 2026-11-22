@@ -41,12 +41,12 @@ fun PassengerDiscoveryHero() {
     val zoom by
     transition.animateFloat(
         initialValue = 1f,
-        targetValue = 1.08f,
+        targetValue = 1.06f,
         animationSpec = infiniteRepeatable(tween(14000, easing = LinearEasing), RepeatMode.Reverse),
         label = "heroZoomValue",
     )
 
-    Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(28.dp)).background(OceanNavy)) {
+    Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).background(OceanNavy)) {
         Image(
             painterResource(R.drawable.ocean_welcome_hero),
             null,
@@ -60,33 +60,33 @@ fun PassengerDiscoveryHero() {
             Modifier.matchParentSize()
                 .background(
                     Brush.verticalGradient(
-                        listOf(OceanNavy.copy(alpha = .20f), OceanNavy.copy(alpha = .95f))
+                        listOf(OceanNavy.copy(alpha = .24f), OceanNavy.copy(alpha = .94f))
                     )
                 )
         )
         Column(
-            Modifier.padding(24.dp).heightIn(min = 220.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            Modifier.padding(18.dp).heightIn(min = 148.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             Surface(color = Color.White.copy(alpha = .16f), shape = RoundedCornerShape(50)) {
                 Text(
-                    "OCEANCRUISE · KHÁM PHÁ",
-                    Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                    style = MaterialTheme.typography.labelMedium,
+                    "KHÁM PHÁ TOUR DU THUYỀN",
+                    Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                    style = MaterialTheme.typography.labelSmall,
                     color = OceanMint,
                 )
             }
-            Spacer(Modifier.height(30.dp))
+            Spacer(Modifier.height(10.dp))
             Text(
-                "Kỳ nghỉ trên biển,\nbắt đầu từ đây.",
-                style = MaterialTheme.typography.headlineMedium,
+                "Kỳ nghỉ trên biển, bắt đầu từ đây.",
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
             )
             Text(
-                "Tìm hành trình dành riêng cho bạn.",
+                "Du thuyền hiện đại - Lịch trình rõ ràng.",
                 color = Color.White.copy(alpha = .9f),
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodySmall,
             )
         }
     }
@@ -97,8 +97,8 @@ fun CruiseVisual(imageUrl: String?, modifier: Modifier = Modifier) {
     Box(
         modifier
             .fillMaxWidth()
-            .height(190.dp)
-            .clip(RoundedCornerShape(22.dp))
+            .height(144.dp)
+            .clip(RoundedCornerShape(18.dp))
             .background(Brush.linearGradient(listOf(OceanNavy, OceanTeal)))
     ) {
         // Nền sóng + logo tàu hiện khi chưa có ảnh (hoặc ảnh đang tải)
@@ -106,20 +106,20 @@ fun CruiseVisual(imageUrl: String?, modifier: Modifier = Modifier) {
             for (i in 0..5) {
                 val path =
                     Path().apply {
-                        moveTo(-30f, size.height * .68f + i * 18f)
+                        moveTo(-30f, size.height * .68f + i * 14f)
                         cubicTo(
                             size.width * .3f,
-                            size.height * .42f + i * 18f,
+                            size.height * .42f + i * 14f,
                             size.width * .7f,
-                            size.height * .95f + i * 18f,
+                            size.height * .95f + i * 14f,
                             size.width + 30f,
-                            size.height * .60f + i * 18f,
+                            size.height * .60f + i * 14f,
                         )
                     }
                 drawPath(path, OceanMint.copy(alpha = .15f), style = Stroke(2f))
             }
         }
-        ShipEmblem(Modifier.align(Alignment.Center).size(100.dp))
+        ShipEmblem(Modifier.align(Alignment.Center).size(72.dp))
 
         if (!imageUrl.isNullOrBlank()) {
             AsyncImage(

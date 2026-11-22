@@ -447,27 +447,51 @@ services:
       kafka:
         condition: service_started
 
-    # Chat Service
+  # ==========================
+  # Chat Service
+  # ==========================
   chat-service:
     build:
       context: .
       dockerfile: backend/chat-service/Dockerfile.dev
+
     container_name: chat-service
     restart: always
+
     ports:
       - "8091:8091"
+
     working_dir: /app/chat-service
+
     volumes:
       - ./backend/chat-service/src:/app/chat-service/src
       - ./backend/common/src:/app/common/src
       - /app/chat-service/target
+
+      # Google Application Default Credentials
+      - "${APPDATA}/gcloud/application_default_credentials.json:/var/secrets/google/application_default_credentials.json:ro"
+
     env_file:
       - .env
+
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-chat:5432/chat_service_db
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+
+      # Google Cloud Dialogflow
+      DIALOGFLOW_PROJECT_ID: ${DIALOGFLOW_PROJECT_ID}
+      GOOGLE_APPLICATION_CREDENTIALS: /var/secrets/google/application_default_credentials.json
+
+      # Dialogflow Webhook Security
+      DIALOGFLOW_WEBHOOK_SECRET: ${DIALOGFLOW_WEBHOOK_SECRET}
+
+      # Internal services
+      AUTH_SERVICE_URL: http://auth-service:8081
+      TOUR_SERVICE_URL: http://tour-service:8088
+
     depends_on:
       postgres-chat:
         condition: service_healthy

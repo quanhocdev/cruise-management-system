@@ -213,7 +213,8 @@ public class VnPayRefundProvider implements RefundProvider {
                     r.id(), code, p.get("vnp_Message"));
             if (Set.of("02", "03", "91", "95", "97").contains(code))
                 return new Outcome("REJECTED", code, null);
-            // 94: VNPay already holds a refund request for this transaction and is processing it.
+            // 94: VNPay already holds a refund request for this transaction and is
+            // processing it.
             if ("94".equals(code))
                 return new Outcome("PROCESSING", code, null);
             return Outcome.unknown(code.matches("[0-9]{2}") ? "VNPAY_" + code : "PROVIDER_UNCONFIRMED");
@@ -234,8 +235,6 @@ public class VnPayRefundProvider implements RefundProvider {
                     p.get("vnp_OrderInfo"), p.get("vnp_Amount"), p.get("vnp_TransactionType"));
             return Outcome.unknown("PROVIDER_REFERENCE_MISMATCH");
         }
-        String code = p.getOrDefault("vnp_ResponseCode", "");
-
         if (query && "94".equals(code)) {
             LOG.warn(
                     "[VNPAY VERIFY] QueryDr duplicate, refundId={}",
