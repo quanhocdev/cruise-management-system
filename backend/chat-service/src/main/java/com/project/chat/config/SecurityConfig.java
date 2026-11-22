@@ -32,14 +32,19 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                         .requestMatchers(
                                 "/actuator/health",
                                 "/actuator/info")
                         .permitAll()
 
+                        // Dialogflow webhook: xác thực bằng X-Webhook-Secret
+                        .requestMatchers(HttpMethod.POST, "/api/webhook").permitAll()
+
                         .requestMatchers("/ws-chat-native/**").authenticated()
                         .requestMatchers("/ws-chat/**").authenticated()
 
+                        // API chat vẫn yêu cầu JWT
                         .requestMatchers("/api/chat/**").authenticated()
 
                         .anyRequest().authenticated())
