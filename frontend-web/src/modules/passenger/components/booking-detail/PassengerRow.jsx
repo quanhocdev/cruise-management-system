@@ -2,8 +2,19 @@ import { Edit3 } from "lucide-react";
 import { formatDate } from "./helpers";
 import "./PassengerRow.css";
 
+const ID_CARD_LABELS = {
+  CCCD: "CCCD",
+  CMND: "CMND",
+  PASSPORT: "Hộ chiếu",
+  CITIZEN_ID: "CCCD",
+  NATIONAL_ID: "CMND / CCCD",
+};
+
 export default function PassengerRow({ index, passenger: p, canEdit, onEdit }) {
   const initial = (p.fullName || "?").trim().charAt(0).toUpperCase();
+  const docLabel = p.idCardType
+    ? ID_CARD_LABELS[p.idCardType] || p.idCardType
+    : "Giấy tờ";
 
   return (
     <article className="bd-passenger">
@@ -34,7 +45,7 @@ export default function PassengerRow({ index, passenger: p, canEdit, onEdit }) {
 
       <dl className="bd-passenger__info">
         <div>
-          <dt>{p.idCardType || "Giấy tờ"}</dt>
+          <dt>{docLabel}</dt>
           <dd>{p.identificationNumber || "—"}</dd>
         </div>
         <div>
