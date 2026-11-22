@@ -43,12 +43,16 @@ import com.project.cruise.android.data.repository.feedback.FeedbackRepository
 import com.project.cruise.android.data.repository.finance.CheckoutRepository
 import com.project.cruise.android.data.repository.notification.ActivityInboxRepository
 import com.project.cruise.android.data.repository.notification.NotificationRepository
+import com.project.cruise.android.data.repository.passenger.PassengerTripDetailRepository
 import com.project.cruise.android.ui.screens.passenger.NotificationScreen
 import com.project.cruise.android.viewmodel.passenger.NotificationViewModel
+import com.project.cruise.android.viewmodel.passenger.PassengerBookedToursViewModel
 import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModel
 import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModelFactory
+import com.project.cruise.android.viewmodel.passenger.PassengerTripDetailViewModel
 import com.project.cruise.android.ui.screens.passenger.MyFeedbackScreen
 import com.project.cruise.android.viewmodel.passenger.FeedbackViewModel
+
 fun NavGraphBuilder.passengerGraph(
     navController: NavHostController,
     authViewModel: AuthViewModel,
@@ -85,10 +89,6 @@ fun NavGraphBuilder.passengerGraph(
                 }
             },
 
-            onVesselTrackingClick = {
-                navController.navigate(Routes.VESSEL_TRACKING)
-            },
-
             onMyFeedbackClick = {
                 navController.navigate(Routes.PASSENGER_FEEDBACK)
             },
@@ -103,7 +103,7 @@ fun NavGraphBuilder.passengerGraph(
         )
     }
 
-// ----- MY FEEDBACK -----
+    // ----- MY FEEDBACK -----
     composable(Routes.PASSENGER_FEEDBACK) {
         MyFeedbackScreen(
             model = feedbackViewModel,
@@ -112,6 +112,7 @@ fun NavGraphBuilder.passengerGraph(
             }
         )
     }
+
     // ----- DASHBOARD -----
     composable(Routes.PASSENGER_DASHBOARD) {
         Dashboard(
@@ -126,7 +127,8 @@ fun NavGraphBuilder.passengerGraph(
             }
         )
     }
-// ----- TOURS (PUBLIC - MÀN HÌNH CHÍNH) -----
+
+    // ----- TOURS (PUBLIC - MÀN HÌNH CHÍNH) -----
     composable(Routes.PASSENGER_TOURS) { backStackEntry ->
         val context = androidx.compose.ui.platform.LocalContext.current
         val tourRepo = remember(tokenManager) {
@@ -188,9 +190,6 @@ fun NavGraphBuilder.passengerGraph(
                 navController.navigate(Routes.PASSENGER_NOTIFICATIONS) {
                     launchSingleTop = true
                 }
-            },
-            onVesselTrackingClick = {
-                navController.navigate(Routes.VESSEL_TRACKING)
             },
             onHomeClick = {}
         )
@@ -287,6 +286,7 @@ fun NavGraphBuilder.passengerGraph(
             onBack = { navController.popBackStack() }
         )
     }
+
     // ----- TOUR DETAIL (PUBLIC) -----
     composable(
         route = Routes.PASSENGER_TOUR_DETAIL,
@@ -311,79 +311,7 @@ fun NavGraphBuilder.passengerGraph(
         )
     }
 
-    composable(
-        route = Routes.PASSENGER_TRIP_DETAIL,
-        arguments = listOf(
-            navArgument("tourId") { type = NavType.StringType },
-            navArgument("bookingId") { type = NavType.LongType }
-        )
-    ) { backStackEntry ->
-        val tourId = backStackEntry.arguments?.getString("tourId") ?: return@composable
-        val bookingId = backStackEntry.arguments?.getLong("bookingId") ?: return@composable
-
-        val tripDetailRepo = remember(tokenManager) {
-            com.project.cruise.android.data.repository.passenger.PassengerTripDetailRepository(
-                RetrofitClient.createPassengerTripDetailApiService(tokenManager)
-            )
-        }
-        val tripDetailViewModel: com.project.cruise.android.viewmodel.passenger.PassengerTripDetailViewModel =
-            viewModel(
-                viewModelStoreOwner = backStackEntry,
-                factory = com.project.cruise.android.viewmodel.passenger.PassengerTripDetailViewModel.Factory(
-                    tripDetailRepo
-                )
-            )
-
-        com.project.cruise.android.ui.screens.passenger.PassengerTripDetailScreen(
-            tourId = tourId,
-            bookingId = bookingId,
-            viewModel = tripDetailViewModel
-        )
-    }
-
-    // ----- DANH SÁCH HÀNH TRÌNH ĐÃ ĐẶT (TAB GIÁM SÁT) -----
-    composable(Routes.VESSEL_TRACKING) { backStackEntry ->
-        val tripDetailRepo = remember(tokenManager) {
-            com.project.cruise.android.data.repository.passenger.PassengerTripDetailRepository(
-                RetrofitClient.createPassengerTripDetailApiService(tokenManager)
-            )
-        }
-        val bookedToursViewModel: com.project.cruise.android.viewmodel.passenger.PassengerBookedToursViewModel =
-            viewModel(
-                viewModelStoreOwner = backStackEntry,
-                factory = com.project.cruise.android.viewmodel.passenger.PassengerBookedToursViewModel.Factory(
-                    tripDetailRepo
-                )
-            )
-
-        com.project.cruise.android.ui.passenger.screen.PassengerBookedToursScreen(
-            viewModel = bookedToursViewModel,
-            onOpenTour = { tourId, bookingId ->
-                navController.navigate(Routes.passengerTripDetail(tourId, bookingId))
-            },
-            onHomeClick = {
-                navController.navigate(Routes.PASSENGER_TOURS) {
-                    popUpTo(Routes.PASSENGER_TOURS) { inclusive = true }
-                }
-            },
-            onMyBookingsClick = {
-                navController.navigate(Routes.PASSENGER_BOOKINGS)
-            },
-            onMessagesClick = {
-                navController.navigate(Routes.PASSENGER_MESSAGES)
-            },
-            onNotificationClick = {
-                navController.navigate(Routes.PASSENGER_NOTIFICATIONS) {
-                    launchSingleTop = true
-                }
-            },
-            onUserClick = {
-                navController.navigate(Routes.PASSENGER_PROFILE)
-            }
-        )
-    }
-
-
+    // ----- TẠO BOOKING -----
     composable(
         route = Routes.PASSENGER_CREATE_BOOKING,
         arguments = listOf(
@@ -427,26 +355,38 @@ fun NavGraphBuilder.passengerGraph(
     }
 
     // ----- BOOKINGS LIST -----
-    composable(Routes.PASSENGER_BOOKINGS) {
+    composable(Routes.PASSENGER_BOOKINGS) { backStackEntry ->
         val bookingRepo = remember(tokenManager) { BookingRepository(RetrofitClient.createBookingApiService(tokenManager)) }
         val bookingViewModel: BookingViewModel =
             viewModel(factory = BookingViewModelFactory(bookingRepo))
 
+        // Lấy ảnh, tuyến, ngày, trạng thái chuyến để làm thẻ booking đã thanh toán.
+        val tripRepo = remember(tokenManager) {
+            PassengerTripDetailRepository(RetrofitClient.createPassengerTripDetailApiService(tokenManager))
+        }
+        val tripsViewModel: PassengerBookedToursViewModel = viewModel(
+            viewModelStoreOwner = backStackEntry,
+            factory = PassengerBookedToursViewModel.Factory(tripRepo)
+        )
+
         MyBookingsScreen(
             viewModel = bookingViewModel,
+            tripsViewModel = tripsViewModel,
             onBookingClick = { bookingId ->
                 navController.navigate(Routes.passengerBookingDetail(bookingId))
             },
             onBack = { navController.popBackStack() },
             onBrowseTours = { navController.navigate(Routes.PASSENGER_TOURS) },
-            onAccount = { navController.navigate(Routes.PASSENGER_PROFILE) } ,
-            onVesselTrackingClick = {
-                navController.navigate(Routes.VESSEL_TRACKING)
+            onAccount = { navController.navigate(Routes.PASSENGER_PROFILE) },
+            onNotificationClick = {
+                navController.navigate(Routes.PASSENGER_NOTIFICATIONS) {
+                    launchSingleTop = true
+                }
             }
         )
     }
 
-    // ----- BOOKING DETAIL -----
+    // ----- BOOKING DETAIL (đã thanh toán: có đủ các tab giám sát) -----
     composable(
         route = Routes.PASSENGER_BOOKING_DETAIL,
         arguments = listOf(navArgument("bookingId") { type = NavType.LongType })
@@ -456,9 +396,18 @@ fun NavGraphBuilder.passengerGraph(
         val bookingViewModel: BookingViewModel =
             viewModel(factory = BookingViewModelFactory(bookingRepo))
 
+        val tripRepo = remember(tokenManager) {
+            PassengerTripDetailRepository(RetrofitClient.createPassengerTripDetailApiService(tokenManager))
+        }
+        val tripViewModel: PassengerTripDetailViewModel = viewModel(
+            viewModelStoreOwner = backStackEntry,
+            factory = PassengerTripDetailViewModel.Factory(tripRepo)
+        )
+
         MyBookingDetailScreen(
             bookingId = bookingId,
             viewModel = bookingViewModel,
+            tripViewModel = tripViewModel,
             onBack = { navController.popBackStack() },
             onSpending = { navController.navigate("passenger_spending/$bookingId") },
             onActivities = { navController.navigate(Routes.passengerActivities(bookingId)) },
@@ -597,7 +546,6 @@ fun NavGraphBuilder.passengerGraph(
             factory = com.project.cruise.android.viewmodel.passenger.FeedbackViewModel.Factory(source)
         )
 
-        // Gọi MyFeedbackScreen chuẩn theo màn hình danh sách invitation chúng ta vừa làm
         com.project.cruise.android.ui.screens.passenger.MyFeedbackScreen(
             model = model,
             onBack = { navController.popBackStack() }
