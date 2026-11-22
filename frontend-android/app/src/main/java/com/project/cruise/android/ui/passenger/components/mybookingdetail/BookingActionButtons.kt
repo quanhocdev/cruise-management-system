@@ -32,13 +32,14 @@ fun BookingActionButtons(
         onActivities?.let {
             Button(
                 onClick = it,
-                modifier = Modifier.fillMaxWidth().heightIn(min = 54.dp),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
                 shape = RoundedCornerShape(18.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = OceanTeal, contentColor = Color.White),
+                colors = ButtonDefaults.buttonColors(containerColor = OceanGold, contentColor = OceanNavy),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp),
             ) {
                 Icon(Icons.Filled.LocationOn, contentDescription = null, modifier = Modifier.size(20.dp))
                 Spacer(Modifier.width(8.dp))
-                Text("Đăng ký hoạt động & tham quan bờ", fontWeight = FontWeight.SemiBold)
+                Text("Đăng ký hoạt động & tham quan bờ", fontWeight = FontWeight.Bold)
             }
         }
         onSpending?.let { ActionRow(Icons.Filled.ShoppingCart, "Xem chi tiêu trong chuyến", it) }
@@ -62,10 +63,10 @@ private fun ActionRow(icon: ImageVector, label: String, onClick: () -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Box(
-                Modifier.size(38.dp).clip(CircleShape).background(OceanMintSoft),
+                Modifier.size(38.dp).clip(CircleShape).background(OceanGoldSoft),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(icon, contentDescription = null, tint = OceanTeal, modifier = Modifier.size(20.dp))
+                Icon(icon, contentDescription = null, tint = OceanGoldDeep, modifier = Modifier.size(20.dp))
             }
             Text(
                 label,

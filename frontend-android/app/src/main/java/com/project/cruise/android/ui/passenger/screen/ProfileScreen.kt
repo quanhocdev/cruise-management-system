@@ -14,8 +14,7 @@ fun ProfileScreen(
     onMyBookingsClick: () -> Unit,
     onMessagesClick: () -> Unit,
     onNotificationClick: () -> Unit = {},
-    onVesselTrackingClick: () -> Unit = {},
-    onMyFeedbackClick: () -> Unit = {}, // Thêm callback
+    onMyFeedbackClick: () -> Unit = {},
     unreadCount: Long = 0L,
     onLogout: () -> Unit,
 ) {
@@ -31,15 +30,10 @@ fun ProfileScreen(
         onMyBookingsClick = onMyBookingsClick,
         onMessagesClick = onMessagesClick,
         onNotificationClick = onNotificationClick,
-        onVesselTrackingClick = onVesselTrackingClick,
-        onMyFeedbackClick = onMyFeedbackClick, // Truyền xuống
+        onMyFeedbackClick = onMyFeedbackClick,
         unreadCount = unreadCount,
-        onLogout = {
-            authViewModel.logout(onLogout)
-        },
-        onRetry = {
-            authViewModel.getCurrentUser()
-        },
+        onLogout = { authViewModel.logout(onLogout) },
+        onRetry = { authViewModel.getCurrentUser() },
     )
 }
 
@@ -50,7 +44,6 @@ fun ProfileContent(
     onMyBookingsClick: () -> Unit,
     onMessagesClick: () -> Unit,
     onNotificationClick: () -> Unit,
-    onVesselTrackingClick: () -> Unit, // <--- Nhận callback giám sát
     unreadCount: Long,
     onLogout: () -> Unit,
     onRetry: () -> Unit,
@@ -69,10 +62,7 @@ fun ProfileContent(
                 onHomeClick = onHomeClick,
                 onLoginClick = {},
                 onUserClick = {},
-                onMyBookingsClick = onMyBookingsClick,
-                onMessagesClick = onMessagesClick,
                 onNotificationClick = onNotificationClick,
-                onVesselTrackingClick = onVesselTrackingClick, // <--- Gắn vào OceanBottomBar
             )
         },
     ) {
@@ -88,9 +78,17 @@ fun ProfileContent(
         item {
             ProfileActionItem(
                 title = "Chuyến đi của tôi",
-                subtitle = "Xem booking, hành khách và trạng thái đặt chỗ",
+                subtitle = "Xem booking, theo dõi hành trình và hành khách",
                 glyph = PassengerGlyph.TICKET,
                 onClick = onMyBookingsClick,
+            )
+        }
+        item {
+            ProfileActionItem(
+                title = "Tin nhắn",
+                subtitle = "Trò chuyện với đội ngũ hỗ trợ",
+                glyph = PassengerGlyph.MESSAGE,
+                onClick = onMessagesClick,
             )
         }
         item {
