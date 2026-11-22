@@ -273,19 +273,12 @@ fun NavGraphBuilder.passengerGraph(
 
     // ----- NOTIFICATIONS SCREEN -----
     composable(Routes.PASSENGER_NOTIFICATIONS) { backStackEntry ->
-        val context = androidx.compose.ui.platform.LocalContext.current
-
-        // Khởi tạo NotificationApiService từ RetrofitClient
         val notificationApi = remember(tokenManager) {
             RetrofitClient.createNotificationApiService(tokenManager)
         }
-
-        // Khởi tạo Repository
         val notificationRepo = remember(notificationApi) {
             NotificationRepository(notificationApi)
         }
-
-        // Khởi tạo ViewModel qua Factory
         val notificationViewModel: NotificationViewModel = viewModel(
             viewModelStoreOwner = backStackEntry,
             factory = NotificationViewModel.Factory(
@@ -293,11 +286,11 @@ fun NavGraphBuilder.passengerGraph(
                 tokenManager = tokenManager
             )
         )
-
         val notificationState by notificationViewModel.state.collectAsState()
 
         NotificationScreen(
             state = notificationState,
+            onRefresh = { notificationViewModel.loadInitialData() },
             onMarkAsRead = { notificationId ->
                 notificationViewModel.markAsRead(notificationId)
             },
@@ -305,14 +298,30 @@ fun NavGraphBuilder.passengerGraph(
                 notificationViewModel.markAllAsRead()
             },
             onNotificationClick = { notification ->
-                if (notification.referenceType == "FEEDBACK_INVITATION" && notification.referenceId != null) {
-                    navController.navigate("passenger_feedback/${notification.referenceId}")
+                if (!notification.isRead) {
+                    notificationViewModel.markAsRead(notification.id)
+                }
+                val refType = notification.referenceType?.uppercase()
+                val notifType = notification.type?.uppercase()
+                when {
+                    refType == "FEEDBACK_INVITATION" || notifType == "FEEDBACK_INVITATION" -> {
+                        navController.navigate(Routes.PASSENGER_FEEDBACK) {
+                            launchSingleTop = true
+                        }
+                    }
+                    refType == "BOOKING" -> {
+                        val refId = notification.referenceId?.takeIf { it.isNotBlank() }
+                        if (refId != null) {
+                            navController.navigate(Routes.passengerBookingDetail(refId))
+                        } else {
+                            navController.navigate(Routes.PASSENGER_BOOKINGS)
+                        }
+                    }
                 }
             },
             onBack = { navController.popBackStack() }
         )
     }
-
     composable(
         route = Routes.PASSENGER_CREATE_BOOKING,
         arguments = listOf(
