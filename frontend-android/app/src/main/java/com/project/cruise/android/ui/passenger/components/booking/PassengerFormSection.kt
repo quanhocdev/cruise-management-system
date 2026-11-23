@@ -1,8 +1,5 @@
 package com.project.cruise.android.ui.passenger.components.booking
 
-import androidx.activity.compose.rememberLauncherForActivityLauncher
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,15 +34,8 @@ fun PassengerFormSection(
     canRemove: Boolean,
     onChange: (PassengerDraft) -> Unit,
     onRemove: () -> Unit,
+    onPickImage: () -> Unit = {},
 ) {
-    val photoPickerLauncher = rememberLauncherForActivityLauncher(
-        contract = ActivityResultContracts.PickVisualMedia()
-    ) { uri ->
-        if (uri != null) {
-            onChange(passenger.copy(idCardImageUri = uri))
-        }
-    }
-
     BookingSection(
         step = "03",
         title = "Hành khách ${index + 1}",
@@ -87,11 +77,7 @@ fun PassengerFormSection(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             OutlinedButton(
-                onClick = {
-                    photoPickerLauncher.launch(
-                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                    )
-                },
+                onClick = onPickImage,
                 enabled = enabled,
                 modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(12.dp),

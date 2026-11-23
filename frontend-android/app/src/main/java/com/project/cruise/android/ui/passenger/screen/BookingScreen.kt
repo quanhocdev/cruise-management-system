@@ -17,6 +17,7 @@ import java.math.BigDecimal
 fun BookingScreen(
     state: PassengerBookingState,
     onDraftChange: (BookingDraft) -> Unit,
+    onPickPassengerImage: (Int) -> Unit = {},
     onSubmit: () -> Unit,
     onRetry: () -> Unit,
     onBack: () -> Unit,
@@ -100,6 +101,7 @@ fun BookingScreen(
                         )
                     )
                 },
+                onPickImage = { onPickPassengerImage(index) },
             )
         }
 

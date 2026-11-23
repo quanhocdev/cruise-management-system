@@ -32,17 +32,55 @@ class BookingRepository(
     private fun resolveImageFile(uri: Uri): Pair<File, String>? {
         val context = appContext ?: return null
         val resolver = context.contentResolver
-        val mimeType = resolver.getType(uri) ?: "image/jpeg"
-        val ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType) ?: "jpg"
+        val rawMime = resolver.getType(uri) ?: "image/jpeg"
         val cacheDir = File(context.cacheDir, "booking_docs").apply { mkdirs() }
-        val tempFile = File.createTempFile("id_card_", ".$ext", cacheDir)
 
-        resolver.openInputStream(uri)?.use { input ->
-            FileOutputStream(tempFile).use { output ->
-                input.copyTo(output)
+        val bytes = resolver.openInputStream(uri)?.use { it.readBytes() } ?: return null
+        val maxBytes = 800 * 1024 // ~800 KB an toàn dưới mức 1 MB (1,048,576 bytes)
+
+        // Nếu file đã nhỏ hơn giới hạn thì ghi thẳng ra cache
+        if (bytes.size <= maxBytes) {
+            val ext = android.webkit.MimeTypeMap.getSingleton()
+                .getExtensionFromMimeType(rawMime)?.takeIf { it.isNotBlank() } ?: "jpg"
+            val outFile = File.createTempFile("id_card_", ".$ext", cacheDir)
+            outFile.writeBytes(bytes)
+            return outFile to rawMime
+        }
+
+        // Nếu lớn hơn giới hạn: decode & nén JPEG cho đến khi <= maxBytes
+        val bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size) ?: return null
+        val scaled = scaleBitmapDown(bitmap, maxSide = 1280)
+        if (scaled !== bitmap) bitmap.recycle()
+
+        val outFile = File.createTempFile("id_card_", ".jpg", cacheDir)
+        var quality = 85
+        var done = false
+
+        while (!done) {
+            val compressedBytes = java.io.ByteArrayOutputStream().use { baos ->
+                scaled.compress(android.graphics.Bitmap.CompressFormat.JPEG, quality, baos)
+                baos.toByteArray()
             }
-        } ?: return null
+            if (compressedBytes.size <= maxBytes || quality <= 35) {
+                outFile.writeBytes(compressedBytes)
+                done = true
+            } else {
+                quality -= 10
+            }
+        }
 
-        return tempFile to mimeType
+        scaled.recycle()
+        return outFile to "image/jpeg"
+    }
+
+    private fun scaleBitmapDown(src: android.graphics.Bitmap, maxSide: Int): android.graphics.Bitmap {
+        val w = src.width
+        val h = src.height
+        val longest = maxOf(w, h)
+        if (longest <= maxSide) return src
+        val ratio = maxSide.toFloat() / longest.toFloat()
+        val newW = (w * ratio).toInt().coerceAtLeast(1)
+        val newH = (h * ratio).toInt().coerceAtLeast(1)
+        return android.graphics.Bitmap.createScaledBitmap(src, newW, newH, true)
     }
 }
