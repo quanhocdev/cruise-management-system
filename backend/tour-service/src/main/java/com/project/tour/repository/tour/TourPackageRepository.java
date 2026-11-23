@@ -5,10 +5,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.Pageable;
 
 import com.project.tour.dto.internal.TourPriceSearchResponse;
 import com.project.tour.model.enums.tour.TourStatusTrip;
-import org.springframework.data.domain.Pageable;
 import com.project.tour.model.operation.TourPackage;
 
 import java.math.BigDecimal;
@@ -71,45 +71,59 @@ public interface TourPackageRepository extends JpaRepository<TourPackage, UUID> 
             WHERE t.statusTrip = :statusTrip
 
             AND (
-                :departurePoint IS NULL
+                :filterDeparture = false
                 OR LOWER(departurePort.name) LIKE LOWER(CONCAT('%', :departurePoint, '%'))
                 OR LOWER(departurePort.city) LIKE LOWER(CONCAT('%', :departurePoint, '%'))
                 OR LOWER(departurePort.country) LIKE LOWER(CONCAT('%', :departurePoint, '%'))
             )
 
             AND (
-                :destination IS NULL
+                :filterDestination = false
                 OR LOWER(destinationPort.name) LIKE LOWER(CONCAT('%', :destination, '%'))
                 OR LOWER(destinationPort.city) LIKE LOWER(CONCAT('%', :destination, '%'))
                 OR LOWER(destinationPort.country) LIKE LOWER(CONCAT('%', :destination, '%'))
             )
 
             AND (
-                :startDate IS NULL
+                :filterStartDate = false
                 OR t.startDate >= :startDate
             )
 
             AND (
-                :endDate IS NULL
+                :filterEndDate = false
                 OR t.startDate <= :endDate
             )
 
-            GROUP BY t.id, t.name
+            GROUP BY t.id, t.name, t.startDate
 
             HAVING
-                (:minPrice IS NULL OR MIN(tp.price) >= :minPrice)
+                (:filterMinPrice = false OR MIN(tp.price) >= :minPrice)
                 AND
-                (:maxPrice IS NULL OR MIN(tp.price) <= :maxPrice)
+                (:filterMaxPrice = false OR MIN(tp.price) <= :maxPrice)
 
             ORDER BY t.startDate ASC, t.name ASC
             """)
     List<TourPriceSearchResponse> searchToursByCriteria(
             @Param("statusTrip") TourStatusTrip statusTrip,
-            @Param("minPrice") BigDecimal minPrice,
-            @Param("maxPrice") BigDecimal maxPrice,
+
+            @Param("filterDeparture") boolean filterDeparture,
             @Param("departurePoint") String departurePoint,
+
+            @Param("filterDestination") boolean filterDestination,
             @Param("destination") String destination,
+
+            @Param("filterStartDate") boolean filterStartDate,
             @Param("startDate") LocalDate startDate,
+
+            @Param("filterEndDate") boolean filterEndDate,
             @Param("endDate") LocalDate endDate,
+
+            @Param("filterMinPrice") boolean filterMinPrice,
+            @Param("minPrice") BigDecimal minPrice,
+
+            @Param("filterMaxPrice") boolean filterMaxPrice,
+            @Param("maxPrice") BigDecimal maxPrice,
+
             Pageable pageable);
+
 }

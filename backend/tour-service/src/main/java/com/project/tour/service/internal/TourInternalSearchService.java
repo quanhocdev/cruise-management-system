@@ -14,10 +14,13 @@ import org.springframework.web.server.ResponseStatusException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
 public class TourInternalSearchService {
+
+    private static final ZoneId VIETNAM_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
 
     private final TourPackageRepository tourPackageRepository;
 
@@ -34,6 +37,8 @@ public class TourInternalSearchService {
             BigDecimal minPrice,
             int limit) {
 
+        validateSearchCriteria(minPrice, null, null, null, limit);
+
         return tourPackageRepository.searchToursByStatusAndMinimumPrice(
                 TourStatusTrip.READY,
                 minPrice,
@@ -41,15 +46,15 @@ public class TourInternalSearchService {
     }
 
     /**
-     * API mới: Tìm tour READY theo nhiều tiêu chí.
+     * Tìm tour READY theo nhiều tiêu chí.
      *
      * Quy tắc thời gian:
-     * - Chỉ có month: sử dụng năm hiện tại.
+     * - Chỉ có month: sử dụng năm hiện tại tại Việt Nam.
      * - Chỉ có year: tìm trong toàn bộ năm đó.
      * - Có cả month và year: tìm đúng tháng/năm.
      * - Không có month và year: không lọc thời gian.
      *
-     * Thời gian được lọc dựa trên Tour.startDate.
+     * Thời gian lọc dựa trên Tour.startDate.
      */
     @Transactional(readOnly = true)
     public List<TourPriceSearchResponse> searchReadyToursByCriteria(
@@ -61,13 +66,18 @@ public class TourInternalSearchService {
             Integer year,
             int limit) {
 
-        validateSearchCriteria(minPrice, maxPrice, month, year, limit);
+        validateSearchCriteria(
+                minPrice,
+                maxPrice,
+                month,
+                year,
+                limit);
 
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(VIETNAM_ZONE);
 
         Integer effectiveYear = year;
 
-        // Khách chỉ nói tháng thì mặc định năm hiện tại.
+        // Chỉ có tháng: mặc định năm hiện tại.
         if (month != null && effectiveYear == null) {
             effectiveYear = today.getYear();
         }
@@ -75,15 +85,13 @@ public class TourInternalSearchService {
         LocalDate startDate = null;
         LocalDate endDate = null;
 
-        // Có tháng: tìm trong tháng cụ thể.
         if (month != null) {
             YearMonth yearMonth = YearMonth.of(effectiveYear, month);
 
             startDate = yearMonth.atDay(1);
             endDate = yearMonth.atEndOfMonth();
-        }
-        // Chỉ có năm: tìm trong toàn bộ năm.
-        else if (effectiveYear != null) {
+
+        } else if (effectiveYear != null) {
             startDate = LocalDate.of(effectiveYear, 1, 1);
             endDate = LocalDate.of(effectiveYear, 12, 31);
         }
@@ -93,12 +101,25 @@ public class TourInternalSearchService {
 
         return tourPackageRepository.searchToursByCriteria(
                 TourStatusTrip.READY,
-                minPrice,
-                maxPrice,
+
+                normalizedDeparture != null,
                 normalizedDeparture,
+
+                normalizedDestination != null,
                 normalizedDestination,
+
+                startDate != null,
                 startDate,
+
+                endDate != null,
                 endDate,
+
+                minPrice != null,
+                minPrice,
+
+                maxPrice != null,
+                maxPrice,
+
                 PageRequest.of(0, limit));
     }
 
@@ -109,16 +130,16 @@ public class TourInternalSearchService {
             Integer year,
             int limit) {
 
-        if (minPrice != null && minPrice.signum() < 0) {
+        if (minPrice != null && minPrice.signum() <= 0) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Giá thấp nhất không được âm");
+                    "Giá thấp nhất phải lớn hơn 0");
         }
 
-        if (maxPrice != null && maxPrice.signum() < 0) {
+        if (maxPrice != null && maxPrice.signum() <= 0) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Giá cao nhất không được âm");
+                    "Giá cao nhất phải lớn hơn 0");
         }
 
         if (minPrice != null

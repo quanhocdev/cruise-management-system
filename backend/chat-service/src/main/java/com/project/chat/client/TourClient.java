@@ -93,6 +93,67 @@ public class TourClient {
         }
 
         /**
+         * Tìm tour READY theo nhiều tiêu chí.
+         */
+        public List<TourPriceSearchResponse> searchReadyToursByCriteria(
+                        BigDecimal minPrice,
+                        BigDecimal maxPrice,
+                        String departurePoint,
+                        String destination,
+                        Integer month,
+                        Integer year,
+                        int limit) {
+
+                if (limit < 1 || limit > 10) {
+                        throw new IllegalArgumentException(
+                                        "Tour search limit must be between 1 and 10");
+                }
+
+                String accessToken = serviceTokenClient.getAccessToken(tourScope);
+
+                List<TourPriceSearchResponse> response = restClient.get()
+                                .uri(uriBuilder -> {
+                                        var builder = uriBuilder.path("/internal/tours/search");
+
+                                        if (minPrice != null) {
+                                                builder.queryParam("minPrice", minPrice);
+                                        }
+
+                                        if (maxPrice != null) {
+                                                builder.queryParam("maxPrice", maxPrice);
+                                        }
+
+                                        if (departurePoint != null && !departurePoint.isBlank()) {
+                                                builder.queryParam("departurePoint", departurePoint.trim());
+                                        }
+
+                                        if (destination != null && !destination.isBlank()) {
+                                                builder.queryParam("destination", destination.trim());
+                                        }
+
+                                        if (month != null) {
+                                                builder.queryParam("month", month);
+                                        }
+
+                                        if (year != null) {
+                                                builder.queryParam("year", year);
+                                        }
+
+                                        builder.queryParam("limit", limit);
+
+                                        return builder.build();
+                                })
+                                .header(
+                                                HttpHeaders.AUTHORIZATION,
+                                                "Bearer " + accessToken)
+                                .retrieve()
+                                .body(new ParameterizedTypeReference<>() {
+                                });
+
+                return response != null ? response : List.of();
+        }
+
+        /**
          * Giữ overload cũ để không ảnh hưởng các nơi đang gọi phương thức này.
          */
         public List<TourPriceSearchResponse> searchReadyToursByMinimumPrice(
