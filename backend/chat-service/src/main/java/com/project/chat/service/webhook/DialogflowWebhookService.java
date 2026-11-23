@@ -165,6 +165,7 @@ public class DialogflowWebhookService {
      * Dialogflow trả giá theo triệu VNĐ.
      * Chuyển sang VNĐ để gọi Tour Service.
      */
+
     private BigDecimal getPriceInVnd(
             Map<String, Object> params,
             String parameterName) {
@@ -176,19 +177,21 @@ public class DialogflowWebhookService {
         try {
             Object value = params.get(parameterName);
 
-            BigDecimal priceInMillion;
+            BigDecimal price = value instanceof Number number
+                    ? new BigDecimal(number.toString())
+                    : new BigDecimal(value.toString());
 
-            if (value instanceof Number number) {
-                priceInMillion = new BigDecimal(number.toString());
-            } else {
-                priceInMillion = new BigDecimal(value.toString());
-            }
-
-            if (priceInMillion.signum() <= 0) {
+            if (price.signum() <= 0) {
                 return null;
             }
 
-            return priceInMillion.multiply(ONE_MILLION);
+            // Số nhỏ hơn 1 triệu được hiểu là đơn vị triệu VNĐ.
+            // Số từ 1 triệu trở lên được hiểu là VNĐ.
+            if (price.compareTo(ONE_MILLION) < 0) {
+                return price.multiply(ONE_MILLION);
+            }
+
+            return price;
 
         } catch (NumberFormatException ex) {
             return null;

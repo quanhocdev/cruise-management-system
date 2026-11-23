@@ -27,7 +27,8 @@ public class TourInternalSearchController {
     }
 
     /**
-     * Tìm tour theo giá khởi điểm tối thiểu.
+     * API cũ: Tìm tour READY theo giá tối thiểu.
+     * Giữ lại để không ảnh hưởng Chat Service hiện tại.
      */
     @GetMapping("/search-by-min-price")
     public List<TourPriceSearchResponse> searchReadyToursByMinimumPrice(
@@ -41,33 +42,32 @@ public class TourInternalSearchController {
     }
 
     /**
-     * Tìm tour theo giá khởi điểm tối đa.
+     * API mới: Tìm tour theo nhiều tiêu chí.
      */
-    @GetMapping("/search-by-max-price")
-    public List<TourPriceSearchResponse> searchReadyToursByMaximumPrice(
-            @RequestParam @DecimalMin(value = "0.01", message = "Giá tìm kiếm phải lớn hơn 0") BigDecimal maxPrice,
+    @GetMapping("/search")
+    public List<TourPriceSearchResponse> searchReadyToursByCriteria(
 
-            @RequestParam(defaultValue = "3") @Min(value = 1, message = "Limit tối thiểu là 1") @Max(value = 10, message = "Limit tối đa là 10") int limit) {
+            @RequestParam(required = false) @DecimalMin(value = "0.01", message = "Giá thấp nhất phải lớn hơn 0") BigDecimal minPrice,
 
-        return tourInternalSearchService.searchReadyToursByMaximumPrice(
-                maxPrice,
-                limit);
-    }
+            @RequestParam(required = false) @DecimalMin(value = "0.01", message = "Giá cao nhất phải lớn hơn 0") BigDecimal maxPrice,
 
-    /**
-     * Tìm tour theo khoảng giá khởi điểm.
-     */
-    @GetMapping("/search-by-price-range")
-    public List<TourPriceSearchResponse> searchReadyToursByPriceRange(
-            @RequestParam @DecimalMin(value = "0.01", message = "Giá thấp nhất phải lớn hơn 0") BigDecimal minPrice,
+            @RequestParam(required = false) String departurePoint,
 
-            @RequestParam @DecimalMin(value = "0.01", message = "Giá cao nhất phải lớn hơn 0") BigDecimal maxPrice,
+            @RequestParam(required = false) String destination,
 
-            @RequestParam(defaultValue = "3") @Min(value = 1, message = "Limit tối thiểu là 1") @Max(value = 10, message = "Limit tối đa là 10") int limit) {
+            @RequestParam(required = false) @Min(1) @Max(12) Integer month,
 
-        return tourInternalSearchService.searchReadyToursByPriceRange(
+            @RequestParam(required = false) @Min(1900) @Max(9999) Integer year,
+
+            @RequestParam(defaultValue = "3") @Min(1) @Max(10) int limit) {
+
+        return tourInternalSearchService.searchReadyToursByCriteria(
                 minPrice,
                 maxPrice,
+                departurePoint,
+                destination,
+                month,
+                year,
                 limit);
     }
 }
