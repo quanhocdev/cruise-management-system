@@ -1,5 +1,6 @@
 package com.project.cruise.android.viewmodel.passenger
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -45,8 +46,12 @@ class PassengerBookingViewModel(
                 )
             } catch (error: CancellationException) {
                 throw error
-            } catch (_: Exception) {
-                _state.value = _state.value.copy(loading = false, error = "Không tải được gói tour. Kiểm tra kết nối rồi thử lại.")
+            } catch (error: Exception) {
+                Log.e(TAG, "refreshPackage failed for tourId=$tourId, packageId=$packageId", error)
+                _state.value = _state.value.copy(
+                    loading = false,
+                    error = "Không tải được gói tour. Kiểm tra kết nối rồi thử lại."
+                )
             }
         }
     }
@@ -72,6 +77,8 @@ class PassengerBookingViewModel(
             } catch (error: CancellationException) {
                 throw error
             } catch (error: HttpException) {
+                val rawBody = runCatching { error.response()?.errorBody()?.string() }.getOrNull()
+                Log.e(TAG, "create booking HTTP ${error.code()} (${error.message()}): $rawBody", error)
                 _state.value = _state.value.copy(
                     submitting = false,
                     outcomeUnknown = error.code() >= 500 || error.code() == 408,
@@ -84,7 +91,8 @@ class PassengerBookingViewModel(
                         else -> "Chưa xác định được kết quả đặt tour. Hãy kiểm tra Booking của tôi để tránh tạo trùng."
                     }
                 )
-            } catch (_: Exception) {
+            } catch (error: Exception) {
+                Log.e(TAG, "create booking failed with exception: ${error.message}", error)
                 _state.value = _state.value.copy(
                     submitting = false,
                     outcomeUnknown = true,
@@ -92,6 +100,10 @@ class PassengerBookingViewModel(
                 )
             }
         }
+    }
+
+    companion object {
+        private const val TAG = "PassengerBookingVM"
     }
 }
 

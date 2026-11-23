@@ -4,14 +4,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.project.cruise.android.ui.common.PassengerCard
 import com.project.cruise.android.ui.common.PassengerPill
 import com.project.cruise.android.ui.common.passengerMoney
-import com.project.cruise.android.ui.components.*
 import com.project.cruise.android.ui.theme.*
 import java.math.BigDecimal
 

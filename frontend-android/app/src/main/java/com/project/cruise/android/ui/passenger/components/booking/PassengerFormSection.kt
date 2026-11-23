@@ -1,13 +1,20 @@
 package com.project.cruise.android.ui.passenger.components.booking
 
+import androidx.activity.compose.rememberLauncherForActivityLauncher
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.project.cruise.android.ui.theme.*
 import com.project.cruise.android.viewmodel.passenger.PassengerDraft
@@ -31,6 +38,14 @@ fun PassengerFormSection(
     onChange: (PassengerDraft) -> Unit,
     onRemove: () -> Unit,
 ) {
+    val photoPickerLauncher = rememberLauncherForActivityLauncher(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+            onChange(passenger.copy(idCardImageUri = uri))
+        }
+    }
+
     BookingSection(
         step = "03",
         title = "Hành khách ${index + 1}",
@@ -64,6 +79,48 @@ fun PassengerFormSection(
         }
         BookingTextField("Ghi chú giấy tờ", passenger.documentNote, enabled) {
             onChange(passenger.copy(documentNote = it))
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            OutlinedButton(
+                onClick = {
+                    photoPickerLauncher.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    )
+                },
+                enabled = enabled,
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(12.dp),
+            ) {
+                Text(
+                    text = if (passenger.idCardImageUri != null) "Đổi ảnh giấy tờ" else "Chọn ảnh giấy tờ từ thư viện",
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+
+            if (passenger.idCardImageUri != null) {
+                TextButton(
+                    onClick = { onChange(passenger.copy(idCardImageUri = null)) },
+                    enabled = enabled,
+                ) {
+                    Text("Bỏ ảnh", color = OceanCoral)
+                }
+            }
+        }
+
+        passenger.idCardImageUri?.let { uri ->
+            Text(
+                text = "Đã chọn ảnh: ${uri.lastPathSegment ?: uri}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
     }
 }

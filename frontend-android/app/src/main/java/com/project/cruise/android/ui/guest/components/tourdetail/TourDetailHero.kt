@@ -8,7 +8,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.project.cruise.android.ui.common.CruiseVisual
 import com.project.cruise.android.ui.common.PassengerPill
-import com.project.cruise.android.ui.components.*
 import com.project.cruise.android.ui.theme.*
 
 @Composable
