@@ -3,6 +3,7 @@ package com.project.chat.service.webhook;
 
 import com.project.chat.client.TourClient;
 import com.project.chat.dto.internal.TourPriceSearchResponse;
+
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -14,9 +15,15 @@ import java.util.Map;
 @Service
 public class DialogflowWebhookService {
 
-    private static final String INTENT_SEARCH_TOUR_BY_PRICE = "TimKiemTourTheoGia";
+    private static final String INTENT_SEARCH_TOUR_BY_MIN_PRICE = "TimKiemTourTheoGia";
+
+    private static final String INTENT_SEARCH_TOUR_BY_MAX_PRICE = "TimKiemTourTheoGiaCaoNhat";
+
+    private static final String INTENT_SEARCH_TOUR_BY_PRICE_RANGE = "TimKiemTourTheoKhoangGia";
 
     private static final int MAX_TOUR_RESULTS = 3;
+
+    private static final BigDecimal ONE_MILLION = BigDecimal.valueOf(1_000_000);
 
     private final TourClient tourClient;
 
@@ -28,72 +35,175 @@ public class DialogflowWebhookService {
             String intentName,
             Map<String, Object> params) {
 
-        if (INTENT_SEARCH_TOUR_BY_PRICE.equals(intentName)) {
-            return handleSearchTourByPrice(params);
+        if (INTENT_SEARCH_TOUR_BY_MIN_PRICE.equals(intentName)) {
+            return handleSearchTourByMinimumPrice(params);
+        }
+
+        if (INTENT_SEARCH_TOUR_BY_MAX_PRICE.equals(intentName)) {
+            return handleSearchTourByMaximumPrice(params);
+        }
+
+        if (INTENT_SEARCH_TOUR_BY_PRICE_RANGE.equals(intentName)) {
+            return handleSearchTourByPriceRange(params);
         }
 
         return "Xin lỗi, hệ thống chưa hỗ trợ nhánh này.";
     }
 
     /**
-     * Xử lý intent tìm tour theo giá.
-     *
-     * Dialogflow:
-     * Parameter: gia_tien
-     * Entity: @sys.number
-     *
-     * Giá người dùng nhập được hiểu là triệu VNĐ.
+     * Tìm tour có giá khởi điểm >= giá người dùng nhập.
      */
-    private String handleSearchTourByPrice(
+    private String handleSearchTourByMinimumPrice(
             Map<String, Object> params) {
 
-        if (params == null || params.get("gia_tien") == null) {
-            return "Dạ, bạn vui lòng cho mình biết mức giá tour mong muốn nhé.";
+        BigDecimal price = getPriceInVnd(params, "gia_tien");
+
+        if (price == null) {
+            return "Dạ, bạn vui lòng cho mình biết mức giá tối thiểu mong muốn nhé.";
         }
 
-        BigDecimal giaTienTrieu;
-
-        try {
-            Object giaObj = params.get("gia_tien");
-
-            if (giaObj instanceof Number number) {
-                giaTienTrieu = new BigDecimal(number.toString());
-            } else {
-                giaTienTrieu = new BigDecimal(giaObj.toString());
-            }
-
-        } catch (NumberFormatException ex) {
-            return "Dạ, mình chưa hiểu mức giá bạn cung cấp. "
-                    + "Bạn vui lòng nhập lại mức giá mong muốn nhé.";
-        }
-
-        if (giaTienTrieu.signum() <= 0) {
-            return "Dạ, mức giá tour cần lớn hơn 0 triệu đồng ạ.";
-        }
-
-        // Dialogflow nhận giá theo triệu VNĐ.
-        // Tour Service sử dụng giá theo VNĐ.
-        BigDecimal minPrice = giaTienTrieu.multiply(
-                BigDecimal.valueOf(1_000_000));
+        BigDecimal priceInMillion = price.divide(ONE_MILLION);
 
         List<TourPriceSearchResponse> tours = tourClient.searchReadyToursByMinimumPrice(
-                minPrice,
+                price,
                 MAX_TOUR_RESULTS);
 
         if (tours.isEmpty()) {
-            return "Dạ hiện tại không tìm thấy tour nào có mức giá từ "
-                    + formatPrice(giaTienTrieu)
+            return "Dạ hiện tại không tìm thấy tour nào có giá khởi điểm từ "
+                    + formatPrice(priceInMillion)
                     + " triệu trở lên ạ.";
         }
 
+        return buildTourResponse(
+                "Dạ, các tour có giá khởi điểm từ "
+                        + formatPrice(priceInMillion)
+                        + " triệu trở lên:",
+                tours);
+    }
+
+    /**
+     * Tìm tour có giá khởi điểm <= giá người dùng nhập.
+     */
+    private String handleSearchTourByMaximumPrice(
+            Map<String, Object> params) {
+
+        BigDecimal price = getPriceInVnd(params, "gia_tien");
+
+        if (price == null) {
+            return "Dạ, bạn vui lòng cho mình biết mức giá tối đa mong muốn nhé.";
+        }
+
+        BigDecimal priceInMillion = price.divide(ONE_MILLION);
+
+        List<TourPriceSearchResponse> tours = tourClient.searchReadyToursByMaximumPrice(
+                price,
+                MAX_TOUR_RESULTS);
+
+        if (tours.isEmpty()) {
+            return "Dạ hiện tại không tìm thấy tour nào có giá khởi điểm không quá "
+                    + formatPrice(priceInMillion)
+                    + " triệu ạ.";
+        }
+
+        return buildTourResponse(
+                "Dạ, các tour có giá khởi điểm không quá "
+                        + formatPrice(priceInMillion)
+                        + " triệu:",
+                tours);
+    }
+
+    /**
+     * Tìm tour có giá khởi điểm nằm trong khoảng người dùng nhập.
+     */
+    private String handleSearchTourByPriceRange(
+            Map<String, Object> params) {
+
+        BigDecimal minPrice = getPriceInVnd(
+                params,
+                "gia_thap_nhat");
+
+        BigDecimal maxPrice = getPriceInVnd(
+                params,
+                "gia_cao_nhat");
+
+        if (minPrice == null || maxPrice == null) {
+            return "Dạ, bạn vui lòng cho mình biết cả giá thấp nhất và giá cao nhất nhé.";
+        }
+
+        if (minPrice.compareTo(maxPrice) > 0) {
+            return "Dạ, mức giá thấp nhất không được lớn hơn mức giá cao nhất. "
+                    + "Bạn vui lòng kiểm tra lại khoảng giá nhé.";
+        }
+
+        BigDecimal minMillion = minPrice.divide(ONE_MILLION);
+        BigDecimal maxMillion = maxPrice.divide(ONE_MILLION);
+
+        List<TourPriceSearchResponse> tours = tourClient.searchReadyToursByPriceRange(
+                minPrice,
+                maxPrice,
+                MAX_TOUR_RESULTS);
+
+        if (tours.isEmpty()) {
+            return "Dạ hiện tại không tìm thấy tour nào có giá khởi điểm trong khoảng "
+                    + formatPrice(minMillion)
+                    + " đến "
+                    + formatPrice(maxMillion)
+                    + " triệu ạ.";
+        }
+
+        return buildTourResponse(
+                "Dạ, các tour có giá khởi điểm từ "
+                        + formatPrice(minMillion)
+                        + " đến "
+                        + formatPrice(maxMillion)
+                        + " triệu:",
+                tours);
+    }
+
+    /**
+     * Lấy parameter từ Dialogflow.
+     * Dialogflow trả giá theo triệu VNĐ.
+     * Chuyển sang VNĐ để gọi Tour Service.
+     */
+    private BigDecimal getPriceInVnd(
+            Map<String, Object> params,
+            String parameterName) {
+
+        if (params == null || params.get(parameterName) == null) {
+            return null;
+        }
+
+        try {
+            Object value = params.get(parameterName);
+
+            BigDecimal priceInMillion;
+
+            if (value instanceof Number number) {
+                priceInMillion = new BigDecimal(number.toString());
+            } else {
+                priceInMillion = new BigDecimal(value.toString());
+            }
+
+            if (priceInMillion.signum() <= 0) {
+                return null;
+            }
+
+            return priceInMillion.multiply(ONE_MILLION);
+
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+
+    private String buildTourResponse(
+            String title,
+            List<TourPriceSearchResponse> tours) {
+
         StringBuilder response = new StringBuilder();
 
-        response.append("Dạ, các tour có mức giá từ ")
-                .append(formatPrice(giaTienTrieu))
-                .append(" triệu trở lên:\n");
+        response.append(title).append("\n");
 
         for (TourPriceSearchResponse tour : tours) {
-
             response.append("- ")
                     .append(tour.tourName())
                     .append(" (Giá thấp nhất: ")
