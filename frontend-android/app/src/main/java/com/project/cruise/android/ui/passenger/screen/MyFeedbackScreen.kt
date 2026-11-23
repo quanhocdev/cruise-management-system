@@ -1,4 +1,4 @@
-package com.project.cruise.android.ui.screens.passenger
+package com.project.cruise.android.ui.passenger.screen
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*

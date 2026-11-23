@@ -68,50 +68,57 @@ fun MyBookingsContent(
     val filtered =
         remember(bookings, query, selected) { bookings.filterBookings(query, selected) }
     val isLoaded = state is BookingListState.Success
-
     PassengerPage(
-        "Chuyến đi của tôi",
-        "Theo dõi đặt chỗ và hành trình",
-        onBack,
-        bottomBar,
-    ) {
-        item { BookingSummaryHeader(bookings = bookings, isLoaded = isLoaded) }
-        item { BookingSearchField(query = query, onQueryChange = { query = it }) }
-        item {
-            BookingStatusFilters(
-                selected = selected,
-                onSelect = { selected = it },
-                resultCount = if (isLoaded) filtered.size else null,
-            )
-        }
-        when (state) {
-            BookingListState.Idle,
-            BookingListState.Loading -> item { PassengerLoading() }
-            is BookingListState.Error -> item { PassengerError(state.message, onRetry) }
-            is BookingListState.Success -> {
-                if (filtered.isEmpty())
-                    item {
-                        BookingListEmpty(
-                            hasBookings = bookings.isNotEmpty(),
-                            canBrowseTours = onBrowseTours != null,
-                            onBrowseTours = { (onBrowseTours ?: onBack)() },
-                            onClearFilters = {
-                                query = ""
-                                selected = null
-                            },
-                        )
-                    }
-                items(filtered, key = { it.id }) { booking ->
-                    val trip = tripsByBooking[booking.id]
-                    if (booking.status == BookingStatus.CONFIRMED && trip != null) {
-                        ConfirmedTripCard(booking, trip) { onBookingClick(booking.id) }
-                    } else {
-                        BookingCard(booking) { onBookingClick(booking.id) }
+        title = "Chuyến đi của tôi",
+        subtitle = "Theo dõi đặt chỗ và hành trình",
+        onBack = onBack,
+        bottomBar = bottomBar,
+        content = {
+            item { BookingSummaryHeader(bookings = bookings, isLoaded = isLoaded) }
+            item { BookingSearchField(query = query, onQueryChange = { query = it }) }
+            item {
+                BookingStatusFilters(
+                    selected = selected,
+                    onSelect = { selected = it },
+                    resultCount = if (isLoaded) filtered.size else null,
+                )
+            }
+            when (state) {
+                BookingListState.Idle,
+                BookingListState.Loading -> item { PassengerLoading() }
+                is BookingListState.Error -> item { PassengerError(state.message, onRetry) }
+                is BookingListState.Success -> {
+                    if (filtered.isEmpty())
+                        item {
+                            BookingListEmpty(
+                                hasBookings = bookings.isNotEmpty(),
+                                canBrowseTours = onBrowseTours != null,
+                                onBrowseTours = { (onBrowseTours ?: onBack)() },
+                                onClearFilters = {
+                                    query = ""
+                                    selected = null
+                                },
+                            )
+                        }
+                    items(filtered, key = { it.id }) { booking ->
+                        val trip = tripsByBooking[booking.id]
+                        if (booking.status == BookingStatus.CONFIRMED && trip != null) {
+                            ConfirmedTripCard(
+                                booking = booking,
+                                trip = trip,
+                                onClick = { onBookingClick(booking.id) },
+                            )
+                        } else {
+                            BookingCard(
+                                booking = booking,
+                                onClick = { onBookingClick(booking.id) },
+                            )
+                        }
                     }
                 }
             }
-        }
-    }
+        },
+    )
 }
 
 private fun List<BookingResponse>.filterBookings(

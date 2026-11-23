@@ -50,7 +50,7 @@ import com.project.cruise.android.viewmodel.passenger.PassengerBookedToursViewMo
 import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModel
 import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModelFactory
 import com.project.cruise.android.viewmodel.passenger.PassengerTripDetailViewModel
-import com.project.cruise.android.ui.screens.passenger.MyFeedbackScreen
+import com.project.cruise.android.ui.passenger.screen.MyFeedbackScreen
 import com.project.cruise.android.viewmodel.passenger.FeedbackViewModel
 
 fun NavGraphBuilder.passengerGraph(
@@ -546,7 +546,7 @@ fun NavGraphBuilder.passengerGraph(
             factory = com.project.cruise.android.viewmodel.passenger.FeedbackViewModel.Factory(source)
         )
 
-        com.project.cruise.android.ui.screens.passenger.MyFeedbackScreen(
+        MyFeedbackScreen(
             model = model,
             onBack = { navController.popBackStack() }
         )
