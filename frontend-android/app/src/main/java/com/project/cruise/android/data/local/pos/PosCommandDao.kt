@@ -1,3 +1,4 @@
+
 package com.project.cruise.android.data.local.pos
 
 import androidx.room.Dao
@@ -24,17 +25,23 @@ interface PosCommandDao {
         WHERE clientRequestId = :clientRequestId
         LIMIT 1
     """)
-    suspend fun findByClientRequestId(
-        clientRequestId: String
-    ): PosCommandEntity?
+    suspend fun findByClientRequestId(clientRequestId: String): PosCommandEntity?
 
+    /**
+     * Lấy các lệnh đang chờ đồng bộ.
+     */
     @Query("""
         SELECT * FROM pos_commands
         WHERE status = 'PENDING_SYNC'
+          AND operation = 'PRODUCT_USAGE'
         ORDER BY createdAt ASC
     """)
     suspend fun findWaitingForSync(): List<PosCommandEntity>
 
+    /**
+     * Chuyển PENDING_SYNC sang SYNCING một cách atomic.
+     * Trả về số dòng được cập nhật.
+     */
     @Query("""
         UPDATE pos_commands
         SET status = 'SYNCING',
@@ -42,11 +49,28 @@ interface PosCommandDao {
             updatedAt = :updatedAt,
             lastError = NULL
         WHERE localId = :localId
+          AND status = 'PENDING_SYNC'
     """)
-    suspend fun markSyncing(
+    suspend fun claimForSync(
         localId: String,
         updatedAt: Long = System.currentTimeMillis()
-    )
+    ): Int
+
+    /**
+     * Khôi phục các lệnh SYNCING bị bỏ dở do ứng dụng
+     * hoặc tiến trình bị dừng đột ngột.
+     */
+    @Query("""
+        UPDATE pos_commands
+        SET status = 'PENDING_SYNC',
+            updatedAt = :updatedAt,
+            lastError = 'Khôi phục lệnh đồng bộ bị gián đoạn'
+        WHERE status = 'SYNCING'
+          AND operation = 'PRODUCT_USAGE'
+    """)
+    suspend fun recoverInterruptedCommands(
+        updatedAt: Long = System.currentTimeMillis()
+    ): Int
 
     @Query("""
         UPDATE pos_commands
@@ -97,4 +121,20 @@ interface PosCommandDao {
         ORDER BY createdAt DESC
     """)
     fun observeAll(): Flow<List<PosCommandEntity>>
+
+
+    @Query("""
+    UPDATE pos_commands
+    SET status = 'PENDING_SYNC',
+        updatedAt = :updatedAt,
+        lastError = 'Khôi phục lệnh đồng bộ bị gián đoạn'
+    WHERE status = 'SYNCING'
+      AND operation = 'PRODUCT_USAGE'
+      AND updatedAt < :staleBefore
+""")
+    suspend fun recoverStaleCommands(
+        staleBefore: Long,
+        updatedAt: Long = System.currentTimeMillis()
+    ): Int
+
 }

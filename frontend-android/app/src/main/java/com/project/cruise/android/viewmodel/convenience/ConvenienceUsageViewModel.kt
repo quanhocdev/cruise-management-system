@@ -1,3 +1,4 @@
+
 package com.project.cruise.android.viewmodel.convenience
 
 import android.app.Application
@@ -8,6 +9,8 @@ import com.project.cruise.android.data.dto.convenience.ProductUsageResponse
 import com.project.cruise.android.data.dto.convenience.ServiceTourResponse
 import com.project.cruise.android.data.dto.convenience.ServiceUsageResponse
 import com.project.cruise.android.data.repository.convenience.ConvenienceRepository
+import com.project.cruise.android.data.repository.convenience.ProductUsageSubmissionResult
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -54,11 +57,13 @@ class ConvenienceUsageViewModel(
                     errorMessage = null
                 )
 
+            } catch (e: CancellationException) {
+                throw e
+
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    errorMessage =
-                        e.message ?: "Không thể tải tiện ích"
+                    errorMessage = e.message ?: "Không thể tải tiện ích"
                 )
             }
         }
@@ -83,29 +88,48 @@ class ConvenienceUsageViewModel(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
                 isSubmitting = true,
+                lastProductUsage = null,
                 errorMessage = null,
                 successMessage = null
             )
 
             try {
-                val response = repository.createProductUsage(
-                    nfcCardUid = nfcCardUid,
-                    productTourId = productTourId,
-                    quantity = quantity
-                )
+                when (
+                    val result = repository.createProductUsage(
+                        nfcCardUid = nfcCardUid,
+                        productTourId = productTourId,
+                        quantity = quantity
+                    )
+                ) {
+                    is ProductUsageSubmissionResult.Confirmed -> {
+                        _uiState.value = _uiState.value.copy(
+                            lastProductUsage = result.response,
+                            successMessage = "Đã ghi nhận sử dụng sản phẩm!",
+                            errorMessage = null
+                        )
+                    }
 
-                _uiState.value = _uiState.value.copy(
-                    isSubmitting = false,
-                    lastProductUsage = response,
-                    successMessage = "Đã ghi nhận sử dụng sản phẩm !",
-                    errorMessage = null
-                )
+                    ProductUsageSubmissionResult.Queued -> {
+                        _uiState.value = _uiState.value.copy(
+                            lastProductUsage = null,
+                            successMessage = "Giao dịch đã lưu trên thiết bị, chờ đồng bộ khi có mạng.",
+                            errorMessage = null
+                        )
+                    }
+                }
+
+            } catch (e: CancellationException) {
+                throw e
 
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
-                    isSubmitting = false,
-                    errorMessage =
-                        e.message ?: "Không thể ghi nhận sử dụng sản phẩm"
+                    errorMessage = e.message
+                        ?: "Không thể ghi nhận sử dụng sản phẩm"
+                )
+
+            } finally {
+                _uiState.value = _uiState.value.copy(
+                    isSubmitting = false
                 )
             }
         }
@@ -133,17 +157,23 @@ class ConvenienceUsageViewModel(
                 )
 
                 _uiState.value = _uiState.value.copy(
-                    isSubmitting = false,
                     lastServiceUsage = response,
-                    successMessage = "Đã ghi nhận sử dụng dịch vụ !",
+                    successMessage = "Đã ghi nhận sử dụng dịch vụ!",
                     errorMessage = null
                 )
 
+            } catch (e: CancellationException) {
+                throw e
+
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
-                    isSubmitting = false,
-                    errorMessage =
-                        e.message ?: "Không thể ghi nhận sử dụng dịch vụ"
+                    errorMessage = e.message
+                        ?: "Không thể ghi nhận sử dụng dịch vụ"
+                )
+
+            } finally {
+                _uiState.value = _uiState.value.copy(
+                    isSubmitting = false
                 )
             }
         }
