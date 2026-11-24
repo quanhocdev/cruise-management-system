@@ -26,7 +26,7 @@ public interface PosCommandRepository extends JpaRepository<PosCommand, UUID> {
 
     @Modifying
     @Query(value = """
-            INSERT INTO pos_commands (
+            INSERT INTO booking.pos_commands (
                 id,
                 client_request_id,
                 actor_id,
@@ -57,9 +57,9 @@ public interface PosCommandRepository extends JpaRepository<PosCommand, UUID> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
-                SELECT pc
-                FROM PosCommand pc
-                WHERE pc.clientRequestId = :clientRequestId
+            SELECT pc
+            FROM PosCommand pc
+            WHERE pc.clientRequestId = :clientRequestId
             """)
     Optional<PosCommand> findByClientRequestIdForUpdate(
             @Param("clientRequestId") UUID clientRequestId);
