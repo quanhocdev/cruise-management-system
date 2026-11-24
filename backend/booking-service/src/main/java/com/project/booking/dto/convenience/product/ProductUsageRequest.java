@@ -1,3 +1,4 @@
+
 package com.project.booking.dto.convenience.product;
 
 import jakarta.validation.constraints.Min;
@@ -8,12 +9,13 @@ import java.util.UUID;
 
 public record ProductUsageRequest(
 
-        @NotBlank(message = "NFC card UID không được để trống") String nfcCardUid,
+                @NotBlank(message = "NFC card UID không được để trống") String nfcCardUid,
 
-        @NotNull(message = "Product tour ID không được để trống") UUID productTourId,
+                @NotNull(message = "Product tour ID không được để trống") UUID productTourId,
 
-        @NotNull(message = "Số lượng không được để trống") @Min(value = 1, message = "Số lượng phải lớn hơn 0") Integer quantity
+                @NotNull(message = "Số lượng không được để trống") @Min(value = 1, message = "Số lượng phải lớn hơn 0") Integer quantity,
+
+                @NotNull(message = "Client request ID không được để trống") UUID clientRequestId
 
 ) {
-
 }

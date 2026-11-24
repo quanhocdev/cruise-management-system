@@ -1,11 +1,11 @@
 
-package com.project.tour.controller;
+package com.project.chat.controller;
 
-import com.project.tour.dto.chat.ChatMessageRequest;
-import com.project.tour.dto.chat.ChatMessageResponse;
-import com.project.tour.dto.chat.ChatSessionRequest;
-import com.project.tour.dto.chat.ChatWelcomeResponse;
-import com.project.tour.service.chat.ChatService;
+import com.project.chat.dto.chat.ChatMessageRequest;
+import com.project.chat.dto.chat.ChatMessageResponse;
+import com.project.chat.dto.chat.ChatSessionRequest;
+import com.project.chat.dto.chat.ChatWelcomeResponse;
+import com.project.chat.service.chat.ChatService;
 
 import jakarta.validation.Valid;
 

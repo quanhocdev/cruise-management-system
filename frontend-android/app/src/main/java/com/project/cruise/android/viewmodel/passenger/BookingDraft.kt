@@ -1,5 +1,8 @@
 package com.project.cruise.android.viewmodel.passenger
 
+import android.net.Uri
+import com.project.cruise.android.data.dto.booking.CreateBookingRequestDto
+import com.project.cruise.android.data.dto.booking.PassengerRequestDto
 import java.time.LocalDate
 
 data class PassengerDraft(
@@ -10,7 +13,8 @@ data class PassengerDraft(
     val email: String = "",
     val idCardType: String = "CCCD",
     val identificationNumber: String = "",
-    val documentNote: String = ""
+    val documentNote: String = "",
+    val idCardImageUri: Uri? = null,
 )
 
 data class BookingDraft(
@@ -61,4 +65,26 @@ data class BookingDraft(
         }
         return null
     }
+
+    fun toCreateRequest(tourId: String, tourPackageId: String): CreateBookingRequestDto =
+        CreateBookingRequestDto(
+            tourId = tourId,
+            tourPackageId = tourPackageId,
+            numberOfRooms = numberOfRooms,
+            primaryContactName = contactName.trim(),
+            primaryContactPhone = contactPhone.trim(),
+            passengers = passengers.map { p ->
+                PassengerRequestDto(
+                    fullName = p.fullName,
+                    dateOfBirth = p.dateOfBirth,
+                    gender = p.gender,
+                    phoneNumber = p.phone.trim().ifEmpty { null },
+                    email = p.email.trim().ifEmpty { null },
+                    idCardType = p.idCardType,
+                    identificationNumber = p.identificationNumber,
+                    documentNote = p.documentNote.trim().ifEmpty { null },
+                    idCardImageUri = p.idCardImageUri,
+                )
+            }
+        )
 }

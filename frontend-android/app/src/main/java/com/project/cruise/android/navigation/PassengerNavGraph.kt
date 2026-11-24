@@ -35,6 +35,8 @@ import com.project.cruise.android.viewmodel.chat.MessagingViewModel
 import com.project.cruise.android.viewmodel.chat.MessagingViewModelFactory
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.platform.LocalContext
+import com.project.cruise.android.MainActivity
 import com.project.cruise.android.data.repository.booking.ActivityRegistrationRepository
 import com.project.cruise.android.viewmodel.auth.MeState
 import com.project.cruise.android.ui.passenger.screen.BookingScreen
@@ -50,7 +52,7 @@ import com.project.cruise.android.viewmodel.passenger.PassengerBookedToursViewMo
 import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModel
 import com.project.cruise.android.viewmodel.passenger.PassengerBookingViewModelFactory
 import com.project.cruise.android.viewmodel.passenger.PassengerTripDetailViewModel
-import com.project.cruise.android.ui.screens.passenger.MyFeedbackScreen
+import com.project.cruise.android.ui.passenger.screen.MyFeedbackScreen
 import com.project.cruise.android.viewmodel.passenger.FeedbackViewModel
 
 fun NavGraphBuilder.passengerGraph(
@@ -320,12 +322,18 @@ fun NavGraphBuilder.passengerGraph(
         )
     ) { backStackEntry ->
         val tourId = backStackEntry.arguments?.getString("tourId") ?: return@composable
-        val packageId = backStackEntry.arguments?.getString("packageId") ?: return@composable
+        val packageId = backStackEntry.arguments?.getString( "packageId") ?: return@composable
 
-        val passengerBookingRepo = remember(tokenManager) {
+        val context = LocalContext.current
+
+        val passengerBookingRepo = remember(tokenManager, context) {
+            val bookingRepository = BookingRepository(
+                apiService = RetrofitClient.createBookingApiService(tokenManager),
+                appContext = context.applicationContext
+            )
             PassengerBookingRepository(
                 tourApi = RetrofitClient.createTourApiService(tokenManager),
-                bookingApi = RetrofitClient.createBookingApiService(tokenManager)
+                bookingRepository = bookingRepository
             )
         }
 
@@ -342,6 +350,15 @@ fun NavGraphBuilder.passengerGraph(
         BookingScreen(
             state = bookingState,
             onDraftChange = bookingViewModel::edit,
+            onPickPassengerImage = { passengerIndex ->
+                (context as? MainActivity)?.launchPickIdCardImage { uri ->
+                    val currentDraft = bookingViewModel.state.value.draft
+                    val updatedPassengers = currentDraft.passengers.mapIndexed { idx, p ->
+                        if (idx == passengerIndex) p.copy(idCardImageUri = uri) else p
+                    }
+                    bookingViewModel.edit(currentDraft.copy(passengers = updatedPassengers))
+                }
+            },
             onSubmit = bookingViewModel::submit,
             onRetry = bookingViewModel::refreshPackage,
             onBack = { navController.popBackStack() },
@@ -546,7 +563,7 @@ fun NavGraphBuilder.passengerGraph(
             factory = com.project.cruise.android.viewmodel.passenger.FeedbackViewModel.Factory(source)
         )
 
-        com.project.cruise.android.ui.screens.passenger.MyFeedbackScreen(
+        MyFeedbackScreen(
             model = model,
             onBack = { navController.popBackStack() }
         )

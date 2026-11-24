@@ -9,12 +9,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.project.cruise.android.ui.common.PassengerCard
-import com.project.cruise.android.ui.common.PassengerPill
-import com.project.cruise.android.ui.components.*
+import com.project.cruise.android.ui.passenger.components.mybookingdetail.ExpandableSection
 import com.project.cruise.android.ui.theme.*
 
 /** Model hiển thị cho lịch trình một ngày (tách khỏi DTO để component độc lập với data layer). */
@@ -34,20 +31,18 @@ data class ScheduleStopUi(
     val visitPrice: String?,
 )
 
+/** Mỗi ngày là một ngăn núp: bấm mới bung danh sách điểm dừng. */
 @Composable
-fun ScheduleDayCard(day: ScheduleDayUi) {
-    PassengerCard {
-        PassengerPill(day.badge)
-        Text(
-            day.name,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = OceanNavy,
-        )
+fun ScheduleDayCard(day: ScheduleDayUi, initiallyExpanded: Boolean = false) {
+    ExpandableSection(
+        title = day.badge,
+        subtitle = day.name,
+        trailing = day.stops.size.takeIf { it > 0 }?.let { "$it điểm dừng" },
+        initiallyExpanded = initiallyExpanded,
+    ) {
         day.description?.takeIf { it.isNotBlank() }?.let {
             Text(it, style = MaterialTheme.typography.bodyMedium, color = OceanSlate)
         }
-        if (day.stops.isNotEmpty()) HorizontalDivider(color = OceanLine)
         day.stops.forEachIndexed { index, stop ->
             StopRow(stop, isLast = index == day.stops.lastIndex)
         }
@@ -62,18 +57,17 @@ private fun StopRow(stop: ScheduleStopUi, isLast: Boolean) {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Box(
-                Modifier.size(28.dp).clip(CircleShape).background(OceanNavy),
+                Modifier.size(28.dp).clip(CircleShape).background(OceanGold),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     stop.order.ifBlank { "•" },
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White,
+                    color = OceanNavy,
                 )
             }
-            if (!isLast)
-                Box(Modifier.width(2.dp).weight(1f).background(OceanLine))
+            if (!isLast) Box(Modifier.width(2.dp).weight(1f).background(OceanGold.copy(alpha = .4f)))
         }
         Column(
             Modifier.weight(1f).padding(bottom = if (isLast) 0.dp else 14.dp),
@@ -86,18 +80,15 @@ private fun StopRow(stop: ScheduleStopUi, isLast: Boolean) {
                 color = OceanNavy,
             )
             stop.timeText?.let {
-                Text(it, color = OceanSlate, style = MaterialTheme.typography.bodySmall)
+                Text(it, color = OceanGoldDeep, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
             }
             stop.visitName?.let { visitName ->
-                Surface(
-                    color = OceanMintSoft.copy(alpha = .5f),
-                    shape = RoundedCornerShape(14.dp),
-                ) {
+                Surface(color = OceanGoldSoft, shape = RoundedCornerShape(14.dp)) {
                     Column(
                         Modifier.fillMaxWidth().padding(12.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                        Text(visitName, fontWeight = FontWeight.SemiBold, color = OceanTeal)
+                        Text(visitName, fontWeight = FontWeight.SemiBold, color = OceanNavy)
                         stop.visitDescription?.takeIf { it.isNotBlank() }?.let {
                             Text(it, color = OceanSlate, style = MaterialTheme.typography.bodySmall)
                         }
@@ -105,8 +96,8 @@ private fun StopRow(stop: ScheduleStopUi, isLast: Boolean) {
                             Text(
                                 it,
                                 style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = OceanNavy,
+                                fontWeight = FontWeight.Bold,
+                                color = OceanGoldDeep,
                             )
                         }
                     }

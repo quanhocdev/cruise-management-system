@@ -12,17 +12,27 @@ import com.project.booking.mapper.ProductUsageMapper;
 import com.project.booking.model.BenefitConsumption;
 import com.project.booking.model.Booking;
 import com.project.booking.model.BookingPassenger;
+import com.project.booking.model.PosCommand;
 import com.project.booking.model.ProductUsage;
+import com.project.booking.repository.PosCommandRepository;
 import com.project.booking.repository.ProductUsageRepository;
 import com.project.booking.service.common.benefit.BenefitConsumptionService;
 import com.project.booking.service.common.pricing.PricingCalculator;
 import com.project.common.event.ProductUsedEvent;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -30,7 +40,10 @@ import java.util.stream.Collectors;
 @Service
 public class ProductUsageServiceImpl implements ProductUsageService {
 
+        private static final String OPERATION_PRODUCT_USAGE = "PRODUCT_USAGE";
+
         private final ProductUsageRepository productUsageRepository;
+        private final PosCommandRepository posCommandRepository;
         private final ProductUsageMapper productUsageMapper;
         private final TourProductClient tourProductClient;
         private final BenefitConsumptionService benefitConsumptionService;
@@ -41,6 +54,7 @@ public class ProductUsageServiceImpl implements ProductUsageService {
 
         public ProductUsageServiceImpl(
                         ProductUsageRepository productUsageRepository,
+                        PosCommandRepository posCommandRepository,
                         ProductUsageMapper productUsageMapper,
                         TourProductClient tourProductClient,
                         BenefitConsumptionService benefitConsumptionService,
@@ -50,6 +64,7 @@ public class ProductUsageServiceImpl implements ProductUsageService {
                         ProductTourManagementClient productTourManagementClient) {
 
                 this.productUsageRepository = productUsageRepository;
+                this.posCommandRepository = posCommandRepository;
                 this.productUsageMapper = productUsageMapper;
                 this.tourProductClient = tourProductClient;
                 this.benefitConsumptionService = benefitConsumptionService;
@@ -61,24 +76,102 @@ public class ProductUsageServiceImpl implements ProductUsageService {
 
         @Override
         @Transactional
-        public ProductUsageResponse create(ProductUsageRequest request) {
+        public ProductUsageResponse create(
+                        ProductUsageRequest request,
+                        UUID actorId) {
 
-                // 1. Validate hành khách bằng NFC + booking
+                if (actorId == null) {
+                        throw new ResponseStatusException(
+                                        HttpStatus.UNAUTHORIZED,
+                                        "Không xác định được nhân viên thực hiện giao dịch.");
+                }
+
+                if (request.clientRequestId() == null) {
+                        throw new ResponseStatusException(
+                                        HttpStatus.BAD_REQUEST,
+                                        "Client request ID không được để trống.");
+                }
+
+                // 1. Tạo dấu nhận diện giao dịch.
+                String payloadHash = calculatePayloadHash(request);
+
+                // 2. Đăng ký giao dịch bằng unique constraint.
+                // Nếu request khác đang xử lý cùng UUID,
+                // PostgreSQL sẽ xử lý xung đột unique constraint.
+                int inserted = posCommandRepository.insertIfAbsent(
+                                UUID.randomUUID(),
+                                request.clientRequestId(),
+                                actorId,
+                                OPERATION_PRODUCT_USAGE,
+                                payloadHash);
+
+                // 3. Khóa và đọc PosCommand.
+                PosCommand command = posCommandRepository
+                                .findByClientRequestIdForUpdate(request.clientRequestId())
+                                .orElseThrow(() -> new IllegalStateException(
+                                                "Không tìm thấy POS command sau khi đăng ký."));
+
+                // 4. Không cho phép sử dụng lại UUID của nhân viên khác.
+                if (!actorId.equals(command.getActorId())) {
+                        throw new ResponseStatusException(
+                                        HttpStatus.CONFLICT,
+                                        "Mã giao dịch đã được sử dụng bởi tài khoản khác.");
+                }
+
+                // 5. Không cho phép dùng cùng UUID với nội dung khác.
+                if (!OPERATION_PRODUCT_USAGE.equals(command.getOperation())
+                                || !payloadHash.equals(command.getPayloadHash())) {
+
+                        throw new ResponseStatusException(
+                                        HttpStatus.CONFLICT,
+                                        "Mã giao dịch đã tồn tại với nội dung khác.");
+                }
+
+                // 6. Nếu giao dịch đã hoàn tất, trả lại kết quả cũ.
+                if (command.getStatus() == PosCommand.CommandStatus.COMPLETED) {
+
+                        if (command.getProductUsageId() == null) {
+                                throw new IllegalStateException(
+                                                "POS command đã hoàn tất nhưng thiếu ProductUsage ID.");
+                        }
+
+                        ProductUsage existingUsage = productUsageRepository
+                                        .findById(command.getProductUsageId())
+                                        .orElseThrow(() -> new IllegalStateException(
+                                                        "Không tìm thấy ProductUsage của giao dịch đã hoàn tất."));
+
+                        return productUsageMapper.toResponse(existingUsage);
+                }
+
+                // 7. PROCESSING không được xử lý lại tùy tiện.
+                // Với thiết kế cùng transaction, trạng thái này
+                // bình thường chưa được commit riêng lẻ.
+                if (command.getStatus() != PosCommand.CommandStatus.PROCESSING) {
+                        throw new ResponseStatusException(
+                                        HttpStatus.CONFLICT,
+                                        "Trạng thái giao dịch POS không hợp lệ.");
+                }
+
+                // Nếu insert bằng 0, đây là UUID đã tồn tại.
+                // Việc đọc bản ghi đã khóa ở trên sẽ cho biết kết quả.
+                // Không xử lý nghiệp vụ lần hai nếu command đã COMPLETED.
+
+                // 8. Validate hành khách bằng NFC + booking.
                 BookingPassenger bookingPassenger = productValidator
                                 .validateAndGetPassenger(request.nfcCardUid());
 
                 Booking booking = bookingPassenger.getBooking();
                 productValidator.validateBooking(booking);
 
-                // 2. Lấy thông tin ProductTour từ Tour Service
+                // 9. Lấy thông tin ProductTour từ Tour Service.
                 TourProductClient.ProductUsageInfo productInfo = tourProductClient.getProductUsageInfo(
                                 request.productTourId(),
                                 booking.getTourPackageId());
 
-                // 3. Validate nghiệp vụ sản phẩm
+                // 10. Validate nghiệp vụ sản phẩm.
                 productValidator.validateProduct(booking, productInfo);
 
-                // 4. Lấy thông tin benefit
+                // 11. Lấy thông tin benefit.
                 UUID packageBenefitId = productInfo.packageBenefitId();
 
                 int benefitQuantity = productInfo.benefitQuantity() == null
@@ -88,7 +181,7 @@ public class ProductUsageServiceImpl implements ProductUsageService {
                 BenefitConsumption benefitConsumption = null;
                 long usedBenefitQuantity = 0;
 
-                // 5. Lock BenefitConsumption để tránh sử dụng benefit đồng thời
+                // 12. Lock BenefitConsumption để tránh sử dụng benefit đồng thời.
                 if (packageBenefitId != null && benefitQuantity > 0) {
 
                         benefitConsumption = benefitConsumptionService.getForUpdate(
@@ -100,7 +193,7 @@ public class ProductUsageServiceImpl implements ProductUsageService {
                                         : benefitConsumption.getUsedQuantity();
                 }
 
-                // 6. Tính giá bằng PricingCalculator dùng chung
+                // 13. Tính giá bằng PricingCalculator dùng chung.
                 var pricingResult = pricingCalculator.calculate(
                                 productInfo.unitPrice(),
                                 productInfo.discountPercent(),
@@ -108,7 +201,7 @@ public class ProductUsageServiceImpl implements ProductUsageService {
                                 benefitQuantity,
                                 usedBenefitQuantity);
 
-                // 7. Cập nhật số lượng benefit đã được áp dụng
+                // 14. Cập nhật số lượng benefit đã được áp dụng.
                 if (benefitConsumption != null
                                 && pricingResult.discountedQuantity() > 0) {
 
@@ -117,7 +210,7 @@ public class ProductUsageServiceImpl implements ProductUsageService {
                                         pricingResult.discountedQuantity());
                 }
 
-                // 8. Lưu ProductUsage với snapshot giá tại thời điểm sử dụng
+                // 15. Lưu ProductUsage với snapshot giá tại thời điểm sử dụng.
                 ProductUsage usage = new ProductUsage();
                 usage.setBookingPassenger(bookingPassenger);
                 usage.setProductTourId(request.productTourId());
@@ -129,7 +222,7 @@ public class ProductUsageServiceImpl implements ProductUsageService {
 
                 ProductUsage savedUsage = productUsageRepository.save(usage);
 
-                // 9. Lấy tên sản phẩm từ Tour Service
+                // 16. Lấy tên sản phẩm từ Tour Service.
                 List<ProductUsageManagementInfo> productInfos = productTourManagementClient
                                 .getProductUsageInfo(List.of(request.productTourId()));
 
@@ -137,9 +230,16 @@ public class ProductUsageServiceImpl implements ProductUsageService {
                                 .filter(info -> request.productTourId().equals(info.productTourId()))
                                 .findFirst()
                                 .orElseThrow(() -> new IllegalStateException(
-                                                "Không tìm thấy thông tin sản phẩm: " + request.productTourId()));
+                                                "Không tìm thấy thông tin sản phẩm: "
+                                                                + request.productTourId()));
 
-                // 10. Gửi event sau khi transaction commit
+                // 17. Đánh dấu command hoàn tất trong cùng transaction.
+                command.setProductUsageId(savedUsage.getId());
+                command.setStatus(PosCommand.CommandStatus.COMPLETED);
+
+                posCommandRepository.save(command);
+
+                // 18. Chỉ gửi event cho giao dịch mới.
                 productUsedEventProducer.sendAfterCommit(
                                 new ProductUsedEvent(
                                                 booking.getId(),
@@ -152,7 +252,32 @@ public class ProductUsageServiceImpl implements ProductUsageService {
                                                 savedUsage.getUsedAt()));
 
                 return productUsageMapper.toResponse(savedUsage);
+        }
 
+        private String calculatePayloadHash(ProductUsageRequest request) {
+
+                String nfcCardUid = request.nfcCardUid();
+                String productTourId = request.productTourId().toString();
+                String quantity = request.quantity().toString();
+
+                // Length-prefix để tránh nhập nhằng khi ghép các trường.
+                String payload = nfcCardUid.length() + ":" + nfcCardUid
+                                + productTourId.length() + ":" + productTourId
+                                + quantity.length() + ":" + quantity;
+
+                try {
+                        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+
+                        byte[] hash = digest.digest(
+                                        payload.getBytes(StandardCharsets.UTF_8));
+
+                        return HexFormat.of().formatHex(hash);
+
+                } catch (NoSuchAlgorithmException exception) {
+                        throw new IllegalStateException(
+                                        "Không thể tạo mã kiểm tra giao dịch.",
+                                        exception);
+                }
         }
 
         @Override
@@ -191,7 +316,7 @@ public class ProductUsageServiceImpl implements ProductUsageService {
 
                 List<UUID> productTourIds = usages.stream()
                                 .map(ProductUsage::getProductTourId)
-                                .filter(java.util.Objects::nonNull)
+                                .filter(Objects::nonNull)
                                 .distinct()
                                 .toList();
 

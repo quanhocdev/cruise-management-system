@@ -1,129 +1,98 @@
 package com.project.cruise.android.ui.guest.components.tourdetail
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.project.cruise.android.data.dto.tour.PortInfoResponse
 import com.project.cruise.android.ui.common.PassengerCard
 import com.project.cruise.android.ui.common.PassengerGlyph
 import com.project.cruise.android.ui.common.PassengerIcon
+import com.project.cruise.android.ui.passenger.components.mybookingdetail.GoldBadge
 import com.project.cruise.android.ui.theme.*
 
+/** Tab "Thông tin": du thuyền và hai đầu hành trình (cảng check-in → cảng kết thúc). */
 @Composable
 fun TourInfoCard(
     cruiseName: String?,
-    startDate: String,
-    endDate: String,
     cruiseCapacity: Number?,
     departurePort: PortInfoResponse? = null,
     arrivalPort: PortInfoResponse? = null,
 ) {
-    PassengerCard {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            PassengerIcon(PassengerGlyph.EXPLORE, OceanTeal, Modifier.size(24.dp))
-            Column(Modifier.weight(1f)) {
-                Text("Du thuyền", style = MaterialTheme.typography.labelSmall, color = OceanSlate)
+    Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
+        PassengerCard {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Box(
+                    Modifier.size(46.dp).clip(CircleShape).background(OceanNavy),
+                    contentAlignment = Alignment.Center,
+                ) { PassengerIcon(PassengerGlyph.EXPLORE, OceanGold, Modifier.size(24.dp)) }
+                Column(Modifier.weight(1f)) {
+                    Text("Du thuyền", style = MaterialTheme.typography.labelSmall, color = OceanSlate)
+                    Text(
+                        cruiseName?.takeIf { it.isNotBlank() } ?: "Đang cập nhật",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = OceanNavy,
+                    )
+                }
+                cruiseCapacity?.let { GoldBadge("$it khách") }
+            }
+        }
+
+        if (departurePort != null || arrivalPort != null) {
+            PassengerCard {
                 Text(
-                    cruiseName?.takeIf { it.isNotBlank() } ?: "Đang cập nhật",
+                    "Hành trình đi qua",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = OceanNavy,
                 )
-            }
-        }
-        HorizontalDivider(color = OceanLine)
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            DateTile("Khởi hành", startDate, Modifier.weight(1f))
-            DateTile("Kết thúc", endDate, Modifier.weight(1f))
-        }
-
-        // --- Hiển thị thông tin Cảng check-in & Cảng kết thúc ---
-        if (departurePort != null || arrivalPort != null) {
-            HorizontalDivider(color = OceanLine)
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                departurePort?.let { port ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        PassengerIcon(PassengerGlyph.EXPLORE, OceanTeal, Modifier.size(20.dp))
-                        Column {
-                            Text("Điểm tập trung check-in", style = MaterialTheme.typography.labelSmall, color = OceanSlate)
-                            Text(
-                                "${port.name} (${port.city})",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = OceanNavy,
-                            )
-                            port.address?.takeIf { it.isNotBlank() }?.let {
-                                Text(it, style = MaterialTheme.typography.bodySmall, color = OceanSlate)
-                            }
-                        }
-                    }
+                departurePort?.let {
+                    PortRow(
+                        label = "Điểm tập trung check-in",
+                        name = "${it.name} (${it.city})",
+                        address = it.address,
+                        marker = OceanGold,
+                        isLast = arrivalPort == null,
+                    )
                 }
-
-                arrivalPort?.let { port ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        PassengerIcon(PassengerGlyph.ARROW, OceanTeal, Modifier.size(20.dp))
-                        Column {
-                            Text("Cảng kết thúc hành trình", style = MaterialTheme.typography.labelSmall, color = OceanSlate)
-                            Text(
-                                "${port.name} (${port.city})",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = OceanNavy,
-                            )
-                        }
-                    }
+                arrivalPort?.let {
+                    PortRow(
+                        label = "Cảng kết thúc hành trình",
+                        name = "${it.name} (${it.city})",
+                        address = null,
+                        marker = OceanNavy,
+                        isLast = true,
+                    )
                 }
             }
-        }
-
-        cruiseCapacity?.let {
-            Text(
-                "Sức chứa du thuyền · $it khách",
-                color = OceanSlate,
-                style = MaterialTheme.typography.bodySmall,
-            )
         }
     }
 }
 
 @Composable
-private fun DateTile(label: String, value: String, modifier: Modifier = Modifier) {
-    Surface(
-        modifier = modifier,
-        color = OceanMintSoft.copy(alpha = .5f),
-        shape = RoundedCornerShape(16.dp),
-    ) {
+private fun PortRow(label: String, name: String, address: String?, marker: Color, isLast: Boolean) {
+    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Box(Modifier.size(14.dp).clip(CircleShape).background(marker))
+            if (!isLast) Box(Modifier.width(2.dp).weight(1f).background(OceanLine))
+        }
         Column(
-            Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+            Modifier.weight(1f).padding(bottom = if (isLast) 0.dp else 16.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                PassengerIcon(PassengerGlyph.CALENDAR, OceanTeal, Modifier.size(16.dp))
-                Text(label, style = MaterialTheme.typography.labelSmall, color = OceanSlate)
+            Text(label, style = MaterialTheme.typography.labelSmall, color = OceanGoldDeep, fontWeight = FontWeight.Bold)
+            Text(name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = OceanNavy)
+            address?.takeIf { it.isNotBlank() }?.let {
+                Text(it, style = MaterialTheme.typography.bodySmall, color = OceanSlate)
             }
-            Text(
-                value,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = OceanNavy,
-            )
         }
     }
 }

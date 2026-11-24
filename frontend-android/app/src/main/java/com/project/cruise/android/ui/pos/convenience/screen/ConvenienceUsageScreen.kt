@@ -66,7 +66,9 @@ fun ConvenienceUsageScreen(
         isSubmitting = uiState.isSubmitting,
         errorMessage = uiState.errorMessage,
         successMessage = uiState.successMessage,
-        confirmEnabled = hasSelection && !uiState.isLoading,
+        confirmEnabled = hasSelection &&
+                !uiState.isLoading &&
+                !uiState.isSubmitting,
         onConfirm = {
             if (isProduct) {
                 selectedProduct?.let { product ->

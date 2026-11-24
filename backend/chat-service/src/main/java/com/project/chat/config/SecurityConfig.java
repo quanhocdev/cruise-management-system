@@ -58,15 +58,21 @@ public class SecurityConfig {
     /**
      * Ưu tiên Bearer token, sau đó mới đọc accessToken cookie.
      */
+
     @Bean
     public BearerTokenResolver bearerTokenResolver() {
-
         return request -> {
+
+            // Dialogflow webhook xác thực bằng X-Webhook-Secret,
+            // không sử dụng JWT hoặc accessToken cookie.
+            if ("POST".equalsIgnoreCase(request.getMethod())
+                    && "/api/webhook".equals(request.getServletPath())) {
+                return null;
+            }
 
             String authorization = request.getHeader("Authorization");
 
-            if (authorization != null
-                    && authorization.startsWith("Bearer ")) {
+            if (authorization != null && authorization.startsWith("Bearer ")) {
                 return authorization.substring(7);
             }
 

@@ -45,14 +45,6 @@ fun LazyListScope.bookingTab(
 ) {
     item(key = "b-summary") { TripBookingSummary(trip.booking, booking, trip.matchedPackage?.name) }
     item(key = "b-qr") { QrToggle(booking.status, access, onRefreshBooking) }
-    item(key = "b-actions") {
-        BookingActionButtons(
-            onActivities = onActivities,
-            onSpending = onSpending,
-            onBill = onBill,
-            onFeedback = onFeedback,
-        )
-    }
     item(key = "b-contact") {
         val b = trip.booking
         val name = b?.primaryContactName ?: booking.primaryContactName
