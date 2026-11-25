@@ -1,0 +1,167 @@
+Baseline v1, đo ngày 25/11/2026
+Docker local, 3 hành khách, mỗi người 1 ảnh, upload Cloudinary
+3 lần đo (bỏ lần khởi động nguội), TB tổng create() = 5370 ms
+
+>>> [BOOKING QUEUE] ACCEPTED REQUEST ID: 96f6900c-cbb9-4ae7-a551-17f895231f20
+booking-service  | 2026-11-25T10:48:27.162Z  INFO 122 --- [booking-service] [ng-queue-worker] c.p.b.service.queue.BookingQueueManager  : [BOOKING QUEUE] PROCESSING | requestId=96f6900c-cbb9-4ae7-a551-17f895231f20 | userId=deb877af-2d8e-4bda-9078-b4a594ad25e6 | receivedAt=2026-11-25T10:48:27.160982089Z | processingStartedAt=2026-11-25T10:48:27.162928185Z | waiting=0
+booking-service  | >>> [SERVICE] Bắt đầu xử lý create booking theo kho phòng...
+booking-service  | >>> [OAUTH2 CACHE] Không tìm thấy token trong Caffeine
+booking-service  | >>> [OAUTH2] Đang gọi Auth Service để lấy token mới...
+booking-service  | >>> [OAUTH2] POST /oauth2/token
+booking-service  | 2026-11-25T10:48:27.167Z DEBUG 122 --- [booking-service] [ng-queue-worker] o.s.web.client.DefaultRestClient         : Writing [{grant_type=[client_credentials], scope=[tour.read]}] as "application/x-www-form-urlencoded" with org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter
+booking-service  | 2026-11-25T10:48:27.302Z DEBUG 122 --- [booking-service] [ng-queue-worker] o.s.web.client.DefaultRestClient         : Reading to [com.project.booking.client.ServiceTokenClient$ServiceTokenResponse]
+booking-service  | >>> [OAUTH2 CACHE] Đã lưu service token vào Caffeine | expires_in=1799s
+booking-service  | 2026-11-25T10:48:27.327Z DEBUG 122 --- [booking-service] [ng-queue-worker] o.s.web.client.DefaultRestClient         : Reading to [com.project.booking.client.TourPackageClient$BookingPackageInfo]
+booking-service  | >>> [TIMING] 1. goi tour-package: 164 ms
+booking-service  | >>> [OAUTH2 CACHE] Lấy service token từ Caffeine
+booking-service  | 2026-11-25T10:48:27.342Z DEBUG 122 --- [booking-service] [ng-queue-worker] o.s.web.client.DefaultRestClient         : Reading to [com.project.booking.client.TourClient$TourInfo]
+booking-service  | >>> [TIMING] 2. goi tour-service: 14 ms
+booking-service  | >>> [TIMING] 3. redis tru phong: 6 ms
+booking-service  | 2026-11-25T10:48:27.351Z DEBUG 122 --- [booking-service] [ng-queue-worker] org.hibernate.SQL                        : select b1_0.id from booking.bookings b1_0 where b1_0.booking_code=? fetch first ? rows only
+booking-service  | 2026-11-25T10:48:27.355Z DEBUG 122 --- [booking-service] [ng-queue-worker] org.hibernate.SQL                        : insert into booking.bookings (booking_code,created_at,created_by_user_id,number_of_rooms,number_passengers,primary_contact_email,primary_contact_name,primary_contact_phone,status,total_amount,tour_id,tour_package_id,updated_at) values (?,?,?,?,?,?,?,?,?,?,?,?,?)
+booking-service  | >>> [TIMING] 4. luu booking: 9 ms
+booking-service  | >>> [SERVICE] Đã lưu xong Booking ID: 18
+booking-service  | CloudinaryFileStorageService
+booking-service  | Folder = passengers
+booking-service  | File = suachua.jpg
+booking-service  | >>> [TIMING]    upload 1 anh: 1677 ms
+booking-service  | 2026-11-25T10:48:29.036Z DEBUG 122 --- [booking-service] [ng-queue-worker] org.hibernate.SQL                        : insert into booking.passengers (created_at,date_of_birth,document_note,email,full_name,gender,id_card_image_public_id,id_card_image_url,id_card_type,identification_number,phone_number,updated_at) values (?,?,?,?,?,?,?,?,?,?,?,?)
+booking-service  | 2026-11-25T10:48:29.039Z DEBUG 122 --- [booking-service] [ng-queue-worker] org.hibernate.SQL                        : insert into booking.booking_passengers (booking_id,checked_in_at,checked_out_at,created_at,nfc_card_uid,passenger_id,room_id,status,updated_at) values (?,?,?,?,?,?,?,?,?)
+booking-service  | CloudinaryFileStorageService
+booking-service  | Folder = passengers
+booking-service  | File = suachua.jpg
+booking-service  | >>> [TIMING]    upload 1 anh: 1135 ms
+booking-service  | 2026-11-25T10:48:30.178Z DEBUG 122 --- [booking-service] [ng-queue-worker] org.hibernate.SQL                        : insert into booking.passengers (created_at,date_of_birth,document_note,email,full_name,gender,id_card_image_public_id,id_card_image_url,id_card_type,identification_number,phone_number,updated_at) values (?,?,?,?,?,?,?,?,?,?,?,?)
+booking-service  | 2026-11-25T10:48:30.182Z DEBUG 122 --- [booking-service] [ng-queue-worker] org.hibernate.SQL                        : insert into booking.booking_passengers (booking_id,checked_in_at,checked_out_at,created_at,nfc_card_uid,passenger_id,room_id,status,updated_at) values (?,?,?,?,?,?,?,?,?)
+booking-service  | CloudinaryFileStorageService
+booking-service  | Folder = passengers
+booking-service  | File = Caphe.jpg
+booking-service  | >>> [TIMING]    upload 1 anh: 2006 ms
+booking-service  | 2026-11-25T10:48:32.191Z DEBUG 122 --- [booking-service] [ng-queue-worker] org.hibernate.SQL                        : insert into booking.passengers (created_at,date_of_birth,document_note,email,full_name,gender,id_card_image_public_id,id_card_image_url,id_card_type,identification_number,phone_number,updated_at) values (?,?,?,?,?,?,?,?,?,?,?,?)
+booking-service  | 2026-11-25T10:48:32.194Z DEBUG 122 --- [booking-service] [ng-queue-worker] org.hibernate.SQL                        : insert into booking.booking_passengers (booking_id,checked_in_at,checked_out_at,created_at,nfc_card_uid,passenger_id,room_id,status,updated_at) values (?,?,?,?,?,?,?,?,?)
+booking-service  | >>> [TIMING] 5. luu tat ca hanh khach (gom upload): 4838 ms
+booking-service  | >>> [TIMING] 6. kafka send: 5 ms
+booking-service  | >>> [KAFKA PRODUCER] Đã bắn event PENDING_PAYMENT cho Booking ID: 18
+booking-service  | 2026-11-25T10:48:32.203Z DEBUG 122 --- [booking-service] [ng-queue-worker] org.hibernate.SQL                        : select bp1_0.id,bp1_0.booking_id,bp1_0.checked_in_at,bp1_0.checked_out_at,bp1_0.created_at,bp1_0.nfc_card_uid,bp1_0.passenger_id,bp1_0.room_id,bp1_0.status,bp1_0.updated_at from booking.booking_passengers bp1_0 where bp1_0.booking_id=? order by bp1_0.id
+booking-service  | >>> [TIMING] 7. lay hanh khach + mapper: 3 ms
+booking-service  | >>> [TIMING] TONG create(): 5042 ms
+booking-service  | >>> [TIMING] TONG tu luc controller nhan: 5071 ms
+booking-service  | 2026-11-25T10:48:32.229Z  INFO 122 --- [booking-service] [ng-queue-worker] c.p.b.service.queue.BookingQueueManager  : [BOOKING QUEUE] COMPLETED | requestId=96f6900c-cbb9-4ae7-a551-17f895231f20 | userId=deb877af-2d8e-4bda-9078-b4a594ad25e6 | receivedAt=2026-11-25T10:48:27.160982089Z | processingStartedAt=2026-11-25T10:48:27.162928185Z | completedAt=2026-11-25T10:48:32.229530211Z | waitingDurationMs=1 | processingDurationMs=5066 | totalDurationMs=5068
+booking-service  | 2026-11-25T10:48:32.230Z  INFO 122 --- [booking-service] [ng-queue-worker] c.p.b.service.queue.BookingQueueManager  : [BOOKING QUEUE] SLOT RELEASED | requestId=96f6900c-cbb9-4ae7-a551-17f895231f20 | active=false | waiting=0
+booking-service  | 2026-11-25T10:48:32.230Z DEBUG 122 --- [booking-service] [nio-8082-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+booking-service  | 2026-11-25T10:48:32.231Z DEBUG 122 --- [booking-service] [nio-8082-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [BookingResponse[id=18, createdByUserId=deb877af-2d8e-4bda-9078-b4a594ad25e6, tourId=1d64f379-199e-41 (truncated)...]
+booking-service  | 2026-11-25T10:48:32.233Z DEBUG 122 --- [booking-service] [nio-8082-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+
+booking-service  | 2026-11-25T10:55:51.221Z DEBUG 122 --- [booking-service] [nio-8082-exec-7] o.s.web.servlet.DispatcherServlet        : POST "/api/passengers/bookings", parameters={multipart}
+booking-service  | 2026-11-25T10:55:51.232Z DEBUG 122 --- [booking-service] [nio-8082-exec-7] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.project.booking.controller.passenger.BookingController#create(CreateBookingRequest, Principal)
+booking-service  | >>> [BOOKING QUEUE] RECEIVED REQUEST
+booking-service  | >>> User ID: deb877af-2d8e-4bda-9078-b4a594ad25e6
+booking-service  | >>> Email: minhquanthcs257@gmail.com
+booking-service  | 2026-11-25T10:55:51.236Z  INFO 122 --- [booking-service] [nio-8082-exec-7] c.p.b.service.queue.BookingQueueManager  : [BOOKING QUEUE] ACCEPTED | requestId=eacab8c2-3078-4b32-9d35-23362c6bdca3 | userId=deb877af-2d8e-4bda-9078-b4a594ad25e6 | status=WAITING | active=false | waiting=1
+booking-service  | >>> [BOOKING QUEUE] ACCEPTED REQUEST ID: eacab8c2-3078-4b32-9d35-23362c6bdca3
+booking-service  | 2026-11-25T10:55:51.237Z  INFO 122 --- [booking-service] [ng-queue-worker] c.p.b.service.queue.BookingQueueManager  : [BOOKING QUEUE] PROCESSING | requestId=eacab8c2-3078-4b32-9d35-23362c6bdca3 | userId=deb877af-2d8e-4bda-9078-b4a594ad25e6 | receivedAt=2026-11-25T10:55:51.236287492Z | processingStartedAt=2026-11-25T10:55:51.237580834Z | waiting=0
+booking-service  | >>> [SERVICE] Bắt đầu xử lý create booking theo kho phòng...
+booking-service  | >>> [OAUTH2 CACHE] Không tìm thấy token trong Caffeine
+booking-service  | >>> [OAUTH2] Đang gọi Auth Service để lấy token mới...
+booking-service  | >>> [OAUTH2] POST /oauth2/token
+booking-service  | 2026-11-25T10:55:51.240Z DEBUG 122 --- [booking-service] [ng-queue-worker] o.s.web.client.DefaultRestClient         : Writing [{grant_type=[client_credentials], scope=[tour.read]}] as "application/x-www-form-urlencoded" with org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter
+booking-service  | 2026-11-25T10:55:51.401Z DEBUG 122 --- [booking-service] [ng-queue-worker] o.s.web.client.DefaultRestClient         : Reading to [com.project.booking.client.ServiceTokenClient$ServiceTokenResponse]
+booking-service  | >>> [OAUTH2 CACHE] Đã lưu service token vào Caffeine | expires_in=1799s
+booking-service  | 2026-11-25T10:55:51.418Z DEBUG 122 --- [booking-service] [ng-queue-worker] o.s.web.client.DefaultRestClient         : Reading to [com.project.booking.client.TourPackageClient$BookingPackageInfo]
+booking-service  | >>> [TIMING] 1. goi tour-package: 180 ms
+booking-service  | >>> [OAUTH2 CACHE] Lấy service token từ Caffeine
+booking-service  | 2026-11-25T10:55:51.435Z DEBUG 122 --- [booking-service] [ng-queue-worker] o.s.web.client.DefaultRestClient         : Reading to [com.project.booking.client.TourClient$TourInfo]
+booking-service  | >>> [TIMING] 2. goi tour-service: 17 ms
+booking-service  | >>> [TIMING] 3. redis tru phong: 4 ms
+booking-service  | 2026-11-25T10:55:51.443Z DEBUG 122 --- [booking-service] [ng-queue-worker] org.hibernate.SQL                        : select b1_0.id from booking.bookings b1_0 where b1_0.booking_code=? fetch first ? rows only
+booking-service  | 2026-11-25T10:55:51.447Z DEBUG 122 --- [booking-service] [ng-queue-worker] org.hibernate.SQL                        : insert into booking.bookings (booking_code,created_at,created_by_user_id,number_of_rooms,number_passengers,primary_contact_email,primary_contact_name,primary_contact_phone,status,total_amount,tour_id,tour_package_id,updated_at) values (?,?,?,?,?,?,?,?,?,?,?,?,?)
+booking-service  | >>> [TIMING] 4. luu booking: 9 ms
+booking-service  | >>> [SERVICE] Đã lưu xong Booking ID: 19
+booking-service  | CloudinaryFileStorageService
+booking-service  | Folder = passengers
+booking-service  | File = suachua.jpg
+booking-service  | >>> [TIMING]    upload 1 anh: 1741 ms
+booking-service  | 2026-11-25T10:55:53.194Z DEBUG 122 --- [booking-service] [ng-queue-worker] org.hibernate.SQL                        : insert into booking.passengers (created_at,date_of_birth,document_note,email,full_name,gender,id_card_image_public_id,id_card_image_url,id_card_type,identification_number,phone_number,updated_at) values (?,?,?,?,?,?,?,?,?,?,?,?)
+booking-service  | 2026-11-25T10:55:53.197Z DEBUG 122 --- [booking-service] [ng-queue-worker] org.hibernate.SQL                        : insert into booking.booking_passengers (booking_id,checked_in_at,checked_out_at,created_at,nfc_card_uid,passenger_id,room_id,status,updated_at) values (?,?,?,?,?,?,?,?,?)
+booking-service  | CloudinaryFileStorageService
+booking-service  | Folder = passengers
+booking-service  | File = suachua.jpg
+booking-service  | >>> [TIMING]    upload 1 anh: 1449 ms
+booking-service  | 2026-11-25T10:55:54.649Z DEBUG 122 --- [booking-service] [ng-queue-worker] org.hibernate.SQL                        : insert into booking.passengers (created_at,date_of_birth,document_note,email,full_name,gender,id_card_image_public_id,id_card_image_url,id_card_type,identification_number,phone_number,updated_at) values (?,?,?,?,?,?,?,?,?,?,?,?)
+booking-service  | 2026-11-25T10:55:54.651Z DEBUG 122 --- [booking-service] [ng-queue-worker] org.hibernate.SQL                        : insert into booking.booking_passengers (booking_id,checked_in_at,checked_out_at,created_at,nfc_card_uid,passenger_id,room_id,status,updated_at) values (?,?,?,?,?,?,?,?,?)
+booking-service  | CloudinaryFileStorageService
+booking-service  | Folder = passengers
+booking-service  | File = Caphe.jpg
+booking-service  | >>> [TIMING]    upload 1 anh: 1866 ms
+booking-service  | 2026-11-25T10:55:56.520Z DEBUG 122 --- [booking-service] [ng-queue-worker] org.hibernate.SQL                        : insert into booking.passengers (created_at,date_of_birth,document_note,email,full_name,gender,id_card_image_public_id,id_card_image_url,id_card_type,identification_number,phone_number,updated_at) values (?,?,?,?,?,?,?,?,?,?,?,?)
+booking-service  | 2026-11-25T10:55:56.522Z DEBUG 122 --- [booking-service] [ng-queue-worker] org.hibernate.SQL                        : insert into booking.booking_passengers (booking_id,checked_in_at,checked_out_at,created_at,nfc_card_uid,passenger_id,room_id,status,updated_at) values (?,?,?,?,?,?,?,?,?)
+booking-service  | >>> [TIMING] 5. luu tat ca hanh khach (gom upload): 5072 ms
+booking-service  | >>> [TIMING] 6. kafka send: 0 ms
+booking-service  | >>> [KAFKA PRODUCER] Đã bắn event PENDING_PAYMENT cho Booking ID: 19
+booking-service  | 2026-11-25T10:55:56.526Z DEBUG 122 --- [booking-service] [ng-queue-worker] org.hibernate.SQL                        : select bp1_0.id,bp1_0.booking_id,bp1_0.checked_in_at,bp1_0.checked_out_at,bp1_0.created_at,bp1_0.nfc_card_uid,bp1_0.passenger_id,bp1_0.room_id,bp1_0.status,bp1_0.updated_at from booking.booking_passengers bp1_0 where bp1_0.booking_id=? order by bp1_0.id
+booking-service  | >>> [TIMING] 7. lay hanh khach + mapper: 2 ms
+booking-service  | >>> [TIMING] TONG create(): 5288 ms
+booking-service  | >>> [TIMING] TONG tu luc controller nhan: 5305 ms
+booking-service  | 2026-11-25T10:55:56.540Z  INFO 122 --- [booking-service] [ng-queue-worker] c.p.b.service.queue.BookingQueueManager  : [BOOKING QUEUE] COMPLETED | requestId=eacab8c2-3078-4b32-9d35-23362c6bdca3 | userId=deb877af-2d8e-4bda-9078-b4a594ad25e6 | receivedAt=2026-11-25T10:55:51.236287492Z | processingStartedAt=2026-11-25T10:55:51.237580834Z | completedAt=2026-11-25T10:55:56.540366685Z | waitingDurationMs=1 | processingDurationMs=5302 | totalDurationMs=5304
+booking-service  | 2026-11-25T10:55:56.541Z  INFO 122 --- [booking-service] [ng-queue-worker] c.p.b.service.queue.BookingQueueManager  : [BOOKING QUEUE] SLOT RELEASED | requestId=eacab8c2-3078-4b32-9d35-23362c6bdca3 | active=false | waiting=0
+booking-service  | 2026-11-25T10:55:56.541Z DEBUG 122 --- [booking-service] [nio-8082-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+booking-service  | 2026-11-25T10:55:56.541Z DEBUG 122 --- [booking-service] [nio-8082-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [BookingResponse[id=19, createdByUserId=deb877af-2d8e-4bda-9078-b4a594ad25e6, tourId=1d64f379-199e-41 (truncated)...]
+booking-service  | 2026-11-25T10:55:56.543Z DEBUG 122 --- [booking-service] [nio-8082-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+
+
+booking-service  | 2026-11-25T11:02:02.637Z  INFO 122 --- [booking-service] [MessageBroker-1] o.s.w.s.c.WebSocketMessageBrokerStats    : WebSocketSession[0 current WS(0)-HttpStream(0)-HttpPoll(0), 0 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(0)-CONNECTED(0)-DISCONNECT(0)], stompBrokerRelay[null], inboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], outboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], sockJsScheduler[pool size = 2, active threads = 1, queued tasks = 0, completed tasks = 1]
+booking-service  | 2026-11-25T11:02:31.367Z DEBUG 122 --- [booking-service] [nio-8082-exec-9] o.s.web.servlet.DispatcherServlet        : POST "/api/passengers/bookings", parameters={multipart}
+booking-service  | 2026-11-25T11:02:31.401Z DEBUG 122 --- [booking-service] [nio-8082-exec-9] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.project.booking.controller.passenger.BookingController#create(CreateBookingRequest, Principal)
+booking-service  | >>> [BOOKING QUEUE] RECEIVED REQUEST
+booking-service  | >>> User ID: deb877af-2d8e-4bda-9078-b4a594ad25e6
+booking-service  | >>> Email: minhquanthcs257@gmail.com
+booking-service  | 2026-11-25T11:02:31.406Z  INFO 122 --- [booking-service] [nio-8082-exec-9] c.p.b.service.queue.BookingQueueManager  : [BOOKING QUEUE] ACCEPTED | requestId=79c79ee4-28a5-4714-a26b-cf1b9915df79 | userId=deb877af-2d8e-4bda-9078-b4a594ad25e6 | status=WAITING | active=false | waiting=1
+booking-service  | >>> [BOOKING QUEUE] ACCEPTED REQUEST ID: 79c79ee4-28a5-4714-a26b-cf1b9915df79
+booking-service  | 2026-11-25T11:02:31.408Z  INFO 122 --- [booking-service] [ng-queue-worker] c.p.b.service.queue.BookingQueueManager  : [BOOKING QUEUE] PROCESSING | requestId=79c79ee4-28a5-4714-a26b-cf1b9915df79 | userId=deb877af-2d8e-4bda-9078-b4a594ad25e6 | receivedAt=2026-11-25T11:02:31.406931576Z | processingStartedAt=2026-11-25T11:02:31.408600083Z | waiting=0
+booking-service  | >>> [SERVICE] Bắt đầu xử lý create booking theo kho phòng...
+booking-service  | >>> [OAUTH2 CACHE] Không tìm thấy token trong Caffeine
+booking-service  | >>> [OAUTH2] Đang gọi Auth Service để lấy token mới...
+booking-service  | >>> [OAUTH2] POST /oauth2/token
+booking-service  | 2026-11-25T11:02:31.413Z DEBUG 122 --- [booking-service] [ng-queue-worker] o.s.web.client.DefaultRestClient         : Writing [{grant_type=[client_credentials], scope=[tour.read]}] as "application/x-www-form-urlencoded" with org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter
+booking-service  | 2026-11-25T11:02:31.604Z DEBUG 122 --- [booking-service] [ng-queue-worker] o.s.web.client.DefaultRestClient         : Reading to [com.project.booking.client.ServiceTokenClient$ServiceTokenResponse]
+booking-service  | >>> [OAUTH2 CACHE] Đã lưu service token vào Caffeine | expires_in=1799s
+booking-service  | 2026-11-25T11:02:31.640Z DEBUG 122 --- [booking-service] [ng-queue-worker] o.s.web.client.DefaultRestClient         : Reading to [com.project.booking.client.TourPackageClient$BookingPackageInfo]
+booking-service  | >>> [TIMING] 1. goi tour-package: 230 ms
+booking-service  | >>> [OAUTH2 CACHE] Lấy service token từ Caffeine
+booking-service  | 2026-11-25T11:02:31.661Z DEBUG 122 --- [booking-service] [ng-queue-worker] o.s.web.client.DefaultRestClient         : Reading to [com.project.booking.client.TourClient$TourInfo]
+booking-service  | >>> [TIMING] 2. goi tour-service: 20 ms
+booking-service  | >>> [TIMING] 3. redis tru phong: 2 ms
+booking-service  | 2026-11-25T11:02:31.666Z DEBUG 122 --- [booking-service] [ng-queue-worker] org.hibernate.SQL                        : select b1_0.id from booking.bookings b1_0 where b1_0.booking_code=? fetch first ? rows only
+booking-service  | 2026-11-25T11:02:31.687Z DEBUG 122 --- [booking-service] [ng-queue-worker] org.hibernate.SQL                        : insert into booking.bookings (booking_code,created_at,created_by_user_id,number_of_rooms,number_passengers,primary_contact_email,primary_contact_name,primary_contact_phone,status,total_amount,tour_id,tour_package_id,updated_at) values (?,?,?,?,?,?,?,?,?,?,?,?,?)
+booking-service  | >>> [TIMING] 4. luu booking: 29 ms
+booking-service  | >>> [SERVICE] Đã lưu xong Booking ID: 20
+booking-service  | CloudinaryFileStorageService
+booking-service  | Folder = passengers
+booking-service  | File = suachua.jpg
+booking-service  | >>> [TIMING]    upload 1 anh: 2056 ms
+booking-service  | 2026-11-25T11:02:33.751Z DEBUG 122 --- [booking-service] [ng-queue-worker] org.hibernate.SQL                        : insert into booking.passengers (created_at,date_of_birth,document_note,email,full_name,gender,id_card_image_public_id,id_card_image_url,id_card_type,identification_number,phone_number,updated_at) values (?,?,?,?,?,?,?,?,?,?,?,?)
+booking-service  | 2026-11-25T11:02:33.757Z DEBUG 122 --- [booking-service] [ng-queue-worker] org.hibernate.SQL                        : insert into booking.booking_passengers (booking_id,checked_in_at,checked_out_at,created_at,nfc_card_uid,passenger_id,room_id,status,updated_at) values (?,?,?,?,?,?,?,?,?)
+booking-service  | CloudinaryFileStorageService
+booking-service  | Folder = passengers
+booking-service  | File = suachua.jpg
+booking-service  | >>> [TIMING]    upload 1 anh: 1451 ms
+booking-service  | 2026-11-25T11:02:35.217Z DEBUG 122 --- [booking-service] [ng-queue-worker] org.hibernate.SQL                        : insert into booking.passengers (created_at,date_of_birth,document_note,email,full_name,gender,id_card_image_public_id,id_card_image_url,id_card_type,identification_number,phone_number,updated_at) values (?,?,?,?,?,?,?,?,?,?,?,?)
+booking-service  | 2026-11-25T11:02:35.220Z DEBUG 122 --- [booking-service] [ng-queue-worker] org.hibernate.SQL                        : insert into booking.booking_passengers (booking_id,checked_in_at,checked_out_at,created_at,nfc_card_uid,passenger_id,room_id,status,updated_at) values (?,?,?,?,?,?,?,?,?)
+booking-service  | CloudinaryFileStorageService
+booking-service  | Folder = passengers
+booking-service  | File = Caphe.jpg
+booking-service  | >>> [TIMING]    upload 1 anh: 1938 ms
+booking-service  | 2026-11-25T11:02:37.161Z DEBUG 122 --- [booking-service] [ng-queue-worker] org.hibernate.SQL                        : insert into booking.passengers (created_at,date_of_birth,document_note,email,full_name,gender,id_card_image_public_id,id_card_image_url,id_card_type,identification_number,phone_number,updated_at) values (?,?,?,?,?,?,?,?,?,?,?,?)
+booking-service  | 2026-11-25T11:02:37.163Z DEBUG 122 --- [booking-service] [ng-queue-worker] org.hibernate.SQL                        : insert into booking.booking_passengers (booking_id,checked_in_at,checked_out_at,created_at,nfc_card_uid,passenger_id,room_id,status,updated_at) values (?,?,?,?,?,?,?,?,?)
+booking-service  | >>> [TIMING] 5. luu tat ca hanh khach (gom upload): 5470 ms
+booking-service  | >>> [TIMING] 6. kafka send: 2 ms
+booking-service  | >>> [KAFKA PRODUCER] Đã bắn event PENDING_PAYMENT cho Booking ID: 20
+booking-service  | 2026-11-25T11:02:37.169Z DEBUG 122 --- [booking-service] [ng-queue-worker] org.hibernate.SQL                        : select bp1_0.id,bp1_0.booking_id,bp1_0.checked_in_at,bp1_0.checked_out_at,bp1_0.created_at,bp1_0.nfc_card_uid,bp1_0.passenger_id,bp1_0.room_id,bp1_0.status,bp1_0.updated_at from booking.booking_passengers bp1_0 where bp1_0.booking_id=? order by bp1_0.id
+booking-service  | >>> [TIMING] 7. lay hanh khach + mapper: 5 ms
+booking-service  | >>> [TIMING] TONG create(): 5763 ms
+booking-service  | >>> [TIMING] TONG tu luc controller nhan: 5771 ms
+booking-service  | 2026-11-25T11:02:37.177Z  INFO 122 --- [booking-service] [ng-queue-worker] c.p.b.service.queue.BookingQueueManager  : [BOOKING QUEUE] COMPLETED | requestId=79c79ee4-28a5-4714-a26b-cf1b9915df79 | userId=deb877af-2d8e-4bda-9078-b4a594ad25e6 | receivedAt=2026-11-25T11:02:31.406931576Z | processingStartedAt=2026-11-25T11:02:31.408600083Z | completedAt=2026-11-25T11:02:37.177635370Z | waitingDurationMs=1 | processingDurationMs=5769 | totalDurationMs=5770
+booking-service  | 2026-11-25T11:02:37.178Z DEBUG 122 --- [booking-service] [nio-8082-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+booking-service  | 2026-11-25T11:02:37.179Z DEBUG 122 --- [booking-service] [nio-8082-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [BookingResponse[id=20, createdByUserId=deb877af-2d8e-4bda-9078-b4a594ad25e6, tourId=1d64f379-199e-41 (truncated)...]
+booking-service  | 2026-11-25T11:02:37.179Z  INFO 122 --- [booking-service] [ng-queue-worker] c.p.b.service.queue.BookingQueueManager  : [BOOKING QUEUE] SLOT RELEASED | requestId=79c79ee4-28a5-4714-a26b-cf1b9915df79 | active=false | waiting=0
+booking-service  | 2026-11-25T11:02:37.182Z DEBUG 122 --- [booking-service] [nio-8082-exec-9] o.s.web.servlet.DispatcherServlet        : Completed 200 OK

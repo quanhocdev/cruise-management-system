@@ -73,6 +73,12 @@ public class BookingServiceImpl implements BookingService {
                 this.tourClient = tourClient;
         }
 
+        private long lap(String label, long since) {
+                long now = System.nanoTime();
+                System.out.println(">>> [TIMING] " + label + ": " + (now - since) / 1_000_000 + " ms");
+                return now;
+        }
+
         @Override
         public synchronized BookingResponse create(
                         CreateBookingRequest request,
@@ -81,6 +87,9 @@ public class BookingServiceImpl implements BookingService {
 
                 try {
                         System.out.println(">>> [SERVICE] Bắt đầu xử lý create booking theo kho phòng...");
+
+                        long start = System.nanoTime();
+                        long t = start;
 
                         UUID packageId = UUID.fromString(request.getTourPackageId());
                         UUID tourId = UUID.fromString(request.getTourId());
@@ -94,6 +103,7 @@ public class BookingServiceImpl implements BookingService {
                         // 1. Lấy thông tin gói Tour
                         TourPackageClient.BookingPackageInfo packageInfo = tourPackageClient
                                         .getBookingPackageInfo(packageId);
+                        t = lap("1. goi tour-package", t);
 
                         Integer roomCapacity = packageInfo.roomCapacity();
                         BigDecimal packagePrice = packageInfo.price();
@@ -106,6 +116,7 @@ public class BookingServiceImpl implements BookingService {
 
                         // 2. Lấy thông tin Tour
                         TourClient.TourInfo tourInfo = getTourInfo(tourId);
+                        t = lap("2. goi tour-service", t);
 
                         if (tourInfo == null) {
                                 throw new AppException(
@@ -130,6 +141,7 @@ public class BookingServiceImpl implements BookingService {
                         Long redisResult = tourRedisService.reservePackageRooms(
                                         packageId,
                                         requestedRooms);
+                        t = lap("3. redis tru phong", t);
 
                         if (redisResult == null || redisResult == -1) {
                                 throw new AppException(
@@ -163,6 +175,7 @@ public class BookingServiceImpl implements BookingService {
                         booking.setStatus(BookingStatus.PENDING_PAYMENT);
 
                         Booking savedBooking = bookingRepository.save(booking);
+                        t = lap("4. luu booking", t);
 
                         System.out.println(
                                         ">>> [SERVICE] Đã lưu xong Booking ID: " + savedBooking.getId());
@@ -198,9 +211,11 @@ public class BookingServiceImpl implements BookingService {
                                 if (pReq.getIdCardImage() != null
                                                 && !pReq.getIdCardImage().isEmpty()) {
 
+                                        long up = System.nanoTime();
                                         UploadResult uploadResult = fileStorageService.saveMultipart(
                                                         pReq.getIdCardImage(),
                                                         "passengers");
+                                        lap("   upload 1 anh", up);
 
                                         passenger.setIdCardImageUrl(uploadResult.getUrl());
                                         passenger.setIdCardImagePublicId(uploadResult.getPublicId());
@@ -217,6 +232,7 @@ public class BookingServiceImpl implements BookingService {
                                 bookingPassengerRepository.save(link);
                         }
 
+                        t = lap("5. luu tat ca hanh khach (gom upload)", t);
                         // 8. Bắn Kafka Event
                         BookingCreatedEvent event = new BookingCreatedEvent(
                                         savedBooking.getId(),
@@ -232,6 +248,8 @@ public class BookingServiceImpl implements BookingService {
                                         savedBooking.getId().toString(),
                                         event);
 
+                        t = lap("6. kafka send", t);
+
                         System.out.println(
                                         ">>> [KAFKA PRODUCER] Đã bắn event PENDING_PAYMENT cho Booking ID: "
                                                         + savedBooking.getId());
@@ -241,10 +259,13 @@ public class BookingServiceImpl implements BookingService {
                                         .findAllByBooking_IdOrderByIdAsc(savedBooking.getId());
 
                         // 10. Trả BookingResponse kèm thông tin Tour
-                        return bookingMapper.toResponse(
+                        BookingResponse res = bookingMapper.toResponse(
                                         savedBooking,
                                         links,
                                         tourInfo);
+                        t = lap("7. lay hanh khach + mapper", t);
+                        lap("TONG create()", start);
+                        return res;
 
                 } catch (Exception e) {
                         e.printStackTrace();

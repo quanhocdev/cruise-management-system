@@ -132,6 +132,7 @@ public class BookingController {
 
         UUID userId = extractUserId(principal);
         String email = extractEmail(principal);
+        long reqStart = System.nanoTime();
 
         System.out.println(
                 ">>> [BOOKING QUEUE] RECEIVED REQUEST");
@@ -158,6 +159,9 @@ public class BookingController {
             // Chờ đúng kết quả của request này.
             // Không trả HTTP 202 khi mới tiếp nhận.
             BookingResponse response = task.getResultFuture().get();
+
+            System.out.println(">>> [TIMING] TONG tu luc controller nhan: "
+                    + (System.nanoTime() - reqStart) / 1_000_000 + " ms");
 
             return ResponseEntity.ok(response);
 
