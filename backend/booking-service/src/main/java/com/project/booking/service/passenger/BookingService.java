@@ -18,7 +18,9 @@ public interface BookingService {
     // 3. Lấy danh sách đơn hàng cá nhân
     List<BookingResponse> getMine(UUID userId);
 
-    // 4. Hủy đơn hàng (chỉ khi CONFIRMED)
+    // 4. Hủy đơn hàng:
+    // - PENDING_PAYMENT: Hủy trực tiếp.
+    // - CONFIRMED: Chuyển sang quy trình hoàn tiền.
     BookingResponse cancel(Long id, UUID userId);
 
     // 5. Gửi nhắc nhở khởi hành tự động

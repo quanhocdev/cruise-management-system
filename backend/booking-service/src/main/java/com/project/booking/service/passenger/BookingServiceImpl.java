@@ -331,29 +331,51 @@ public class BookingServiceImpl implements BookingService {
         }
 
         @Override
+        @Transactional
         public BookingResponse cancel(Long id, UUID userId) {
 
                 Booking booking = findBookingById(id);
 
+                // 1. Kiểm tra quyền sở hữu
                 if (!Objects.equals(booking.getCreatedByUserId(), userId)) {
                         throw new AppException(
                                         "You cannot cancel this booking",
                                         HttpStatus.FORBIDDEN);
                 }
 
-                if (booking.getStatus() != BookingStatus.CONFIRMED) {
+                // 2. Chỉ hủy booking chưa thanh toán
+                if (booking.getStatus() != BookingStatus.PENDING_PAYMENT) {
                         throw new AppException(
-                                        "Only CONFIRMED bookings can be cancelled",
+                                        "Only unpaid bookings can be cancelled directly",
                                         HttpStatus.CONFLICT);
                 }
 
+                // 3. Trả số phòng đã đặt về Redis
+                UUID releaseRequestId = UUID.nameUUIDFromBytes(
+                                ("booking-cancel-" + booking.getId())
+                                                .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+                Long result = tourRedisService.releasePackageRooms(
+                                booking.getTourPackageId(),
+                                booking.getNumberOfRooms(),
+                                releaseRequestId);
+
+                if (result == null || (result != 0L && result != 1L)) {
+                        throw new AppException(
+                                        "Unable to release booking rooms",
+                                        HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+
+                // 4. Cập nhật trạng thái booking
                 booking.setStatus(BookingStatus.CANCELLED);
 
                 Booking saved = bookingRepository.save(booking);
 
+                // 5. Lấy thông tin hành khách
                 List<BookingPassenger> links = bookingPassengerRepository
                                 .findAllByBooking_IdOrderByIdAsc(saved.getId());
 
+                // 6. Lấy thông tin tour
                 TourClient.TourInfo tourInfo = getTourInfo(saved.getTourId());
 
                 return bookingMapper.toResponse(
