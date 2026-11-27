@@ -25,7 +25,10 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -40,7 +43,7 @@ import java.util.UUID;
 public class BookingServiceImpl implements BookingService {
 
         private static final String BOOKING_CREATED_TOPIC = "booking-created-topic";
-
+        private final ExecutorService uploadExecutor = Executors.newFixedThreadPool(4);
         private final BookingRepository bookingRepository;
         private final PassengerRepository passengerRepository;
         private final BookingPassengerRepository bookingPassengerRepository;
@@ -180,8 +183,23 @@ public class BookingServiceImpl implements BookingService {
                         System.out.println(
                                         ">>> [SERVICE] Đã lưu xong Booking ID: " + savedBooking.getId());
 
-                        // 7. Lưu danh sách hành khách
-                        for (PassengerRequest pReq : request.getPassengers()) {
+                        // 7. Lưu danh sách hành
+
+                        List<PassengerRequest> passengerReqs = request.getPassengers();
+
+                        List<CompletableFuture<UploadResult>> uploadFutures = passengerReqs.stream()
+                                        .map(p -> (p.getIdCardImage() != null && !p.getIdCardImage().isEmpty())
+                                                        ? CompletableFuture.supplyAsync(
+                                                                        () -> fileStorageService.saveMultipart(
+                                                                                        p.getIdCardImage(),
+                                                                                        "passengers"),
+                                                                        uploadExecutor)
+                                                        : CompletableFuture.<UploadResult>completedFuture(null))
+                                        .toList();
+
+                        for (int i = 0; i < passengerReqs.size(); i++) {
+
+                                PassengerRequest pReq = passengerReqs.get(i);
 
                                 Passenger passenger = new Passenger();
 
@@ -208,15 +226,14 @@ public class BookingServiceImpl implements BookingService {
 
                                 passenger.setDocumentNote(pReq.getDocumentNote());
 
-                                if (pReq.getIdCardImage() != null
-                                                && !pReq.getIdCardImage().isEmpty()) {
+                                UploadResult uploadResult;
+                                try {
+                                        uploadResult = uploadFutures.get(i).join();
+                                } catch (CompletionException ex) {
+                                        throw ex.getCause() instanceof RuntimeException re ? re : ex;
+                                }
 
-                                        long up = System.nanoTime();
-                                        UploadResult uploadResult = fileStorageService.saveMultipart(
-                                                        pReq.getIdCardImage(),
-                                                        "passengers");
-                                        lap("   upload 1 anh", up);
-
+                                if (uploadResult != null) {
                                         passenger.setIdCardImageUrl(uploadResult.getUrl());
                                         passenger.setIdCardImagePublicId(uploadResult.getPublicId());
                                 }

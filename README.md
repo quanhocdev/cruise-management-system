@@ -181,8 +181,6 @@ flowchart LR
     TOUR --- CL
 ```
 
-> The diagram above shows the main interactions. Adjust arrows to match your actual flows.
-
 ### 🧱 Services
 
 | Service                     | Responsibility                                                                                                              |
@@ -244,6 +242,7 @@ flowchart LR
 │   ├── notification-service/
 │   ├── feedback-service/
 │   └── common/
+├── docs/                  # Benchmark logs (baseline vs. optimized)
 ├── frontend-web/          # React web app
 ├── frontend-android/      # Jetpack Compose Android app
 ├── docker-compose.yml
@@ -400,6 +399,32 @@ Copy `.env.example` to `.env` and replace every `your_..._here` placeholder with
 ## 🖼️ Screenshots
 
 _Add screenshots or a demo link here._
+
+---
+
+## ⚡ Performance Notes
+
+### Booking API: parallel ID-card uploads
+
+Creating a booking (`POST /api/passengers/bookings`) was slow because each passenger's
+ID-card image was uploaded to Cloudinary one after another. I measured the flow with
+per-stage timing logs in `BookingServiceImpl.create()` and found that uploads took
+about 95% of the processing time. Tracked in issue #128.
+
+| Version                                                                                                        | Change                                 | Passengers + upload (avg, min–max) | `create()` total (avg) |
+| -------------------------------------------------------------------------------------------------------------- | -------------------------------------- | ---------------------------------- | ---------------------- |
+| [`v1-baseline`](https://github.com/quanhocdev/cruise-management-system/releases/tag/v1-baseline)               | Sequential uploads                     | 5127 ms (4838–5470)                | 5370 ms                |
+| [`v2-parallel-upload`](https://github.com/quanhocdev/cruise-management-system/releases/tag/v2-parallel-upload) | Parallel uploads (`CompletableFuture`) | 2932 ms (1872–3541)                | 3126 ms                |
+
+Other stages (tour-service call, Redis, DB write, Kafka) stayed roughly constant at about 200 ms combined.
+
+**Setup:** local Docker, 3 passengers with 1 ID-card image each, uploaded to Cloudinary,
+calling booking-service directly (port 8082), with chat, feedback and notification services stopped.
+Raw logs: [`docs/baseline-timing.txt`](docs/baseline-timing.txt), [`docs/after-timing.txt`](docs/after-timing.txt).
+
+**Limitations:** 3 measured runs per version (one cold-start run discarded), home Wi-Fi,
+and the two versions were measured on different days (Nov 25 and Nov 27). Upload time to Cloudinary
+depends on the network and varies between runs. The ranges of the two versions do not overlap.
 
 ---
 
